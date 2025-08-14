@@ -1,0 +1,9 @@
+{
+	"name": "wpovernight/advanced-order-manager",
+	"description": "Advanced Order Manager for WooCommerce",
+	"autoload": {
+		"psr-4": {
+			"WPO\\AOM\\": "includes/"
+		}
+	}
+}
