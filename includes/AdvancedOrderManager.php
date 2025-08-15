@@ -6,9 +6,9 @@ defined( 'ABSPATH' ) || exit;
 
 final class AdvancedOrderManager {
 
-	public const VERSION                              = '1.0.0';
+	public const VERSION              = '1.0.0';
 
-	protected static ?AdvancedOrderManager $_instance = null;
+	protected static ?self $_instance = null;
 
 	/**
 	 * Get the instance of the class.
