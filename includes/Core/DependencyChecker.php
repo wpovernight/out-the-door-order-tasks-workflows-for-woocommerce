@@ -1,6 +1,6 @@
 <?php
 
-namespace WPO\AOM;
+namespace WPO\AOM\Core;
 
 defined( 'ABSPATH' ) || exit;
 

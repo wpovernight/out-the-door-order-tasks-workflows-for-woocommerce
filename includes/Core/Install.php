@@ -1,6 +1,8 @@
 <?php
 
-namespace WPO\AOM;
+namespace WPO\AOM\Core;
+
+use WPO\AOM\AdvancedOrderManager;
 
 defined( 'ABSPATH' ) || exit;
 

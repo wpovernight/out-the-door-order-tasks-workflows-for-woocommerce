@@ -2,6 +2,8 @@
 
 namespace WPO\AOM;
 
+use WPO\AOM\Core\Install;
+
 defined( 'ABSPATH' ) || exit;
 
 final class AdvancedOrderManager {
@@ -113,6 +115,13 @@ final class AdvancedOrderManager {
 	private function service_map(): array {
 		$map = array(
 			// ToDo: Add services here: property_name => class_name
+			/**
+			 * Sample:
+			 * 'custom_status_admin' => array(
+			 *     \WPO\AOM\Admin\AdminPanel::class,
+			 *     true, // Whether to store in a dynamic property.
+			 * ),
+			 */
 		);
 
 		/**
