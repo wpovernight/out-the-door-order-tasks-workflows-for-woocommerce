@@ -72,7 +72,7 @@ final class DependencyChecker {
 		}
 
 		if ( ! $this->is_wc_activated() ) {
-			$errors[] = __( 'WooCommerce must be activated.', 'wpo_aom' );
+			$errors[] = __( 'WooCommerce must be activated.', 'wpo-aom' );
 		} elseif ( ! $this->is_wc_version_compatible() ) {
 			$errors[] = sprintf(
 				/* translators: %s: minimum WooCommerce version */
@@ -133,7 +133,7 @@ final class DependencyChecker {
 	 */
 	public function display_admin_notice( array $errors ): void {
 		$title   = '<strong>' . esc_html__( 'Advanced Order Manager for WooCommerce', 'wpo_aom' ) . '</strong>';
-		$content = esc_html__( 'can’t run because:', 'wpo_aom' );
+		$content = esc_html__( 'can’t run because:', 'wpo-aom' );
 		$list    = '<ul><li>' . implode( '</li><li>', array_map( 'esc_html', $errors ) ) . '</li></ul>';
 
 		printf(

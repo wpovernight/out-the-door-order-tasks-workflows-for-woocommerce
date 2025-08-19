@@ -53,6 +53,9 @@ final class AdvancedOrderManager {
 			return;
 		}
 
+		// Load the Install class.
+		Install::instance()->register();
+
 		$this->define_constants();
 		$this->init_hooks();
 	}
@@ -126,10 +129,17 @@ final class AdvancedOrderManager {
 	 * @return void
 	 */
 	private function register_services(): void {
-		foreach( $this->service_map() as $property => $class ) {
+		foreach( $this->service_map() as $property => $definition ) {
+			[ $class, $store ] = $definition;
+
 			$service = $this->resolve_service( $class );
 
-			if ( property_exists( $this, $property ) ) {
+			if ( method_exists( $service, 'register' ) ) {
+				$service->register();
+			}
+
+			// Store the service in a dynamic property if specified.
+			if ( $store && property_exists( $this, $property ) ) {
 				/* @phpstan-ignore-next-line Suppressing type warning for dynamic property assignment. */
 				$this->{$property} = $service;
 			}

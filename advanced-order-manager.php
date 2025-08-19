@@ -13,7 +13,7 @@
  * Requires PHP:         7.4
  * WC requires at least: 8.2
  * WC tested up to:      10.0
- * Text Domain:          wpo_aom
+ * Text Domain:          wpo-aom
  * Domain Path:          /languages
  */
 
