@@ -148,7 +148,7 @@ final class AdvancedOrderManager {
 			}
 
 			// Store the service in a dynamic property if specified.
-			if ( $store && property_exists( $this, $property ) ) {
+			if ( $store && ! property_exists( $this, $property ) ) {
 				/* @phpstan-ignore-next-line Suppressing type warning for dynamic property assignment. */
 				$this->{$property} = $service;
 			}
