@@ -8,7 +8,7 @@ defined( 'ABSPATH' ) || exit;
 
 final class AdvancedOrderManager {
 
-	public const VERSION              = '1.0.0';
+	public const VERSION = '1.0.0';
 
 	protected static ?self $_instance = null;
 
@@ -79,6 +79,9 @@ final class AdvancedOrderManager {
 	private function init_hooks(): void {
 		add_action( 'init', array( $this, 'translations' ), 9 );
 		add_action( 'init', array( $this, 'initialize' ) );
+
+		// Declare Woo features compatibility.
+		add_action( 'before_woocommerce_init', array( $this, 'woo_features_compatibility' ) );
 	}
 
 	/**
@@ -127,7 +130,7 @@ final class AdvancedOrderManager {
 		/**
 		 * Filters the Advanced Order Manager service map.
 		 *
-		 * @param array<string,class-string> $map Service map.
+		 * @param array<string,array> $map Service map.
 		 */
 		return (array) apply_filters( 'wpo_aom_service_map', $map );
 	}
@@ -138,7 +141,7 @@ final class AdvancedOrderManager {
 	 * @return void
 	 */
 	private function register_services(): void {
-		foreach( $this->service_map() as $property => $definition ) {
+		foreach ( $this->service_map() as $property => $definition ) {
 			[ $class, $store ] = $definition;
 
 			$service = $this->resolve_service( $class );
@@ -168,6 +171,18 @@ final class AdvancedOrderManager {
 		}
 
 		return new $class();
+	}
+
+	/**
+	 * Declare WooCommerce features compatibility.
+	 *
+	 * @return void
+	 */
+	public function woo_features_compatibility(): void {
+		if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+			// HPOS (compatible)
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', WPO_AOM_PLUGIN_FILE, true );
+		}
 	}
 
 	/**
