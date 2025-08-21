@@ -50,7 +50,7 @@ class CustomOrderStatusRepository extends BaseRepository {
 	 * @return CustomOrderStatus|null
 	 */
 	public function find_by_key( string $status_key ): ?CustomOrderStatus {
-		$result = $this->where( 'status_key', '=', $status_key )->first();
+		$result = $this->where( 'status_key', $status_key )->first();
 
 		return $result ? new CustomOrderStatus( $result ) : null;
 	}
