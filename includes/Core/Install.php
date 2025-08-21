@@ -126,11 +126,17 @@ final class Install {
 		global $wpdb;
 
 		$charset_collate = $wpdb->get_charset_collate();
-		$sql             = '';
 
-		// ToDo: Add table creation schema here
-
-		return $sql;
+		// ToDo: Update the table columns
+		return "CREATE TABLE `{$wpdb->prefix}wpo_aom_custom_statuses` (
+			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+			status_key VARCHAR(64) NOT NULL,
+			name VARCHAR(255) NOT NULL,
+			color VARCHAR(32) DEFAULT NULL,
+			PRIMARY KEY (id),
+			UNIQUE KEY (status_key)
+		) {$charset_collate};
+		";
 	}
 
 	/**
