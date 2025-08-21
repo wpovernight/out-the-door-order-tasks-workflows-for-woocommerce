@@ -3,6 +3,9 @@
 namespace WPO\AOM;
 
 use WPO\AOM\Core\Install;
+use WPO\AOM\Core\DependencyChecker;
+use WPO\AOM\Admin\CustomOrderStatusAdmin;
+use WPO\AOM\Services\CustomOrderStatusService;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -117,14 +120,8 @@ final class AdvancedOrderManager {
 	 */
 	private function service_map(): array {
 		$map = array(
-			// ToDo: Add services here: property_name => class_name
-			/**
-			 * Sample:
-			 * 'custom_status_admin' => array(
-			 *     \WPO\AOM\Admin\AdminPanel::class,
-			 *     true, // Whether to store in a dynamic property.
-			 * ),
-			 */
+			'custom_order_status'       => array( CustomOrderStatusService::class, true ),
+			'custom_order_status_admin' => array( CustomOrderStatusAdmin::class, false ),
 		);
 
 		/**
