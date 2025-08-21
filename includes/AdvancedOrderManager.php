@@ -3,6 +3,8 @@
 namespace WPO\AOM;
 
 use WPO\AOM\Core\Install;
+use WPO\AOM\Core\DependencyChecker;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -179,9 +181,9 @@ final class AdvancedOrderManager {
 	 * @return void
 	 */
 	public function woo_features_compatibility(): void {
-		if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+		if ( class_exists( FeaturesUtil::class ) ) {
 			// HPOS (compatible)
-			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', WPO_AOM_PLUGIN_FILE, true );
+			FeaturesUtil::declare_compatibility( 'custom_order_tables', WPO_AOM_PLUGIN_FILE, true );
 		}
 	}
 

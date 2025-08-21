@@ -37,6 +37,11 @@ final class Install {
 		return self::$_instance;
 	}
 
+	/**
+	 * Register the installation and upgrade hooks.
+	 *
+	 * @return void
+	 */
 	public function register(): void {
 		// Create tables & set version immediately on activation.
 		register_activation_hook( WPO_AOM_PLUGIN_FILE, array( self::class, 'install' ) );
@@ -68,6 +73,7 @@ final class Install {
 		// If the version is not set, it means this is a fresh installation.
 		if ( empty( $current_version ) ) {
 			self::install();
+
 			return;
 		}
 
