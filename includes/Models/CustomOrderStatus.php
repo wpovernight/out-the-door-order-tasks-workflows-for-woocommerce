@@ -8,7 +8,7 @@ class CustomOrderStatus {
 
 	public int $id;
 	public string $status_key;
-	public string $name;
+	public string $label;
 	public string $color;
 
 	/**
@@ -19,7 +19,7 @@ class CustomOrderStatus {
 	public function __construct( array $data = array() ) {
 		$this->id         = absint( $data['id'] ?? 0 );
 		$this->status_key = $data['status_key'] ?? '';
-		$this->name       = $data['name'] ?? '';
+		$this->label      = $data['label'] ?? '';
 		$this->color      = $data['color'] ?? '#ccc';
 	}
 
@@ -32,7 +32,7 @@ class CustomOrderStatus {
 		return array(
 			'id'         => $this->id,
 			'status_key' => $this->status_key,
-			'name'       => $this->name,
+			'label'      => $this->label,
 			'color'      => $this->color,
 		);
 	}

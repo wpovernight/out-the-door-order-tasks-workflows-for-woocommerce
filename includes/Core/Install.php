@@ -137,7 +137,7 @@ final class Install {
 		return "CREATE TABLE `{$wpdb->prefix}wpo_aom_custom_statuses` (
 			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			status_key VARCHAR(64) NOT NULL,
-			name VARCHAR(255) NOT NULL,
+			label VARCHAR(255) NOT NULL,
 			color VARCHAR(32) DEFAULT NULL,
 			PRIMARY KEY (id),
 			UNIQUE KEY (status_key)
