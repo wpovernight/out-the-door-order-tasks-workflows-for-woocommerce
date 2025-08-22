@@ -9,7 +9,7 @@ class CustomOrderStatus {
 	public int $id;
 	public string $status_key;
 	public string $label;
-	public string $color;
+	public string $background;
 
 	/**
 	 * Constructor.
@@ -20,7 +20,7 @@ class CustomOrderStatus {
 		$this->id         = absint( $data['id'] ?? 0 );
 		$this->status_key = $data['status_key'] ?? '';
 		$this->label      = $data['label'] ?? '';
-		$this->color      = $data['color'] ?? '#ccc';
+		$this->background = $data['background'] ?? '#ccc';
 	}
 
 	/**
@@ -33,7 +33,7 @@ class CustomOrderStatus {
 			'id'         => $this->id,
 			'status_key' => $this->status_key,
 			'label'      => $this->label,
-			'color'      => $this->color,
+			'background' => $this->background,
 		);
 	}
 

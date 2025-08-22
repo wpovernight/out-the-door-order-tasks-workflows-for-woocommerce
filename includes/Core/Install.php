@@ -138,7 +138,7 @@ final class Install {
 			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			status_key VARCHAR(64) NOT NULL,
 			label VARCHAR(255) NOT NULL,
-			color VARCHAR(32) DEFAULT NULL,
+			background VARCHAR(32) DEFAULT NULL,
 			PRIMARY KEY (id),
 			UNIQUE KEY (status_key)
 		) {$charset_collate};
