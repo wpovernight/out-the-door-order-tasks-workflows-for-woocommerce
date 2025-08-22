@@ -66,7 +66,7 @@ final class DependencyChecker {
 		if ( ! $this->is_php_version_compatible() ) {
 			$errors[] = sprintf(
 				/* translators: %s: minimum PHP version */
-				__( 'PHP %s+ is required.', 'wpo_aom' ),
+				__( 'PHP %s+ is required.', 'wpo-aom' ),
 				self::PHP_MIN_VERSION
 			);
 		}
@@ -76,7 +76,7 @@ final class DependencyChecker {
 		} elseif ( ! $this->is_wc_version_compatible() ) {
 			$errors[] = sprintf(
 				/* translators: %s: minimum WooCommerce version */
-				__( 'WooCommerce %s+ is required.', 'wpo_aom' ),
+				__( 'WooCommerce %s+ is required.', 'wpo-aom' ),
 				self::WC_MIN_VERSION
 			);
 		}
@@ -132,7 +132,7 @@ final class DependencyChecker {
 	 * @return void
 	 */
 	public function display_admin_notice( array $errors ): void {
-		$title   = '<strong>' . esc_html__( 'Advanced Order Manager for WooCommerce', 'wpo_aom' ) . '</strong>';
+		$title   = '<strong>' . esc_html__( 'Advanced Order Manager for WooCommerce', 'wpo-aom' ) . '</strong>';
 		$content = esc_html__( 'can’t run because:', 'wpo-aom' );
 		$list    = '<ul><li>' . implode( '</li><li>', array_map( 'esc_html', $errors ) ) . '</li></ul>';
 

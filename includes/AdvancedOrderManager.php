@@ -35,7 +35,7 @@ final class AdvancedOrderManager {
 	 * @return void
 	 */
 	public function __clone() {
-		_doing_it_wrong( __FUNCTION__, esc_html__( 'Cloning is forbidden.', 'wpo_aom' ), '1.0.0' );
+		_doing_it_wrong( __FUNCTION__, esc_html__( 'Cloning is forbidden.', 'wpo-aom' ), '1.0.0' );
 	}
 
 	/**
@@ -44,7 +44,7 @@ final class AdvancedOrderManager {
 	 * @return void
 	 */
 	public function __wakeup() {
-		_doing_it_wrong( __FUNCTION__, esc_html__( 'Unserializing is forbidden.', 'wpo_aom' ), '1.0.0' );
+		_doing_it_wrong( __FUNCTION__, esc_html__( 'Unserializing is forbidden.', 'wpo-aom' ), '1.0.0' );
 	}
 
 	/**
@@ -64,6 +64,9 @@ final class AdvancedOrderManager {
 
 		$this->define_constants();
 		$this->init_hooks();
+
+		// Register services.
+		$this->register_services();
 	}
 
 	/**
@@ -81,8 +84,7 @@ final class AdvancedOrderManager {
 	 * @return void
 	 */
 	private function init_hooks(): void {
-		add_action( 'init', array( $this, 'translations' ), 9 );
-		add_action( 'init', array( $this, 'initialize' ) );
+		add_action( 'init', array( $this, 'translations' ) );
 
 		// Declare Woo features compatibility.
 		add_action( 'before_woocommerce_init', array( $this, 'woo_features_compatibility' ) );
@@ -94,7 +96,7 @@ final class AdvancedOrderManager {
 	 * @return void
 	 */
 	public function translations(): void {
-		$text_domain             = 'wpo_aom';
+		$text_domain             = 'wpo-aom';
 		$locale                  = apply_filters( 'plugin_locale', determine_locale(), $text_domain );
 		$custom_translation_path = WP_LANG_DIR . '/wpo-advanced-order-manager/wpo-advanced-order-manager-' . $locale . '.mo';
 		$plugin_translation_path = WP_LANG_DIR . '/plugins/wpo-advanced-order-manager-' . $locale . '.mo';
@@ -103,15 +105,6 @@ final class AdvancedOrderManager {
 		load_textdomain( $text_domain, $custom_translation_path );
 		load_textdomain( $text_domain, $plugin_translation_path );
 		load_plugin_textdomain( $text_domain, false, dirname( plugin_basename( WPO_AOM_PLUGIN_FILE ) ) . '/languages' );
-	}
-
-	/**
-	 * Initialize the plugin and register services.
-	 *
-	 * @return void
-	 */
-	public function initialize(): void {
-		$this->register_services();
 	}
 
 	/**
