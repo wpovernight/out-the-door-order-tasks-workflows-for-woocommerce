@@ -1,0 +1,14 @@
+.custom_order_statuses th.column-actions,
+.custom_order_statuses td.column-actions {
+	text-align: right;
+}
+
+span.wpo-aom-custom-order-status-preview {
+	padding: 0 1em;
+}
+
+.wpo-aom-custom-order-status-actions {
+	display: inline-flex;
+	margin: 0;
+	gap: 6px;
+}

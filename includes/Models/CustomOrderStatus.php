@@ -37,4 +37,13 @@ class CustomOrderStatus {
 		);
 	}
 
+	/**
+	 * Get the prefixed status key for WooCommerce.
+	 *
+	 * @return string
+	 */
+	public function get_prefixed_status_key(): string {
+		return 'wc-' . $this->status_key;
+	}
+
 }
