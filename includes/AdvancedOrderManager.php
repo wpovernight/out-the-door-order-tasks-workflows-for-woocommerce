@@ -33,7 +33,7 @@ final class AdvancedOrderManager {
 	 * @return void
 	 */
 	public function __clone() {
-		_doing_it_wrong( __FUNCTION__, esc_html__( 'Cloning is forbidden.', 'wpo_aom' ), '1.0.0' );
+		_doing_it_wrong( __FUNCTION__, esc_html__( 'Cloning is forbidden.', 'wpo-aom' ), '1.0.0' );
 	}
 
 	/**
@@ -42,7 +42,7 @@ final class AdvancedOrderManager {
 	 * @return void
 	 */
 	public function __wakeup() {
-		_doing_it_wrong( __FUNCTION__, esc_html__( 'Unserializing is forbidden.', 'wpo_aom' ), '1.0.0' );
+		_doing_it_wrong( __FUNCTION__, esc_html__( 'Unserializing is forbidden.', 'wpo-aom' ), '1.0.0' );
 	}
 
 	/**
@@ -92,7 +92,7 @@ final class AdvancedOrderManager {
 	 * @return void
 	 */
 	public function translations(): void {
-		$text_domain             = 'wpo_aom';
+		$text_domain             = 'wpo-aom';
 		$locale                  = apply_filters( 'plugin_locale', determine_locale(), $text_domain );
 		$custom_translation_path = WP_LANG_DIR . '/wpo-advanced-order-manager/wpo-advanced-order-manager-' . $locale . '.mo';
 		$plugin_translation_path = WP_LANG_DIR . '/plugins/wpo-advanced-order-manager-' . $locale . '.mo';
