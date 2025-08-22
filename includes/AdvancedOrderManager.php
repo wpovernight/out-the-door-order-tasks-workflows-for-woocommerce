@@ -62,6 +62,9 @@ final class AdvancedOrderManager {
 
 		$this->define_constants();
 		$this->init_hooks();
+
+		// Register services.
+		$this->register_services();
 	}
 
 	/**
@@ -79,8 +82,7 @@ final class AdvancedOrderManager {
 	 * @return void
 	 */
 	private function init_hooks(): void {
-		add_action( 'init', array( $this, 'translations' ), 9 );
-		add_action( 'init', array( $this, 'initialize' ) );
+		add_action( 'init', array( $this, 'translations' ) );
 
 		// Declare Woo features compatibility.
 		add_action( 'before_woocommerce_init', array( $this, 'woo_features_compatibility' ) );
@@ -101,15 +103,6 @@ final class AdvancedOrderManager {
 		load_textdomain( $text_domain, $custom_translation_path );
 		load_textdomain( $text_domain, $plugin_translation_path );
 		load_plugin_textdomain( $text_domain, false, dirname( plugin_basename( WPO_AOM_PLUGIN_FILE ) ) . '/languages' );
-	}
-
-	/**
-	 * Initialize the plugin and register services.
-	 *
-	 * @return void
-	 */
-	public function initialize(): void {
-		$this->register_services();
 	}
 
 	/**
