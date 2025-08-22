@@ -5,7 +5,6 @@ namespace WPO\AOM;
 use WPO\AOM\Core\Install;
 use WPO\AOM\Core\DependencyChecker;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
-use WPO\AOM\Admin\CustomOrderStatusAdmin;
 use WPO\AOM\Services\CustomOrderStatusService;
 
 defined( 'ABSPATH' ) || exit;
@@ -115,7 +114,7 @@ final class AdvancedOrderManager {
 	private function service_map(): array {
 		$map = array(
 			'custom_order_status'       => array( CustomOrderStatusService::class, true ),
-			'custom_order_status_admin' => array( CustomOrderStatusAdmin::class, false ),
+			'custom_order_status_admin' => array( \WPO\AOM\Admin\CustomOrderStatus\Screen::class, false ),
 		);
 
 		/**
