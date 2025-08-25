@@ -111,8 +111,9 @@ class Table extends WP_List_Table {
 	 */
 	protected function column_status_preview( CustomOrderStatus $item ): string {
 		return sprintf(
-			'<span class="wpo-aom-custom-order-status-preview order-status" style="background-color:%s;">%s</span>',
+			'<span class="wpo-aom-custom-order-status-preview order-status" style="background-color:%s; color: %s">%s</span>',
 			esc_attr( $item->background ),
+			esc_attr( $item->foreground ),
 			esc_html( $item->label )
 		);
 	}
