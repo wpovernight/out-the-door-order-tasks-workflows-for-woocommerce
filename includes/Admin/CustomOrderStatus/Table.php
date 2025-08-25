@@ -126,14 +126,13 @@ class Table extends WP_List_Table {
 	 * @return string
 	 */
 	protected function column_actions( CustomOrderStatus $item ): string {
-		$edit_url   = wp_nonce_url( add_query_arg(
-			array( 'action' => 'edit', 'status_id' => $item->id ),
-			admin_url( 'admin.php?page=wc-settings&tab=wpo_aom_custom_status_tab' )
-		) );
-		$delete_url = wp_nonce_url( add_query_arg(
-			array( 'action' => 'delete', 'status_id' => $item->id ),
-			admin_url( 'admin.php?page=wc-settings&tab=wpo_aom_custom_status_tab' )
-		), 'wpo_aom_delete_custom_status_' . $item->id );
+		$edit_url = wp_nonce_url(
+			add_query_arg(
+				array( 'action' => 'edit', 'status_id' => $item->id ),
+				admin_url( 'admin.php?page=wc-settings&tab=wpo_aom_custom_status_tab' )
+			),
+			'wpo_aom_edit_custom_order_status'
+		);
 
 		$edit_button   = sprintf(
 			'<a href="%s" id="wpo-aom-custom-order-status-edit" data-id="%d"><span class="dashicons dashicons-edit"></span>%s</a>',
@@ -142,8 +141,7 @@ class Table extends WP_List_Table {
 			'<span class="screen-reader-text">' . esc_html__( 'Edit', 'wpo-aom' ) . '</span>'
 		);
 		$delete_button = sprintf(
-			'<a href="%s" id="wpo-aom-custom-order-status-delete" data-id="%d"><span class="dashicons dashicons-trash"></span>%s</a>',
-			$delete_url,
+			'<a href="#" id="wpo-aom-custom-order-status-delete" data-id="%d"><span class="dashicons dashicons-trash"></span>%s</a>',
 			$item->id,
 			'<span class="screen-reader-text">' . esc_html__( 'Delete', 'wpo-aom' ) . '</span>'
 		);

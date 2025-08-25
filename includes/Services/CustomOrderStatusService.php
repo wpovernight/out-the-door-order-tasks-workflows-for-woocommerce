@@ -22,10 +22,13 @@ class CustomOrderStatusService {
 	 * Register the service.
 	 */
 	public function register(): void {
+		// Add custom order statuses to WooCommerce.
 		add_filter( 'wc_order_statuses', array( $this, 'add_to_order_statuses' ) );
 		add_filter( 'woocommerce_register_shop_order_post_statuses', array( $this, 'register_order_statuses' ) );
 		add_filter( 'bulk_actions-edit-shop_order', array( $this, 'add_to_bulk_action' ) );
 		add_filter( 'bulk_actions-woocommerce_page_wc-orders', array( $this, 'add_to_bulk_action' ) ); // HPOS support
+
+		// Add dynamic styles for custom order statuses in the orders page.
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_dynamic_style' ), 99 );
 	}
 

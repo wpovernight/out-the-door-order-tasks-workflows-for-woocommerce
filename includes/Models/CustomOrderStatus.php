@@ -2,9 +2,11 @@
 
 namespace WPO\AOM\Models;
 
+use WPO\AOM\Contracts\ArraySerializableModel;
+
 defined( 'ABSPATH' ) || exit;
 
-class CustomOrderStatus {
+class CustomOrderStatus implements ArraySerializableModel {
 
 	public int $id;
 	public string $status_key;
@@ -22,7 +24,7 @@ class CustomOrderStatus {
 		$this->status_key = $data['status_key'] ?? '';
 		$this->label      = $data['label'] ?? '';
 		$this->background = $data['background'] ?? '#ccc';
-		$this->foreground = $this->get_foreground_color( $this->background );
+		$this->foreground = $data['foreground'] ?? $this->get_foreground_color( $this->background );
 	}
 
 	/**
@@ -37,6 +39,20 @@ class CustomOrderStatus {
 			'label'      => $this->label,
 			'background' => $this->background,
 			'foreground' => $this->foreground,
+		);
+	}
+
+	/**
+	 * Convert the model to an array suitable for database storage.
+	 *
+	 * @return array
+	 */
+	public function to_db_array(): array {
+		return array(
+			'id'         => $this->id,
+			'status_key' => $this->status_key,
+			'label'      => $this->label,
+			'background' => $this->background,
 		);
 	}
 

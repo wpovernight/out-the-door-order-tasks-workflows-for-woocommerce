@@ -63,7 +63,7 @@ class CustomOrderStatusRepository extends BaseRepository {
 	 * @return int|false
 	 */
 	public function insert_status( CustomOrderStatus $status ) {
-		return $this->insert( $status->to_array() );
+		return $this->insert( $status->to_db_array() );
 	}
 
 	/**
@@ -74,7 +74,7 @@ class CustomOrderStatusRepository extends BaseRepository {
 	 * @return int
 	 */
 	public function update_status( CustomOrderStatus $status ): int {
-		return $this->where( 'id', $status->id )->update( $status->to_array() );
+		return $this->where( 'id', $status->id )->update( $status->to_db_array() );
 	}
 
 	/**
