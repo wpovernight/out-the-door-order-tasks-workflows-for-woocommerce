@@ -24,6 +24,9 @@ final class Screen {
 
 		// Custom field for woocommerce_admin_fields() to display the preview.
 		add_action( 'woocommerce_admin_field_wpo_aom_cos_preview', array( $this, 'render_preview_field' ) );
+
+		// Delete a custom order status using AJAX.
+		add_action( 'wp_ajax_wpo_aom_delete_custom_order_status', array( $this, 'ajax_delete_custom_order_status' ) );
 	}
 
 	/**
@@ -50,15 +53,23 @@ final class Screen {
 			WPO_AOM_VERSION
 		);
 
-		if ( 'edit' === $this->get_current_action() ) {
-			wp_enqueue_script(
-				'wpo-aom-custom-status-script',
-				WPO_AOM()->plugin_url() . '/includes/Admin/assets/js/custom-order-status.js',
-				array( 'jquery' ),
-				WPO_AOM_VERSION,
-				true
-			);
-		}
+		wp_enqueue_script(
+			'wpo-aom-custom-status-script',
+			WPO_AOM()->plugin_url() . '/includes/Admin/assets/js/custom-order-status.js',
+			array( 'jquery' ),
+			WPO_AOM_VERSION,
+			true
+		);
+
+		wp_localize_script(
+			'wpo-aom-custom-status-script',
+			'wpo_aom_cos_params',
+			array(
+				'ajax_url'     => admin_url( 'admin-ajax.php' ),
+				'nonce'        => wp_create_nonce( 'wpo_aom_cos' ),
+				'confirm_text' => esc_html__( 'Are you sure?', 'wpo-aom' ),
+			)
+		);
 	}
 
 	/**
@@ -231,6 +242,33 @@ final class Screen {
 
 			WPO_AOM()->custom_order_status->update( $status_id, $data );
 		}
+	}
+
+	/**
+	 * Handle the AJAX request to delete a custom order status.
+	 *
+	 * @return void
+	 */
+	public function ajax_delete_custom_order_status(): void {
+		if (
+			! current_user_can( 'manage_woocommerce' ) ||
+			! check_ajax_referer( 'wpo_aom_cos', '_wpnonce', false ) ||
+			empty( $_POST['status_id'] ) ||
+			! is_numeric( $_POST['status_id'] )
+		) {
+			wp_send_json_error( array( 'message' => esc_html__( 'Invalid request.', 'wpo-aom' ) ) );
+		}
+
+		$status_id = absint( $_POST['status_id'] );
+		$deleted   = WPO_AOM()->custom_order_status->delete( $status_id );
+
+		if ( $deleted ) {
+			wp_send_json_success( array( 'message' => esc_html__( 'Custom order status deleted successfully.', 'wpo-aom' ) ) );
+		} else {
+			wp_send_json_error( array( 'message' => esc_html__( 'Failed to delete custom order status.', 'wpo-aom' ) ) );
+		}
+
+		wp_die();
 	}
 
 	/**

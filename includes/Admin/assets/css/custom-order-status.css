@@ -12,3 +12,12 @@ span.wpo-aom-custom-order-status-preview {
 	margin: 0;
 	gap: 6px;
 }
+
+.wpo-aom-custom-order-status-actions button {
+	background: transparent;
+	border: none;
+	margin: 0;
+	padding: 0;
+	color: #2271b1;
+	cursor: pointer;
+}

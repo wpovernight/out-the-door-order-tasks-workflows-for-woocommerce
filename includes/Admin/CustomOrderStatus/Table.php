@@ -135,13 +135,13 @@ class Table extends WP_List_Table {
 		);
 
 		$edit_button   = sprintf(
-			'<a href="%s" id="wpo-aom-custom-order-status-edit" data-id="%d"><span class="dashicons dashicons-edit"></span>%s</a>',
+			'<a href="%s" class="wpo-aom-custom-order-status-edit" data-status-id="%d"><span class="dashicons dashicons-edit"></span>%s</a>',
 			$edit_url,
 			$item->id,
 			'<span class="screen-reader-text">' . esc_html__( 'Edit', 'wpo-aom' ) . '</span>'
 		);
 		$delete_button = sprintf(
-			'<a href="#" id="wpo-aom-custom-order-status-delete" data-id="%d"><span class="dashicons dashicons-trash"></span>%s</a>',
+			'<button class="wpo-aom-custom-order-status-delete" data-status-id="%d"><span class="dashicons dashicons-trash"></span>%s</button>',
 			$item->id,
 			'<span class="screen-reader-text">' . esc_html__( 'Delete', 'wpo-aom' ) . '</span>'
 		);

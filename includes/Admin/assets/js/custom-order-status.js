@@ -1,5 +1,54 @@
 jQuery( function( $ ) {
 
+	/* ==============================
+	 * Delete Button
+	 * ============================= */
+
+	 $( '.wpo-aom-custom-order-status-delete' ).on( 'click', function ( event ) {
+		event.preventDefault();
+
+	 	if ( ! confirm( wpo_aom_cos_params.confirm_text ) ) {
+			return;
+		}
+
+		$( 'body' ).block( {
+			message: null,
+			overlayCSS: {
+				background: '#fff',
+				opacity: 0.6
+			}
+		} );
+
+		$.ajax( {
+			url:  wpo_aom_cos_params.ajax_url,
+			type: 'POST',
+			data: {
+				action:   'wpo_aom_delete_custom_order_status',
+				status_id: $( this ).data( 'status-id' ),
+				_wpnonce: wpo_aom_cos_params.nonce
+			},
+			cache: false,
+			success: function ( response ) {
+				if ( response.success ) {
+					location.reload();
+				} else {
+					console.error( 'Failed to delete custom order status: ' + ( response?.data?.message || 'Unknown error' ) );
+				}
+			},
+			error: function ( xhr, status, error ) {
+				console.error( 'AJAX error while deleting custom order status: ' + error );
+			},
+			complete: function() {
+				$( 'body' ).unblock();
+			}
+		} );
+	 } );
+
+
+	/* ==============================
+	 * Edit Page Preview
+	 * ============================= */
+
 	/**
 	 * Updates the preview span with the current label and background color values.
 	 */
