@@ -21,6 +21,9 @@ final class Screen {
 		add_filter( 'woocommerce_settings_tabs_array', array( $this, 'add_settings_tab' ), 50 );
 		add_action( 'woocommerce_settings_tabs_wpo_aom_custom_status_tab', array( $this, 'render_tab_content' ) );
 		add_action( 'woocommerce_update_options_wpo_aom_custom_status_tab', array( $this, 'save_tab_content' ) );
+
+		// Custom field for woocommerce_admin_fields() to display the preview.
+		add_action( 'woocommerce_admin_field_wpo_aom_cos_preview', array( $this, 'render_preview_field' ) );
 	}
 
 	/**
@@ -46,6 +49,16 @@ final class Screen {
 			array(),
 			WPO_AOM_VERSION
 		);
+
+		if ( 'edit' === $this->get_current_action() ) {
+			wp_enqueue_script(
+				'wpo-aom-custom-status-script',
+				WPO_AOM()->plugin_url() . '/includes/Admin/assets/js/custom-order-status.js',
+				array( 'jquery' ),
+				WPO_AOM_VERSION,
+				true
+			);
+		}
 	}
 
 	/**
@@ -167,9 +180,38 @@ final class Screen {
 				'required' => true,
 			),
 			array(
+				'title' => esc_html__( 'Preview', 'wpo-aom' ),
+				'id'    => 'wpo_aom_custom_order_status_preview',
+				'type'  => 'wpo_aom_cos_preview',
+			),
+			array(
 				'type' => 'sectionend',
 				'id'   => $option_name,
 			),
+		);
+	}
+
+	/**
+	 * Render the custom preview field for the edit page.
+	 *
+	 * @param array $value
+	 *
+	 * @return void
+	 */
+	public function render_preview_field( array $value ): void {
+		printf(
+			'<tr class="%s">
+				<th scope="row" class="titledesc">
+					<label>%s</label>
+				</th>
+				<td class="forminp forminp-%s">
+					<span class="wpo-aom-custom-order-status-preview order-status" id="%s"></span>
+				</td>
+			</tr>',
+			esc_attr( $value['row_class'] ),
+			esc_html( $value['title'] ),
+			esc_attr( sanitize_title( $value['type'] ) ),
+			esc_attr( $value['id'] )
 		);
 	}
 
