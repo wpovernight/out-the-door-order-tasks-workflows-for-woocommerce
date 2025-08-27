@@ -91,10 +91,16 @@ final class Screen {
 	 * @return void
 	 */
 	public function render_tab_content() {
-		if ( $this->get_current_action() === 'edit' ) {
-			$this->render_edit_screen();
-		} else {
-			$this->render_list_table();
+		switch ( $this->get_current_action() ) {
+			case 'create':
+				$this->render_create_screen();
+				break;
+			case 'edit':
+				$this->render_edit_screen();
+				break;
+			default:
+				$this->render_list_table();
+				break;
 		}
 	}
 
@@ -108,7 +114,25 @@ final class Screen {
 		$hide_save_button = true;
 
 		$table = new Table();
+
+		// Add title and "Add New" button.
+		printf(
+			'<h2>%s <a href="%s" class="page-title-action">%s</a></h2>',
+			esc_html__( 'Custom Order Statuses', 'wpo-aom' ),
+			esc_url( admin_url( 'admin.php?page=wc-settings&tab=wpo_aom_custom_status_tab&action=create' ) ),
+			esc_html__( 'Add New', 'wpo-aom' )
+		);
+
 		$table->display_tab_content();
+	}
+
+	/**
+	 * Render the create screen for a new custom order status.
+	 *
+	 * @return void
+	 */
+	private function render_create_screen(): void {
+		woocommerce_admin_fields( $this->get_edit_settings_fields() );
 	}
 
 	/**
@@ -178,8 +202,8 @@ final class Screen {
 				'default'           => $status ? $status->status_key : '',
 				'required'          => true,
 				'custom_attributes' => array(
-					'pattern' => '^[a-z0-9_]+$',
-					'title'   => esc_html__( 'Only lowercase letters, numbers, and underscores are allowed.', 'wpo-aom' ),
+					'pattern' => '^[a-z0-9_-]+$',
+					'title'   => esc_html__( 'Only lowercase letters, numbers, hyphens, and underscores are allowed.', 'wpo-aom' ),
 				),
 			),
 			array(
@@ -232,15 +256,21 @@ final class Screen {
 	 * @return void
 	 */
 	public function save_tab_content(): void {
-		if ( 'edit' === $this->get_current_action() ) {
-			$status_id = absint( $_GET['status_id'] ?? 0 );
-			$data      = array(
-				'status_key' => sanitize_text_field( $_POST['wpo_aom_custom_order_status_key'] ?? '' ),
-				'label'      => sanitize_text_field( $_POST['wpo_aom_custom_order_status_label'] ?? '' ),
-				'background' => sanitize_hex_color( $_POST['wpo_aom_custom_order_status_background'] ?? '' ),
-			);
+		$data = array(
+			'status_key' => sanitize_text_field( $_POST['wpo_aom_custom_order_status_key'] ?? '' ),
+			'label'      => sanitize_text_field( $_POST['wpo_aom_custom_order_status_label'] ?? '' ),
+			'background' => sanitize_hex_color( $_POST['wpo_aom_custom_order_status_background'] ?? '' ),
+		);
 
-			WPO_AOM()->custom_order_status->update( $status_id, $data );
+		switch ( $this->get_current_action() ) {
+			case 'edit':
+				$status_id = absint( $_GET['status_id'] ?? 0 );
+				WPO_AOM()->custom_order_status->update( $status_id, $data );
+				break;
+			case 'create':
+				WPO_AOM()->custom_order_status->create( $data );
+				wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=wpo_aom_custom_status_tab' ) );
+				break;
 		}
 	}
 
@@ -280,7 +310,7 @@ final class Screen {
 		$action = $_REQUEST['action'] ?? '';
 
 		// Only allow specific actions.
-		if ( ! in_array( $action, array( 'edit' ), true ) ) {
+		if ( ! in_array( $action, array( 'edit', 'create' ), true ) ) {
 			$action = '';
 		}
 
