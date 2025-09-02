@@ -14,10 +14,10 @@ final class AdvancedOrderManager {
 
 	public const VERSION = '1.0.0';
 
+	public ?CustomOrderStatus $custom_order_status = null;
+
+
 	protected static ?self $_instance = null;
-
-	private ?CustomOrderStatus $custom_order_status = null;
-
 
 	/**
 	 * Get the instance of the class.
