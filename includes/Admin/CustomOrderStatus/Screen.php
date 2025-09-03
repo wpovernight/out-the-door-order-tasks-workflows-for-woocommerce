@@ -36,6 +36,7 @@ final class Screen {
 	 */
 	public function enqueue_scripts(): void {
 		$screen = get_current_screen();
+		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
 		if (
 			! $screen ||
@@ -48,14 +49,14 @@ final class Screen {
 
 		wp_enqueue_style(
 			'wpo-aom-custom-status',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/custom-order-status.css',
+			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/custom-order-status' . $suffix . '.css',
 			array(),
 			WPO_AOM_VERSION
 		);
 
 		wp_enqueue_script(
 			'wpo-aom-custom-status-script',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/js/custom-order-status.js',
+			WPO_AOM()->plugin_url() . '/includes/Admin/assets/js/custom-order-status' . $suffix . '.js',
 			array( 'jquery' ),
 			WPO_AOM_VERSION,
 			true

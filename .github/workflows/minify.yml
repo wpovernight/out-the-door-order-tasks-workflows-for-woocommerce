@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - '../../includes/Admin/assets/**/*.js'
-      - '../../includes/Admin/assets/**/*.css'
+      - 'includes/Admin/assets/**/*.js'
+      - 'includes/Admin/assets/**/*.css'
 
 jobs:
   build:
