@@ -5,6 +5,9 @@ namespace WPO\AOM;
 use WPO\AOM\Core\Install;
 use WPO\AOM\Core\DependencyChecker;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use WPO\AOM\Models\Task;
+use WPO\AOM\Repositories\RepositoryRegistry;
+use WPO\AOM\Repositories\TaskRepository;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -65,6 +68,9 @@ final class AdvancedOrderManager {
 
 		// Register services.
 		$this->register_services();
+
+		// Register repository bindings.
+		$this->register_repository_bindings();
 	}
 
 	/**
@@ -166,6 +172,15 @@ final class AdvancedOrderManager {
 		}
 
 		return new $class();
+	}
+
+	/**
+	 * Register repository bindings.
+	 *
+	 * @return void
+	 */
+	private function register_repository_bindings(): void {
+		RepositoryRegistry::register( Task::class, fn() => new TaskRepository() );
 	}
 
 	/**
