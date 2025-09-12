@@ -132,11 +132,44 @@ final class Install {
 		global $wpdb;
 
 		$charset_collate = $wpdb->get_charset_collate();
-		$sql             = '';
 
-		// ToDo: Add table creation schema here
+		return "
+		CREATE TABLE `{$wpdb->prefix}wpo_aom_tasks` (
+			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+			title VARCHAR(255) NOT NULL,
+			description TEXT DEFAULT NULL,
+			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			PRIMARY KEY  (id)
+		) {$charset_collate};
+		CREATE TABLE `{$wpdb->prefix}wpo_aom_task_fields` (
+			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+			label VARCHAR(255) NOT NULL,
+			type VARCHAR(20) NOT NULL,
+			is_required TINYINT(1) NOT NULL DEFAULT 0,
+			is_visible TINYINT(1) NOT NULL DEFAULT 1,
+			is_protected TINYINT(1) NOT NULL DEFAULT 0,
+			PRIMARY KEY  (id)
+		) {$charset_collate};
+		CREATE TABLE `{$wpdb->prefix}wpo_aom_task_field_options` (
+			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+			field_id BIGINT(20) UNSIGNED NOT NULL,
+			label VARCHAR(255) NOT NULL,
+			color VARCHAR(7) DEFAULT NULL,
+			PRIMARY KEY  (id),
+			FOREIGN KEY (field_id) REFERENCES {$wpdb->prefix}wpo_aom_task_fields(id) ON DELETE CASCADE
+		) {$charset_collate};
+		CREATE TABLE `{$wpdb->prefix}wpo_aom_task_field_values` (
+			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+			task_id BIGINT(20) UNSIGNED NOT NULL,
+			field_id BIGINT(20) UNSIGNED NOT NULL,
+			value TEXT DEFAULT NULL,
+			PRIMARY KEY  (id),
+			FOREIGN KEY (task_id) REFERENCES {$wpdb->prefix}wpo_aom_tasks(id) ON DELETE CASCADE,
+			FOREIGN KEY (field_id) REFERENCES {$wpdb->prefix}wpo_aom_task_fields(id) ON DELETE CASCADE
+		) {$charset_collate};
+		";
 
-		return $sql;
 	}
 
 	/**
