@@ -3,6 +3,7 @@
 namespace WPO\AOM\Repositories;
 
 use InvalidArgumentException;
+use WPO\AOM\Models\BaseModel;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -12,6 +13,9 @@ abstract class BaseRepository {
 	private string $plugin_table_prefix = 'wpo_aom_';
 	private string $table_name;
 
+	/** @var class-string<BaseModel> */
+	private string $model_class;
+
 	/**
 	 * Each where item is: array{0:string column, 1:string operator, 2:mixed value, 3:string logic AND|OR}
 	 *
@@ -20,7 +24,8 @@ abstract class BaseRepository {
 	private array $wheres = array();
 
 	/** @var array<int, mixed> */
-	private array $bindings  = array();
+	private array $bindings = array();
+
 	private array $columns   = array( '*' );
 	private string $order_by = '';
 	private int $limit       = 0;
@@ -32,55 +37,24 @@ abstract class BaseRepository {
 	 * Constructor.
 	 *
 	 * @param string $table_name
+	 * @param class-string<BaseModel> $model_class
 	 */
-	protected function __construct( string $table_name ) {
+	protected function __construct( string $table_name, string $model_class ) {
 		global $wpdb;
 
-		$this->wpdb       = $wpdb;
-		$this->table_name = $table_name;
+		$this->wpdb        = $wpdb;
+		$this->table_name  = $table_name;
+		$this->model_class = $model_class;
 	}
 
 	/** ================================
-	 *   Helpers
-	 *  ================================ */
-
-	/**
-	 * Get the full table name with prefix.
-	 *
-	 * @return string
-	 */
-	protected function get_table_full_name(): string {
-		return $this->wpdb->prefix . $this->plugin_table_prefix . $this->table_name;
-	}
-
-	/**
-	 * Get column names from the table.
-	 * This caches the column names to avoid repeated queries.
-	 *
-	 * @return array
-	 */
-	protected function get_column_names(): array {
-		if ( isset( self::$column_names[ $this->table_name ] ) ) {
-			return self::$column_names[ $this->table_name ];
-		}
-
-		// WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Direct query is safe here as table name is validated internally and cannot be parameterized.
-		$columns = (array) $this->wpdb->get_col( "DESCRIBE {$this->get_table_full_name()}" );
-		$columns = array_map( 'strtolower', $columns );
-
-		self::$column_names[ $this->table_name ] = $columns;
-
-		return $columns;
-	}
-
-	/** ================================
-	 *   CRUD
+	 *   CRUD Operations
 	 *  ================================ */
 
 	/**
 	 * Get records.
 	 *
-	 * @return array<int, array<string, mixed>>
+	 * @return array<int, BaseModel>
 	 */
 	public function get( bool $reset = true ): array {
 		$columns = implode( ', ', $this->columns );
@@ -97,7 +71,7 @@ abstract class BaseRepository {
 			$this->reset_query();
 		}
 
-		return $result;
+		return array_map( array( $this, 'map_to_model' ), $result );
 	}
 
 	/**
@@ -105,9 +79,9 @@ abstract class BaseRepository {
 	 *
 	 * @param int $id Record ID.
 	 *
-	 * @return array<string, mixed>|null
+	 * @return BaseModel|null
 	 */
-	public function find( int $id ): ?array {
+	public function find( int $id ): ?BaseModel {
 		$results = $this->where( 'id', absint( $id ) )->limit( 1 )->get();
 
 		return ! empty( $results ) ? reset( $results ) : null;
@@ -116,9 +90,9 @@ abstract class BaseRepository {
 	/**
 	 * Get first record.
 	 *
-	 * @return array<string, mixed>|null
+	 * @return BaseModel|null
 	 */
-	public function first(): ?array {
+	public function first(): ?BaseModel {
 		$results = $this->limit( 1 )->get();
 
 		return ! empty( $results ) ? reset( $results ) : null;
@@ -200,6 +174,50 @@ abstract class BaseRepository {
 		$this->reset_query();
 
 		return (int) $this->wpdb->delete( $this->get_table_full_name(), $where );
+	}
+
+	/** ================================
+	 *   Helpers
+	 *  ================================ */
+
+	/**
+	 * Map a single row to a model instance.
+	 *
+	 * @param array<string, mixed> $row
+	 *
+	 * @return BaseModel
+	 */
+	protected function map_to_model( array $row ): BaseModel {
+		return new $this->model_class( $row );
+	}
+
+	/**
+	 * Get the full table name with prefix.
+	 *
+	 * @return string
+	 */
+	protected function get_table_full_name(): string {
+		return $this->wpdb->prefix . $this->plugin_table_prefix . $this->table_name;
+	}
+
+	/**
+	 * Get column names from the table.
+	 * This caches the column names to avoid repeated queries.
+	 *
+	 * @return array
+	 */
+	protected function get_column_names(): array {
+		if ( isset( self::$column_names[ $this->table_name ] ) ) {
+			return self::$column_names[ $this->table_name ];
+		}
+
+		// WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Direct query is safe here as table name is validated internally and cannot be parameterized.
+		$columns = (array) $this->wpdb->get_col( "DESCRIBE {$this->get_table_full_name()}" );
+		$columns = array_map( 'strtolower', $columns );
+
+		self::$column_names[ $this->table_name ] = $columns;
+
+		return $columns;
 	}
 
 	/** ================================
