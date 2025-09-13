@@ -5,9 +5,7 @@ namespace WPO\AOM;
 use WPO\AOM\Core\Install;
 use WPO\AOM\Core\DependencyChecker;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
-use WPO\AOM\Models\Task;
-use WPO\AOM\Repositories\RepositoryRegistry;
-use WPO\AOM\Repositories\TaskRepository;
+use WPO\AOM\Core\ServiceContainer;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -66,11 +64,9 @@ final class AdvancedOrderManager {
 		$this->define_constants();
 		$this->init_hooks();
 
-		// Register services.
-		$this->register_services();
-
-		// Register repository bindings.
-		$this->register_repository_bindings();
+		// Register services and repositories.
+		$service_provider = new ServiceContainer();
+		$service_provider->register( $this );
 	}
 
 	/**
@@ -109,78 +105,6 @@ final class AdvancedOrderManager {
 		load_textdomain( $text_domain, $custom_translation_path );
 		load_textdomain( $text_domain, $plugin_translation_path );
 		load_plugin_textdomain( $text_domain, false, dirname( plugin_basename( WPO_AOM_PLUGIN_FILE ) ) . '/languages' );
-	}
-
-	/**
-	 * Return the map of service properties to class names.
-	 *
-	 * @return array<string,class-string>
-	 */
-	private function service_map(): array {
-		$map = array(
-			// ToDo: Add services here: property_name => class_name
-			/**
-			 * Sample:
-			 * 'custom_status_admin' => array(
-			 *     \WPO\AOM\Admin\AdminPanel::class,
-			 *     true, // Whether to store in a dynamic property.
-			 * ),
-			 */
-		);
-
-		/**
-		 * Filters the Advanced Order Manager service map.
-		 *
-		 * @param array<string,array> $map Service map.
-		 */
-		return (array) apply_filters( 'wpo_aom_service_map', $map );
-	}
-
-	/**
-	 * Instantiate and store services (singleton- or constructor-based).
-	 *
-	 * @return void
-	 */
-	private function register_services(): void {
-		foreach ( $this->service_map() as $property => $definition ) {
-			[ $class, $store ] = $definition;
-
-			$service = $this->resolve_service( $class );
-
-			if ( method_exists( $service, 'register' ) ) {
-				$service->register();
-			}
-
-			// Store the service in a dynamic property if specified.
-			if ( $store && ! property_exists( $this, $property ) ) {
-				/* @phpstan-ignore-next-line Suppressing type warning for dynamic property assignment. */
-				$this->{$property} = $service;
-			}
-		}
-	}
-
-	/**
-	 * Resolve a service instance (supports overrides, ::instance(), or new).
-	 *
-	 * @param string $class
-	 *
-	 * @return object
-	 */
-	private function resolve_service( string $class ): object {
-		if ( is_callable( array( $class, 'instance' ) ) ) {
-			return $class::instance();
-		}
-
-		return new $class();
-	}
-
-	/**
-	 * Register repository bindings.
-	 *
-	 * @return void
-	 */
-	private function register_repository_bindings(): void {
-		RepositoryRegistry::register( Task::class, fn() => new TaskRepository() );
 	}
 
 	/**

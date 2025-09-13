@@ -5,7 +5,6 @@ namespace WPO\AOM\Repositories;
 defined( 'ABSPATH' ) || exit;
 
 final class RepositoryRegistry {
-
 	/** @var array<string, BaseRepository> */
 	private static array $map = array();
 
@@ -44,6 +43,5 @@ final class RepositoryRegistry {
 
 		return $repository;
 	}
-
 }
 
