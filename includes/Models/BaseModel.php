@@ -6,7 +6,6 @@ use WPO\AOM\Repositories\BaseRepository;
 use WPO\AOM\Repositories\RepositoryRegistry;
 
 abstract class BaseModel {
-
 	protected array $non_db_properties = array();
 
 	/**
@@ -15,7 +14,9 @@ abstract class BaseModel {
 	 * @return array<string, mixed>
 	 */
 	public function to_array(): array {
-		return get_object_vars( $this );
+		$data = get_object_vars( $this );
+		unset( $data['non_db_properties'] );
+		return $data;
 	}
 
 	/**
@@ -27,8 +28,8 @@ abstract class BaseModel {
 		$data = $this->to_array();
 
 		// Exclude non-DB properties
-		foreach ( $this->non_db_properties as $prop ) {
-			unset( $data[ $prop ] );
+		foreach ( $this->non_db_properties as $property ) {
+			unset( $data[ $property ] );
 		}
 
 		return $data;
@@ -37,10 +38,10 @@ abstract class BaseModel {
 	/**
 	 * Get the repository for a given model class.
 	 *
-	 * @template T of BaseModel
-	 * @param class-string<T> $model_class
+	 * @template TModel of BaseModel
+	 * @param class-string<TModel> $model_class
 	 *
-	 * @return BaseRepository<T>
+	 * @return BaseRepository<TModel>
 	 */
 	protected function repository( string $model_class ): BaseRepository {
 		return RepositoryRegistry::get( $model_class );
@@ -49,11 +50,11 @@ abstract class BaseModel {
 	/**
 	 * Fetch a related model by foreign key.
 	 *
-	 * @template T of BaseModel
-	 * @param class-string<T> $related_class
+	 * @template TModel of BaseModel
+	 * @param class-string<TModel> $related_class
 	 * @param string $foreign_key
 	 *
-	 * @return T|null
+	 * @return TModel|null
 	 */
 	protected function related( string $related_class, string $foreign_key ): ?BaseModel {
 		$id = $this->{$foreign_key} ?? null;
@@ -63,5 +64,4 @@ abstract class BaseModel {
 
 		return $this->repository( $related_class )->find( $id );
 	}
-
 }
