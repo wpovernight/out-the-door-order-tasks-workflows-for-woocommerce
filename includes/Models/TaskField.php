@@ -7,7 +7,6 @@ use WPO\AOM\Enums\TaskFieldTypes;
 defined( 'ABSPATH' ) || exit;
 
 class TaskField extends BaseModel {
-
 	public int $id;
 	public string $label;
 	public string $type;
@@ -35,5 +34,4 @@ class TaskField extends BaseModel {
 		$this->is_visible   = ! isset( $data['is_visible'] ) || $data['is_visible'];
 		$this->is_protected = isset( $data['is_protected'] ) && $data['is_protected'];
 	}
-
 }

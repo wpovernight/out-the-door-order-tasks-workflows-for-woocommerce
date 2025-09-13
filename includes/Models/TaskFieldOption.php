@@ -5,7 +5,6 @@ namespace WPO\AOM\Models;
 defined( 'ABSPATH' ) || exit;
 
 class TaskFieldOption extends BaseModel {
-
 	public int $id;
 	public int $field_id;
 	public string $label;
@@ -23,5 +22,4 @@ class TaskFieldOption extends BaseModel {
 		$this->label    = $data['label'] ?? '';
 		$this->color    = $data['color'] ?? '#000000';
 	}
-
 }

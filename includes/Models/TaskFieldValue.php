@@ -5,7 +5,6 @@ namespace WPO\AOM\Models;
 defined( 'ABSPATH' ) || exit;
 
 class TaskFieldValue extends BaseModel {
-
 	public int $id;
 	public int $task_id;
 	public int $field_id;
@@ -23,5 +22,4 @@ class TaskFieldValue extends BaseModel {
 		$this->field_id = absint( $data['field_id'] );
 		$this->value    = $data['value'] ?? null;
 	}
-
 }
