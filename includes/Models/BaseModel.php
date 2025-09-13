@@ -9,6 +9,19 @@ abstract class BaseModel {
 	protected array $non_db_properties = array();
 
 	/**
+	 * Fill the model with data from an associative array.
+	 *
+	 * @param array<string, mixed> $data
+	 */
+	public function fill( array $data ): void {
+		foreach ( $data as $key => $value ) {
+			if ( property_exists( $this, $key ) ) {
+				$this->{$key} = $value;
+			}
+		}
+	}
+
+	/**
 	 * Convert the model to an array.
 	 *
 	 * @return array<string, mixed>
