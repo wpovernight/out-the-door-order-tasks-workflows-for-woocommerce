@@ -6,7 +6,7 @@ use WPO\AOM\Enums\TaskFieldTypes;
 
 defined( 'ABSPATH' ) || exit;
 
-class TaskFields extends BaseModel {
+class TaskField extends BaseModel {
 
 	public int $id;
 	public string $label;
