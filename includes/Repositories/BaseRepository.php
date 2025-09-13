@@ -8,7 +8,6 @@ use WPO\AOM\Models\BaseModel;
 defined( 'ABSPATH' ) || exit;
 
 abstract class BaseRepository {
-
 	protected \wpdb $wpdb;
 	private string $plugin_table_prefix = 'wpo_aom_';
 	private string $table_name;
@@ -77,9 +76,10 @@ abstract class BaseRepository {
 	/**
 	 * Find a record by ID.
 	 *
+	 * @template TModel of BaseModel
 	 * @param int $id Record ID.
 	 *
-	 * @return BaseModel|null
+	 * @return TModel|null
 	 */
 	public function find( int $id ): ?BaseModel {
 		$results = $this->where( 'id', absint( $id ) )->limit( 1 )->get();
@@ -90,7 +90,8 @@ abstract class BaseRepository {
 	/**
 	 * Get first record.
 	 *
-	 * @return BaseModel|null
+	 * @template TModel of BaseModel
+	 * @return TModel|null
 	 */
 	public function first(): ?BaseModel {
 		$results = $this->limit( 1 )->get();
@@ -111,6 +112,13 @@ abstract class BaseRepository {
 		}
 
 		$this->validate_columns( array_keys( $data ) );
+
+		// Convert DateTime objects to strings.
+		foreach ( $data as $key => $value ) {
+			if ( $value instanceof \DateTime ) {
+				$data[ $key ] = $value->format( 'Y-m-d H:i:s' );
+			}
+		}
 
 		$result = $this->wpdb->insert( $this->get_table_full_name(), $data );
 
@@ -152,6 +160,18 @@ abstract class BaseRepository {
 		return (bool) $this->wpdb->update( $this->get_table_full_name(), $data, $where );
 	}
 
+	/**
+	 * Save the model (insert or update based on presence of ID).
+	 *
+	 * @param BaseModel $model
+	 *
+	 * @return int|false
+	 */
+	public function save( BaseModel $model ) {
+		return $model->id
+			? $this->where( 'id', $model->id )->update( $model->to_db_array() )
+			: $this->insert( $model->to_db_array() );
+	}
 
 	/**
 	 * Delete records from the table based on the WHERE clause.
@@ -495,5 +515,4 @@ abstract class BaseRepository {
 		$this->limit    = 0;
 		$this->offset   = 0;
 	}
-
 }
