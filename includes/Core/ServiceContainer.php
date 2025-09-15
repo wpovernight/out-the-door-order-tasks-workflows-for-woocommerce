@@ -23,6 +23,24 @@ final class ServiceContainer {
 	private array $instances = array();
 
 	/**
+	 * Static service map.
+	 *
+	 * @var array<string, array{string,bool}>
+	 */
+	private static array $service_map = array(
+		'task_management_service' => array( 'task_management_service', true ),
+	);
+
+	/**
+	 * Default repository bindings.
+	 *
+	 * @var array<string, string>
+	 */
+	private static array $default_bindings = array(
+		Task::class => TaskRepository::class,
+	);
+
+	/**
 	 * Register repositories and services.
 	 *
 	 * @param AdvancedOrderManager $plugin Plugin instance.
@@ -91,16 +109,12 @@ final class ServiceContainer {
 	 * @return array<string, array{string,bool}>
 	 */
 	private function service_map(): array {
-		$map = array(
-			'task_management_service' => array( 'task_management_service', true ),
-		);
-
 		/**
 		 * Filters the Advanced Order Manager service map.
 		 *
 		 * @param array<string, array{string,bool}> $map Service map.
 		 */
-		return (array) apply_filters( 'wpo_aom_service_map', $map );
+		return (array) apply_filters( 'wpo_aom_service_map', self::$service_map );
 	}
 
 	/**
@@ -109,7 +123,16 @@ final class ServiceContainer {
 	 * @return void
 	 */
 	private function register_repository_bindings(): void {
-		RepositoryRegistry::register( Task::class, fn() => new TaskRepository() );
+		/**
+		 * Filters the Advanced Order Manager repository bindings.
+		 *
+		 * @param array<string, string> $bindings Repository bindings.
+		 */
+		$bindings = apply_filters( 'wpo_aom_repository_bindings', self::$default_bindings );
+
+		foreach ( $bindings as $model => $repository ) {
+			RepositoryRegistry::register( $model, fn() => new $repository() );
+		}
 	}
 
 	/**
