@@ -5,6 +5,9 @@ namespace WPO\AOM\Core;
 use InvalidArgumentException;
 use WPO\AOM\AdvancedOrderManager;
 use WPO\AOM\Models\Task;
+use WPO\AOM\Models\TaskField;
+use WPO\AOM\Models\TaskFieldOption;
+use WPO\AOM\Models\TaskFieldValue;
 use WPO\AOM\Repositories\RepositoryRegistry;
 use WPO\AOM\Repositories\TaskFieldOptionRepository;
 use WPO\AOM\Repositories\TaskFieldRepository;
@@ -37,7 +40,10 @@ final class ServiceContainer {
 	 * @var array<string, string>
 	 */
 	private static array $default_bindings = array(
-		Task::class => TaskRepository::class,
+		Task::class            => TaskRepository::class,
+		TaskField::class       => TaskFieldRepository::class,
+		TaskFieldOption::class => TaskFieldOptionRepository::class,
+		TaskFieldValue::class  => TaskFieldValueRepository::class,
 	);
 
 	/**
