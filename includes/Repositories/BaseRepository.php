@@ -74,20 +74,6 @@ abstract class BaseRepository {
 	}
 
 	/**
-	 * Find a record by ID.
-	 *
-	 * @template TModel of BaseModel
-	 * @param int $id Record ID.
-	 *
-	 * @return TModel|null
-	 */
-	public function find( int $id ): ?BaseModel {
-		$results = $this->where( 'id', absint( $id ) )->limit( 1 )->get();
-
-		return ! empty( $results ) ? reset( $results ) : null;
-	}
-
-	/**
 	 * Get first record.
 	 *
 	 * @template TModel of BaseModel
@@ -97,6 +83,44 @@ abstract class BaseRepository {
 		$results = $this->limit( 1 )->get();
 
 		return ! empty( $results ) ? reset( $results ) : null;
+	}
+
+	/**
+	 * Find a record by ID.
+	 *
+	 * @template TModel of BaseModel
+	 * @param int $id Record ID.
+	 *
+	 * @return TModel|null
+	 */
+	public function find( int $id ): ?BaseModel {
+		return $this->where( 'id', asbint( $id ) )->first();
+	}
+
+	/**
+	 * Find a record by a specific column and value.
+	 *
+	 * @template TModel of BaseModel
+	 * @param string $column
+	 * @param mixed $value
+	 *
+	 * @return TModel|null
+	 */
+	public function find_by( string $column, $value ): ?BaseModel {
+		return $this->where( $column, $value )->first();
+	}
+
+	/**
+	 * Find all records matching a specific column and value.
+	 *
+	 * @template TModel of BaseModel
+	 * @param string $column
+	 * @param mixed $value
+	 *
+	 * @return array<int, TModel>
+	 */
+	public function find_all_by( string $column, $value ): array {
+		return $this->where( $column, $value )->get();
 	}
 
 	/**
