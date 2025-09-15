@@ -22,4 +22,22 @@ class TaskFieldValue extends BaseModel {
 		$this->field_id = absint( $data['field_id'] );
 		$this->value    = $data['value'] ?? null;
 	}
+
+	/**
+	 * Get the associated Task.
+	 *
+	 * @return Task|null
+	 */
+	public function task(): ?Task {
+		return $this->belongs_to_one( Task::class, 'task_id' );
+	}
+
+	/**
+	 * Get the associated TaskField.
+	 *
+	 * @return TaskField|null
+	 */
+	public function field(): ?TaskField {
+		return $this->belongs_to_one( TaskField::class, 'field_id' );
+	}
 }

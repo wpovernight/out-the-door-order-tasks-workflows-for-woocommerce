@@ -27,4 +27,13 @@ class Task extends BaseModel {
 		$this->created_at  = new DateTime( $data['created_at'] ?? 'now' );
 		$this->updated_at  = new DateTime( $data['updated_at'] ?? 'now' );
 	}
+
+	/**
+	 * Get related field values.
+	 *
+	 * @return TaskFieldValue[]
+	 */
+	public function field_values(): array {
+		return $this->has_many( TaskFieldValue::class, 'task_id' );
+	}
 }

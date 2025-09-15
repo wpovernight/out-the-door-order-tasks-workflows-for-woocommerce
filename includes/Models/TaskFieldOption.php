@@ -22,4 +22,13 @@ class TaskFieldOption extends BaseModel {
 		$this->label    = $data['label'] ?? '';
 		$this->color    = $data['color'] ?? '#000000';
 	}
+
+	/**
+	 * Get the associated TaskField.
+	 *
+	 * @return TaskField|null
+	 */
+	public function field(): ?TaskField {
+		return $this->belongs_to_one( TaskField::class, 'field_id' );
+	}
 }

@@ -34,4 +34,22 @@ class TaskField extends BaseModel {
 		$this->is_visible   = ! isset( $data['is_visible'] ) || $data['is_visible'];
 		$this->is_protected = isset( $data['is_protected'] ) && $data['is_protected'];
 	}
+
+	/**
+	 * Get related field values.
+	 *
+	 * @return TaskFieldValue[]
+	 */
+	public function field_values(): array {
+		return $this->has_many( TaskFieldValue::class, 'field_id' );
+	}
+
+	/**
+	 * Get related field options.
+	 *
+	 * @return TaskFieldOption[]
+	 */
+	public function field_options(): array {
+		return $this->has_many( TaskFieldOption::class, 'field_id' );
+	}
 }
