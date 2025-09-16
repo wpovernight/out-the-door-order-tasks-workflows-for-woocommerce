@@ -96,7 +96,7 @@ abstract class BaseRepository {
 	 * @return TModel|null
 	 */
 	public function find( int $id ): ?BaseModel {
-		return $this->where( 'id', asbint( $id ) )->first();
+		return $this->where( 'id', absint( $id ) )->first();
 	}
 
 	/**
