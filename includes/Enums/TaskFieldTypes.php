@@ -5,11 +5,12 @@ namespace WPO\AOM\Enums;
 defined( 'ABSPATH' ) || exit;
 
 final class TaskFieldTypes {
-
-	public const TEXT = 'text';
+	public const TEXT   = 'text';
 	public const NUMBER = 'number';
 	public const SELECT = 'select';
-	public const DATE = 'date';
+	public const DATE   = 'date';
+	public const USER   = 'user';
+	public const ORDER  = 'order';
 
 	/**
 	 * Get all valid field types.
@@ -22,6 +23,8 @@ final class TaskFieldTypes {
 			self::NUMBER,
 			self::SELECT,
 			self::DATE,
+			self::USER,
+			self::ORDER,
 		);
 	}
 
@@ -35,5 +38,4 @@ final class TaskFieldTypes {
 	public static function is_valid( string $type ): bool {
 		return in_array( $type, self::all(), true );
 	}
-
 }

@@ -3,6 +3,7 @@
 namespace WPO\AOM\Core;
 
 use WPO\AOM\AdvancedOrderManager;
+use WPO\AOM\Repositories\TaskFieldRepository;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -57,6 +58,7 @@ final class Install {
 	 */
 	public static function install(): void {
 		self::create_tables();
+		self::insert_default_data();
 
 		// Store the plugin version in the options table.
 		update_option( self::$option_version, AdvancedOrderManager::VERSION, true );
@@ -147,7 +149,7 @@ final class Install {
 			label VARCHAR(255) NOT NULL,
 			type VARCHAR(20) NOT NULL,
 			is_required TINYINT(1) NOT NULL DEFAULT 0,
-			is_visible TINYINT(1) NOT NULL DEFAULT 1,
+			is_editable TINYINT(1) NOT NULL DEFAULT 1,
 			is_protected TINYINT(1) NOT NULL DEFAULT 0,
 			PRIMARY KEY  (id)
 		) {$charset_collate};
@@ -169,7 +171,51 @@ final class Install {
 			FOREIGN KEY (field_id) REFERENCES {$wpdb->prefix}wpo_aom_task_fields(id) ON DELETE CASCADE
 		) {$charset_collate};
 		";
+	}
 
+	/**
+	 * Insert default data into the database.
+	 *
+	 * @return void
+	 */
+	private static function insert_default_data(): void {
+		$task_field_repository = new TaskFieldRepository();
+
+		$default_fields = array(
+			array(
+				'label'        => 'Assignee',
+				'type'         => 'user',
+				'is_required'  => false,
+				'is_editable'  => false,
+				'is_protected' => true,
+			),
+			array(
+				'label'        => 'Order ID',
+				'type'         => 'order',
+				'is_required'  => false,
+				'is_editable'  => false,
+				'is_protected' => true,
+			),
+		);
+
+		$all_fields = $task_field_repository->get();
+
+		foreach ( $default_fields as $field_data ) {
+			$exists = false;
+			foreach ( $all_fields as $existing_field ) {
+				if (
+					$existing_field->label === $field_data['label'] &&
+					$existing_field->type === $field_data['type']
+				) {
+					$exists = true;
+					break;
+				}
+			}
+
+			if ( ! $exists ) {
+				$task_field_repository->insert( $field_data );
+			}
+		}
 	}
 
 	/**

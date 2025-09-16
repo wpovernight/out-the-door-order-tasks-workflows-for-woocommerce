@@ -53,7 +53,9 @@ abstract class BaseRepository {
 	/**
 	 * Get records.
 	 *
-	 * @return array<int, BaseModel>
+	 * @template TModel of BaseModel
+	 * @param bool $reset Whether to reset the query after execution. Default true.
+	 * @return array<int, TModel>
 	 */
 	public function get( bool $reset = true ): array {
 		$columns = implode( ', ', $this->columns );
