@@ -55,6 +55,7 @@ abstract class BaseRepository {
 	 *
 	 * @template TModel of BaseModel
 	 * @param bool $reset Whether to reset the query after execution. Default true.
+	 *
 	 * @return array<int, TModel>
 	 */
 	public function get( bool $reset = true ): array {
@@ -123,6 +124,23 @@ abstract class BaseRepository {
 	 */
 	public function find_all_by( string $column, $value ): array {
 		return $this->where( $column, $value )->get();
+	}
+
+	/**
+	 * Find all records where a column's value is in a given array.
+	 *
+	 * @template TModel of BaseModel
+	 * @param string $column
+	 * @param array<int, mixed> $value
+	 *
+	 * @return array<int, TModel>
+	 */
+	public function find_all_by_in( string $column, array $value ): array {
+		if ( empty( $value ) ) {
+			return array();
+		}
+
+		return $this->where( $column, 'IN', $value )->get();
 	}
 
 	/**
