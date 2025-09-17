@@ -179,8 +179,6 @@ final class Install {
 	 * @return void
 	 */
 	private static function insert_default_data(): void {
-		$task_field_repository = new TaskFieldRepository();
-
 		$default_fields = array(
 			array(
 				'label'        => 'Assignee',
@@ -198,7 +196,8 @@ final class Install {
 			),
 		);
 
-		$all_fields = $task_field_repository->get();
+		$task_field_repository = new TaskFieldRepository();
+		$all_fields            = $task_field_repository->get();
 
 		foreach ( $default_fields as $field_data ) {
 			$exists = false;

@@ -126,7 +126,7 @@ final class TaskService {
 			$field_value = $values_by_field_id[ $field->id ]->value ?? null;
 
 			$field_options = 'select' === $field->type
-				? $this->task_field_option_repository->find_by( 'field_id', $field->id )
+				? $this->task_field_option_repository->find_by( 'field_id', $field->id )->to_array()
 				: array();
 
 			$task_fields[] = array_merge(
