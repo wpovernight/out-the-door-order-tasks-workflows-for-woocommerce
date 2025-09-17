@@ -79,12 +79,12 @@ final class Install {
 			return;
 		}
 
-		if ( version_compare( $current_version, AdvancedOrderManager::VERSION, '>=' ) ) {
-			return; // No upgrade needed.
-		}
-
-		if ( ! self::acquire_upgrade_lock() ) {
-			return; // Another process is already running migrations.
+		// If the current version is the same or higher, or if we can't acquire the lock, do nothing.
+		if (
+			version_compare( $current_version, AdvancedOrderManager::VERSION, '>=' ) ||
+			! self::acquire_upgrade_lock()
+		) {
+			return;
 		}
 
 		try {
