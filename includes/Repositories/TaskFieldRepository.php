@@ -16,4 +16,15 @@ class TaskFieldRepository extends BaseRepository {
 	public function __construct() {
 		parent::__construct( self::$table_name, self::$model_class );
 	}
+
+	/**
+	 * Find a TaskField by its label.
+	 *
+	 * @param string $label
+	 *
+	 * @return TaskField|null
+	 */
+	public function find_by_label( string $label ): ?TaskField {
+		return $this->where( 'label', $label )->first();
+	}
 }
