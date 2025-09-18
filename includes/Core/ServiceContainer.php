@@ -8,11 +8,10 @@ use WPO\AOM\Models\TaskField;
 use WPO\AOM\Models\TaskFieldOption;
 use WPO\AOM\Models\TaskFieldValue;
 use WPO\AOM\Repositories\RepositoryRegistry;
-use WPO\AOM\Repositories\TaskFieldOptionRepository;
-use WPO\AOM\Repositories\TaskFieldRepository;
-use WPO\AOM\Repositories\TaskFieldValueRepository;
 use WPO\AOM\Repositories\TaskRepository;
-use WPO\AOM\REST\BaseRestController;
+use WPO\AOM\Repositories\TaskFieldRepository;
+use WPO\AOM\Repositories\TaskFieldOptionRepository;
+use WPO\AOM\Repositories\TaskFieldValueRepository;
 use WPO\AOM\Services\TaskManagementService;
 
 defined( 'ABSPATH' ) || exit;
@@ -33,16 +32,16 @@ final class ServiceContainer {
 	/**
 	 * Static service map.
 	 *
-	 * @var array<string, class-string>
+	 * @var array
 	 */
 	private static array $service_map = array(
-		'task_management_service' => TaskManagementService::class,
+		'task_management_service'
 	);
 
 	/**
 	 * Default repository bindings.
 	 *
-	 * @var array<string, string>
+	 * @var array<string, class-string>
 	 */
 	private static array $default_bindings = array(
 		Task::class            => TaskRepository::class,
@@ -52,22 +51,22 @@ final class ServiceContainer {
 	);
 
 	/**
-	 * Register repositories and services.
+	 * Register services and repository bindings.
 	 *
 	 * @return void
 	 */
-	public function register() {
+	public function register(): void {
 		$this->register_services();
 		$this->register_repository_bindings();
 	}
 
 	/**
-	 * Register service classes and optionally assign them to plugin properties.
+	 * Register service classes and call their register method if available.
 	 *
 	 * @return void
 	 */
 	private function register_services(): void {
-		foreach ( $this->service_map() as $id => $class ) {
+		foreach ( $this->get_service_map() as $id ) {
 			$service = $this->resolve_service( $id );
 
 			if ( method_exists( $service, 'register' ) ) {
@@ -77,7 +76,7 @@ final class ServiceContainer {
 	}
 
 	/**
-	 * Resolve a service instance (builds it once and caches it).
+	 * Resolve a service instance, build it if it hasn’t been cached yet.
 	 *
 	 * @param string $id Service ID.
 	 *
@@ -90,24 +89,69 @@ final class ServiceContainer {
 			return $this->instances[ $id ];
 		}
 
-		$build_method = 'build_' . $id;
+		// Check for a builder callback.
+		$callback = $this->get_service_builder_callback( $id );
 
-		if ( ! method_exists( $this, $build_method ) ) {
-			throw new InvalidArgumentException( "Service ID '{$id}' is not defined." );
+		if ( is_callable( $callback ) ) {
+			$this->instances[ $id ] = call_user_func( $callback );
+
+			return $this->instances[ $id ];
 		}
 
-		/** @uses build_task_management_service() */
-		$this->instances[ $id ] = $this->{$build_method}();
+		// Fallback to internal build method.
+		$build_method = 'build_' . $id;
 
-		return $this->instances[ $id ];
+		if ( method_exists( $this, $build_method ) ) {
+			/** @uses build_task_management_service() */
+			$this->instances[ $id ] = $this->{$build_method}();
+
+			return $this->instances[ $id ];
+		}
+
+
+		throw new InvalidArgumentException( sprintf( 'Service ID "%s" is not defined.', $id ) );
 	}
 
 	/**
-	 * Define the map of plugin properties to service IDs.
+	 * Retrieve a builder callback for a service ID via filter.
 	 *
-	 * @return array<string, array{string,bool}>
+	 * @param string $id Service ID.
+	 *
+	 * @return callable|null
 	 */
-	private function service_map(): array {
+	protected function get_service_builder_callback( string $id ): ?callable {
+		/**
+		 * Filters the Advanced Order Manager service builders.
+		 *
+		 * @param array<string, callable> $builders Associative array of service ID => callback.
+		 */
+		$builders = apply_filters( 'wpo_aom_service_builders', array(
+			// 'service_id' => fn() => new ServiceClass(),
+		) );
+
+		if ( isset( $builders[ $id ] ) ) {
+			$callback = $builders[ $id ];
+
+			if ( is_callable( $callback ) ) {
+				return $callback;
+			}
+
+			_doing_it_wrong(
+				__METHOD__,
+				sprintf( 'Builder callback for service ID "%s" is not callable.', $id ),
+				'1.0.0'
+			);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get the service map, allowing filter overrides.
+	 *
+	 * @return array<string, class-string>
+	 */
+	private function get_service_map(): array {
 		/**
 		 * Filters the Advanced Order Manager service map.
 		 *
@@ -117,7 +161,7 @@ final class ServiceContainer {
 	}
 
 	/**
-	 * Register repository bindings.
+	 * Register model-to-repository bindings in the global registry.
 	 *
 	 * @return void
 	 */
@@ -125,9 +169,9 @@ final class ServiceContainer {
 		/**
 		 * Filters the Advanced Order Manager repository bindings.
 		 *
-		 * @param array<string, string> $bindings Repository bindings.
+		 * @param array<string, class-string> $bindings Repository bindings.
 		 */
-		$bindings = apply_filters( 'wpo_aom_repository_bindings', self::$default_bindings );
+		$bindings = (array) apply_filters( 'wpo_aom_repository_bindings', self::$default_bindings );
 
 		foreach ( $bindings as $model => $repository ) {
 			RepositoryRegistry::register( $model, fn() => new $repository() );
@@ -135,7 +179,7 @@ final class ServiceContainer {
 	}
 
 	/**
-	 * Build the TaskService.
+	 * Build and return an instance of TaskManagementService.
 	 *
 	 * @return TaskManagementService
 	 */
