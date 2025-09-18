@@ -3,6 +3,7 @@
 namespace WPO\AOM\Services;
 
 use Exception;
+use WPO\AOM\Enums\TaskFieldTypes;
 use WPO\AOM\Models\Task;
 use WPO\AOM\Models\TaskField;
 use WPO\AOM\Models\TaskFieldValue;
@@ -62,39 +63,20 @@ final class TaskService {
 		$all_fields = $this->get_all_fields();
 		$all_values = $this->task_field_value_repository->get();
 
-		// Fetch select-type fields and their options.
-		$select_fields        = array_filter( $all_fields, fn( $field ) => 'select' === $field->type );
-		$select_field_ids     = array_map( fn( $field ) => $field->id, $select_fields );
-		$select_field_options = $this->task_field_option_repository->find_all_by_in( 'field_id', $select_field_ids );
-
 		// Group values and options for easy lookup.
 		$values_by_task_and_field = array();
 		foreach ( $all_values as $value ) {
 			$values_by_task_and_field[ $value->task_id ][ $value->field_id ] = $value;
 		}
 
-		// Group options by field ID for easy lookup.
-		$options_by_field = array();
-		foreach ( $select_field_options as $option ) {
-			$options_by_field[ $option->field_id ][] = $option->to_array();
-		}
-
-		// Assemble final task data with fields and values.
+		// Construct the result set.
 		$result = array();
 		foreach ( $tasks as $task ) {
 			$task_fields = array();
 
 			foreach ( $all_fields as $field ) {
-				$field_value   = $values_by_task_and_field[ $task->id ][ $field->id ] ?? null;
-				$field_options = 'select' === $field->type ? ( $options_by_field[ $field->id ] ?? array() ) : array();
-
-				$task_fields[] = array_merge(
-					$field->to_array(),
-					array(
-						'value'   => $field_value->value ?? null,
-						'options' => $field_options,
-					),
-				);
+				$field_value   = $this->get_field_value( $values_by_task_and_field[ $task->id ][ $field->id ], $field );
+				$task_fields[] = array_merge( $field->to_array(), array( 'value' => $field_value ) );
 			}
 
 			$result[] = array_merge( $task->to_array(), array( 'fields' => $task_fields ) );
@@ -121,21 +103,10 @@ final class TaskService {
 		$values_by_field_id = array_column( $values, null, 'field_id' );
 		$task_fields        = array();
 
-		// Map field values to their definitions
+		// Map field values to their respective fields.
 		foreach ( $fields as $field ) {
-			$field_value = $values_by_field_id[ $field->id ]->value ?? null;
-
-			$field_options = 'select' === $field->type
-				? $this->task_field_option_repository->find_by( 'field_id', $field->id )->to_array()
-				: array();
-
-			$task_fields[] = array_merge(
-				$field->to_array(),
-				array(
-					'value'   => $field_value,
-					'options' => $field_options ?? array(),
-				)
-			);
+			$field_value = $this->get_field_value( $values_by_field_id[ $field->id ], $field );
+			$task_fields[] = array_merge( $field->to_array(), array( 'value' => $field_value ) );
 		}
 
 		return array_merge( $task->to_array(), array( 'fields' => $task_fields ) );

@@ -190,9 +190,9 @@ final class Install {
 				'is_protected' => true,
 			),
 			array(
-				'label'        => 'Order ID',
+				'label'        => 'Order',
 				'type'         => 'number',
-				'slug'         => 'order_id',
+				'slug'         => 'order',
 				'is_required'  => false,
 				'is_editable'  => false,
 				'is_protected' => true,
