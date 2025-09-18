@@ -14,7 +14,7 @@ use WPO\AOM\Repositories\TaskRepository;
 
 defined( 'ABSPATH' ) || exit;
 
-final class TaskService {
+final class TaskManagementService {
 	protected TaskRepository $task_repository;
 	protected TaskFieldRepository $task_field_repository;
 	protected TaskFieldOptionRepository $task_field_option_repository;

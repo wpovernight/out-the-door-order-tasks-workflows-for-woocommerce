@@ -3,7 +3,6 @@
 namespace WPO\AOM\Core;
 
 use InvalidArgumentException;
-use WPO\AOM\AdvancedOrderManager;
 use WPO\AOM\Models\Task;
 use WPO\AOM\Models\TaskField;
 use WPO\AOM\Models\TaskFieldOption;
@@ -13,11 +12,17 @@ use WPO\AOM\Repositories\TaskFieldOptionRepository;
 use WPO\AOM\Repositories\TaskFieldRepository;
 use WPO\AOM\Repositories\TaskFieldValueRepository;
 use WPO\AOM\Repositories\TaskRepository;
-use WPO\AOM\Services\TaskService;
+use WPO\AOM\REST\BaseRestController;
+use WPO\AOM\Services\TaskManagementService;
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * The ServiceContainer class handles the registration and instantiation of services
+ * and repository bindings within the Advanced Order Manager plugin.
+ */
 final class ServiceContainer {
+
 	/**
 	 * Internal service instance cache.
 	 *
@@ -28,10 +33,10 @@ final class ServiceContainer {
 	/**
 	 * Static service map.
 	 *
-	 * @var array<string, array{string,bool}>
+	 * @var array<string, class-string>
 	 */
 	private static array $service_map = array(
-		'task_management_service' => array( 'task_management_service', true ),
+		'task_management_service' => TaskManagementService::class,
 	);
 
 	/**
@@ -49,36 +54,24 @@ final class ServiceContainer {
 	/**
 	 * Register repositories and services.
 	 *
-	 * @param AdvancedOrderManager $plugin Plugin instance.
-	 *
 	 * @return void
 	 */
-	public function register( AdvancedOrderManager $plugin ) {
-		$this->register_services( $plugin );
+	public function register() {
+		$this->register_services();
 		$this->register_repository_bindings();
 	}
 
 	/**
 	 * Register service classes and optionally assign them to plugin properties.
 	 *
-	 * @param AdvancedOrderManager $plugin Plugin instance.
-	 *
 	 * @return void
 	 */
-	private function register_services( AdvancedOrderManager $plugin ): void {
-		foreach ( $this->service_map() as $property => $definition ) {
-			[ $id, $store ] = $definition;
-
+	private function register_services(): void {
+		foreach ( $this->service_map() as $id => $class ) {
 			$service = $this->resolve_service( $id );
 
 			if ( method_exists( $service, 'register' ) ) {
 				$service->register();
-			}
-
-			// Store the service in a dynamic property if specified.
-			if ( $store && ! property_exists( $this, $property ) ) {
-				/* @phpstan-ignore-next-line Suppressing type warning for dynamic property assignment. */
-				$plugin->{$property} = $service;
 			}
 		}
 	}
@@ -118,7 +111,7 @@ final class ServiceContainer {
 		/**
 		 * Filters the Advanced Order Manager service map.
 		 *
-		 * @param array<string, array{string,bool}> $map Service map.
+		 * @param array<string, class-string> $map Service map.
 		 */
 		return (array) apply_filters( 'wpo_aom_service_map', self::$service_map );
 	}
@@ -144,10 +137,10 @@ final class ServiceContainer {
 	/**
 	 * Build the TaskService.
 	 *
-	 * @return TaskService
+	 * @return TaskManagementService
 	 */
-	private function build_task_management_service(): TaskService {
-		return new TaskService(
+	private function build_task_management_service(): TaskManagementService {
+		return new TaskManagementService(
 			new TaskRepository(),
 			new TaskFieldRepository(),
 			new TaskFieldOptionRepository(),
