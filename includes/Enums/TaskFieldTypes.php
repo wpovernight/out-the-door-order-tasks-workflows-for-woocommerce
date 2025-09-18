@@ -9,8 +9,6 @@ final class TaskFieldTypes {
 	public const NUMBER = 'number';
 	public const SELECT = 'select';
 	public const DATE   = 'date';
-	public const USER   = 'user';
-	public const ORDER  = 'order';
 
 	/**
 	 * Get all valid field types.
@@ -23,8 +21,6 @@ final class TaskFieldTypes {
 			self::NUMBER,
 			self::SELECT,
 			self::DATE,
-			self::USER,
-			self::ORDER,
 		);
 	}
 

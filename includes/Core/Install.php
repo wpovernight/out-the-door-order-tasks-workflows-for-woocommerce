@@ -148,6 +148,7 @@ final class Install {
 			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			label VARCHAR(255) NOT NULL,
 			type VARCHAR(20) NOT NULL,
+			slug VARCHAR(255) NOT NULL,
 			is_required TINYINT(1) NOT NULL DEFAULT 0,
 			is_editable TINYINT(1) NOT NULL DEFAULT 1,
 			is_protected TINYINT(1) NOT NULL DEFAULT 0,
@@ -182,14 +183,16 @@ final class Install {
 		$default_fields = array(
 			array(
 				'label'        => 'Assignee',
-				'type'         => 'user',
+				'type'         => 'number',
+				'slug'         => 'assignee',
 				'is_required'  => false,
 				'is_editable'  => false,
 				'is_protected' => true,
 			),
 			array(
 				'label'        => 'Order ID',
-				'type'         => 'order',
+				'type'         => 'number',
+				'slug'         => 'order_id',
 				'is_required'  => false,
 				'is_editable'  => false,
 				'is_protected' => true,

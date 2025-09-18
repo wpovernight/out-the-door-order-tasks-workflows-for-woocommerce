@@ -10,6 +10,7 @@ class TaskField extends BaseModel {
 	public int $id;
 	public string $label;
 	public string $type;
+	public string $slug;
 	public bool $is_required;
 	public bool $is_editable;
 	public bool $is_protected;
@@ -23,6 +24,7 @@ class TaskField extends BaseModel {
 	public function __construct( array $data = array() ) {
 		$this->id    = absint( $data['id'] ?? 0 );
 		$this->label = $data['label'];
+		$this->slug  = sanitize_title( $this->label );
 
 		$type = $data['type'] ?? '';
 		if ( ! TaskFieldTypes::is_valid( $type ) ) {

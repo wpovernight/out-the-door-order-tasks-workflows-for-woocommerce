@@ -28,6 +28,14 @@ abstract class BaseModel {
 	 */
 	public function to_array(): array {
 		$data = get_object_vars( $this );
+
+		// Convert any DateTime properties to strings.
+		foreach ( $data as $key => $value ) {
+			if ( $value instanceof \DateTimeInterface ) {
+				$data[ $key ] = $value->format( 'c' ); // ISO 8601 format
+			}
+		}
+
 		unset( $data['non_db_properties'] );
 
 		return $data;
