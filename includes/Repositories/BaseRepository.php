@@ -222,7 +222,11 @@ abstract class BaseRepository {
 	 *
 	 * @return int|false Number of rows deleted or false on failure.
 	 */
-	public function delete(): int {
+	public function delete( ?int $id = null ): int {
+		if ( ! empty( $id ) ) {
+			$this->where( 'id', absint( $id ) );
+		}
+
 		if ( empty( $this->wheres ) ) {
 			throw new \RuntimeException( 'No WHERE clause specified for delete.' );
 		}

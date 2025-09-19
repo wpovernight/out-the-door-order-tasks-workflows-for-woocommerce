@@ -44,7 +44,7 @@ final class TaskManagementService {
 	 *
 	 * @return array<int, Task>
 	 */
-	public function get_all_tasks( bool $with_fields ): array {
+	public function get_all_tasks(): array {
 		return $this->task_repository->get();
 	}
 
@@ -166,7 +166,7 @@ final class TaskManagementService {
 	 * @return bool
 	 */
 	public function delete_task( int $task_id ): bool {
-		return $this->task_repository->where( 'id', $task_id )->delete();
+		return $this->task_repository->delete( $task_id );
 	}
 
 	/** ================================
@@ -213,7 +213,7 @@ final class TaskManagementService {
 	 * @return bool
 	 */
 	public function delete_field( int $field_id ): bool {
-		return $this->task_field_repository->where( 'id', $field_id )->delete();
+		return $this->task_field_repository->delete( $field_id );
 	}
 
 	/**
@@ -270,7 +270,7 @@ final class TaskManagementService {
 	 * @return bool
 	 */
 	public function delete_option( int $option_id ): bool {
-		return $this->task_field_option_repository->where( 'id', $option_id )->delete();
+		return $this->task_field_option_repository->delete( $option_id );
 	}
 
 	/** ================================
@@ -364,4 +364,89 @@ final class TaskManagementService {
 		return $this->set_field_value( $task_id, $field->id, $user_id );
 	}
 
+	/** ================================
+	 *   Helper Methods
+	 *  ================================ */
+
+	/**
+	 * Get parsed field value based on type and slug.
+	 *
+	 * @param TaskFieldValue $field_value Raw field value from the DB.
+	 * @param TaskField $field Type of the field (e.g., 'number', 'text', etc.).
+	 *
+	 * @return mixed Parsed field value.
+	 */
+	public function get_field_value( TaskFieldValue $field_value, TaskField $field ) {
+		if ( is_null( $field_value->value ) ) {
+			return null;
+		}
+
+		$raw      = $field_value->value;
+		$resolved = null;
+
+		switch ( $field->type ) {
+			case TaskFieldTypes::NUMBER:
+				$raw = is_numeric( $raw ) ? (float) $raw : null;
+
+				// Handle special cases based on slug.
+				switch ( $field->slug ) {
+					case 'assignee':
+						$user = get_userdata( (int) $raw );
+						if ( $user ) {
+							$resolved = array(
+								'id'         => $user->ID,
+								'username'   => $user->user_login,
+								'email'      => $user->user_email,
+								'first_name' => $user->first_name,
+								'last_name'  => $user->last_name,
+							);
+						}
+						break;
+
+					case 'order':
+						$order = wc_get_order( (int) $raw );
+						if ( $order ) {
+							$resolved = array(
+								'id'           => $order->get_id(),
+								'status'       => $order->get_status(),
+								'total'        => $order->get_total(),
+								'currency'     => $order->get_currency(),
+								'date_created' => $order->get_date_created()
+									? $order->get_date_created()->date( 'c' )
+									: null,
+							);
+						}
+						break;
+				}
+				break;
+
+			case TaskFieldTypes::DATE:
+				$timestamp = strtotime( $raw ) ?: null;
+				if ( $timestamp ) {
+					$resolved = date( 'c', $timestamp );
+				}
+				break;
+
+			case TaskFieldTypes::TEXT:
+			case TaskFieldTypes::SELECT:
+			default:
+				// For text and select, raw is already the useful value.
+				// Resolved remains null.
+				break;
+		}
+
+		$value = array(
+			'raw'      => $raw,
+			'resolved' => $resolved,
+		);
+
+		/**
+		 * Filters the parsed field value.
+		 *
+		 * @param array|null     $value       Structured value with raw and resolved.
+		 * @param TaskFieldValue $field_value Original field value object.
+		 * @param TaskField      $field       Field definition object.
+		 */
+		return apply_filters( 'wpo_aom_task_get_field_value', $value, $field_value, $field );
+	}
 }

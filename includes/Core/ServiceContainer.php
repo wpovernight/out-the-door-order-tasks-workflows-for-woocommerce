@@ -31,11 +31,13 @@ final class ServiceContainer {
 
 	/**
 	 * Static service map.
+	 * Class names should match the build method suffix, e.g. 'TaskManagementService' => build_TaskManagementService()
 	 *
 	 * @var array
 	 */
 	private static array $service_map = array(
 		'task_management_service'
+		'TaskManagementService' => TaskManagementService::class,
 	);
 
 	/**
@@ -66,8 +68,8 @@ final class ServiceContainer {
 	 * @return void
 	 */
 	private function register_services(): void {
-		foreach ( $this->get_service_map() as $id ) {
-			$service = $this->resolve_service( $id );
+		foreach ( $this->get_service_map() as $id => $class_string ) {
+			$service = $this->resolve_service( $id, $class_string );
 
 			if ( method_exists( $service, 'register' ) ) {
 				$service->register();
@@ -79,12 +81,15 @@ final class ServiceContainer {
 	 * Resolve a service instance, build it if it hasn’t been cached yet.
 	 *
 	 * @param string $id Service ID.
+	 * @param string $class_string
 	 *
 	 * @return object
 	 *
-	 * @throws InvalidArgumentException If the service ID is not defined.
 	 */
-	public function resolve_service( string $id ): object {
+	public function resolve_service( string $id, string $class_string = '' ): object {
+		// Remove namespace from ID if present.
+		$id = ltrim( strrchr( $id, '\\' ), '\\' ) ?: $id;
+
 		if ( isset( $this->instances[ $id ] ) ) {
 			return $this->instances[ $id ];
 		}
@@ -102,12 +107,18 @@ final class ServiceContainer {
 		$build_method = 'build_' . $id;
 
 		if ( method_exists( $this, $build_method ) ) {
-			/** @uses build_task_management_service() */
+			/** @uses build_TaskManagementService() */
 			$this->instances[ $id ] = $this->{$build_method}();
 
 			return $this->instances[ $id ];
 		}
 
+		// Create a new instance.
+		if ( class_exists( $class_string ) ) {
+			$this->instances[ $id ] = new $class_string();
+
+			return $this->instances[ $id ];
+		}
 
 		throw new InvalidArgumentException( sprintf( 'Service ID "%s" is not defined.', $id ) );
 	}
@@ -126,7 +137,7 @@ final class ServiceContainer {
 		 * @param array<string, callable> $builders Associative array of service ID => callback.
 		 */
 		$builders = apply_filters( 'wpo_aom_service_builders', array(
-			// 'service_id' => fn() => new ServiceClass(),
+			// Example: 'service_id' => fn() => new ServiceClass(),
 		) );
 
 		if ( isset( $builders[ $id ] ) ) {
@@ -183,7 +194,7 @@ final class ServiceContainer {
 	 *
 	 * @return TaskManagementService
 	 */
-	private function build_task_management_service(): TaskManagementService {
+	private function build_TaskManagementService(): TaskManagementService {
 		return new TaskManagementService(
 			new TaskRepository(),
 			new TaskFieldRepository(),
