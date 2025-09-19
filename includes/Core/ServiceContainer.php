@@ -36,7 +36,6 @@ final class ServiceContainer {
 	 * @var array
 	 */
 	private static array $service_map = array(
-		'task_management_service'
 		'TaskManagementService' => TaskManagementService::class,
 	);
 
