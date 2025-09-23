@@ -183,6 +183,36 @@ final class Install {
 		$default_fields = array(
 			// Default fields, non-editable and protected fields.
 			array(
+				'label'        => 'Status',
+				'type'         => 'select',
+				'slug'         => 'status',
+				'is_required'  => true,
+				'is_editable'  => true,
+				'is_protected' => true,
+				'options'      => array(
+					array(
+						'label' => 'To Do',
+						'color' => '#6c757d',
+					),
+					array(
+						'label' => 'In Progress',
+						'color' => '#17a2b8',
+					),
+					array(
+						'label' => 'On Hold',
+						'color' => '#ffc107',
+					),
+					array(
+						'label' => 'Completed',
+						'color' => '#28a745',
+					),
+					array(
+						'label' => 'Cancelled',
+						'color' => '#dc3545',
+					),
+				),
+			),
+			array(
 				'label'        => 'Assignee',
 				'type'         => 'number',
 				'slug'         => 'assignee',
