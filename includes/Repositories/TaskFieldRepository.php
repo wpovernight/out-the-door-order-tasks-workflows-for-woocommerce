@@ -24,7 +24,7 @@ class TaskFieldRepository extends BaseRepository {
 	 *
 	 * @return TaskField|null
 	 */
-	public function find_by_label( string $label ): ?TaskField {
-		return $this->where( 'label', $label )->first();
+	public function find_by_slug( string $label ): ?TaskField {
+		return $this->where( 'slug', $label )->first();
 	}
 }

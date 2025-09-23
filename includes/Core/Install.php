@@ -3,12 +3,12 @@
 namespace WPO\AOM\Core;
 
 use WPO\AOM\AdvancedOrderManager;
+use WPO\AOM\Repositories\TaskFieldOptionRepository;
 use WPO\AOM\Repositories\TaskFieldRepository;
 
 defined( 'ABSPATH' ) || exit;
 
 final class Install {
-
 	private static string $option_version      = 'wpo_aom_version';
 	private static string $option_upgrade_lock = 'wpo_aom_upgrade_lock';
 
@@ -181,6 +181,7 @@ final class Install {
 	 */
 	private static function insert_default_data(): void {
 		$default_fields = array(
+			// Default fields, non-editable and protected fields.
 			array(
 				'label'        => 'Assignee',
 				'type'         => 'number',
@@ -197,10 +198,47 @@ final class Install {
 				'is_editable'  => false,
 				'is_protected' => true,
 			),
+			array(
+				'label'        => 'Due Date',
+				'type'         => 'date',
+				'slug'         => 'due_date',
+				'is_required'  => false,
+				'is_editable'  => false,
+				'is_protected' => true,
+			),
+			// Editable and non-protected fields.
+			array(
+				'label'        => 'Priority',
+				'type'         => 'select',
+				'slug'         => 'priority',
+				'is_required'  => false,
+				'is_editable'  => true,
+				'is_protected' => false,
+				'options'      => array(
+					array(
+						'label' => 'Low',
+						'color' => '#34c38f',
+					),
+					array(
+						'label' => 'Medium',
+						'color' => '#f1b44c',
+					),
+					array(
+						'label' => 'High',
+						'color' => '#f46a6a',
+					),
+					array(
+						'label' => 'Critical',
+						'color' => '#f46a6a',
+					)
+				),
+			),
 		);
 
 		$task_field_repository = new TaskFieldRepository();
 		$all_fields            = $task_field_repository->get();
+
+		$task_field_option_repository = new TaskFieldOptionRepository();
 
 		foreach ( $default_fields as $field_data ) {
 			$exists = false;
@@ -215,7 +253,18 @@ final class Install {
 			}
 
 			if ( ! $exists ) {
-				$task_field_repository->insert( $field_data );
+				$field_options = $field_data['options'] ?? array();
+				unset( $field_data['options'] );
+
+				$task_field_id = $task_field_repository->insert( $field_data );
+
+				// Insert options if it's a select field.
+				if ( $task_field_id && ! empty( $field_options ) ) {
+					foreach ( $field_options as $option ) {
+						$task_field_option_repository
+							->insert( array_merge( $option, array( 'field_id' => $task_field_id ) ) );
+					}
+				}
 			}
 		}
 	}
@@ -249,5 +298,4 @@ final class Install {
 	private static function release_upgrade_lock(): void {
 		delete_option( self::$option_upgrade_lock );
 	}
-
 }

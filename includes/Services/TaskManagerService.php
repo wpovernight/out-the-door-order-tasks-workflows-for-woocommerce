@@ -370,7 +370,7 @@ final class TaskManagerService {
 	 * @return bool
 	 */
 	public function assign_task_to_user( int $task_id, int $user_id ): bool {
-		$field = $this->task_field_repository->find_by_label( 'Assignee' );
+		$field = $this->task_field_repository->find_by_slug( 'assignee' );
 
 		if ( ! $field ) {
 			return false;
