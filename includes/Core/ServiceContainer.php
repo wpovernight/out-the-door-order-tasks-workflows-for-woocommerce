@@ -13,7 +13,7 @@ use WPO\AOM\Repositories\TaskFieldRepository;
 use WPO\AOM\Repositories\TaskFieldOptionRepository;
 use WPO\AOM\Repositories\TaskFieldValueRepository;
 use WPO\AOM\REST\TaskController;
-use WPO\AOM\Services\TaskManagementService;
+use WPO\AOM\Services\TaskManagerService;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -32,13 +32,13 @@ final class ServiceContainer {
 
 	/**
 	 * Static service map.
-	 * Class names should match the build method suffix, e.g. 'TaskManagementService' => build_TaskManagementService()
+	 * Class names should match the build method suffix, e.g. 'TaskManagerService' => build_TaskManagerService()
 	 *
 	 * @var array
 	 */
 	private static array $service_map = array(
-		'TaskManagementService' => TaskManagementService::class,
-		'TaskController'        => TaskController::class,
+		'TaskManagerService' => TaskManagerService::class,
+		'TaskController'     => TaskController::class,
 	);
 
 	/**
@@ -108,7 +108,7 @@ final class ServiceContainer {
 		$build_method = 'build_' . $id;
 
 		if ( method_exists( $this, $build_method ) ) {
-			/** @uses build_TaskManagementService() */
+			/** @uses build_TaskManagerService() */
 			$this->instances[ $id ] = $this->{$build_method}();
 
 			return $this->instances[ $id ];
@@ -191,12 +191,12 @@ final class ServiceContainer {
 	}
 
 	/**
-	 * Build and return an instance of TaskManagementService.
+	 * Build and return an instance of TaskManagerService.
 	 *
-	 * @return TaskManagementService
+	 * @return TaskManagerService
 	 */
-	private function build_TaskManagementService(): TaskManagementService {
-		return new TaskManagementService(
+	private function build_TaskManagerService(): TaskManagerService {
+		return new TaskManagerService(
 			new TaskRepository(),
 			new TaskFieldRepository(),
 			new TaskFieldOptionRepository(),

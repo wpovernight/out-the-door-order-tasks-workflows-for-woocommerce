@@ -6,7 +6,7 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 use WP_Error;
-use WPO\AOM\Services\TaskManagementService;
+use WPO\AOM\Services\TaskManagerService;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -76,9 +76,9 @@ class TaskController extends BaseRestController {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_items( WP_REST_Request $request ) {
-		/** @var TaskManagementService $task_management_service */
-		$task_management_service = WPO_AOM()->get_service( TaskManagementService::class );
-		$tasks                   = $task_management_service->get_all_tasks_with_fields();
+		/** @var TaskManagerService $task_manager_service */
+		$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
+		$tasks                = $task_manager_service->get_all_tasks_with_fields();
 
 		// ToDo: Add pagination, filtering, etc.
 
@@ -109,11 +109,11 @@ class TaskController extends BaseRestController {
 
 		// ToDo: Maybe adding support for fields during creation?
 
-		/** @var TaskManagementService $task_management_service */
-		$task_management_service = WPO_AOM()->get_service( TaskManagementService::class );
+		/** @var TaskManagerService $task_manager_service */
+		$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
 
 		try {
-			$task = $task_management_service->create_task( $data );
+			$task = $task_manager_service->create_task( $data );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'task_creation_failed', $e->getMessage(), array( 'status' => 500 ) );
 		}
@@ -135,9 +135,9 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'invalid_id', 'Invalid task ID provided', array( 'status' => 400 ) );
 		}
 
-		/** @var TaskManagementService $task_management_service */
-		$task_management_service = WPO_AOM()->get_service( TaskManagementService::class );
-		$task                    = $task_management_service->get_task( $id );
+		/** @var TaskManagerService $task_manager_service */
+		$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
+		$task                 = $task_manager_service->get_task( $id );
 
 		if ( ! $task ) {
 			return new WP_Error( 'not_found', 'Task not found', array( 'status' => 404 ) );
@@ -174,11 +174,11 @@ class TaskController extends BaseRestController {
 			) );
 		}
 
-		/** @var TaskManagementService $task_management_service */
-		$task_management_service = WPO_AOM()->get_service( TaskManagementService::class );
+		/** @var TaskManagerService $task_manager_service */
+		$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
 
 		try {
-			$task = $task_management_service->update_task( $id, $data );
+			$task = $task_manager_service->update_task( $id, $data );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'task_update_failed', $e->getMessage(), array( 'status' => 500 ) );
 		}
@@ -200,11 +200,11 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'invalid_id', 'Invalid task ID provided', array( 'status' => 400 ) );
 		}
 
-		/** @var TaskManagementService $task_management_service */
-		$task_management_service = WPO_AOM()->get_service( TaskManagementService::class );
+		/** @var TaskManagerService $task_manager_service */
+		$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
 
 		try {
-			$task_management_service->delete_task( $id );
+			$task_manager_service->delete_task( $id );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'task_deletion_failed', $e->getMessage(), array( 'status' => 500 ) );
 		}
