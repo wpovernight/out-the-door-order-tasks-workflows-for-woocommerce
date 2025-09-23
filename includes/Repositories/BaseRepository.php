@@ -3,6 +3,7 @@
 namespace WPO\AOM\Repositories;
 
 use InvalidArgumentException;
+use RuntimeException;
 use WPO\AOM\Models\BaseModel;
 
 defined( 'ABSPATH' ) || exit;
@@ -177,6 +178,8 @@ abstract class BaseRepository {
 	 * @param array<string, mixed> $data Columns to set.
 	 *
 	 * @return bool
+	 * @throws RuntimeException If no WHERE clause is specified.
+	 * @throws InvalidArgumentException If data is empty or columns are invalid.
 	 */
 	public function update( array $data ): bool {
 		// Validate the data array.
@@ -186,7 +189,7 @@ abstract class BaseRepository {
 
 		// Ensure that the WHERE clause is set.
 		if ( empty( $this->wheres ) ) {
-			throw new \RuntimeException( 'No WHERE clause specified for update.' );
+			throw new RuntimeException( 'No WHERE clause specified for update.' );
 		}
 
 		$this->validate_columns( array_keys( $data ) );
@@ -207,9 +210,12 @@ abstract class BaseRepository {
 	/**
 	 * Save the model (insert or update based on presence of ID).
 	 *
-	 * @param BaseModel $model
+	 * @template TModel of BaseModel
+	 * @param TModel $model
 	 *
 	 * @return int|false
+	 * @throws InvalidArgumentException
+	 * @throws RuntimeException
 	 */
 	public function save( BaseModel $model ) {
 		return $model->id
@@ -221,6 +227,8 @@ abstract class BaseRepository {
 	 * Delete records from the table based on the WHERE clause.
 	 *
 	 * @return int|false Number of rows deleted or false on failure.
+	 * @throws RuntimeException If no WHERE clause is specified.
+	 * @throws InvalidArgumentException If invalid arguments are sent to where().
 	 */
 	public function delete( ?int $id = null ): int {
 		if ( ! empty( $id ) ) {
@@ -228,7 +236,7 @@ abstract class BaseRepository {
 		}
 
 		if ( empty( $this->wheres ) ) {
-			throw new \RuntimeException( 'No WHERE clause specified for delete.' );
+			throw new RuntimeException( 'No WHERE clause specified for delete.' );
 		}
 
 		// Prepare WHERE array
@@ -315,6 +323,7 @@ abstract class BaseRepository {
 	 * @param string $logical_operator AND|OR (default AND).
 	 *
 	 * @return self
+	 * @throws InvalidArgumentException If invalid arguments are provided.
 	 */
 	public function where( string $column, string $operator, $value = null, string $logical_operator = 'AND' ): self {
 		// If only two arguments are provided, assume the operator is '='.
