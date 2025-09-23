@@ -12,6 +12,7 @@ use WPO\AOM\Repositories\TaskRepository;
 use WPO\AOM\Repositories\TaskFieldRepository;
 use WPO\AOM\Repositories\TaskFieldOptionRepository;
 use WPO\AOM\Repositories\TaskFieldValueRepository;
+use WPO\AOM\REST\TaskController;
 use WPO\AOM\Services\TaskManagementService;
 
 defined( 'ABSPATH' ) || exit;
@@ -37,6 +38,7 @@ final class ServiceContainer {
 	 */
 	private static array $service_map = array(
 		'TaskManagementService' => TaskManagementService::class,
+		'TaskController'        => TaskController::class,
 	);
 
 	/**
