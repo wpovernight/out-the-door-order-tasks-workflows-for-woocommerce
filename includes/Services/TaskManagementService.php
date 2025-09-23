@@ -3,6 +3,8 @@
 namespace WPO\AOM\Services;
 
 use Exception;
+use InvalidArgumentException;
+use RuntimeException;
 use WPO\AOM\Enums\TaskFieldTypes;
 use WPO\AOM\Models\Task;
 use WPO\AOM\Models\TaskField;
@@ -75,8 +77,10 @@ final class TaskManagementService {
 			$task_fields = array();
 
 			foreach ( $all_fields as $field ) {
-				$field_value   = $this->get_field_value( $values_by_task_and_field[ $task->id ][ $field->id ], $field );
-				$task_fields[] = array_merge( $field->to_array(), array( 'value' => $field_value ) );
+				if ( isset( $values_by_task_and_field[ $task->id ][ $field->id ] ) ) {
+					$field_value = $this->get_field_value( $values_by_task_and_field[ $task->id ][ $field->id ], $field );
+				}
+				$task_fields[] = array_merge( $field->to_array(), array( 'value' => $field_value ?? null ) );
 			}
 
 			$result[] = array_merge( $task->to_array(), array( 'fields' => $task_fields ) );
@@ -105,7 +109,7 @@ final class TaskManagementService {
 
 		// Map field values to their respective fields.
 		foreach ( $fields as $field ) {
-			$field_value = $this->get_field_value( $values_by_field_id[ $field->id ], $field );
+			$field_value   = $this->get_field_value( $values_by_field_id[ $field->id ], $field );
 			$task_fields[] = array_merge( $field->to_array(), array( 'value' => $field_value ) );
 		}
 
@@ -128,14 +132,28 @@ final class TaskManagementService {
 	 *
 	 * @param array<string, mixed> $data
 	 *
-	 * @return int|false Inserted ID or false on failure
+	 * @return Task
 	 *
 	 * @throws Exception
 	 */
 	public function create_task( array $data ): Task {
+		if ( empty( $data['title'] ) || ! is_string( $data['title'] ) ) {
+			throw new Exception( 'Task title is required and must be a string.' );
+		}
+
+		$data['title']       = sanitize_text_field( $data['title'] );
+		$data['description'] = isset( $data['description'] ) ? sanitize_textarea_field( $data['description'] ) : '';
+
 		$task = new Task( $data );
 
-		return $this->task_repository->save( $task );
+		$result   = $this->task_repository->save( $task );
+		$task->id = $result;
+
+		if ( ! $result ) {
+			throw new Exception( 'Failed to create task.' );
+		}
+
+		return $task;
 	}
 
 	/**
@@ -145,7 +163,8 @@ final class TaskManagementService {
 	 * @param array<string, mixed> $data
 	 *
 	 * @return bool
-	 * @throws Exception
+	 * @throws InvalidArgumentException
+	 * @throws RuntimeException
 	 */
 	public function update_task( int $task_id, array $data ): bool {
 		$task = $this->task_repository->find( $task_id );
@@ -164,6 +183,8 @@ final class TaskManagementService {
 	 * @param int $task_id
 	 *
 	 * @return bool
+	 * @throws RuntimeException
+	 * @throws InvalidArgumentException
 	 */
 	public function delete_task( int $task_id ): bool {
 		return $this->task_repository->delete( $task_id );
