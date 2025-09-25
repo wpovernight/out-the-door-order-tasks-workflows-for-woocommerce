@@ -183,7 +183,7 @@ final class Install {
 		$default_fields = array(
 			// Default fields, non-editable and protected fields.
 			array(
-				'label'        => 'Status',
+				'label'        => 'Status', // For Kanban columns.
 				'type'         => 'select',
 				'slug'         => 'status',
 				'is_required'  => true,
@@ -199,23 +199,31 @@ final class Install {
 						'color' => '#17a2b8',
 					),
 					array(
-						'label' => 'On Hold',
-						'color' => '#ffc107',
-					),
-					array(
 						'label' => 'Completed',
 						'color' => '#28a745',
 					),
-					array(
-						'label' => 'Cancelled',
-						'color' => '#dc3545',
-					),
 				),
+			),
+			array(
+				'label' => 'Position', // For ordering tasks within a status column in Kanban view.
+				'type'  => 'number',
+				'slug'  => 'position',
+				'is_required'  => true,
+				'is_editable'  => false,
+				'is_protected' => true,
 			),
 			array(
 				'label'        => 'Assignee',
 				'type'         => 'number',
 				'slug'         => 'assignee',
+				'is_required'  => false,
+				'is_editable'  => false,
+				'is_protected' => true,
+			),
+			array(
+				'label'        => 'Creator',
+				'type'         => 'number',
+				'slug'         => 'creator',
 				'is_required'  => false,
 				'is_editable'  => false,
 				'is_protected' => true,

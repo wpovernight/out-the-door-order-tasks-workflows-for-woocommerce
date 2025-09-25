@@ -68,7 +68,10 @@ final class TaskManagerService {
 		// Group values and options for easy lookup.
 		$values_by_task_and_field = array();
 		foreach ( $all_values as $value ) {
-			$values_by_task_and_field[ $value->task_id ][ $value->field_id ] = $value;
+			if ( ! isset( $values_by_task_and_field[ $value->task_id ][ $value->field_id ] ) ) {
+				$values_by_task_and_field[ $value->task_id ][ $value->field_id ] = array();
+			}
+			$values_by_task_and_field[ $value->task_id ][ $value->field_id ][] = $value;
 		}
 
 		// Construct the result set.
@@ -77,8 +80,15 @@ final class TaskManagerService {
 			$task_fields = array();
 
 			foreach ( $all_fields as $field ) {
+				$field_value = array();
+
 				if ( isset( $values_by_task_and_field[ $task->id ][ $field->id ] ) ) {
-					$field_value = $this->get_field_value( $values_by_task_and_field[ $task->id ][ $field->id ], $field );
+					// If multiple values exist for the same field, get all values.
+					if ( is_array( $values_by_task_and_field[ $task->id ][ $field->id ] ) ) {
+						foreach ( $values_by_task_and_field[ $task->id ][ $field->id ] as $single_value ) {
+							$field_value[] = $this->get_field_value( $single_value, $field );
+						}
+					}
 				}
 				$task_fields[] = array_merge( $field->to_array(), array( 'value' => $field_value ?? null ) );
 			}
