@@ -90,7 +90,7 @@ final class TaskManagerService {
 						}
 					}
 				}
-				$task_fields[] = array_merge( $field->to_array(), array( 'value' => $field_value ?? null ) );
+				$task_fields[] = array_merge( $field->to_array(), array( 'values' => $field_value ?? null ) );
 			}
 
 			$result[] = array_merge( $task->to_array(), array( 'fields' => $task_fields ) );
@@ -120,7 +120,7 @@ final class TaskManagerService {
 		// Map field values to their respective fields.
 		foreach ( $fields as $field ) {
 			$field_value   = $this->get_field_value( $values_by_field_id[ $field->id ], $field );
-			$task_fields[] = array_merge( $field->to_array(), array( 'value' => $field_value ) );
+			$task_fields[] = array_merge( $field->to_array(), array( 'values' => $field_value ) );
 		}
 
 		return array_merge( $task->to_array(), array( 'fields' => $task_fields ) );
