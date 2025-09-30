@@ -22,10 +22,11 @@ export async function fetchTasks(): Promise<Task[]> {
 	return data.map((task: any) => {
 		const statusField = task.fields.find((field: any) => field.slug === 'status');
 		const positionField = task.fields.find((field: any) => field.slug === 'position');
+
 		return {
 			...task,
-			column: statusField?.value?.raw,
-			position: positionField?.value?.raw,
+			column: statusField?.values && statusField.values.length > 0 ? statusField.values[0].raw : undefined,
+			position: positionField?.values && positionField.values.length > 0 ? positionField.values[0].raw : undefined,
 		};
 	});
 }

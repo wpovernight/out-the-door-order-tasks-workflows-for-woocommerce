@@ -41,10 +41,6 @@ const KanbanBoard: React.FC = () => {
 		// });
 	};
 
-
-	console.log( "Tasks:" );
-	console.log( tasks );
-
 	const columns = ['To Do', 'In Progress', 'Completed']; // ToDo: fetch from backend
 
 	return (
