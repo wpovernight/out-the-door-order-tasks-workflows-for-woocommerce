@@ -422,6 +422,7 @@ final class TaskManagerService {
 				// Handle special cases based on slug.
 				switch ( $field->slug ) {
 					case 'assignee':
+					case 'creator':
 						$user = get_userdata( (int) $raw );
 						if ( $user ) {
 							$resolved = array(

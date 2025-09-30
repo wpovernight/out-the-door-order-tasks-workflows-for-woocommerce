@@ -3,6 +3,7 @@
 namespace WPO\AOM\Core;
 
 use InvalidArgumentException;
+use WPO\AOM\Admin\TaskManager\Screen;
 use WPO\AOM\Models\Task;
 use WPO\AOM\Models\TaskField;
 use WPO\AOM\Models\TaskFieldOption;
@@ -39,6 +40,7 @@ final class ServiceContainer {
 	private static array $service_map = array(
 		'TaskManagerService' => TaskManagerService::class,
 		'TaskController'     => TaskController::class,
+		'TaskManager_Screen' => Screen::class,
 	);
 
 	/**
