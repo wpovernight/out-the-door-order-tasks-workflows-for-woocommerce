@@ -5,33 +5,57 @@ import Column from './Column';
 
 const KanbanBoard: React.FC = () => {
 	const [tasks, setTasks] = React.useState<Task[]>([]);
+	const [dropIndicator, setDropIndicator] = React.useState<{ columnId: string; index: number; } | null>(null);
 
 	React.useEffect(() => {
 		fetchTasks().then(setTasks).catch(console.error);
 	}, []);
 
 	const handleTaskDrop = (taskId: number, newColumn: string, newIndex: number) => {
-		setTasks((prev) => {
-			// find the task
-			const task = prev.find((t) => t.id === taskId);
-			if (!task) return prev;
+		setTasks((currentState) => {
+			const movedTask = currentState.find((task) => task.id === taskId);
+			if (!movedTask) {
+				return currentState;
+			}
 
-			// remove from old column
-			const without = prev.filter((t) => t.id !== taskId);
+			const stateWithoutMovedTask = currentState.filter((task) => task.id !== taskId);
 
-			// insert at newIndex in new column
-			const before = without.filter(t => t.column === newColumn);
-			const after = without.filter(t => t.column !== newColumn);
+			if (newColumn === movedTask.column) {
+				// Reordering within the same column
+				const columnTasks = stateWithoutMovedTask.filter(task => task.column === newColumn);
 
-			const updatedColumnTasks = [
-				...before.slice(0, newIndex),
-				{ ...task, column: newColumn, position: newIndex },
-				...before.slice(newIndex).map((t, i) => ({ ...t, position: newIndex + 1 + i })),
-			];
+				const safeIndex = Math.max(0, Math.min(newIndex, columnTasks.length));
+				const reordered = [
+					...columnTasks.slice(0, safeIndex),
+					{...movedTask, position: safeIndex},
+					...columnTasks.slice(safeIndex),
+				].map((task, index) => ({...task, position: index}));
 
-			return [...after, ...updatedColumnTasks];
+				const otherTasks = stateWithoutMovedTask.filter(task => task.column !== newColumn);
+
+				return [...otherTasks, ...reordered];
+			} else {
+				// Moving across columns
+				const sourceColumnTasks = stateWithoutMovedTask.filter(task => task.column === movedTask.column);
+				const destinationColumnTasks = stateWithoutMovedTask.filter(task => task.column === newColumn);
+				const unchangedTasks = stateWithoutMovedTask.filter(
+					task => task.column !== movedTask.column && task.column !== newColumn
+				);
+
+				const safeIndex = Math.max(0, Math.min(newIndex, destinationColumnTasks.length));
+				const updatedDestination = [
+					...destinationColumnTasks.slice(0, safeIndex),
+					{...movedTask, column: newColumn},
+					...destinationColumnTasks.slice(safeIndex),
+				].map((task, index) => ({...task, position: index}));
+
+				const updatedSource = sourceColumnTasks.map((task, index) => ({...task, position: index}));
+
+				return [...unchangedTasks, ...updatedSource, ...updatedDestination];
+			}
 		});
 
+		// ToDo: Update backend
 		// Persist to backend
 		// updateTask(taskId, {
 		// 	fields: [
@@ -56,6 +80,8 @@ const KanbanBoard: React.FC = () => {
 							.sort((a, b) => a.position - b.position)
 					}
 					onTaskDrop={handleTaskDrop}
+					dropIndicator={dropIndicator}
+					setDropIndicator={setDropIndicator}
 				/>
 			))}
 		</div>
