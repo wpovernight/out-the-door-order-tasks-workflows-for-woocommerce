@@ -81,6 +81,9 @@ final class Screen {
 			return;
 		}
 
-		echo '<div id="wpo-aom-task-app"></div>';
+		echo '<div id="wpo-aom-task-management">
+			<h1>', esc_html__( 'Task Management', 'wpo-aom' ), '</h1>
+			<div id="wpo-aom-task-manager-container"></div>
+			</div>';
 	}
 }
