@@ -40,15 +40,6 @@ final class AdvancedOrderManager {
 	}
 
 	/**
-	 * Prevent unserialization.
-	 *
-	 * @return void
-	 */
-	public function __wakeup() {
-		_doing_it_wrong( __FUNCTION__, esc_html__( 'Unserializing is forbidden.', 'wpo-aom' ), '1.0.0' );
-	}
-
-	/**
 	 * Constructor.
 	 */
 	private function __construct() {
