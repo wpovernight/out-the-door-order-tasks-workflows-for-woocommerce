@@ -1,77 +1,92 @@
 .kanban-board {
-	display: flex;
-	gap: 1em;
-	padding: 1em;
-	height: calc(100vh - 2rem);
-	overflow-x: auto;
+    display: flex;
+    gap: 1em;
+    padding: 1em;
+    height: calc(100vh - 2rem);
+    overflow-x: auto;
 }
 
 .kanban-board .kanban-column {
-	position: relative;
-	flex: 0 0 300px;
-	display: flex;
-	flex-direction: column;
-	background: #ebecf0;
-	border-radius: 8px;
-	padding: 0.75em;
-	max-height: 100%;
-	gap: 1em;
+    flex: 0 0 300px;
+    display: flex;
+    flex-direction: column;
+    background: #ebecf0;
+    border-radius: 8px;
+    padding: 0.75em;
+    max-height: 100%;
+    gap: 1em;
+}
+
+.kanban-board .kanban-column > .kanban-column-scrollable {
+    overflow-y: auto;
+    flex-grow: 1;
+    /*padding-right: 0.25em;*/
+    scrollbar-width: thin;
+    scrollbar-color: #ccc transparent;
+}
+
+.kanban-board .kanban-column .kanban-column-container {
+    height: 100%;
 }
 
 .kanban-board .kanban-column h2 {
-	font-size: 1em;
-	font-weight: bold;
-	margin-bottom: 0.75em;
-	text-transform: uppercase;
-	color: #333;
-}
-
-.kanban-board .kanban-column {
-	overflow-y: auto;
+    font-size: 1em;
+    font-weight: bold;
+    margin-bottom: 0.75em;
+    text-transform: uppercase;
+    color: #333;
 }
 
 .kanban-board .kanban-column::-webkit-scrollbar {
-	width: 6px;
+    width: 6px;
 }
+
 .kanban-board .kanban-column::-webkit-scrollbar-thumb {
-	background-color: #ccc;
-	border-radius: 3px;
+    background-color: #ccc;
+    border-radius: 3px;
+}
+
+.kanban-board .kanban-card-wrapper {
+    position: relative;
+    user-select: none;
+    margin: 0.25em 0;
+    display: block;
+    min-height: 10px;
 }
 
 .kanban-board .kanban-card {
-	background: #fff;
-	border-radius: 1em;
-	padding: 0.75em;
-	box-shadow: 0 1px 2px rgba(0,0,0,0.15);
-	border: 1px solid #c3c4c7;
-	cursor: grab;
-	transition: box-shadow 0.2s ease, transform 0.1s ease;
+    background: #fff;
+    border-radius: 1em;
+    padding: 0.75em;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    border: 1px solid #c3c4c7;
+    cursor: grab;
+    transition: box-shadow 0.2s ease, transform 0.1s ease;
 }
 
 .kanban-board .kanban-card:hover {
-	box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .kanban-board .kanban-card:active {
-	cursor: grabbing;
-	transform: scale(0.98);
+    cursor: grabbing;
+    transform: scale(0.98);
 }
 
-.kanban-board .drop-line {
-	/*position: absolute;*/
-	height: 3px;
-	background: #0079bf; /* blue like Trello */
-	border-radius: 2px;
-	/*margin: 4px 0;*/
+.kanban-board .kanban-drop-indicator {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #0079bf;
+    border-radius: 2px;
+    z-index: 1;
 }
 
-.kanban-board .drop-gap {
-	height: 8px;          /* invisible area to catch drops */
+.kanban-board .kanban-drop-indicator.top {
+    top: -2px;
 }
 
-.kanban-board .drop-line {
-	height: 3px;
-	background: #0079bf;  /* Trello blue */
-	border-radius: 2px;
-	margin: 2px 0;
+.kanban-board .kanban-drop-indicator.bottom {
+    bottom: -2px;
 }

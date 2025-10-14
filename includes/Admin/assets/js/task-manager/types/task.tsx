@@ -1,6 +1,6 @@
 export type FieldValue = {
-	raw: any;
-	resolved: any;
+	raw: unknown;
+	resolved: unknown;
 };
 
 export type TaskField = {
@@ -22,7 +22,9 @@ export type Task = {
 	updated_at: string;
 	fields: TaskField[];
 
-	// Derived properties for Kanban
+	// Derived UI properties for Kanban
 	column: string;
 	position: number;
 };
+
+export type TaskDB = Omit<Task, 'fields'>;
