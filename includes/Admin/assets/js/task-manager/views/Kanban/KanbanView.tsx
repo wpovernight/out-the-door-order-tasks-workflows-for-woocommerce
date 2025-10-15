@@ -23,36 +23,23 @@ export const KanbanView: React.FC = () => {
         }
     }, [reloadTasks, isInitialized]);
 
+    // ToDo: Improve and translatable
     if (!isInitialized || loading) {
         return (
-            <div className="kanban-view">
-                <div className="loading-spinner">Loading tasks...</div>
-            </div>
+            <div className="loading-spinner">Loading tasks...</div>
         );
     }
 
+    // ToDo: Improve and translatable
     if (error) {
         return (
-            <div className="kanban-view">
-                <div className="error-message">
-                    Error loading tasks: {error.message}
-                    <button onClick={() => reloadTasks()} className="retry-button">
-                        Retry
-                    </button>
-                </div>
+            <div className="error-message">
+                Error loading tasks: {error.message}
             </div>
         );
     }
 
     return (
-        <div className="kanban-view">
-            {tasks.length === 0 ? (
-                <div className="empty-state">
-                    <p>No tasks available. Please add some tasks to get started.</p>
-                </div>
-            ) : (
-                <Board/>
-            )}
-        </div>
+        <Board/>
     );
 };

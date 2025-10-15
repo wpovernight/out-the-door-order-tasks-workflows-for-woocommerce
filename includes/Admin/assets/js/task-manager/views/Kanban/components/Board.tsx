@@ -107,12 +107,10 @@ export const Board: React.FC = () => {
     }, []);
 
     return (
-        <div className="kanban-board-wrapper">
-            <div ref={scrollableRef} className="kanban-board">
-                {Object.entries(columns).map(([columnName, columnTasks]) => (
-                    <Column key={columnName} column={columnName} tasks={columnTasks}/>
-                ))}
-            </div>
+        <div ref={scrollableRef} className="kanban-board">
+            {Object.entries(columns).map(([columnName, columnTasks]) => (
+                <Column key={columnName} column={columnName} tasks={columnTasks}/>
+            ))}
         </div>
     );
 }

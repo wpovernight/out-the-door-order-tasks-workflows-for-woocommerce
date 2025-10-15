@@ -85,7 +85,9 @@ export const Card: React.FC<CardProps> = ({task}) => {
                         closestEdge: edge,
                     });
                 },
-                onDragLeave() {
+                onDragLeave({ source }) {
+                    if (!isCardData(source.data)) return;
+                    if (source.data.task.id === task.id) return;
                     setState(IDLE);
                 },
                 onDrop() {
@@ -102,7 +104,7 @@ export const Card: React.FC<CardProps> = ({task}) => {
                 <span className="kanban-drop-indicator top"/>
             )}
 
-            <div ref={innerRef} className={`kanban-card ${state.type === 'dragging' ? 'dragging' : ''}`}>
+            <div ref={innerRef} className={`kanban-card ${state.type !== 'idle' ? state.type : ''}`}>
                 <h3>{task.title}</h3>
                 <p>{task.description}</p>
             </div>

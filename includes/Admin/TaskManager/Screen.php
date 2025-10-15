@@ -32,7 +32,7 @@ final class Screen {
 
 		wp_enqueue_script(
 			'wpo-aom-admin-task-manager',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/js/task-manager/dist/app.js',
+			WPO_AOM()->plugin_url() . '/includes/Admin/assets/js/task-manager/build/task-manager.js',
 			array(),
 			WPO_AOM_VERSION,
 			true
@@ -49,7 +49,7 @@ final class Screen {
 
 		wp_enqueue_style(
 			'wpo-aom-admin-task-manager',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/js/task-manager/dist/app.css',
+			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/task-manager.css',
 			array(),
 			WPO_AOM_VERSION
 		);
