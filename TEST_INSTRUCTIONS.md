@@ -1,0 +1,119 @@
+# Test Instruction for Task Manager
+
+> ⚠️ Temporary file for testing PR. Will be removed before merge.
+> The build files is also not to be included in the final merge.
+
+To test the Task Manager board, follow these steps:
+- **Create Sample Tasks**:
+Run the below code snippet to create sample tasks programmatically.
+
+```php
+
+create_sample_tasks( 10 ); // Send number of sample tasks to create.
+
+function create_sample_tasks(int $count, $reset = true): void
+{
+    if ($reset) {
+        remove_sample_tasks();
+    }
+    $task_repository = new \WPO\AOM\Repositories\TaskRepository();
+    $task_field_repository = new \WPO\AOM\Repositories\TaskFieldRepository();
+    $value_repository = new \WPO\AOM\Repositories\TaskFieldValueRepository();
+
+    // Default field IDs.
+    $fields = array(
+        'status' => $task_field_repository->find_by_slug('status')->id,
+        'position' => $task_field_repository->find_by_slug('position')->id,
+        'assignee' => $task_field_repository->find_by_slug('assignee')->id,
+        'creator' => $task_field_repository->find_by_slug('creator')->id,
+        'order' => $task_field_repository->find_by_slug('order')->id,
+        'priority' => $task_field_repository->find_by_slug('priority')->id,
+        'due_date' => $task_field_repository->find_by_slug('due_date')->id,
+    );
+
+    $user_id = 1;
+    $order_id = 1885;
+
+    for ($i = 1; $i <= $count; $i++) {
+        $title = sprintf('Sample Task %d', $i);
+        $description = sprintf('This is sample task number %d.', $i);
+
+        // Example randomized or patterned values.
+        $statuses = array('To Do', 'In Progress', 'Completed');
+        $priorities = array('Low', 'Medium', 'High');
+
+        $values = array(
+            'status' => $statuses[array_rand($statuses)],
+            'position' => $i,
+            'assignee' => $user_id,
+            'creator' => $user_id,
+            'order' => $order_id,
+            'priority' => $priorities[array_rand($priorities)],
+            'due_date' => date('Y-m-d', strtotime(sprintf('+%d days', rand(2, 10)))),
+        );
+
+        create_task($task_repository, $value_repository, $fields, $title, $description, $values);
+    }
+
+    echo sprintf("%d sample tasks created.\n", $count);
+}
+
+function create_task(
+    \WPO\AOM\Repositories\TaskRepository           $task_repo,
+    \WPO\AOM\Repositories\TaskFieldValueRepository $value_repo,
+    array                                          $fields,
+    string                                         $title,
+    string                                         $description,
+    array                                          $values
+): void
+{
+    $task_id = $task_repo->insert(
+        array(
+            'title' => $title,
+            'description' => $description,
+        )
+    );
+
+    foreach ($values as $slug => $value) {
+        if (isset($fields[$slug])) {
+            $value_repo->insert(
+                array(
+                    'task_id' => $task_id,
+                    'field_id' => $fields[$slug],
+                    'value' => $value,
+                )
+            );
+        }
+    }
+}
+
+function remove_sample_tasks(): void {
+	$task_repository = new \WPO\AOM\Repositories\TaskRepository();
+	$tasks = $task_repository->get();
+
+	foreach ( $tasks as $task ) {
+		$task_repository->delete( $task->id );
+	}
+
+	// Also remove associated field values.
+	$task_field_value_repository = new \WPO\AOM\Repositories\TaskFieldValueRepository();
+	$task_field_value_repository->get();
+
+	foreach ( $task_field_value_repository->get() as $field_value ) {
+		$task_field_value_repository->delete( $field_value->id );
+	}
+
+	echo "Sample tasks removed.\n";
+}
+```
+
+- Navigate to the WooCommerce > Task Manager section in the WordPress admin dashboard to see the board.
+
+The build file is included temporary to ease the testing.
+
+In case you want to build the files yourself, run bellow commands:
+```bash
+cd includes/Admin/assets/js/task-manager
+npm install
+npm run build
+```
