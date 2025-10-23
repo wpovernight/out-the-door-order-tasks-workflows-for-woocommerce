@@ -148,7 +148,8 @@ These definitions improve type safety and readability throughout the codebase.
 
 To build frontend react apps, navigate to the respective directories and run the following commands:
 ```bash
-cd includes/Admin/task-manager
+# Change the directory to your desired one.
+cd includes/Admin/js/app-directory
 npm install
 npm run build
 ```
