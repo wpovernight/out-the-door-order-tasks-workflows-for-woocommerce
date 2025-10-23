@@ -3,8 +3,14 @@
 > ⚠️ Temporary file for testing PR. Will be removed before merge.
 > The build files is also not to be included in the final merge.
 
-To test the Task Manager board, follow these steps:
-- **Create Sample Tasks**:
+## Test Instructions
+
+- Create sample tasks using the provided code snippet below.
+- Navigate to the `WooCommerce > Task Management` section in the dashboard to see the board.
+
+> The build file is included temporary to ease the testing. However, in case you want to build the files yourself, please refer to the manual build instructions at the bottom of this document.
+## Task Creation for Testing
+
 Run the below code snippet to create sample tasks programmatically.
 
 ```php
@@ -106,11 +112,10 @@ function remove_sample_tasks(): void {
 }
 ```
 
-- Navigate to the WooCommerce > Task Manager section in the WordPress admin dashboard to see the board.
+---
 
-The build file is included temporary to ease the testing.
-
-In case you want to build the files yourself, run bellow commands:
+## Manual Build Instructions
+To build the Task Manager React app, run the following commands:
 ```bash
 cd includes/Admin/assets/js/task-manager
 npm install
