@@ -11,85 +11,84 @@ Run the below code snippet to create sample tasks programmatically.
 
 create_sample_tasks( 10 ); // Send number of sample tasks to create.
 
-function create_sample_tasks(int $count, $reset = true): void
-{
-    if ($reset) {
-        remove_sample_tasks();
-    }
-    $task_repository = new \WPO\AOM\Repositories\TaskRepository();
-    $task_field_repository = new \WPO\AOM\Repositories\TaskFieldRepository();
-    $value_repository = new \WPO\AOM\Repositories\TaskFieldValueRepository();
 
-    // Default field IDs.
-    $fields = array(
-        'status' => $task_field_repository->find_by_slug('status')->id,
-        'position' => $task_field_repository->find_by_slug('position')->id,
-        'assignee' => $task_field_repository->find_by_slug('assignee')->id,
-        'creator' => $task_field_repository->find_by_slug('creator')->id,
-        'order' => $task_field_repository->find_by_slug('order')->id,
-        'priority' => $task_field_repository->find_by_slug('priority')->id,
-        'due_date' => $task_field_repository->find_by_slug('due_date')->id,
-    );
+function create_sample_tasks( int $count, $reset = true ): void {
+	if ( $reset ) {
+		remove_sample_tasks();
+	}
+	$task_repository       = new \WPO\AOM\Repositories\TaskRepository();
+	$task_field_repository = new \WPO\AOM\Repositories\TaskFieldRepository();
+	$value_repository      = new \WPO\AOM\Repositories\TaskFieldValueRepository();
 
-    $user_id = 1;
-    $order_id = 1885;
+	// Default field IDs.
+	$fields = array(
+		'status'   => $task_field_repository->find_by_slug( 'status' )->id,
+		'position' => $task_field_repository->find_by_slug( 'position' )->id,
+		'assignee' => $task_field_repository->find_by_slug( 'assignee' )->id,
+		'creator'  => $task_field_repository->find_by_slug( 'creator' )->id,
+		'order'    => $task_field_repository->find_by_slug( 'order' )->id,
+		'priority' => $task_field_repository->find_by_slug( 'priority' )->id,
+		'due_date' => $task_field_repository->find_by_slug( 'due_date' )->id,
+	);
 
-    for ($i = 1; $i <= $count; $i++) {
-        $title = sprintf('Sample Task %d', $i);
-        $description = sprintf('This is sample task number %d.', $i);
+	$user_id  = 1;
+	$order_id = 1885;
 
-        // Example randomized or patterned values.
-        $statuses = array('To Do', 'In Progress', 'Completed');
-        $priorities = array('Low', 'Medium', 'High');
+	for ( $i = 1; $i <= $count; $i ++ ) {
+		$title       = sprintf( 'Sample Task %d', $i );
+		$description = sprintf( 'This is sample task number %d.', $i );
 
-        $values = array(
-            'status' => $statuses[array_rand($statuses)],
-            'position' => $i,
-            'assignee' => $user_id,
-            'creator' => $user_id,
-            'order' => $order_id,
-            'priority' => $priorities[array_rand($priorities)],
-            'due_date' => date('Y-m-d', strtotime(sprintf('+%d days', rand(2, 10)))),
-        );
+		// Example randomized or patterned values.
+		$statuses   = array( 'To Do', 'In Progress', 'Completed' );
+		$priorities = array( 'Low', 'Medium', 'High' );
 
-        create_task($task_repository, $value_repository, $fields, $title, $description, $values);
-    }
+		$values = array(
+			'status'   => $statuses[ array_rand( $statuses ) ],
+			'position' => $i,
+			'assignee' => $user_id,
+			'creator'  => $user_id,
+			'order'    => $order_id,
+			'priority' => $priorities[ array_rand( $priorities ) ],
+			'due_date' => date( 'Y-m-d', strtotime( sprintf( '+%d days', rand( 2, 10 ) ) ) ),
+		);
 
-    echo sprintf("%d sample tasks created.\n", $count);
+		create_task( $task_repository, $value_repository, $fields, $title, $description, $values );
+	}
+
+	echo sprintf( "%d sample tasks created.\n", $count );
 }
 
 function create_task(
-    \WPO\AOM\Repositories\TaskRepository           $task_repo,
-    \WPO\AOM\Repositories\TaskFieldValueRepository $value_repo,
-    array                                          $fields,
-    string                                         $title,
-    string                                         $description,
-    array                                          $values
-): void
-{
-    $task_id = $task_repo->insert(
-        array(
-            'title' => $title,
-            'description' => $description,
-        )
-    );
+	\WPO\AOM\Repositories\TaskRepository $task_repo,
+	\WPO\AOM\Repositories\TaskFieldValueRepository $value_repo,
+	array $fields,
+	string $title,
+	string $description,
+	array $values
+): void {
+	$task_id = $task_repo->insert(
+		array(
+			'title'       => $title,
+			'description' => $description,
+		)
+	);
 
-    foreach ($values as $slug => $value) {
-        if (isset($fields[$slug])) {
-            $value_repo->insert(
-                array(
-                    'task_id' => $task_id,
-                    'field_id' => $fields[$slug],
-                    'value' => $value,
-                )
-            );
-        }
-    }
+	foreach ( $values as $slug => $value ) {
+		if ( isset( $fields[ $slug ] ) ) {
+			$value_repo->insert(
+				array(
+					'task_id'  => $task_id,
+					'field_id' => $fields[ $slug ],
+					'value'    => $value,
+				)
+			);
+		}
+	}
 }
 
 function remove_sample_tasks(): void {
 	$task_repository = new \WPO\AOM\Repositories\TaskRepository();
-	$tasks = $task_repository->get();
+	$tasks           = $task_repository->get();
 
 	foreach ( $tasks as $task ) {
 		$task_repository->delete( $task->id );
