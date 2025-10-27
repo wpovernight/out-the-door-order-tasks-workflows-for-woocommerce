@@ -5,7 +5,7 @@ const apiRoot = (window as any).WPO_AOM_TaskManager?.apiRoot;
 const nonce = (window as any).WPO_AOM_TaskManager?.nonce;
 
 if (!apiRoot) {
-	console.warn("⚠️ API Root is missing. API calls will fail.");
+    console.warn("⚠️ API Root is missing. API calls will fail.");
 }
 
 /**
@@ -17,12 +17,12 @@ if (!apiRoot) {
  * @throws Will throw an error if the response is not ok.
  */
 async function handleResponse<T>(response: Response): Promise<T> {
-	if (!response.ok) {
-		const errorText = await response.text();
-		throw new Error(`API request failed: ${response.status}: ${errorText}`);
-	}
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API request failed: ${response.status}: ${errorText}`);
+    }
 
-	return response.json() as Promise<T>;
+    return response.json() as Promise<T>;
 }
 
 /**
@@ -32,37 +32,37 @@ async function handleResponse<T>(response: Response): Promise<T> {
  * @throws Will throw an error if the API request fails.
  */
 export async function fetchTasks(): Promise<Task[]> {
-	const response = await fetch(`${apiRoot}/tasks`, {
-		method: 'GET',
-		credentials: 'include',
-		headers: {'X-WP-Nonce': nonce},
-	});
+    const response = await fetch(`${apiRoot}/tasks`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {'X-WP-Nonce': nonce},
+    });
 
-	const data = await handleResponse<any[]>(response);
+    const data = await handleResponse<any[]>(response);
 
-	return data.map((task: any) => {
-		const statusField = task.fields.find((field: any) => field.slug === 'status');
-		const positionField = task.fields.find((field: any) => field.slug === 'position');
+    return data.map((task: any) => {
+        const statusField = task.fields.find((field: any) => field.slug === 'status');
+        const positionField = task.fields.find((field: any) => field.slug === 'status_position');
 
-		return {
-			...task,
-			column: statusField?.values?.[0]?.raw ?? undefined,
-			position: positionField?.values?.[0]?.raw ?? undefined,
-		};
-	});
+        return {
+            ...task,
+            column: statusField?.values?.[0]?.raw ?? undefined,
+            position: positionField?.values?.[0]?.raw ?? undefined,
+        };
+    });
 }
 
 // ToDo: Update this function
 export async function updateTask(taskId: number, payload: Partial<Task>): Promise<Task> {
-	const response = await fetch(`${apiRoot}/tasks/${taskId}`, {
-		method: "PUT",
-		credentials: "include",
-		headers: {
-			"Content-Type": "application/json",
-			"X-WP-Nonce": nonce,
-		},
-		body: JSON.stringify(payload),
-	});
+    const response = await fetch(`${apiRoot}/tasks/${taskId}`, {
+        method: "PUT",
+        credentials: "include",
+        headers: {
+            "Content-Type": "application/json",
+            "X-WP-Nonce": nonce,
+        },
+        body: JSON.stringify(payload),
+    });
 
-	return handleResponse<Task>(response);
+    return handleResponse<Task>(response);
 }

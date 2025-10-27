@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import {useView} from "../context/ViewContext";
-
 import Header from "./Header";
 import Calendar from "../views/Calendar/calendar";
 import {KanbanView} from "../views/Kanban/KanbanView";
