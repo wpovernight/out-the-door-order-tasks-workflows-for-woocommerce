@@ -44,6 +44,7 @@ final class Screen {
 			array(
 				'apiRoot' => esc_url_raw( rest_url( '/wc/v3/wpo/aom' ) ),
 				'nonce'   => wp_create_nonce( 'wp_rest' ),
+				'loading' => esc_html__( 'Loading...', 'wpo-aom' ),
 			)
 		);
 

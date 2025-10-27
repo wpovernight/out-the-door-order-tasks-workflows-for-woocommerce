@@ -1,5 +1,4 @@
-import {Task} from "../types/task";
-import {useActionState} from "react";
+import {Task, FieldOption} from "../types/task";
 
 const apiRoot = (window as any).WPO_AOM_TaskManager?.apiRoot;
 const nonce = (window as any).WPO_AOM_TaskManager?.nonce;
@@ -65,4 +64,23 @@ export async function updateTask(taskId: number, payload: Partial<Task>): Promis
     });
 
     return handleResponse<Task>(response);
+}
+
+/**
+ * Fetches the available status options from the API.
+ *
+ * @returns {Promise<FieldOption[]>} A promise that resolves to an array of column names.
+ * @throws Will throw an error if the API request fails.
+ */
+export async function fetchStatus(): Promise<FieldOption[]> {
+    const response = await fetch(`${apiRoot}/tasks/fields/status/options`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            "Content-Type": "application/json",
+            "X-WP-Nonce": nonce,
+        },
+    });
+
+    return handleResponse<FieldOption[]>(response);
 }

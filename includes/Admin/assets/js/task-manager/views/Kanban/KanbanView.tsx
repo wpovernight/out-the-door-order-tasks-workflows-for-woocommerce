@@ -3,15 +3,17 @@ import {useTasks} from "../../context/TaskContext";
 import {Board} from "./components/Board";
 
 export const KanbanView: React.FC = () => {
-    const {tasks, reloadTasks} = useTasks();
+    const {loadTasks, loadStatuses} = useTasks();
     const [isInitialized, setIsInitialized] = React.useState(false);
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState<Error | null>(null);
 
     useEffect(() => {
-        const initializeTasks = async () => {
+        // Initialize by loading tasks and columns.
+        const initialize = async () => {
             try {
-                await reloadTasks();
+                await loadTasks();
+                await loadStatuses();
             } catch (error) {
                 console.error("Failed to load tasks:", error);
             }
@@ -19,14 +21,14 @@ export const KanbanView: React.FC = () => {
         };
 
         if (!isInitialized) {
-            initializeTasks();
+            initialize();
         }
-    }, [reloadTasks, isInitialized]);
+    }, [loadTasks, loadStatuses, isInitialized]);
 
     // ToDo: Improve and translatable
     if (!isInitialized || loading) {
         return (
-            <div className="loading-spinner">Loading tasks...</div>
+            <div className="loading-spinner">{(window as any).WPO_AOM_TaskManager.loading}</div>
         );
     }
 

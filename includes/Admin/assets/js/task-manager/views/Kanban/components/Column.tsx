@@ -5,12 +5,12 @@ import {draggable, dropTargetForElements} from "@atlaskit/pragmatic-drag-and-dro
 import {autoScrollForElements} from "@atlaskit/pragmatic-drag-and-drop-auto-scroll/element";
 
 import {useTasks} from "../../../context/TaskContext";
-import {Task} from "../../../types/task";
+import {FieldOption, Task} from "../../../types/task";
 import {getColumnData, isCardData} from "../data";
 import {Card} from "./Card";
 
 interface ColumnProps {
-    column: string;
+    column: FieldOption;
     tasks: Task[];
 }
 
@@ -40,7 +40,7 @@ export const Column: React.FC<ColumnProps> = ({column, tasks}) => {
         const container = containerRef.current;
         invariant(scrollable && header && container);
 
-        const columnData = getColumnData({column});
+        const columnData = getColumnData({column: column.label});
 
         return combine(
             // Make the column draggable (for future enhancement)
@@ -81,7 +81,7 @@ export const Column: React.FC<ColumnProps> = ({column, tasks}) => {
                 async onDrop({source}) {
                     if (!isCardData(source.data)) return;
                     const {task, fromColumn} = source.data;
-                    if (fromColumn !== column) {
+                    if (fromColumn !== column.label) {
                         // await saveTask(task.id, {column});
                     }
                     setState(IDLE);
@@ -99,7 +99,7 @@ export const Column: React.FC<ColumnProps> = ({column, tasks}) => {
     return (
         <div className="kanban-column">
             <div ref={headerRef} className="kanban-column-header">
-                <h2>{column}</h2>
+                <h2>{column.label}</h2>
             </div>
             <div ref={scrollableRef} className="kanban-column-scrollable">
                 <div ref={containerRef} className="kanban-column-container">

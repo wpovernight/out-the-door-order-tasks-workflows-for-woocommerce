@@ -11,20 +11,28 @@ import {Column} from "./Column";
 
 
 export const Board: React.FC = () => {
-    const {tasks} = useTasks();
+    const {tasks, statuses} = useTasks();
     const scrollableRef = useRef<HTMLDivElement | null>(null);
     const {setTasks} = useTasks();
 
-    // Group tasks by column name
-    const columns = useMemo(() => {
+    // Group tasks by status(column) name
+    const taskGroups = useMemo(() => {
         const grouped: Record<string, typeof tasks> = {};
-        tasks.forEach((task) => {
-            const column = task.column;
-            if (!grouped[column]) grouped[column] = [];
-            grouped[column].push(task);
+
+        statuses.forEach(col => {
+            grouped[col.label] = [];
         });
+
+        // Distribute tasks into their respective columns
+        tasks.forEach(task => {
+            const columnName = task.column;
+            if (grouped[columnName]) {
+                grouped[columnName].push(task);
+            }
+        });
+
         return grouped;
-    }, [tasks]);
+    }, [tasks, statuses]);
 
     // Enable horizontal auto-scroll while dragging.
     useEffect(() => {
@@ -77,6 +85,7 @@ export const Board: React.FC = () => {
                         });
 
                         if (fromColumn !== dropTargetData.column) {
+                            // ToDo: Complete this
                             // await saveTask(task.id, {column: dropTargetData.column});
                         }
 
@@ -95,7 +104,7 @@ export const Board: React.FC = () => {
                                     : t
                             );
                         });
-                        // await saveTask(task.id, {column: toColumn});
+                        // await saveTask(task.id, {column: toColumn}); // ToDo: Complete this
                     }
                 },
             }),
@@ -108,8 +117,8 @@ export const Board: React.FC = () => {
 
     return (
         <div ref={scrollableRef} className="kanban-board">
-            {Object.entries(columns).map(([columnName, columnTasks]) => (
-                <Column key={columnName} column={columnName} tasks={columnTasks}/>
+            {statuses.map((col) => (
+                <Column key={col.id} column={col} tasks={taskGroups[col.label] || []} />
             ))}
         </div>
     );
