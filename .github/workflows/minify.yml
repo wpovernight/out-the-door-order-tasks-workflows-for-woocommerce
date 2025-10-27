@@ -6,6 +6,7 @@ on:
     paths:
       - 'includes/Admin/assets/**/*.js'
       - 'includes/Admin/assets/**/*.css'
+      - '!includes/Admin/assets/**/build/**'
 
 jobs:
   build:
