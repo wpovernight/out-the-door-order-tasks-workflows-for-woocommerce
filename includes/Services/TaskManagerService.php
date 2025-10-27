@@ -261,6 +261,33 @@ final class TaskManagerService {
 	 *  ================================ */
 
 	/**
+	 * Get all options for a specific select-type field.
+	 *
+	 * @param int $field_id
+	 *
+	 * @return array
+	 */
+	public function get_options_for_field( int $field_id ): array {
+		return $this->task_field_option_repository->find_all_by( 'field_id', $field_id );
+	}
+
+	/**
+	 * Get all options for a specific select-type field by the field slug.
+	 *
+	 * @param string $slug
+	 *
+	 * @return array
+	 */
+	public function get_options_for_field_by_slug( string $slug ): array {
+		$field = $this->task_field_repository->find_by_slug( $slug );
+		if ( ! $field ) {
+			return array();
+		}
+
+		return $this->get_options_for_field( $field->id );
+	}
+
+	/**
 	 * Add an option to a select-type field.
 	 *
 	 * @param int $field_id
