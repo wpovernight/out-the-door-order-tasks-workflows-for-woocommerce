@@ -19,6 +19,13 @@ class TaskController extends BaseRestController {
 	 * @return void
 	 */
 	public function register_routes(): void {
+		/**
+		 * Collection endpoints:
+		 * GET  /{namespace}/tasks  -> returns array of task objects.
+		 * POST /{namespace}/tasks  -> returns created task object.
+		 *
+		 * Both enforce permission_callback and validate args against item schema.
+		 */
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->resource_name,
@@ -39,6 +46,14 @@ class TaskController extends BaseRestController {
 			)
 		);
 
+		/**
+		 * Single item endpoints:
+		 * GET    /{namespace}/tasks/{id}  -> returns single task object.
+		 * PUT    /{namespace}/tasks/{id}  -> returns updated task object.
+		 * DELETE /{namespace}/tasks/{id}  -> returns success message.
+		 *
+		 * All enforce permission_callback and validate args against item schema.
+		 */
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->resource_name . '/(?P<id>[\d]+)',

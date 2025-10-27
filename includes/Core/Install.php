@@ -159,6 +159,7 @@ final class Install {
 			field_id BIGINT(20) UNSIGNED NOT NULL,
 			label VARCHAR(255) NOT NULL,
 			color VARCHAR(7) DEFAULT NULL,
+			position INT NOT NULL DEFAULT 0,
 			PRIMARY KEY  (id),
 			FOREIGN KEY (field_id) REFERENCES {$wpdb->prefix}wpo_aom_task_fields(id) ON DELETE CASCADE
 		) {$charset_collate};
@@ -181,42 +182,38 @@ final class Install {
 	 */
 	private static function insert_default_data(): void {
 		$default_fields = array(
-			// Default fields, non-editable and protected fields.
+			// Default fields: Non-editable and protected fields.
 			array(
-				'label'        => 'Status', // For Kanban columns.
+				'label'        => 'Status',
 				'type'         => 'select',
 				'slug'         => 'status',
 				'is_required'  => true,
 				'is_editable'  => true,
 				'is_protected' => true,
-				'options'      => array(
+				'options' => array(
 					array(
-						'label' => 'To Do',
-						'color' => '#6c757d',
+						'label'    => 'To Do',
+						'color'    => '#6c757d',
+						'position' => 1,
 					),
 					array(
-						'label' => 'In Progress',
-						'color' => '#17a2b8',
+						'label'    => 'In Progress',
+						'color'    => '#17a2b8',
+						'position' => 2,
 					),
 					array(
-						'label' => 'Completed',
-						'color' => '#28a745',
+						'label'    => 'Completed',
+						'color'    => '#28a745',
+						'position' => 3,
 					),
 				),
 			),
+			// position within status - used for ordering tasks in Kanban view
 			array(
-				'label' => 'Position', // For ordering tasks within a status column in Kanban view.
+				'label' => 'Position',
 				'type'  => 'number',
 				'slug'  => 'position',
 				'is_required'  => true,
-				'is_editable'  => false,
-				'is_protected' => true,
-			),
-			array(
-				'label'        => 'Assignee',
-				'type'         => 'number',
-				'slug'         => 'assignee',
-				'is_required'  => false,
 				'is_editable'  => false,
 				'is_protected' => true,
 			),
