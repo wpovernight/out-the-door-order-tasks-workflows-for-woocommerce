@@ -33,7 +33,7 @@ final class Screen {
 		wp_enqueue_script(
 			'wpo-aom-admin-task-manager',
 			WPO_AOM()->plugin_url() . '/includes/Admin/assets/js/task-manager/build/task-manager.js',
-			array(),
+			array( 'wp-element' ),
 			WPO_AOM_VERSION,
 			true
 		);
@@ -42,9 +42,14 @@ final class Screen {
 			'wpo-aom-admin-task-manager',
 			'WPO_AOM_TaskManager',
 			array(
-				'apiRoot' => esc_url_raw( rest_url( '/wc/v3/wpo/aom' ) ),
-				'nonce'   => wp_create_nonce( 'wp_rest' ),
-				'loading' => esc_html__( 'Loading...', 'wpo-aom' ),
+				'apiRoot'      => esc_url_raw( rest_url( '/wc/v3/wpo/aom' ) ),
+				'nonce'        => wp_create_nonce( 'wp_rest' ),
+				'loading'      => esc_html__( 'Loading...', 'wpo-aom' ),
+				'errorLoading' => esc_html__( 'Error loading tasks. Please try again.', 'wpo-aom' ),
+				'views'        => array(
+					'kanban'   => esc_html__( 'Kanban', 'wpo-aom' ),
+					'calendar' => esc_html__( 'Calendar', 'wpo-aom' ),
+				),
 			)
 		);
 

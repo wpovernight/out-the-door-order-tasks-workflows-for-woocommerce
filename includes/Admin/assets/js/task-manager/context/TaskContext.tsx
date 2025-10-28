@@ -3,18 +3,17 @@ import {Task, FieldOption} from "../types/task";
 import {fetchTasks, fetchStatus, updateTask} from "../utils/api";
 
 interface TaskContextType {
-    tasks: Task[],
-    setTasks: React.Dispatch<React.SetStateAction<Task[]>>,
-    loadTasks: () => Promise<void>,
-    saveTask: (taskId: number, updates: Partial<Task>) => Promise<void>,
-    statuses: FieldOption[],
-    loadStatuses: () => Promise<void>,
-    // ToDo: add other CRUD operations here
+    tasks: Task[];
+    setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
+    loadTasks: () => Promise<void>;
+    saveTask: (taskId: number, updates: Partial<Task>) => Promise<void>;
+    statuses: FieldOption[];
+    loadStatuses: () => Promise<void>;
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
-export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
+export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [statuses, setStatuses] = useState<FieldOption[]>([]);
 
@@ -25,14 +24,13 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({children}
         } catch (error) {
             console.error("Failed to fetch tasks:", error);
         }
-    }
+    };
 
-    // ToDo: Finish this.
     const saveTask = async (taskId: number, updates: Partial<Task>) => {
         // try {
         // 	const updated = await updateTask(taskId, updates);
-        // 	setTasks((prev) =>
-        // 		prev.map((t) => (t.id === taskId ? { ...t, ...updated } : t))
+        // 	setTasks(prev =>
+        // 		prev.map(t => (t.id === taskId ? { ...t, ...updated } : t))
         // 	);
         // } catch (err) {
         // 	console.error("Failed to update task:", err);
@@ -46,33 +44,28 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({children}
         } catch (error) {
             console.error("Failed to fetch columns:", error);
         }
-    }
+    };
 
     return (
-        <TaskContext.Provider value={{
-            tasks: tasks,
-            setTasks: setTasks,
-            loadTasks: loadTasks,
-            saveTask: saveTask,
-            statuses: statuses,
-            loadStatuses: loadStatuses,
-        }}>
+        <TaskContext.Provider
+            value={{
+                tasks,
+                setTasks,
+                loadTasks,
+                saveTask,
+                statuses,
+                loadStatuses,
+            }}
+        >
             {children}
         </TaskContext.Provider>
     );
-}
+};
 
-/**
- * Custom hook to use the TaskContext.
- *
- * @returns {TaskContextType} The current tasks and a functions to do CRUD operations on tasks
- * @throws Will throw an error if used outside a TaskProvider
- */
 export const useTasks = (): TaskContextType => {
     const context = useContext(TaskContext);
     if (!context) {
         throw new Error('useTasks must be used within a TaskProvider');
     }
-
     return context;
-}
+};

@@ -9,6 +9,8 @@
 		"allowSyntheticDefaultImports": true,
 		"forceConsistentCasingInFileNames": true,
 		"skipLibCheck": true,
-		"outDir": "./dist"
-	}
+		"outDir": "./dist",
+		"types": ["react", "node"],
+	},
+	"exclude": ["node_modules", "build", "dist"]
 }

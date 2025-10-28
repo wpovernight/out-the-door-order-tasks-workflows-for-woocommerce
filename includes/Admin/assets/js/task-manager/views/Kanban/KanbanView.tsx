@@ -9,34 +9,49 @@ export const KanbanView: React.FC = () => {
     const [error, setError] = React.useState<Error | null>(null);
 
     useEffect(() => {
+        let isCancelled = false;
+
         // Initialize by loading tasks and columns.
         const initialize = async () => {
+            setLoading(true);
             try {
-                await loadTasks();
-                await loadStatuses();
-            } catch (error) {
-                console.error("Failed to load tasks:", error);
+                await Promise.all([loadTasks(), loadStatuses()]);
+                if (!isCancelled) setIsInitialized(true);
+            } catch (error: unknown) {
+                if (!isCancelled) {
+                    setError(
+                        error instanceof Error
+                            ? error
+                            : new Error("Unknown initialization error")
+                    );
+                }
+            } finally {
+                if (!isCancelled) setLoading(false);
             }
-            setIsInitialized(true);
         };
 
         if (!isInitialized) {
+            console.log("Initializing Kanban View...");
             initialize();
         }
-    }, [loadTasks, loadStatuses, isInitialized]);
 
-    // ToDo: Improve and translatable
+        return () => {
+            isCancelled = true;
+        };
+    }, [ isInitialized]);
+
     if (!isInitialized || loading) {
         return (
-            <div className="loading-spinner">{(window as any).WPO_AOM_TaskManager.loading}</div>
+            <div className="loading-spinner">
+                {(window as any).WPO_AOM_TaskManager.loading}
+            </div>
         );
     }
 
-    // ToDo: Improve and translatable
     if (error) {
         return (
             <div className="error-message">
-                Error loading tasks: {error.message}
+                {(window as any).WPO_AOM_TaskManager.errorLoading}
             </div>
         );
     }
