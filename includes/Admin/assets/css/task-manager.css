@@ -46,6 +46,12 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
 }
 
 #wpo-aom-task-manager-container > .inner > .header > .views-filter > ul > li {
+    margin-bottom: 0;
+}
+
+#wpo-aom-task-manager-container > .inner > .header > .views-filter > ul > li> button {
+    background: transparent;
+    border: none;
     cursor: pointer;
     padding-bottom: 0.7em;
     margin-bottom: 0;

@@ -5,8 +5,8 @@
   "scripts": {
     "build": "webpack --mode production",
     "dev": "webpack --mode development --watch",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix"
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx --ignore-path .eslintignore\n",
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --ignore-path .eslintignore --fix"
   },
   "author": "",
   "license": "ISC",

@@ -1,21 +1,20 @@
 import * as React from 'react';
 
-import {useView} from "../context/ViewContext";
-import Header from "./Header";
-import Calendar from "../views/Calendar/calendar";
-import {KanbanView} from "../views/Kanban/KanbanView";
+import { useView } from '../context/ViewContext';
+import Header from './Header';
+import Calendar from '../views/Calendar/calendar';
+import { KanbanView } from '../views/Kanban/KanbanView';
 
 export default function Page() {
-    const {view} = useView();
+	const { view } = useView();
 
-    return (
-        <div className="inner">
-            <Header/>
-            <div className={`view ${view}-view`}>
-                {view === 'kanban' && <KanbanView/>}
-                {view === 'calendar' && <Calendar/>}
-            </div>
-        </div>
-    );
+	return (
+		<div className="inner">
+			<Header />
+			<div className={`view ${view}-view`}>
+				{view === 'kanban' && <KanbanView />}
+				{view === 'calendar' && <Calendar />}
+			</div>
+		</div>
+	);
 }
-

@@ -7,6 +7,8 @@ on:
       - 'includes/Admin/assets/**/*.js'
       - 'includes/Admin/assets/**/*.css'
       - '!includes/Admin/assets/**/build/**'
+      - '!includes/Admin/assets/**/webpack.config.js'
+      - '!includes/Admin/assets/**/.eslintrc.js'
 
 jobs:
   build:
