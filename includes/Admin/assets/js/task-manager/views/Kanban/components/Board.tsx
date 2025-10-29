@@ -6,7 +6,12 @@ import { autoScrollForElements } from '@atlaskit/pragmatic-drag-and-drop-auto-sc
 import { extractClosestEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
 
 import { useTasks } from '../../../context/TaskContext';
-import { isCardData, isColumnData, isCardDropTargetData } from '../data';
+import {
+	isCardData,
+	isColumnData,
+	isCardDropTargetData,
+	isTask,
+} from '../data';
 import { Column } from './Column';
 
 export const Board: React.FC = () => {
@@ -30,14 +35,57 @@ export const Board: React.FC = () => {
 			}
 		});
 
-		// Sort tasks within each column by their position
-		for (const column in grouped) {
-			grouped[column].sort((a, b) => a.position - b.position);
+		// Order tasks by previous_task_id chain
+		const sortByPreviousTaskId = (tasksInColumn: typeof tasks) => {
+			const byId = new Map(tasksInColumn.map((t) => [t.id, t]));
+			const sorted: typeof tasks = [];
+			const remaining = new Set(tasksInColumn.map((t) => t.id));
 
-			// Set previous_task_id for each task
-			for (let index = 0; index < grouped[column].length; index++) {
-				const current = grouped[column][index];
-				const previous = grouped[column][index - 1];
+			// Find the first task(s) without a valid previous_task_id
+			const heads = tasksInColumn.filter(
+				(t) => !t.previous_task_id || !byId.has(t.previous_task_id)
+			);
+
+			// Start sorting by walking through linked previous_task_id chains
+			const visitChain = (task: any) => {
+				let current = task;
+				while (current && remaining.has(current.id)) {
+					sorted.push(current);
+					remaining.delete(current.id);
+					current = [...remaining]
+						.map((id) => byId.get(id))
+						.filter(isTask)
+						.find((t) => t.previous_task_id === task.id);
+					task = current;
+				}
+			};
+
+			heads.sort((a, b) => a.position - b.position).forEach(visitChain);
+
+			// If some tasks are still unlinked, sort them by position
+			if (remaining.size > 0) {
+				const unlinked = [...remaining]
+					.map((id) => byId.get(id))
+					.filter(isTask);
+				unlinked
+					.sort((a, b) => a.position - b.position)
+					.forEach((t) => sorted.push(t));
+			}
+
+			return sorted;
+		};
+
+		// Sort tasks in each column
+		for (const column in grouped) {
+			const sorted = sortByPreviousTaskId(grouped[column]);
+
+			// Reassign sorted list
+			grouped[column] = sorted;
+
+			// Ensure previous_task_id is filled consistently
+			for (let index = 0; index < sorted.length; index++) {
+				const current = sorted[index];
+				const previous = sorted[index - 1];
 				current.previous_task_id = previous ? previous.id : null;
 			}
 		}
@@ -125,6 +173,9 @@ export const Board: React.FC = () => {
 						if (fromColumn === toColumn) {
 							return;
 						}
+						console.log(
+							`Moving task ${task.id} from ${fromColumn} to ${toColumn}`
+						); // ToDo: Remove debug log
 
 						setTasks((prev) => {
 							return prev.map((t) =>
@@ -133,6 +184,8 @@ export const Board: React.FC = () => {
 									: t
 							);
 						});
+
+						console.log(tasks); // ToDo: Remove debug log
 						// await saveTask(task.id, {column: toColumn}); // ToDo: Complete this
 					}
 				},
