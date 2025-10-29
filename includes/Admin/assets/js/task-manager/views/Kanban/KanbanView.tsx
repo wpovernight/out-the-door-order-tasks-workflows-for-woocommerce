@@ -1,50 +1,35 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTasks } from '../../context/TaskContext';
 import { Board } from './components/Board';
 
 export const KanbanView: React.FC = () => {
-	const { loadTasks, loadStatuses } = useTasks();
-	const [isInitialized, setIsInitialized] = React.useState(false);
-	const [loading, setLoading] = React.useState(false);
-	const [error, setError] = React.useState<Error | null>(null);
+	const { isInitialized, loadTasks, loadStatuses } = useTasks();
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState<Error | null>(null);
 
 	useEffect(() => {
-		let isCancelled = false;
-
-		// Initialize by loading tasks and columns.
 		const initialize = async () => {
+			if (isInitialized) {
+				return;
+			}
 			setLoading(true);
 			try {
 				await Promise.all([loadTasks(), loadStatuses()]);
-				if (!isCancelled) {
-					setIsInitialized(true);
-				}
 			} catch (err: unknown) {
-				if (!isCancelled) {
-					setError(
-						err instanceof Error
-							? err
-							: new Error('Unknown initialization error')
-					);
-				}
+				setError(
+					err instanceof Error
+						? err
+						: new Error('Unknown initialization error')
+				);
 			} finally {
-				if (!isCancelled) {
-					setLoading(false);
-				}
+				setLoading(false);
 			}
 		};
+		console.log('Initializing Kanban View...'); // ToDo: Remove debug log
+		initialize();
+	}, [isInitialized, loadTasks, loadStatuses]);
 
-		if (!isInitialized) {
-			console.log('Initializing Kanban View...'); // ToDo: Remove debug log
-			initialize();
-		}
-
-		return () => {
-			isCancelled = true;
-		};
-	}, [isInitialized]);
-
-	if (!isInitialized || loading) {
+	if (loading) {
 		return (
 			<div className="loading-spinner">
 				{(window as any).WPO_AOM_TaskManager.loading}
