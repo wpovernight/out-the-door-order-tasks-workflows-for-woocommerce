@@ -16,11 +16,23 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
 
-      - name: Auto Minify
-        uses: alexmigf/auto-minify@exclude-dirs
-        with:
-          directory: 'includes/Admin/assets'
-          exclude_directories: '**/build'
+      - name: Install Node tools
+        run: |
+          npm install -g terser clean-css-cli
+
+      - name: Minify JS files
+        run: |
+          find includes/Admin/assets -type f -name "*.js" \
+            ! -path "*/build/*" \
+            ! -name "webpack.config.js" \
+            ! -name ".eslintrc.js" \
+            -exec terser {} -o {} --compress --mangle \;
+
+      - name: Minify CSS files
+        run: |
+          find includes/Admin/assets -type f -name "*.css" \
+            ! -path "*/build/*" \
+            -exec cleancss -o {} {} \;
 
       - name: Auto committing minified files
         uses: stefanzweifel/git-auto-commit-action@v4
