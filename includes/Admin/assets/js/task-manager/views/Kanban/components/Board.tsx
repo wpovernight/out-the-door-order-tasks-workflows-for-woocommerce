@@ -30,6 +30,18 @@ export const Board: React.FC = () => {
 			}
 		});
 
+		// Sort tasks within each column by their position
+		for (const column in grouped) {
+			grouped[column].sort((a, b) => a.position - b.position);
+
+			// Set previous_task_id for each task
+			for (let index = 0; index < grouped[column].length; index++) {
+				const current = grouped[column][index];
+				const previous = grouped[column][index - 1];
+				current.previous_task_id = previous ? previous.id : null;
+			}
+		}
+
 		return grouped;
 	}, [tasks, statuses]);
 

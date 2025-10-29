@@ -45,7 +45,7 @@ export async function fetchTasks(): Promise<Task[]> {
 			(field: any) => field.slug === 'status'
 		);
 		const positionField = task.fields.find(
-			(field: any) => field.slug === 'status_position'
+			(field: any) => field.slug === 'position'
 		);
 
 		return {

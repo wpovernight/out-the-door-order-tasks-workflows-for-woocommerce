@@ -122,7 +122,6 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 
 	return (
 		<div ref={outerRef} className="kanban-card-wrapper">
-			{' '}
 			{/* kanban prefix is used to avoid css conflicts */}
 			{/* Drop indicator above */}
 			{state.type === 'over' && state.closestEdge === 'top' && (

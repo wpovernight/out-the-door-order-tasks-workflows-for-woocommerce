@@ -25,6 +25,7 @@ export type Task = {
 	// Derived UI properties for Kanban
 	column: string;
 	position: number;
+	previous_task_id?: number | null;
 };
 
 export type FieldOption = {

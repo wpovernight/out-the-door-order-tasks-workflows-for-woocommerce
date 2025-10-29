@@ -11,6 +11,7 @@ export default function Page() {
 	return (
 		<div className="inner">
 			<Header />
+			{/* Use <Activity> component when WP React version updated to 19.2 */}
 			<div className={`view ${view}-view`}>
 				{view === 'kanban' && <KanbanView />}
 				{view === 'calendar' && <Calendar />}
