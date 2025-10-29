@@ -1,5 +1,5 @@
 const path = require('path');
-
+// Test auto minify action
 module.exports = (env, argv) => {
 	const mode = argv.mode || 'development';
 	const isProduction = mode === 'production';
