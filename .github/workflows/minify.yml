@@ -6,23 +6,21 @@ on:
     paths:
       - 'includes/Admin/assets/**/*.js'
       - 'includes/Admin/assets/**/*.css'
-      - '!includes/Admin/assets/**/build/**'
-      - '!includes/Admin/assets/**/webpack.config.js'
-      - '!includes/Admin/assets/**/.eslintrc.js'
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.head_ref }}
 
       - name: Auto Minify
-        uses: nizarmah/auto-minify@v2.1
+        uses: alexmigf/auto-minify@exclude-dirs
         with:
           directory: 'includes/Admin/assets'
+          exclude_directories: '**/build'
 
       - name: Auto committing minified files
         uses: stefanzweifel/git-auto-commit-action@v4
