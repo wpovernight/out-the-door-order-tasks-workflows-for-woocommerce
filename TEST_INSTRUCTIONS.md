@@ -18,10 +18,11 @@ Run the below code snippet to create sample tasks programmatically.
 create_sample_tasks( 10 ); // Send number of sample tasks to create.
 
 
-function create_sample_tasks( int $count, $reset = true ): void {
+function create_sample_tasks( int $count, bool $reset = true ): void {
 	if ( $reset ) {
 		remove_sample_tasks();
 	}
+
 	$task_repository       = new \WPO\AOM\Repositories\TaskRepository();
 	$task_field_repository = new \WPO\AOM\Repositories\TaskFieldRepository();
 	$value_repository      = new \WPO\AOM\Repositories\TaskFieldValueRepository();
@@ -39,27 +40,36 @@ function create_sample_tasks( int $count, $reset = true ): void {
 	$user_id  = 1;
 	$order_id = 1885;
 
-	for ( $i = 1; $i <= $count; $i ++ ) {
+	$statuses   = array( 'To Do', 'In Progress', 'Completed' );
+	$priorities = array( 'Low', 'Medium', 'High' );
+
+	// Track the position count per status.
+	$status_positions = array_fill_keys( $statuses, 0 );
+
+	for ( $i = 1; $i <= $count; $i++ ) {
 		$title       = sprintf( 'Sample Task %d', $i );
 		$description = sprintf( 'This is sample task number %d.', $i );
 
-		// Example randomized or patterned values.
-		$statuses   = array( 'To Do', 'In Progress', 'Completed' );
-		$priorities = array( 'Low', 'Medium', 'High' );
+		// Randomly select status and priority.
+		$status   = $statuses[ array_rand( $statuses ) ];
+		$priority = $priorities[ array_rand( $priorities ) ];
+
+		// Increment position for the selected status.
+		$status_positions[ $status ]++;
 
 		$values = array(
-			'status'   => $statuses[ array_rand( $statuses ) ],
-			'position' => $i,
+			'status'   => $status,
+			'position' => $status_positions[ $status ],
 			'creator'  => $user_id,
 			'order'    => $order_id,
-			'priority' => $priorities[ array_rand( $priorities ) ],
+			'priority' => $priority,
 			'due_date' => date( 'Y-m-d', strtotime( sprintf( '+%d days', rand( 2, 10 ) ) ) ),
 		);
 
 		create_task( $task_repository, $value_repository, $fields, $title, $description, $values );
 	}
 
-	echo sprintf( "%d sample tasks created.\n", $count );
+	printf( "%d sample tasks created.\n", $count );
 }
 
 function create_task(
