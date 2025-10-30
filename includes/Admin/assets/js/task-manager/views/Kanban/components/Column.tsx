@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import invariant from 'tiny-invariant';
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
 import {
@@ -18,10 +18,10 @@ interface ColumnProps {
 }
 
 type ColumnState =
-	| { type: 'idle' }
-	| { type: 'drag-over-card'; draggingRect: DOMRect }
-	| { type: 'drag-over-empty' }
-	| { type: 'dragging' };
+	| { type: 'idle' } // No drag interaction occurring
+	| { type: 'drag-over-card'; draggingRect: DOMRect } // Indicates a card is being dragged over this column
+	| { type: 'drag-over-empty' } // Indicates a card is being dragged over empty space in this column
+	| { type: 'dragging' }; // Indicates the column itself is being dragged
 
 const IDLE: ColumnState = { type: 'idle' };
 
@@ -33,11 +33,31 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 	const [state, setState] = useState<ColumnState>(IDLE);
 	// const {saveTask} = useTasks();
 
+	const tasksRef = useRef(tasks);
 	useEffect(() => {
-		console.log('[Column state]', state); // ToDo: Remove debug log
-	}, [state]);
+		tasksRef.current = tasks;
+	}, [tasks]);
+
+	const updateState = useCallback(
+		(newState: ColumnState) => {
+			setState((prev) => {
+				if (prev.type === newState.type) {
+					return prev;
+				}
+				return newState;
+			});
+		},
+		[] // no dependencies; safe because setState is stable
+	);
+
+	const resetState = useCallback(() => {
+		updateState(IDLE);
+	}, [updateState]);
 
 	useEffect(() => {
+		// Used to prevent state updates after unmount,
+		let isMounted = true;
+
 		const scrollable = scrollableRef.current;
 		const header = headerRef.current;
 		const container = containerRef.current;
@@ -46,16 +66,12 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 		const columnData = getColumnData({ column: column.label });
 
 		return combine(
-			// Make the column draggable (for future enhancement)
+			// Make the column draggable (for future enhancement) // ToDo: Complete this feature
 			draggable({
 				element: header,
 				getInitialData: () => columnData,
-				onDragStart() {
-					setState({ type: 'dragging' });
-				},
-				onDrop() {
-					setState(IDLE);
-				},
+				onDragStart: resetState,
+				onDrop: resetState,
 			}),
 
 			// Make column a valid drop target for cards.
@@ -64,52 +80,91 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 				canDrop: ({ source }) => isCardData(source.data),
 				getData: () => columnData,
 				onDragEnter({ source }) {
-					if (isCardData(source.data)) {
-						setState({
+					if (!isCardData(source.data)) {
+						return;
+					}
+
+					// Recompute current tasks dynamically
+					const currentTasks = tasksRef.current.filter(
+						(t) => t.status === column.label
+					);
+
+					if (currentTasks.length === 0) {
+						updateState({ type: 'drag-over-empty' });
+					} else {
+						updateState({
 							type: 'drag-over-card',
 							draggingRect: source.data.rect,
 						});
 					}
 				},
 				onDropTargetChange({ source, location }) {
-					if (isCardData(source.data)) {
-						const hasNoTasks = tasks.length === 0;
-						if (hasNoTasks) {
-							setState({ type: 'drag-over-empty' });
-						} else {
-							setState({
-								type: 'drag-over-card',
-								draggingRect: source.data.rect,
-							});
+					if (!isCardData(source.data)) {
+						return;
+					}
+
+					// If no inner card target is under cursor, treat it as empty
+					const hasNoTargets =
+						location.current.dropTargets.length === 1;
+					// `1` means only the column itself is targeted (no inner card)
+					if (hasNoTargets) {
+						const currentTasks = tasksRef.current.filter(
+							(t) => t.status === column.label
+						);
+
+						if (currentTasks.length === 0) {
+							updateState({ type: 'drag-over-empty' });
+							return;
 						}
 					}
+
+					updateState({
+						type: 'drag-over-card',
+						draggingRect: source.data.rect,
+					});
 				},
-				onDragLeave() {
-					setState(IDLE);
-				},
+
+				onDragLeave: resetState,
+
 				async onDrop({ source }) {
 					if (!isCardData(source.data)) {
 						return;
 					}
 					const { task, fromColumn } = source.data;
 					if (fromColumn !== column.label) {
-						// await saveTask(task.id, {column});
+						// await saveTask(task.id, { status: column.label });
 					}
-					setState(IDLE);
+					if (isMounted) {
+						resetState();
+					}
 				},
 			}),
 
-			// Auto-scroll while dragging cards.
-			autoScrollForElements({
-				element: scrollable,
-				canScroll: ({ source }) => isCardData(source.data),
-			})
+			// Cleanup function to set isMounted to false on unmount.
+			() => {
+				isMounted = false;
+			}
 		);
-	}, [column, tasks]);
+	}, [column.label, updateState, resetState]);
 
+	// Auto-scroll while dragging cards.
+	// This is separated from the above useEffect to avoid re-initializing.
+	useEffect(() => {
+		const scrollable = scrollableRef.current;
+		if (!scrollable) {
+			return;
+		}
+
+		return autoScrollForElements({
+			element: scrollable,
+			canScroll: ({ source }) => isCardData(source.data),
+		});
+	}, []);
+
+	// ToDo: Add visual drop indicators for columns
 	return (
 		<div className="kanban-column">
-			<div ref={headerRef} className="kanban-column-header">
+			<div ref={headerRef} className="kanban-column-header" tabIndex={0}>
 				<h2>{column.label}</h2>
 			</div>
 			<div ref={scrollableRef} className="kanban-column-scrollable">
@@ -120,7 +175,7 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 
 					{/* Separator line at the bottom when dragging over empty space */}
 					{state.type === 'drag-over-empty' && (
-						<div className="kanban-drop-indicator" />
+						<span className="kanban-drop-indicator" />
 					)}
 				</div>
 			</div>
