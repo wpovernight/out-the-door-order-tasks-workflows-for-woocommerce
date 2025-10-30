@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
 	draggable,
 	dropTargetForElements,
@@ -17,9 +17,9 @@ import { getCardData, getCardDropTargetData, isCardData } from '../data';
 // Visual state
 // ------------------------------
 type CardState =
-	| { type: 'idle' }
-	| { type: 'dragging' }
-	| { type: 'over'; draggingRect: DOMRect; closestEdge: string };
+	| { type: 'idle' } // Indicates no drag interaction occurring
+	| { type: 'dragging' } // Indicates the card itself is being dragged
+	| { type: 'over'; draggingRect: DOMRect; closestEdge: string }; // Indicates a card is being dragged over this card
 
 const IDLE: CardState = { type: 'idle' };
 
@@ -36,9 +36,26 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 	const innerRef = useRef<HTMLDivElement | null>(null);
 	const [state, setState] = useState<CardState>(IDLE);
 
+	const taskRef = useRef(task);
 	useEffect(() => {
-		console.log('[Card state]', state); // ToDo: Remove debug log
-	}, [state]);
+		taskRef.current = task;
+	}, [task]);
+
+	const updateState = useCallback(
+		(newState: CardState) => {
+			setState((prev) => {
+				if (prev.type === newState.type) {
+					return prev;
+				}
+				return newState;
+			});
+		},
+		[] // no dependencies; safe because setState is stable
+	);
+
+	const resetState = useCallback(() => {
+		updateState(IDLE);
+	}, [updateState]);
 
 	useEffect(() => {
 		const outer = outerRef.current;
@@ -53,16 +70,14 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 				element: inner,
 				getInitialData: ({ element }) =>
 					getCardData({
-						task,
-						fromColumn: task.status,
+						task: taskRef.current,
+						fromColumn: taskRef.current.status,
 						rect: element.getBoundingClientRect(),
 					}),
 				onDragStart() {
 					setState({ type: 'dragging' });
 				},
-				onDrop() {
-					setState(IDLE);
-				},
+				onDrop: resetState,
 			}),
 
 			// ------------------------------
@@ -70,14 +85,14 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 			// ------------------------------
 			dropTargetForElements({
 				element: outer,
-				getIsSticky: () => true,
-				// canDrop({ source }) {
-				//     return isCardData(source.data);
-				// },
+				getIsSticky: ({ source }) => isCardData(source.data),
+				canDrop({ source }) {
+					return isCardData(source.data);
+				},
 				getData: ({ element, input }) => {
 					const data = getCardDropTargetData({
-						task,
-						column: task.status,
+						task: taskRef.current,
+						column: taskRef.current.status,
 					});
 					return attachClosestEdge(data, {
 						element,
@@ -86,10 +101,10 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 					});
 				},
 				onDragEnter({ source, self }) {
-					if (!isCardData(source.data)) {
-						return;
-					}
-					if (source.data.task.id === task.id) {
+					if (
+						!isCardData(source.data) ||
+						source.data.task.id === taskRef.current.id
+					) {
 						return;
 					}
 
@@ -105,20 +120,28 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 					});
 				},
 				onDragLeave({ source }) {
-					if (!isCardData(source.data)) {
+					if (
+						!isCardData(source.data) ||
+						source.data.task.id === taskRef.current.id
+					) {
 						return;
 					}
-					if (source.data.task.id === task.id) {
-						return;
-					}
-					setState(IDLE);
+
+					resetState();
 				},
-				onDrop() {
-					setState(IDLE);
+				onDrop({ source }) {
+					if (
+						!isCardData(source.data) ||
+						source.data.task.id === taskRef.current.id
+					) {
+						return;
+					}
+
+					resetState();
 				},
 			})
 		);
-	}, [task]);
+	}, [resetState, taskRef]);
 
 	return (
 		<div ref={outerRef} className="kanban-card-wrapper">
