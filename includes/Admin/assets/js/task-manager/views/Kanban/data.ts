@@ -2,32 +2,32 @@
 import { Task } from '../../types/task';
 
 // ------------------------------
-// Types
+// Drag Data Types
 // ------------------------------
 
-export type DraggingCardData = {
+export type DraggingCardData = Readonly<{
 	type: 'card';
 	task: Task;
 	fromColumn: string;
 	rect: DOMRect;
-};
+}>;
 
-export type DraggingColumnData = {
+export type DraggingColumnData = Readonly<{
 	type: 'column';
 	column: string;
-};
+}>;
 
-export type CardDropTargetData = {
+export type CardDropTargetData = Readonly<{
 	type: 'card-drop-target';
 	task: Task;
 	column: string;
 	edge?: 'top' | 'bottom';
-};
+}>;
 
-export type ColumnDropTargetData = {
+export type ColumnDropTargetData = Readonly<{
 	type: 'column-drop-target';
 	column: string;
-};
+}>;
 
 // ------------------------------
 // Type Guards
@@ -42,28 +42,58 @@ export function isTask(data: unknown): data is Task {
 	);
 }
 
-export function isCardData(data: any): data is DraggingCardData {
-	return data?.type === 'card' && !!data.task;
+export function isCardData(data: unknown): data is DraggingCardData {
+	return (
+		typeof data === 'object' &&
+		data !== null &&
+		(data as any).type === 'card' &&
+		isTask((data as any).task) &&
+		typeof (data as any).fromColumn === 'string'
+	);
 }
 
-export function isColumnData(data: any): data is DraggingColumnData {
-	return data?.type === 'column' && typeof data.column === 'string';
+export function isColumnData(data: unknown): data is DraggingColumnData {
+	return (
+		typeof data === 'object' &&
+		data !== null &&
+		(data as any).type === 'column' &&
+		typeof (data as any).column === 'string'
+	);
 }
 
-export function isCardDropTargetData(data: any): data is CardDropTargetData {
-	return data?.type === 'card-drop-target' && !!data.task;
+export function isCardDropTargetData(
+	data: unknown
+): data is CardDropTargetData {
+	return (
+		typeof data === 'object' &&
+		data !== null &&
+		(data as any).type === 'card-drop-target' &&
+		isTask((data as any).task) &&
+		typeof (data as any).column === 'string'
+	);
 }
 
 export function isColumnDropTargetData(
-	data: any
+	data: unknown
 ): data is ColumnDropTargetData {
 	return (
-		data?.type === 'column-drop-target' && typeof data.column === 'string'
+		typeof data === 'object' &&
+		data !== null &&
+		(data as any).type === 'column-drop-target' &&
+		typeof (data as any).column === 'string'
 	);
 }
 
 // ------------------------------
-// Card helpers
+// Helper Factory
+// ------------------------------
+
+function freeze<T extends object>(data: T): Readonly<T> {
+	return Object.freeze(data);
+}
+
+// ------------------------------
+// Card Helpers
 // ------------------------------
 
 export function getCardData({
@@ -75,12 +105,12 @@ export function getCardData({
 	fromColumn: string;
 	rect: DOMRect;
 }): DraggingCardData {
-	return {
+	return freeze({
 		type: 'card',
 		task,
 		fromColumn,
 		rect,
-	};
+	});
 }
 
 export function getCardDropTargetData({
@@ -90,15 +120,15 @@ export function getCardDropTargetData({
 	task: Task;
 	column: string;
 }): CardDropTargetData {
-	return {
+	return freeze({
 		type: 'card-drop-target',
 		task,
 		column,
-	};
+	});
 }
 
 // ------------------------------
-// Column helpers
+// Column Helpers
 // ------------------------------
 
 export function getColumnData({
@@ -106,10 +136,10 @@ export function getColumnData({
 }: {
 	column: string;
 }): DraggingColumnData {
-	return {
+	return freeze({
 		type: 'column',
 		column,
-	};
+	});
 }
 
 export function getColumnDropTargetData({
@@ -117,8 +147,8 @@ export function getColumnDropTargetData({
 }: {
 	column: string;
 }): ColumnDropTargetData {
-	return {
+	return freeze({
 		type: 'column-drop-target',
 		column,
-	};
+	});
 }
