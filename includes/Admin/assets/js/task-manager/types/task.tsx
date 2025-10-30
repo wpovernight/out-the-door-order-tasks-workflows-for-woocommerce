@@ -34,3 +34,5 @@ export type FieldOption = {
 	label: string;
 	color: string;
 };
+
+export type TaskArray = Task[];
