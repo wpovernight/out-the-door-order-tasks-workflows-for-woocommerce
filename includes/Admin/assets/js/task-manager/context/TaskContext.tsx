@@ -10,7 +10,7 @@ interface TaskContextType {
 	loadTasks: (force?: boolean) => Promise<void>;
 	loadStatuses: (force?: boolean) => Promise<void>;
 	saveTask: (taskId: number, updates: Partial<Task>) => Promise<void>;
-	isInitialized: boolean;
+	isDataLoaded: boolean;
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
@@ -59,7 +59,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 		// implement your update logic
 	};
 
-	const isInitialized = tasksLoaded && statusesLoaded;
+	const isDataLoaded = tasksLoaded && statusesLoaded;
 
 	return (
 		<TaskContext.Provider
@@ -71,7 +71,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				loadTasks,
 				loadStatuses,
 				saveTask,
-				isInitialized,
+				isDataLoaded,
 			}}
 		>
 			{children}
