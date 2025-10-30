@@ -23,7 +23,7 @@ export type Task = {
 	fields: TaskField[];
 
 	// Derived UI properties for Kanban
-	column: string;
+	status: string;
 	position: number;
 	previous_task_id?: number | null;
 };

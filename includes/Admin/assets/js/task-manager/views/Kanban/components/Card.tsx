@@ -54,7 +54,7 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 				getInitialData: ({ element }) =>
 					getCardData({
 						task,
-						fromColumn: task.column,
+						fromColumn: task.status,
 						rect: element.getBoundingClientRect(),
 					}),
 				onDragStart() {
@@ -77,7 +77,7 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 				getData: ({ element, input }) => {
 					const data = getCardDropTargetData({
 						task,
-						column: task.column,
+						column: task.status,
 					});
 					return attachClosestEdge(data, {
 						element,

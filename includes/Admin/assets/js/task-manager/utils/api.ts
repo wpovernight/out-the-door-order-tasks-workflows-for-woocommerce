@@ -50,7 +50,7 @@ export async function fetchTasks(): Promise<Task[]> {
 
 		return {
 			...task,
-			column: statusField?.values?.[0]?.raw ?? undefined,
+			status: statusField?.values?.[0]?.raw ?? undefined,
 			position: positionField?.values?.[0]?.raw ?? undefined,
 		};
 	});

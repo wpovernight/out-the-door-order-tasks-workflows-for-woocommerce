@@ -29,7 +29,7 @@ export const Board: React.FC = () => {
 
 		// Distribute tasks into their respective columns
 		tasks.forEach((task) => {
-			const columnName = task.column;
+			const columnName = task.status;
 			if (grouped[columnName]) {
 				grouped[columnName].push(task);
 			}
