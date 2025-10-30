@@ -1,12 +1,16 @@
+type FieldPrimitive = string | number | boolean | null;
+
 export type FieldValue = {
-	raw: unknown;
-	resolved: unknown;
+	raw: FieldPrimitive | FieldPrimitive[];
+	resolved: FieldPrimitive | FieldPrimitive[];
 };
+
+type FieldType = 'text' | 'number' | 'select' | 'date' | string; // fallback for custom extensions
 
 export type TaskField = {
 	id: number;
 	label: string;
-	type: string;
+	type: FieldType;
 	slug: string;
 	is_required: boolean;
 	is_editable: boolean;
@@ -32,7 +36,7 @@ export type FieldOption = {
 	id: number;
 	field_id: number;
 	label: string;
-	color: string;
+	color: `#${string}` | `rgb(${number},${number},${number})` | string;
 };
 
 export type TaskArray = Task[];
