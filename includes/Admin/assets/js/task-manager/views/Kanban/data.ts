@@ -33,8 +33,13 @@ export type ColumnDropTargetData = {
 // Type Guards
 // ------------------------------
 
-export function isTask(data: any): data is Task {
-	return Boolean(data && (data as Task).id);
+export function isTask(data: unknown): data is Task {
+	return (
+		typeof data === 'object' &&
+		data !== null &&
+		'id' in data &&
+		typeof (data as { id: unknown }).id === 'number'
+	);
 }
 
 export function isCardData(data: any): data is DraggingCardData {
