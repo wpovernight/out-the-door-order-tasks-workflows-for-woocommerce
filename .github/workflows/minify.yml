@@ -23,6 +23,7 @@ jobs:
       - name: Minify JS files
         run: |
           find includes/Admin/assets -type f -name "*.js" \
+            ! -name "*.min.js" \
             ! -path "*/build/*" \
             ! -name "webpack.config.js" \
             ! -name ".eslintrc.js" \
@@ -31,6 +32,7 @@ jobs:
       - name: Minify CSS files
         run: |
           find includes/Admin/assets -type f -name "*.css" \
+            ! -name "*.min.css" \
             ! -path "*/build/*" \
             -exec bash -c 'cleancss -o "${0%.css}.min.css" "$0"' {} \;
 
