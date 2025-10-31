@@ -160,10 +160,15 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     line-height: 1.4
 }
 
-.kanban-board .kanban-card.dragging {
-    opacity: .5;
+.kanban-board .kanban-card.dragging,
+.kanban-board .kanban-card.selected {
     border-color: var(--primary-color);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, .25)
+}
+
+.kanban-board .kanban-card.dragging {
+    cursor: grabbing;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, .25);
+    opacity: .5;
 }
 
 .kanban-board .kanban-drop-indicator {

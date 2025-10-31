@@ -13,7 +13,8 @@ import { useViewTasks } from '../context/ViewTaskContext';
 
 export const Board: React.FC = () => {
 	const { statuses } = useTasks();
-	const { viewTasks, setViewTasks } = useViewTasks();
+	const { viewTasks, setViewTasks, clearSelectedTask } =
+		useViewTasks();
 	const scrollableRef = useRef<HTMLDivElement | null>(null);
 
 	// Setup DND behavior
@@ -119,8 +120,17 @@ export const Board: React.FC = () => {
 		);
 	}, [setViewTasks]);
 
+	// Clear highlight when clicking anywhere on the board background
+	const handleClick = () => {
+		clearSelectedTask();
+	};
+
 	return (
-		<div ref={scrollableRef} className="kanban-board">
+		<div
+			ref={scrollableRef}
+			className="kanban-board"
+			onClick={handleClick}
+		>
 			{statuses.map((col) => (
 				<Column
 					key={col.id}

@@ -12,6 +12,7 @@ import invariant from 'tiny-invariant';
 
 import { Task } from '../../../types/task';
 import { getCardData, getCardDropTargetData, isCardData } from '../data';
+import { useViewTasks } from '../context/ViewTaskContext';
 
 // ------------------------------
 // Visual state
@@ -19,7 +20,8 @@ import { getCardData, getCardDropTargetData, isCardData } from '../data';
 type CardState =
 	| { type: 'idle' } // Indicates no drag interaction occurring
 	| { type: 'dragging' } // Indicates the card itself is being dragged
-	| { type: 'over'; draggingRect: DOMRect; closestEdge: string }; // Indicates a card is being dragged over this card
+	| { type: 'over'; draggingRect: DOMRect; closestEdge: string } // Indicates a card is being dragged over this card
+	| { type: 'dropped' }; // Indicates a card has just been dropped on this card
 
 const IDLE: CardState = { type: 'idle' };
 
@@ -35,6 +37,7 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 	const outerRef = useRef<HTMLDivElement | null>(null);
 	const innerRef = useRef<HTMLDivElement | null>(null);
 	const [state, setState] = useState<CardState>(IDLE);
+	const { selectedTask, selectTask } = useViewTasks();
 
 	const taskRef = useRef(task);
 	useEffect(() => {
@@ -77,7 +80,10 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 				onDragStart() {
 					updateState({ type: 'dragging' });
 				},
-				onDrop: resetState,
+				onDrop() {
+					updateState({ type: 'dropped' });
+					selectTask(taskRef.current);
+				},
 			}),
 
 			// ------------------------------
@@ -141,7 +147,17 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 				},
 			})
 		);
-	}, [updateState, resetState, taskRef]);
+	}, [updateState, resetState, taskRef, selectTask]);
+
+    // ToDo: Fix
+    const [isSelected, setIsSelected] = useState(false);
+    useEffect(() => {
+        setIsSelected(selectedTask?.id === task.id);
+    }, [selectedTask, task.id]);
+
+    const handleClick = () => {
+        selectTask(task);
+    };
 
 	return (
 		<div ref={outerRef} className="kanban-card-wrapper">
@@ -152,7 +168,8 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 			)}
 			<div
 				ref={innerRef}
-				className={`kanban-card ${state.type !== 'idle' ? state.type : ''}`}
+				className={`kanban-card ${state.type !== 'idle' ? state.type : ''} ${isSelected ? 'selected' : ''} ${selectedTask?.id}`}
+                onClick={handleClick}
 			>
 				<h3>{task.title}</h3>
 				<p>{task.description}</p>

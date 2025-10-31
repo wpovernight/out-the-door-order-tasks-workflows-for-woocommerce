@@ -6,6 +6,9 @@ import { groupAndSortTasks } from '../../../utils/task-sort';
 interface ViewTaskContextType {
 	viewTasks: Record<string, Task[]>;
 	setViewTasks: React.Dispatch<React.SetStateAction<Record<string, Task[]>>>;
+	selectedTask: Task | null;
+	selectTask: (task: Task) => void;
+	clearSelectedTask: () => void;
 }
 
 const ViewTaskContext = React.createContext<ViewTaskContextType | undefined>(
@@ -17,6 +20,15 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
 	const { tasks, statuses, isDataLoaded } = useTasks();
 	const [viewTasks, setViewTasks] = useState<Record<string, Task[]>>({});
+	const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+
+	const selectTask = (task: Task) => {
+		setSelectedTask(task);
+	};
+
+	const clearSelectedTask = () => {
+		setSelectedTask(null);
+	};
 
 	useEffect(() => {
 		if (
@@ -37,6 +49,9 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 			value={{
 				viewTasks,
 				setViewTasks,
+				selectedTask,
+				selectTask,
+				clearSelectedTask,
 			}}
 		>
 			{children}
