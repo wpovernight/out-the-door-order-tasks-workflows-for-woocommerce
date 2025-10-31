@@ -5,7 +5,10 @@ export function groupAndSortTasks(
 	tasks: Task[],
 	statuses: FieldOption[]
 ): Record<string, Task[]> {
-	console.log('Grouping tasks by status...'); // ToDo: Remove debug log
+	if (tasks.length === 0) {
+		return {};
+	}
+
 	const grouped: Record<string, typeof tasks> = {};
 
 	statuses.forEach((col) => {
