@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
+
 import invariant from 'tiny-invariant';
 import { monitorForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
@@ -6,25 +7,16 @@ import { autoScrollForElements } from '@atlaskit/pragmatic-drag-and-drop-auto-sc
 import { extractClosestEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
 
 import { useTasks } from '../../../context/TaskContext';
-import {
-	isCardData,
-	isColumnData,
-	isCardDropTargetData,
-} from '../data';
+import { isCardData, isColumnData, isCardDropTargetData } from '../data';
 import { Column } from './Column';
-import { groupAndSortTasks } from '../../../utils/task-sort';
+import { useViewTasks } from '../context/ViewTaskContext';
 
 export const Board: React.FC = () => {
-	const { tasks, statuses, setTasks } = useTasks();
+	const { statuses } = useTasks();
+	const { viewTasks, setViewTasks } = useViewTasks();
 	const scrollableRef = useRef<HTMLDivElement | null>(null);
 
-	// Group tasks by status(column) name
-	const taskGroups = useMemo(
-		() => groupAndSortTasks(tasks, statuses),
-		[tasks, statuses]
-	);
-
-	// Enable horizontal auto-scroll while dragging.
+	// Setup DND behavior
 	useEffect(() => {
 		const scrollable = scrollableRef.current;
 		invariant(scrollable);
@@ -40,66 +32,53 @@ export const Board: React.FC = () => {
 
 					const destination = location.current.dropTargets[0];
 					if (!destination) {
-						// if dropped outside any drop targets
 						return;
 					}
 
 					const dropTargetData = destination.data;
-
 					const fromColumn = dragging.fromColumn;
 					const task = dragging.task;
 
-					// Drop on another card
+					// Drop onto another card
 					if (isCardDropTargetData(dropTargetData)) {
 						const toColumn = dropTargetData.column;
 						const edge = extractClosestEdge(dropTargetData);
 						const targetTask = dropTargetData.task;
 
-						// Dropping onto itself - no-op
 						if (task.id === targetTask.id) {
 							return;
 						}
 
-						// Reorder locally
-						setTasks((prev) => {
-							const newTasks = [...prev];
+						setViewTasks((prev) => {
+							const updated = structuredClone(prev);
+							const fromList = updated[fromColumn] || [];
+							const toList = updated[toColumn] || [];
 
-							// Remove task from source column
-							const fromIndex = newTasks.findIndex(
+							// Remove from source
+							const fromIndex = fromList.findIndex(
 								(t) => t.id === task.id
 							);
-							if (fromIndex === -1) {
-								return prev;
+							if (fromIndex !== -1) {
+								fromList.splice(fromIndex, 1);
 							}
-							newTasks.splice(fromIndex, 1);
 
-							// Find insertion point in target column
-							const targetTaskIndex = newTasks.findIndex(
+							// Find target index and insert
+							const targetIndex = toList.findIndex(
 								(t) => t.id === targetTask.id
 							);
-							if (targetTaskIndex === -1) {
-								return prev;
-							}
-
 							const insertAt =
 								edge === 'bottom'
-									? targetTaskIndex + 1
-									: targetTaskIndex;
-
-							// Insert task at new position with updated column
-							newTasks.splice(insertAt, 0, {
+									? targetIndex + 1
+									: targetIndex;
+							toList.splice(insertAt, 0, {
 								...task,
 								status: toColumn,
 							});
 
-							return newTasks;
+							updated[fromColumn] = fromList;
+							updated[toColumn] = toList;
+							return updated;
 						});
-
-						if (fromColumn !== dropTargetData.column) {
-							// ToDo: Complete this
-							// await saveTask(task.id, {column: dropTargetData.column});
-						}
-
 						return;
 					}
 
@@ -109,30 +88,27 @@ export const Board: React.FC = () => {
 						if (fromColumn === toColumn) {
 							return;
 						}
-						console.log(
-							`Moving task ${task.id} from ${fromColumn} to ${toColumn}`
-						); // ToDo: Remove debug log
 
-						const lastInColumn = taskGroups[toColumn]?.slice(-1)[0];
+						setViewTasks((prev) => {
+							const updated = structuredClone(prev);
+							const fromList = updated[fromColumn] || [];
+							const toList = updated[toColumn] || [];
 
-						setTasks((prev) => {
-							return prev.map((t) =>
-								t.id === task.id
-									? {
-											...t,
-											status: toColumn,
-											previous_task_id: lastInColumn
-												? lastInColumn?.id
-												: null,
-										}
-									: t
+							// Remove from source column
+							const fromIndex = fromList.findIndex(
+								(t) => t.id === task.id
 							);
+							if (fromIndex !== -1) {
+								fromList.splice(fromIndex, 1);
+							}
+
+							// Append to end of target column
+							toList.push({ ...task, status: toColumn });
+
+							updated[fromColumn] = fromList;
+							updated[toColumn] = toList;
+							return updated;
 						});
-
-						// ToDo: update the previous_task_id of the next task in the original column
-
-						// console.log(tasks); // ToDo: Remove debug log
-						// await saveTask(task.id, {column: toColumn}); // ToDo: Complete this
 					}
 				},
 			}),
@@ -141,7 +117,7 @@ export const Board: React.FC = () => {
 				canScroll: ({ source }) => isCardData(source.data),
 			})
 		);
-	}, [setTasks, taskGroups]);
+	}, [setViewTasks]);
 
 	return (
 		<div ref={scrollableRef} className="kanban-board">
@@ -149,7 +125,7 @@ export const Board: React.FC = () => {
 				<Column
 					key={col.id}
 					column={col}
-					tasks={taskGroups[col.label] || []}
+					tasks={viewTasks[col.label] || []}
 				/>
 			))}
 		</div>

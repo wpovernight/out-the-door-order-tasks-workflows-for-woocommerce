@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useTasks } from '../../context/TaskContext';
 import { Board } from './components/Board';
+import { ViewTaskProvider } from './context/ViewTaskContext';
 
 export const KanbanView: React.FC = () => {
+	useEffect(() => {
+		console.log('KanbanView mounted'); // Debug log
+	}, []);
+
 	const { isDataLoaded, loadTasks, loadStatuses } = useTasks();
 
 	type Status = 'idle' | 'loading' | 'error';
@@ -67,5 +72,9 @@ export const KanbanView: React.FC = () => {
 		);
 	}
 
-	return <Board />;
+	return (
+		<ViewTaskProvider>
+			<Board />
+		</ViewTaskProvider>
+	);
 };

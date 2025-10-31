@@ -75,7 +75,7 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 						rect: element.getBoundingClientRect(),
 					}),
 				onDragStart() {
-					setState({ type: 'dragging' });
+					updateState({ type: 'dragging' });
 				},
 				onDrop: resetState,
 			}),
@@ -141,7 +141,7 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 				},
 			})
 		);
-	}, [resetState, taskRef]);
+	}, [updateState, resetState, taskRef]);
 
 	return (
 		<div ref={outerRef} className="kanban-card-wrapper">
