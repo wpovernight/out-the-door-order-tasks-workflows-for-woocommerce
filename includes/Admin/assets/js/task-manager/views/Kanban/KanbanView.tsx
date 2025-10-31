@@ -44,7 +44,6 @@ export const KanbanView: React.FC = () => {
 			}
 		};
 
-		console.log('Initializing Kanban View...'); // ToDo: Remove debug log
 		initialize();
 
 		return () => {
