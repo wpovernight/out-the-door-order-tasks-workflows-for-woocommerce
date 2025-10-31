@@ -15,8 +15,7 @@ const ViewTaskContext = React.createContext<ViewTaskContextType | undefined>(
 export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 	children,
 }) => {
-	const { tasks, statuses, isDataLoaded, loadTasks, loadStatuses, setTasks } =
-		useTasks();
+	const { tasks, statuses, isDataLoaded } = useTasks();
 	const [viewTasks, setViewTasks] = useState<Record<string, Task[]>>({});
 
 	useEffect(() => {

@@ -1,4 +1,4 @@
-import { FieldOption, Task, TaskArray } from '../types/task';
+import { FieldOption, Task } from '../types/task';
 
 export function groupAndSortTasks(
 	tasks: Task[],

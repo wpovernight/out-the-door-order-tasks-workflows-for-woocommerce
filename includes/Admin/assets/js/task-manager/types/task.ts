@@ -38,5 +38,3 @@ export type FieldOption = {
 	label: string;
 	color: `#${string}` | `rgb(${number},${number},${number})` | string;
 };
-
-export type TaskArray = Task[];
