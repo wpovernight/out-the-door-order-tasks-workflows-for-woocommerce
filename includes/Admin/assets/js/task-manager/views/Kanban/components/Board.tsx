@@ -10,7 +10,6 @@ import {
 	isCardData,
 	isColumnData,
 	isCardDropTargetData,
-	isTask,
 } from '../data';
 import { Column } from './Column';
 import { groupAndSortTasks } from '../../../utils/task-sort';
@@ -142,7 +141,7 @@ export const Board: React.FC = () => {
 				canScroll: ({ source }) => isCardData(source.data),
 			})
 		);
-	}, [setTasks]);
+	}, [setTasks, taskGroups]);
 
 	return (
 		<div ref={scrollableRef} className="kanban-board">
