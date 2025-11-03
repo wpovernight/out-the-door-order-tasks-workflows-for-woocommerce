@@ -157,6 +157,7 @@ final class Install {
 		CREATE TABLE `{$wpdb->prefix}wpo_aom_task_field_options` (
 			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			field_id BIGINT(20) UNSIGNED NOT NULL,
+			slug VARCHAR(255) NOT NULL,
 			label VARCHAR(255) NOT NULL,
 			color VARCHAR(7) DEFAULT NULL,
 			position INT NOT NULL DEFAULT 0,
@@ -193,16 +194,19 @@ final class Install {
 				'options' => array(
 					array(
 						'label'    => 'To Do',
+						'slug'     => 'to_do',
 						'color'    => '#6c757d',
 						'position' => 1,
 					),
 					array(
 						'label'    => 'In Progress',
+						'slug'     => 'in_progress',
 						'color'    => '#17a2b8',
 						'position' => 2,
 					),
 					array(
 						'label'    => 'Completed',
+						'slug'     => 'completed',
 						'color'    => '#28a745',
 						'position' => 3,
 					),
@@ -252,18 +256,22 @@ final class Install {
 				'options'      => array(
 					array(
 						'label' => 'Low',
+						'slug'  => 'low',
 						'color' => '#34c38f',
 					),
 					array(
 						'label' => 'Medium',
+						'slug'  => 'medium',
 						'color' => '#f1b44c',
 					),
 					array(
 						'label' => 'High',
+						'slug'  => 'high',
 						'color' => '#f46a6a',
 					),
 					array(
 						'label' => 'Critical',
+						'slug'  => 'critical',
 						'color' => '#f46a6a',
 					)
 				),
