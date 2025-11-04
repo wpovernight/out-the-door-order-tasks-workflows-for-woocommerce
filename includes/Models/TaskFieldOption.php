@@ -7,6 +7,7 @@ defined( 'ABSPATH' ) || exit;
 class TaskFieldOption extends BaseModel {
 	public int $id;
 	public int $field_id;
+	public string $slug;
 	public string $label;
 	public string $color;
 
@@ -19,7 +20,8 @@ class TaskFieldOption extends BaseModel {
 	public function __construct( array $data = array() ) {
 		$this->id       = absint( $data['id'] ?? 0 );
 		$this->field_id = absint( $data['field_id'] );
-		$this->label    = $data['label'] ?? '';
+		$this->slug     = $data['slug'];
+		$this->label    = $data['label'];
 		$this->color    = $data['color'] ?? '#000000';
 	}
 
