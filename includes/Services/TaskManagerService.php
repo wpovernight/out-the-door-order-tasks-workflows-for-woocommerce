@@ -422,6 +422,88 @@ final class TaskManagerService {
 		return $this->set_field_value( $task_id, $field->id, $user_id );
 	}
 
+	/**
+	 * Move a task to a different position.
+	 *
+	 * @param int $task_id
+	 * @param int $target_status_id
+	 * @param int|null $previous_task_id
+	 *
+	 * @return bool
+	 */
+	public function move_task( int $task_id, int $target_status_id, ?int $previous_task_id = null ) {
+		$status_field   = $this->task_field_repository->find_by_slug( 'status' );
+		$position_field = $this->task_field_repository->find_by_slug( 'position' );
+
+		if ( ! $status_field || ! $position_field ) {
+			return false;
+		}
+
+		// Check if the new status ID is valid.
+		$target_status_option = $this->task_field_option_repository->find( $target_status_id );
+		if ( ! $target_status_option || $target_status_option->field_id !== $status_field->id ) {
+			return false;
+		}
+
+		// Update status.
+//		$status_updated = $this->set_field_value( $task_id, $status_field->id, $target_status_id );
+//		if ( ! $status_updated ) {
+//			return false;
+//		}
+
+		// Determine new position.
+		if ( empty( $previous_task_id ) ) {
+			// If no previous task is specified, place at the start.
+			$previous_position = 0.0;
+		} else {
+			$previous_task = $this->task_repository->find( $previous_task_id );
+			if ( ! $previous_task ) {
+				return false;
+			}
+			$previous_status_value = $this->task_field_value_repository->find_by_task_and_field( $previous_task->id, $status_field->id );
+			if ( ! $previous_status_value || (int) $previous_status_value->value !== $target_status_id ) {
+				return false;
+			}
+			$previous_position_value = $this->task_field_value_repository->find_by_task_and_field( $previous_task->id, $position_field->id );
+			$previous_position       = $previous_position_value ? (float) $previous_position_value->value : 0.0;
+		}
+
+		$next_position_value     = $this->task_repository->get_next_task_position( $previous_task->id ?? null, $target_status_id );
+		$new_position           = $next_position_value ? $this->calculate_fractional_position( $previous_position, $next_position_value ) : $previous_position + 1.0;
+
+		return $new_position;
+
+//		return $this->set_field_value( $task_id, $position_field->id, $new_position );
+	}
+
+	/**
+	 * Calculate a new fractional position between two positions.
+	 *
+	 * @param float $previous_position
+	 * @param float $next_position
+	 *
+	 * @return float
+	 */
+	private function calculate_fractional_position( float $previous_position, float $next_position ): float {
+		$position = ( $previous_position + $next_position ) / 2;
+
+		$precision = 0.0001;
+		// Check for precision issues.
+		if ( abs( $next_position - $previous_position ) < $precision ) {
+			// ToDo: Run rebalancing if positions are too close.
+		}
+
+		return $position;
+	}
+
+	public function set_due_date( int $task_id, string $date ): bool {
+		// ToDo: Complete this method
+	}
+
+	public function mark_task_complete( int $task_id ): bool {
+		// ToDo: Complete this method
+	}
+
 	/** ================================
 	 *   Helper Methods
 	 *  ================================ */
@@ -462,7 +544,6 @@ final class TaskManagerService {
 
 				// Handle special cases based on slug.
 				switch ( $field->slug ) {
-					case 'assignee':
 					case 'creator':
 						$user = get_userdata( (int) $raw );
 						if ( $user ) {
