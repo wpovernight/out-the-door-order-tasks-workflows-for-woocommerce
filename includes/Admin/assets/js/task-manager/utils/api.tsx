@@ -50,7 +50,7 @@ export async function fetchTasks(): Promise<Task[]> {
 
 		return {
 			...task,
-			status: statusField?.values?.[0]?.raw ?? undefined,
+			status: statusField?.values?.[0]?.resolved?.['slug'] ?? undefined,
 			position: positionField?.values?.[0]?.raw ?? undefined,
 		};
 	});

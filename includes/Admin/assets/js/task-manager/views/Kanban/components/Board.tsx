@@ -135,7 +135,7 @@ export const Board: React.FC = () => {
 				<Column
 					key={col.id}
 					column={col}
-					tasks={viewTasks[col.label] || []}
+					tasks={viewTasks[col.slug] || []}
 				/>
 			))}
 		</div>

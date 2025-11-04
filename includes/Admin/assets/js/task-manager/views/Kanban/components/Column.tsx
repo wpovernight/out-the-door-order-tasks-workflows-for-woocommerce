@@ -63,7 +63,7 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 		const container = containerRef.current;
 		invariant(scrollable && header && container);
 
-		const columnData = getColumnData({ column: column.label });
+		const columnData = getColumnData({ column: column.slug });
 
 		return combine(
 			// Make the column draggable (for future enhancement) // ToDo: Complete this feature
@@ -86,7 +86,7 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 
 					// Recompute current tasks dynamically
 					const currentTasks = tasksRef.current.filter(
-						(t) => t.status === column.label
+						(t) => t.status === column.slug
 					);
 
 					if (currentTasks.length === 0) {
@@ -109,7 +109,7 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 					// `1` means only the column itself is targeted (no inner card)
 					if (hasNoTargets) {
 						const currentTasks = tasksRef.current.filter(
-							(t) => t.status === column.label
+							(t) => t.status === column.slug
 						);
 
 						if (currentTasks.length === 0) {
@@ -131,8 +131,8 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 						return;
 					}
 					const { task, fromColumn } = source.data;
-					if (fromColumn !== column.label) {
-						// await saveTask(task.id, { status: column.label });
+					if (fromColumn !== column.slug) {
+						// await saveTask(task.id, { status: column.slug });
 					}
 					if (isMounted) {
 						resetState();
@@ -145,7 +145,7 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 				isMounted = false;
 			}
 		);
-	}, [column.label, updateState, resetState]);
+	}, [column.slug, updateState, resetState]);
 
 	// Auto-scroll while dragging cards.
 	// This is separated from the above useEffect to avoid re-initializing.

@@ -11,7 +11,7 @@ export function groupAndSortTasks(
 	const grouped: Record<string, typeof tasks> = {};
 
 	statuses.forEach((col) => {
-		grouped[col.label] = [];
+		grouped[col.slug] = [];
 	});
 
 	// Distribute tasks into their respective columns
