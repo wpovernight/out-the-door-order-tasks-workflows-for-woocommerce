@@ -115,6 +115,18 @@ abstract class BaseRepository {
 	}
 
 	/**
+	 * Find a TaskField by its label.
+	 *
+	 * @template TModel of BaseModel
+	 * @param string $label
+	 *
+	 * @return TModel|null
+	 */
+	public function find_by_slug( string $label ): ?BaseModel {
+		return $this->where( 'slug', $label )->first();
+	}
+
+	/**
 	 * Find all records matching a specific column and value.
 	 *
 	 * @template TModel of BaseModel
