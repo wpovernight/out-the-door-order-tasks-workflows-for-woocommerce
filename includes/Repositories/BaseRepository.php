@@ -52,14 +52,13 @@ abstract class BaseRepository {
 	 *  ================================ */
 
 	/**
-	 * Get records.
+	 * Get the compiled query.
 	 *
-	 * @template TModel of BaseModel
-	 * @param bool $reset Whether to reset the query after execution. Default true.
+	 * @param bool $reset
 	 *
-	 * @return array<int, TModel>
+	 * @return string
 	 */
-	public function get( bool $reset = true ): array {
+	public function get_query( bool $reset = false ): string {
 		$columns = implode( ', ', $this->columns );
 		$query   = "SELECT {$columns} FROM {$this->get_table_full_name()}";
 		$query   = $this->append_query_clauses( $query );
@@ -67,6 +66,24 @@ abstract class BaseRepository {
 		if ( ! empty( $this->bindings ) ) {
 			$query = $this->wpdb->prepare( $query, ...array_values( $this->bindings ) );
 		}
+
+		if ( $reset ) {
+			$this->reset_query();
+		}
+
+		return $query;
+	}
+
+	/**
+	 * Get records as models.
+	 *
+	 * @template TModel of BaseModel
+	 * @param bool $reset Whether to reset the query after execution. Default true.
+	 *
+	 * @return array<int, TModel>
+	 */
+	public function get( bool $reset = true ): array {
+		$query = $this->get_query( false );
 
 		$result = $this->wpdb->get_results( $query, ARRAY_A ) ?? array();
 
