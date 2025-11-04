@@ -443,6 +443,20 @@ final class TaskManagerService {
 		$resolved = null;
 
 		switch ( $field->type ) {
+			case TaskFieldTypes::SELECT:
+				$raw = (float) $raw;
+
+				switch ( $field->slug ) {
+					case 'status':
+					case 'priority':
+						$field_option = $this->task_field_option_repository->find( (int) $raw );
+						if ( $field_option ) {
+							$resolved = $field_option->to_array();
+						}
+						break;
+				}
+				break;
+
 			case TaskFieldTypes::NUMBER:
 				$raw = is_numeric( $raw ) ? (float) $raw : null;
 
