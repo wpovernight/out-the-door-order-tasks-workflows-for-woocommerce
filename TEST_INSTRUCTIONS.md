@@ -18,14 +18,15 @@ Run the below code snippet to create sample tasks programmatically.
 create_sample_tasks( 10 ); // Send number of sample tasks to create.
 
 
-function create_sample_tasks( int $count, bool $reset = true ): void {
+function create_sample_tasks( int $count 15, bool $reset = true ): void {
 	if ( $reset ) {
 		remove_sample_tasks();
 	}
 
-	$task_repository       = new \WPO\AOM\Repositories\TaskRepository();
-	$task_field_repository = new \WPO\AOM\Repositories\TaskFieldRepository();
-	$value_repository      = new \WPO\AOM\Repositories\TaskFieldValueRepository();
+	$task_repository              = new \WPO\AOM\Repositories\TaskRepository();
+	$task_field_repository        = new \WPO\AOM\Repositories\TaskFieldRepository();
+	$task_field_option_repository = new \WPO\AOM\Repositories\TaskFieldOptionRepository();
+	$value_repository             = new \WPO\AOM\Repositories\TaskFieldValueRepository();
 
 	// Default field IDs.
 	$fields = array(
@@ -38,10 +39,19 @@ function create_sample_tasks( int $count, bool $reset = true ): void {
 	);
 
 	$user_id  = 1;
-	$order_id = 1885;
+	$order_id = 1885; // Update as you want
 
-	$statuses   = array( 'To Do', 'In Progress', 'Completed' );
-	$priorities = array( 'Low', 'Medium', 'High' );
+	$statuses = array(
+		$task_field_option_repository->find_by_slug( 'to_do' )->id,
+		$task_field_option_repository->find_by_slug( 'in_progress' )->id,
+		$task_field_option_repository->find_by_slug( 'completed' )->id,
+	);
+	$priorities = array(
+		$task_field_option_repository->find_by_slug( 'low' )->id,
+		$task_field_option_repository->find_by_slug( 'medium' )->id,
+		$task_field_option_repository->find_by_slug( 'high' )->id,
+		$task_field_option_repository->find_by_slug( 'critical' )->id,
+	);
 
 	// Track the position count per status.
 	$status_positions = array_fill_keys( $statuses, 0 );
