@@ -12,14 +12,21 @@ abstract class BaseRepository {
 	protected \wpdb $wpdb;
 	private string $plugin_table_prefix = 'wpo_aom_';
 	private string $table_name;
+	private ?string $alias = null;
 
 	/** @var class-string<BaseModel> */
 	private string $model_class;
 
+	private array $joins = array();
+
 	/**
-	 * Each where item is: array{0:string column, 1:string operator, 2:mixed value, 3:string logic AND|OR}
+	 * Each where item is an array of:
+	 * [0] => string column
+	 * [1] => string operator
+	 * [2] => mixed value
+	 * [3] => string logical operator (AND|OR)
 	 *
-	 * @var array<int, array{0:string,1:string,2:mixed,3:string}>
+	 * @var array<int, string|array{0:string,1:string,2:mixed,3:string}>
 	 */
 	private array $wheres = array();
 
@@ -60,7 +67,7 @@ abstract class BaseRepository {
 	 */
 	public function get_query( bool $reset = false ): string {
 		$columns = implode( ', ', $this->columns );
-		$query   = "SELECT {$columns} FROM {$this->get_table_full_name()}";
+		$query   = "SELECT {$columns} FROM {$this->get_table_full_name( true )}";
 		$query   = $this->append_query_clauses( $query );
 
 		if ( ! empty( $this->bindings ) ) {
@@ -225,9 +232,12 @@ abstract class BaseRepository {
 
 		// Prepare WHERE array
 		// This method compiles the WHERE clauses using the `where` method of the query builder.
-		// It assumes that the WHERE clauses only contain equality checks (i.e., `=` operator).
+		// It only works with equality checks (i.e., `=` operator), as we are using WordPress's built-in update method.
 		$where = array();
 		foreach ( $this->wheres as [$column, $operator, $value, $logical_operator] ) {
+			if ( '=' !== $operator ) {
+				throw new InvalidArgumentException( 'Only equality checks are supported in WHERE clause for update.' );
+			}
 			$where[ $column ] = $value;
 		}
 
@@ -270,9 +280,12 @@ abstract class BaseRepository {
 
 		// Prepare WHERE array
 		// This method compiles the WHERE clauses using the `where` method of the query builder.
-		// It assumes that the WHERE clauses only contain equality checks (i.e., `=` operator).
+		// It only works with equality checks (i.e., `=` operator), as we are using WordPress's built-in update method.
 		$where = array();
 		foreach ( $this->wheres as [$column, $operator, $value, $logical_operator] ) {
+			if ( '=' !== $operator ) {
+				throw new InvalidArgumentException( 'Only equality checks are supported in WHERE clause for update.' );
+			}
 			$where[ $column ] = $value;
 		}
 
@@ -294,15 +307,6 @@ abstract class BaseRepository {
 	 */
 	protected function map_to_model( array $row ): BaseModel {
 		return new $this->model_class( $row );
-	}
-
-	/**
-	 * Get the full table name with prefix.
-	 *
-	 * @return string
-	 */
-	protected function get_table_full_name(): string {
-		return $this->wpdb->prefix . $this->plugin_table_prefix . $this->table_name;
 	}
 
 	/**
@@ -330,15 +334,85 @@ abstract class BaseRepository {
 	 *  ================================ */
 
 	/**
+	 * Set an alias for the table.
+	 *
+	 * @param string $alias
+	 *
+	 * @return self
+	 */
+	public function alias( string $alias ): self {
+		$this->alias = $alias;
+
+		return $this;
+	}
+
+	/**
+	 * Get the full table name with prefix and optional alias.
+	 *
+	 * @param bool $with_alias
+	 *
+	 * @return string
+	 */
+	public function get_table_full_name( bool $with_alias = false ): string {
+		$name = $this->wpdb->prefix . $this->plugin_table_prefix . $this->table_name;
+		return $this->alias && $with_alias ? "{$name} AS {$this->alias}" : $name;
+	}
+
+	/**
 	 * Select columns.
 	 *
 	 * @param array<int,string> $columns Columns.
 	 *
-	 * @return $this
+	 * @return self
 	 */
 	public function select( array $columns ): self {
 		$this->validate_columns( $columns );
 		$this->columns = $columns;
+
+		return $this;
+	}
+
+	/**
+	 * Add a JOIN clause to the query.
+	 *
+	 * Usage examples:
+	 *   ->join('values AS v', 'tasks.id', '=', 'v.task_id')
+	 *   ->join('values AS v', 'tasks.id = v.task_id')
+	 *
+	 * @param string $table The table name (optionally with alias).
+	 * @param string $first First column or full ON condition.
+	 * @param string|null $operator Comparison operator or null.
+	 * @param string|null $second Second column if operator provided.
+	 * @param string $type Join type: INNER, LEFT, RIGHT, FULL, CROSS.
+	 *
+	 * @return self
+	 * @throws InvalidArgumentException
+	 */
+	public function join(
+		string $table,
+		string $first,
+		?string $operator = null,
+		?string $second = null,
+		string $type = 'INNER'
+	): self {
+		$type        = strtoupper( $type );
+		$valid_types = array( 'INNER', 'LEFT', 'RIGHT', 'FULL', 'CROSS' );
+
+		if ( ! in_array( $type, $valid_types, true ) ) {
+			throw new InvalidArgumentException( 'Invalid join type provided.' );
+		}
+
+		if ( $operator === null && $second === null ) {
+			// Full ON condition provided in $first.
+			$on_condition = $first;
+		} elseif ( $operator !== null && $second !== null ) {
+			// Column comparison provided.
+			$on_condition = "{$first} {$operator} {$second}";
+		} else {
+			throw new InvalidArgumentException( 'Invalid arguments for JOIN clause.' );
+		}
+
+		$this->joins[] = "{$type} JOIN {$table} ON {$on_condition}";
 
 		return $this;
 	}
@@ -387,12 +461,35 @@ abstract class BaseRepository {
 	}
 
 	/**
+	 * Add a raw WHERE clause to the query.
+	 *
+	 * @param string $condition
+	 * @param string $logical_operator
+	 *
+	 * @return self
+	 * @throws InvalidArgumentException If invalid logical operator is provided.
+	 */
+	public function where_raw( string $condition, string $logical_operator = 'AND' ): self {
+		$this->validate_logical_operator( $logical_operator );
+
+		$this->wheres[] = array(
+			$condition,
+			'RAW',
+			null,
+			strtoupper( $logical_operator )
+		);
+
+		return $this;
+	}
+
+	/**
 	 * Add an ORDER BY clause to the query.
 	 *
 	 * @param string $column
 	 * @param string $direction (ASC|DESC)
 	 *
 	 * @return self
+	 * @throws InvalidArgumentException If invalid arguments or direction are provided.
 	 */
 	public function order_by( string $column, string $direction = 'ASC' ): self {
 		$direction = strtoupper( $direction );
@@ -406,11 +503,30 @@ abstract class BaseRepository {
 	}
 
 	/**
+	 * Add a raw ORDER BY clause to the query.
+	 *
+	 * @param string $expression
+	 * @param string $direction
+	 *
+	 * @return self
+	 * @throws InvalidArgumentException If invalid direction is provided.
+	 */
+	public function order_by_raw( string $expression, string $direction = 'ASC' ): self {
+		$direction = strtoupper( $direction );
+
+		$this->validate_direction( $direction );
+
+		$this->order_by = " ORDER BY {$expression} {$direction}";
+
+		return $this;
+	}
+
+	/**
 	 * Set a limit on the number of records returned.
 	 *
 	 * @param int $limit
 	 *
-	 * @return $this
+	 * @return self
 	 */
 	public function limit( int $limit ): self {
 		$this->limit = absint( $limit );
@@ -423,7 +539,7 @@ abstract class BaseRepository {
 	 *
 	 * @param int $offset
 	 *
-	 * @return $this
+	 * @return self
 	 */
 	public function offset( int $offset ): self {
 		$this->offset = absint( $offset );
@@ -443,11 +559,25 @@ abstract class BaseRepository {
 	 * @return string
 	 */
 	private function append_query_clauses( string $query ): string {
+		$query .= $this->compile_joins();
 		$query .= $this->compile_where();
 		$query .= $this->order_by;
 		$query .= $this->compile_limit_offset();
 
 		return $query;
+	}
+
+	/**
+	 * Compile the JOIN clauses into a SQL string.
+	 *
+	 * @return string
+	 */
+	private function compile_joins(): string {
+		if ( empty( $this->joins ) ) {
+			return '';
+		}
+
+		return ' ' . implode( ' ', $this->joins ) . ' ';
 	}
 
 	/**
@@ -466,6 +596,11 @@ abstract class BaseRepository {
 			[ $column, $operator, $value, $logical_operator ] = $where;
 
 			$prefix = ( 0 === $index ) ? '' : " {$logical_operator} ";
+
+			if ( 'RAW' === $operator ) {
+				$parts[] = "{$prefix}{$column}";
+				continue;
+			}
 
 			if ( is_array( $value ) && in_array( $operator, array( 'IN', 'NOT IN' ), true ) ) {
 				$placeholders = implode( ',', array_fill( 0, count( $value ), '%s' ) );
@@ -541,6 +676,18 @@ abstract class BaseRepository {
 	 */
 	private function validate_columns( array $columns ): void {
 		foreach ( $columns as $column ) {
+			// Separate column name from possible alias.
+			if ( false !== stripos( $column, ' AS ' ) ) {
+				$parts  = preg_split( '/\s+AS\s+/i', $column );
+				$column = $parts[0];
+			}
+
+			// Handle table.column format.
+			if ( false !== strpos( $column, '.' ) ) {
+				$parts  = explode( '.', $column );
+				$column = end( $parts );
+			}
+
 			if ( '*' !== $column && ! in_array( strtolower( $column ), $this->get_column_names(), true ) ) {
 				throw new InvalidArgumentException( "Column {$column} does not exist in the table." );
 			}
@@ -595,6 +742,7 @@ abstract class BaseRepository {
 	 */
 	private function reset_query(): void {
 		$this->columns  = array( '*' );
+		$this->joins    = array();
 		$this->wheres   = array();
 		$this->bindings = array();
 		$this->order_by = '';
