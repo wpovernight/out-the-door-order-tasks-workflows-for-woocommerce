@@ -35,6 +35,7 @@ export type Task = {
 export type FieldOption = {
 	id: number;
 	field_id: number;
+	slug: string;
 	label: string;
 	color: `#${string}` | `rgb(${number},${number},${number})` | string;
 };
