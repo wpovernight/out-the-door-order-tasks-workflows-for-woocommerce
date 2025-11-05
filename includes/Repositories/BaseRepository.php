@@ -12,6 +12,8 @@ abstract class BaseRepository {
 	protected \wpdb $wpdb;
 	private string $plugin_table_prefix = 'wpo_aom_';
 	private string $table_name;
+	protected bool $enable_cache = false;
+	protected static array $cache = array();
 	private ?string $alias = null;
 
 	/** @var class-string<BaseModel> */
@@ -114,18 +116,6 @@ abstract class BaseRepository {
 	}
 
 	/**
-	 * Find a record by ID.
-	 *
-	 * @template TModel of BaseModel
-	 * @param int $id Record ID.
-	 *
-	 * @return TModel|null
-	 */
-	public function find( int $id ): ?BaseModel {
-		return $this->where( 'id', absint( $id ) )->first();
-	}
-
-	/**
 	 * Find a record by a specific column and value.
 	 *
 	 * @template TModel of BaseModel
@@ -135,7 +125,29 @@ abstract class BaseRepository {
 	 * @return TModel|null
 	 */
 	public function find_by( string $column, $value ): ?BaseModel {
-		return $this->where( $column, $value )->first();
+		$cached = $this->get_cache( $column, $value );
+		if ( $cached ) {
+			return $cached;
+		}
+
+		$model = $this->where( $column, $value )->first();
+		if ( $model ) {
+			$this->set_cache( $column, $value, $model );
+		}
+
+		return $model;
+	}
+
+	/**
+	 * Find a record by ID.
+	 *
+	 * @template TModel of BaseModel
+	 * @param int $id Record ID.
+	 *
+	 * @return TModel|null
+	 */
+	public function find( int $id ): ?BaseModel {
+		return $this->find_by( 'id', absint( $id ) );
 	}
 
 	/**
@@ -147,7 +159,7 @@ abstract class BaseRepository {
 	 * @return TModel|null
 	 */
 	public function find_by_slug( string $label ): ?BaseModel {
-		return $this->where( 'slug', $label )->first();
+		return $this->find_by( 'slug', $label );
 	}
 
 	/**
@@ -297,6 +309,15 @@ abstract class BaseRepository {
 	/** ================================
 	 *   Helpers
 	 *  ================================ */
+
+	/**
+	 * Clear the static cache.
+	 *
+	 * @return void
+	 */
+	public static function clear_cache(): void {
+		self::$cache = array();
+	}
 
 	/**
 	 * Map a single row to a model instance.
@@ -748,5 +769,57 @@ abstract class BaseRepository {
 		$this->order_by = '';
 		$this->limit    = 0;
 		$this->offset   = 0;
+	}
+
+	/**
+	 * Get a cached model by column and value.
+	 *
+	 * @template TModel of BaseModel
+	 * @param string $column
+	 * @param mixed $value
+	 *
+	 * @return TModel|null
+	 */
+	private function get_cache( string $column, $value ): ?BaseModel {
+		if ( ! $this->enable_cache ) {
+			return null;
+		}
+
+		$cache_key = $this->cache_key( $column, $value );
+
+		return self::$cache[ $cache_key ] ?? null;
+	}
+
+	/**
+	 * Set a cached model by column and value.
+	 *
+	 * @template TModel of BaseModel
+	 * @param string $column
+	 * @param mixed $value
+	 * @param TModel $model
+	 *
+	 * @return void
+	 */
+	private function set_cache( string $column, $value, BaseModel $model ): void {
+		if ( ! $this->enable_cache ) {
+			return;
+		}
+
+		$cache_key                 = $this->cache_key( $column, $value );
+		self::$cache[ $cache_key ] = $model;
+	}
+
+	/**
+	 * Generate a cache key for a column and value.
+	 *
+	 * @param string $column
+	 * @param $value
+	 *
+	 * @return string
+	 */
+	private function cache_key( string $column, $value ): string {
+		$class = static::class;
+
+		return sprintf( '%s:%s:%s', $class, strtolower( $column ), (string) $value );
 	}
 }
