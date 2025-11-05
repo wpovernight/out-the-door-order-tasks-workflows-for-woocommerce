@@ -8,6 +8,7 @@ use RuntimeException;
 use WPO\AOM\Enums\TaskFieldTypes;
 use WPO\AOM\Models\Task;
 use WPO\AOM\Models\TaskField;
+use WPO\AOM\Models\TaskFieldOption;
 use WPO\AOM\Models\TaskFieldValue;
 use WPO\AOM\Repositories\TaskFieldOptionRepository;
 use WPO\AOM\Repositories\TaskFieldRepository;
@@ -252,13 +253,25 @@ final class TaskManagerService {
 	 *
 	 * @return array<int, TaskField>
 	 */
-	public function get_all_fields(): array {
-		return $this->task_field_repository->get();
+	public function get_all_fields( $index_by = 'slug' ): array {
+		$fields = $this->task_field_repository->get();
+		return array_column( $fields, null, $index_by );
 	}
 
 	/** ================================
 	 *   Task Field Option Methods
 	 *  ================================ */
+
+	/**
+	 * Get a specific option by ID.
+	 *
+	 * @param int $option_id
+	 *
+	 * @return TaskFieldOption|null
+	 */
+	public function get_option( int $option_id ): ?TaskFieldOption {
+		return $this->task_field_option_repository->find( $option_id );
+	}
 
 	/**
 	 * Get all options for a specific select-type field.
@@ -336,14 +349,15 @@ final class TaskManagerService {
 	 *  ================================ */
 
 	/**
-	 * Get all field values for a specific task.
+	 * Get field values for a specific task, indexed by field ID.
 	 *
 	 * @param int $task_id
 	 *
 	 * @return array<int, TaskFieldValue>
 	 */
 	public function get_field_values_for_task( int $task_id ): array {
-		return $this->task_field_value_repository->find_all_by( 'task_id', $task_id );
+		$values = $this->task_field_value_repository->find_all_by( 'task_id', $task_id );
+		return array_column( $values, null, 'field_id' );
 	}
 
 	/**
@@ -399,30 +413,6 @@ final class TaskManagerService {
 	 *  ================================ */
 
 	/**
-	 * Assign a task to a user by setting the "Assignee" field.
-	 *
-	 * @param int $task_id
-	 * @param int $user_id
-	 *
-	 * @return bool
-	 */
-	public function assign_task_to_user( int $task_id, int $user_id ): bool {
-		$field = $this->task_field_repository->find_by_slug( 'assignee' );
-
-		if ( ! $field ) {
-			return false;
-		}
-
-		// Check if user exists.
-		$user = get_user_by( 'id', $user_id );
-		if ( ! $user ) {
-			return false;
-		}
-
-		return $this->set_field_value( $task_id, $field->id, $user_id );
-	}
-
-	/**
 	 * Move a task to a different position.
 	 *
 	 * @param int $task_id
@@ -431,49 +421,61 @@ final class TaskManagerService {
 	 *
 	 * @return bool
 	 */
-	public function move_task( int $task_id, int $target_status_id, ?int $previous_task_id = null ) {
-		$status_field   = $this->task_field_repository->find_by_slug( 'status' );
-		$position_field = $this->task_field_repository->find_by_slug( 'position' );
+	public function move_task( int $task_id, int $target_status_id, ?int $previous_task_id = null ): bool {
+		$fields         = $this->get_all_fields();
+		$status_field_id   = $fields['status']->id ?? null;
+		$position_field_id = $fields['position']->id ?? null;
 
-		if ( ! $status_field || ! $position_field ) {
+		if ( ! $status_field_id || ! $position_field_id ) {
 			return false;
 		}
 
 		// Check if the new status ID is valid.
-		$target_status_option = $this->task_field_option_repository->find( $target_status_id );
-		if ( ! $target_status_option || $target_status_option->field_id !== $status_field->id ) {
+		$target_status_option_field = $this->get_option( $target_status_id );
+		if ( ! $target_status_option_field || $target_status_option_field->field_id !== $status_field_id ) {
 			return false;
 		}
 
-		// Update status.
-//		$status_updated = $this->set_field_value( $task_id, $status_field->id, $target_status_id );
-//		if ( ! $status_updated ) {
-//			return false;
-//		}
+		// If no previous task is specified, place at the start.
+		$previous_position = 0.0;
 
 		// Determine new position.
-		if ( empty( $previous_task_id ) ) {
-			// If no previous task is specified, place at the start.
-			$previous_position = 0.0;
-		} else {
-			$previous_task = $this->task_repository->find( $previous_task_id );
-			if ( ! $previous_task ) {
-				return false;
-			}
-			$previous_status_value = $this->task_field_value_repository->find_by_task_and_field( $previous_task->id, $status_field->id );
-			if ( ! $previous_status_value || (int) $previous_status_value->value !== $target_status_id ) {
-				return false;
-			}
-			$previous_position_value = $this->task_field_value_repository->find_by_task_and_field( $previous_task->id, $position_field->id );
-			$previous_position       = $previous_position_value ? (float) $previous_position_value->value : 0.0;
+		if ( ! empty( $previous_task_id ) ) {
+			$previous_task_values = $this->get_field_values_for_task( $previous_task_id );
+
+			$previous_position = (float) ( $previous_task_values[ $position_field_id ]->value ?? 0.0 );
+			$previous_status_id = (int) ( $previous_task_values[ $status_field_id ]->value ?? 0 );
 		}
 
-		$next_position_value     = $this->task_repository->get_next_task_position( $previous_task->id ?? null, $target_status_id );
-		$new_position           = $next_position_value ? $this->calculate_fractional_position( $previous_position, $next_position_value ) : $previous_position + 1.0;
+		// Update status
+		if ( isset( $previous_status_id ) && $previous_status_id !== $target_status_id ) {
+			$status_updated = $this->set_field_value( $task_id, $status_field_id, $target_status_id );
+			if ( ! $status_updated ) {
+				return false;
+			}
+		}
 
-		return $new_position;
+		$next_position_value = $this->task_repository->get_next_task_position(
+			$previous_task_id,
+			$target_status_id,
+			$status_field_id,
+			$position_field_id,
+			$previous_position
+		);
+		$new_position        = $next_position_value
+			? $this->calculate_fractional_position( $previous_position, $next_position_value )
+			: $previous_position + 1.0;
+
+		$new_position = apply_filters(
+			'wpo_aom_task_calculated_new_position',
+			(float) number_format( $new_position, 5, '.', '' ),
+			$task_id,
+			$previous_task_id,
+			$target_status_id
+		);
 
 //		return $this->set_field_value( $task_id, $position_field->id, $new_position );
+		return $this->set_field_value( $task_id, $position_field_id, $new_position );
 	}
 
 	/**
