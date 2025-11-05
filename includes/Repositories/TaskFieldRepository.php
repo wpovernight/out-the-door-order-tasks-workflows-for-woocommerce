@@ -9,6 +9,7 @@ defined( 'ABSPATH' ) || exit;
 class TaskFieldRepository extends BaseRepository {
 	private static string $table_name = 'task_fields';
 	private static string $model_class = TaskField::class;
+	protected bool $enable_cache = true;
 
 	/**
 	 * Constructor.
