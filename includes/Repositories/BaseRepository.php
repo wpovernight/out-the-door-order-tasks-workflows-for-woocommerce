@@ -176,6 +176,42 @@ abstract class BaseRepository {
 	}
 
 	/**
+	 * Find multiple records by their IDs.
+	 *
+	 * @template TModel of BaseModel
+	 * @param array<int> $ids
+	 *
+	 * @return array<int, TModel>
+	 */
+	public function find_many( array $ids ): array {
+		if ( empty( $ids ) ) {
+			return array();
+		}
+
+		$results      = array();
+		$uncached_ids = array();
+
+		foreach ( $ids as $id ) {
+			$cache = $this->get_cache( 'id', $id );
+			if ( $cache ) {
+				$results[] = $cache;
+			} else {
+				$uncached_ids[] = $id;
+			}
+		}
+
+		if ( ! empty( $uncached_ids ) ) {
+			$found_models = $this->where( 'id', 'IN', $uncached_ids )->get();
+			foreach ( $found_models as $model ) {
+				$this->set_cache( 'id', $model->id, $model );
+				$results[] = $model;
+			}
+		}
+
+		return $results;
+	}
+
+	/**
 	 * Find all records where a column's value is in a given array.
 	 *
 	 * @template TModel of BaseModel
