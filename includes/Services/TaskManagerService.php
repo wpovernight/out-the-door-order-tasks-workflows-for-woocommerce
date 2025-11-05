@@ -419,9 +419,9 @@ final class TaskManagerService {
 	 * @param int $target_status_id
 	 * @param int|null $previous_task_id
 	 *
-	 * @return bool
+	 * @return float
 	 */
-	public function move_task( int $task_id, int $target_status_id, ?int $previous_task_id = null ): bool {
+	public function move_task( int $task_id, int $target_status_id, ?int $previous_task_id = null ): float {
 		$fields         = $this->get_all_fields();
 		$status_field_id   = $fields['status']->id ?? null;
 		$position_field_id = $fields['position']->id ?? null;
@@ -476,6 +476,9 @@ final class TaskManagerService {
 
 //		return $this->set_field_value( $task_id, $position_field->id, $new_position );
 		return $this->set_field_value( $task_id, $position_field_id, $new_position );
+		$this->set_field_value( $task_id, $position_field_id, $new_position );
+
+		return $new_position;
 	}
 
 	/**
