@@ -447,14 +447,6 @@ final class TaskManagerService {
 			$previous_status_id = (int) ( $previous_task_values[ $status_field_id ]->value ?? 0 );
 		}
 
-		// Update status
-		if ( isset( $previous_status_id ) && $previous_status_id !== $target_status_id ) {
-			$status_updated = $this->set_field_value( $task_id, $status_field_id, $target_status_id );
-			if ( ! $status_updated ) {
-				return false;
-			}
-		}
-
 		$next_position_value = $this->task_repository->get_next_task_position(
 			$previous_task_id,
 			$target_status_id,
@@ -477,6 +469,14 @@ final class TaskManagerService {
 //		return $this->set_field_value( $task_id, $position_field->id, $new_position );
 		return $this->set_field_value( $task_id, $position_field_id, $new_position );
 		$this->set_field_value( $task_id, $position_field_id, $new_position );
+		$update_data = array($position_field_id => $new_position,);
+		// Update status
+		if ( ! isset( $previous_status_id ) || $previous_status_id !== $target_status_id ) {
+			$update_data[ $status_field_id ] = $target_status_id;
+		}
+
+		$result = $this->update_field_values( $task_id, $update_data );
+
 
 		return $new_position;
 	}
