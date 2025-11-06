@@ -54,8 +54,6 @@ class TaskFieldValueRepository extends BaseRepository {
 		$case_sql   = 'CASE `field_id` ' . implode( ' ', $cases ) . ' END';
 		$set_clause = "`value` = {$case_sql}";
 
-		code_log( 'Set clause: ' . $set_clause );
-
 		return $this->where( 'task_id', $task_id )
 		            ->where( 'field_id', 'IN', array_keys( $field_values ) )
 		            ->update_raw( $set_clause );

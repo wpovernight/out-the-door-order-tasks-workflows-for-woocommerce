@@ -454,7 +454,7 @@ final class TaskManagerService {
 			$task_id
 		);
 		$new_position        = $next_position_value
-			? $this->calculate_fractional_position( $previous_position, $next_position_value )
+			? $this->calculate_fractional_position( $previous_position, $next_position_value, $target_status_id )
 			: $previous_position + 1.0;
 
 		$new_position = apply_filters(
@@ -485,7 +485,7 @@ final class TaskManagerService {
 	 *
 	 * @return float
 	 */
-	private function calculate_fractional_position( float $previous_position, float $next_position ): float {
+	private function calculate_fractional_position( float $previous_position, float $next_position, int $status_id ): float {
 		if ( $previous_position >= $next_position ) {
 			throw new InvalidArgumentException( 'Previous position must be less than next position.' );
 		}
@@ -500,10 +500,14 @@ final class TaskManagerService {
 		$precision = 0.0001;
 		// Check for precision issues.
 		if ( abs( $next_position - $previous_position ) < $precision ) {
-			// ToDo: Run rebalancing if positions are too close.
+			$this->rebalance_positions( $status_id );
 		}
 
 		return $position;
+	}
+
+	public function rebalance_positions( ?int $status_id = null ): void {
+		// ToDo: Complete this method
 	}
 
 	public function set_due_date( int $task_id, string $date ): bool {
