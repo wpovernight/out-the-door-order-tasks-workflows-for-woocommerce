@@ -12,10 +12,14 @@ import { Column } from './Column';
 import { useViewTasks } from '../context/ViewTaskContext';
 
 export const Board: React.FC = () => {
-	const { statuses } = useTasks();
-	const { viewTasks, setViewTasks, clearSelectedTask } =
-		useViewTasks();
+	const { statuses, moveTask } = useTasks();
+	const { viewTasks, setViewTasks, clearSelectedTask } = useViewTasks();
 	const scrollableRef = useRef<HTMLDivElement | null>(null);
+
+	const statusesRef = useRef(statuses);
+	useEffect(() => {
+		statusesRef.current = statuses;
+	}, [statuses]);
 
 	// Setup DND behavior
 	useEffect(() => {
@@ -78,6 +82,16 @@ export const Board: React.FC = () => {
 
 							updated[fromColumn] = fromList;
 							updated[toColumn] = toList;
+
+							// Persist the move via API
+							const previousTaskId =
+								insertAt > 0 ? toList[insertAt - 1].id : null;
+							const targetStatusId =
+								statusesRef.current.find(
+									(s) => s.slug === toColumn
+								)?.id || 0;
+							moveTask(task.id, previousTaskId, targetStatusId);
+
 							return updated;
 						});
 						return;
@@ -108,6 +122,20 @@ export const Board: React.FC = () => {
 
 							updated[fromColumn] = fromList;
 							updated[toColumn] = toList;
+
+							// Persist the move via API
+							// Get the last task in the target column to set as previousTaskId
+							// - 2 is used because we just pushed the task to the end of the list
+							const previousTaskId =
+								toList.length > 1
+									? toList[toList.length - 2].id
+									: null;
+							const targetStatusId =
+								statusesRef.current.find(
+									(s) => s.slug === toColumn
+								)?.id || 0;
+							moveTask(task.id, previousTaskId, targetStatusId);
+
 							return updated;
 						});
 					}
@@ -118,7 +146,7 @@ export const Board: React.FC = () => {
 				canScroll: ({ source }) => isCardData(source.data),
 			})
 		);
-	}, [setViewTasks]);
+	}, [setViewTasks, moveTask, statusesRef]);
 
 	// Clear highlight when clicking anywhere on the board background
 	const handleClick = () => {
@@ -126,12 +154,8 @@ export const Board: React.FC = () => {
 	};
 
 	return (
-		<div
-			ref={scrollableRef}
-			className="kanban-board"
-			onClick={handleClick}
-		>
-			{statuses.map((col) => (
+		<div ref={scrollableRef} className="kanban-board" onClick={handleClick}>
+			{statusesRef.current.map((col) => (
 				<Column
 					key={col.id}
 					column={col}
