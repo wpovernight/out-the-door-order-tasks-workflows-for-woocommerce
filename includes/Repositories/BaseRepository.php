@@ -227,6 +227,29 @@ abstract class BaseRepository {
 	}
 
 	/**
+	 * Execute a raw query.
+	 *
+	 * @param string $query
+	 * @param array<int, mixed> $bindings
+	 * @param bool $reset
+	 *
+	 * @return int Number of rows affected.
+	 */
+	public function execute_raw( string $query, array $bindings = array(), bool $reset = true ): int {
+		if ( ! empty( $bindings ) ) {
+			$query = $this->wpdb->prepare( $query, ...array_values( $bindings ) );
+		}
+
+		$result = $this->wpdb->query( $query );
+
+		if ( $reset ) {
+			$this->reset_query();
+		}
+
+		return $result;
+	}
+
+	/**
 	 * Insert a record.
 	 *
 	 * @param array<string, mixed> $data

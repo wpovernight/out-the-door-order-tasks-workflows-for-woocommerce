@@ -4,6 +4,7 @@ namespace WPO\AOM\Repositories;
 
 use InvalidArgumentException;
 use WPO\AOM\Models\Task;
+use WPO\AOM\Models\TaskField;
 use WPO\AOM\Models\TaskFieldValue;
 
 defined( 'ABSPATH' ) || exit;
@@ -72,5 +73,59 @@ class TaskRepository extends BaseRepository {
 			->first();
 
 		return $next_task_value_field ? (float) $next_task_value_field->value : null;
+	}
+
+	/**
+	 * Rebalance positions of tasks, optionally within a specific status.
+	 *
+	 * @param int|null $status_id
+	 *
+	 * @return void
+	 */
+	public function rebalance_positions( ?int $status_id = null ): void {
+		$task_field_value_repository = RepositoryRegistry::get( TaskFieldValue::class );
+
+		$task_field_repository = RepositoryRegistry::get( TaskField::class );
+		$fields                = $task_field_repository->get();
+		$fields_by_slug        = array_column( $fields, null, 'slug' );
+		$status_field_id       = $fields_by_slug['status']->id ?? null;
+		$position_field_id     = $fields_by_slug['position']->id ?? null;
+
+		if ( ! $status_field_id || ! $position_field_id ) {
+			return;
+		}
+
+		$task_field_value_table_name = $task_field_value_repository->get_table_full_name();
+		$ranked_cte = "
+			WITH ranked AS (
+				SELECT
+					position.id,
+					ROW_NUMBER() OVER (
+						PARTITION BY status.value
+						ORDER BY
+							CAST(position.value AS DECIMAL(10, 5))
+					) AS new_position
+				FROM
+					{$task_field_value_table_name} AS position
+					INNER JOIN {$task_field_value_table_name} AS status ON position.task_id = status.task_id
+				WHERE
+					status.field_id = '{$status_field_id}'
+					AND position.field_id = '{$position_field_id}'
+		";
+
+		if ( $status_id ) {
+			$ranked_cte .= " AND status.value = '{$status_id}' ";
+		}
+
+		$ranked_cte .= "
+			)
+			UPDATE
+				{$task_field_value_table_name} AS p
+				INNER JOIN ranked r ON p.id = r.id
+			SET
+				p.value = r.new_position;
+		";
+
+		$task_field_value_repository->execute_raw( $ranked_cte );
 	}
 }
