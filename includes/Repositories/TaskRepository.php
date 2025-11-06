@@ -38,7 +38,7 @@ class TaskRepository extends BaseRepository {
 		int $position_field_id,
 		?float $given_task_position = null
 	): ?float {
-		if ( empty( $given_task_id ) && empty( $given_task_position ) ) {
+		if ( empty( $given_task_id ) && is_null( $given_task_position ) ) {
 			throw new InvalidArgumentException( 'Either given_task_id or given_task_position must be provided.' );
 		}
 
