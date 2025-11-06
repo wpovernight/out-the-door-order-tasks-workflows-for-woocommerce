@@ -71,10 +71,7 @@ abstract class BaseRepository {
 		$columns = implode( ', ', $this->columns );
 		$query   = "SELECT {$columns} FROM {$this->get_table_full_name( true )}";
 		$query   = $this->append_query_clauses( $query );
-
-		if ( ! empty( $this->bindings ) ) {
-			$query = $this->wpdb->prepare( $query, ...array_values( $this->bindings ) );
-		}
+		$query   = $this->append_bindings( $query );
 
 		if ( $reset ) {
 			$this->reset_query();
@@ -295,6 +292,38 @@ abstract class BaseRepository {
 	}
 
 	/**
+	 * Update records with a raw SET clause.
+	 *
+	 * @param string $set_clause Raw SET clause (e.g., "column1 = value1, column2 = value2").
+	 *
+	 * @return int
+	 * @throws InvalidArgumentException If SET clause is empty.
+	 * @throws RuntimeException If no WHERE clause is specified.
+	 */
+	public function update_raw( string $set_clause ): int {
+		// Ensure that the SET clause is not empty.
+		if ( '' === trim( $set_clause ) ) {
+			throw new InvalidArgumentException( 'SET clause must not be empty.' );
+		}
+
+		// Ensure that the WHERE clause is set.
+		if ( empty( $this->wheres ) ) {
+			throw new RuntimeException( 'No WHERE clause specified for update.' );
+		}
+
+		$query = "UPDATE {$this->get_table_full_name()} SET {$set_clause}";
+		$query = $this->append_query_clauses( $query );
+		$query = $this->append_bindings( $query );
+
+		$this->reset_query();
+		code_log( $query );
+
+		$result = $this->wpdb->query( $query );
+
+		return false === $result ? false : (int) $result;
+	}
+
+	/**
 	 * Save the model (insert or update based on presence of ID).
 	 *
 	 * @template TModel of BaseModel
@@ -412,7 +441,7 @@ abstract class BaseRepository {
 	 */
 	public function get_table_full_name( bool $with_alias = false ): string {
 		$name = $this->wpdb->prefix . $this->plugin_table_prefix . $this->table_name;
-		return $this->alias && $with_alias ? "{$name} AS {$this->alias}" : $name;
+		return esc_sql( $this->alias && $with_alias ? "{$name} AS {$this->alias}" : $name );
 	}
 
 	/**
@@ -620,6 +649,21 @@ abstract class BaseRepository {
 		$query .= $this->compile_where();
 		$query .= $this->order_by;
 		$query .= $this->compile_limit_offset();
+
+		return $query;
+	}
+
+	/**
+	 * Append bindings to the query using $wpdb->prepare.
+	 *
+	 * @param string $query
+	 *
+	 * @return string
+	 */
+	private function append_bindings( string $query ): string {
+		if ( ! empty( $this->bindings ) ) {
+			$query = $this->wpdb->prepare( $query, ...array_values( $this->bindings ) );
+		}
 
 		return $query;
 	}
