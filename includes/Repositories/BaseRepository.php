@@ -81,14 +81,15 @@ abstract class BaseRepository {
 	}
 
 	/**
-	 * Get records as models.
+	 * Get records.
 	 *
 	 * @template TModel of BaseModel
+	 * @param bool $raw Whether to return raw database results instead of model instances. Default false.
 	 * @param bool $reset Whether to reset the query after execution. Default true.
 	 *
 	 * @return array<int, TModel>
 	 */
-	public function get( bool $reset = true ): array {
+	public function get( bool $raw = false, bool $reset = true ): array {
 		$query = $this->get_query( false );
 
 		$result = $this->wpdb->get_results( $query, ARRAY_A ) ?? array();
@@ -97,7 +98,7 @@ abstract class BaseRepository {
 			$this->reset_query();
 		}
 
-		return array_map( array( $this, 'map_to_model' ), $result );
+		return $raw ? $result : array_map( array( $this, 'map_to_model' ), $result );
 	}
 
 	/**
@@ -596,12 +597,8 @@ abstract class BaseRepository {
 	 * @return self
 	 * @throws InvalidArgumentException If invalid direction is provided.
 	 */
-	public function order_by_raw( string $expression, string $direction = 'ASC' ): self {
-		$direction = strtoupper( $direction );
-
-		$this->validate_direction( $direction );
-
-		$this->order_by = " ORDER BY {$expression} {$direction}";
+	public function order_by_raw( string $expression ): self {
+		$this->order_by = " ORDER BY {$expression}";
 
 		return $this;
 	}

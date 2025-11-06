@@ -27,6 +27,7 @@ class TaskRepository extends BaseRepository {
 	 * @param int $status_field_id
 	 * @param int $position_field_id
 	 * @param float|null $given_task_position
+	 * @param int|null $moving_task_id
 	 *
 	 * @return float|null
 	 * @throws InvalidArgumentException
@@ -67,7 +68,7 @@ class TaskRepository extends BaseRepository {
 		}
 
 		$next_task_value_field = $query
-			->order_by_raw('CAST(position.value AS DECIMAL(10,5))')
+			->order_by_raw('CAST(position.value AS DECIMAL(10,5)) ASC')
 			->first();
 
 		return $next_task_value_field ? (float) $next_task_value_field->value : null;
