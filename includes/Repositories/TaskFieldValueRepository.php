@@ -31,4 +31,33 @@ class TaskFieldValueRepository extends BaseRepository {
 			->where( 'field_id', $field_id )
 			->first();
 	}
+
+	/**
+	 * Update multiple field values for a given task.
+	 *
+	 * @param int $task_id
+	 * @param array $field_values Associative array of field_id => value
+	 *
+	 * @return bool|int
+	 */
+	public function update_task_multiple_field_values( int $task_id, array $field_values ): int {
+		if ( empty( $field_values ) ) {
+			return false;
+		}
+
+		$cases = array();
+		foreach ( $field_values as $field_id => $value ) {
+			$escaped_value = esc_sql( $value );
+			$field_id      = (int) $field_id;
+			$cases[]       = "WHEN {$field_id} THEN '{$escaped_value}'";
+		}
+		$case_sql   = 'CASE `field_id` ' . implode( ' ', $cases ) . ' END';
+		$set_clause = "`value` = {$case_sql}";
+
+		code_log( 'Set clause: ' . $set_clause );
+
+		return $this->where( 'task_id', $task_id )
+		            ->where( 'field_id', 'IN', array_keys( $field_values ) )
+		            ->update_raw( $set_clause );
+	}
 }
