@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Task, FieldOption } from '../types/task';
-import { fetchTasks, fetchStatus } from '../utils/api';
+import { fetchTasks, fetchStatus, moveTask as moveTaskAPI } from '../utils/api';
 
 interface TaskContextType {
 	tasks: Task[];
@@ -11,6 +11,11 @@ interface TaskContextType {
 	loadStatuses: (force?: boolean) => Promise<void>;
 	saveTask: (taskId: number, updates: Partial<Task>) => Promise<void>;
 	isDataLoaded: boolean;
+	moveTask: (
+		taskId: number,
+		previousTaskId: number | null,
+		targetStatusId: number
+	) => Promise<void>;
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
@@ -28,6 +33,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 			if (tasksLoaded && !force) {
 				return;
 			}
+
 			try {
 				const data = await fetchTasks();
 				setTasks(data);
@@ -55,6 +61,22 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 		[statusesLoaded]
 	);
 
+	const moveTask = async (
+		taskId: number,
+		previousTaskId: number | null,
+		targetStatusId: number
+	) => {
+		try {
+			const response = await moveTaskAPI(
+				taskId,
+				previousTaskId,
+				targetStatusId
+			);
+		} catch (error) {
+			console.error('Failed to move task:', error);
+		}
+	};
+
 	const saveTask = async (taskId: number, updates: Partial<Task>) => {
 		// implement your update logic
 	};
@@ -72,6 +94,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				loadStatuses,
 				saveTask,
 				isDataLoaded,
+				moveTask,
 			}}
 		>
 			{children}

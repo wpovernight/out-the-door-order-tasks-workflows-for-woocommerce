@@ -13,6 +13,7 @@ if (!apiRoot) {
  *
  * @template T - The expected type of the response data.
  * @param  response
+ *
  * @return {Promise<T>} The parsed JSON data.
  * @throws Will throw an error if the response is not ok.
  */
@@ -50,10 +51,41 @@ export async function fetchTasks(): Promise<Task[]> {
 
 		return {
 			...task,
-			status: statusField?.values?.[0]?.resolved?.['slug'] ?? undefined,
+			status: statusField?.values?.[0]?.resolved?.slug ?? undefined,
 			position: positionField?.values?.[0]?.raw ?? undefined,
 		};
 	});
+}
+
+/**
+ * Moves a task to a new status and position.
+ *
+ * @param {number}        taskId         - The ID of the task to move.
+ * @param {number | null} previousTaskId - The ID of the task that will precede the moved task in the new status, or null if it will be the first task.
+ * @param {number}        targetStatusId - The ID of the target status.
+ *
+ * @return {Promise<void>} A promise that resolves when the task has been moved.
+ * @throws Will throw an error if the API request fails.
+ */
+export async function moveTask(
+	taskId: number,
+	previousTaskId: number | null,
+	targetStatusId: number
+): Promise<void> {
+	const response = await fetch(`${apiRoot}/tasks/${taskId}/move`, {
+		method: 'POST',
+		credentials: 'include',
+		headers: {
+			'Content-Type': 'application/json',
+			'X-WP-Nonce': nonce,
+		},
+		body: JSON.stringify({
+			previous_task_id: previousTaskId,
+			target_status_id: targetStatusId,
+		}),
+	});
+
+	return handleResponse<void>(response);
 }
 
 // ToDo: Update this function
