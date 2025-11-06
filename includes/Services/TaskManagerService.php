@@ -441,7 +441,7 @@ final class TaskManagerService {
 
 		// Determine new position.
 		if ( ! empty( $previous_task_id ) ) {
-			$previous_task_position_value = $this->task_field_value_repository->find_by_task_and_field( $task_id, $position_field_id );
+			$previous_task_position_value = $this->task_field_value_repository->find_by_task_and_field( $previous_task_id, $position_field_id );
 			$previous_position = (float) ( $previous_task_position_value->value ?? 0.0 );
 		}
 
@@ -450,7 +450,8 @@ final class TaskManagerService {
 			$target_status_id,
 			$status_field_id,
 			$position_field_id,
-			$previous_position
+			$previous_position,
+			$task_id
 		);
 		$new_position        = $next_position_value
 			? $this->calculate_fractional_position( $previous_position, $next_position_value )

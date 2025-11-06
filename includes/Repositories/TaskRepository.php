@@ -36,7 +36,8 @@ class TaskRepository extends BaseRepository {
 		int $status_id,
 		int $status_field_id,
 		int $position_field_id,
-		?float $given_task_position = null
+		?float $given_task_position = null,
+		?int $moving_task_id = null
 	): ?float {
 		if ( empty( $given_task_id ) && is_null( $given_task_position ) ) {
 			throw new InvalidArgumentException( 'Either given_task_id or given_task_position must be provided.' );
@@ -51,14 +52,21 @@ class TaskRepository extends BaseRepository {
 			$given_task_position    = $given_task_field_value ? (float) $given_task_field_value->value : 0.0;
 		}
 
-		$next_task_value_field = $task_field_value_repository
+		$query = $task_field_value_repository
 			->select(array('position.*'))
 			->alias('position')
 			->join("{$task_field_value_table_name} AS status", 'position.task_id', '=', 'status.task_id')
 			->where('status.field_id', $status_field_id)
 			->where('status.value', $status_id)
 			->where('position.field_id', $position_field_id)
-			->where_raw("CAST(position.value AS DECIMAL(10,5)) > {$given_task_position}")
+			->where('position.task_id', '!=', $given_task_id ?? 0)
+			->where_raw("CAST(position.value AS DECIMAL(10,5)) > {$given_task_position}");
+
+		if ( $moving_task_id ) {
+			$query->where( 'position.task_id', '!=', $moving_task_id );
+		}
+
+		$next_task_value_field = $query
 			->order_by_raw('CAST(position.value AS DECIMAL(10,5))')
 			->first();
 
