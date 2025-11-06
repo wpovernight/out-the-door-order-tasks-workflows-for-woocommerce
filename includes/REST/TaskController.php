@@ -82,6 +82,22 @@ class TaskController extends BaseRestController {
 			),
 		);
 
+		/**
+		 * Task move endpoint:
+		 * POST /{namespace}/tasks/{id}/move -> moves a task to a new position/status.
+		 */
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->resource_name . '/(?P<id>[\d]+)/move',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'move_task' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+				),
+			)
+		);
+
 		// Field options endpoints
 
 		// GET /{namespace}/tasks/fields/{field_id}/options -> returns options for a specific field.
@@ -383,5 +399,28 @@ class TaskController extends BaseRestController {
 				),
 			),
 		);
+	}
+
+	/**
+	 * Move a task to a new position/status.
+	 *
+	 * @param WP_REST_Request $request
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function move_task( WP_REST_Request $request ) {
+		$task_id          = (int) $request->get_param( 'id' );
+		$previous_task_id = $request->get_param( 'previous_task_id' ) ? (int) $request->get_param( 'previous_task_id' ) : null;
+		$target_status_id = (int) $request->get_param( 'target_status_id' );
+
+		/** @var TaskManagerService $task_service */
+		$task_service = WPO_AOM()->get_service( TaskManagerService::class );
+		$new_position = $task_service->move_task( $task_id, $target_status_id, $previous_task_id );
+
+		if ( ! $new_position ) {
+			return new WP_Error( 'task_move_failed', 'Failed to move task', array( 'status' => 500 ) );
+		}
+
+		return rest_ensure_response( array( 'new_position' => $new_position ) );
 	}
 }
