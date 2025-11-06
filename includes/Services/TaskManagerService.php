@@ -441,10 +441,8 @@ final class TaskManagerService {
 
 		// Determine new position.
 		if ( ! empty( $previous_task_id ) ) {
-			$previous_task_values = $this->get_field_values_for_task( $previous_task_id );
-
-			$previous_position = (float) ( $previous_task_values[ $position_field_id ]->value ?? 0.0 );
-			$previous_status_id = (int) ( $previous_task_values[ $status_field_id ]->value ?? 0 );
+			$previous_task_position_value = $this->task_field_value_repository->find_by_task_and_field( $task_id, $position_field_id );
+			$previous_position = (float) ( $previous_task_position_value->value ?? 0.0 );
 		}
 
 		$next_position_value = $this->task_repository->get_next_task_position(
@@ -466,14 +464,6 @@ final class TaskManagerService {
 			$target_status_id
 		);
 
-//		return $this->set_field_value( $task_id, $position_field->id, $new_position );
-		return $this->set_field_value( $task_id, $position_field_id, $new_position );
-		$this->set_field_value( $task_id, $position_field_id, $new_position );
-		$update_data = array($position_field_id => $new_position,);
-		// Update status
-		if ( ! isset( $previous_status_id ) || $previous_status_id !== $target_status_id ) {
-			$update_data[ $status_field_id ] = $target_status_id;
-		}
 		$update_data = array(
 			$position_field_id => $new_position,
 			$status_field_id => $target_status_id,
@@ -495,6 +485,15 @@ final class TaskManagerService {
 	 * @return float
 	 */
 	private function calculate_fractional_position( float $previous_position, float $next_position ): float {
+		if ( $previous_position >= $next_position ) {
+			throw new InvalidArgumentException( 'Previous position must be less than next position.' );
+		}
+
+		// Handle case where putting at the start, while the next position is greater than 1.0.
+		if ( 0.0 === $previous_position && $next_position > 1.0  ) {
+			return 1.0;
+		}
+
 		$position = ( $previous_position + $next_position ) / 2;
 
 		$precision = 0.0001;

@@ -316,7 +316,6 @@ abstract class BaseRepository {
 		$query = $this->append_bindings( $query );
 
 		$this->reset_query();
-		code_log( $query );
 
 		$result = $this->wpdb->query( $query );
 
