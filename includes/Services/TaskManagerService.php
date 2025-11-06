@@ -474,9 +474,14 @@ final class TaskManagerService {
 		if ( ! isset( $previous_status_id ) || $previous_status_id !== $target_status_id ) {
 			$update_data[ $status_field_id ] = $target_status_id;
 		}
+		$update_data = array(
+			$position_field_id => $new_position,
+			$status_field_id => $target_status_id,
+		);
 
-		$result = $this->update_field_values( $task_id, $update_data );
+		code_log( $update_data );
 
+		$result = $this->task_field_value_repository->update_task_multiple_field_values( $task_id, $update_data );
 
 		return $new_position;
 	}
