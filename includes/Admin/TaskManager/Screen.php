@@ -33,7 +33,7 @@ final class Screen {
 		wp_enqueue_script(
 			'wpo-aom-admin-task-manager',
 			WPO_AOM()->plugin_url() . '/includes/Admin/assets/js/task-manager/build/task-manager.js',
-			array( 'wp-element' ),
+			array( 'wp-element', 'wp-components' ),
 			WPO_AOM_VERSION,
 			true
 		);

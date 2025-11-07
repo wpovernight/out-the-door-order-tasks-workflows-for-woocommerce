@@ -161,11 +161,24 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 		});
 	}, []);
 
+	const openTaskCreationModal = () => {
+		console.log('Opening task creation modal for column:', column.id);
+		openSidebar(<TaskForm columnId={column.id} onDone={closeSidebar} />, {
+			title: 'Create Task',
+		});
+	};
+
 	// ToDo: Add visual drop indicators for columns
 	return (
 		<div className="kanban-column">
 			<div ref={headerRef} className="kanban-column-header" tabIndex={0}>
 				<h2>{column.label}</h2>
+				<button
+					onClick={openTaskCreationModal}
+					className="add-task-button"
+				>
+					<span className="screenReader">Create</span>
+				</button>
 			</div>
 			<div ref={scrollableRef} className="kanban-column-scrollable">
 				<div ref={containerRef} className="kanban-column-container">

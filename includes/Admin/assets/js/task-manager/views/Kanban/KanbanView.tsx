@@ -35,7 +35,6 @@ export const KanbanView: React.FC = () => {
 				if (!isMounted) {
 					return;
 				}
-
 				setStatus('error');
 				setError(
 					err instanceof Error

@@ -113,7 +113,10 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
 
 .kanban-board .kanban-column-header {
     margin-bottom: .5em;
-    padding: 1em
+    padding: 1em;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .kanban-board .kanban-column h2 {
@@ -206,4 +209,32 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
         opacity: 1;
         transform: scaleX(1)
     }
+}
+
+.add-task-button {
+    background: transparent;
+    border: none;
+    color: #838790;
+    font-size: 1.5em;
+    cursor: pointer;
+    transition: all 0.3s;
+    border-radius: 0.3em;
+    width: 1.3em;
+    height: 1.3em;
+    padding: 0;
+    margin: 0;
+}
+
+.add-task-button:hover {
+    background-color: #0000000d;
+}
+
+.add-task-button::before {
+    content: '\f543';
+    font-family: 'dashicons';
+    display: block;
+}
+
+.screenReader {
+    display: none;
 }
