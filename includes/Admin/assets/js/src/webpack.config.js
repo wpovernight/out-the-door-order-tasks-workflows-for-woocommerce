@@ -36,8 +36,6 @@ module.exports = (env, argv) => {
 		externals: {
 			react: 'React',
 			'react-dom': 'ReactDOM',
-			'react/jsx-runtime': 'React',
-			'react/jsx-dev-runtime': 'React',
 		},
 		devtool: isProduction ? false : 'source-map',
 		optimization: {
