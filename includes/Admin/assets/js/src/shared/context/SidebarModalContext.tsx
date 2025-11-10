@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useState } from 'react';
-import { SidebarModal } from '../components/SidebarModal';
+import { SidebarModal } from '@shared/components/SidebarModal';
 
 type OpenOptions = {
 	title?: string;

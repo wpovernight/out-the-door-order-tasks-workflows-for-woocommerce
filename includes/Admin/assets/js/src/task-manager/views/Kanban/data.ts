@@ -1,5 +1,5 @@
 // views/Kanban/data.ts
-import { Task } from '../../types/task';
+import { Task } from '@shared/types/task';
 
 // ------------------------------
 // Drag Data Types

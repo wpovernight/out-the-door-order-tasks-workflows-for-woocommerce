@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Task } from '../../../types/task';
+import { Task } from '@shared/types/task';
 import { useTasks } from '../../../context/TaskContext';
 import { groupAndSortTasks } from '../../../utils/task-sort';
 

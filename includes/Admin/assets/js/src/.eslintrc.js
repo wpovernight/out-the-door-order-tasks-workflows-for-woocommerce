@@ -7,4 +7,8 @@ module.exports = {
 		sourceType: 'module',
 		ecmaFeatures: { jsx: true },
 	},
+	// Temporarily rules
+	rules: {
+		'no-console': 'off',
+	}
 };

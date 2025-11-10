@@ -10,7 +10,7 @@ import {
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
 import invariant from 'tiny-invariant';
 
-import { Task } from '../../../types/task';
+import { Task } from '@shared/types/task';
 import { getCardData, getCardDropTargetData, isCardData } from '../data';
 import { useViewTasks } from '../context/ViewTaskContext';
 
@@ -149,15 +149,15 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 		);
 	}, [updateState, resetState, taskRef, selectTask]);
 
-    // ToDo: Fix
-    const [isSelected, setIsSelected] = useState(false);
-    useEffect(() => {
-        setIsSelected(selectedTask?.id === task.id);
-    }, [selectedTask, task.id]);
+	// ToDo: Fix
+	const [isSelected, setIsSelected] = useState(false);
+	useEffect(() => {
+		setIsSelected(selectedTask?.id === task.id);
+	}, [selectedTask, task.id]);
 
-    const handleClick = () => {
-        selectTask(task);
-    };
+	const handleClick = () => {
+		selectTask(task);
+	};
 
 	return (
 		<div ref={outerRef} className="kanban-card-wrapper">
@@ -169,7 +169,7 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 			<div
 				ref={innerRef}
 				className={`kanban-card ${state.type !== 'idle' ? state.type : ''} ${isSelected ? 'selected' : ''} ${selectedTask?.id}`}
-                onClick={handleClick}
+				onClick={handleClick}
 			>
 				<h3>{task.title}</h3>
 				<p>{task.description}</p>

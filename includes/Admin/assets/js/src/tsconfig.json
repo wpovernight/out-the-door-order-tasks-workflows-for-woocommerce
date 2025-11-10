@@ -1,5 +1,11 @@
 {
 	"compilerOptions": {
+		"baseUrl": "./",
+		"paths": {
+			"@shared/*": ["shared/*"],
+			"@taskManager/*": ["task-manager/*"],
+			"@orderEdit/*": ["order-edit/*"]
+		},
 		"target": "ES6",
 		"jsx": "react",
 		"module": "ESNext",

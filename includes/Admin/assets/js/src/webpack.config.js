@@ -6,14 +6,22 @@ module.exports = (env, argv) => {
 
 	return {
 		mode,
-		entry: './index.tsx',
+		entry: {
+			'task-manager': path.resolve(__dirname, 'task-manager/index.tsx'),
+			// 'order-edit': path.resolve(__dirname, 'order-edit/index.tsx'),
+		},
 		output: {
-			filename: 'task-manager.js',
-			path: path.resolve(__dirname, 'build'),
-			clean: true,
+			filename: '[name].js',
+			path: path.resolve(__dirname, '..'), // output directly in /js (parent of src)
+			clean: false, // don’t delete other files
 		},
 		resolve: {
 			extensions: ['.ts', '.tsx', '.js'],
+			alias: {
+				'@shared': path.resolve(__dirname, 'shared/'),
+				'@taskManager': path.resolve(__dirname, 'task-manager/'),
+				'@orderEdit': path.resolve(__dirname, 'order-edit/'),
+			},
 		},
 		module: {
 			rules: [
@@ -31,7 +39,7 @@ module.exports = (env, argv) => {
 			'react/jsx-runtime': 'React',
 			'react/jsx-dev-runtime': 'React',
 		},
-		devtool: !isProduction ? 'source-map' : false,
+		devtool: isProduction ? false : 'source-map',
 		optimization: {
 			minimize: isProduction,
 		},

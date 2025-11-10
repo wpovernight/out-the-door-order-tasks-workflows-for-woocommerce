@@ -8,9 +8,11 @@ import {
 import { autoScrollForElements } from '@atlaskit/pragmatic-drag-and-drop-auto-scroll/element';
 
 import { useTasks } from '../../../context/TaskContext';
-import { FieldOption, Task } from '../../../types/task';
+import { FieldOption, Task } from '@shared/types/task';
 import { getColumnData, isCardData } from '../data';
 import { Card } from './Card';
+import { useSidebarModal } from '@shared/context/SidebarModalContext';
+import { TaskForm } from '../forms/TaskForm';
 
 interface ColumnProps {
 	column: FieldOption;
@@ -29,6 +31,7 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 	const scrollableRef = useRef<HTMLDivElement | null>(null);
 	const headerRef = useRef<HTMLDivElement | null>(null);
 	const containerRef = useRef<HTMLDivElement | null>(null);
+	const { openSidebar, closeSidebar } = useSidebarModal();
 
 	const [state, setState] = useState<ColumnState>(IDLE);
 	// const {saveTask} = useTasks();

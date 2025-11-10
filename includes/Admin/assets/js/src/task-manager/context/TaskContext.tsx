@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Task, FieldOption } from '../types/task';
-import { fetchTasks, fetchStatus, moveTask as moveTaskAPI } from '../utils/api';
+import { Task, FieldOption } from '@shared/types/task';
+import { fetchTasks, fetchStatus, moveTask as moveTaskAPI } from '@shared/utils/api';
 
 interface TaskContextType {
 	tasks: Task[];
