@@ -32,7 +32,7 @@ export const SidebarModal: React.FC<SidebarModalProps> = ({
 				/>
 
 				{/* Sidebar Modal */}
-				<motion.aside
+				<motion.div
 					key="sidebar-modal"
 					className="wpo-aom-sidebar-modal"
 					initial={{ x: '100%' }}
@@ -45,14 +45,14 @@ export const SidebarModal: React.FC<SidebarModalProps> = ({
 							<h2 className="wpo-aom-sidebar-title">{title}</h2>
 						)}
 						<button
-							className="wpo-aom-sidebar-close"
+							className="wpo-button wpo-aom-sidebar-close"
 							onClick={onClose}
 						>
 							<span className="screenReader">Close</span>
 						</button>
 					</div>
 					<div className="wpo-aom-sidebar-content">{children}</div>
-				</motion.aside>
+				</motion.div>
 			</>
 		</AnimatePresence>
 	);
