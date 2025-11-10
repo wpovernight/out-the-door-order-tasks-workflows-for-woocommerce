@@ -135,7 +135,7 @@ function remove_sample_tasks(): void {
 ## Manual Build Instructions
 To build the Task Manager React app, run the following commands:
 ```bash
-cd includes/Admin/assets/js/task-manager
+cd includes/Admin/assets/js/src
 npm install
 npm run build
 ```
