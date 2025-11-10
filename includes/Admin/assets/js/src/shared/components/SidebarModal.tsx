@@ -46,7 +46,7 @@ export const SidebarModal: React.FC<SidebarModalProps> = ({
 							)}
 							<button
 								type="button"
-								className="wpo-button wpo-aom-sidebar-close"
+								className="wpo-button wpo-button-icon wpo-aom-sidebar-close"
 								onClick={onClose}
 							>
 								<span className="screenReader">Close</span>

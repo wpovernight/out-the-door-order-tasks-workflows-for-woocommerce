@@ -167,7 +167,7 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 	const openTaskCreationModal = () => {
 		console.log('Opening task creation modal for column:', column.id);
 		openSidebar(<TaskForm columnId={column.id} onDone={closeSidebar} />, {
-			title: 'Create Task',
+			title: 'Add Task',
 		});
 	};
 
@@ -178,7 +178,7 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 				<h2>{column.label}</h2>
 				<button
 					onClick={openTaskCreationModal}
-					className="add-task-button"
+					className="wpo-button wpo-button-icon add-task-button"
 				>
 					<span className="screenReader">Create</span>
 				</button>

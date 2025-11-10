@@ -1,10 +1,9 @@
 :root {
-    --primary-color: #0079bf;
-    --bg-light: #f5f6f7;
-    --card-bg: #fff;
-    --text-primary: #333;
-    --border-color: #c3c4c7;
-    --card-shadow-sm: 0px 1px 1px #1E1F2140, 0px 0px 1px #1E1F214F
+    --wpo-aom-primary-color: #0079bf;
+    --wpo-aom-bg-light: #f5f6f7;
+    --wpo-aom-card-bg: #fff;
+    --wpo-aom-text-primary: #333;
+    --wpo-aom-card-shadow: 0px 1px 1px #1E1F2140, 0px 0px 1px #1E1F214F
 }
 
 .screenReader {
@@ -61,8 +60,8 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
 }
 
 #wpo-aom-task-manager-container > .inner > .header > .views-filter > ul > li.active, #wpo-aom-task-manager-container > .inner > .header > .views-filter > ul > li:hover {
-    color: var(--primary-color);
-    border-bottom: 2px solid var(--primary-color)
+    color: var(--wpo-aom-primary-color);
+    border-bottom: 2px solid var(--wpo-aom-primary-color)
 }
 
 .kanban-board {
@@ -76,7 +75,7 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     flex: 0 0 21em;
     display: flex;
     flex-direction: column;
-    background: var(--bg-light);
+    background: var(--wpo-aom-bg-light);
     border-radius: 6px;
     padding-bottom: 1em;
     border: 1px solid #d1d9e0
@@ -129,7 +128,7 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     margin: 0;
     text-transform: uppercase;
     letter-spacing: .5px;
-    color: var(--text-primary)
+    color: var(--wpo-aom-text-primary)
 }
 
 .kanban-board .kanban-card-wrapper {
@@ -139,25 +138,25 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
 }
 
 .kanban-board .kanban-card {
-    background: var(--card-bg);
+    background: var(--wpo-aom-card-bg);
     border-radius: 4px;
     padding: .875em;
     margin: .1em;
-    box-shadow: var(--card-shadow-sm);
+    box-shadow: var(--wpo-aom-card-shadow);
     cursor: grab;
     transition: all .15s ease;
     border: 1px solid transparent
 }
 
 .kanban-board .kanban-card:hover {
-    border-color: var(--primary-color)
+    border-color: var(--wpo-aom-primary-color)
 }
 
 .kanban-board .kanban-card h3 {
     margin: 0 0 .5em 0;
     font-size: .95em;
     font-weight: 600;
-    color: var(--text-primary)
+    color: var(--wpo-aom-text-primary)
 }
 
 .kanban-board .kanban-card p {
@@ -169,7 +168,7 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
 
 .kanban-board .kanban-card.dragging,
 .kanban-board .kanban-card.selected {
-    border-color: var(--primary-color);
+    border-color: var(--wpo-aom-primary-color);
 }
 
 .kanban-board .kanban-card.dragging {
@@ -183,7 +182,7 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     left: 0;
     right: 0;
     height: 3px;
-    background: var(--primary-color);
+    background: var(--wpo-aom-primary-color);
     border-radius: 2px;
     z-index: 10;
     animation: slideIn .15s ease-out
@@ -215,25 +214,46 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     }
 }
 
+.wpo-aom-actions {
+    display: flex;
+    gap: 0.6em;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.wpo-aom-actions > .wpo-button {
+    flex: 1;
+    border: 1px solid #dadcde;
+    height: 2.5em;
+}
+
 .wpo-button {
     background: transparent;
     border: none;
     cursor: pointer;
-    padding: 0;
-    margin: 0;
     transition: all 0.3s;
     border-radius: 0.3em;
+}
+
+.wpo-button-primary {
+    background-color: #6e1edc;
+    color: #fff;
+}
+
+.wpo-button-icon {
+    padding: 0;
+    margin: 0;
     font-size: 1.5em;
+}
+
+.wpo-button-icon:hover {
+    background-color: #0000000d;
 }
 
 .add-task-button {
     color: #838790;
     width: 1.3em;
     height: 1.3em;
-}
-
-.add-task-button:hover {
-    background-color: #0000000d;
 }
 
 .add-task-button::before {
@@ -255,7 +275,7 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     right: 0;
     height: calc(100vh - 32px);
     z-index: 9991;
-    width: 37em;
+    width: 27vw;
     overflow: hidden;
     overscroll-behavior-y: none;
     border-left: 1px solid #ddd;
@@ -281,4 +301,10 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
 .wpo-aom-sidebar-header {
     display: flex;
     justify-content: space-between;
+}
+
+.wpo-aom-task-form > fieldset > div {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
 }
