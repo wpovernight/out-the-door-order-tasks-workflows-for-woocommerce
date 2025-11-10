@@ -7,6 +7,10 @@
     --card-shadow-sm: 0px 1px 1px #1E1F2140, 0px 0px 1px #1E1F214F
 }
 
+.screenReader {
+    display: none;
+}
+
 body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     background-color: #fff;
     padding-left: 0
@@ -211,18 +215,21 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     }
 }
 
-.add-task-button {
+.wpo-button {
     background: transparent;
     border: none;
-    color: #838790;
-    font-size: 1.5em;
     cursor: pointer;
-    transition: all 0.3s;
-    border-radius: 0.3em;
-    width: 1.3em;
-    height: 1.3em;
     padding: 0;
     margin: 0;
+    transition: all 0.3s;
+    border-radius: 0.3em;
+    font-size: 1.5em;
+}
+
+.add-task-button {
+    color: #838790;
+    width: 1.3em;
+    height: 1.3em;
 }
 
 .add-task-button:hover {
@@ -235,6 +242,43 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     display: block;
 }
 
-.screenReader {
-    display: none;
+.wpo-aom-sidebar-close::before {
+    content: '\f335';
+    font-family: 'dashicons';
+}
+
+.wpo-aom-sidebar-modal {
+    position: fixed;
+    inset: 0;
+    top: 32px; /* Adjust for admin bar height */
+    left: auto;
+    right: 0;
+    height: calc(100vh - 32px);
+    z-index: 9991;
+    width: 37em;
+    overflow: hidden;
+    overscroll-behavior-y: none;
+    border-left: 1px solid #ddd;
+    background: #fff;
+}
+
+.wpo-aom-sidebar-backdrop {
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    position: fixed;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    left: 0;
+    right: auto;
+    z-index: 9990;
+}
+
+.wpo-aom-sidebar-modal > * {
+    padding: 1em;
+}
+
+.wpo-aom-sidebar-header {
+    display: flex;
+    justify-content: space-between;
 }
