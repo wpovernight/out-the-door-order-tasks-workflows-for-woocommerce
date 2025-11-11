@@ -3,7 +3,8 @@
     --wpo-aom-bg-light: #f5f6f7;
     --wpo-aom-card-bg: #fff;
     --wpo-aom-text-primary: #333;
-    --wpo-aom-card-shadow: 0px 1px 1px #1E1F2140, 0px 0px 1px #1E1F214F
+    --wpo-aom-card-shadow: 0px 1px 1px #1E1F2140, 0px 0px 1px #1E1F214F;
+    --wpo-aom-border-color: #d5d7da;
 }
 
 .screenReader {
@@ -243,8 +244,13 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
 .wpo-button-icon {
     padding: 0;
     margin: 0;
-    font-size: 1.5em;
 }
+
+.wpo-button-icon::before {
+    font-family: 'dashicons';
+    display: block;
+}
+
 
 .wpo-button-icon:hover {
     background-color: #0000000d;
@@ -254,17 +260,21 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     color: #838790;
     width: 1.3em;
     height: 1.3em;
+    font-size: 1.5em;
 }
 
 .add-task-button::before {
     content: '\f543';
-    font-family: 'dashicons';
-    display: block;
+}
+
+.wpo-aom-sidebar-close {
+    width: 1.3em;
+    height: 1.3em;
+    font-size: 1.7em;
 }
 
 .wpo-aom-sidebar-close::before {
     content: '\f335';
-    font-family: 'dashicons';
 }
 
 .wpo-aom-sidebar-modal {
@@ -275,11 +285,35 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     right: 0;
     height: calc(100vh - 32px);
     z-index: 9991;
-    width: 27vw;
+    width: 40em;
     overflow: hidden;
     overscroll-behavior-y: none;
     border-left: 1px solid #ddd;
     background: #fff;
+}
+
+.wpo-aom-sidebar-modal > .inner {
+    overflow-y: auto;
+    height: 100%;
+    scrollbar-gutter: stable;
+    display: flex;
+    flex-direction: column;
+}
+
+.wpo-aom-sidebar-content {
+    height: 100%;
+}
+
+.wpo-aom-task-form {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.wpo-aom-task-form > .wpo-aom-actions {
+    border-top: 1px solid var(--wpo-aom-border-color);
+    padding: 2em 1em;
+    margin-top: auto;
 }
 
 .wpo-aom-sidebar-backdrop {
@@ -294,17 +328,41 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     z-index: 9990;
 }
 
-.wpo-aom-sidebar-modal > * {
-    padding: 1em;
+.wpo-aom-sidebar-header > h2 {
+    padding: 0;
+    margin: 0;
+}
+
+.wpo-aom-task-form > fieldset {
+    display: flex;
+    flex-direction: column;
+    gap: 2em;
 }
 
 .wpo-aom-sidebar-header {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    padding: 1em;
 }
 
-.wpo-aom-task-form > fieldset > div {
+.wpo-aom-task-field-group {
+    display: flex;
+    padding: 0 1em;
+    gap: 0.5em;
+}
+
+.wpo-aom-task-field-group input,
+.wpo-aom-task-field-group select,
+.wpo-aom-task-field-group textarea {
+    font-size: inherit;
+    border-color: var(--wpo-aom-border-color);
+    border-radius: 0.5em;
+}
+
+.wpo-aom-task-field-group > * {
     width: 100%;
     display: flex;
     flex-direction: column;
+    gap: 5px;
 }

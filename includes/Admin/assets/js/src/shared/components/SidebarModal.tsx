@@ -38,23 +38,21 @@ export const SidebarModal: React.FC<SidebarModalProps> = ({
 						exit={{ x: '100%' }}
 						transition={{ type: 'tween', duration: 0.3 }}
 					>
-						<div className="wpo-aom-sidebar-header">
-							{title && (
-								<h2 className="wpo-aom-sidebar-title">
-									{title}
-								</h2>
-							)}
-							<button
-								type="button"
-								className="wpo-button wpo-button-icon wpo-aom-sidebar-close"
-								onClick={onClose}
-							>
-								<span className="screenReader">Close</span>
-							</button>
-						</div>
+						<div className="inner">
+							<div className="wpo-aom-sidebar-header">
+								{title && <h2>{title}</h2>}
+								<button
+									type="button"
+									className="wpo-button wpo-button-icon wpo-aom-sidebar-close"
+									onClick={onClose}
+								>
+									<span className="screenReader">Close</span>
+								</button>
+							</div>
 
-						<div className="wpo-aom-sidebar-content">
-							{children}
+							<div className="wpo-aom-sidebar-content">
+								{children}
+							</div>
 						</div>
 					</motion.div>
 				</>
