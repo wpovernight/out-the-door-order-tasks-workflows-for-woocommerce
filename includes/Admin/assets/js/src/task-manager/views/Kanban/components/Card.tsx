@@ -166,10 +166,16 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 			{state.type === 'over' && state.closestEdge === 'top' && (
 				<span className="kanban-drop-indicator top" />
 			)}
+			{/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
 			<div
 				ref={innerRef}
 				className={`kanban-card ${state.type !== 'idle' ? state.type : ''} ${isSelected ? 'selected' : ''} ${selectedTask?.id}`}
 				onClick={handleClick}
+				onKeyDown={(e) => {
+					if (e.key === 'Enter' || e.key === ' ') {
+						handleClick();
+					}
+				}}
 			>
 				<h3>{task.title}</h3>
 				<p>{task.description}</p>

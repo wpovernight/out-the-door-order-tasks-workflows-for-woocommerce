@@ -154,7 +154,18 @@ export const Board: React.FC = () => {
 	};
 
 	return (
-		<div ref={scrollableRef} className="kanban-board" onClick={handleClick}>
+		// eslint-disable-next-line jsx-a11y/no-static-element-interactions
+		<div
+			ref={scrollableRef}
+			className="kanban-board"
+			onClick={handleClick}
+			tabIndex={0}
+			onKeyDown={(e) => {
+				if (e.key === 'Escape') {
+					clearSelectedTask();
+				}
+			}}
+		>
 			{statusesRef.current.map((col) => (
 				<Column
 					key={col.id}
