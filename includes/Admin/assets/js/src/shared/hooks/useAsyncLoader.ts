@@ -47,7 +47,8 @@ export function useAsyncLoader(
 		return () => {
 			isActive = false;
 		};
-	}, [...dependencies, asyncFunction]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, dependencies);
 
 	return { loadingStatus: status, loadingError: error };
 }
