@@ -1,61 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useTasks } from '../../context/TaskContext';
 import { Board } from './components/Board';
 import { ViewTaskProvider } from './context/ViewTaskContext';
+import { useAsyncLoader } from '@shared/hooks/useAsyncLoader';
 
 export const KanbanView: React.FC = () => {
 	useEffect(() => {
 		console.log('KanbanView mounted'); // Debug log
 	}, []);
 
-	const { isDataLoaded, loadTasks, loadStatuses } = useTasks();
+	const { loadTasks, loadFieldOptions } = useTasks();
 
-	type Status = 'idle' | 'loading' | 'error';
+	const { loadingStatus, loadingError } = useAsyncLoader(async () => {
+		await Promise.all([loadTasks(), loadFieldOptions('status')]);
+	}, [loadTasks, loadFieldOptions]);
 
-	const [status, setStatus] = useState<Status>('idle');
-	const [error, setError] = useState<Error | null>(null);
-
-	useEffect(() => {
-		let isMounted = true;
-
-		const initialize = async () => {
-			if (isDataLoaded) {
-				setStatus('idle');
-				return;
-			}
-
-			setStatus('loading');
-
-			try {
-				await Promise.all([loadTasks(), loadStatuses()]);
-				if (isMounted) {
-					setStatus('idle');
-				}
-			} catch (err: unknown) {
-				if (!isMounted) {
-					return;
-				}
-				setStatus('error');
-				setError(
-					err instanceof Error
-						? err
-						: new Error('Unknown initialization error')
-				);
-			} finally {
-				if (isMounted) {
-					setStatus('idle');
-				}
-			}
-		};
-
-		initialize();
-
-		return () => {
-			isMounted = false;
-		};
-	}, [isDataLoaded, loadTasks, loadStatuses]);
-
-	if (status === 'loading') {
+	// ToDo: Use a skeleton loader instead of a simple loading spinner
+	if (loadingStatus === 'loading') {
 		return (
 			<div className="loading-spinner">
 				{(window as any).WPO_AOM_TaskManager.loading}
@@ -63,7 +24,8 @@ export const KanbanView: React.FC = () => {
 		);
 	}
 
-	if (status === 'error') {
+	// ToDo: Improve error handling UI
+	if (loadingStatus === 'error') {
 		return (
 			<div className="error-message">
 				{(window as any).WPO_AOM_TaskManager.errorLoading}
