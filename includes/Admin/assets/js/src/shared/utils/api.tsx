@@ -36,7 +36,10 @@ export async function fetchTasks(): Promise<Task[]> {
 	const response = await fetch(`${apiRoot}/tasks`, {
 		method: 'GET',
 		credentials: 'include',
-		headers: { 'X-WP-Nonce': nonce },
+		headers: {
+			'Content-Type': 'application/json',
+			'X-WP-Nonce': nonce,
+		},
 	});
 
 	const data = await handleResponse<any[]>(response);
@@ -106,21 +109,29 @@ export async function updateTask(
 	return handleResponse<Task>(response);
 }
 
+export async function fetchFieldOptions(
+	fieldSlug: string
+): Promise<FieldOption[]> {
+	const response = await fetch(
+		`${apiRoot}/tasks/fields/${fieldSlug}/options`,
+		{
+			method: 'GET',
+			credentials: 'include',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-WP-Nonce': nonce,
+			},
+		}
+	);
+
+	return handleResponse<FieldOption[]>(response);
+}
+
 /**
  * Fetches the available status options from the API.
  *
  * @return {Promise<FieldOption[]>} A promise that resolves to an array of column names.
  * @throws Will throw an error if the API request fails.
  */
-export async function fetchStatus(): Promise<FieldOption[]> {
-	const response = await fetch(`${apiRoot}/tasks/fields/status/options`, {
-		method: 'GET',
-		credentials: 'include',
-		headers: {
-			'Content-Type': 'application/json',
-			'X-WP-Nonce': nonce,
-		},
-	});
-
-	return handleResponse<FieldOption[]>(response);
-}
+export const fetchStatus = (): Promise<FieldOption[]> =>
+	fetchFieldOptions('status');
