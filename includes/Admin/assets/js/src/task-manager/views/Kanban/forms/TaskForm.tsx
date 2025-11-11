@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTasks } from '../../../context/TaskContext';
 import { useAsyncLoader } from '@shared/hooks/useAsyncLoader';
+import { FieldOptionDropdown } from '@shared/components/FieldOptionDropdownField';
 
 type Status = 'idle' | 'loading' | 'error';
 
@@ -54,28 +55,17 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				<div className="wpo-aom-task-field-group">
 					<div>
 						<label htmlFor="status">Status</label>
-						<select
-							id="status"
-							name="status"
-							defaultValue={columnId}
-							required
-						>
-							{fieldOptions.status?.map((option) => (
-								<option key={option.id} value={option.slug}>
-									{option.label}
-								</option>
-							))}
-						</select>
+						<FieldOptionDropdown
+							value="Select"
+							options={fieldOptions.status}
+						/>
 					</div>
 					<div>
 						<label htmlFor="priority">Priority</label>
-						<select id="priority" name="priority">
-							{fieldOptions.priority?.map((option) => (
-								<option key={option.id} value={option.slug}>
-									{option.label}
-								</option>
-							))}
-						</select>
+						<FieldOptionDropdown
+							value="Select"
+							options={fieldOptions?.priority || []}
+						/>
 					</div>
 					<div>
 						<label htmlFor="due-date">Due Date</label>
@@ -85,7 +75,13 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				<div className="wpo-aom-task-field-group">
 					<div>
 						<label htmlFor="title">Title</label>
-						<input id="title" name="title" type="text" placeholder="Write a name for your task." required />
+						<input
+							id="title"
+							name="title"
+							type="text"
+							placeholder="Write a name for your task."
+							required
+						/>
 					</div>
 				</div>
 				<div className="wpo-aom-task-field-group">
@@ -109,7 +105,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 							id="description"
 							name="description"
 							rows={4}
-                            placeholder="Describe the task."
+							placeholder="Describe the task."
 						/>
 					</div>
 				</div>
