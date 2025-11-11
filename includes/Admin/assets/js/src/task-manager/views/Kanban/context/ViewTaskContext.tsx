@@ -18,7 +18,7 @@ const ViewTaskContext = React.createContext<ViewTaskContextType | undefined>(
 export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 	children,
 }) => {
-	const { tasks, statuses, isDataLoaded } = useTasks();
+	const { tasks, fieldOptions, tasksLoaded, fieldOptionsLoaded } = useTasks();
 	const [viewTasks, setViewTasks] = useState<Record<string, Task[]>>({});
 	const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
@@ -31,8 +31,10 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 	};
 
 	useEffect(() => {
+		const statuses = fieldOptions.status || [];
 		if (
-			!isDataLoaded ||
+			!tasksLoaded ||
+			!fieldOptionsLoaded.has('status') ||
 			tasks.length === 0 ||
 			statuses.length === 0 ||
 			Object.keys(viewTasks).length > 0
@@ -42,7 +44,7 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 
 		const grouped = groupAndSortTasks(tasks, statuses);
 		setViewTasks(grouped);
-	}, [isDataLoaded, tasks, statuses, viewTasks]);
+	}, [tasks, viewTasks, fieldOptions, tasksLoaded, fieldOptionsLoaded]);
 
 	return (
 		<ViewTaskContext.Provider
