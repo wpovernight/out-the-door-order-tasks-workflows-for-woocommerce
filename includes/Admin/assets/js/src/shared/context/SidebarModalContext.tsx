@@ -22,10 +22,10 @@ export const SidebarModalProvider: React.FC<{ children: React.ReactNode }> = ({
 	const [content, setContent] = useState<React.ReactNode>(null);
 
 	const openSidebar = useCallback(
-		(content: React.ReactNode, options?: OpenOptions) => {
+		(sidebarContent: React.ReactNode, options?: OpenOptions) => {
 			setIsOpen(true);
 			setTitle(options?.title);
-			setContent(content);
+			setContent(sidebarContent);
 		},
 		[]
 	);
