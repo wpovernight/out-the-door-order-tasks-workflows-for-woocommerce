@@ -12,14 +12,14 @@ import { Column } from './Column';
 import { useViewTasks } from '../context/ViewTaskContext';
 
 export const Board: React.FC = () => {
-	const { statuses, moveTask } = useTasks();
+	const { fieldOptions, moveTask } = useTasks();
 	const { viewTasks, setViewTasks, clearSelectedTask } = useViewTasks();
 	const scrollableRef = useRef<HTMLDivElement | null>(null);
 
-	const statusesRef = useRef(statuses);
+	const statusesRef = useRef(fieldOptions.status || []);
 	useEffect(() => {
-		statusesRef.current = statuses;
-	}, [statuses]);
+		statusesRef.current = fieldOptions.status || [];
+	}, [fieldOptions.status]);
 
 	// Setup DND behavior
 	useEffect(() => {
