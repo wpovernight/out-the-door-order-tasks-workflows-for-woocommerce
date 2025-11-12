@@ -56,15 +56,19 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 					<div>
 						<label htmlFor="status">Status</label>
 						<FieldOptionDropdown
-							value="Select"
+							placeholder="Select"
 							options={fieldOptions.status}
+							id="status"
+							selected={fieldOptions?.status?.[0]}
 						/>
 					</div>
 					<div>
 						<label htmlFor="priority">Priority</label>
 						<FieldOptionDropdown
-							value="Select"
+							placeholder="Select"
 							options={fieldOptions?.priority || []}
+							id="priority"
+							selected={fieldOptions?.priority?.[0]}
 						/>
 					</div>
 					<div>

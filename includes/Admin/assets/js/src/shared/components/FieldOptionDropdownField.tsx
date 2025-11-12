@@ -1,33 +1,77 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { FieldOption } from '@shared/types/task';
 import { useOnClickOutside } from '@shared/hooks/useOnClickOutside';
 
 interface DropdownProps {
-	value: string;
+	placeholder: string;
 	options: FieldOption[];
-	className?: string;
 	id?: string;
-	selectedSlug?: string;
-	onChange?: (value: string | number) => void;
+	className?: string;
+	selected?: FieldOption;
+	onChange?: (option: FieldOption) => void;
 }
 
 export const FieldOptionDropdown: React.FC<DropdownProps> = ({
-	value,
+	placeholder,
 	options,
 	className,
 	id,
-	selectedSlug,
+	selected,
 	onChange,
 }) => {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const [open, setOpen] = useState<boolean>(false);
-	const selected = options.find((option) => option.slug === selectedSlug);
+
+	const [selectedOption, setSelectedOption] = useState<FieldOption | null>(
+		null
+	);
+
+	useEffect(() => {
+		setSelectedOption(selected || null);
+	}, [selected]);
+
 	const toggleOpen = () => setOpen((prev) => !prev);
 
-	const handleClickOutside = () => {
-		setOpen(false);
+	useOnClickOutside(containerRef, () => setOpen(false));
+
+	// Helper function to calculate text color based on background color to keep text readable and accessible.
+	const calculateTextColor = (hex?: string): string | undefined => {
+		if (!hex) {
+			return undefined;
+		}
+		let c = hex.startsWith('#') ? hex.slice(1) : hex;
+		if (c.length === 3) {
+			c = c
+				.split('')
+				.map((ch) => ch + ch)
+				.join('');
+		}
+		if (c.length !== 6) {
+			return undefined;
+		}
+		const r = parseInt(c.slice(0, 2), 16);
+		const g = parseInt(c.slice(2, 4), 16);
+		const b = parseInt(c.slice(4, 6), 16);
+		const brightness = (299 * r + 587 * g + 114 * b) / 1000;
+		return brightness > 140 ? '#111' : '#fff';
 	};
-	useOnClickOutside(containerRef, handleClickOutside);
+
+	const applyStyle = (option?: FieldOption) => {
+		const backgroundColor = option?.color || undefined;
+		const textColor = calculateTextColor(backgroundColor);
+		return backgroundColor
+			? ({
+					backgroundColor,
+					color: textColor,
+				} as React.CSSProperties)
+			: {};
+	};
+
+	const handleSelect = (option: FieldOption) => {
+		onChange?.(option);
+		setOpen(false);
+		setSelectedOption(option);
+	};
 
 	return (
 		<div
@@ -36,17 +80,15 @@ export const FieldOptionDropdown: React.FC<DropdownProps> = ({
 		>
 			<button
 				type="button"
-				className={`${className ? className : ''} ${open ? 'open' : ''}`}
 				id={id}
+				className={`${className ? className : ''} ${open ? 'open' : ''}`}
 				onClick={toggleOpen}
 			>
 				<span
-					style={{
-						backgroundColor:
-							selected && selected.color ? selected.color : '',
-					}}
+					className="wpo-aom-label"
+					style={selectedOption ? applyStyle(selectedOption) : {}}
 				>
-					{selected ? selected.label : value}
+					{selectedOption ? selectedOption.label : placeholder}
 				</span>
 			</button>
 			{open && (
@@ -55,30 +97,23 @@ export const FieldOptionDropdown: React.FC<DropdownProps> = ({
 						// eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
 						<li
 							key={option.id}
-							className={`${selectedSlug === option.slug ? 'selected' : ''}`}
-							onClick={() => {
-								if (onChange) {
-									onChange(option.slug);
-								}
-								setOpen(false);
-							}}
+							className={`${
+								selectedOption?.slug === option.slug
+									? 'selected'
+									: ''
+							}`}
+							onClick={() => handleSelect(option)}
 							onKeyDown={(e) => {
 								if (e.key === 'Enter' || e.key === ' ') {
 									e.preventDefault();
-									if (onChange) {
-										onChange(option.slug);
-									}
-									setOpen(false);
+									handleSelect(option);
 								}
 							}}
 							tabIndex={0}
 						>
 							<span
-								style={{
-									backgroundColor: option.color
-										? option.color
-										: '',
-								}}
+								className="wpo-aom-label"
+								style={applyStyle(option)}
 							>
 								{option.label}
 							</span>
