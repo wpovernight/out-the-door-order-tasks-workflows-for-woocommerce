@@ -12,7 +12,7 @@ interface DropdownProps {
 }
 
 export const FieldOptionDropdown: React.FC<DropdownProps> = ({
-	placeholder,
+	placeholder = 'Select',
 	options,
 	className,
 	id,
