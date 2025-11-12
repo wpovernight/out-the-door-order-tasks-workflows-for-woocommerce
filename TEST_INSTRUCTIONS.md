@@ -18,7 +18,7 @@ Run the below code snippet to create sample tasks programmatically.
 create_sample_tasks( 10 ); // Send number of sample tasks to create.
 
 
-function create_sample_tasks( int $count 15, bool $reset = true ): void {
+function create_sample_tasks( int $count = 15, bool $reset = true ): void {
 	if ( $reset ) {
 		remove_sample_tasks();
 	}
