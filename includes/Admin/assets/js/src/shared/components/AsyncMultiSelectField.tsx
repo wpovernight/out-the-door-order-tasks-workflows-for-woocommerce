@@ -29,18 +29,14 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 }) => {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-	const [showOptions, setShowOptions] = useState<boolean>(false);
+
+	const [showResults, setShowResults] = useState<boolean>(false);
 	const [results, setResults] = useState<Option[]>([]);
 	const [selected, setSelected] = useState<Option[]>(selectedOptions);
 	const [query, setQuery] = useState<string>('');
 	const [loading, setLoading] = useState<boolean>(false);
 
-	useOnClickOutside(containerRef, () => setShowOptions(false));
-
-	// Sync selectedOptions prop with internal state
-	useEffect(() => {
-		setSelected(selectedOptions);
-	}, [selectedOptions]);
+	useOnClickOutside(containerRef, () => setShowResults(false));
 
 	// Debounced async search with stale-response guard
 	useEffect(() => {
@@ -51,7 +47,7 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 
 		if (!query.trim()) {
 			setResults([]);
-			setShowOptions(false);
+			setShowResults(false);
 			return;
 		}
 
@@ -64,7 +60,7 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 			try {
 				const results = await onSearch(query);
 				setResults(results);
-				setShowOptions(true);
+				setShowResults(true);
 			} catch (error) {
 				// eslint-disable-next-line no-console
 				console.error('Error fetching results:', error);
@@ -82,7 +78,7 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 
 	const handleInputFocus = () => {
 		if (results.length) {
-			setShowOptions(true);
+			setShowResults(true);
 		}
 	};
 
@@ -94,7 +90,7 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 		}
 		onSelect?.(option);
 		setSelected((prevSelected) => [...prevSelected, option]);
-		setShowOptions(false);
+		setShowResults(false);
 		setQuery('');
 		setResults([]);
 	};
@@ -115,12 +111,13 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 				type="text"
 				id={id}
 				className={className}
+				name={id}
 				placeholder={placeholder}
 				onFocus={handleInputFocus}
 				onChange={(e) => setQuery(e.target.value)}
 			/>
 
-			{showOptions && (
+			{showResults && (
 				<ul className="wpo-aom-async-multi-select-options">
 					{loading ? (
 						<li>Loading...</li>

@@ -2,6 +2,7 @@ import React from 'react';
 import { useTasks } from '../../../context/TaskContext';
 import { useAsyncLoader } from '@shared/hooks/useAsyncLoader';
 import { FieldOptionDropdown } from '@shared/components/FieldOptionDropdownField';
+import { AsyncMultiSelectField } from '@shared/components/AsyncMultiSelectField';
 
 type Status = 'idle' | 'loading' | 'error';
 
@@ -93,13 +94,30 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 						<label htmlFor="associated-orders">
 							Associated Orders
 						</label>
-						<select
+						<AsyncMultiSelectField
+							placeholder="Search orders by number"
 							id="associated-orders"
-							name="associated_orders"
-							className="wpo-aom-multiselect  wc-enhanced-select"
-							data-placeholder="Search orders by number"
-							multiple
-						></select>
+							className="wpo-aom-async-multiselect"
+							// Simulate return results of a search request
+							onSearch={async (query: string) => {
+								return [
+									{
+										id: 1,
+										label: `Order #${query} - John Doe`,
+									},
+									{
+										id: 2,
+										label: `Order #${query} - Jane Smith`,
+									},
+								];
+							}}
+							onSelect={(option) => {
+								console.log('Selected order:', option);
+							}}
+							onRemove={(optionId) => {
+								console.log('Removed order ID:', optionId);
+							}}
+						/>
 					</div>
 				</div>
 				<div className="wpo-aom-task-field-group">
