@@ -470,8 +470,6 @@ final class TaskManagerService {
 			$status_field_id => $target_status_id,
 		);
 
-		code_log( $update_data );
-
 		$result = $this->task_field_value_repository->update_task_multiple_field_values( $task_id, $update_data );
 
 		return $new_position;
@@ -500,14 +498,11 @@ final class TaskManagerService {
 		$precision = 0.0001;
 		// Check for precision issues.
 		if ( abs( $next_position - $previous_position ) < $precision ) {
-			$this->rebalance_positions( $status_id );
+			// ToDo: Improve this part by considering async rebalancing, locks, etc.
+			$this->task_repository->rebalance_positions( $status_id );
 		}
 
 		return $position;
-	}
-
-	public function rebalance_positions( ?int $status_id = null ): void {
-		// ToDo: Complete this method
 	}
 
 	public function set_due_date( int $task_id, string $date ): bool {
