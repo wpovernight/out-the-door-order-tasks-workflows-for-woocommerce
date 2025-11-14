@@ -169,7 +169,7 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 			{/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
 			<div
 				ref={innerRef}
-				className={`kanban-card ${state.type !== 'idle' ? state.type : ''} ${isSelected ? 'selected' : ''} ${selectedTask?.id}`}
+				className={`kanban-card ${state.type !== 'idle' ? state.type : ''} ${isSelected ? 'selected' : ''}`}
 				onClick={handleClick}
 				onKeyDown={(e) => {
 					if (e.key === 'Enter' || e.key === ' ') {
