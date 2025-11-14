@@ -14,29 +14,29 @@
 
 body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     background-color: #fff;
-    padding-left: 0
+    padding-left: 0;
 }
 
 #wpo-aom-task-management > h1 {
     font-size: 1.5em;
-    margin: 1.3em
+    margin: 1.3em;
 }
 
 #wpo-aom-task-manager-container {
-    margin-top: 3em
+    margin-top: 3em;
 }
 
 #wpo-aom-task-manager-container > .inner > .header {
-    border-bottom: 1px solid #091E4224
+    border-bottom: 1px solid #091E4224;
 }
 
 #wpo-aom-task-manager-container > .inner > .view {
     height: calc(100vh - 14em);
-    padding: 1em
+    padding: 1em;
 }
 
 #wpo-aom-task-manager-container > .inner > .header > .views-filter {
-    margin-left: 2em
+    margin-left: 2em;
 }
 
 #wpo-aom-task-manager-container > .inner > .header > .views-filter > ul {
@@ -46,11 +46,11 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     font-weight: 600;
     list-style: none;
     padding: 0;
-    margin: 0
+    margin: 0;
 }
 
 #wpo-aom-task-manager-container > .inner > .header > .views-filter > ul > li {
-    margin-bottom: 0
+    margin-bottom: 0;
 }
 
 #wpo-aom-task-manager-container > .inner > .header > .views-filter > ul > li > button {
@@ -58,19 +58,19 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     border: none;
     cursor: pointer;
     padding-bottom: .7em;
-    margin-bottom: 0
+    margin-bottom: 0;
 }
 
 #wpo-aom-task-manager-container > .inner > .header > .views-filter > ul > li.active, #wpo-aom-task-manager-container > .inner > .header > .views-filter > ul > li:hover {
     color: var(--wpo-aom-primary-color);
-    border-bottom: 2px solid var(--wpo-aom-primary-color)
+    border-bottom: 2px solid var(--wpo-aom-primary-color);
 }
 
 .kanban-board {
     display: flex;
     gap: 1em;
     height: 100%;
-    overflow-x: auto
+    overflow-x: auto;
 }
 
 .kanban-board .kanban-column {
@@ -80,7 +80,7 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     background: var(--wpo-aom-bg-light);
     border-radius: 6px;
     padding-bottom: 1em;
-    border: 1px solid #d1d9e0
+    border: 1px solid #d1d9e0;
 }
 
 .kanban-board .kanban-column-scrollable {
@@ -88,24 +88,24 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     overflow-y: auto;
     scrollbar-color: #ccc transparent;
     margin-right: 4px;
-    padding: 0 1px 0 5px
+    padding: 2px 1px 2px 5px;
 }
 
 .kanban-board .kanban-column-scrollable::-webkit-scrollbar {
-    width: .5em
+    width: .5em;
 }
 
 .kanban-board .kanban-column-scrollable::-webkit-scrollbar-track {
-    background: 0 0
+    background: 0 0;
 }
 
 .kanban-board .kanban-column-scrollable::-webkit-scrollbar-thumb {
     background-color: #ccc;
-    border-radius: 3px
+    border-radius: 3px;
 }
 
 .kanban-board .kanban-column-scrollable::-webkit-scrollbar-thumb:hover {
-    background-color: #999
+    background-color: #999;
 }
 
 .kanban-board .kanban-column-container {
@@ -113,7 +113,7 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     flex-direction: column;
     gap: 3px;
     min-height: 100%;
-    padding: 0 2px
+    padding: 0 2px;
 }
 
 .kanban-board .kanban-column-header {
@@ -136,7 +136,7 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
 .kanban-board .kanban-card-wrapper {
     position: relative;
     user-select: none;
-    display: block
+    display: block;
 }
 
 .kanban-board .kanban-card {
@@ -147,25 +147,25 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     box-shadow: var(--wpo-aom-card-shadow);
     cursor: grab;
     transition: all .15s ease;
-    border: 1px solid transparent
+    border: 1px solid transparent;
 }
 
 .kanban-board .kanban-card:hover {
-    border-color: var(--wpo-aom-primary-color)
+    border-color: var(--wpo-aom-primary-color);
 }
 
 .kanban-board .kanban-card h3 {
     margin: 0 0 .5em 0;
     font-size: .95em;
     font-weight: 600;
-    color: var(--wpo-aom-text-primary)
+    color: var(--wpo-aom-text-primary);
 }
 
 .kanban-board .kanban-card p {
     margin: 0;
     font-size: .85em;
     color: #666;
-    line-height: 1.4
+    line-height: 1.4;
 }
 
 .kanban-board .kanban-card.dragging,
@@ -187,32 +187,32 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     background: var(--wpo-aom-primary-color);
     border-radius: 2px;
     z-index: 10;
-    animation: slideIn .15s ease-out
+    animation: slideIn .15s ease-out;
 }
 
 .kanban-board .kanban-drop-indicator.top {
-    top: -2px
+    top: -2px;
 }
 
 .kanban-board .kanban-drop-indicator.bottom {
-    bottom: -2px
+    bottom: -2px;
 }
 
 .kanban-column-container > .kanban-drop-indicator {
     position: static;
     height: 2px;
     margin: .5em 0;
-    border-radius: 1px
+    border-radius: 1px;
 }
 
 @keyframes slideIn {
     from {
         opacity: 0;
-        transform: scaleX(.8)
+        transform: scaleX(.8);
     }
     to {
         opacity: 1;
-        transform: scaleX(1)
+        transform: scaleX(1);
     }
 }
 
