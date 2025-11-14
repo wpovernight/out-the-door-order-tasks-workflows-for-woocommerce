@@ -82,17 +82,32 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 				element: container,
 				canDrop: ({ source }) => isCardData(source.data),
 				getData: () => columnData,
-				onDragEnter({ source }) {
+				onDragEnter({ source, location }) {
 					if (!isCardData(source.data)) {
 						return;
 					}
 
-					// Recompute current tasks dynamically
-					const currentTasks = tasksRef.current.filter(
-						(t) => t.status === column.slug
-					);
+					// Check if dragging over empty space or over a card
+					const hasNoTargets =
+						location.current.dropTargets.length === 1;
+					if (hasNoTargets) {
+						updateState({ type: 'drag-over-empty' });
+					} else {
+						updateState({
+							type: 'drag-over-card',
+							draggingRect: source.data.rect,
+						});
+					}
+				},
+				onDrag({ source, location }) {
+					if (!isCardData(source.data)) {
+						return;
+					}
 
-					if (currentTasks.length === 0) {
+					// Check if dragging over empty space or over a card
+					const hasNoTargets =
+						location.current.dropTargets.length === 1;
+					if (hasNoTargets) {
 						updateState({ type: 'drag-over-empty' });
 					} else {
 						updateState({
@@ -106,19 +121,13 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 						return;
 					}
 
-					// If no inner card target is under cursor, treat it as empty
+					// If no inner card target is under cursor, treat it as empty space
 					const hasNoTargets =
 						location.current.dropTargets.length === 1;
 					// `1` means only the column itself is targeted (no inner card)
 					if (hasNoTargets) {
-						const currentTasks = tasksRef.current.filter(
-							(t) => t.status === column.slug
-						);
-
-						if (currentTasks.length === 0) {
-							updateState({ type: 'drag-over-empty' });
-							return;
-						}
+						updateState({ type: 'drag-over-empty' });
+						return;
 					}
 
 					updateState({
@@ -184,15 +193,17 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 				</button>
 			</div>
 			<div ref={scrollableRef} className="kanban-column-scrollable">
-				<div ref={containerRef} className="kanban-column-container">
+				<div
+					ref={containerRef}
+					className={`kanban-column-container ${
+						state.type === 'drag-over-empty'
+							? 'show-drop-indicator'
+							: ''
+					}`}
+				>
 					{tasks.map((task) => (
 						<Card key={task.id} task={task} />
 					))}
-
-					{/* Separator line at the bottom when dragging over empty space */}
-					{state.type === 'drag-over-empty' && (
-						<span className="kanban-drop-indicator" />
-					)}
 				</div>
 			</div>
 		</div>

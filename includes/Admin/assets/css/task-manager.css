@@ -88,7 +88,7 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     overflow-y: auto;
     scrollbar-color: #ccc transparent;
     margin-right: 4px;
-    padding: 2px 1px 2px 5px;
+    padding: 4px 1px 0 5px;
 }
 
 .kanban-board .kanban-column-scrollable::-webkit-scrollbar {
@@ -111,9 +111,8 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
 .kanban-board .kanban-column-container {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 5px;
     min-height: 100%;
-    padding: 0 2px;
 }
 
 .kanban-board .kanban-column-header {
@@ -176,10 +175,11 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
 .kanban-board .kanban-card.dragging {
     cursor: grabbing;
     box-shadow: 0 8px 16px rgba(0, 0, 0, .25);
-    opacity: .5;
+    opacity: .4;
 }
 
-.kanban-board .kanban-drop-indicator {
+.kanban-card-wrapper.drop-indicator-top::before {
+    content: "";
     position: absolute;
     left: 0;
     right: 0;
@@ -187,33 +187,36 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     background: var(--wpo-aom-primary-color);
     border-radius: 2px;
     z-index: 10;
-    animation: slideIn .15s ease-out;
+    top: -4px;
 }
 
-.kanban-board .kanban-drop-indicator.top {
-    top: -2px;
+.kanban-card-wrapper.drop-indicator-bottom::after,
+.kanban-column-container.show-drop-indicator .kanban-card-wrapper:last-child::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--wpo-aom-primary-color);
+    border-radius: 2px;
+    z-index: 10;
+    bottom: -4px;
 }
 
-.kanban-board .kanban-drop-indicator.bottom {
-    bottom: -2px;
+.kanban-column-container.show-drop-indicator:not(:has(.kanban-card-wrapper))::after {
+    content: "";
+    height: 2px;
+    background: var(--wpo-aom-primary-color);
+    border-radius: 2px;
+    z-index: 10;
 }
+
 
 .kanban-column-container > .kanban-drop-indicator {
     position: static;
     height: 2px;
     margin: .5em 0;
     border-radius: 1px;
-}
-
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: scaleX(.8);
-    }
-    to {
-        opacity: 1;
-        transform: scaleX(1);
-    }
 }
 
 .wpo-aom-actions {

@@ -125,6 +125,34 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 						closestEdge: edge,
 					});
 				},
+				onDrag({ source, self }) {
+					if (
+						!isCardData(source.data) ||
+						source.data.task.id === taskRef.current.id
+					) {
+						return;
+					}
+
+					const edge = extractClosestEdge(self.data);
+					if (!edge) {
+						return;
+					}
+
+					setState((prevState: CardState): CardState => {
+						if (
+							prevState.type === 'over' &&
+							prevState.closestEdge === edge
+						) {
+							return prevState;
+						}
+
+						return {
+							type: 'over',
+							draggingRect: source.data.rect as DOMRect,
+							closestEdge: edge,
+						};
+					});
+				},
 				onDragLeave({ source }) {
 					if (
 						!isCardData(source.data) ||
@@ -160,12 +188,19 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 	};
 
 	return (
-		<div ref={outerRef} className="kanban-card-wrapper">
+		<div
+			ref={outerRef}
+			className={`kanban-card-wrapper ${
+				state.type === 'over' && state.closestEdge === 'top'
+					? 'drop-indicator-top'
+					: ''
+			} ${
+				state.type === 'over' && state.closestEdge === 'bottom'
+					? 'drop-indicator-bottom'
+					: ''
+			}`}
+		>
 			{/* kanban prefix is used to avoid css conflicts */}
-			{/* Drop indicator above */}
-			{state.type === 'over' && state.closestEdge === 'top' && (
-				<span className="kanban-drop-indicator top" />
-			)}
 			{/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
 			<div
 				ref={innerRef}
@@ -180,10 +215,6 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 				<h3>{task.title}</h3>
 				<p>{task.description}</p>
 			</div>
-			{/* Drop indicator below */}
-			{state.type === 'over' && state.closestEdge === 'bottom' && (
-				<span className="kanban-drop-indicator bottom" />
-			)}
 		</div>
 	);
 };
