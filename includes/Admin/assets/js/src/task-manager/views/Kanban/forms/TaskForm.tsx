@@ -3,8 +3,7 @@ import { useTasks } from '../../../context/TaskContext';
 import { useAsyncLoader } from '@shared/hooks/useAsyncLoader';
 import { FieldOptionDropdown } from '@shared/components/FieldOptionDropdownField';
 import { AsyncMultiSelectField } from '@shared/components/AsyncMultiSelectField';
-
-type Status = 'idle' | 'loading' | 'error';
+import { searchOrders } from '@shared/utils/api';
 
 interface TaskFormProps {
 	taskId?: number;
@@ -18,7 +17,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 	onDone,
 }) => {
 	const { saveTask, loadTasks } = useTasks();
-	const { fieldOptions, loadFieldOptions, fieldOptionsLoaded } = useTasks();
+	const { fieldOptions, loadFieldOptions } = useTasks();
 
 	const { loadingStatus, loadingError } = useAsyncLoader(async () => {
 		await Promise.all([
@@ -95,31 +94,16 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 							Associated Orders
 						</label>
 						<AsyncMultiSelectField
-							placeholder="Search orders by number"
+							placeholder="Search orders by number, customer, address..."
 							id="associated-orders"
-							// Simulate return results of a search request
+							// ToDo: Lazy load for next pages
 							onSearch={async (query: string) => {
-								return [
-									{
-										id: 1,
-										label: `Order #${query} - John Doe`,
-										url: `/order/${query}`,
-									},
-									{
-										id: 2,
-										label: `Order #${query} - Jane Smith`,
-										url: `/order/${query}`,
-									},
-									{
-										id: 3,
-										label: `Order #${query} - Alice Johnson`,
-										url: `/order/${query}`,
-									},
-									{
-										id: 4,
-										label: `Order #${query} - Bob Brown`,
-									},
-								];
+								const results = await searchOrders(query);
+								return results.map((order) => ({
+									id: order.id,
+									label: `#${order.id}`,
+									searchLabel: `#${order.id} - ${order.billing?.first_name} ${order.billing?.last_name}`,
+								}));
 							}}
 							onSelect={(option) => {
 								console.log('Selected order:', option);
