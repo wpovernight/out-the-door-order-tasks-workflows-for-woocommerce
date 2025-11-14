@@ -1,9 +1,15 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, {
+	createContext,
+	useContext,
+	useState,
+	useCallback,
+	useRef,
+} from 'react';
 import { Task, FieldOption } from '@shared/types/task';
 import {
 	fetchTasks,
-	moveTask as moveTaskAPI,
 	fetchFieldOptions,
+	moveTask as moveTaskAPI,
 } from '@shared/utils/api';
 
 interface TaskContextType {
@@ -22,7 +28,6 @@ interface TaskContextType {
 		targetStatusId: number
 	) => Promise<void>;
 	tasksLoaded: boolean;
-	fieldOptionsLoaded: Set<string>;
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
@@ -30,17 +35,13 @@ const TaskContext = createContext<TaskContextType | undefined>(undefined);
 export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 	children,
 }) => {
+	// ---------------------
+	// TASKS
+	// ---------------------
 	const [tasks, setTasks] = useState<Task[]>([]);
 	const [tasksLoaded, setTasksLoaded] = useState(false);
 
-	const [fieldOptions, setFieldOptions] = useState<
-		Record<string, FieldOption[]>
-	>({});
-	const [fieldOptionsLoaded, setFieldOptionsLoaded] = useState<Set<string>>(
-		new Set()
-	);
-
-	const loadTasks = React.useCallback(
+	const loadTasks = useCallback(
 		async (force = false) => {
 			if (tasksLoaded && !force) {
 				return;
@@ -57,19 +58,38 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 		[tasksLoaded]
 	);
 
-	const loadFieldOptions = React.useCallback(
-		async (fieldSlug: string, force: boolean = false) => {
-			if (fieldOptionsLoaded.has(fieldSlug) && !force) {
+	// ---------------------
+	// FIELD OPTIONS
+	// ---------------------
+	const [fieldOptions, setFieldOptions] = useState<
+		Record<string, FieldOption[]>
+	>({});
+
+	// Track loaded flags in a ref only.
+	const loadedOptionsRef = useRef<Set<string>>(new Set());
+
+	/**
+	 * Must be stable: empty dependency array.
+	 * Must NOT depend on any state object.
+	 */
+	const loadFieldOptions = useCallback(
+		async (fieldSlug: string, force = false) => {
+			// Read from ref, not state.
+			if (loadedOptionsRef.current.has(fieldSlug) && !force) {
 				return;
 			}
 
 			try {
 				const data = await fetchFieldOptions(fieldSlug);
+
+				// Triggers UI update.
 				setFieldOptions((prev) => ({
 					...prev,
 					[fieldSlug]: data,
 				}));
-				setFieldOptionsLoaded((prev) => new Set(prev).add(fieldSlug));
+
+				// Update loaded flag without triggering rerender.
+				loadedOptionsRef.current.add(fieldSlug);
 			} catch (error) {
 				console.error(
 					`Failed to fetch field options for ${fieldSlug}:`,
@@ -77,27 +97,26 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				);
 			}
 		},
-		[fieldOptionsLoaded]
-	);
+		[]
+	); // No dependencies should be added here.
 
+	// ---------------------
+	// MOVE TASK
+	// ---------------------
 	const moveTask = async (
 		taskId: number,
 		previousTaskId: number | null,
 		targetStatusId: number
 	) => {
 		try {
-			const response = await moveTaskAPI(
-				taskId,
-				previousTaskId,
-				targetStatusId
-			);
+			await moveTaskAPI(taskId, previousTaskId, targetStatusId);
 		} catch (error) {
 			console.error('Failed to move task:', error);
 		}
 	};
 
-	const saveTask = async (taskId: number, updates: Partial<Task>) => {
-		// implement your update logic
+	const saveTask = async () => {
+		// ToDo: implement later
 	};
 
 	return (
@@ -111,7 +130,6 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				setFieldOptions,
 				loadFieldOptions,
 				tasksLoaded,
-				fieldOptionsLoaded,
 				moveTask,
 			}}
 		>
