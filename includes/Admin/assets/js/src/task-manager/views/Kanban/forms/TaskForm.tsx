@@ -36,7 +36,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 
 	if (loadingStatus === 'loading') {
 		return (
-			<div className="loading-spinner">
+			<div className="loading-spinner" style={{ padding: '0 1em' }}>
 				{(window as any).WPO_AOM_TaskManager.loading}
 			</div>
 		);
@@ -97,17 +97,27 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 						<AsyncMultiSelectField
 							placeholder="Search orders by number"
 							id="associated-orders"
-							className="wpo-aom-async-multiselect"
 							// Simulate return results of a search request
 							onSearch={async (query: string) => {
 								return [
 									{
 										id: 1,
 										label: `Order #${query} - John Doe`,
+										url: `/order/${query}`,
 									},
 									{
 										id: 2,
 										label: `Order #${query} - Jane Smith`,
+										url: `/order/${query}`,
+									},
+									{
+										id: 3,
+										label: `Order #${query} - Alice Johnson`,
+										url: `/order/${query}`,
+									},
+									{
+										id: 4,
+										label: `Order #${query} - Bob Brown`,
 									},
 								];
 							}}

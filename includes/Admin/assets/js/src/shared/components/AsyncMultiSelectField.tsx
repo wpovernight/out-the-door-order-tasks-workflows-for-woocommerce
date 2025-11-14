@@ -29,6 +29,7 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 }) => {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const inputRef = useRef<HTMLInputElement>(null);
 
 	const [showResults, setShowResults] = useState<boolean>(false);
 	const [results, setResults] = useState<Option[]>([]);
@@ -58,8 +59,12 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 		debounceRef.current = setTimeout(async () => {
 			setLoading(true);
 			try {
-				const results = await onSearch(query);
-				setResults(results);
+				const searchResults = await onSearch(query);
+				const filteredResults = searchResults.filter(
+					(result) =>
+						!selected.find((option) => option.id === result.id)
+				);
+				setResults(filteredResults);
 				setShowResults(true);
 			} catch (error) {
 				// eslint-disable-next-line no-console
@@ -74,7 +79,7 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 				window.clearTimeout(debounceRef.current);
 			}
 		};
-	}, [query, onSearch]);
+	}, [query, onSearch, selected]);
 
 	const handleInputFocus = () => {
 		if (results.length) {
@@ -93,6 +98,7 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 		setShowResults(false);
 		setQuery('');
 		setResults([]);
+		inputRef.current?.focus();
 	};
 
 	const handleRemoveOption = (optionId: number) => {
@@ -100,6 +106,32 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 		setSelected((prevSelected) =>
 			prevSelected.filter((option) => option.id !== optionId)
 		);
+		inputRef.current?.focus();
+	};
+
+	const handleOptionKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+		if (e.key === 'ArrowDown') {
+			e.preventDefault();
+			(
+				e.currentTarget.parentElement?.nextElementSibling?.querySelector(
+					'button'
+				) as HTMLButtonElement | null
+			)?.focus();
+		}
+
+		if (e.key === 'ArrowUp') {
+			e.preventDefault();
+			(
+				e.currentTarget.parentElement?.previousElementSibling?.querySelector(
+					'button'
+				) as HTMLButtonElement | null
+			)?.focus();
+		}
+
+		if (e.key === 'Escape') {
+			setShowResults(false);
+			inputRef.current?.focus();
+		}
 	};
 
 	return (
@@ -108,6 +140,7 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 			className={`wpo-aom-async-multi-select-container ${className ?? ''}`}
 		>
 			<input
+				ref={inputRef}
 				type="text"
 				id={id}
 				className={className}
@@ -115,27 +148,67 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 				placeholder={placeholder}
 				onFocus={handleInputFocus}
 				onChange={(e) => setQuery(e.target.value)}
-			/>
+				value={query}
+				onKeyDown={(e) => {
+					if (e.key === 'Escape') {
+						setShowResults(false);
+						return;
+					}
 
+					if (e.key === 'ArrowDown') {
+						e.preventDefault();
+						const first = containerRef.current?.querySelector(
+							'.wpo-aom-async-multi-select-options li'
+						) as HTMLElement | null;
+
+						(
+							first?.querySelector(
+								'button'
+							) as HTMLButtonElement | null
+						)?.focus();
+					}
+				}}
+			/>
+			<div className="screenReader" aria-live="polite">
+				{(() => {
+					if (loading) {
+						return 'Loading results...';
+					}
+					if (showResults) {
+						return results.length
+							? `${results.length} results found`
+							: 'No results found';
+					}
+					return '';
+				})()}
+			</div>
+
+			{showResults && loading && (
+				<div className="wpo-aom-async-multi-select-message">
+					<p>Loading...</p>
+				</div>
+			)}
+			{showResults && !loading && !Boolean(results.length) && (
+				// ToDo: translatable string
+				<div className="wpo-aom-async-multi-select-message">
+					<p>No results found</p>
+				</div>
+			)}
 			{showResults && (
 				<ul className="wpo-aom-async-multi-select-options">
-					{loading ? (
-						<li>Loading...</li>
-					) : Boolean(results.length) ? (
+					{!loading &&
+						Boolean(results.length) &&
 						results.map((option) => (
-							<li
-								key={option.id}
-								onClick={() => handleSelectOption(option)}
-							>
-								{option.label}
+							<li key={option.id}>
+								<button
+									type="button"
+									onClick={() => handleSelectOption(option)}
+									onKeyDown={handleOptionKeyDown}
+								>
+									{option.label}
+								</button>
 							</li>
-						))
-					) : (
-						// ToDo: translatable string
-						<li className="wpo-aom-async-multi-select-no-results">
-							No results found
-						</li>
-					)}
+						))}
 				</ul>
 			)}
 
