@@ -1,6 +1,7 @@
 import { Task, FieldOption } from '../types/task';
 
 const apiRoot = (window as any).WPO_AOM_TaskManager?.apiRoot;
+const apiNamespace = (window as any).WPO_AOM_TaskManager?.apiNamespace;
 const nonce = (window as any).WPO_AOM_TaskManager?.nonce;
 
 if (!apiRoot) {
@@ -33,7 +34,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
  * @throws Will throw an error if the API request fails.
  */
 export async function fetchTasks(): Promise<Task[]> {
-	const response = await fetch(`${apiRoot}/tasks`, {
+	const response = await fetch(`${apiRoot}/${apiNamespace}/tasks`, {
 		method: 'GET',
 		credentials: 'include',
 		headers: {
@@ -75,18 +76,21 @@ export async function moveTask(
 	previousTaskId: number | null,
 	targetStatusId: number
 ): Promise<void> {
-	const response = await fetch(`${apiRoot}/tasks/${taskId}/move`, {
-		method: 'POST',
-		credentials: 'include',
-		headers: {
-			'Content-Type': 'application/json',
-			'X-WP-Nonce': nonce,
-		},
-		body: JSON.stringify({
-			previous_task_id: previousTaskId,
-			target_status_id: targetStatusId,
-		}),
-	});
+	const response = await fetch(
+		`${apiRoot}/${apiNamespace}/tasks/${taskId}/move`,
+		{
+			method: 'POST',
+			credentials: 'include',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-WP-Nonce': nonce,
+			},
+			body: JSON.stringify({
+				previous_task_id: previousTaskId,
+				target_status_id: targetStatusId,
+			}),
+		}
+	);
 
 	return handleResponse<void>(response);
 }
@@ -96,7 +100,7 @@ export async function updateTask(
 	taskId: number,
 	payload: Partial<Task>
 ): Promise<Task> {
-	const response = await fetch(`${apiRoot}/tasks/${taskId}`, {
+	const response = await fetch(`${apiRoot}/${apiNamespace}/tasks/${taskId}`, {
 		method: 'PUT',
 		credentials: 'include',
 		headers: {
@@ -113,7 +117,7 @@ export async function fetchFieldOptions(
 	fieldSlug: string
 ): Promise<FieldOption[]> {
 	const response = await fetch(
-		`${apiRoot}/tasks/fields/${fieldSlug}/options`,
+		`${apiRoot}/${apiNamespace}/tasks/fields/${fieldSlug}/options`,
 		{
 			method: 'GET',
 			credentials: 'include',
@@ -135,3 +139,21 @@ export async function fetchFieldOptions(
  */
 export const fetchStatus = (): Promise<FieldOption[]> =>
 	fetchFieldOptions('status');
+
+/**
+ * Searches orders based on a search term.
+ *
+ * @param  term
+ * @return {Promise<any[]>} A promise that resolves to an array of orders.
+ * @throws Will throw an error if the API request fails.
+ */
+export const searchOrders = (term: string) => {
+	return fetch(`${apiRoot}/orders?search=${encodeURIComponent(term)}`, {
+		method: 'GET',
+		credentials: 'include',
+		headers: {
+			'Content-Type': 'application/json',
+			'X-WP-Nonce': nonce,
+		},
+	}).then(handleResponse<any[]>);
+};
