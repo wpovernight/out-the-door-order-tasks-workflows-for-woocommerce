@@ -53,7 +53,7 @@ export const FieldOptionDropdown: React.FC<DropdownProps> = ({
 		const g = parseInt(c.slice(2, 4), 16);
 		const b = parseInt(c.slice(4, 6), 16);
 		const brightness = (299 * r + 587 * g + 114 * b) / 1000;
-		return brightness > 140 ? '#111' : '#fff';
+		return brightness > 128 ? '#111' : '#fff';
 	};
 
 	const applyStyle = (option?: FieldOption) => {

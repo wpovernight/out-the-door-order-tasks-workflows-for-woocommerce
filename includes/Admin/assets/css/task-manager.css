@@ -412,6 +412,7 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     margin: 5px 0 0;
     background: #fff;
     width: 100%;
+    z-index: 1;
 }
 
 .wpo-aom-field-option-dropdown-container > ul > li {
@@ -449,6 +450,7 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     margin: 5px 0 0;
     background: #fff;
     width: 100%;
+    z-index: 1;
 }
 
 .wpo-aom-async-multi-select-container > .wpo-aom-async-multi-select-message {
@@ -459,6 +461,7 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     margin: 5px 0 0;
     background: #fff;
     width: 100%;
+    z-index: 1;
 }
 
 .wpo-aom-async-multi-select-container > .wpo-aom-async-multi-select-message > p {

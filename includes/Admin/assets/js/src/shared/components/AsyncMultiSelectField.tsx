@@ -4,6 +4,7 @@ import { useOnClickOutside } from '@shared/hooks/useOnClickOutside';
 interface Option {
 	id: number;
 	label: string;
+	searchLabel?: string;
 	fieldId?: number;
 	url?: string;
 }
@@ -59,20 +60,22 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 		debounceRef.current = setTimeout(async () => {
 			setLoading(true);
 			try {
+				setShowResults(true);
+
 				const searchResults = await onSearch(query);
 				const filteredResults = searchResults.filter(
 					(result) =>
 						!selected.find((option) => option.id === result.id)
 				);
+
 				setResults(filteredResults);
-				setShowResults(true);
 			} catch (error) {
 				// eslint-disable-next-line no-console
 				console.error('Error fetching results:', error);
 			} finally {
 				setLoading(false);
 			}
-		}, 300);
+		}, 500);
 
 		return () => {
 			if (debounceRef.current) {
@@ -194,21 +197,19 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 					<p>No results found</p>
 				</div>
 			)}
-			{showResults && (
+			{showResults && !loading && Boolean(results.length) && (
 				<ul className="wpo-aom-async-multi-select-options">
-					{!loading &&
-						Boolean(results.length) &&
-						results.map((option) => (
-							<li key={option.id}>
-								<button
-									type="button"
-									onClick={() => handleSelectOption(option)}
-									onKeyDown={handleOptionKeyDown}
-								>
-									{option.label}
-								</button>
-							</li>
-						))}
+					{results.map((option) => (
+						<li key={option.id}>
+							<button
+								type="button"
+								onClick={() => handleSelectOption(option)}
+								onKeyDown={handleOptionKeyDown}
+							>
+								{option.searchLabel}
+							</button>
+						</li>
+					))}
 				</ul>
 			)}
 
