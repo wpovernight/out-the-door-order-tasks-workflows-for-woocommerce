@@ -42,7 +42,8 @@ final class Screen {
 			'wpo-aom-admin-task-manager',
 			'WPO_AOM_TaskManager',
 			array(
-				'apiRoot'      => esc_url_raw( rest_url( '/wc/v3/wpo/aom' ) ),
+				'apiRoot'      => esc_url_raw( rest_url( '/wc/v3' ) ),
+				'apiNamespace' => 'wpo/aom',
 				'nonce'        => wp_create_nonce( 'wp_rest' ),
 				'loading'      => esc_html__( 'Loading...', 'wpo-aom' ),
 				'errorLoading' => esc_html__( 'Error loading tasks. Please try again.', 'wpo-aom' ),
