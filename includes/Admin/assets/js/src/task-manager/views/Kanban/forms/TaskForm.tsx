@@ -3,7 +3,7 @@ import { useTasks } from '../../../context/TaskContext';
 import { useAsyncLoader } from '@shared/hooks/useAsyncLoader';
 import { FieldOptionDropdown } from '@shared/components/FieldOptionDropdownField';
 import { AsyncMultiSelectField } from '@shared/components/AsyncMultiSelectField';
-import { searchOrders } from '@shared/utils/api';
+import { fetchTaskFields, searchOrders } from '@shared/utils/api';
 
 interface TaskFormProps {
 	taskId?: number;
@@ -16,19 +16,45 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 	columnId,
 	onDone,
 }) => {
-	const { saveTask, loadTasks } = useTasks();
-	const { fieldOptions, loadFieldOptions } = useTasks();
+	const {
+		createTask,
+		loadTaskFields,
+		taskFields,
+		fieldOptions,
+		loadFieldOptions,
+	} = useTasks();
 
 	const { loadingStatus, loadingError } = useAsyncLoader(async () => {
 		await Promise.all([
+			loadTaskFields(),
 			loadFieldOptions('status'),
 			loadFieldOptions('priority'),
 		]);
-	}, [loadFieldOptions]);
+	}, [loadFieldOptions, loadTaskFields]);
 
 	const submit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		// await saveTask();
+
+		const form = e.target as HTMLFormElement;
+		const formData = new FormData(form);
+
+		const fieldValues: Record<string, any> = {};
+		taskFields.forEach((field) => {
+			const value = formData.get(`field_${field.slug}`);
+			if (value !== null) {
+				fieldValues[field.id] = value;
+			}
+		});
+
+		const payload: Record<string, any> = {
+			title: formData.get('title'),
+			description: formData.get('description'),
+			fields: fieldValues,
+		};
+
+		console.log(payload);
+
+		await createTask(payload);
 		// await loadTasks(true);
 		onDone?.();
 	};
@@ -59,7 +85,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 							placeholder="Select"
 							options={fieldOptions.status}
 							id="status"
-							selected={fieldOptions?.status?.[0]}
+							name="field_status"
+							selected={fieldOptions?.status?.[columnId - 1]}
 						/>
 					</div>
 					<div>
@@ -68,12 +95,17 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 							placeholder="Select"
 							options={fieldOptions?.priority || []}
 							id="priority"
+							name="field_priority"
 							selected={fieldOptions?.priority?.[0]}
 						/>
 					</div>
 					<div>
 						<label htmlFor="due-date">Due Date</label>
-						<input id="due-date" name="due_date" type="date" />
+						<input
+							id="due-date"
+							name="field_due_date"
+							type="date"
+						/>
 					</div>
 				</div>
 				<div className="wpo-aom-task-field-group">
@@ -96,6 +128,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 						<AsyncMultiSelectField
 							placeholder="Search orders by number, customer, address..."
 							id="associated-orders"
+							name="field_associated_orders"
 							// ToDo: Lazy load for next pages
 							onSearch={async (query: string) => {
 								const results = await searchOrders(query);
