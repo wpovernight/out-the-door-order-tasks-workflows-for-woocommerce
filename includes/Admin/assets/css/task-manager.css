@@ -416,13 +416,24 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
 }
 
 .wpo-aom-field-option-dropdown-container > ul > li {
+    margin: 0;
+    padding: 0;
+}
+
+.wpo-aom-field-option-dropdown-container > ul > li > button {
     padding: 0.7em 1em;
     cursor: pointer;
     margin: 0;
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
 }
 
-.wpo-aom-field-option-dropdown-container > ul > li:hover {
+.wpo-aom-field-option-dropdown-container > ul > li > button:hover,
+.wpo-aom-field-option-dropdown-container > ul > li > button:focus {
     background-color: #00000012;
+    outline: none;
 }
 
 .wpo-aom-label {
@@ -468,12 +479,15 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     margin: 0.5em;
 }
 
-.wpo-aom-async-multi-select-container > ul.wpo-aom-async-multi-select-options > li:hover {
+.wpo-aom-async-multi-select-container > ul.wpo-aom-async-multi-select-options > li > button:hover,
+.wpo-aom-async-multi-select-container > ul.wpo-aom-async-multi-select-options > li > button:focus {
     background-color: #00000012;
+    outline: none;
 }
 
 .wpo-aom-async-multi-select-container > ul.wpo-aom-async-multi-select-options > li {
     margin: 0;
+    padding: 0;
 }
 
 .wpo-aom-async-multi-select-container > ul.wpo-aom-async-multi-select-options > li > button {
