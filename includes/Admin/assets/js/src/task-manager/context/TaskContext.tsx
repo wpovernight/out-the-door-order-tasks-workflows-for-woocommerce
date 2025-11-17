@@ -5,11 +5,13 @@ import React, {
 	useCallback,
 	useRef,
 } from 'react';
-import { Task, FieldOption } from '@shared/types/task';
+import { Task, FieldOption, TaskField } from '@shared/types/task';
 import {
 	fetchTasks,
+	fetchTaskFields,
 	fetchFieldOptions,
 	moveTask as moveTaskAPI,
+	createTask as createTaskAPI,
 } from '@shared/utils/api';
 
 interface TaskContextType {
@@ -17,17 +19,23 @@ interface TaskContextType {
 	setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
 	loadTasks: (force?: boolean) => Promise<void>;
 	saveTask: (taskId: number, updates: Partial<Task>) => Promise<void>;
+	taskFields: Record<string, TaskField>;
+	setTaskFields: React.Dispatch<
+		React.SetStateAction<Record<string, TaskField>>
+	>;
+	loadTaskFields: (force?: boolean) => Promise<void>;
 	fieldOptions: Record<string, FieldOption[]>;
 	setFieldOptions: React.Dispatch<
 		React.SetStateAction<Record<string, FieldOption[]>>
 	>;
 	loadFieldOptions: (fieldSlug: string, force?: boolean) => Promise<void>;
+	tasksLoaded: boolean;
 	moveTask: (
 		taskId: number,
 		previousTaskId: number | null,
 		targetStatusId: number
 	) => Promise<void>;
-	tasksLoaded: boolean;
+	createTask: (taskData: Partial<Task>) => Promise<Task>;
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
@@ -56,6 +64,29 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 			}
 		},
 		[tasksLoaded]
+	);
+
+	// ---------------------
+	// FIELD
+	// ---------------------
+	const [taskFields, setTaskFields] = useState<Record<string, TaskField>>({});
+	const [taskFieldsLoaded, setTaskFieldsLoaded] = useState(false);
+
+	const loadTaskFields = useCallback(
+		async (force = false) => {
+			if (taskFieldsLoaded && !force) {
+				return;
+			}
+
+			try {
+				const data = await fetchTaskFields();
+				setTaskFields(data);
+				setTaskFieldsLoaded(true);
+			} catch (error) {
+				console.error('Failed to fetch task fields:', error);
+			}
+		},
+		[taskFieldsLoaded]
 	);
 
 	// ---------------------
@@ -115,6 +146,20 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 		}
 	};
 
+	const createTask = useCallback(
+		async (taskData: Partial<Task>): Promise<Task> => {
+			try {
+				const newTask = await createTaskAPI(taskData);
+				setTasks((prevTasks) => [...prevTasks, newTask]);
+				return newTask;
+			} catch (error) {
+				console.error('Failed to create task:', error);
+				throw error;
+			}
+		},
+		[]
+	);
+
 	const saveTask = async () => {
 		// ToDo: implement later
 	};
@@ -126,11 +171,15 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				setTasks,
 				loadTasks,
 				saveTask,
+				taskFields,
+				setTaskFields,
+				loadTaskFields,
 				fieldOptions,
 				setFieldOptions,
 				loadFieldOptions,
 				tasksLoaded,
 				moveTask,
+				createTask,
 			}}
 		>
 			{children}
