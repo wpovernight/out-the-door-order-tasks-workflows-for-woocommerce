@@ -98,7 +98,26 @@ class TaskController extends BaseRestController {
 			)
 		);
 
-		// Field options endpoints
+		/**
+		 * Field endpoints:
+		 * GET /{namespace}/tasks/fields -> returns all task fields.
+		 */
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->resource_name . '/fields',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_task_fields' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+				),
+			)
+		);
+
+
+		/**
+		 * Field options endpoints:
+		 */
 
 		// GET /{namespace}/tasks/fields/{field_id}/options -> returns options for a specific field.
 		register_rest_route(
@@ -159,8 +178,9 @@ class TaskController extends BaseRestController {
 		$data = $request->get_json_params();
 
 		$errors = $this->validate( $data, array(
-			'title'       => 'required|string',
-			'description' => 'string',
+			'title'        => 'required|string',
+			'description'  => 'string',
+			'field_values' => 'array',
 		) );
 
 		if ( ! empty( $errors ) ) {
@@ -170,13 +190,11 @@ class TaskController extends BaseRestController {
 			) );
 		}
 
-		// ToDo: Maybe adding support for fields during creation?
-
 		/** @var TaskManagerService $task_manager_service */
 		$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
 
 		try {
-			$task = $task_manager_service->create_task( $data );
+			$task = $task_manager_service->create_task( $data['title'], $data['description'] ?? '', $data['field_values'] ?? array() );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'task_creation_failed', $e->getMessage(), array( 'status' => 500 ) );
 		}
@@ -319,6 +337,21 @@ class TaskController extends BaseRestController {
 				),
 			),
 		);
+	}
+
+	/**
+	 * Get all task fields.
+	 *
+	 * @param WP_REST_Request $request
+	 *
+	 * @return mixed
+	 */
+	public function get_task_fields( WP_REST_Request $request ) {
+		/** @var TaskManagerService $task_manager_service */
+		$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
+		$fields               = $task_manager_service->get_all_fields();
+
+		return rest_ensure_response( $fields );
 	}
 
 	/**

@@ -141,21 +141,24 @@ final class TaskManagerService {
 	/**
 	 * Create a new Task.
 	 *
-	 * @param array<string, mixed> $data
+	 * @param string $title
+	 * @param string $description
+	 * @param array $field_values
 	 *
 	 * @return Task
 	 *
 	 * @throws Exception
 	 */
-	public function create_task( array $data ): Task {
-		if ( empty( $data['title'] ) || ! is_string( $data['title'] ) ) {
+	public function create_task( string $title, string $description, array $field_values ): Task {
+		if ( empty( $title ) ) {
 			throw new Exception( 'Task title is required and must be a string.' );
 		}
 
-		$data['title']       = sanitize_text_field( $data['title'] );
-		$data['description'] = isset( $data['description'] ) ? sanitize_textarea_field( $data['description'] ) : '';
-
-		$task = new Task( $data );
+		$task_data = array(
+			'title'       => sanitize_text_field( $title ),
+			'description' => sanitize_textarea_field( $description )
+		);
+		$task      = new Task( $task_data );
 
 		$result   = $this->task_repository->save( $task );
 		$task->id = $result;
@@ -163,6 +166,16 @@ final class TaskManagerService {
 		if ( ! $result ) {
 			throw new Exception( 'Failed to create task.' );
 		}
+
+		$field_values_array = array();
+		foreach ( $field_values as $field_value ) {
+			$field_id = $field_value['field_id'];
+			$value    = $field_value['value'];
+			$field_values_array[ $field_id ] = $value;
+		}
+
+		// Set field values.
+		$this->task_field_value_repository->update_task_multiple_field_values( $task->id, $field_values_array );
 
 		return $task;
 	}
@@ -480,6 +493,7 @@ final class TaskManagerService {
 	 *
 	 * @param float $previous_position
 	 * @param float $next_position
+	 * @param int $status_id
 	 *
 	 * @return float
 	 */
