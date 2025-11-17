@@ -45,17 +45,29 @@ class TaskFieldValueRepository extends BaseRepository {
 			return false;
 		}
 
-		$cases = array();
+		$rows = array();
 		foreach ( $field_values as $field_id => $value ) {
-			$escaped_value = esc_sql( $value );
-			$field_id      = (int) $field_id;
-			$cases[]       = "WHEN {$field_id} THEN '{$escaped_value}'";
-		}
-		$case_sql   = 'CASE `field_id` ' . implode( ' ', $cases ) . ' END';
-		$set_clause = "`value` = {$case_sql}";
+			$field_id = (int) $field_id;
 
-		return $this->where( 'task_id', $task_id )
-		            ->where( 'field_id', 'IN', array_keys( $field_values ) )
-		            ->update_raw( $set_clause );
+			if ( is_array( $value ) ) {
+				foreach ( $value as $single ) {
+					$rows[] = sprintf(
+						"(%d, %d, '%s')",
+						$task_id,
+						$field_id,
+						esc_sql( $single )
+					);
+				}
+			} else {
+				$rows[] = sprintf(
+					"(%d, %d, '%s')",
+					$task_id,
+					$field_id,
+					esc_sql( $value )
+				);
+			}
+		}
+
+		return $this->insert_raw( '`task_id`, `field_id`, `value`', implode( ',', $rows ) );
 	}
 }

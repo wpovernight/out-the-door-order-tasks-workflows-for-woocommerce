@@ -278,6 +278,29 @@ abstract class BaseRepository {
 	}
 
 	/**
+	 * Insert a record with raw columns and values.
+	 *
+	 * @param string $columns Comma-separated column names.
+	 * @param string $values Comma-separated values.
+	 *
+	 * @return int Insert id.
+	 * @throws InvalidArgumentException If columns or values are empty.
+	 */
+	public function insert_raw( string $columns, string $values ): int {
+		if ( '' === trim( $columns ) || '' === trim( $values ) ) {
+			throw new InvalidArgumentException( 'Columns and values must not be empty.' );
+		}
+
+		$query = "INSERT INTO {$this->get_table_full_name()} ({$columns}) VALUES {$values} ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)";
+
+		$result = $this->wpdb->query( $query );
+
+		$this->reset_query();
+
+		return false === $result ? false : (int) $this->wpdb->insert_id;
+	}
+
+	/**
 	 * Update records.
 	 *
 	 * @param array<string, mixed> $data Columns to set.
