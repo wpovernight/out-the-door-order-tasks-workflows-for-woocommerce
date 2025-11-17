@@ -14,6 +14,7 @@ interface AsyncMultiSelectProps {
 	selectedOptions?: Option[];
 	id?: string;
 	className?: string;
+	name?: string;
 	onSearch?: (term: string) => Promise<Option[]>;
 	onSelect?: (option: Option) => void;
 	onRemove?: (optionId: number) => void;
@@ -24,6 +25,7 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 	selectedOptions = [],
 	id,
 	className,
+	name,
 	onSearch,
 	onSelect,
 	onRemove,
@@ -112,6 +114,24 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 		inputRef.current?.focus();
 	};
 
+	const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+		if (e.key === 'Escape') {
+			setShowResults(false);
+			return;
+		}
+
+		if (e.key === 'ArrowDown') {
+			e.preventDefault();
+			const first = containerRef.current?.querySelector(
+				'.wpo-aom-async-multi-select-options li'
+			) as HTMLElement | null;
+
+			(
+				first?.querySelector('button') as HTMLButtonElement | null
+			)?.focus();
+		}
+	};
+
 	const handleOptionKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
 		if (e.key === 'ArrowDown') {
 			e.preventDefault();
@@ -147,30 +167,12 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 				type="text"
 				id={id}
 				className={className}
-				name={id}
+				name={name}
 				placeholder={placeholder}
 				onFocus={handleInputFocus}
 				onChange={(e) => setQuery(e.target.value)}
 				value={query}
-				onKeyDown={(e) => {
-					if (e.key === 'Escape') {
-						setShowResults(false);
-						return;
-					}
-
-					if (e.key === 'ArrowDown') {
-						e.preventDefault();
-						const first = containerRef.current?.querySelector(
-							'.wpo-aom-async-multi-select-options li'
-						) as HTMLElement | null;
-
-						(
-							first?.querySelector(
-								'button'
-							) as HTMLButtonElement | null
-						)?.focus();
-					}
-				}}
+				onKeyDown={handleInputKeyDown}
 			/>
 			<div className="screenReader" aria-live="polite">
 				{(() => {
@@ -216,6 +218,14 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 			<ul className="wpo-aom-async-multi-select-selected-options">
 				{selected.map((option) => (
 					<li key={option.id}>
+						{/* Hidden input for form submission */}
+						{name && (
+							<input
+								type="hidden"
+								name={`${name}[]`}
+								value={option.id}
+							/>
+						)}
 						{option.url ? (
 							<a
 								href={option.url}

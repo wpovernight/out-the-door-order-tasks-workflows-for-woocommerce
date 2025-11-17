@@ -341,6 +341,7 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     display: flex;
     flex-direction: column;
     gap: 2em;
+    margin-bottom: 2em;
 }
 
 .wpo-aom-sidebar-header {

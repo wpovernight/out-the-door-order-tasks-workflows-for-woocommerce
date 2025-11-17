@@ -61,9 +61,9 @@ export const FieldOptionDropdown: React.FC<DropdownProps> = ({
 	onChange,
 }) => {
 	const containerRef = useRef<HTMLDivElement>(null);
-    const triggerButtonRef = useRef<HTMLButtonElement>(null);
+	const triggerButtonRef = useRef<HTMLButtonElement>(null);
 
-    const [open, setOpen] = useState<boolean>(false);
+	const [open, setOpen] = useState<boolean>(false);
 	const [selectedOption, setSelectedOption] = useState<FieldOption | null>(
 		selected ?? null
 	);
@@ -85,7 +85,7 @@ export const FieldOptionDropdown: React.FC<DropdownProps> = ({
 		onChange?.(option);
 		setOpen(false);
 		setSelectedOption(option);
-        triggerButtonRef.current?.focus();
+		triggerButtonRef.current?.focus();
 	};
 
 	const handleButtonKeyDown = (e: React.KeyboardEvent) => {
@@ -159,7 +159,7 @@ export const FieldOptionDropdown: React.FC<DropdownProps> = ({
 				/>
 			)}
 			<button
-                ref={triggerButtonRef}
+				ref={triggerButtonRef}
 				type="button"
 				id={id}
 				className={[className, open && 'open']
