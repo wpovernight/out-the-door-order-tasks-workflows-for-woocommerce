@@ -1,4 +1,4 @@
-import { Task, FieldOption } from '../types/task';
+import { Task, FieldOption, TaskField } from '../types/task';
 
 const apiRoot = (window as any).WPO_AOM_TaskManager?.apiRoot;
 const apiNamespace = (window as any).WPO_AOM_TaskManager?.apiNamespace;
@@ -62,6 +62,28 @@ export async function fetchTasks(): Promise<Task[]> {
 }
 
 /**
+ * Creates a new task with the given payload.
+ *
+ * @param {Partial<Task>} payload - The task data to create.
+ *
+ * @return {Promise<Task>} A promise that resolves to the created task.
+ * @throws Will throw an error if the API request fails.
+ */
+export async function createTask(payload: Partial<Task>): Promise<Task> {
+	const response = await fetch(`${apiRoot}/${apiNamespace}/tasks`, {
+		method: 'POST',
+		credentials: 'include',
+		headers: {
+			'Content-Type': 'application/json',
+			'X-WP-Nonce': nonce,
+		},
+		body: JSON.stringify(payload),
+	});
+
+	return handleResponse<Task>(response);
+}
+
+/**
  * Moves a task to a new status and position.
  *
  * @param {number}        taskId         - The ID of the task to move.
@@ -113,6 +135,32 @@ export async function updateTask(
 	return handleResponse<Task>(response);
 }
 
+/**
+ * Fetches task fields from the API.
+ *
+ * @return {Promise<Record<string, TaskField>>} A promise that resolves to a record of task fields.
+ * @throws Will throw an error if the API request fails.
+ */
+export async function fetchTaskFields(): Promise<Record<string, TaskField>> {
+	const response = await fetch(`${apiRoot}/${apiNamespace}/tasks/fields`, {
+		method: 'GET',
+		credentials: 'include',
+		headers: {
+			'Content-Type': 'application/json',
+			'X-WP-Nonce': nonce,
+		},
+	});
+
+	return handleResponse<Record<string, TaskField>>(response);
+}
+
+/**
+ * Fetches options for a specific field.
+ *
+ * @param  fieldSlug
+ * @return {Promise<FieldOption[]>} A promise that resolves to an array of field options.
+ * @throws Will throw an error if the API request fails.
+ */
 export async function fetchFieldOptions(
 	fieldSlug: string
 ): Promise<FieldOption[]> {
@@ -132,22 +180,13 @@ export async function fetchFieldOptions(
 }
 
 /**
- * Fetches the available status options from the API.
- *
- * @return {Promise<FieldOption[]>} A promise that resolves to an array of column names.
- * @throws Will throw an error if the API request fails.
- */
-export const fetchStatus = (): Promise<FieldOption[]> =>
-	fetchFieldOptions('status');
-
-/**
  * Searches orders based on a search term.
  *
  * @param  term
  * @return {Promise<any[]>} A promise that resolves to an array of orders.
  * @throws Will throw an error if the API request fails.
  */
-export const searchOrders = (term: string) => {
+export const searchOrders = (term: string): Promise<any[]> => {
 	return fetch(`${apiRoot}/orders?search=${encodeURIComponent(term)}`, {
 		method: 'GET',
 		credentials: 'include',

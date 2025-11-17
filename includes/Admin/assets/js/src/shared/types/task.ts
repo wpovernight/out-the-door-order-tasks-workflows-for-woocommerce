@@ -15,7 +15,7 @@ export type TaskField = {
 	is_required: boolean;
 	is_editable: boolean;
 	is_protected: boolean;
-	values: FieldValue[];
+	values?: FieldValue[];
 };
 
 export type Task = {
