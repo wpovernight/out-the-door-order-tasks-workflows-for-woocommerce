@@ -3,7 +3,7 @@ import { useTasks } from '../../../context/TaskContext';
 import { useAsyncLoader } from '@shared/hooks/useAsyncLoader';
 import { FieldOptionDropdown } from '@shared/components/FieldOptionDropdownField';
 import { AsyncMultiSelectField } from '@shared/components/AsyncMultiSelectField';
-import { fetchTaskFields, searchOrders } from '@shared/utils/api';
+import { searchOrders } from '@shared/utils/api';
 
 interface TaskFormProps {
 	taskId?: number;
@@ -17,6 +17,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 	onDone,
 }) => {
 	const {
+        loadTasks,
 		createTask,
 		loadTaskFields,
 		taskFields,
@@ -32,30 +33,64 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 		]);
 	}, [loadFieldOptions, loadTaskFields]);
 
+	const prepareFormData = (formData: FormData): Record<string, any> => {
+		const fieldValues: Array<{
+			field_id: number;
+			value: string | string[] | number;
+		}> = [];
+		for (const fieldSlug of Object.keys(taskFields)) {
+			const arrayInputs = ['order'];
+			const fieldSlugFormatted = fieldSlug.replace(/-/g, '_');
+			const field = taskFields[fieldSlug];
+			const formFieldName = `field_${fieldSlugFormatted}`;
+
+			// For multiple value fields, try with [] suffix first
+			let rawValue: FormDataEntryValue[];
+			if (arrayInputs.includes(fieldSlug)) {
+				rawValue = formData.getAll(`${formFieldName}[]`);
+				// Fallback to without [] if nothing found
+				if (rawValue.length === 0) {
+					rawValue = formData.getAll(formFieldName);
+				}
+			} else {
+				rawValue = formData.getAll(formFieldName);
+			}
+
+			if (rawValue.length === 0) {
+				continue; // Skip if no value provided
+			}
+
+			let value: any;
+			if (arrayInputs.includes(fieldSlug)) {
+				value = rawValue;
+			} else {
+				value = rawValue[0];
+			}
+
+			if (value !== null) {
+				fieldValues.push({
+					field_id: field.id,
+					value,
+				});
+			}
+		}
+
+		return {
+			title: formData.get('title'),
+			description: formData.get('description'),
+			field_values: fieldValues,
+		};
+	};
+
 	const submit = async (e: React.FormEvent) => {
 		e.preventDefault();
 
 		const form = e.target as HTMLFormElement;
 		const formData = new FormData(form);
-
-		const fieldValues: Record<string, any> = {};
-		taskFields.forEach((field) => {
-			const value = formData.get(`field_${field.slug}`);
-			if (value !== null) {
-				fieldValues[field.id] = value;
-			}
-		});
-
-		const payload: Record<string, any> = {
-			title: formData.get('title'),
-			description: formData.get('description'),
-			fields: fieldValues,
-		};
-
-		console.log(payload);
+		const payload = prepareFormData(formData);
 
 		await createTask(payload);
-		// await loadTasks(true);
+		await loadTasks(true);
 		onDone?.();
 	};
 
@@ -74,6 +109,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 			</div>
 		);
 	}
+
+	// The form field name should follow the pattern: field_{field_slug}
 
 	return (
 		<form onSubmit={submit} className="wpo-aom-task-form">
@@ -128,7 +165,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 						<AsyncMultiSelectField
 							placeholder="Search orders by number, customer, address..."
 							id="associated-orders"
-							name="field_associated_orders"
+							name="field_order"
 							// ToDo: Lazy load for next pages
 							onSearch={async (query: string) => {
 								const results = await searchOrders(query);

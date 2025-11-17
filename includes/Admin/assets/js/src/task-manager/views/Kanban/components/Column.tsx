@@ -174,9 +174,8 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 	}, []);
 
 	const openTaskCreationModal = () => {
-		console.log('Opening task creation modal for column:', column.id);
 		openSidebar(<TaskForm columnId={column.id} onDone={closeSidebar} />, {
-			title: 'Add Task',
+			title: 'Add Task', // ToDo: translatable string
 		});
 	};
 
