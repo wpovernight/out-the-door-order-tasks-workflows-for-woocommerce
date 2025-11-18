@@ -10,7 +10,7 @@ import {
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
 import invariant from 'tiny-invariant';
 
-import { Task } from '@shared/types/task';
+import { isFieldOption, Task } from '@shared/types/task';
 import { getCardData, getCardDropTargetData, isCardData } from '../data';
 import { useViewTasks } from '../context/ViewTaskContext';
 
@@ -187,6 +187,20 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 		selectTask(task);
 	};
 
+	const priorityField = task.fields?.find(
+		(field) => field.slug === 'priority'
+	);
+	const dueDateField = task.fields?.find(
+		(field) => field.slug === 'due-date'
+	);
+
+	const priorityValue = priorityField?.values
+		? priorityField.values[0]?.resolved
+		: null;
+	const dueDateValue = dueDateField?.values
+		? dueDateField.values[0]?.raw
+		: null;
+
 	return (
 		<div
 			ref={outerRef}
@@ -213,7 +227,20 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 				}}
 			>
 				<h3>{task.title}</h3>
-				<p>{task.description}</p>
+				<div className="kanban-card-tags">
+					{priorityValue && isFieldOption(priorityValue) && (
+						<span
+							className={`kanban-card-tag priority-${priorityValue?.slug}`}
+						>
+							{priorityValue.label}
+						</span>
+					)}
+				</div>
+				{dueDateValue && (
+					<span className="kanban-card-due-date">
+						Due date: {dueDateValue}
+					</span>
+				)}
 			</div>
 		</div>
 	);

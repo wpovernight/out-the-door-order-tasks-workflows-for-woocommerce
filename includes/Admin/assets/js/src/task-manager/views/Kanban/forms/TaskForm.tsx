@@ -136,7 +136,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 	// The form field name should follow the pattern: field_{field_slug}
 
 	return (
-		<form onSubmit={submit} className={`wpo-aom-task-form ${isSubmitting ? 'submitting' : ''}`}>
+		<form
+			onSubmit={submit}
+			className={`wpo-aom-task-form ${isSubmitting ? 'submitting' : ''}`}
+		>
 			<fieldset disabled={isSubmitting}>
 				<div className="wpo-aom-task-field-group">
 					<div>
@@ -226,11 +229,20 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				</div>
 			</fieldset>
 			<div className="wpo-aom-actions">
-				<button type="button" className="wpo-button" onClick={onDone} disabled={isSubmitting}>
+				<button
+					type="button"
+					className="wpo-button"
+					onClick={onDone}
+					disabled={isSubmitting}
+				>
 					Cancel
 				</button>
-				<button type="submit" className="wpo-button wpo-button-primary" disabled={isSubmitting}>
-                    {isSubmitting && <span className="wpo-aom-spinner"></span>}
+				<button
+					type="submit"
+					className="wpo-button wpo-button-primary"
+					disabled={isSubmitting}
+				>
+					{isSubmitting && <span className="wpo-aom-spinner"></span>}
 					{taskId ? 'Update Task' : 'Create Task'}
 				</button>
 			</div>
