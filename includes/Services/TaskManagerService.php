@@ -193,12 +193,30 @@ final class TaskManagerService {
 			throw new Exception( 'Failed to create task.' );
 		}
 
+		$status_id = 1;
+		$status_field_id = null;
+		$position_field_id = $this->task_field_repository->find_by_slug( 'position' )->id ?? null;
+
 		$field_values_array = array();
 		foreach ( $field_values as $field_value ) {
-			$field_id = $field_value['field_id'];
-			$value    = $field_value['value'];
+			$field_id                        = $field_value['field_id'];
+			$value                           = $field_value['value'];
 			$field_values_array[ $field_id ] = $value;
+
+			if ( $field_value['field_slug'] === 'status' ) {
+				$status_id       = $value;
+				$status_field_id = $field_value['field_id'];
+			}
 		}
+
+		// Set the position field manually to be last in the status column.
+		$last_position                            = $this->task_repository->get_last_task_position(
+			$status_id,
+			$status_field_id,
+			$position_field_id
+		);
+		$new_position                             = $last_position ? $last_position + 1.0 : 1.0;
+		$field_values_array[ $position_field_id ] = $new_position;
 
 		// Set field values.
 		$this->task_field_value_repository->update_task_multiple_field_values( $task->id, $field_values_array );

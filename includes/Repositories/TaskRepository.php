@@ -76,6 +76,36 @@ class TaskRepository extends BaseRepository {
 	}
 
 	/**
+	 * Get the position of the last task in a given status.
+	 *
+	 * @param int $status_id
+	 * @param int $status_field_id
+	 * @param int $position_field_id
+	 *
+	 * @return float|null
+	 */
+	public function get_last_task_position(
+		int $status_id,
+		int $status_field_id,
+		int $position_field_id
+	): ?float {
+		$task_field_value_repository = RepositoryRegistry::get( TaskFieldValue::class );
+		$task_field_value_table_name = $task_field_value_repository->get_table_full_name();
+
+		$last_task_value_field = $task_field_value_repository
+			->select(array('position.*'))
+			->alias('position')
+			->join("{$task_field_value_table_name} AS status", 'position.task_id', '=', 'status.task_id')
+			->where('status.field_id', $status_field_id)
+			->where('status.value', $status_id)
+			->where('position.field_id', $position_field_id)
+			->order_by_raw('CAST(position.value AS DECIMAL(10,5)) DESC')
+			->first();
+
+		return $last_task_value_field ? (float) $last_task_value_field->value : null;
+	}
+
+	/**
 	 * Rebalance positions of tasks, optionally within a specific status.
 	 *
 	 * @param int|null $status_id
