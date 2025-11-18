@@ -15,7 +15,7 @@ interface AsyncMultiSelectProps {
 	id?: string;
 	className?: string;
 	name?: string;
-	onSearch?: (term: string) => Promise<Option[]>;
+	onSearch?: (query: string, signal: AbortSignal) => Promise<Option[]>;
 	onSelect?: (option: Option) => void;
 	onRemove?: (optionId: number) => void;
 }
@@ -42,9 +42,9 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 
 	useOnClickOutside(containerRef, () => setShowResults(false));
 
-	// Debounced async search with stale-response guard
+	const abortControllerRef = useRef<AbortController | null>(null);
+
 	useEffect(() => {
-		// If no onSearch prop is provided, do nothing
 		if (!onSearch) {
 			return;
 		}
@@ -60,11 +60,26 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 		}
 
 		debounceRef.current = setTimeout(async () => {
+			// Cancel any previous request
+			if (abortControllerRef.current) {
+				abortControllerRef.current.abort();
+			}
+
+			// Create new abort controller for this request
+			abortControllerRef.current = new AbortController();
+			const signal = abortControllerRef.current.signal;
+
 			setLoading(true);
 			try {
 				setShowResults(true);
 
-				const searchResults = await onSearch(query);
+				const searchResults = await onSearch(query, signal);
+
+				// Check if request was aborted
+				if (signal.aborted) {
+					return;
+				}
+
 				const filteredResults = searchResults.filter(
 					(result) =>
 						!selected.find((option) => option.id === result.id)
@@ -72,16 +87,25 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 
 				setResults(filteredResults);
 			} catch (error) {
-				// eslint-disable-next-line no-console
+				// Ignore abort errors
+				if (error instanceof Error && error.name === 'AbortError') {
+					return;
+				}
 				console.error('Error fetching results:', error);
 			} finally {
-				setLoading(false);
+				if (!signal.aborted) {
+					setLoading(false);
+				}
 			}
-		}, 500);
+		}, 300);
 
 		return () => {
 			if (debounceRef.current) {
 				window.clearTimeout(debounceRef.current);
+			}
+			// Cancel request on cleanup
+			if (abortControllerRef.current) {
+				abortControllerRef.current.abort();
 			}
 		};
 	}, [query, onSearch, selected]);

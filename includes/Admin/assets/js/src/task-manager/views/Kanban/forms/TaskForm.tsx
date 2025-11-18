@@ -38,7 +38,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 	const prepareFormData = (formData: FormData): Record<string, any> => {
 		const fieldValues: Array<{
 			field_id: number;
-            field_slug: string;
+			field_slug: string;
 			value: string | string[] | number;
 		}> = [];
 
@@ -74,7 +74,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 			if (value !== null) {
 				fieldValues.push({
 					field_id: field.id,
-                    field_slug: field.slug,
+					field_slug: field.slug,
 					value,
 				});
 			}
@@ -178,8 +178,14 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 							id="associated-orders"
 							name="field_order"
 							// ToDo: Lazy load for next pages
-							onSearch={async (query: string) => {
-								const results = await searchOrders(query);
+							onSearch={async (
+								query: string,
+								signal?: AbortSignal
+							) => {
+								const results = await searchOrders(
+									query,
+									signal
+								);
 								return results.map((order) => ({
 									id: order.id,
 									label: `#${order.id}`,

@@ -197,10 +197,14 @@ export async function fetchFieldOptions(
  * Searches orders based on a search term.
  *
  * @param  term
+ * @param  signal
  * @return {Promise<any[]>} A promise that resolves to an array of orders.
  * @throws Will throw an error if the API request fails.
  */
-export const searchOrders = (term: string): Promise<any[]> => {
+export const searchOrders = (
+	term: string,
+	signal?: AbortSignal
+): Promise<any[]> => {
 	return fetch(`${apiRoot}/orders?search=${encodeURIComponent(term)}`, {
 		method: 'GET',
 		credentials: 'include',
@@ -208,5 +212,6 @@ export const searchOrders = (term: string): Promise<any[]> => {
 			'Content-Type': 'application/json',
 			'X-WP-Nonce': nonce,
 		},
+		signal,
 	}).then(handleResponse<any[]>);
 };
