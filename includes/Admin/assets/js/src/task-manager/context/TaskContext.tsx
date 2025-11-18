@@ -29,7 +29,6 @@ interface TaskContextType {
 		React.SetStateAction<Record<string, FieldOption[]>>
 	>;
 	loadFieldOptions: (fieldSlug: string, force?: boolean) => Promise<void>;
-	tasksLoaded: boolean;
 	moveTask: (
 		taskId: number,
 		previousTaskId: number | null,
@@ -47,46 +46,54 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 	// TASKS
 	// ---------------------
 	const [tasks, setTasks] = useState<Task[]>([]);
-	const [tasksLoaded, setTasksLoaded] = useState(false);
+	const tasksLoadedRef = useRef(false);
 
 	const loadTasks = useCallback(
 		async (force = false) => {
-			if (tasksLoaded && !force) {
+			if (tasksLoadedRef.current && !force) {
 				return;
 			}
 
 			try {
 				const data = await fetchTasks();
 				setTasks(data);
-				setTasksLoaded(true);
+				tasksLoadedRef.current = true;
 			} catch (error) {
 				console.error('Failed to fetch tasks:', error);
 			}
 		},
-		[tasksLoaded]
+		[] // Stable reference
 	);
 
 	// ---------------------
 	// FIELD
 	// ---------------------
 	const [taskFields, setTaskFields] = useState<Record<string, TaskField>>({});
-	const [taskFieldsLoaded, setTaskFieldsLoaded] = useState(false);
+	const taskFieldsLoadedRef = useRef(false);
+	const taskFieldsLoadingRef = useRef(false);
 
 	const loadTaskFields = useCallback(
 		async (force = false) => {
-			if (taskFieldsLoaded && !force) {
+			if (
+				(taskFieldsLoadedRef.current || taskFieldsLoadingRef.current) &&
+				!force
+			) {
 				return;
 			}
+
+			taskFieldsLoadingRef.current = true;
 
 			try {
 				const data = await fetchTaskFields();
 				setTaskFields(data);
-				setTaskFieldsLoaded(true);
+				taskFieldsLoadedRef.current = true;
 			} catch (error) {
 				console.error('Failed to fetch task fields:', error);
+			} finally {
+				taskFieldsLoadingRef.current = false;
 			}
 		},
-		[taskFieldsLoaded]
+		[] // No dependencies - stable reference
 	);
 
 	// ---------------------
@@ -95,41 +102,40 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 	const [fieldOptions, setFieldOptions] = useState<
 		Record<string, FieldOption[]>
 	>({});
-
-	// Track loaded flags in a ref only.
 	const loadedOptionsRef = useRef<Set<string>>(new Set());
+	const loadingOptionsRef = useRef<Set<string>>(new Set());
 
-	/**
-	 * Must be stable: empty dependency array.
-	 * Must NOT depend on any state object.
-	 */
 	const loadFieldOptions = useCallback(
 		async (fieldSlug: string, force = false) => {
-			// Read from ref, not state.
-			if (loadedOptionsRef.current.has(fieldSlug) && !force) {
+			// Skip if already loaded or currently loading
+			if (
+				(loadedOptionsRef.current.has(fieldSlug) ||
+					loadingOptionsRef.current.has(fieldSlug)) &&
+				!force
+			) {
 				return;
 			}
 
+			loadingOptionsRef.current.add(fieldSlug);
+
 			try {
 				const data = await fetchFieldOptions(fieldSlug);
-
-				// Triggers UI update.
 				setFieldOptions((prev) => ({
 					...prev,
 					[fieldSlug]: data,
 				}));
-
-				// Update loaded flag without triggering rerender.
 				loadedOptionsRef.current.add(fieldSlug);
 			} catch (error) {
 				console.error(
 					`Failed to fetch field options for ${fieldSlug}:`,
 					error
 				);
+			} finally {
+				loadingOptionsRef.current.delete(fieldSlug);
 			}
 		},
-		[]
-	); // No dependencies should be added here.
+		[] // No dependencies - stable reference
+	);
 
 	// ---------------------
 	// MOVE TASK
@@ -177,7 +183,6 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				fieldOptions,
 				setFieldOptions,
 				loadFieldOptions,
-				tasksLoaded,
 				moveTask,
 				createTask,
 			}}

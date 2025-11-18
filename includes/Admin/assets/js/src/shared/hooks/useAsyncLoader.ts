@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-export type AsyncLoaderStatus = 'idle' | 'loading' | 'error';
+export type AsyncLoaderStatus = 'idle' | 'loading' | 'loaded' | 'error';
 
 interface UseAsyncLoaderResult {
 	loadingStatus: AsyncLoaderStatus;
@@ -28,7 +28,7 @@ export function useAsyncLoader(
 			try {
 				await asyncFunction();
 				if (isActive) {
-					setStatus('idle');
+					setStatus('loaded');
 				}
 			} catch (err) {
 				if (isActive) {

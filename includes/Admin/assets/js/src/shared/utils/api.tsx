@@ -80,7 +80,21 @@ export async function createTask(payload: Partial<Task>): Promise<Task> {
 		body: JSON.stringify(payload),
 	});
 
-	return handleResponse<Task>(response);
+	const task = await handleResponse<any>(response);
+
+	// Apply the same mapping as fetchTasks
+	const statusField = task.fields?.find(
+		(field: any) => field.slug === 'status'
+	);
+	const positionField = task.fields?.find(
+		(field: any) => field.slug === 'position'
+	);
+
+	return {
+		...task,
+		status: statusField?.values?.[0]?.resolved?.slug ?? undefined,
+		position: positionField?.values?.[0]?.raw ?? undefined,
+	};
 }
 
 /**

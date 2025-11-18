@@ -5,15 +5,20 @@ import { ViewTaskProvider } from './context/ViewTaskContext';
 import { useAsyncLoader } from '@shared/hooks/useAsyncLoader';
 
 export const KanbanView: React.FC = () => {
-	useEffect(() => {
-		console.log('KanbanView mounted'); // Debug log
-	}, []);
-
-	const { loadTasks, loadFieldOptions } = useTasks();
+	const { loadTasks, loadTaskFields, loadFieldOptions } = useTasks();
 
 	const { loadingStatus, loadingError } = useAsyncLoader(async () => {
 		await Promise.all([loadTasks(), loadFieldOptions('status')]);
 	}, [loadTasks, loadFieldOptions]);
+
+	// Lazy load - Prefetch form data after board is displayed
+	useEffect(() => {
+		if (loadingStatus === 'loaded') {
+			// These run in background, no need to await
+			loadFieldOptions('priority');
+			loadTaskFields();
+		}
+	}, [loadingStatus, loadFieldOptions, loadTaskFields]);
 
 	// ToDo: Use a skeleton loader instead of a simple loading spinner
 	if (loadingStatus === 'loading') {
