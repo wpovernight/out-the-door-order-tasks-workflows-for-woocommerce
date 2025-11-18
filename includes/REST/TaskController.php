@@ -210,7 +210,8 @@ class TaskController extends BaseRestController {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_item( WP_REST_Request $request ) {
-		$id = (int) $request->get_param( 'id' );
+		$id             = (int) $request->get_param( 'id' );
+		$include_fields = $request->get_param( 'include_fields' ) ?? true;
 
 		if ( $id <= 0 ) {
 			return new WP_Error( 'invalid_id', 'Invalid task ID provided', array( 'status' => 400 ) );
@@ -218,7 +219,9 @@ class TaskController extends BaseRestController {
 
 		/** @var TaskManagerService $task_manager_service */
 		$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
-		$task                 = $task_manager_service->get_task( $id );
+		$task                 = $include_fields
+			? $task_manager_service->get_task_with_fields( $id )
+			: $task_manager_service->get_task( $id );
 
 		if ( ! $task ) {
 			return new WP_Error( 'not_found', 'Task not found', array( 'status' => 404 ) );

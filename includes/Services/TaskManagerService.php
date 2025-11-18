@@ -113,6 +113,19 @@ final class TaskManagerService {
 			return null;
 		}
 
+		$task_fields = $this->get_task_fields_and_values( $task_id );
+
+		return array_merge( $task->to_array(), array( 'fields' => $task_fields ) );
+	}
+
+	/**
+	 * Get all fields and their values for a specific task.
+	 *
+	 * @param int $task_id
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function get_task_fields_and_values( int $task_id ): array {
 		$fields             = $this->get_all_fields();
 		$values             = $this->get_field_values_for_task( $task_id );
 		$values_by_field_id = array_column( $values, null, 'field_id' );
@@ -120,11 +133,16 @@ final class TaskManagerService {
 
 		// Map field values to their respective fields.
 		foreach ( $fields as $field ) {
+			if ( ! isset( $values_by_field_id[ $field->id ] ) ) {
+				$task_fields[] = array_merge( $field->to_array(), array( 'values' => null ) );
+				continue;
+			}
+
 			$field_value   = $this->get_field_value( $values_by_field_id[ $field->id ], $field );
 			$task_fields[] = array_merge( $field->to_array(), array( 'values' => $field_value ) );
 		}
 
-		return array_merge( $task->to_array(), array( 'fields' => $task_fields ) );
+		return $task_fields;
 	}
 
 	/**
@@ -145,11 +163,11 @@ final class TaskManagerService {
 	 * @param string $description
 	 * @param array $field_values
 	 *
-	 * @return Task
+	 * @return array<string, mixed>|null
 	 *
 	 * @throws Exception
 	 */
-	public function create_task( string $title, string $description, array $field_values ): Task {
+	public function create_task( string $title, string $description, array $field_values ): ?array {
 		if ( empty( $title ) ) {
 			throw new Exception( 'Task title is required and must be a string.' );
 		}
@@ -177,7 +195,9 @@ final class TaskManagerService {
 		// Set field values.
 		$this->task_field_value_repository->update_task_multiple_field_values( $task->id, $field_values_array );
 
-		return $task;
+		$task_fields = $this->get_task_fields_and_values( $task->id );
+
+		return array_merge( $task->to_array(), array( 'fields' => $task_fields ) );
 	}
 
 	/**
