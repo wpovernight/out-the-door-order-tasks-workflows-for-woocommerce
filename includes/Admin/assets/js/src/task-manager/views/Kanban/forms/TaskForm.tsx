@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTasks } from '../../../context/TaskContext';
 import { useAsyncLoader } from '@shared/hooks/useAsyncLoader';
 import { FieldOptionDropdown } from '@shared/components/FieldOptionDropdownField';
@@ -27,6 +27,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 		loadFieldOptions,
 	} = useTasks();
 
+	const [isSubmitting, setIsSubmitting] = useState(false);
 	const { loadingStatus, loadingError } = useAsyncLoader(async () => {
 		await Promise.all([
 			loadTaskFields(),
@@ -89,14 +90,25 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 
 	const submit = async (e: React.FormEvent) => {
 		e.preventDefault();
+		if (isSubmitting) {
+			return; // Prevent multiple submissions
+		}
+		setIsSubmitting(true);
 
-		const form = e.target as HTMLFormElement;
-		const formData = new FormData(form);
-		const payload = prepareFormData(formData);
-		const newTask = await createTask(payload);
+		try {
+			const form = e.target as HTMLFormElement;
+			const formData = new FormData(form);
+			const payload = prepareFormData(formData);
 
-		onTaskCreated?.(newTask);
-		onDone?.();
+			const newTask = await createTask(payload);
+
+			onTaskCreated?.(newTask);
+			onDone?.();
+		} catch (error) {
+			console.error('Failed to create task:', error);
+		} finally {
+			setIsSubmitting(false);
+		}
 	};
 
 	// Check if data is actually loaded
@@ -124,8 +136,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 	// The form field name should follow the pattern: field_{field_slug}
 
 	return (
-		<form onSubmit={submit} className="wpo-aom-task-form">
-			<fieldset>
+		<form onSubmit={submit} className={`wpo-aom-task-form ${isSubmitting ? 'submitting' : ''}`}>
+			<fieldset disabled={isSubmitting}>
 				<div className="wpo-aom-task-field-group">
 					<div>
 						<label htmlFor="status">Status</label>
@@ -214,10 +226,11 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				</div>
 			</fieldset>
 			<div className="wpo-aom-actions">
-				<button type="button" className="wpo-button" onClick={onDone}>
+				<button type="button" className="wpo-button" onClick={onDone} disabled={isSubmitting}>
 					Cancel
 				</button>
-				<button type="submit" className="wpo-button wpo-button-primary">
+				<button type="submit" className="wpo-button wpo-button-primary" disabled={isSubmitting}>
+                    {isSubmitting && <span className="wpo-aom-spinner"></span>}
 					{taskId ? 'Update Task' : 'Create Task'}
 				</button>
 			</div>
