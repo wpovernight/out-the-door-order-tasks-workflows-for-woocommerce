@@ -13,6 +13,7 @@ import { getColumnData, isCardData } from '../data';
 import { Card } from './Card';
 import { useSidebarModal } from '@shared/context/SidebarModalContext';
 import { TaskForm } from '../forms/TaskForm';
+import { useViewTasks } from '@taskManager/views/Kanban/context/ViewTaskContext';
 
 interface ColumnProps {
 	column: FieldOption;
@@ -173,10 +174,31 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 		});
 	}, []);
 
+	const { setViewTasks } = useViewTasks();
+
 	const openTaskCreationModal = () => {
-		openSidebar(<TaskForm columnId={column.id} onDone={closeSidebar} />, {
-			title: 'Add Task', // ToDo: translatable string
-		});
+		openSidebar(
+			<TaskForm
+				columnId={column.id}
+				onDone={closeSidebar}
+				onTaskCreated={(newTask) => {
+					setViewTasks((prev) => {
+						const updated = structuredClone(prev);
+						const status = newTask.status || column.slug;
+						if (updated[status]) {
+							updated[status].push({
+								...newTask,
+								status,
+							});
+						}
+						return updated;
+					});
+				}}
+			/>,
+			{
+				title: 'Add Task', // ToDo: translatable string
+			}
+		);
 	};
 
 	// ToDo: Add visual drop indicators for columns

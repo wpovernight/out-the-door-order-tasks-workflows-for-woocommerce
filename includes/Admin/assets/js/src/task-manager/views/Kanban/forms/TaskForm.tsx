@@ -4,20 +4,22 @@ import { useAsyncLoader } from '@shared/hooks/useAsyncLoader';
 import { FieldOptionDropdown } from '@shared/components/FieldOptionDropdownField';
 import { AsyncMultiSelectField } from '@shared/components/AsyncMultiSelectField';
 import { searchOrders } from '@shared/utils/api';
+import { Task } from '@shared/types/task';
 
 interface TaskFormProps {
 	taskId?: number;
 	columnId: number;
 	onDone?: () => void;
+	onTaskCreated?: (task: Task) => void;
 }
 
 export const TaskForm: React.FC<TaskFormProps> = ({
 	taskId,
 	columnId,
 	onDone,
+	onTaskCreated,
 }) => {
 	const {
-        loadTasks,
 		createTask,
 		loadTaskFields,
 		taskFields,
@@ -36,8 +38,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 	const prepareFormData = (formData: FormData): Record<string, any> => {
 		const fieldValues: Array<{
 			field_id: number;
+            field_slug: string;
 			value: string | string[] | number;
 		}> = [];
+
 		for (const fieldSlug of Object.keys(taskFields)) {
 			const arrayInputs = ['order'];
 			const fieldSlugFormatted = fieldSlug.replace(/-/g, '_');
@@ -70,6 +74,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 			if (value !== null) {
 				fieldValues.push({
 					field_id: field.id,
+                    field_slug: field.slug,
 					value,
 				});
 			}
@@ -88,13 +93,19 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 		const form = e.target as HTMLFormElement;
 		const formData = new FormData(form);
 		const payload = prepareFormData(formData);
+		const newTask = await createTask(payload);
 
-		await createTask(payload);
-		await loadTasks(true);
+		onTaskCreated?.(newTask);
 		onDone?.();
 	};
 
-	if (loadingStatus === 'loading') {
+	// Check if data is actually loaded
+	const isDataReady =
+		Object.keys(taskFields).length > 0 &&
+		fieldOptions.status?.length > 0 &&
+		fieldOptions.priority?.length > 0;
+
+	if (loadingStatus === 'loading' || !isDataReady) {
 		return (
 			<div className="loading-spinner" style={{ padding: '0 1em' }}>
 				{(window as any).WPO_AOM_TaskManager.loading}
