@@ -138,8 +138,16 @@ final class TaskManagerService {
 				continue;
 			}
 
-			$field_value   = $this->get_field_value( $values_by_field_id[ $field->id ], $field );
-			$task_fields[] = array_merge( $field->to_array(), array( 'values' => $field_value ) );
+			$task_field_values = array();
+			if ( is_array( $values_by_field_id[ $field->id ] ) ) {
+				foreach ( $values_by_field_id[ $field->id ] as $single_value ) {
+					$task_field_values[] = $this->get_field_value( $single_value, $field );
+				}
+			} else {
+				$task_field_values[] = $this->get_field_value( $values_by_field_id[ $field->id ], $field );
+			}
+
+			$task_fields[] = array_merge( $field->to_array(), array( 'values' => $task_field_values ) );
 		}
 
 		return $task_fields;
