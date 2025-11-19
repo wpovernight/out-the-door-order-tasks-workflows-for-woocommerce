@@ -181,7 +181,7 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 			<TaskForm
 				columnId={column.id}
 				onDone={closeSidebar}
-				onTaskCreated={(newTask) => {
+				onTaskSaved={(newTask) => {
 					setViewTasks((prev) => {
 						const updated = structuredClone(prev);
 						const status = newTask.status || column.slug;

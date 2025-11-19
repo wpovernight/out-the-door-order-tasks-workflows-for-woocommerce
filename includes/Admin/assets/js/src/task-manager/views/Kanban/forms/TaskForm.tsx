@@ -4,23 +4,23 @@ import { useAsyncLoader } from '@shared/hooks/useAsyncLoader';
 import { FieldOptionDropdown } from '@shared/components/FieldOptionDropdownField';
 import { AsyncMultiSelectField } from '@shared/components/AsyncMultiSelectField';
 import { searchOrders } from '@shared/utils/api';
-import { FieldOption, isFieldOption, Task } from '@shared/types/task';
+import { isFieldOption, Task } from '@shared/types/task';
 
 interface TaskFormProps {
 	task?: Task;
 	columnId?: number;
 	onDone?: () => void;
-	onTaskCreated?: (task: Task) => void;
+	onTaskSaved?: (task: Task) => void;
 }
 
 export const TaskForm: React.FC<TaskFormProps> = ({
 	task,
 	columnId,
 	onDone,
-	onTaskCreated,
+	onTaskSaved,
 }) => {
 	const {
-		createTask,
+		saveTask,
 		loadTaskFields,
 		taskFields,
 		fieldOptions,
@@ -100,9 +100,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 			const formData = new FormData(form);
 			const payload = prepareFormData(formData);
 
-			const newTask = await createTask(payload);
-
-			onTaskCreated?.(newTask);
+			const savedTask = await saveTask(payload, task?.id);
+			onTaskSaved?.(savedTask);
 			onDone?.();
 		} catch (error) {
 			console.error('Failed to create task:', error);

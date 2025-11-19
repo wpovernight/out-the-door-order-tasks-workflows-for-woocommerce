@@ -12,13 +12,14 @@ import {
 	fetchFieldOptions,
 	moveTask as moveTaskAPI,
 	createTask as createTaskAPI,
+	updateTask as updateTaskAPI,
 } from '@shared/utils/api';
 
 interface TaskContextType {
 	tasks: Task[];
 	setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
 	loadTasks: (force?: boolean) => Promise<void>;
-	saveTask: (taskId: number, updates: Partial<Task>) => Promise<void>;
+	saveTask: (data: Partial<Task>, taskId?: number) => Promise<Task>;
 	taskFields: Record<string, TaskField>;
 	setTaskFields: React.Dispatch<
 		React.SetStateAction<Record<string, TaskField>>
@@ -34,7 +35,6 @@ interface TaskContextType {
 		previousTaskId: number | null,
 		targetStatusId: number
 	) => Promise<void>;
-	createTask: (taskData: Partial<Task>) => Promise<Task>;
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
@@ -63,6 +63,58 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 			}
 		},
 		[] // Stable reference
+	);
+
+	const createTask = useCallback(
+		async (taskData: Partial<Task>): Promise<Task> => {
+			try {
+				const newTask = await createTaskAPI(taskData);
+				setTasks((prevTasks) => [...prevTasks, newTask]);
+				return newTask;
+			} catch (error) {
+				console.error('Failed to create task:', error);
+				throw error;
+			}
+		},
+		[]
+	);
+
+	const updateTask = useCallback(
+		async (taskId: number, updates: Partial<Task>): Promise<Task> => {
+			try {
+				const updatedTask = await updateTaskAPI(taskId, updates);
+				setTasks((prevTasks) =>
+					prevTasks.map((task) =>
+						task.id === taskId ? updatedTask : task
+					)
+				);
+				return updatedTask;
+			} catch (error) {
+				console.error('Failed to update task:', error);
+				throw error;
+			}
+		},
+		[]
+	);
+
+	const saveTask = useCallback(
+		async (data: Partial<Task>, taskId?: number): Promise<Task> => {
+			try {
+				let task;
+
+				if (taskId) {
+					task = await updateTask(taskId, data);
+				} else {
+					task = await createTask(data);
+				}
+
+				return task;
+			} catch (error) {
+				console.error('Failed to save task:', error);
+				throw error;
+			}
+		},
+		[createTask, updateTask]
 	);
 
 	// ---------------------
@@ -152,24 +204,6 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 		}
 	};
 
-	const createTask = useCallback(
-		async (taskData: Partial<Task>): Promise<Task> => {
-			try {
-				const newTask = await createTaskAPI(taskData);
-				setTasks((prevTasks) => [...prevTasks, newTask]);
-				return newTask;
-			} catch (error) {
-				console.error('Failed to create task:', error);
-				throw error;
-			}
-		},
-		[]
-	);
-
-	const saveTask = async () => {
-		// ToDo: implement later
-	};
-
 	return (
 		<TaskContext.Provider
 			value={{
@@ -184,7 +218,6 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				setFieldOptions,
 				loadFieldOptions,
 				moveTask,
-				createTask,
 			}}
 		>
 			{children}

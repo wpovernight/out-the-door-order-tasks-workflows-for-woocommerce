@@ -131,7 +131,6 @@ export async function moveTask(
 	return handleResponse<void>(response);
 }
 
-// ToDo: Update this function
 export async function updateTask(
 	taskId: number,
 	payload: Partial<Task>
@@ -146,7 +145,21 @@ export async function updateTask(
 		body: JSON.stringify(payload),
 	});
 
-	return handleResponse<Task>(response);
+	const task = await handleResponse<any>(response);
+
+	// Apply the same mapping as fetchTasks
+	const statusField = task.fields?.find(
+		(field: any) => field.slug === 'status'
+	);
+	const positionField = task.fields?.find(
+		(field: any) => field.slug === 'position'
+	);
+
+	return {
+		...task,
+		status: statusField?.values?.[0]?.resolved?.slug ?? undefined,
+		position: positionField?.values?.[0]?.raw ?? undefined,
+	};
 }
 
 /**

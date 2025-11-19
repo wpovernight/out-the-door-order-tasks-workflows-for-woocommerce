@@ -40,7 +40,7 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 	const outerRef = useRef<HTMLDivElement | null>(null);
 	const innerRef = useRef<HTMLDivElement | null>(null);
 	const [state, setState] = useState<CardState>(IDLE);
-	const { selectedTask, selectTask } = useViewTasks();
+	const { selectedTask, selectTask, setViewTasks } = useViewTasks();
 	const { openSidebar, closeSidebar } = useSidebarModal();
 
 	const taskRef = useRef(task);
@@ -190,9 +190,38 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 	const handleClick = () => {
 		selectTask(task);
 
-		openSidebar(<TaskForm task={task} onDone={closeSidebar} />, {
-			title: `Edit Task: ${task.title}`,
-		});
+		openSidebar(
+			<TaskForm
+				task={task}
+				onDone={closeSidebar}
+				onTaskSaved={(updatedTask) => {
+					setViewTasks((prev) => {
+						const updated = structuredClone(prev);
+						const newStatus = updatedTask.status;
+
+						// Remove task from all columns (in case status changed)
+						for (const status in updated) {
+							updated[status] = updated[status].filter(
+								(t) => t.id !== updatedTask.id
+							);
+						}
+
+						// Add task to the correct column
+						if (updated[newStatus]) {
+							updated[newStatus].push({
+								...updatedTask,
+								status: newStatus,
+							});
+						}
+
+						return updated;
+					});
+				}}
+			/>,
+			{
+				title: `Edit Task: ${task.title}`,
+			}
+		);
 	};
 
 	const priorityField = task.fields?.find(
