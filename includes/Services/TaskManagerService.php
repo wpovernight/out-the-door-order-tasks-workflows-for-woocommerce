@@ -651,9 +651,8 @@ final class TaskManagerService {
 				break;
 
 			case TaskFieldTypes::TEXT:
-			case TaskFieldTypes::SELECT:
 			default:
-				// For text and select, raw is already the useful value.
+				// For text, raw is already the useful value.
 				// Resolved remains null.
 				break;
 		}

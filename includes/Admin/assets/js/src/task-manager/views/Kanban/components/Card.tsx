@@ -13,6 +13,7 @@ import invariant from 'tiny-invariant';
 import { isFieldOption, Task } from '@shared/types/task';
 import { getCardData, getCardDropTargetData, isCardData } from '../data';
 import { useViewTasks } from '../context/ViewTaskContext';
+import { getColorStyle } from '@shared/utils/colorUtils';
 
 // ------------------------------
 // Visual state
@@ -200,7 +201,15 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 	const dueDateValue = dueDateField?.values
 		? dueDateField.values[0]?.raw
 		: null;
+	const dueDate = dueDateValue
+		? new Date(dueDateValue.toString()).toLocaleDateString('en-US', {
+				month: 'short',
+				day: 'numeric',
+				year: 'numeric',
+			})
+		: null;
 
+	// kanban prefix is used to avoid css conflicts.
 	return (
 		<div
 			ref={outerRef}
@@ -214,7 +223,6 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 					: ''
 			}`}
 		>
-			{/* kanban prefix is used to avoid css conflicts */}
 			{/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
 			<div
 				ref={innerRef}
@@ -227,18 +235,19 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 				}}
 			>
 				<h3>{task.title}</h3>
-				<div className="kanban-card-tags">
+				<ul className="kanban-card-tags">
 					{priorityValue && isFieldOption(priorityValue) && (
-						<span
-							className={`kanban-card-tag priority-${priorityValue?.slug}`}
+						<li
+							className={`kanban-card-priority priority-${priorityValue?.slug}`}
+							style={getColorStyle(priorityValue.color)}
 						>
 							{priorityValue.label}
-						</span>
+						</li>
 					)}
-				</div>
+				</ul>
 				{dueDateValue && (
 					<span className="kanban-card-due-date">
-						Due date: {dueDateValue}
+						Due date: {dueDate}
 					</span>
 				)}
 			</div>
