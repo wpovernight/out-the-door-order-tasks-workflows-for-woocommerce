@@ -14,6 +14,8 @@ import { isFieldOption, Task } from '@shared/types/task';
 import { getCardData, getCardDropTargetData, isCardData } from '../data';
 import { useViewTasks } from '../context/ViewTaskContext';
 import { getColorStyle } from '@shared/utils/colorUtils';
+import { useSidebarModal } from '@shared/context/SidebarModalContext';
+import { TaskForm } from '@taskManager/views/Kanban/forms/TaskForm';
 
 // ------------------------------
 // Visual state
@@ -39,6 +41,7 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 	const innerRef = useRef<HTMLDivElement | null>(null);
 	const [state, setState] = useState<CardState>(IDLE);
 	const { selectedTask, selectTask } = useViewTasks();
+	const { openSidebar, closeSidebar } = useSidebarModal();
 
 	const taskRef = useRef(task);
 	useEffect(() => {
@@ -186,6 +189,10 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 
 	const handleClick = () => {
 		selectTask(task);
+
+		openSidebar(<TaskForm task={task} onDone={closeSidebar} />, {
+			title: `Edit Task: ${task.title}`,
+		});
 	};
 
 	const priorityField = task.fields?.find(

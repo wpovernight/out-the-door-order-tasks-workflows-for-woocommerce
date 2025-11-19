@@ -4,17 +4,17 @@ import { useAsyncLoader } from '@shared/hooks/useAsyncLoader';
 import { FieldOptionDropdown } from '@shared/components/FieldOptionDropdownField';
 import { AsyncMultiSelectField } from '@shared/components/AsyncMultiSelectField';
 import { searchOrders } from '@shared/utils/api';
-import { Task } from '@shared/types/task';
+import { FieldOption, isFieldOption, Task } from '@shared/types/task';
 
 interface TaskFormProps {
-	taskId?: number;
-	columnId: number;
+	task?: Task;
+	columnId?: number;
 	onDone?: () => void;
 	onTaskCreated?: (task: Task) => void;
 }
 
 export const TaskForm: React.FC<TaskFormProps> = ({
-	taskId,
+	task,
 	columnId,
 	onDone,
 	onTaskCreated,
@@ -133,8 +133,42 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 		);
 	}
 
-	// The form field name should follow the pattern: field_{field_slug}
+	let statusOption = task
+		? task.fields.find((field) => field.slug === 'status')?.values?.[0]
+				?.resolved
+		: null;
+	statusOption =
+		statusOption && isFieldOption(statusOption)
+			? statusOption
+			: fieldOptions?.status?.[(columnId ?? 1) - 1];
 
+	let priorityOption = task
+		? task.fields.find((field) => field.slug === 'priority')?.values?.[0]
+				?.resolved
+		: null;
+	priorityOption =
+		priorityOption && isFieldOption(priorityOption)
+			? priorityOption
+			: fieldOptions?.priority?.[0];
+
+	const dueDate = task
+		? (task.fields.find((field) => field.slug === 'due-date')?.values?.[0]
+				?.raw as string)
+		: undefined;
+	const associatedOrders = task
+		? task.fields.find((field) => field.slug === 'order')?.values
+		: undefined;
+	// return raw values as an array
+	let associatedOrderIds: { id: number; label: string }[] | undefined = [];
+	if (associatedOrders) {
+		associatedOrderIds = associatedOrders.map((value) => {
+			{
+				return { id: Number(value.raw), label: `#${value.raw}` };
+			}
+		});
+	}
+
+	// The form field name should follow the pattern: field_{field_slug}
 	return (
 		<form
 			onSubmit={submit}
@@ -149,7 +183,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 							options={fieldOptions.status}
 							id="status"
 							name="field_status"
-							selected={fieldOptions?.status?.[columnId - 1]}
+							selected={statusOption}
 						/>
 					</div>
 					<div>
@@ -159,7 +193,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 							options={fieldOptions?.priority || []}
 							id="priority"
 							name="field_priority"
-							selected={fieldOptions?.priority?.[0]}
+							selected={priorityOption}
 						/>
 					</div>
 					<div>
@@ -168,6 +202,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 							id="due-date"
 							name="field_due_date"
 							type="date"
+							defaultValue={dueDate}
 						/>
 					</div>
 				</div>
@@ -178,6 +213,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 							id="title"
 							name="title"
 							type="text"
+							defaultValue={task ? task.title : ''}
 							placeholder="Write a name for your task."
 							required
 						/>
@@ -190,6 +226,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 						</label>
 						<AsyncMultiSelectField
 							placeholder="Search orders by number, customer, address..."
+							selectedOptions={associatedOrderIds}
 							id="associated-orders"
 							name="field_order"
 							// ToDo: Lazy load for next pages
@@ -224,6 +261,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 							name="description"
 							rows={4}
 							placeholder="Describe the task."
+							defaultValue={task ? task.description : ''}
 						/>
 					</div>
 				</div>
@@ -243,7 +281,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 					disabled={isSubmitting}
 				>
 					{isSubmitting && <span className="wpo-aom-spinner"></span>}
-					{taskId ? 'Update Task' : 'Create Task'}
+					{task ? 'Update Task' : 'Create Task'}
 				</button>
 			</div>
 		</form>

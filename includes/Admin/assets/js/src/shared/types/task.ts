@@ -7,7 +7,7 @@ export type FieldOption = {
 };
 
 type FieldPrimitive = string | number | boolean | null;
-type FieldResolved =
+export type FieldResolved =
 	| FieldPrimitive
 	| FieldPrimitive[]
 	| FieldOption
