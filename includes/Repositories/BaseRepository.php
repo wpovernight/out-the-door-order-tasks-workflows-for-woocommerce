@@ -278,26 +278,34 @@ abstract class BaseRepository {
 	}
 
 	/**
-	 * Insert a record with raw columns and values.
+	 * Insert multiple records with raw columns and prepared values.
 	 *
 	 * @param string $columns Comma-separated column names.
-	 * @param string $values Comma-separated values.
+	 * @param array $rows Array of placeholder strings, e.g., ['(%d, %d, %s)', '(%d, %d, %s)'].
+	 * @param array $bindings Flat array of all values for prepare().
 	 *
-	 * @return int Insert id.
-	 * @throws InvalidArgumentException If columns or values are empty.
+	 * @return int|false Number of affected rows or false on failure.
+	 * @throws InvalidArgumentException If columns, rows, or bindings are empty.
 	 */
-	public function insert_raw( string $columns, string $values ): int {
-		if ( '' === trim( $columns ) || '' === trim( $values ) ) {
-			throw new InvalidArgumentException( 'Columns and values must not be empty.' );
+	public function insert_raw( string $columns, array $rows, array $bindings ) {
+		if ( '' === trim( $columns ) || empty( $rows ) || empty( $bindings ) ) {
+			throw new InvalidArgumentException( 'Columns, rows, and bindings must not be empty.' );
 		}
 
-		$query = "INSERT INTO {$this->get_table_full_name()} ({$columns}) VALUES {$values} ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)";
+		$placeholders = implode( ', ', $rows );
+		$query        = "INSERT INTO {$this->get_table_full_name()} ({$columns}) VALUES {$placeholders}";
+
+		// Add bindings
+		$this->bindings = array_merge( $this->bindings, $bindings );
+
+		// Prepare query with bindings
+		$query = $this->append_bindings( $query );
 
 		$result = $this->wpdb->query( $query );
 
 		$this->reset_query();
 
-		return false === $result ? false : (int) $this->wpdb->insert_id;
+		return false === $result ? false : (int) $result;
 	}
 
 	/**
@@ -407,7 +415,7 @@ abstract class BaseRepository {
 		$where = array();
 		foreach ( $this->wheres as [$column, $operator, $value, $logical_operator] ) {
 			if ( '=' !== $operator ) {
-				throw new InvalidArgumentException( 'Only equality checks are supported in WHERE clause for update.' );
+				throw new InvalidArgumentException( 'Only equality checks are supported in WHERE clause for delete.' );
 			}
 			$where[ $column ] = $value;
 		}
@@ -417,9 +425,59 @@ abstract class BaseRepository {
 		return (int) $this->wpdb->delete( $this->get_table_full_name(), $where );
 	}
 
+	/**
+	 * Delete records using the full query builder (supports IN, etc.).
+	 *
+	 * @return int|false Number of rows deleted or false on failure.
+	 * @throws RuntimeException If no WHERE clause is specified.
+	 */
+	public function delete_raw() {
+		if ( empty( $this->wheres ) ) {
+			throw new RuntimeException( 'No WHERE clause specified for delete.' );
+		}
+
+		$query = "DELETE FROM {$this->get_table_full_name()}";
+		$query .= $this->compile_where();
+		$query = $this->append_bindings( $query );
+
+		$result = $this->wpdb->query( $query );
+
+		$this->reset_query();
+
+		return $result;
+	}
+
 	/** ================================
 	 *   Helpers
 	 *  ================================ */
+
+	/**
+	 * Execute a callback within a database transaction.
+	 *
+	 * @param callable $callback
+	 *
+	 * @return mixed Result of the callback, or false on failure.
+	 * @throws \Exception
+	 */
+	public function transaction( callable $callback ) {
+		$this->wpdb->query( 'START TRANSACTION' );
+
+		try {
+			$result = $callback( $this );
+
+			if ( false === $result ) {
+				$this->wpdb->query( 'ROLLBACK' );
+				return false;
+			}
+
+			$this->wpdb->query( 'COMMIT' );
+			return $result;
+
+		} catch ( \Exception $e ) {
+			$this->wpdb->query( 'ROLLBACK' );
+			throw $e;
+		}
+	}
 
 	/**
 	 * Clear the static cache.
