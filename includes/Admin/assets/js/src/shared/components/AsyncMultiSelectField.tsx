@@ -240,36 +240,37 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 			)}
 
 			<ul className="wpo-aom-async-multi-select-selected-options">
-				{selected.map((option) => (
-					<li key={option.id}>
-						{/* Hidden input for form submission */}
-						{name && (
-							<input
-								type="hidden"
-								name={`${name}[]`}
-								value={option.id}
-							/>
-						)}
-						{option.url ? (
-							<a
-								href={option.url}
-								target="_blank"
-								rel="noopener noreferrer"
+				{selected &&
+					selected.map((option) => (
+						<li key={option.id}>
+							{/* Hidden input for form submission */}
+							{name && (
+								<input
+									type="hidden"
+									name={`${name}[]`}
+									value={option.id}
+								/>
+							)}
+							{option.url ? (
+								<a
+									href={option.url}
+									target="_blank"
+									rel="noopener noreferrer"
+								>
+									{option.label}
+								</a>
+							) : (
+								option.label
+							)}
+							<button
+								type="button"
+								className="wpo-button wpo-button-icon wpo-aom-sidebar-close"
+								onClick={() => handleRemoveOption(option.id)}
 							>
-								{option.label}
-							</a>
-						) : (
-							option.label
-						)}
-						<button
-							type="button"
-							className="wpo-button wpo-button-icon wpo-aom-sidebar-close"
-							onClick={() => handleRemoveOption(option.id)}
-						>
-							<span className="screenReader">Close</span>
-						</button>
-					</li>
-				))}
+								<span className="screenReader">Close</span>
+							</button>
+						</li>
+					))}
 			</ul>
 		</div>
 	);

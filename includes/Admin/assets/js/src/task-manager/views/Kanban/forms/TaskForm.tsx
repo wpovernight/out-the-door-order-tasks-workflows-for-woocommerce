@@ -154,18 +154,23 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 		? (task.fields.find((field) => field.slug === 'due-date')?.values?.[0]
 				?.raw as string)
 		: undefined;
-	const associatedOrders = task
-		? task.fields.find((field) => field.slug === 'order')?.values
-		: undefined;
-	// return raw values as an array
-	let associatedOrderIds: { id: number; label: string }[] | undefined = [];
-	if (associatedOrders) {
-		associatedOrderIds = associatedOrders.map((value) => {
-			{
-				return { id: Number(value.raw), label: `#${value.raw}` };
+
+	const associatedOrders = task?.fields.find(
+		(field) => field.slug === 'order'
+	)?.values;
+	const associatedOrderIds = associatedOrders
+		?.map((v) => {
+			const raw = v?.raw;
+			if (raw === null || raw === '') {
+				return null;
 			}
-		});
-	}
+			const num = Number(raw);
+			if (Number.isNaN(num)) {
+				return null;
+			}
+			return { id: num, label: `#${raw}` };
+		})
+		.filter((item): item is { id: number; label: string } => item !== null);
 
 	// The form field name should follow the pattern: field_{field_slug}
 	return (
