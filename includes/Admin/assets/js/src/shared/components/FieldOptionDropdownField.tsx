@@ -1,45 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { FieldOption } from '@shared/types/task';
 import { useOnClickOutside } from '@shared/hooks/useOnClickOutside';
-
-// Helper function to calculate text color based on background color to keep text readable and accessible.
-const calculateTextColor = (hex?: string): string => {
-	if (!hex) {
-		return '#000';
-	}
-
-	let c = hex.replace('#', '');
-
-	if (c.length === 3) {
-		c = c
-			.split('')
-			.map((ch) => ch + ch)
-			.join('');
-	}
-
-	// Validate hex
-	if (!/^[0-9A-Fa-f]{6}$/.test(c)) {
-		return '#000';
-	}
-
-	const r = parseInt(c.slice(0, 2), 16);
-	const g = parseInt(c.slice(2, 4), 16);
-	const b = parseInt(c.slice(4, 6), 16);
-
-	const brightness = (299 * r + 587 * g + 114 * b) / 1000;
-	return brightness > 128 ? '#000' : '#fff';
-};
-
-const applyStyle = (option?: FieldOption) => {
-	const backgroundColor = option?.color || undefined;
-	const textColor = calculateTextColor(backgroundColor);
-	return backgroundColor
-		? ({
-				backgroundColor,
-				color: textColor,
-			} as React.CSSProperties)
-		: {};
-};
+import { getColorStyle } from '@shared/utils/colorUtils';
 
 interface DropdownProps {
 	placeholder: string;
@@ -77,7 +39,7 @@ export const FieldOptionDropdown: React.FC<DropdownProps> = ({
 	useOnClickOutside(containerRef, () => setOpen(false));
 
 	const selectedStyle = useMemo(
-		() => (selectedOption ? applyStyle(selectedOption) : {}),
+		() => (selectedOption ? getColorStyle(selectedOption.color) : {}),
 		[selectedOption]
 	);
 
@@ -183,7 +145,7 @@ export const FieldOptionDropdown: React.FC<DropdownProps> = ({
 							>
 								<span
 									className="wpo-aom-label"
-									style={applyStyle(option)}
+									style={getColorStyle(option.color)}
 								>
 									{option.label}
 								</span>
