@@ -170,6 +170,7 @@ final class Install {
 			field_id BIGINT(20) UNSIGNED NOT NULL,
 			value TEXT DEFAULT NULL,
 			PRIMARY KEY  (id),
+			KEY idx_task_field_lookup (task_id, field_id),
 			FOREIGN KEY (task_id) REFERENCES {$wpdb->prefix}wpo_aom_tasks(id) ON DELETE CASCADE,
 			FOREIGN KEY (field_id) REFERENCES {$wpdb->prefix}wpo_aom_task_fields(id) ON DELETE CASCADE
 		) {$charset_collate};
