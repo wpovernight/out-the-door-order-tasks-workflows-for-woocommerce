@@ -78,6 +78,7 @@ class TaskRepository extends BaseRepository {
 	/**
 	 * Get the position of the last task in a given status.
 	 *
+	 * @param int|null $given_task_id
 	 * @param int $status_id
 	 * @param int $status_field_id
 	 * @param int $position_field_id
@@ -85,6 +86,7 @@ class TaskRepository extends BaseRepository {
 	 * @return float|null
 	 */
 	public function get_last_task_position(
+		?int $given_task_id,
 		int $status_id,
 		int $status_field_id,
 		int $position_field_id
@@ -99,6 +101,7 @@ class TaskRepository extends BaseRepository {
 			->where('status.field_id', $status_field_id)
 			->where('status.value', $status_id)
 			->where('position.field_id', $position_field_id)
+			->where('position.task_id', '!=', $given_task_id ?? 0)
 			->order_by_raw('CAST(position.value AS DECIMAL(10,5)) DESC')
 			->first();
 

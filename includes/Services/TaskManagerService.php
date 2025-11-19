@@ -169,13 +169,13 @@ final class TaskManagerService {
 	 *
 	 * @param string $title
 	 * @param string $description
-	 * @param array $field_values
+	 * @param array|null $field_values
 	 *
 	 * @return array<string, mixed>|null
 	 *
 	 * @throws Exception
 	 */
-	public function create_task( string $title, string $description, array $field_values ): ?array {
+	public function create_task( string $title, string $description, ?array $field_values = array() ): ?array {
 		if ( empty( $title ) ) {
 			throw new Exception( 'Task title is required and must be a string.' );
 		}
@@ -193,7 +193,7 @@ final class TaskManagerService {
 			throw new Exception( 'Failed to create task.' );
 		}
 
-		$status_id = 1;
+		$status_id = 1; // Default status ID
 		$status_field_id = null;
 		$position_field_id = $this->task_field_repository->find_by_slug( 'position' )->id ?? null;
 
@@ -211,6 +211,7 @@ final class TaskManagerService {
 
 		// Set the position field manually to be last in the status column.
 		$last_position                            = $this->task_repository->get_last_task_position(
+			null,
 			$status_id,
 			$status_field_id,
 			$position_field_id
@@ -221,30 +222,74 @@ final class TaskManagerService {
 		// Set field values.
 		$this->task_field_value_repository->update_task_multiple_field_values( $task->id, $field_values_array );
 
-		$task_fields = $this->get_task_fields_and_values( $task->id );
+		$task_with_data = $this->get_task_fields_and_values( $task->id );
 
-		return array_merge( $task->to_array(), array( 'fields' => $task_fields ) );
+		return array_merge( $task->to_array(), array( 'fields' => $task_with_data ) );
 	}
 
 	/**
 	 * Update a Task by ID.
 	 *
 	 * @param int $task_id
-	 * @param array<string, mixed> $data
+	 * @param array<string, mixed> $task_data
+	 * @param array|null $field_values
 	 *
-	 * @return bool
-	 * @throws InvalidArgumentException
-	 * @throws RuntimeException
+	 * @return array|null
+	 * @throws Exception
 	 */
-	public function update_task( int $task_id, array $data ): bool {
+	public function update_task( int $task_id, array $task_data, ?array $field_values = array() ): ?array {
 		$task = $this->task_repository->find( $task_id );
 		if ( ! $task ) {
 			return false;
 		}
 
-		$task->fill( $data );
+		$task->fill( $task_data );
 
-		return (bool) $this->task_repository->save( $task );
+		$result = $this->task_repository->save( $task );
+
+		if ( ! $result ) {
+			throw new RuntimeException( 'Failed to update task.' );
+		}
+
+		$status_field_id = null;
+
+		// Update field values if provided.
+		if ( ! empty( $field_values ) ) {
+			$field_values_array = array();
+			foreach ( $field_values as $field_value ) {
+				$field_id                        = $field_value['field_id'];
+				$value                           = $field_value['value'];
+				$field_values_array[ $field_id ] = $value;
+
+				// Check if status field is being updated
+				if ( $field_value['field_slug'] === 'status' ) {
+					$status_field_id = $field_value['field_id'];
+				}
+			}
+
+			$this->task_field_value_repository->update_task_multiple_field_values( $task_id, $field_values_array );
+		}
+
+		// Update position if the status has been changed.
+		if ( $status_field_id ) {
+			$position_field_id = $this->task_field_repository->find_by_slug( 'position' )->id ?? null;
+			if ( $position_field_id ) {
+				$last_position                            = $this->task_repository->get_last_task_position(
+					$task_id,
+					(int) $field_values_array[ $status_field_id ],
+					$status_field_id,
+					$position_field_id
+				);
+				$new_position                             = $last_position ? $last_position + 1.0 : 1.0;
+				$field_values_array[ $position_field_id ] = $new_position;
+
+				$this->task_field_value_repository->update_task_multiple_field_values( $task_id, $field_values_array );
+			}
+		}
+
+		$task_with_data = $this->get_task_fields_and_values( $task_id );
+
+		return array_merge( $task->to_array(), array( 'fields' => $task_with_data ) );
 	}
 
 	/**

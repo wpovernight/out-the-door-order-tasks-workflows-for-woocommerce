@@ -249,6 +249,7 @@ class TaskController extends BaseRestController {
 		$errors = $this->validate( $data, array(
 			'title'       => 'string',
 			'description' => 'string',
+			'field_values' => 'array',
 		) );
 
 		if ( ! empty( $errors ) ) {
@@ -262,7 +263,7 @@ class TaskController extends BaseRestController {
 		$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
 
 		try {
-			$task = $task_manager_service->update_task( $id, $data );
+			$task = $task_manager_service->update_task( $id, $data, $data['field_values'] ?? null );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'task_update_failed', $e->getMessage(), array( 'status' => 500 ) );
 		}
