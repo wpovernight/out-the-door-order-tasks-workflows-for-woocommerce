@@ -264,6 +264,8 @@ final class TaskManagerService {
 				// Check if status field is being updated
 				if ( $field_value['field_slug'] === 'status' ) {
 					$status_field_id = $field_value['field_id'];
+					$current_status_value = $this->task_field_value_repository->find_by_task_and_field( $task_id, $status_field_id );
+					$new_status_value = $value;
 				}
 			}
 
@@ -271,7 +273,7 @@ final class TaskManagerService {
 		}
 
 		// Update position if the status has been changed.
-		if ( $status_field_id ) {
+		if ( $status_field_id && isset( $current_status_value ) && $current_status_value->value !== $new_status_value ) {
 			$position_field_id = $this->task_field_repository->find_by_slug( 'position' )->id ?? null;
 			if ( $position_field_id ) {
 				$last_position                            = $this->task_repository->get_last_task_position(

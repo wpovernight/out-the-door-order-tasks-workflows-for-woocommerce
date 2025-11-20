@@ -13,6 +13,7 @@ import {
 	moveTask as moveTaskAPI,
 	createTask as createTaskAPI,
 	updateTask as updateTaskAPI,
+	deleteTask as deleteTaskAPI,
 } from '@shared/utils/api';
 
 interface TaskContextType {
@@ -20,6 +21,7 @@ interface TaskContextType {
 	setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
 	loadTasks: (force?: boolean) => Promise<void>;
 	saveTask: (data: Partial<Task>, taskId?: number) => Promise<Task>;
+	deleteTask: (taskId: number) => Promise<void>;
 	taskFields: Record<string, TaskField>;
 	setTaskFields: React.Dispatch<
 		React.SetStateAction<Record<string, TaskField>>
@@ -96,6 +98,15 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 		},
 		[]
 	);
+
+	const deleteTask = useCallback(async (taskId: number): Promise<void> => {
+		try {
+			await deleteTaskAPI(taskId);
+		} catch (error) {
+			console.error('Failed to delete task:', error);
+			throw error;
+		}
+	}, []);
 
 	const saveTask = useCallback(
 		async (data: Partial<Task>, taskId?: number): Promise<Task> => {
@@ -211,6 +222,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				setTasks,
 				loadTasks,
 				saveTask,
+				deleteTask,
 				taskFields,
 				setTaskFields,
 				loadTaskFields,

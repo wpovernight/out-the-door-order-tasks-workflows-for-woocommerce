@@ -135,7 +135,10 @@ export const FieldOptionDropdown: React.FC<DropdownProps> = ({
 				</span>
 			</button>
 			{open && (
-				<ul id={id ? `${id}-options` : undefined}>
+				<ul
+					className="wpo-action-menu"
+					id={id ? `${id}-options` : undefined}
+				>
 					{options.map((option) => (
 						<li key={option.id}>
 							<button

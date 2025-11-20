@@ -16,6 +16,7 @@ import { useViewTasks } from '../context/ViewTaskContext';
 import { getColorStyle } from '@shared/utils/colorUtils';
 import { useSidebarModal } from '@shared/context/SidebarModalContext';
 import { TaskForm } from '@taskManager/views/Kanban/forms/TaskForm';
+import { useTasks } from '@taskManager/context/TaskContext';
 
 // ------------------------------
 // Visual state
@@ -34,12 +35,20 @@ const IDLE: CardState = { type: 'idle' };
 
 interface CardProps {
 	task: Task;
+	isOptionsOpen: boolean;
+	onOptionsToggle: (id: number | null) => void;
 }
 
-export const Card: React.FC<CardProps> = ({ task }) => {
+export const Card: React.FC<CardProps> = ({
+	task,
+	isOptionsOpen,
+	onOptionsToggle,
+}) => {
 	const outerRef = useRef<HTMLDivElement | null>(null);
 	const innerRef = useRef<HTMLDivElement | null>(null);
 	const [state, setState] = useState<CardState>(IDLE);
+
+	const { deleteTask } = useTasks();
 	const { selectedTask, selectTask, setViewTasks } = useViewTasks();
 	const { openSidebar, closeSidebar } = useSidebarModal();
 
@@ -187,8 +196,34 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 		setIsSelected(selectedTask?.id === task.id);
 	}, [selectedTask, task.id]);
 
-	const handleClick = () => {
+	const handleCardClick = () => {
 		selectTask(task);
+	};
+
+	const handleOptionsClick = (e: React.MouseEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
+		onOptionsToggle(isOptionsOpen ? null : task.id);
+	};
+
+	const handleRemoveTask = (e: React.MouseEvent) => {
+		e.preventDefault();
+		deleteTask(task.id);
+		setViewTasks((prev) => {
+			const updated = structuredClone(prev);
+			for (const status in updated) {
+				updated[status] = updated[status].filter(
+					(t) => t.id !== task.id
+				);
+			}
+			return updated;
+		});
+	};
+
+	const handleEditTask = (e: React.MouseEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
+		onOptionsToggle(null);
 
 		openSidebar(
 			<TaskForm
@@ -263,14 +298,48 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 			<div
 				ref={innerRef}
 				className={`kanban-card ${state.type !== 'idle' ? state.type : ''} ${isSelected ? 'selected' : ''}`}
-				onClick={handleClick}
+				onClick={handleCardClick}
 				onKeyDown={(e) => {
 					if (e.key === 'Enter' || e.key === ' ') {
-						handleClick();
+						handleCardClick();
 					}
 				}}
 			>
-				<h3>{task.title}</h3>
+				<div className="kanban-card-header">
+					<h3>{task.title}</h3>
+					{/*ToDo: translatable string*/}
+					<div className="kanban-card-options">
+						<button
+							className="wpo-button wpo-button-icon wpo-options-button"
+							type="button"
+							onClick={handleOptionsClick}
+						>
+							<span className="screenReader">Options</span>
+						</button>
+						{isOptionsOpen && (
+							<ul className="wpo-action-menu">
+								<li>
+									<button
+										type="button"
+										className="wpo-button wpo-edit-button"
+										onClick={handleEditTask}
+									>
+										Edit
+									</button>
+								</li>
+								<li>
+									<button
+										type="button"
+										className="wpo-button wpo-edit-delete"
+										onClick={handleRemoveTask}
+									>
+										Delete
+									</button>
+								</li>
+							</ul>
+						)}
+					</div>
+				</div>
 				<ul className="kanban-card-tags">
 					{priorityValue && isFieldOption(priorityValue) && (
 						<li

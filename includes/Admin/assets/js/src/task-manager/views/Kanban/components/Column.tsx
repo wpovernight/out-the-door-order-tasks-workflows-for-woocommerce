@@ -18,6 +18,8 @@ import { useViewTasks } from '@taskManager/views/Kanban/context/ViewTaskContext'
 interface ColumnProps {
 	column: FieldOption;
 	tasks: Task[];
+	openOptionsCardId: number | null;
+	setOpenOptionsCardId: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 type ColumnState =
@@ -28,7 +30,12 @@ type ColumnState =
 
 const IDLE: ColumnState = { type: 'idle' };
 
-export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
+export const Column: React.FC<ColumnProps> = ({
+	column,
+	tasks,
+	openOptionsCardId,
+	setOpenOptionsCardId,
+}) => {
 	const scrollableRef = useRef<HTMLDivElement | null>(null);
 	const headerRef = useRef<HTMLDivElement | null>(null);
 	const containerRef = useRef<HTMLDivElement | null>(null);
@@ -223,7 +230,14 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 					}`}
 				>
 					{tasks.map((task) => (
-						<Card key={task.id} task={task} />
+						<Card
+							key={task.id}
+							task={task}
+							isOptionsOpen={openOptionsCardId === task.id}
+							onOptionsToggle={(id: number | null) =>
+								setOpenOptionsCardId(id)
+							}
+						/>
 					))}
 				</div>
 			</div>

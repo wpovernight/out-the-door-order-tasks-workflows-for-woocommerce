@@ -153,6 +153,61 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     border: 1px solid transparent;
 }
 
+.kanban-board .kanban-card > .kanban-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.kanban-board .kanban-card > .kanban-card-header > .kanban-card-options > ul {
+    width: 15em;
+    right: 1em;
+}
+
+.kanban-board .kanban-card > .kanban-card-header > .kanban-card-options > ul > li > button {
+    padding: 0.7em 1em;
+    display: flex;
+    align-items: center;
+}
+
+.wpo-options-button {
+    width: 2em;
+    height: 2em;
+}
+
+.wpo-options-button::before {
+    content: '\f11c';
+    font-family: 'dashicons';
+    font-size: 1.2em;
+}
+
+.wpo-edit-button::before {
+    content: '\f464';
+    font-family: 'dashicons';
+}
+
+.wpo-edit-delete,
+.kanban-card-options .wpo-action-menu .wpo-edit-delete::before{
+    color: #d1242f;
+}
+
+.wpo-edit-delete::before {
+    content: '\f182';
+    font-family: 'dashicons';
+}
+
+.kanban-card-options .wpo-action-menu button::before {
+    margin-right: 6px;
+    color: #59636e;
+    font-size: 1.4em;
+}
+
+.kanban-card-options .wpo-edit-delete::before {
+    vertical-align: middle;
+    margin-right: 6px;
+    color: #59636e;
+}
+
 .kanban-board .kanban-card:hover {
     border-color: var(--wpo-aom-primary-color);
 }
@@ -433,38 +488,40 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     font-size: 1.2em;
 }
 
-.wpo-aom-field-option-dropdown-container > ul {
+.wpo-action-menu {
     position: absolute;
-    cursor: pointer;
     box-shadow: var(--wpo-aom-floating-shadow);
     padding: 0;
-    border-radius: 8px;
-    overflow: hidden;
     margin: 5px 0 0;
+    border-radius: 0.5em;
+    overflow: hidden;
     background: #fff;
     width: 100%;
     z-index: 1;
 }
 
-.wpo-aom-field-option-dropdown-container > ul > li {
+.wpo-action-menu > li {
     margin: 0;
     padding: 0;
 }
 
-.wpo-aom-field-option-dropdown-container > ul > li > button {
-    padding: 0.7em 1em;
+.wpo-action-menu > li > button {
     cursor: pointer;
     margin: 0;
-    background: none;
     border: none;
     width: 100%;
     text-align: left;
+    background: none;
 }
 
-.wpo-aom-field-option-dropdown-container > ul > li > button:hover,
-.wpo-aom-field-option-dropdown-container > ul > li > button:focus {
+.wpo-action-menu > li > button:hover,
+.wpo-action-menu > li > button:focus {
     background-color: #00000012;
     outline: none;
+}
+
+.wpo-aom-field-option-dropdown-container > ul > li > button {
+    padding: 0.7em 1em;
 }
 
 .wpo-aom-label {

@@ -97,6 +97,50 @@ export async function createTask(payload: Partial<Task>): Promise<Task> {
 	};
 }
 
+export async function updateTask(
+	taskId: number,
+	payload: Partial<Task>
+): Promise<Task> {
+	const response = await fetch(`${apiRoot}/${apiNamespace}/tasks/${taskId}`, {
+		method: 'PUT',
+		credentials: 'include',
+		headers: {
+			'Content-Type': 'application/json',
+			'X-WP-Nonce': nonce,
+		},
+		body: JSON.stringify(payload),
+	});
+
+	const task = await handleResponse<any>(response);
+
+	// Apply the same mapping as fetchTasks
+	const statusField = task.fields?.find(
+		(field: any) => field.slug === 'status'
+	);
+	const positionField = task.fields?.find(
+		(field: any) => field.slug === 'position'
+	);
+
+	return {
+		...task,
+		status: statusField?.values?.[0]?.resolved?.slug ?? undefined,
+		position: positionField?.values?.[0]?.raw ?? undefined,
+	};
+}
+
+export async function deleteTask(taskId: number): Promise<void> {
+	const response = await fetch(`${apiRoot}/${apiNamespace}/tasks/${taskId}`, {
+		method: 'DELETE',
+		credentials: 'include',
+		headers: {
+			'Content-Type': 'application/json',
+			'X-WP-Nonce': nonce,
+		},
+	});
+
+	return handleResponse<void>(response);
+}
+
 /**
  * Moves a task to a new status and position.
  *
@@ -129,37 +173,6 @@ export async function moveTask(
 	);
 
 	return handleResponse<void>(response);
-}
-
-export async function updateTask(
-	taskId: number,
-	payload: Partial<Task>
-): Promise<Task> {
-	const response = await fetch(`${apiRoot}/${apiNamespace}/tasks/${taskId}`, {
-		method: 'PUT',
-		credentials: 'include',
-		headers: {
-			'Content-Type': 'application/json',
-			'X-WP-Nonce': nonce,
-		},
-		body: JSON.stringify(payload),
-	});
-
-	const task = await handleResponse<any>(response);
-
-	// Apply the same mapping as fetchTasks
-	const statusField = task.fields?.find(
-		(field: any) => field.slug === 'status'
-	);
-	const positionField = task.fields?.find(
-		(field: any) => field.slug === 'position'
-	);
-
-	return {
-		...task,
-		status: statusField?.values?.[0]?.resolved?.slug ?? undefined,
-		position: positionField?.values?.[0]?.raw ?? undefined,
-	};
 }
 
 /**

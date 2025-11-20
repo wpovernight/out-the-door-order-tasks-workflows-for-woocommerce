@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import invariant from 'tiny-invariant';
 import { monitorForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
@@ -14,6 +14,10 @@ import { useViewTasks } from '../context/ViewTaskContext';
 export const Board: React.FC = () => {
 	const { fieldOptions, moveTask } = useTasks();
 	const { viewTasks, setViewTasks, clearSelectedTask } = useViewTasks();
+	const [openOptionsCardId, setOpenOptionsCardId] = useState<number | null>(
+		null
+	);
+
 	const scrollableRef = useRef<HTMLDivElement | null>(null);
 
 	const statusesRef = useRef(fieldOptions.status || []);
@@ -151,6 +155,7 @@ export const Board: React.FC = () => {
 	// Clear highlight when clicking anywhere on the board background
 	const handleClick = () => {
 		clearSelectedTask();
+		setOpenOptionsCardId(null);
 	};
 
 	return (
@@ -171,6 +176,8 @@ export const Board: React.FC = () => {
 					key={col.id}
 					column={col}
 					tasks={viewTasks[col.slug] || []}
+					openOptionsCardId={openOptionsCardId}
+					setOpenOptionsCardId={setOpenOptionsCardId}
 				/>
 			))}
 		</div>
