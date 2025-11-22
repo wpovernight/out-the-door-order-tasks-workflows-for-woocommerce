@@ -5,6 +5,7 @@ namespace WPO\AOM\Services;
 use Exception;
 use InvalidArgumentException;
 use RuntimeException;
+use WPO\AOM\Enums\DefaultTaskFields;
 use WPO\AOM\Enums\TaskFieldTypes;
 use WPO\AOM\Models\Task;
 use WPO\AOM\Models\TaskField;
@@ -194,10 +195,8 @@ final class TaskManagerService {
 		}
 
 		$status_id = 1; // Default status ID
-		$status_field_id = null;
-		$position_field_id = $this->task_field_repository->find_by_slug( 'position' )->id ?? null;
-
 		$field_values_array = array();
+
 		foreach ( $field_values as $field_value ) {
 			$field_id                        = $field_value['field_id'];
 			$value                           = $field_value['value'];
@@ -205,19 +204,13 @@ final class TaskManagerService {
 
 			if ( $field_value['field_slug'] === 'status' ) {
 				$status_id       = $value;
-				$status_field_id = $field_value['field_id'];
 			}
 		}
 
 		// Set the position field manually to be last in the status column.
-		$last_position                            = $this->task_repository->get_last_task_position(
-			null,
-			$status_id,
-			$status_field_id,
-			$position_field_id
-		);
-		$new_position                             = $last_position ? $last_position + 1.0 : 1.0;
-		$field_values_array[ $position_field_id ] = $new_position;
+		$last_position = $this->task_repository->get_last_task_position( null, $status_id );
+
+		$field_values_array[ DefaultTaskFields::POSITION ] = $last_position ? $last_position + 1.0 : 1.0;
 
 		// Set field values.
 		$this->task_field_value_repository->update_task_multiple_field_values( $task->id, $field_values_array );
@@ -251,8 +244,6 @@ final class TaskManagerService {
 			throw new RuntimeException( 'Failed to update task.' );
 		}
 
-		$status_field_id = null;
-
 		// Update field values if provided.
 		if ( ! empty( $field_values ) ) {
 			$field_values_array = array();
@@ -263,8 +254,9 @@ final class TaskManagerService {
 
 				// Check if status field is being updated
 				if ( $field_value['field_slug'] === 'status' ) {
-					$status_field_id = $field_value['field_id'];
-					$current_status_value = $this->task_field_value_repository->find_by_task_and_field( $task_id, $status_field_id );
+					$current_status_value = $this
+						->task_field_value_repository
+						->find_by_task_and_field( $task_id, DefaultTaskFields::STATUS );
 					$new_status_value = $value;
 				}
 			}
@@ -273,20 +265,15 @@ final class TaskManagerService {
 		}
 
 		// Update position if the status has been changed.
-		if ( $status_field_id && isset( $current_status_value ) && $current_status_value->value !== $new_status_value ) {
-			$position_field_id = $this->task_field_repository->find_by_slug( 'position' )->id ?? null;
-			if ( $position_field_id ) {
-				$last_position                            = $this->task_repository->get_last_task_position(
-					$task_id,
-					(int) $field_values_array[ $status_field_id ],
-					$status_field_id,
-					$position_field_id
-				);
-				$new_position                             = $last_position ? $last_position + 1.0 : 1.0;
-				$field_values_array[ $position_field_id ] = $new_position;
+		if ( isset( $current_status_value ) && $current_status_value->value !== $new_status_value ) {
+			$last_position = $this->task_repository->get_last_task_position(
+				$task_id,
+				(int) $field_values_array[ DefaultTaskFields::STATUS ],
+			);
 
-				$this->task_field_value_repository->update_task_multiple_field_values( $task_id, $field_values_array );
-			}
+			$field_values_array[ DefaultTaskFields::POSITION ] = $last_position ? $last_position + 1.0 : 1.0;
+
+			$this->task_field_value_repository->update_task_multiple_field_values( $task_id, $field_values_array );
 		}
 
 		$task_with_data = $this->get_task_fields_and_values( $task_id );
@@ -375,7 +362,7 @@ final class TaskManagerService {
 	 *
 	 * @return TaskFieldOption|null
 	 */
-	public function get_option( int $option_id ): ?TaskFieldOption {
+	public function get_field_option( int $option_id ): ?TaskFieldOption {
 		return $this->task_field_option_repository->find( $option_id );
 	}
 
@@ -386,7 +373,7 @@ final class TaskManagerService {
 	 *
 	 * @return array
 	 */
-	public function get_options_for_field( int $field_id ): array {
+	public function get_field_options_by_field_id( int $field_id ): array {
 		return $this->task_field_option_repository->find_all_by( 'field_id', $field_id );
 	}
 
@@ -397,13 +384,13 @@ final class TaskManagerService {
 	 *
 	 * @return array
 	 */
-	public function get_options_for_field_by_slug( string $slug ): array {
+	public function get_field_options_by_field_slug( string $slug ): array {
 		$field = $this->task_field_repository->find_by_slug( $slug );
 		if ( ! $field ) {
 			return array();
 		}
 
-		return $this->get_options_for_field( $field->id );
+		return $this->get_field_options_by_field_id( $field->id );
 	}
 
 	/**
@@ -414,7 +401,7 @@ final class TaskManagerService {
 	 *
 	 * @return int
 	 */
-	public function add_option_to_field( int $field_id, array $option_data ): int {
+	public function add_field_option( int $field_id, array $option_data ): int {
 		$option_data['field_id'] = $field_id;
 
 		return $this->task_field_option_repository->insert( $option_data );
@@ -428,7 +415,7 @@ final class TaskManagerService {
 	 *
 	 * @return bool
 	 */
-	public function update_option( int $option_id, array $option_data ): bool {
+	public function update_field_option( int $option_id, array $option_data ): bool {
 		$option = $this->task_field_option_repository->find( $option_id );
 		if ( ! $option ) {
 			return false;
@@ -446,7 +433,7 @@ final class TaskManagerService {
 	 *
 	 * @return bool
 	 */
-	public function delete_option( int $option_id ): bool {
+	public function delete_field_option( int $option_id ): bool {
 		return $this->task_field_option_repository->delete( $option_id );
 	}
 
@@ -528,17 +515,9 @@ final class TaskManagerService {
 	 * @return float
 	 */
 	public function move_task( int $task_id, int $target_status_id, ?int $previous_task_id = null ): float {
-		$fields         = $this->get_all_fields();
-		$status_field_id   = $fields['status']->id ?? null;
-		$position_field_id = $fields['position']->id ?? null;
-
-		if ( ! $status_field_id || ! $position_field_id ) {
-			return false;
-		}
-
 		// Check if the new status ID is valid.
-		$target_status_option_field = $this->get_option( $target_status_id );
-		if ( ! $target_status_option_field || $target_status_option_field->field_id !== $status_field_id ) {
+		$target_status_option_field = $this->get_field_option( $target_status_id );
+		if ( ! $target_status_option_field || $target_status_option_field->field_id !== DefaultTaskFields::STATUS ) {
 			return false;
 		}
 
@@ -547,15 +526,15 @@ final class TaskManagerService {
 
 		// Determine new position.
 		if ( ! empty( $previous_task_id ) ) {
-			$previous_task_position_value = $this->task_field_value_repository->find_by_task_and_field( $previous_task_id, $position_field_id );
+			$previous_task_position_value = $this
+				->task_field_value_repository
+				->find_by_task_and_field( $previous_task_id, DefaultTaskFields::POSITION );
 			$previous_position = (float) ( $previous_task_position_value->value ?? 0.0 );
 		}
 
 		$next_position_value = $this->task_repository->get_next_task_position(
 			$previous_task_id,
 			$target_status_id,
-			$status_field_id,
-			$position_field_id,
 			$previous_position,
 			$task_id
 		);
@@ -572,11 +551,11 @@ final class TaskManagerService {
 		);
 
 		$update_data = array(
-			$position_field_id => $new_position,
-			$status_field_id => $target_status_id,
+			DefaultTaskFields::STATUS => $target_status_id,
+			DefaultTaskFields::POSITION => $new_position,
 		);
 
-		$result = $this->task_field_value_repository->update_task_multiple_field_values( $task_id, $update_data );
+		$this->task_field_value_repository->update_task_multiple_field_values( $task_id, $update_data );
 
 		return $new_position;
 	}

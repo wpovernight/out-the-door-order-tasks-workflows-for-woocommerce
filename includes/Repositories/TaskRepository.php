@@ -3,8 +3,8 @@
 namespace WPO\AOM\Repositories;
 
 use InvalidArgumentException;
+use WPO\AOM\Enums\DefaultTaskFields;
 use WPO\AOM\Models\Task;
-use WPO\AOM\Models\TaskField;
 use WPO\AOM\Models\TaskFieldValue;
 
 defined( 'ABSPATH' ) || exit;
@@ -25,8 +25,6 @@ class TaskRepository extends BaseRepository {
 	 *
 	 * @param int|null $given_task_id
 	 * @param int|null $status_id
-	 * @param int $status_field_id
-	 * @param int $position_field_id
 	 * @param float|null $given_task_position
 	 * @param int|null $moving_task_id
 	 *
@@ -36,8 +34,6 @@ class TaskRepository extends BaseRepository {
 	public function get_next_task_position(
 		?int $given_task_id,
 		int $status_id,
-		int $status_field_id,
-		int $position_field_id,
 		?float $given_task_position = null,
 		?int $moving_task_id = null
 	): ?float {
@@ -50,26 +46,26 @@ class TaskRepository extends BaseRepository {
 
 		if ( $given_task_id && empty( $given_task_position ) ) {
 			$given_task_field_value = $task_field_value_repository
-				->find_by_task_and_field( $given_task_id, $position_field_id );
+				->find_by_task_and_field( $given_task_id, DefaultTaskFields::POSITION );
 			$given_task_position    = $given_task_field_value ? (float) $given_task_field_value->value : 0.0;
 		}
 
 		$query = $task_field_value_repository
-			->select(array('position.*'))
-			->alias('position')
-			->join("{$task_field_value_table_name} AS status", 'position.task_id', '=', 'status.task_id')
-			->where('status.field_id', $status_field_id)
-			->where('status.value', $status_id)
-			->where('position.field_id', $position_field_id)
-			->where('position.task_id', '!=', $given_task_id ?? 0)
-			->where_raw("CAST(position.value AS DECIMAL(10,5)) > {$given_task_position}");
+			->select( array( 'position.*' ) )
+			->alias( 'position' )
+			->join( "{$task_field_value_table_name} AS status", 'position.task_id', '=', 'status.task_id' )
+			->where( 'status.field_id', DefaultTaskFields::STATUS )
+			->where( 'status.value', $status_id )
+			->where( 'position.field_id', DefaultTaskFields::POSITION )
+			->where( 'position.task_id', '!=', $given_task_id ?? 0 )
+			->where_raw( "CAST(position.value AS DECIMAL(10,5)) > {$given_task_position}" );
 
 		if ( $moving_task_id ) {
 			$query->where( 'position.task_id', '!=', $moving_task_id );
 		}
 
 		$next_task_value_field = $query
-			->order_by_raw('CAST(position.value AS DECIMAL(10,5)) ASC')
+			->order_by_raw( 'CAST(position.value AS DECIMAL(10,5)) ASC' )
 			->first();
 
 		return $next_task_value_field ? (float) $next_task_value_field->value : null;
@@ -80,29 +76,25 @@ class TaskRepository extends BaseRepository {
 	 *
 	 * @param int|null $given_task_id
 	 * @param int $status_id
-	 * @param int $status_field_id
-	 * @param int $position_field_id
 	 *
 	 * @return float|null
 	 */
 	public function get_last_task_position(
 		?int $given_task_id,
-		int $status_id,
-		int $status_field_id,
-		int $position_field_id
+		int $status_id
 	): ?float {
 		$task_field_value_repository = RepositoryRegistry::get( TaskFieldValue::class );
 		$task_field_value_table_name = $task_field_value_repository->get_table_full_name();
 
 		$last_task_value_field = $task_field_value_repository
-			->select(array('position.*'))
-			->alias('position')
-			->join("{$task_field_value_table_name} AS status", 'position.task_id', '=', 'status.task_id')
-			->where('status.field_id', $status_field_id)
-			->where('status.value', $status_id)
-			->where('position.field_id', $position_field_id)
-			->where('position.task_id', '!=', $given_task_id ?? 0)
-			->order_by_raw('CAST(position.value AS DECIMAL(10,5)) DESC')
+			->select( array( 'position.*' ) )
+			->alias( 'position' )
+			->join( "{$task_field_value_table_name} AS status", 'position.task_id', '=', 'status.task_id' )
+			->where( 'status.field_id', DefaultTaskFields::STATUS )
+			->where( 'status.value', $status_id )
+			->where( 'position.field_id', DefaultTaskFields::POSITION )
+			->where( 'position.task_id', '!=', $given_task_id ?? 0 )
+			->order_by_raw( 'CAST(position.value AS DECIMAL(10,5)) DESC' )
 			->first();
 
 		return $last_task_value_field ? (float) $last_task_value_field->value : null;
@@ -118,18 +110,11 @@ class TaskRepository extends BaseRepository {
 	public function rebalance_positions( ?int $status_id = null ): void {
 		$task_field_value_repository = RepositoryRegistry::get( TaskFieldValue::class );
 
-		$task_field_repository = RepositoryRegistry::get( TaskField::class );
-		$fields                = $task_field_repository->get();
-		$fields_by_slug        = array_column( $fields, null, 'slug' );
-		$status_field_id       = $fields_by_slug['status']->id ?? null;
-		$position_field_id     = $fields_by_slug['position']->id ?? null;
-
-		if ( ! $status_field_id || ! $position_field_id ) {
-			return;
-		}
+		$status_field_id       = DefaultTaskFields::STATUS;
+		$position_field_id     = DefaultTaskFields::POSITION;
 
 		$task_field_value_table_name = $task_field_value_repository->get_table_full_name();
-		$ranked_cte = "
+		$ranked_cte                  = "
 			WITH ranked AS (
 				SELECT
 					position.id,

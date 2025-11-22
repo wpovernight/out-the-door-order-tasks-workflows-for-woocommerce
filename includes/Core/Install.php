@@ -183,16 +183,22 @@ final class Install {
 	 * @return void
 	 */
 	private static function insert_default_data(): void {
+		global $wpdb;
+
 		$default_fields = array(
-			// Default fields: Non-editable and protected fields.
+			/*
+			 * Default fields: Non-editable and protected fields.
+			 */
+			// Status(column in Kanban view) field.
 			array(
+				'id'           => 1,
 				'label'        => 'Status',
 				'type'         => 'select',
 				'slug'         => 'status',
 				'is_required'  => true,
 				'is_editable'  => true,
 				'is_protected' => true,
-				'options' => array(
+				'options'      => array(
 					array(
 						'label'    => 'To Do',
 						'slug'     => 'to_do',
@@ -213,16 +219,28 @@ final class Install {
 					),
 				),
 			),
-			// position within status - used for ordering tasks in Kanban view
+			// Status position - used for ordering statuses(columns) in Kanban view
 			array(
-				'label' => 'Position',
-				'type'  => 'number',
-				'slug'  => 'position',
+				'id'           => 2,
+				'label'        => 'Status Position',
+				'type'         => 'number',
+				'slug'         => 'status_position',
+				'is_required'  => true,
+				'is_editable'  => false,
+				'is_protected' => true,
+			),
+			// Position within status - used for ordering tasks in a column in Kanban view
+			array(
+				'id'           => 3,
+				'label'        => 'Position',
+				'type'         => 'number',
+				'slug'         => 'position',
 				'is_required'  => true,
 				'is_editable'  => false,
 				'is_protected' => true,
 			),
 			array(
+				'id'           => 4,
 				'label'        => 'Creator',
 				'type'         => 'number',
 				'slug'         => 'creator',
@@ -231,6 +249,7 @@ final class Install {
 				'is_protected' => true,
 			),
 			array(
+				'id'           => 5,
 				'label'        => 'Order',
 				'type'         => 'number',
 				'slug'         => 'order',
@@ -239,6 +258,7 @@ final class Install {
 				'is_protected' => true,
 			),
 			array(
+				'id'           => 6,
 				'label'        => 'Due Date',
 				'type'         => 'date',
 				'slug'         => 'due_date',
@@ -246,8 +266,11 @@ final class Install {
 				'is_editable'  => false,
 				'is_protected' => true,
 			),
-			// Editable and non-protected fields.
+			/*
+			 * Editable and non-protected fields.
+			 */
 			array(
+				'id'           => 7,
 				'label'        => 'Priority',
 				'type'         => 'select',
 				'slug'         => 'priority',
@@ -279,37 +302,54 @@ final class Install {
 			),
 		);
 
-		$task_field_repository = new TaskFieldRepository();
-		$all_fields            = $task_field_repository->get();
-
+		$task_field_repository        = new TaskFieldRepository();
 		$task_field_option_repository = new TaskFieldOptionRepository();
 
 		foreach ( $default_fields as $field_data ) {
-			$exists = false;
-			foreach ( $all_fields as $existing_field ) {
-				if (
-					$existing_field->label === $field_data['label'] &&
-					$existing_field->type === $field_data['type']
-				) {
-					$exists = true;
-					break;
-				}
-			}
+			$field_id = $field_data['id'];
 
-			if ( ! $exists ) {
+			// Check if field with this specific ID already exists.
+			$existing_field = $task_field_repository->find( $field_id );
+
+			if ( ! $existing_field ) {
 				$field_options = $field_data['options'] ?? array();
 				unset( $field_data['options'] );
 
-				$task_field_id = $task_field_repository->insert( $field_data );
+				// Use raw INSERT to ensure the exact ID is used.
+				$table_name = $wpdb->prefix . 'wpo_aom_task_fields';
+				$result     = $wpdb->insert( $table_name, $field_data );
 
-				// Insert options if it's a select field.
-				if ( $task_field_id && ! empty( $field_options ) ) {
-					foreach ( $field_options as $option ) {
-						$task_field_option_repository
-							->insert( array_merge( $option, array( 'field_id' => $task_field_id ) ) );
+				if ( $result ) {
+					$inserted_id = (int) $wpdb->insert_id;
+
+					// Verify the ID matches what we expected.
+					if ( $inserted_id !== $field_id ) {
+						// Log error or throw exception - ID mismatch is critical.
+						error_log(
+							sprintf(
+								'WPO AOM: Failed to insert field with ID %d. Got ID %d instead.',
+								$field_id,
+								$inserted_id
+							)
+						);
+						continue;
+					}
+
+					// Insert options if it's a select field.
+					if ( ! empty( $field_options ) ) {
+						foreach ( $field_options as $option ) {
+							$task_field_option_repository
+								->insert( array_merge( $option, array( 'field_id' => $inserted_id ) ) );
+						}
 					}
 				}
 			}
+		}
+
+		// Reset auto-increment to prevent gaps if needed.
+		$max_id = $wpdb->get_var( "SELECT MAX(id) FROM {$wpdb->prefix}wpo_aom_task_fields" );
+		if ( $max_id ) {
+			$wpdb->query( $wpdb->prepare( "ALTER TABLE {$wpdb->prefix}wpo_aom_task_fields AUTO_INCREMENT = %d", $max_id + 1 ) );
 		}
 	}
 

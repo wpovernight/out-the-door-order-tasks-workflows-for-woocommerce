@@ -374,7 +374,7 @@ class TaskController extends BaseRestController {
 
 		/** @var TaskManagerService $task_manager_service */
 		$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
-		$options              = $task_manager_service->get_options_for_field( $field_id );
+		$options              = $task_manager_service->get_field_options_by_field_id( $field_id );
 
 		if ( empty( $options ) ) {
 			return new WP_Error( 'not_found', 'Field not found or has no options', array( 'status' => 404 ) );
@@ -392,7 +392,7 @@ class TaskController extends BaseRestController {
 
 		/** @var TaskManagerService $task_manager_service */
 		$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
-		$options              = $task_manager_service->get_options_for_field_by_slug( $field_slug );
+		$options              = $task_manager_service->get_field_options_by_field_slug( $field_slug );
 
 		if ( empty( $options ) ) {
 			return new WP_Error( 'not_found', 'Field not found or has no options', array( 'status' => 404 ) );
