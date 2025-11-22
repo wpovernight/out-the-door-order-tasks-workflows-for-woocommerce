@@ -6,10 +6,19 @@ import {
 	dropTargetForElements,
 } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { autoScrollForElements } from '@atlaskit/pragmatic-drag-and-drop-auto-scroll/element';
+import {
+	attachClosestEdge,
+	extractClosestEdge,
+	type Edge,
+} from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
 
-import { useTasks } from '../../../context/TaskContext';
 import { FieldOption, Task } from '@shared/types/task';
-import { getColumnData, isCardData } from '../data';
+import {
+	getColumnData,
+	getColumnDropTargetData,
+	isCardData,
+	isColumnData,
+} from '../data';
 import { Card } from './Card';
 import { useSidebarModal } from '@shared/context/SidebarModalContext';
 import { TaskForm } from '../forms/TaskForm';
@@ -26,7 +35,8 @@ type ColumnState =
 	| { type: 'idle' } // No drag interaction occurring
 	| { type: 'drag-over-card'; draggingRect: DOMRect } // Indicates a card is being dragged over this column
 	| { type: 'drag-over-empty' } // Indicates a card is being dragged over empty space in this column
-	| { type: 'dragging' }; // Indicates the column itself is being dragged
+	| { type: 'dragging' } // Indicates the column itself is being dragged
+	| { type: 'column-drag-over'; edge: Edge | null }; // Indicates another column is being dragged over this column
 
 const IDLE: ColumnState = { type: 'idle' };
 
@@ -75,13 +85,48 @@ export const Column: React.FC<ColumnProps> = ({
 		invariant(scrollable && header && container);
 
 		const columnData = getColumnData({ column: column.slug });
+		const columnDropTargetData = getColumnDropTargetData({
+			column: column.slug,
+		});
 
 		return combine(
-			// Make the column draggable (for future enhancement) // ToDo: Complete this feature
+			// Make the column header draggable
 			draggable({
 				element: header,
 				getInitialData: () => columnData,
-				onDragStart: resetState,
+				onDragStart: () => updateState({ type: 'dragging' }),
+				onDrop: resetState,
+			}),
+
+			// Make the column header a drop target for other columns
+			dropTargetForElements({
+				element: header,
+				canDrop: ({ source }) => isColumnData(source.data),
+				getData: ({ input }) =>
+					attachClosestEdge(columnDropTargetData, {
+						element: header,
+						input,
+						allowedEdges: ['left', 'right'],
+					}),
+				onDragEnter: ({ source, self }) => {
+					if (
+						isColumnData(source.data) &&
+						source.data.column !== column.slug
+					) {
+						const edge = extractClosestEdge(self.data);
+						updateState({ type: 'column-drag-over', edge });
+					}
+				},
+				onDrag: ({ source, self }) => {
+					if (
+						isColumnData(source.data) &&
+						source.data.column !== column.slug
+					) {
+						const edge = extractClosestEdge(self.data);
+						updateState({ type: 'column-drag-over', edge });
+					}
+				},
+				onDragLeave: resetState,
 				onDrop: resetState,
 			}),
 
@@ -208,9 +253,10 @@ export const Column: React.FC<ColumnProps> = ({
 		);
 	};
 
-	// ToDo: Add visual drop indicators for columns
 	return (
-		<div className="kanban-column">
+		<div
+			className={`kanban-column ${state.type === 'dragging' ? 'is-dragging' : ''} ${state.type === 'drag-over-empty' ? 'is-column-drag-over' : ''} ${state.type === 'column-drag-over' && state.edge === 'left' ? 'column-drop-indicator-left' : ''} ${state.type === 'column-drag-over' && state.edge === 'right' ? 'column-drop-indicator-right' : ''}`}
+		>
 			<div ref={headerRef} className="kanban-column-header" tabIndex={0}>
 				<h2>{column.label}</h2>
 				<button

@@ -7,9 +7,15 @@ import { autoScrollForElements } from '@atlaskit/pragmatic-drag-and-drop-auto-sc
 import { extractClosestEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
 
 import { useTasks } from '../../../context/TaskContext';
-import { isCardData, isColumnData, isCardDropTargetData } from '../data';
+import {
+	isCardData,
+	isColumnData,
+	isCardDropTargetData,
+	isColumnDropTargetData,
+} from '../data';
 import { Column } from './Column';
 import { useViewTasks } from '../context/ViewTaskContext';
+import { FieldOption } from '@shared/types/task';
 
 export const Board: React.FC = () => {
 	const { fieldOptions, moveTask } = useTasks();
@@ -17,12 +23,14 @@ export const Board: React.FC = () => {
 	const [openOptionsCardId, setOpenOptionsCardId] = useState<number | null>(
 		null
 	);
+	const [columnOrder, setColumnOrder] = useState<FieldOption[]>([]);
 
 	const scrollableRef = useRef<HTMLDivElement | null>(null);
 
 	const statusesRef = useRef(fieldOptions.status || []);
 	useEffect(() => {
 		statusesRef.current = fieldOptions.status || [];
+		setColumnOrder(fieldOptions.status || []);
 	}, [fieldOptions.status]);
 
 	// Setup DND behavior
@@ -31,6 +39,7 @@ export const Board: React.FC = () => {
 		invariant(scrollable);
 
 		return combine(
+			// Monitor for card drops
 			monitorForElements({
 				canMonitor: ({ source }) => isCardData(source.data),
 				async onDrop({ source, location }) {
@@ -145,9 +154,71 @@ export const Board: React.FC = () => {
 					}
 				},
 			}),
+
+			// Monitor for column drops (reordering)
+			monitorForElements({
+				canMonitor: ({ source }) => isColumnData(source.data),
+				onDrop({ source, location }) {
+					const dragging = source.data;
+					if (!isColumnData(dragging)) {
+						return;
+					}
+
+					const destination = location.current.dropTargets[0];
+					if (!destination) {
+						return;
+					}
+
+					const dropTargetData = destination.data;
+
+					if (isColumnDropTargetData(dropTargetData)) {
+						const fromColumnSlug = dragging.column;
+						const toColumnSlug = dropTargetData.column;
+
+						if (fromColumnSlug === toColumnSlug) {
+							return;
+						}
+
+						// Extract the edge to determine insert position
+						const edge = extractClosestEdge(dropTargetData);
+
+						// Reorder columns
+						setColumnOrder((prev) => {
+							const updated = [...prev];
+							const fromIndex = updated.findIndex(
+								(col) => col.slug === fromColumnSlug
+							);
+							const toIndex = updated.findIndex(
+								(col) => col.slug === toColumnSlug
+							);
+
+							if (fromIndex === -1 || toIndex === -1) {
+								return prev;
+							}
+
+							// Remove from source position
+							const [movedColumn] = updated.splice(fromIndex, 1);
+
+							// Recalculate target index after removal
+							const newToIndex = updated.findIndex(
+								(col) => col.slug === toColumnSlug
+							);
+
+							// Insert based on edge
+							const insertIndex =
+								edge === 'right' ? newToIndex + 1 : newToIndex;
+							updated.splice(insertIndex, 0, movedColumn);
+
+							return updated;
+						});
+					}
+				},
+			}),
+
 			autoScrollForElements({
 				element: scrollable,
-				canScroll: ({ source }) => isCardData(source.data),
+				canScroll: ({ source }) =>
+					isCardData(source.data) || isColumnData(source.data),
 			})
 		);
 	}, [setViewTasks, moveTask, statusesRef]);
@@ -171,7 +242,7 @@ export const Board: React.FC = () => {
 				}
 			}}
 		>
-			{statusesRef.current.map((col) => (
+			{columnOrder.map((col) => (
 				<Column
 					key={col.id}
 					column={col}
