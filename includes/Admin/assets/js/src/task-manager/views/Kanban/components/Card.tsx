@@ -17,6 +17,7 @@ import { getColorStyle } from '@shared/utils/colorUtils';
 import { useSidebarModal } from '@shared/context/SidebarModalContext';
 import { TaskForm } from '@taskManager/views/Kanban/forms/TaskForm';
 import { useTasks } from '@taskManager/context/TaskContext';
+import { useLocalized } from '@shared/hooks/useLocalized';
 
 // ------------------------------
 // Visual state
@@ -48,6 +49,7 @@ export const Card: React.FC<CardProps> = ({
 	const innerRef = useRef<HTMLDivElement | null>(null);
 	const [state, setState] = useState<CardState>(IDLE);
 
+	const localized = useLocalized();
 	const { deleteTask } = useTasks();
 	const { selectedTask, selectTask, setViewTasks } = useViewTasks();
 	const { openSidebar, closeSidebar } = useSidebarModal();
@@ -254,7 +256,7 @@ export const Card: React.FC<CardProps> = ({
 				}}
 			/>,
 			{
-				title: `Edit Task: ${task.title}`,
+				title: `${localized.kanban.editTask}: ${task.title}`,
 			}
 		);
 	};
@@ -307,14 +309,15 @@ export const Card: React.FC<CardProps> = ({
 			>
 				<div className="kanban-card-header">
 					<h3>{task.title}</h3>
-					{/*ToDo: translatable string*/}
 					<div className="kanban-card-options">
 						<button
 							className="wpo-button wpo-button-icon wpo-options-button"
 							type="button"
 							onClick={handleOptionsClick}
 						>
-							<span className="screenReader">Options</span>
+							<span className="screenReader">
+								{localized.kanban.options}
+							</span>
 						</button>
 						{isOptionsOpen && (
 							<ul className="wpo-action-menu">
@@ -324,7 +327,7 @@ export const Card: React.FC<CardProps> = ({
 										className="wpo-button wpo-edit-button"
 										onClick={handleEditTask}
 									>
-										Edit
+										{localized.actions.edit}
 									</button>
 								</li>
 								<li>
@@ -333,7 +336,7 @@ export const Card: React.FC<CardProps> = ({
 										className="wpo-button wpo-edit-delete"
 										onClick={handleRemoveTask}
 									>
-										Delete
+										{localized.actions.delete}
 									</button>
 								</li>
 							</ul>
@@ -352,7 +355,7 @@ export const Card: React.FC<CardProps> = ({
 				</ul>
 				{dueDateValue && (
 					<span className="kanban-card-due-date">
-						Due date: {dueDate}
+						{localized.kanban.dueDateLabel}: {dueDate}
 					</span>
 				)}
 			</div>

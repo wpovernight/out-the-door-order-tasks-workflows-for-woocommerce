@@ -51,6 +51,38 @@ final class Screen {
 					'kanban'   => esc_html__( 'Kanban', 'wpo-aom' ),
 					'calendar' => esc_html__( 'Calendar', 'wpo-aom' ),
 				),
+				'kanban'       => array(
+					'addTask'      => esc_html__( 'Add Task', 'wpo-aom' ),
+					'editTask'     => esc_html__( 'Edit Task', 'wpo-aom' ),
+					'options'      => esc_html__( 'Options', 'wpo-aom' ),
+					'create'       => esc_html__( 'Create', 'wpo-aom' ),
+					'dueDateLabel' => esc_html__( 'Due date', 'wpo-aom' ),
+				),
+				'form'         => array(
+					'labels'       => array(
+						'status'           => esc_html__( 'Status', 'wpo-aom' ),
+						'priority'         => esc_html__( 'Priority', 'wpo-aom' ),
+						'dueDate'          => esc_html__( 'Due Date', 'wpo-aom' ),
+						'title'            => esc_html__( 'Title', 'wpo-aom' ),
+						'description'      => esc_html__( 'Description', 'wpo-aom' ),
+						'associatedOrders' => esc_html__( 'Associated Orders', 'wpo-aom' ),
+					),
+					'placeholders' => array(
+						'select'          => esc_html__( 'Select', 'wpo-aom' ),
+						'taskName'        => esc_html__( 'Write a name for your task.', 'wpo-aom' ),
+						'taskDescription' => esc_html__( 'Describe the task.', 'wpo-aom' ),
+						'searchOrders'    => esc_html__( 'Search orders by number, customer, address...', 'wpo-aom' ),
+					),
+				),
+				'actions'      => array(
+					'edit'       => esc_html__( 'Edit', 'wpo-aom' ),
+					'delete'     => esc_html__( 'Delete', 'wpo-aom' ),
+					'deleteTask' => esc_html__( 'Delete task', 'wpo-aom' ),
+					'cancel'     => esc_html__( 'Cancel', 'wpo-aom' ),
+					'apply'      => esc_html__( 'Apply', 'wpo-aom' ),
+					'createTask' => esc_html__( 'Create Task', 'wpo-aom' ),
+					'updateTask' => esc_html__( 'Update Task', 'wpo-aom' ),
+				),
 			)
 		);
 

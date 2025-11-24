@@ -23,6 +23,7 @@ import { Card } from './Card';
 import { useSidebarModal } from '@shared/context/SidebarModalContext';
 import { TaskForm } from '../forms/TaskForm';
 import { useViewTasks } from '@taskManager/views/Kanban/context/ViewTaskContext';
+import { useLocalized } from '@shared/hooks/useLocalized';
 
 interface ColumnProps {
 	column: FieldOption;
@@ -49,6 +50,7 @@ export const Column: React.FC<ColumnProps> = ({
 	const scrollableRef = useRef<HTMLDivElement | null>(null);
 	const headerRef = useRef<HTMLDivElement | null>(null);
 	const containerRef = useRef<HTMLDivElement | null>(null);
+	const localized = useLocalized();
 	const { openSidebar, closeSidebar } = useSidebarModal();
 
 	const [state, setState] = useState<ColumnState>(IDLE);
@@ -237,7 +239,7 @@ export const Column: React.FC<ColumnProps> = ({
 				}}
 			/>,
 			{
-				title: 'Add Task', // ToDo: translatable string
+				title: localized.kanban.addTask,
 			}
 		);
 	};
@@ -252,7 +254,9 @@ export const Column: React.FC<ColumnProps> = ({
 					onClick={openTaskCreationModal}
 					className="wpo-button wpo-button-icon add-task-button"
 				>
-					<span className="screenReader">Create</span>
+					<span className="screenReader">
+						{localized.kanban.create}
+					</span>
 				</button>
 			</div>
 			<div ref={scrollableRef} className="kanban-column-scrollable">

@@ -21,6 +21,39 @@ export function useLocalized(): WPOAOMLocalized {
 			loading: 'Loading...',
 			errorLoading: 'Error loading tasks. Please try again.',
 			views: {},
+			kanban: {
+				addTask: 'Add Task',
+				editTask: 'Edit Task',
+				options: 'Options',
+				create: 'Create',
+				dueDateLabel: 'Due date: ',
+			},
+			form: {
+				labels: {
+					status: 'Status',
+					priority: 'Priority',
+					dueDate: 'Due Date',
+					title: 'Title',
+					description: 'Description',
+					associatedOrders: 'Associated Orders',
+				},
+				placeholders: {
+					select: 'Select',
+					taskName: 'Write a name for your task.',
+					taskDescription: 'Describe the task.',
+					searchOrders:
+						'Search orders by number, customer, address...',
+				},
+			},
+			actions: {
+				edit: 'Edit',
+				delete: 'Delete',
+				deleteTask: 'Delete task',
+				cancel: 'Cancel',
+				apply: 'Apply',
+				createTask: 'Create Task',
+				updateTask: 'Update Task',
+			},
 		};
 	}
 
