@@ -148,6 +148,30 @@ class TaskController extends BaseRestController {
 				),
 			)
 		);
+
+		// POST /{namespace}/tasks/fields/{field_id}/options/reorder -> reorder field options.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->resource_name . '/fields/(?P<field_id>[\d]+)/options/reorder',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'reorder_field_options' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+					'args'                => array(
+						'ordered_option_ids' => array(
+							'required'          => true,
+							'type'              => 'array',
+							'items'             => array( 'type' => 'integer' ),
+							'description'       => __( 'Array of option IDs in desired order.', 'wpo-aom' ),
+							'validate_callback' => function ( $param ) {
+								return is_array( $param ) && ! empty( $param );
+							},
+						),
+					),
+				),
+			)
+		);
 	}
 
 	/**
@@ -399,6 +423,53 @@ class TaskController extends BaseRestController {
 		}
 
 		return rest_ensure_response( $options );
+	}
+
+	/**
+	 * Reorder field options by updating their position values.
+	 *
+	 * @param WP_REST_Request $request
+	 *
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function reorder_field_options( WP_REST_Request $request ) {
+		$field_id           = (int) $request->get_param( 'field_id' );
+		$ordered_option_ids = $request->get_param( 'ordered_option_ids' );
+
+		// Validate field_id.
+		if ( $field_id <= 0 ) {
+			return new WP_Error( 'invalid_field_id', 'Invalid field ID provided', array( 'status' => 400 ) );
+		}
+
+		/** @var TaskManagerService $task_manager_service */
+		$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
+
+		try {
+			$task_manager_service->update_field_option_positions( $field_id, $ordered_option_ids );
+
+			return rest_ensure_response(
+				array(
+					'success' => true,
+					'message' => __( 'Field option positions updated successfully', 'wpo-aom' ),
+				)
+			);
+		} catch ( \InvalidArgumentException $e ) {
+			// Validation errors (field not found, invalid option IDs, etc.).
+			return new WP_Error(
+				'invalid_data',
+				$e->getMessage(),
+				array( 'status' => 400 )
+			);
+		} catch ( \Exception $e ) {
+			// Unexpected errors (database issues, etc.).
+			error_log( 'Failed to reorder field options: ' . $e->getMessage() );
+
+			return new WP_Error(
+				'update_failed',
+				'Failed to update field option positions',
+				array( 'status' => 500 )
+			);
+		}
 	}
 
 	/**

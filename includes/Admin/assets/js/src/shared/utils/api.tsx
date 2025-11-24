@@ -220,6 +220,36 @@ export async function fetchFieldOptions(
 }
 
 /**
+ * Reorders field options by updating their position values.
+ *
+ * @param  fieldId - The field ID whose options are being reordered
+ * @param  orderedOptionIds - Array of option IDs in the desired order
+ * @return {Promise<{ success: boolean; message: string }>} A promise that resolves to the API response.
+ * @throws Will throw an error if the API request fails.
+ */
+export async function reorderFieldOptions(
+	fieldId: number,
+	orderedOptionIds: number[]
+): Promise<{ success: boolean; message: string }> {
+	const response = await fetch(
+		`${apiRoot}/${apiNamespace}/tasks/fields/${fieldId}/options/reorder`,
+		{
+			method: 'POST',
+			credentials: 'include',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-WP-Nonce': nonce,
+			},
+			body: JSON.stringify({
+				ordered_option_ids: orderedOptionIds,
+			}),
+		}
+	);
+
+	return handleResponse<{ success: boolean; message: string }>(response);
+}
+
+/**
  * Searches orders based on a search term.
  *
  * @param  term

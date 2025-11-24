@@ -16,6 +16,7 @@ import {
 import { Column } from './Column';
 import { useViewTasks } from '../context/ViewTaskContext';
 import { FieldOption } from '@shared/types/task';
+import { reorderFieldOptions } from '@shared/utils/api';
 
 export const Board: React.FC = () => {
 	const { fieldOptions, moveTask } = useTasks();
@@ -208,6 +209,20 @@ export const Board: React.FC = () => {
 							const insertIndex =
 								edge === 'right' ? newToIndex + 1 : newToIndex;
 							updated.splice(insertIndex, 0, movedColumn);
+
+							// Persist the new column order to the API
+							const orderedIds = updated.map((col) => col.id);
+							const fieldId = updated[0]?.field_id;
+							if (fieldId) {
+								reorderFieldOptions(fieldId, orderedIds).catch(
+									(error) => {
+										console.error(
+											'Failed to persist column order:',
+											error
+										);
+									}
+								);
+							}
 
 							return updated;
 						});

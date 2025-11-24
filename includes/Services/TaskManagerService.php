@@ -437,6 +437,69 @@ final class TaskManagerService {
 		return $this->task_field_option_repository->delete( $option_id );
 	}
 
+	/**
+	 * Update the position order of field options.
+	 *
+	 * @param int   $field_id           The field ID.
+	 * @param array $ordered_option_ids Array of option IDs in desired order.
+	 *
+	 * @return void
+	 * @throws InvalidArgumentException If field doesn't exist or option IDs are invalid.
+	 */
+	public function update_field_option_positions( int $field_id, array $ordered_option_ids ): void {
+		// Validate that the field exists.
+		$field = $this->task_field_repository->find( $field_id );
+		if ( ! $field ) {
+			throw new InvalidArgumentException( "Field with ID {$field_id} does not exist." );
+		}
+
+		// Get all existing options for this field.
+		$existing_options = $this->task_field_option_repository->get_by_field_id_ordered( $field_id );
+		if ( empty( $existing_options ) ) {
+			throw new InvalidArgumentException( "Field {$field_id} has no options to reorder." );
+		}
+
+		// Extract valid option IDs for this field.
+		$valid_option_ids = array_map(
+			function ( $option ) {
+				return $option->id;
+			},
+			$existing_options
+		);
+
+		// Validate that all provided option IDs belong to this field.
+		foreach ( $ordered_option_ids as $option_id ) {
+			if ( ! in_array( $option_id, $valid_option_ids, true ) ) {
+				throw new InvalidArgumentException( "Option ID {$option_id} does not belong to field {$field_id}." );
+			}
+		}
+
+		// Validate no duplicates in the provided list.
+		$unique_ids = array_unique( $ordered_option_ids );
+		if ( count( $unique_ids ) !== count( $ordered_option_ids ) ) {
+			throw new InvalidArgumentException(
+				'Duplicate option IDs detected in the reorder request. Each option ID must appear exactly once.'
+			);
+		}
+
+		// Validate completeness: All option IDs must be provided.
+		if ( count( $ordered_option_ids ) !== count( $existing_options ) ) {
+			throw new InvalidArgumentException(
+				sprintf(
+					'Incomplete option list provided. Expected %d option IDs, got %d. All options must be included when reordering.',
+					count( $existing_options ),
+					count( $ordered_option_ids )
+				)
+			);
+		}
+
+		// Update positions in the database.
+		$this->task_field_option_repository->update_positions( $field_id, $ordered_option_ids );
+
+		// Clear repository cache to ensure fresh data on next fetch.
+		$this->task_field_option_repository::clear_cache();
+	}
+
 	/** ================================
 	 *   Task Field Value Methods
 	 *  ================================ */
