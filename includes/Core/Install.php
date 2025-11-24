@@ -219,19 +219,9 @@ final class Install {
 					),
 				),
 			),
-			// Status position - used for ordering statuses(columns) in Kanban view
+			// Position within status - used for ordering tasks within a status column in Kanban view
 			array(
 				'id'           => 2,
-				'label'        => 'Status Position',
-				'type'         => 'number',
-				'slug'         => 'status_position',
-				'is_required'  => true,
-				'is_editable'  => false,
-				'is_protected' => true,
-			),
-			// Position within status - used for ordering tasks in a column in Kanban view
-			array(
-				'id'           => 3,
 				'label'        => 'Position',
 				'type'         => 'number',
 				'slug'         => 'position',
@@ -240,7 +230,7 @@ final class Install {
 				'is_protected' => true,
 			),
 			array(
-				'id'           => 4,
+				'id'           => 3,
 				'label'        => 'Creator',
 				'type'         => 'number',
 				'slug'         => 'creator',
@@ -249,7 +239,7 @@ final class Install {
 				'is_protected' => true,
 			),
 			array(
-				'id'           => 5,
+				'id'           => 4,
 				'label'        => 'Order',
 				'type'         => 'number',
 				'slug'         => 'order',
@@ -258,7 +248,7 @@ final class Install {
 				'is_protected' => true,
 			),
 			array(
-				'id'           => 6,
+				'id'           => 5,
 				'label'        => 'Due Date',
 				'type'         => 'date',
 				'slug'         => 'due_date',
@@ -270,7 +260,7 @@ final class Install {
 			 * Editable and non-protected fields.
 			 */
 			array(
-				'id'           => 7,
+				'id'           => 6,
 				'label'        => 'Priority',
 				'type'         => 'select',
 				'slug'         => 'priority',

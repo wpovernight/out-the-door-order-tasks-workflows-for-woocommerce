@@ -12,15 +12,14 @@ defined( 'ABSPATH' ) || exit;
  */
 final class DefaultTaskFields {
 	// Protected system fields
-	public const STATUS = 1;
-	public const STATUS_POSITION = 2;
-	public const POSITION = 3;
-	public const CREATOR = 4;
-	public const ORDER = 5;
-	public const DUE_DATE = 6;
+	public const STATUS   = 1;
+	public const POSITION = 2;
+	public const CREATOR  = 3;
+	public const ORDER    = 4;
+	public const DUE_DATE = 5;
 
 	// User-editable default fields
-	public const PRIORITY = 7;
+	public const PRIORITY = 6;
 
 	/**
 	 * Get all default field IDs.
@@ -30,7 +29,6 @@ final class DefaultTaskFields {
 	public static function all(): array {
 		return array(
 			self::STATUS,
-			self::STATUS_POSITION,
 			self::POSITION,
 			self::CREATOR,
 			self::ORDER,
@@ -47,7 +45,6 @@ final class DefaultTaskFields {
 	public static function protected(): array {
 		return array(
 			self::STATUS,
-			self::STATUS_POSITION,
 			self::POSITION,
 			self::CREATOR,
 			self::ORDER,
@@ -75,7 +72,6 @@ final class DefaultTaskFields {
 	public static function required(): array {
 		return array(
 			self::STATUS,
-			self::STATUS_POSITION,
 			self::POSITION,
 		);
 	}
