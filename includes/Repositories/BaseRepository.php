@@ -350,12 +350,13 @@ abstract class BaseRepository {
 	 * Update records with a raw SET clause.
 	 *
 	 * @param string $set_clause Raw SET clause (e.g., "column1 = value1, column2 = value2").
+	 * @param array $bindings
 	 *
 	 * @return int
 	 * @throws InvalidArgumentException If SET clause is empty.
 	 * @throws RuntimeException If no WHERE clause is specified.
 	 */
-	public function update_raw( string $set_clause ): int {
+	public function update_raw( string $set_clause, array $bindings ): int {
 		// Ensure that the SET clause is not empty.
 		if ( '' === trim( $set_clause ) ) {
 			throw new InvalidArgumentException( 'SET clause must not be empty.' );
@@ -365,6 +366,9 @@ abstract class BaseRepository {
 		if ( empty( $this->wheres ) ) {
 			throw new RuntimeException( 'No WHERE clause specified for update.' );
 		}
+
+		// Add bindings
+		$this->bindings = array_merge( $this->bindings, $bindings );
 
 		$query = "UPDATE {$this->get_table_full_name()} SET {$set_clause}";
 		$query = $this->append_query_clauses( $query );
