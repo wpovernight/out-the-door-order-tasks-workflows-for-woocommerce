@@ -367,14 +367,14 @@ final class TaskManagerService {
 	}
 
 	/**
-	 * Get all options for a specific select-type field.
+	 * Get all options for a specific select-type field, ordered by position.
 	 *
 	 * @param int $field_id
 	 *
 	 * @return array
 	 */
 	public function get_field_options_by_field_id( int $field_id ): array {
-		return $this->task_field_option_repository->find_all_by( 'field_id', $field_id );
+		return $this->task_field_option_repository->get_by_field_id_ordered( $field_id );
 	}
 
 	/**

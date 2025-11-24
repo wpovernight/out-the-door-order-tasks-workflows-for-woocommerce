@@ -83,7 +83,7 @@ class TaskController extends BaseRestController {
 		);
 
 		/**
-		 * Task move endpoint:
+		 * Task movement endpoint:
 		 * POST /{namespace}/tasks/{id}/move -> moves a task to a new position/status.
 		 */
 		register_rest_route(
@@ -432,6 +432,11 @@ class TaskController extends BaseRestController {
 				'color'    => array(
 					'description' => __( 'Option color.', 'wpo-aom' ),
 					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'position' => array(
+					'description' => __( 'Option position for ordering.', 'wpo-aom' ),
+					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
 			),

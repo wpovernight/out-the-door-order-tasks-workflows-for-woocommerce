@@ -10,6 +10,7 @@ class TaskFieldOption extends BaseModel {
 	public string $slug;
 	public string $label;
 	public string $color;
+	public int $position;
 
 
 	/**
@@ -23,6 +24,7 @@ class TaskFieldOption extends BaseModel {
 		$this->slug     = $data['slug'];
 		$this->label    = $data['label'];
 		$this->color    = $data['color'] ?? '#000000';
+		$this->position = absint( $data['position'] ?? 0 );
 	}
 
 	/**

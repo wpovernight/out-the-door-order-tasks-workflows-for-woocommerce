@@ -4,6 +4,7 @@ export type FieldOption = {
 	slug: string;
 	label: string;
 	color: `#${string}` | `rgb(${number},${number},${number})` | string;
+	position: number;
 };
 
 type FieldPrimitive = string | number | boolean | null;
