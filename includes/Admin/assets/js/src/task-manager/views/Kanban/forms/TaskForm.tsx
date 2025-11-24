@@ -5,6 +5,7 @@ import { FieldOptionDropdown } from '@shared/components/FieldOptionDropdownField
 import { AsyncMultiSelectField } from '@shared/components/AsyncMultiSelectField';
 import { searchOrders } from '@shared/utils/api';
 import { isFieldOption, Task } from '@shared/types/task';
+import { useLocalized } from '@shared/hooks/useLocalized';
 
 interface TaskFormProps {
 	task?: Task;
@@ -27,6 +28,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 		loadFieldOptions,
 	} = useTasks();
 
+	const localized = useLocalized();
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const { loadingStatus, loadingError } = useAsyncLoader(async () => {
 		await Promise.all([
@@ -119,17 +121,13 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 	if (loadingStatus === 'loading' || !isDataReady) {
 		return (
 			<div className="loading-spinner" style={{ padding: '0 1em' }}>
-				{(window as any).WPO_AOM_TaskManager.loading}
+				{localized.loading}
 			</div>
 		);
 	}
 
 	if (loadingStatus === 'error') {
-		return (
-			<div className="error-message">
-				{(window as any).WPO_AOM_TaskManager.errorLoading}
-			</div>
-		);
+		return <div className="error-message">{localized.errorLoading}</div>;
 	}
 
 	let statusOption = task

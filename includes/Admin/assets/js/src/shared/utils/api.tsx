@@ -1,8 +1,8 @@
 import { Task, FieldOption, TaskField } from '../types/task';
 
-const apiRoot = (window as any).WPO_AOM_TaskManager?.apiRoot;
-const apiNamespace = (window as any).WPO_AOM_TaskManager?.apiNamespace;
-const nonce = (window as any).WPO_AOM_TaskManager?.nonce;
+const apiRoot = window.WPO_AOM_TaskManager?.apiRoot;
+const apiNamespace = window.WPO_AOM_TaskManager?.apiNamespace;
+const nonce = window.WPO_AOM_TaskManager?.nonce;
 
 if (!apiRoot) {
 	// eslint-disable-next-line no-console

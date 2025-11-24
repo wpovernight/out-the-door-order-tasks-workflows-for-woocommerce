@@ -1,8 +1,10 @@
 import React from 'react';
 import { AVAILABLE_VIEWS, useView } from '../context/ViewContext';
+import { useLocalized } from '@shared/hooks/useLocalized';
 
 export default function Header() {
 	const { view, setView } = useView();
+	const localized = useLocalized();
 
 	return (
 		<div className="header">
@@ -18,11 +20,7 @@ export default function Header() {
 								onClick={() => setView(availableView)}
 								className="view-button"
 							>
-								{
-									(window as any).WPO_AOM_TaskManager.views[
-										availableView
-									]
-								}
+								{localized.views[availableView]}
 							</button>
 						</li>
 					))}
