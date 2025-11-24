@@ -222,7 +222,7 @@ export async function fetchFieldOptions(
 /**
  * Reorders field options by updating their position values.
  *
- * @param  fieldId - The field ID whose options are being reordered
+ * @param  fieldId          - The field ID whose options are being reordered
  * @param  orderedOptionIds - Array of option IDs in the desired order
  * @return {Promise<{ success: boolean; message: string }>} A promise that resolves to the API response.
  * @throws Will throw an error if the API request fails.

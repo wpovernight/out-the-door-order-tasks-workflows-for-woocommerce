@@ -52,12 +52,6 @@ export const Column: React.FC<ColumnProps> = ({
 	const { openSidebar, closeSidebar } = useSidebarModal();
 
 	const [state, setState] = useState<ColumnState>(IDLE);
-	// const {saveTask} = useTasks();
-
-	const tasksRef = useRef(tasks);
-	useEffect(() => {
-		tasksRef.current = tasks;
-	}, [tasks]);
 
 	const updateState = useCallback(
 		(newState: ColumnState) => {
@@ -191,14 +185,9 @@ export const Column: React.FC<ColumnProps> = ({
 
 				onDragLeave: resetState,
 
-				async onDrop({ source }) {
-					if (!isCardData(source.data)) {
-						return;
-					}
-					const { task, fromColumn } = source.data;
-					if (fromColumn !== column.slug) {
-						// await saveTask(task.id, { status: column.slug });
-					}
+				onDrop() {
+					// Card drop logic is handled by Board.tsx monitor
+					// Reset visual state after drop
 					if (isMounted) {
 						resetState();
 					}
