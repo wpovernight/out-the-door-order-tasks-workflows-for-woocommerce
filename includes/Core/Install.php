@@ -57,6 +57,11 @@ final class Install {
 	 * @return void
 	 */
 	public static function install(): void {
+		if ( get_option( self::$option_version ) ) {
+			// Already installed.
+			return;
+		}
+
 		self::create_tables();
 		self::insert_default_data();
 
