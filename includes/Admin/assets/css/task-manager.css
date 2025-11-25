@@ -30,7 +30,11 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     border-bottom: 1px solid #091E4224;
 }
 
-#wpo-aom-task-manager-container > .inner > .view {
+#wpo-aom-task-manager-container .view.calendar-view {
+    padding: 0 1em;
+}
+
+#wpo-aom-task-manager-container .view.kanban-view {
     height: calc(100vh - 14em);
     padding: 1em;
 }
@@ -219,7 +223,7 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     font-size: 1.2em;
 }
 
-.wpo-edit-button::before {
+.card-edit-button::before {
     content: '';
     display: inline-block;
     width: 1.1em;
@@ -235,12 +239,12 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     -webkit-mask-repeat: no-repeat;
 }
 
-.wpo-edit-delete,
-.kanban-card-options .wpo-action-menu .wpo-edit-delete::before {
+.card-delete-button,
+.kanban-card-options .wpo-action-menu .card-delete-button::before {
     color: #ef4444;
 }
 
-.wpo-edit-delete::before {
+.card-delete-button::before {
     content: '';
     display: inline-block;
     width: 1.1em;
@@ -262,7 +266,7 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     font-size: 1.4em;
 }
 
-.kanban-card-options .wpo-edit-delete::before {
+.kanban-card-options .card-delete-button::before {
     vertical-align: middle;
     margin-right: 6px;
     color: #59636e;
@@ -286,12 +290,14 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     padding: 0;
 }
 
-.kanban-board .kanban-card ul.kanban-card-tags > li {
+.wpo-tag {
+    display: inline-block;
     border-radius: 1em;
     padding: 0 0.7em;
     font-size: 0.9em;
     font-weight: 600;
     margin: 0;
+    white-space: nowrap;
 }
 
 .kanban-board .kanban-card span.kanban-card-due-date {
@@ -667,4 +673,419 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
 
 .wpo-aom-async-multi-select-container > ul.wpo-aom-async-multi-select-selected-options > li > .wpo-button:hover {
     border-radius: 5em;
+}
+
+
+/* ========================================
+   Calendar View
+   ======================================== */
+
+.calendar-view-container {
+    display: flex;
+    height: 100%;
+}
+
+.calendar-sidebar {
+    display: flex;
+    flex-direction: column;
+    background: #F5F5F5;
+    border-right: 1px solid #e5e7eb;
+    width: 25em;
+    height: 100%;
+}
+
+
+.calendar-date-range-preset-selector {
+    padding: 1.5em 1.5em 0 1.5em;
+}
+
+.calendar-date-range-preset-selector > select {
+    width: 100%;
+    border: 1px solid #D5D7DA;
+    border-radius: 0.5em;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.calendar-date-range-preset-selector:focus {
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 0.1875em rgba(124, 58, 237, 0.1);
+}
+
+
+.calendar-selector {
+    padding: 1.5em;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+/* Navigation */
+.calendar-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5em;
+}
+
+.calendar-navigation h2 {
+    font-size: 1em;
+    margin: 0;
+    order: 2;
+}
+
+.wpo-navigate-previous,
+.wpo-navigate-next {
+    width: 1.5em;
+    height: 1.5em;
+    position: relative;
+}
+
+.wpo-navigate-previous {
+    order: 1;
+}
+
+.wpo-navigate-next {
+    order: 3;
+}
+
+.wpo-navigate-previous:hover,
+.wpo-navigate-next:hover {
+    background-color: #eaeaea;
+}
+
+.wpo-navigate-previous::before,
+.wpo-navigate-next::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 1.25em;
+    height: 1.25em;
+    background-color: currentColor;
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+}
+
+.wpo-navigate-previous::before {
+    mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='black' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M15 19l-7-7 7-7'/%3E%3C/svg%3E");
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='black' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M15 19l-7-7 7-7'/%3E%3C/svg%3E");
+}
+
+.wpo-navigate-next::before {
+    mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='black' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M9 5l7 7-7 7'/%3E%3C/svg%3E");
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='black' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M9 5l7 7-7 7'/%3E%3C/svg%3E");
+}
+
+.date-range-inputs {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+}
+
+.date-range-inputs > input {
+    min-width: 2em;
+    flex: 1;
+    width: 100%;
+    border: 1px solid #D5D7DA;
+    border-radius: 0.5em;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.date-range-inputs > input:focus {
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 0.1875em rgba(124, 58, 237, 0.1);
+}
+
+
+.calendar-grid {
+    width: 100%;
+}
+
+.calendar-weekday-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.25em;
+    margin-bottom: 0.5em;
+}
+
+.calendar-weekday-header > .calendar-weekday {
+    text-align: center;
+    font-size: 0.75em;
+    font-weight: 500;
+    color: #6b7280;
+    padding: 0.5em 0;
+}
+
+.calendar-days-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.25em;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    border: none;
+    background: transparent;
+    border-radius: 2em;
+    cursor: pointer;
+    color: #374151;
+    transition: background-color 0.2s;
+    width: 2.5em;
+    height: 2.5em;
+}
+
+.calendar-day:hover:not(:disabled) {
+    background-color: #f3f4f6;
+}
+
+.calendar-day:disabled {
+    cursor: default;
+}
+
+.calendar-day.calendar-day-other-month {
+    color: #d1d5db;
+    cursor: default;
+}
+
+.calendar-day.calendar-day-today:not(.calendar-day-selected) {
+    border: 0.125em solid #7c3aed;
+    font-weight: 600;
+}
+
+.calendar-day.calendar-day-selected {
+    background-color: #6E1EDC;
+    color: white;
+    font-weight: 600;
+}
+
+.calendar-day.calendar-day-in-range:not(.calendar-day-selected) {
+    background-color: #ede9fe;
+}
+
+
+.calendar-actions {
+    display: flex;
+    gap: 0.5em;
+    margin-top: 0.5em;
+    border-top: 1px solid #E9EAEB;
+    padding-top: 1.5em;
+}
+
+.calendar-actions > button {
+    font-weight: 500;
+    flex: 1;
+    transition: all 0.2s;
+    border-radius: 0.5em;
+    padding: 0.75em 0;
+}
+
+.calendar-actions > .wpo-clear-button {
+    background: white;
+    border: 1px solid #D5D7DA;
+}
+
+.calendar-actions > .wpo-clear-button:hover {
+    background-color: #f9fafb;
+}
+
+.calendar-actions > .wpo-apply-button {
+    background: #7c3aed;
+    color: white;
+}
+
+.calendar-actions > .wpo-apply-button:hover {
+    background-color: #6d28d9;
+}
+
+
+.calendar-task-list-container > h2 {
+    margin-left: 1em;
+}
+
+.calendar-task-list-container {
+    flex: 1;
+}
+
+.calendar-task-list-title {
+    font-size: 1.5em;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 1.5em 0;
+}
+
+
+.calendar-task-table-wrapper {
+    overflow: hidden;
+}
+
+.calendar-task-table-wrapper > table {
+    width: 100%;
+    border-collapse: collapse;
+    border-left: 0.0625em solid #e5e7eb;
+    border-right: 0.0625em solid #e5e7eb;
+}
+
+.calendar-task-table-wrapper > table > thead {
+    background-color: #f9fafb;
+    border-bottom: 0.0625em solid #e5e7eb;
+}
+
+.calendar-task-table-wrapper > table > thead th {
+    padding: 0.75em 1em;
+    text-align: left;
+    font-weight: 500;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.calendar-task-table-wrapper > table > thead th.calendar-task-title {
+    width: 12em;
+}
+
+.calendar-task-th-sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s;
+}
+
+.calendar-task-th-sortable:hover {
+    background-color: #f3f4f6;
+}
+
+.calendar-sort-icon {
+    margin-left: 0.25em;
+    color: #9ca3af;
+    font-size: 0.75em;
+    display: inline-block;
+    transition: color 0.2s;
+}
+
+.calendar-sort-icon-active {
+    color: #7c3aed;
+    font-weight: bold;
+}
+
+.calendar-task-table-wrapper > table > tbody > tr {
+    border-bottom: 0.0625em solid #e5e7eb;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    height: 5em;
+    vertical-align: middle;
+}
+
+.calendar-task-table-wrapper > table > tbody > tr:hover {
+    background-color: #f9fafb;
+}
+
+.calendar-task-table-wrapper > table > tbody > tr:nth-child(even) {
+    background-color: #FAFAFA;
+}
+
+.calendar-task-table-wrapper > table > tbody > tr > td {
+    padding: 1em;
+    color: #374151;
+}
+
+.calendar-task-table-wrapper > table > tbody > tr > td.task-due-date {
+    white-space: nowrap;
+}
+
+.calendar-task-table-wrapper > table > tbody > tr > td:first-child,
+.calendar-task-table-wrapper > table > thead > tr > th:first-child {
+    padding-left: 1.5em;
+}
+
+.calendar-task-table-wrapper > table > tbody > tr > td:last-child,
+.calendar-task-table-wrapper > table > thead > tr > th:last-child {
+    color: #6b7280;
+}
+
+.calendar-task-table-wrapper > table > tbody > td > span {
+    display: inline-block;
+    padding: 0.125em 0.7em;
+    border-radius: 1em;
+    font-size: 0.9em;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Empty State */
+.calendar-task-empty-state {
+    padding: 2em 1em;
+    text-align: center;
+    color: #6b7280;
+    font-size: 0.875em;
+}
+
+
+.task-row-actions {
+    display: flex;
+    gap: 0.75em;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+}
+
+.task-row-actions > li {
+    margin: 0;
+    padding: 0;
+}
+
+.task-edit,
+.task-delete {
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #9ca3af;
+    padding: 0.25em;
+    border-radius: 0.25em;
+    transition: color 0.2s, background-color 0.2s;
+    width: 2em;
+    height: 2em;
+    position: relative;
+}
+
+.task-edit:hover {
+    color: #7c3aed;
+    background-color: #ede9fe;
+}
+
+.task-delete:hover {
+    color: #ef4444;
+    background-color: #fee2e2;
+}
+
+.task-edit::before,
+.task-delete::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 1.5em;
+    height: 1.5em;
+    background-color: currentColor;
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+}
+
+.task-edit::before {
+    mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='black' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z'/%3E%3C/svg%3E");
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='black' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z'/%3E%3C/svg%3E");
+}
+
+.task-delete::before {
+    mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='black' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'/%3E%3C/svg%3E");
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='black' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'/%3E%3C/svg%3E");
 }

@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { useView } from '../context/ViewContext';
 import Header from './Header';
-import Calendar from '../views/Calendar/calendar';
+import { CalendarView } from '../views/Calendar/CalendarView';
 import { KanbanView } from '../views/Kanban/KanbanView';
 
 export default function Page() {
@@ -14,7 +14,7 @@ export default function Page() {
 			{/* Use <Activity> component when WP React version updated to 19.2 */}
 			<div className={`view ${view}-view`}>
 				{view === 'kanban' && <KanbanView />}
-				{view === 'calendar' && <Calendar />}
+				{view === 'calendar' && <CalendarView />}
 			</div>
 		</div>
 	);

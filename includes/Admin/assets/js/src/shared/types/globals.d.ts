@@ -9,6 +9,32 @@ export interface WPOAOMLocalized {
 	loading: string;
 	errorLoading: string;
 	views: Record<string, string>;
+	calendar: {
+		todaysTasks: string;
+		task: string;
+		priority: string;
+		status: string;
+		dueDate: string;
+		description: string;
+		noTasksFound: string;
+		viewModes: {
+			byDay: string;
+			byWeek: string;
+			byMonth: string;
+		};
+		dateRangePresets: {
+			today: string;
+			yesterday: string;
+			currentWeek: string;
+			lastWeek: string;
+			currentMonth: string;
+			lastMonth: string;
+			custom: string;
+		};
+		selectDate: string;
+		previousMonth: string;
+		nextMonth: string;
+	};
 	kanban: {
 		addTask: string;
 		editTask: string;
@@ -34,10 +60,13 @@ export interface WPOAOMLocalized {
 	};
 	actions: {
 		edit: string;
+		editTask: string;
 		delete: string;
 		deleteTask: string;
 		cancel: string;
+		clear: string;
 		apply: string;
+		actions: string;
 		createTask: string;
 		updateTask: string;
 	};

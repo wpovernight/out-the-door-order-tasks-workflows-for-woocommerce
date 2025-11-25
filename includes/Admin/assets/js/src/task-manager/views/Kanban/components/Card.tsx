@@ -324,7 +324,7 @@ export const Card: React.FC<CardProps> = ({
 								<li>
 									<button
 										type="button"
-										className="wpo-button wpo-edit-button"
+										className="wpo-button card-edit-button"
 										onClick={handleEditTask}
 									>
 										{localized.actions.edit}
@@ -333,7 +333,7 @@ export const Card: React.FC<CardProps> = ({
 								<li>
 									<button
 										type="button"
-										className="wpo-button wpo-edit-delete"
+										className="wpo-button card-delete-button"
 										onClick={handleRemoveTask}
 									>
 										{localized.actions.delete}
@@ -346,7 +346,7 @@ export const Card: React.FC<CardProps> = ({
 				<ul className="kanban-card-tags">
 					{priorityValue && isFieldOption(priorityValue) && (
 						<li
-							className={`kanban-card-priority priority-${priorityValue?.slug}`}
+							className={`wpo-tag kanban-card-priority priority-${priorityValue?.slug}`}
 							style={getColorStyle(priorityValue.color)}
 						>
 							{priorityValue.label}
