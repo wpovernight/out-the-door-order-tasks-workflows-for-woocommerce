@@ -1,10 +1,6 @@
 import React from 'react';
 import { Task, isFieldOption } from '@shared/types/task';
-import {
-	getTaskDueDate,
-	formatDate,
-	getFieldValue,
-} from '../utils';
+import { getTaskDueDate, formatDate, getFieldValue } from '../utils';
 import { getColorStyle } from '@shared/utils/colorUtils';
 
 interface TaskRowProps {
@@ -20,10 +16,27 @@ const TaskRow: React.FC<TaskRowProps> = ({
 	onTaskEdit,
 	onTaskDelete,
 }) => {
-    const dueDate = getTaskDueDate(task);
+	const dueDate = getTaskDueDate(task);
 
 	const priorityValue = getFieldValue(task, 'priority');
 	const statusValue = getFieldValue(task, 'status');
+
+	const truncateText = (text: string, maxLength: number = 140): string => {
+		if (!text || text.length <= maxLength) {
+			return text;
+		}
+
+		// Find the last space within maxLength.
+		const truncated = text.substring(0, maxLength);
+		const lastSpaceIndex = truncated.lastIndexOf(' ');
+
+		// If there's a space, cut there; otherwise cut at maxLength.
+		if (lastSpaceIndex > 0) {
+			return truncated.substring(0, lastSpaceIndex).trim() + '...';
+		}
+
+		return truncated.trim() + '...';
+	};
 
 	const priorityLabel = isFieldOption(priorityValue)
 		? priorityValue.label
@@ -46,7 +59,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
 	return (
 		<tr onClick={() => onTaskClick?.(task)}>
 			<td className="task-title">
-				<div>{task.title}</div>
+				<div>{truncateText(task.title, 40)}</div>
 			</td>
 
 			<td className="task-priority">
@@ -67,7 +80,9 @@ const TaskRow: React.FC<TaskRowProps> = ({
 				</time>
 			</td>
 
-			<td className="task-description">{task.description || ''}</td>
+			<td className="task-description" title={task.description || ''}>
+				{truncateText(task.description || '')}
+			</td>
 
 			<td className="task-actions">
 				<ul className="task-row-actions">
@@ -85,9 +100,8 @@ const TaskRow: React.FC<TaskRowProps> = ({
 							className="task-delete"
 							onClick={(e) => {
 								e.stopPropagation();
-								const confirmed = window.confirm(
-									`Are you sure?`
-								);
+								const confirmed =
+									window.confirm(`Are you sure?`);
 								if (confirmed) {
 									onTaskDelete?.(task.id);
 								}

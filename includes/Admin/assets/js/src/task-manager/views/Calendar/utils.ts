@@ -187,7 +187,6 @@ export const getDateRangeFromPreset = (preset: DateRangePreset): DateRange => {
 	}
 };
 
-
 // Field utility functions
 export const getFieldBySlug = (task: Task, slug: string) => {
 	return task.fields.find((field) => field.slug === slug);
@@ -227,4 +226,3 @@ export const getTaskDueDate = (task: Task): Date | null => {
 	const date = new Date(dueDateValue);
 	return isNaN(date.getTime()) ? null : date;
 };
-
