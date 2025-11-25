@@ -4,9 +4,11 @@
 > The build files is also not to be included in the final merge.
 
 ## Test Instructions
-
-- Create sample tasks using the provided code snippet below.
+- Install and activate the **Advanced Order Manager** plugin.
+- Copy the code snippet below into a PHP file and include it in your WordPress environment (e.g., via a custom plugin or theme's `functions.php`).
+- Create sample tasks by calling `create_sample_tasks( 10 );` function.
 - Navigate to the `WooCommerce > Task Management` section in the dashboard to see the board.
+- If the plugin is already installed but the database schema requires updating, you can run the `reinstall_database_schema()` function to update the schema and reset default values.
 
 > The build file is included temporary to ease the testing. However, in case you want to build the files yourself, please refer to the manual build instructions at the bottom of this document.
 ## Task Creation for Testing
@@ -128,6 +130,32 @@ function remove_sample_tasks(): void {
 
 	echo "Sample tasks removed.\n";
 }
+
+function reinstall_database_schema(): void {
+	// Remove tables if they exist.
+	global $wpdb;
+
+	$tables = array(
+		$wpdb->prefix . 'wpo_aom_task_field_values',
+		$wpdb->prefix . 'wpo_aom_task_field_options',
+		$wpdb->prefix . 'wpo_aom_task_fields',
+		$wpdb->prefix . 'wpo_aom_tasks',
+	);
+
+	foreach ( $tables as $table ) {
+		$wpdb->query( "DROP TABLE IF EXISTS {$table}" );
+	}
+	echo "Existing AOM tables dropped.\n";
+
+	// Remove version option.
+	delete_option( 'wpo_aom_version' );
+	echo "AOM version option removed.\n";
+
+	// Run plugin installation to recreate tables and insert default data.
+	\WPO\AOM\Core\Install::instance()->install();
+	echo "AOM database schema updated.\n";
+}
+
 ```
 
 ---
