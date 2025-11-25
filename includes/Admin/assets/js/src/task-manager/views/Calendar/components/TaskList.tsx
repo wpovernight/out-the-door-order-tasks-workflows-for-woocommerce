@@ -2,13 +2,15 @@ import React, { useState, useMemo } from 'react';
 import { Task, isFieldOption } from '@shared/types/task';
 import TaskRow from './TaskRow';
 import { useLocalized } from '@shared/hooks/useLocalized';
-import { getTaskDueDate, getFieldValue } from '../utils';
+import { getTaskDueDate, getFieldValue, formatDate, DateRange, DateRangePreset } from '../utils';
 
 type SortColumn = 'title' | 'priority' | 'status' | 'dueDate';
 type SortDirection = 'asc' | 'desc';
 
 interface TaskListProps {
 	tasks: Task[];
+	dateRange: DateRange;
+	dateRangePreset: DateRangePreset;
 	onTaskClick?: (task: Task) => void;
 	onTaskEdit?: (task: Task) => void;
 	onTaskDelete?: (taskId: number) => void;
@@ -16,6 +18,8 @@ interface TaskListProps {
 
 const TaskList: React.FC<TaskListProps> = ({
 	tasks,
+	dateRange,
+	dateRangePreset,
 	onTaskClick,
 	onTaskEdit,
 	onTaskDelete,
@@ -23,6 +27,41 @@ const TaskList: React.FC<TaskListProps> = ({
 	const localized = useLocalized();
 	const [sortColumn, setSortColumn] = useState<SortColumn>('dueDate');
 	const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+
+	// Generate dynamic title based on preset or date range
+	const getTitle = (): string => {
+		const taskCount = tasks.length;
+		const taskCountText =
+			taskCount === 1
+				? `1 ${localized.calendar.task.toLowerCase()}`
+				: `${taskCount} ${localized.calendar.tasks}`;
+
+		if (dateRangePreset !== 'custom') {
+			const presetLabels: Record<string, string> = {
+				today: localized.calendar.dateRangePresets.today,
+				yesterday: localized.calendar.dateRangePresets.yesterday,
+				'current-week': localized.calendar.dateRangePresets.currentWeek,
+				'last-week': localized.calendar.dateRangePresets.lastWeek,
+				'current-month': localized.calendar.dateRangePresets.currentMonth,
+				'last-month': localized.calendar.dateRangePresets.lastMonth,
+			};
+			const presetLabel = presetLabels[dateRangePreset] || localized.calendar.dateRangePresets.today;
+			return `${presetLabel}'s tasks - ${taskCountText}`;
+		}
+
+		if (dateRange.start) {
+			const startDate = formatDate(dateRange.start);
+			const endDate = dateRange.end ? formatDate(dateRange.end) : startDate;
+
+			if (startDate === endDate) {
+				return `${startDate} - ${taskCountText}`;
+			}
+			return `${startDate} - ${endDate} (${taskCountText})`;
+		}
+
+		// Fallback
+		return `${localized.calendar.tasks} - ${taskCountText}`;
+	};
 
 	const handleSort = (column: SortColumn) => {
 		if (sortColumn === column) {
@@ -111,7 +150,7 @@ const TaskList: React.FC<TaskListProps> = ({
 
 	return (
 		<div className="calendar-task-list-container">
-			<h2>{localized.calendar.todaysTasks}</h2>
+			<h2>{getTitle()}</h2>
 
 			<div className="calendar-task-table-wrapper">
 				<table>

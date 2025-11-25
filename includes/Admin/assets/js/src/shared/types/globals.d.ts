@@ -10,8 +10,8 @@ export interface WPOAOMLocalized {
 	errorLoading: string;
 	views: Record<string, string>;
 	calendar: {
-		todaysTasks: string;
 		task: string;
+		tasks: string;
 		priority: string;
 		status: string;
 		dueDate: string;

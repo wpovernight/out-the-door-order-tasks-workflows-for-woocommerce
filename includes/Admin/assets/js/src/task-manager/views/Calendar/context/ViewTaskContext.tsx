@@ -26,6 +26,7 @@ interface ViewTaskContextType {
 	// Date range preset
 	dateRangePreset: DateRangePreset;
 	setDateRangePreset: (preset: DateRangePreset) => void;
+	appliedDateRangePreset: DateRangePreset;
 
 	// Selected task
 	selectedTask: Task | null;
@@ -51,8 +52,12 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 	const today = new Date();
 	today.setHours(0, 0, 0, 0);
 
-	// Date range preset
+	// Date range preset (pending - not yet applied)
 	const [dateRangePreset, setDateRangePresetState] =
+		useState<DateRangePreset>('today');
+
+	// Applied date range preset (used for display in title)
+	const [appliedDateRangePreset, setAppliedDateRangePreset] =
 		useState<DateRangePreset>('today');
 
 	// Applied date range (used for filtering tasks)
@@ -79,11 +84,13 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 
 	const applyDateRange = () => {
 		setDateRange(pendingDateRange);
+		setAppliedDateRangePreset(dateRangePreset);
 	};
 
 	const filteredTasks = useMemo(() => {
+		// If no date range is set, return empty array (no tasks to show)
 		if (!dateRange.start || tasks.length === 0) {
-			return tasks;
+			return [];
 		}
 
 		const endDate = dateRange.end || dateRange.start;
@@ -136,6 +143,7 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				applyDateRange,
 				dateRangePreset,
 				setDateRangePreset,
+				appliedDateRangePreset,
 				selectedTask,
 				selectTask,
 				clearSelectedTask,

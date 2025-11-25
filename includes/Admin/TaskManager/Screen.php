@@ -59,8 +59,8 @@ final class Screen {
 					'dueDateLabel' => esc_html__( 'Due date', 'wpo-aom' ),
 				),
 				'calendar'     => array(
-					'todaysTasks'   => __( "Today's tasks", 'wpo-aom' ),
 					'task'          => esc_html__( 'Task', 'wpo-aom' ),
+					'tasks'         => esc_html__( 'Tasks', 'wpo-aom' ),
 					'priority'      => esc_html__( 'Priority', 'wpo-aom' ),
 					'status'        => esc_html__( 'Status', 'wpo-aom' ),
 					'dueDate'       => esc_html__( 'Due date', 'wpo-aom' ),

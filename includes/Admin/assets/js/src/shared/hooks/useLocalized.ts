@@ -29,8 +29,8 @@ export function useLocalized(): WPOAOMLocalized {
 				dueDateLabel: 'Due date: ',
 			},
 			calendar: {
-				todaysTasks: "Today's tasks",
 				task: 'Task',
+				tasks: 'Tasks',
 				priority: 'Priority',
 				status: 'Status',
 				dueDate: 'Due date',

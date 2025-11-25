@@ -27,6 +27,7 @@ export const CalendarContent: React.FC = () => {
 		applyDateRange,
 		dateRangePreset,
 		setDateRangePreset,
+		appliedDateRangePreset,
 		selectTask,
 		goToPreviousMonth,
 		goToNextMonth,
@@ -109,6 +110,7 @@ export const CalendarContent: React.FC = () => {
 
 	const handleCancel = () => {
 		setPendingDateRange({ start: null, end: null });
+        setDateRangePreset('custom');
 	};
 
 	const handleApply = () => {
@@ -169,6 +171,8 @@ export const CalendarContent: React.FC = () => {
 
 			<TaskList
 				tasks={filteredTasks}
+				dateRange={dateRange}
+				dateRangePreset={appliedDateRangePreset}
 				onTaskClick={selectTask}
 				onTaskEdit={handleTaskEdit}
 				onTaskDelete={handleTaskDelete}
