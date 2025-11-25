@@ -842,7 +842,8 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
 }
 
 .calendar-day:hover:not(:disabled) {
-    background-color: #f3f4f6;
+    background-color: #F0E8FC;
+    color: #5818AF;
 }
 
 .calendar-day:disabled {
@@ -866,7 +867,8 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
 }
 
 .calendar-day.calendar-day-in-range:not(.calendar-day-selected) {
-    background-color: #ede9fe;
+    background-color: #F0E8FC;
+    color: #5818AF;
 }
 
 
