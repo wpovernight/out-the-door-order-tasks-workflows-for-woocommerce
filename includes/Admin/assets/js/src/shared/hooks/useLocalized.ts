@@ -26,7 +26,7 @@ export function useLocalized(): WPOAOMLocalized {
 				editTask: 'Edit Task',
 				options: 'Options',
 				create: 'Create',
-				dueDateLabel: 'Due date: ',
+				dueDateLabel: 'Due date',
 			},
 			calendar: {
 				task: 'Task',

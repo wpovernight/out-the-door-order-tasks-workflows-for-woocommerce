@@ -221,6 +221,7 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     content: '\f11c';
     font-family: 'dashicons';
     font-size: 1.2em;
+    color: #59636e;
 }
 
 .card-edit-button::before {
@@ -839,6 +840,7 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     transition: background-color 0.2s;
     width: 2.5em;
     height: 2.5em;
+    line-height: 1;
 }
 
 .calendar-day:hover:not(:disabled) {

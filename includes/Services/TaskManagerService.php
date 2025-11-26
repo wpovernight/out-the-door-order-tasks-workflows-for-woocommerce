@@ -654,14 +654,6 @@ final class TaskManagerService {
 		return $position;
 	}
 
-	public function set_due_date( int $task_id, string $date ): bool {
-		// ToDo: Complete this method
-	}
-
-	public function mark_task_complete( int $task_id ): bool {
-		// ToDo: Complete this method
-	}
-
 	/** ================================
 	 *   Helper Methods
 	 *  ================================ */
