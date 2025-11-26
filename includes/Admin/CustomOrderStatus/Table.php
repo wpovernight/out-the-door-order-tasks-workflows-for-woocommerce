@@ -4,6 +4,7 @@ namespace WPO\AOM\Admin\CustomOrderStatus;
 
 use WP_List_Table;
 use WPO\AOM\Models\CustomOrderStatus;
+use WPO\AOM\Services\CustomOrderStatusService;
 
 if ( ! class_exists( 'WP_List_Table' ) ) {
 	require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
@@ -63,6 +64,8 @@ class Table extends WP_List_Table {
 		$columns             = $this->get_columns();
 		$per_page            = $this->get_items_per_page( 'report_items_per_page', 20 );
 		$current_page_number = $this->get_pagenum();
+
+		/** @var CustomOrderStatusService $custom_statuses */
 		$custom_statuses     = WPO_AOM()->custom_order_status->all();
 		$total_items         = count( $custom_statuses );
 

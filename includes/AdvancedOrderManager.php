@@ -5,7 +5,6 @@ namespace WPO\AOM;
 use WPO\AOM\Core\Install;
 use WPO\AOM\Core\DependencyChecker;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
-use WPO\AOM\Models\CustomOrderStatus;
 use WPO\AOM\Services\CustomOrderStatusService;
 
 defined( 'ABSPATH' ) || exit;
@@ -14,10 +13,9 @@ final class AdvancedOrderManager {
 
 	public const VERSION = '1.0.0';
 
-	public ?CustomOrderStatus $custom_order_status = null;
-
-
 	protected static ?self $_instance = null;
+
+	public ?CustomOrderStatusService $custom_order_status = null;
 
 	/**
 	 * Get the instance of the class.
@@ -145,7 +143,7 @@ final class AdvancedOrderManager {
 			}
 
 			// Store the service in a dynamic property if specified.
-			if ( $store && ! property_exists( $this, $property ) ) {
+			if ( $store && ( ! property_exists( $this, $property ) || is_null( $this->$property ) ) ) {
 				/* @phpstan-ignore-next-line Suppressing type warning for dynamic property assignment. */
 				$this->{$property} = $service;
 			}
