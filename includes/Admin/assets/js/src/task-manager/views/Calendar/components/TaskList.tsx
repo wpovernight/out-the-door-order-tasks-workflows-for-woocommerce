@@ -2,7 +2,13 @@ import React, { useState, useMemo } from 'react';
 import { Task, isFieldOption } from '@shared/types/task';
 import TaskRow from './TaskRow';
 import { useLocalized } from '@shared/hooks/useLocalized';
-import { getTaskDueDate, getFieldValue, formatDate, DateRange, DateRangePreset } from '../utils';
+import {
+	getTaskDueDate,
+	getFieldValue,
+	formatDate,
+	DateRange,
+	DateRangePreset,
+} from '../utils';
 
 type SortColumn = 'title' | 'priority' | 'status' | 'dueDate';
 type SortDirection = 'asc' | 'desc';
@@ -42,16 +48,21 @@ const TaskList: React.FC<TaskListProps> = ({
 				yesterday: localized.calendar.dateRangePresets.yesterday,
 				'current-week': localized.calendar.dateRangePresets.currentWeek,
 				'last-week': localized.calendar.dateRangePresets.lastWeek,
-				'current-month': localized.calendar.dateRangePresets.currentMonth,
+				'current-month':
+					localized.calendar.dateRangePresets.currentMonth,
 				'last-month': localized.calendar.dateRangePresets.lastMonth,
 			};
-			const presetLabel = presetLabels[dateRangePreset] || localized.calendar.dateRangePresets.today;
+			const presetLabel =
+				presetLabels[dateRangePreset] ||
+				localized.calendar.dateRangePresets.today;
 			return `${presetLabel}'s tasks - ${taskCountText}`;
 		}
 
 		if (dateRange.start) {
 			const startDate = formatDate(dateRange.start);
-			const endDate = dateRange.end ? formatDate(dateRange.end) : startDate;
+			const endDate = dateRange.end
+				? formatDate(dateRange.end)
+				: startDate;
 
 			if (startDate === endDate) {
 				return `${startDate} - ${taskCountText}`;

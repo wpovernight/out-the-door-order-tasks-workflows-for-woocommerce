@@ -50,6 +50,7 @@ export const Column: React.FC<ColumnProps> = ({
 	const scrollableRef = useRef<HTMLDivElement | null>(null);
 	const headerRef = useRef<HTMLDivElement | null>(null);
 	const containerRef = useRef<HTMLDivElement | null>(null);
+	const columnWrapperRef = useRef<HTMLDivElement | null>(null);
 	const localized = useLocalized();
 	const { openSidebar, closeSidebar } = useSidebarModal();
 
@@ -78,7 +79,8 @@ export const Column: React.FC<ColumnProps> = ({
 		const scrollable = scrollableRef.current;
 		const header = headerRef.current;
 		const container = containerRef.current;
-		invariant(scrollable && header && container);
+		const columnWrapper = columnWrapperRef.current;
+		invariant(scrollable && header && container && columnWrapper);
 
 		const columnData = getColumnData({ column: column.slug });
 		const columnDropTargetData = getColumnDropTargetData({
@@ -94,13 +96,13 @@ export const Column: React.FC<ColumnProps> = ({
 				onDrop: resetState,
 			}),
 
-			// Make the column header a drop target for other columns
+			// Make the column wrapper a drop target for other columns
 			dropTargetForElements({
-				element: header,
+				element: columnWrapper,
 				canDrop: ({ source }) => isColumnData(source.data),
 				getData: ({ input }) =>
 					attachClosestEdge(columnDropTargetData, {
-						element: header,
+						element: columnWrapper,
 						input,
 						allowedEdges: ['left', 'right'],
 					}),
@@ -246,38 +248,45 @@ export const Column: React.FC<ColumnProps> = ({
 
 	return (
 		<div
+			ref={columnWrapperRef}
 			className={`kanban-column ${state.type === 'dragging' ? 'is-dragging' : ''} ${state.type === 'drag-over-empty' ? 'is-column-drag-over' : ''} ${state.type === 'column-drag-over' && state.edge === 'left' ? 'column-drop-indicator-left' : ''} ${state.type === 'column-drag-over' && state.edge === 'right' ? 'column-drop-indicator-right' : ''}`}
 		>
-			<div ref={headerRef} className="kanban-column-header" tabIndex={0}>
-				<h2>{column.label}</h2>
-				<button
-					onClick={openTaskCreationModal}
-					className="wpo-button wpo-button-icon add-task-button"
-				>
-					<span className="screenReader">
-						{localized.kanban.create}
-					</span>
-				</button>
-			</div>
-			<div ref={scrollableRef} className="kanban-column-scrollable">
+			<div className="kanban-column-inner">
 				<div
-					ref={containerRef}
-					className={`kanban-column-container ${
-						state.type === 'drag-over-empty'
-							? 'show-drop-indicator'
-							: ''
-					}`}
+					ref={headerRef}
+					className="kanban-column-header"
+					tabIndex={0}
 				>
-					{tasks.map((task) => (
-						<Card
-							key={task.id}
-							task={task}
-							isOptionsOpen={openOptionsCardId === task.id}
-							onOptionsToggle={(id: number | null) =>
-								setOpenOptionsCardId(id)
-							}
-						/>
-					))}
+					<h2>{column.label}</h2>
+					<button
+						onClick={openTaskCreationModal}
+						className="wpo-button wpo-button-icon add-task-button"
+					>
+						<span className="screenReader">
+							{localized.kanban.create}
+						</span>
+					</button>
+				</div>
+				<div ref={scrollableRef} className="kanban-column-scrollable">
+					<div
+						ref={containerRef}
+						className={`kanban-column-container ${
+							state.type === 'drag-over-empty'
+								? 'show-drop-indicator'
+								: ''
+						}`}
+					>
+						{tasks.map((task) => (
+							<Card
+								key={task.id}
+								task={task}
+								isOptionsOpen={openOptionsCardId === task.id}
+								onOptionsToggle={(id: number | null) =>
+									setOpenOptionsCardId(id)
+								}
+							/>
+						))}
+					</div>
 				</div>
 			</div>
 		</div>

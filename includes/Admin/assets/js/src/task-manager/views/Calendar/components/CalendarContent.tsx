@@ -110,7 +110,7 @@ export const CalendarContent: React.FC = () => {
 
 	const handleCancel = () => {
 		setPendingDateRange({ start: null, end: null });
-        setDateRangePreset('custom');
+		setDateRangePreset('custom');
 	};
 
 	const handleApply = () => {
