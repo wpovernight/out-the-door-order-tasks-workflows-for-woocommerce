@@ -2,7 +2,7 @@
  * Global type declarations for the WPO AOM Task Manager plugin.
  */
 
-export interface WPOAOMLocalized {
+export interface WpoAomTaskManagerData {
 	apiRoot: string;
 	apiNamespace: string;
 	nonce: string;
@@ -74,7 +74,7 @@ export interface WPOAOMLocalized {
 
 declare global {
 	interface Window {
-		WPO_AOM_TaskManager: WPOAOMLocalized;
+        wpoAomTaskManager: WpoAomTaskManagerData;
 	}
 }
 

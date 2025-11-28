@@ -1,10 +1,10 @@
 import React from 'react';
 import { AVAILABLE_VIEWS, useView } from '../context/ViewContext';
-import { useLocalized } from '@shared/hooks/useLocalized';
+import { useTaskManagerData } from '@taskManager/hooks/useTaskManagerData';
 
 export default function Header() {
 	const { view, setView } = useView();
-	const localized = useLocalized();
+	const localized = useTaskManagerData();
 
 	return (
 		<div className="header">

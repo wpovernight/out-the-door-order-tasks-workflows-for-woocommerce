@@ -17,7 +17,7 @@ import { getColorStyle } from '@shared/utils/colorUtils';
 import { useSidebarModal } from '@shared/context/SidebarModalContext';
 import { TaskForm } from '@shared/components/TaskForm';
 import { useTasks } from '@shared/context/TaskContext';
-import { useLocalized } from '@shared/hooks/useLocalized';
+import { useTaskManagerData } from '@taskManager/hooks/useTaskManagerData';
 
 // ------------------------------
 // Visual state
@@ -49,7 +49,7 @@ export const Card: React.FC<CardProps> = ({
 	const innerRef = useRef<HTMLDivElement | null>(null);
 	const [state, setState] = useState<CardState>(IDLE);
 
-	const localized = useLocalized();
+	const localized = useTaskManagerData();
 	const { deleteTask } = useTasks();
 	const { selectedTask, selectTask, setViewTasks } = useViewTasks();
 	const { openSidebar, closeSidebar } = useSidebarModal();

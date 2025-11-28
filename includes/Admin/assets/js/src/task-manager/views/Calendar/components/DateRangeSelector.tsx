@@ -2,7 +2,7 @@ import React from 'react';
 import { DateRange } from '../context/ViewTaskContext';
 import { CalendarDay } from '../data';
 import CalendarGrid from './CalendarGrid';
-import { useLocalized } from '@shared/hooks/useLocalized';
+import { useTaskManagerData } from '@taskManager/hooks/useTaskManagerData';
 
 interface DateRangeSelectorProps {
 	currentDate: Date;
@@ -31,7 +31,7 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 	onApply,
 	monthName,
 }) => {
-	const localized = useLocalized();
+	const localized = useTaskManagerData();
 
 	// Format date for input field (YYYY-MM-DD)
 	const formatDateForInput = (date: Date | null): string => {

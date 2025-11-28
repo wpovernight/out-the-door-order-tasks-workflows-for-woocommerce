@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Task, isFieldOption } from '@shared/types/task';
 import TaskRow from './TaskRow';
-import { useLocalized } from '@shared/hooks/useLocalized';
+import { useTaskManagerData } from '@taskManager/hooks/useTaskManagerData';
 import {
 	getTaskDueDate,
 	getFieldValue,
@@ -30,7 +30,7 @@ const TaskList: React.FC<TaskListProps> = ({
 	onTaskEdit,
 	onTaskDelete,
 }) => {
-	const localized = useLocalized();
+	const localized = useTaskManagerData();
 	const [sortColumn, setSortColumn] = useState<SortColumn>('dueDate');
 	const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 

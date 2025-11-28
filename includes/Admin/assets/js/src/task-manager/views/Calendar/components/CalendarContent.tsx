@@ -3,7 +3,7 @@ import { useViewTasks } from '../context/ViewTaskContext';
 import { useTasks } from '@shared/context/TaskContext';
 import { useSidebarModal } from '@shared/context/SidebarModalContext';
 import { TaskForm } from '@shared/components/TaskForm';
-import { useLocalized } from '@shared/hooks/useLocalized';
+import { useTaskManagerData } from '@taskManager/hooks/useTaskManagerData';
 import { Task } from '@shared/types/task';
 import { CalendarDay } from '../data';
 import {
@@ -35,7 +35,7 @@ export const CalendarContent: React.FC = () => {
 
 	const { deleteTask, setTasks } = useTasks();
 	const { openSidebar, closeSidebar } = useSidebarModal();
-	const localized = useLocalized();
+	const localized = useTaskManagerData();
 
 	// Generate calendar data
 	const { monthName } = useMemo(

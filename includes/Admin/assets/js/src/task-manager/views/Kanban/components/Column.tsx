@@ -23,7 +23,7 @@ import { Card } from './Card';
 import { useSidebarModal } from '@shared/context/SidebarModalContext';
 import { TaskForm } from '@shared/components/TaskForm';
 import { useViewTasks } from '@taskManager/views/Kanban/context/ViewTaskContext';
-import { useLocalized } from '@shared/hooks/useLocalized';
+import { useTaskManagerData } from '@taskManager/hooks/useTaskManagerData';
 
 interface ColumnProps {
 	column: FieldOption;
@@ -51,7 +51,7 @@ export const Column: React.FC<ColumnProps> = ({
 	const headerRef = useRef<HTMLDivElement | null>(null);
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const columnWrapperRef = useRef<HTMLDivElement | null>(null);
-	const localized = useLocalized();
+	const localized = useTaskManagerData();
 	const { openSidebar, closeSidebar } = useSidebarModal();
 
 	const [state, setState] = useState<ColumnState>(IDLE);

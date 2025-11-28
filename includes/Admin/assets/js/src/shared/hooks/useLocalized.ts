@@ -1,90 +1,20 @@
-import { WPOAOMLocalized } from '../types/globals';
-
 /**
- * Hook to safely access localized data for WPO AOM Task Manager.
- * Provides type-safe access to window.WPO_AOM_TaskManager.
+ * Generic hook to safely access localized data passed from PHP via wp_localize_script.
  *
- * @return {WPOAOMLocalized} The localized data object.
+ * @template T - The type of the localized data object.
+ * @param {string} globalKey - The key under which the data is stored on the window object.
+ * @return {T} The localized data object.
+ * @throws {Error} If the data is not found on the window object.
+ *
+ * @example
+ * const data = useLocalized<WpoAomTaskManagerData>('wpoAomTaskManager');
  */
-export function useLocalized(): WPOAOMLocalized {
-	if (!window.WPO_AOM_TaskManager) {
-		// eslint-disable-next-line no-console
-		console.error(
-			'WPO_AOM_TaskManager is not defined. Localized data missing.'
-		);
+export function useLocalized<T>(globalKey: string): T {
+    const data = (window as any)[globalKey];
 
-		// Return defaults to prevent crashes
-		return {
-			apiRoot: '',
-			apiNamespace: '',
-			nonce: '',
-			loading: 'Loading...',
-			errorLoading: 'Error loading tasks. Please try again.',
-			views: {},
-			kanban: {
-				addTask: 'Add Task',
-				editTask: 'Edit Task',
-				options: 'Options',
-				create: 'Create',
-				dueDateLabel: 'Due date',
-			},
-			calendar: {
-				task: 'Task',
-				tasks: 'Tasks',
-				priority: 'Priority',
-				status: 'Status',
-				dueDate: 'Due date',
-				description: 'Description',
-				noTasksFound: 'No tasks found for the selected date range',
-				viewModes: {
-					byDay: 'By day',
-					byWeek: 'By week',
-					byMonth: 'By month',
-				},
-				dateRangePresets: {
-					today: 'Today',
-					yesterday: 'Yesterday',
-					currentWeek: 'Current Week',
-					lastWeek: 'Last Week',
-					currentMonth: 'Current Month',
-					lastMonth: 'Last Month',
-					custom: 'Custom',
-				},
-				selectDate: 'Select a date',
-				previousMonth: 'Previous month',
-				nextMonth: 'Next month',
-			},
-			form: {
-				labels: {
-					status: 'Status',
-					priority: 'Priority',
-					dueDate: 'Due Date',
-					title: 'Title',
-					description: 'Description',
-					associatedOrders: 'Associated Orders',
-				},
-				placeholders: {
-					select: 'Select',
-					taskName: 'Write a name for your task.',
-					taskDescription: 'Describe the task.',
-					searchOrders:
-						'Search orders by number, customer, address...',
-				},
-			},
-			actions: {
-				edit: 'Edit',
-				editTask: 'Edit task',
-				delete: 'Delete',
-				deleteTask: 'Delete task',
-				cancel: 'Cancel',
-				clear: 'Clear',
-				apply: 'Apply',
-				actions: 'Actions',
-				createTask: 'Create Task',
-				updateTask: 'Update Task',
-			},
-		};
-	}
+    if (!data) {
+        throw new Error(`Localized data "${globalKey}" not found on the window object`);
+    }
 
-	return window.WPO_AOM_TaskManager;
+    return data as T;
 }

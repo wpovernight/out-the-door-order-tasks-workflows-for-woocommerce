@@ -1,6 +1,6 @@
 import React from 'react';
 import { DateRangePreset } from '../context/ViewTaskContext';
-import { useLocalized } from '@shared/hooks/useLocalized';
+import { useTaskManagerData } from '@taskManager/hooks/useTaskManagerData';
 
 interface DateRangePresetSelectorProps {
 	value: DateRangePreset;
@@ -11,7 +11,7 @@ const DateRangePresetSelector: React.FC<DateRangePresetSelectorProps> = ({
 	value,
 	onChange,
 }) => {
-	const localized = useLocalized();
+	const localized = useTaskManagerData();
 
 	return (
 		<div className="calendar-date-range-preset-selector">

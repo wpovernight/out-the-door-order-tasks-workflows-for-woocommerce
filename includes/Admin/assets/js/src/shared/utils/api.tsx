@@ -1,13 +1,26 @@
 import { Task, FieldOption, TaskField } from '../types/task';
 
-const apiRoot = window.WPO_AOM_TaskManager?.apiRoot;
-const apiNamespace = window.WPO_AOM_TaskManager?.apiNamespace;
-const nonce = window.WPO_AOM_TaskManager?.nonce;
+// Get API configuration from window object
+// This works for both task-manager and order-edit as they both provide the same API config
+function getApiConfig() {
+	const taskManagerData = (window as any).wpoAomTaskManager;
+	const orderEditData = (window as any).wpoAomOrderEdit;
 
-if (!apiRoot) {
-	// eslint-disable-next-line no-console
-	console.warn('⚠️ API Root is missing. API calls will fail.');
+	const config = taskManagerData || orderEditData;
+
+	if (!config) {
+		console.warn('⚠️ API configuration not found. API calls will fail.');
+		return { apiRoot: '', apiNamespace: '', nonce: '' };
+	}
+
+	return {
+		apiRoot: config.apiRoot,
+		apiNamespace: config.apiNamespace,
+		nonce: config.nonce,
+	};
 }
+
+const { apiRoot, apiNamespace, nonce } = getApiConfig();
 
 /**
  * Handles the API response, checking for errors and parsing JSON.
