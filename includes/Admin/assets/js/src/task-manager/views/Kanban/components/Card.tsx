@@ -15,8 +15,8 @@ import { getCardData, getCardDropTargetData, isCardData } from '../data';
 import { useViewTasks } from '../context/ViewTaskContext';
 import { getColorStyle } from '@shared/utils/colorUtils';
 import { useSidebarModal } from '@shared/context/SidebarModalContext';
-import { TaskForm } from '@taskManager/views/Kanban/forms/TaskForm';
-import { useTasks } from '@taskManager/context/TaskContext';
+import { TaskForm } from '@shared/components/TaskForm';
+import { useTasks } from '@shared/context/TaskContext';
 import { useLocalized } from '@shared/hooks/useLocalized';
 
 // ------------------------------

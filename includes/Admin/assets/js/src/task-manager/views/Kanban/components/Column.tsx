@@ -21,7 +21,7 @@ import {
 } from '../data';
 import { Card } from './Card';
 import { useSidebarModal } from '@shared/context/SidebarModalContext';
-import { TaskForm } from '../forms/TaskForm';
+import { TaskForm } from '@shared/components/TaskForm';
 import { useViewTasks } from '@taskManager/views/Kanban/context/ViewTaskContext';
 import { useLocalized } from '@shared/hooks/useLocalized';
 

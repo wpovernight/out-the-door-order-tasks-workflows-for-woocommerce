@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useTasks } from '../../context/TaskContext';
+import { useTasks } from '@shared/context/TaskContext';
 import { ViewTaskProvider } from './context/ViewTaskContext';
 import { CalendarContent } from './components/CalendarContent';
 import { useAsyncLoader } from '@shared/hooks/useAsyncLoader';

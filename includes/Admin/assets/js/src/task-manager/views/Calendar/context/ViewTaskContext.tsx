@@ -1,6 +1,6 @@
 import React, { useContext, useState, useMemo } from 'react';
 import { Task } from '@shared/types/task';
-import { useTasks } from '../../../context/TaskContext';
+import { useTasks } from '@shared/context/TaskContext';
 import {
 	getTaskDueDate,
 	getDateRangeFromPreset,

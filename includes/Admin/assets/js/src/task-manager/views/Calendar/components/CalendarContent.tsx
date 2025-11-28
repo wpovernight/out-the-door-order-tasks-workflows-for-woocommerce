@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { useViewTasks } from '../context/ViewTaskContext';
-import { useTasks } from '../../../context/TaskContext';
+import { useTasks } from '@shared/context/TaskContext';
 import { useSidebarModal } from '@shared/context/SidebarModalContext';
-import { TaskForm } from '@taskManager/views/Kanban/forms/TaskForm';
+import { TaskForm } from '@shared/components/TaskForm';
 import { useLocalized } from '@shared/hooks/useLocalized';
 import { Task } from '@shared/types/task';
 import { CalendarDay } from '../data';

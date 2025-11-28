@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Task } from '@shared/types/task';
-import { useTasks } from '../../../context/TaskContext';
+import { useTasks } from '@shared/context/TaskContext';
 import { groupAndSortTasks } from '../../../utils/task-sort';
 
 interface ViewTaskContextType {
