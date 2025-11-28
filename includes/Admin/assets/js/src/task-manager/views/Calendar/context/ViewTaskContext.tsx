@@ -1,12 +1,8 @@
 import React, { useContext, useState, useMemo } from 'react';
 import { Task } from '@shared/types/task';
 import { useTasks } from '@shared/context/TaskContext';
-import {
-	getTaskDueDate,
-	getDateRangeFromPreset,
-	DateRange,
-	DateRangePreset,
-} from '../utils';
+import { getTaskDueDate } from '@shared/utils/fieldUtils';
+import { getDateRangeFromPreset, DateRange, DateRangePreset } from '../utils';
 
 export type { DateRangePreset, DateRange };
 

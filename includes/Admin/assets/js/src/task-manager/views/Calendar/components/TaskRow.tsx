@@ -1,6 +1,7 @@
 import React from 'react';
 import { Task, isFieldOption } from '@shared/types/task';
-import { getTaskDueDate, formatDate, getFieldValue } from '../utils';
+import { getTaskDueDate, getFieldValue } from '@shared/utils/fieldUtils';
+import { formatDate } from '../utils';
 import { getColorStyle } from '@shared/utils/colorUtils';
 
 interface TaskRowProps {

@@ -2,13 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { Task, isFieldOption } from '@shared/types/task';
 import TaskRow from './TaskRow';
 import { useTaskManagerData } from '@taskManager/hooks/useTaskManagerData';
-import {
-	getTaskDueDate,
-	getFieldValue,
-	formatDate,
-	DateRange,
-	DateRangePreset,
-} from '../utils';
+import { getTaskDueDate, getFieldValue } from '@shared/utils/fieldUtils';
+import { formatDate, DateRange, DateRangePreset } from '../utils';
 
 type SortColumn = 'title' | 'priority' | 'status' | 'dueDate';
 type SortDirection = 'asc' | 'desc';
