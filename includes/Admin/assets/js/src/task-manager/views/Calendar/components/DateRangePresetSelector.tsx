@@ -11,7 +11,7 @@ const DateRangePresetSelector: React.FC<DateRangePresetSelectorProps> = ({
 	value,
 	onChange,
 }) => {
-	const localized = useTaskManagerData();
+	const { i18n } = useTaskManagerData();
 
 	return (
 		<div className="calendar-date-range-preset-selector">
@@ -24,25 +24,25 @@ const DateRangePresetSelector: React.FC<DateRangePresetSelectorProps> = ({
 				onChange={(e) => onChange(e.target.value as DateRangePreset)}
 			>
 				<option value="today">
-					{localized.calendar.dateRangePresets.today}
+					{i18n.calendar.dateRangePresets.today}
 				</option>
 				<option value="yesterday">
-					{localized.calendar.dateRangePresets.yesterday}
+					{i18n.calendar.dateRangePresets.yesterday}
 				</option>
 				<option value="current-week">
-					{localized.calendar.dateRangePresets.currentWeek}
+					{i18n.calendar.dateRangePresets.currentWeek}
 				</option>
 				<option value="last-week">
-					{localized.calendar.dateRangePresets.lastWeek}
+					{i18n.calendar.dateRangePresets.lastWeek}
 				</option>
 				<option value="current-month">
-					{localized.calendar.dateRangePresets.currentMonth}
+					{i18n.calendar.dateRangePresets.currentMonth}
 				</option>
 				<option value="last-month">
-					{localized.calendar.dateRangePresets.lastMonth}
+					{i18n.calendar.dateRangePresets.lastMonth}
 				</option>
 				<option value="custom">
-					{localized.calendar.dateRangePresets.custom}
+					{i18n.calendar.dateRangePresets.custom}
 				</option>
 			</select>
 		</div>

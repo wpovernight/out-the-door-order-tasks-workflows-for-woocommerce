@@ -10,11 +10,13 @@
  * const data = useLocalized<WpoAomTaskManagerData>('wpoAomTaskManager');
  */
 export function useLocalized<T>(globalKey: string): T {
-    const data = (window as any)[globalKey];
+	const data = (window as any)[globalKey];
 
-    if (!data) {
-        throw new Error(`Localized data "${globalKey}" not found on the window object`);
-    }
+	if (!data) {
+		throw new Error(
+			`Localized data "${globalKey}" not found on the window object`
+		);
+	}
 
-    return data as T;
+	return data as T;
 }

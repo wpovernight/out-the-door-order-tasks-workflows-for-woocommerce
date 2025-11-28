@@ -4,7 +4,7 @@ import { useTaskManagerData } from '@taskManager/hooks/useTaskManagerData';
 
 export default function Header() {
 	const { view, setView } = useView();
-	const localized = useTaskManagerData();
+	const { i18n } = useTaskManagerData();
 
 	return (
 		<div className="header">
@@ -20,7 +20,7 @@ export default function Header() {
 								onClick={() => setView(availableView)}
 								className="view-button"
 							>
-								{localized.views[availableView]}
+								{i18n.views[availableView]}
 							</button>
 						</li>
 					))}

@@ -49,7 +49,7 @@ export const Card: React.FC<CardProps> = ({
 	const innerRef = useRef<HTMLDivElement | null>(null);
 	const [state, setState] = useState<CardState>(IDLE);
 
-	const localized = useTaskManagerData();
+	const { i18n } = useTaskManagerData();
 	const { deleteTask } = useTasks();
 	const { selectedTask, selectTask, setViewTasks } = useViewTasks();
 	const { openSidebar, closeSidebar } = useSidebarModal();
@@ -256,7 +256,7 @@ export const Card: React.FC<CardProps> = ({
 				}}
 			/>,
 			{
-				title: `${localized.kanban.editTask}: ${task.title}`,
+				title: `${i18n.kanban.editTask}: ${task.title}`,
 			}
 		);
 	};
@@ -316,7 +316,7 @@ export const Card: React.FC<CardProps> = ({
 							onClick={handleOptionsClick}
 						>
 							<span className="screenReader">
-								{localized.kanban.options}
+								{i18n.kanban.options}
 							</span>
 						</button>
 						{isOptionsOpen && (
@@ -327,7 +327,7 @@ export const Card: React.FC<CardProps> = ({
 										className="wpo-button card-edit-button"
 										onClick={handleEditTask}
 									>
-										{localized.actions.edit}
+										{i18n.actions.edit}
 									</button>
 								</li>
 								<li>
@@ -336,7 +336,7 @@ export const Card: React.FC<CardProps> = ({
 										className="wpo-button card-delete-button"
 										onClick={handleRemoveTask}
 									>
-										{localized.actions.delete}
+										{i18n.actions.delete}
 									</button>
 								</li>
 							</ul>
@@ -355,7 +355,7 @@ export const Card: React.FC<CardProps> = ({
 				</ul>
 				{dueDateValue && (
 					<span className="kanban-card-due-date">
-						{localized.kanban.dueDateLabel}: {dueDate}
+						{i18n.kanban.dueDateLabel}: {dueDate}
 					</span>
 				)}
 			</div>

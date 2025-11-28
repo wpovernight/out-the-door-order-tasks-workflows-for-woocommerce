@@ -1,7 +1,5 @@
 import { Task, FieldOption, TaskField } from '../types/task';
 
-// Get API configuration from window object
-// This works for both task-manager and order-edit as they both provide the same API config
 function getApiConfig() {
 	const taskManagerData = (window as any).wpoAomTaskManager;
 	const orderEditData = (window as any).wpoAomOrderEdit;

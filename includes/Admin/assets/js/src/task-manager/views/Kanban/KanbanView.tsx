@@ -7,7 +7,7 @@ import { useTaskManagerData } from '@taskManager/hooks/useTaskManagerData';
 
 export const KanbanView: React.FC = () => {
 	const { loadTasks, loadTaskFields, loadFieldOptions } = useTasks();
-	const localized = useTaskManagerData();
+	const { i18n } = useTaskManagerData();
 
 	const { loadingStatus, loadingError } = useAsyncLoader(async () => {
 		await Promise.all([loadTasks(), loadFieldOptions('status')]);
@@ -24,12 +24,12 @@ export const KanbanView: React.FC = () => {
 
 	// ToDo: Use a skeleton loader instead of a simple loading spinner
 	if (loadingStatus === 'loading') {
-		return <div className="loading-spinner">{localized.loading}</div>;
+		return <div className="loading-spinner">{i18n.loading}</div>;
 	}
 
 	// ToDo: Improve error handling UI
 	if (loadingStatus === 'error') {
-		return <div className="error-message">{localized.errorLoading}</div>;
+		return <div className="error-message">{i18n.errorLoading}</div>;
 	}
 
 	return (

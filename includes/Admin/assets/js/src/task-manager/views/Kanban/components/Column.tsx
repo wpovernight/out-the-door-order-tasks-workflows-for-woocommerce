@@ -51,7 +51,7 @@ export const Column: React.FC<ColumnProps> = ({
 	const headerRef = useRef<HTMLDivElement | null>(null);
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const columnWrapperRef = useRef<HTMLDivElement | null>(null);
-	const localized = useTaskManagerData();
+	const { i18n } = useTaskManagerData();
 	const { openSidebar, closeSidebar } = useSidebarModal();
 
 	const [state, setState] = useState<ColumnState>(IDLE);
@@ -241,7 +241,7 @@ export const Column: React.FC<ColumnProps> = ({
 				}}
 			/>,
 			{
-				title: localized.kanban.addTask,
+				title: i18n.kanban.addTask,
 			}
 		);
 	};
@@ -263,7 +263,7 @@ export const Column: React.FC<ColumnProps> = ({
 						className="wpo-button wpo-button-icon add-task-button"
 					>
 						<span className="screenReader">
-							{localized.kanban.create}
+							{i18n.kanban.create}
 						</span>
 					</button>
 				</div>

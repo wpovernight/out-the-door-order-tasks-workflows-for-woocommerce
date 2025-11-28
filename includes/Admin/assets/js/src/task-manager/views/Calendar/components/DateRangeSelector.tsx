@@ -31,7 +31,7 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 	onApply,
 	monthName,
 }) => {
-	const localized = useTaskManagerData();
+	const { i18n } = useTaskManagerData();
 
 	// Format date for input field (YYYY-MM-DD)
 	const formatDateForInput = (date: Date | null): string => {
@@ -111,13 +111,13 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 					className="wpo-button wpo-clear-button"
 					onClick={onCancel}
 				>
-					{localized.actions.clear}
+					{i18n.actions.clear}
 				</button>
 				<button
 					className="wpo-button wpo-apply-button"
 					onClick={onApply}
 				>
-					{localized.actions.apply}
+					{i18n.actions.apply}
 				</button>
 			</div>
 		</div>

@@ -30,7 +30,7 @@ const TaskList: React.FC<TaskListProps> = ({
 	onTaskEdit,
 	onTaskDelete,
 }) => {
-	const localized = useTaskManagerData();
+	const { i18n } = useTaskManagerData();
 	const [sortColumn, setSortColumn] = useState<SortColumn>('dueDate');
 	const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
@@ -39,22 +39,21 @@ const TaskList: React.FC<TaskListProps> = ({
 		const taskCount = tasks.length;
 		const taskCountText =
 			taskCount === 1
-				? `1 ${localized.calendar.task.toLowerCase()}`
-				: `${taskCount} ${localized.calendar.tasks}`;
+				? `1 ${i18n.calendar.task.toLowerCase()}`
+				: `${taskCount} ${i18n.calendar.tasks}`;
 
 		if (dateRangePreset !== 'custom') {
 			const presetLabels: Record<string, string> = {
-				today: localized.calendar.dateRangePresets.today,
-				yesterday: localized.calendar.dateRangePresets.yesterday,
-				'current-week': localized.calendar.dateRangePresets.currentWeek,
-				'last-week': localized.calendar.dateRangePresets.lastWeek,
-				'current-month':
-					localized.calendar.dateRangePresets.currentMonth,
-				'last-month': localized.calendar.dateRangePresets.lastMonth,
+				today: i18n.calendar.dateRangePresets.today,
+				yesterday: i18n.calendar.dateRangePresets.yesterday,
+				'current-week': i18n.calendar.dateRangePresets.currentWeek,
+				'last-week': i18n.calendar.dateRangePresets.lastWeek,
+				'current-month': i18n.calendar.dateRangePresets.currentMonth,
+				'last-month': i18n.calendar.dateRangePresets.lastMonth,
 			};
 			const presetLabel =
 				presetLabels[dateRangePreset] ||
-				localized.calendar.dateRangePresets.today;
+				i18n.calendar.dateRangePresets.today;
 			return `${presetLabel}'s tasks - ${taskCountText}`;
 		}
 
@@ -71,7 +70,7 @@ const TaskList: React.FC<TaskListProps> = ({
 		}
 
 		// Fallback
-		return `${localized.calendar.tasks} - ${taskCountText}`;
+		return `${i18n.calendar.tasks} - ${taskCountText}`;
 	};
 
 	const handleSort = (column: SortColumn) => {
@@ -171,32 +170,31 @@ const TaskList: React.FC<TaskListProps> = ({
 								className="calendar-task-title calendar-task-th-sortable"
 								onClick={() => handleSort('title')}
 							>
-								{localized.calendar.task}{' '}
-								{renderSortIcon('title')}
+								{i18n.calendar.task} {renderSortIcon('title')}
 							</th>
 							<th
 								className="calendar-task-th-sortable"
 								onClick={() => handleSort('priority')}
 							>
-								{localized.calendar.priority}{' '}
+								{i18n.calendar.priority}{' '}
 								{renderSortIcon('priority')}
 							</th>
 							<th
 								className="calendar-task-th-sortable"
 								onClick={() => handleSort('status')}
 							>
-								{localized.calendar.status}{' '}
+								{i18n.calendar.status}{' '}
 								{renderSortIcon('status')}
 							</th>
 							<th
 								className="calendar-task-th-sortable"
 								onClick={() => handleSort('dueDate')}
 							>
-								{localized.calendar.dueDate}{' '}
+								{i18n.calendar.dueDate}{' '}
 								{renderSortIcon('dueDate')}
 							</th>
-							<th>{localized.calendar.description}</th>
-							<th>{localized.actions.actions}</th>
+							<th>{i18n.calendar.description}</th>
+							<th>{i18n.actions.actions}</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -206,7 +204,7 @@ const TaskList: React.FC<TaskListProps> = ({
 									colSpan={6}
 									className="calendar-task-empty-state"
 								>
-									{localized.calendar.noTasksFound}
+									{i18n.calendar.noTasksFound}
 								</td>
 							</tr>
 						) : (

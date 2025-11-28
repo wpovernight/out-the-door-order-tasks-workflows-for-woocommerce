@@ -35,7 +35,7 @@ export const CalendarContent: React.FC = () => {
 
 	const { deleteTask, setTasks } = useTasks();
 	const { openSidebar, closeSidebar } = useSidebarModal();
-	const localized = useTaskManagerData();
+	const { i18n } = useTaskManagerData();
 
 	// Generate calendar data
 	const { monthName } = useMemo(
@@ -132,7 +132,7 @@ export const CalendarContent: React.FC = () => {
 				}}
 			/>,
 			{
-				title: `${localized.actions.edit}: ${task.title}`,
+				title: `${i18n.actions.edit}: ${task.title}`,
 			}
 		);
 	};
