@@ -13,8 +13,7 @@ import invariant from 'tiny-invariant';
 import { Task } from '@shared/types/task';
 import { getCardData, getCardDropTargetData, isCardData } from '../data';
 import { useViewTasks } from '../context/ViewTaskContext';
-import { useSidebarModal } from '@shared/context/SidebarModalContext';
-import { TaskForm } from '@shared/components/TaskForm';
+import { useTaskEdit } from '@shared/hooks/useTaskFormModal';
 import { TaskCard } from '@shared/components/TaskCard';
 import { useTasks } from '@shared/context/TaskContext';
 import { useTaskManagerData } from '@taskManager/hooks/useTaskManagerData';
@@ -52,7 +51,7 @@ export const Card: React.FC<CardProps> = ({
 	const { i18n } = useTaskManagerData();
 	const { deleteTask } = useTasks();
 	const { selectedTask, selectTask, setViewTasks } = useViewTasks();
-	const { openSidebar, closeSidebar } = useSidebarModal();
+	const { openEditTaskModal } = useTaskEdit();
 
 	const taskRef = useRef(task);
 	useEffect(() => {
@@ -227,38 +226,33 @@ export const Card: React.FC<CardProps> = ({
 		e.stopPropagation();
 		onOptionsToggle(null);
 
-		openSidebar(
-			<TaskForm
-				task={task}
-				onDone={closeSidebar}
-				onTaskSaved={(updatedTask) => {
-					setViewTasks((prev) => {
-						const updated = structuredClone(prev);
-						const newStatus = updatedTask.status;
+		openEditTaskModal({
+			task,
+			onTaskSaved: (updatedTask) => {
+				setViewTasks((prev) => {
+					const updated = structuredClone(prev);
+					const newStatus = updatedTask.status;
 
-						// Remove task from all columns (in case status changed)
-						for (const status in updated) {
-							updated[status] = updated[status].filter(
-								(t) => t.id !== updatedTask.id
-							);
-						}
+					// Remove task from all columns (in case status changed)
+					for (const status in updated) {
+						updated[status] = updated[status].filter(
+							(t) => t.id !== updatedTask.id
+						);
+					}
 
-						// Add task to the correct column
-						if (updated[newStatus]) {
-							updated[newStatus].push({
-								...updatedTask,
-								status: newStatus,
-							});
-						}
+					// Add task to the correct column
+					if (updated[newStatus]) {
+						updated[newStatus].push({
+							...updatedTask,
+							status: newStatus,
+						});
+					}
 
-						return updated;
-					});
-				}}
-			/>,
-			{
-				title: `${i18n.kanban.editTask}: ${task.title}`,
-			}
-		);
+					return updated;
+				});
+			},
+			title: `${i18n.kanban.editTask}: ${task.title}`,
+		});
 	};
 
 	// kanban prefix is used to avoid css conflicts.

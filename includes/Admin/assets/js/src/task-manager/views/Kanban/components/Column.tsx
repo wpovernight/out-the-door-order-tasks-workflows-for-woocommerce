@@ -20,8 +20,7 @@ import {
 	isColumnData,
 } from '../data';
 import { Card } from './Card';
-import { useSidebarModal } from '@shared/context/SidebarModalContext';
-import { TaskForm } from '@shared/components/TaskForm';
+import { useTaskCreation } from '@shared/hooks/useTaskFormModal';
 import { useViewTasks } from '@taskManager/views/Kanban/context/ViewTaskContext';
 import { useTaskManagerData } from '@taskManager/hooks/useTaskManagerData';
 
@@ -52,7 +51,7 @@ export const Column: React.FC<ColumnProps> = ({
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const columnWrapperRef = useRef<HTMLDivElement | null>(null);
 	const { i18n } = useTaskManagerData();
-	const { openSidebar, closeSidebar } = useSidebarModal();
+	const { openCreateTaskModal } = useTaskCreation();
 
 	const [state, setState] = useState<ColumnState>(IDLE);
 
@@ -222,28 +221,23 @@ export const Column: React.FC<ColumnProps> = ({
 	const { setViewTasks } = useViewTasks();
 
 	const openTaskCreationModal = () => {
-		openSidebar(
-			<TaskForm
-				columnId={column.id}
-				onDone={closeSidebar}
-				onTaskSaved={(newTask) => {
-					setViewTasks((prev) => {
-						const updated = structuredClone(prev);
-						const status = newTask.status || column.slug;
-						if (updated[status]) {
-							updated[status].push({
-								...newTask,
-								status,
-							});
-						}
-						return updated;
-					});
-				}}
-			/>,
-			{
-				title: i18n.kanban.addTask,
-			}
-		);
+		openCreateTaskModal({
+			columnId: column.id,
+			onTaskSaved: (newTask) => {
+				setViewTasks((prev) => {
+					const updated = structuredClone(prev);
+					const status = newTask.status || column.slug;
+					if (updated[status]) {
+						updated[status].push({
+							...newTask,
+							status,
+						});
+					}
+					return updated;
+				});
+			},
+			title: i18n.kanban.addTask,
+		});
 	};
 
 	return (

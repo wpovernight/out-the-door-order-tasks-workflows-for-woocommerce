@@ -1,8 +1,7 @@
 import React, { useMemo } from 'react';
 import { useViewTasks } from '../context/ViewTaskContext';
 import { useTasks } from '@shared/context/TaskContext';
-import { useSidebarModal } from '@shared/context/SidebarModalContext';
-import { TaskForm } from '@shared/components/TaskForm';
+import { useTaskEdit } from '@shared/hooks/useTaskFormModal';
 import { useTaskManagerData } from '@taskManager/hooks/useTaskManagerData';
 import { Task } from '@shared/types/task';
 import { CalendarDay } from '../data';
@@ -34,7 +33,7 @@ export const CalendarContent: React.FC = () => {
 	} = useViewTasks();
 
 	const { deleteTask, setTasks } = useTasks();
-	const { openSidebar, closeSidebar } = useSidebarModal();
+	const { openEditTaskModal } = useTaskEdit();
 	const { i18n } = useTaskManagerData();
 
 	// Generate calendar data
@@ -118,23 +117,17 @@ export const CalendarContent: React.FC = () => {
 	};
 
 	const handleTaskEdit = (task: Task) => {
-		openSidebar(
-			<TaskForm
-				task={task}
-				onDone={closeSidebar}
-				onTaskSaved={(updatedTask) => {
-					setTasks((prevTasks) =>
-						prevTasks.map((t) =>
-							t.id === updatedTask.id ? updatedTask : t
-						)
-					);
-					closeSidebar();
-				}}
-			/>,
-			{
-				title: `${i18n.actions.edit}: ${task.title}`,
-			}
-		);
+		openEditTaskModal({
+			task,
+			onTaskSaved: (updatedTask) => {
+				setTasks((prevTasks) =>
+					prevTasks.map((t) =>
+						t.id === updatedTask.id ? updatedTask : t
+					)
+				);
+			},
+			title: `${i18n.actions.edit}: ${task.title}`,
+		});
 	};
 
 	const handleTaskDelete = async (taskId: number) => {
