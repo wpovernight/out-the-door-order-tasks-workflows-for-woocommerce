@@ -285,6 +285,8 @@ export const Card: React.FC<CardProps> = ({
 				onDeleteClick={handleRemoveTask}
 				className={state.type !== 'idle' ? state.type : ''}
 				innerRef={innerRef}
+				actionsDisplayMode="menu"
+				headingLevel="h3"
 				i18n={{
 					options: i18n.kanban.options,
 					edit: i18n.actions.edit,
