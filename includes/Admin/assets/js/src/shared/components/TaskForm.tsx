@@ -31,10 +31,20 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 	} = useTasks();
 
 	// Get localized data from whichever app is active (task-manager or order-edit)
+	const globalKey = (window as any).WPO_AOM_TaskManager
+		? 'WPO_AOM_TaskManager'
+		: (window as any).WPO_AOM_OrderEdit
+			? 'WPO_AOM_OrderEdit'
+			: null;
+
+	if (!globalKey) {
+		throw new Error(
+			'TaskForm requires either WPO_AOM_TaskManager or WPO_AOM_OrderEdit to be localized on the window object'
+		);
+	}
+
 	const data = useLocalized<WpoAomTaskManagerData | WpoAomOrderEditData>(
-		(window as any).wpoAomTaskManager
-			? 'wpoAomTaskManager'
-			: 'wpoAomOrderEdit'
+		globalKey
 	);
 	const i18n = data.i18n;
 

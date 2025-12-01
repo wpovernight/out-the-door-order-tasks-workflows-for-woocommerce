@@ -1,8 +1,8 @@
 import { Task, FieldOption, TaskField } from '../types/task';
 
 function getApiConfig() {
-	const taskManagerData = (window as any).wpoAomTaskManager;
-	const orderEditData = (window as any).wpoAomOrderEdit;
+	const taskManagerData = (window as any).WPO_AOM_TaskManager;
+	const orderEditData = (window as any).WPO_AOM_OrderEdit;
 
 	const config = taskManagerData || orderEditData;
 

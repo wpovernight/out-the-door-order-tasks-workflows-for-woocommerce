@@ -7,7 +7,7 @@
  * @throws {Error} If the data is not found on the window object.
  *
  * @example
- * const data = useLocalized<WpoAomTaskManagerData>('wpoAomTaskManager');
+ * const data = useLocalized<WpoAomTaskManagerData>('WPO_AOM_TaskManager');
  */
 export function useLocalized<T>(globalKey: string): T {
 	const data = (window as any)[globalKey];

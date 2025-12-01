@@ -76,7 +76,7 @@ export interface WpoAomTaskManagerData {
 
 declare global {
 	interface Window {
-        wpoAomTaskManager: WpoAomTaskManagerData;
+		WPO_AOM_TaskManager: WpoAomTaskManagerData;
 	}
 }
 

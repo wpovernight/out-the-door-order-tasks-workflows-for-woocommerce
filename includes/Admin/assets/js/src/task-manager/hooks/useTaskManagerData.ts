@@ -8,5 +8,5 @@ import { WpoAomTaskManagerData } from '@taskManager/types/globals';
  * @throws {Error} If the Task Manager data is not found on the window object.
  */
 export function useTaskManagerData(): WpoAomTaskManagerData {
-	return useLocalized<WpoAomTaskManagerData>('wpoAomTaskManager');
+	return useLocalized<WpoAomTaskManagerData>('WPO_AOM_TaskManager');
 }
