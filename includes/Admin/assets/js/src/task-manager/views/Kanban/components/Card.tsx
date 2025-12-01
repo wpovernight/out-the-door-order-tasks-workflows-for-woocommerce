@@ -10,12 +10,12 @@ import {
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
 import invariant from 'tiny-invariant';
 
-import { isFieldOption, Task } from '@shared/types/task';
+import { Task } from '@shared/types/task';
 import { getCardData, getCardDropTargetData, isCardData } from '../data';
 import { useViewTasks } from '../context/ViewTaskContext';
-import { getColorStyle } from '@shared/utils/colorUtils';
 import { useSidebarModal } from '@shared/context/SidebarModalContext';
 import { TaskForm } from '@shared/components/TaskForm';
+import { TaskCard } from '@shared/components/TaskCard';
 import { useTasks } from '@shared/context/TaskContext';
 import { useTaskManagerData } from '@taskManager/hooks/useTaskManagerData';
 
@@ -261,27 +261,6 @@ export const Card: React.FC<CardProps> = ({
 		);
 	};
 
-	const priorityField = task.fields?.find(
-		(field) => field.slug === 'priority'
-	);
-	const dueDateField = task.fields?.find(
-		(field) => field.slug === 'due-date'
-	);
-
-	const priorityValue = priorityField?.values
-		? priorityField.values[0]?.resolved
-		: null;
-	const dueDateValue = dueDateField?.values
-		? dueDateField.values[0]?.raw
-		: null;
-	const dueDate = dueDateValue
-		? new Date(dueDateValue.toString()).toLocaleDateString('en-US', {
-				month: 'short',
-				day: 'numeric',
-				year: 'numeric',
-			})
-		: null;
-
 	// kanban prefix is used to avoid css conflicts.
 	return (
 		<div
@@ -296,69 +275,23 @@ export const Card: React.FC<CardProps> = ({
 					: ''
 			}`}
 		>
-			{/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
-			<div
-				ref={innerRef}
-				className={`kanban-card ${state.type !== 'idle' ? state.type : ''} ${isSelected ? 'selected' : ''}`}
-				onClick={handleCardClick}
-				onKeyDown={(e) => {
-					if (e.key === 'Enter' || e.key === ' ') {
-						handleCardClick();
-					}
+			<TaskCard
+				task={task}
+				isOptionsOpen={isOptionsOpen}
+				isSelected={isSelected}
+				onCardClick={handleCardClick}
+				onOptionsClick={handleOptionsClick}
+				onEditClick={handleEditTask}
+				onDeleteClick={handleRemoveTask}
+				className={state.type !== 'idle' ? state.type : ''}
+				innerRef={innerRef}
+				i18n={{
+					options: i18n.kanban.options,
+					edit: i18n.actions.edit,
+					delete: i18n.actions.delete,
+					dueDateLabel: i18n.kanban.dueDateLabel,
 				}}
-			>
-				<div className="kanban-card-header">
-					<h3>{task.title}</h3>
-					<div className="kanban-card-options">
-						<button
-							className="wpo-button wpo-button-icon wpo-options-button"
-							type="button"
-							onClick={handleOptionsClick}
-						>
-							<span className="screenReader">
-								{i18n.kanban.options}
-							</span>
-						</button>
-						{isOptionsOpen && (
-							<ul className="wpo-action-menu">
-								<li>
-									<button
-										type="button"
-										className="wpo-button card-edit-button"
-										onClick={handleEditTask}
-									>
-										{i18n.actions.edit}
-									</button>
-								</li>
-								<li>
-									<button
-										type="button"
-										className="wpo-button card-delete-button"
-										onClick={handleRemoveTask}
-									>
-										{i18n.actions.delete}
-									</button>
-								</li>
-							</ul>
-						)}
-					</div>
-				</div>
-				<ul className="kanban-card-tags">
-					{priorityValue && isFieldOption(priorityValue) && (
-						<li
-							className={`wpo-tag kanban-card-priority priority-${priorityValue?.slug}`}
-							style={getColorStyle(priorityValue.color)}
-						>
-							{priorityValue.label}
-						</li>
-					)}
-				</ul>
-				{dueDateValue && (
-					<span className="kanban-card-due-date">
-						{i18n.kanban.dueDateLabel}: {dueDate}
-					</span>
-				)}
-			</div>
+			/>
 		</div>
 	);
 };
