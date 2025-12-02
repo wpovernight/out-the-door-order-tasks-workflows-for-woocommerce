@@ -127,25 +127,24 @@ final class TaskManagerService {
 	 * @return array<int, array<string, mixed>>
 	 */
 	public function get_task_fields_and_values( int $task_id ): array {
-		$fields             = $this->get_all_fields();
-		$values             = $this->get_field_values_for_task( $task_id );
-		$values_by_field_id = array_column( $values, null, 'field_id' );
-		$task_fields        = array();
+		$fields      = $this->get_all_fields();
+		$values      = $this->get_field_values_for_task( $task_id );
+		$task_fields = array();
 
 		// Map field values to their respective fields.
 		foreach ( $fields as $field ) {
-			if ( ! isset( $values_by_field_id[ $field->id ] ) ) {
+			if ( ! isset( $values[ $field->id ] ) ) {
 				$task_fields[] = array_merge( $field->to_array(), array( 'values' => null ) );
 				continue;
 			}
 
 			$task_field_values = array();
-			if ( is_array( $values_by_field_id[ $field->id ] ) ) {
-				foreach ( $values_by_field_id[ $field->id ] as $single_value ) {
+			if ( is_array( $values[ $field->id ] ) ) {
+				foreach ( $values[ $field->id ] as $single_value ) {
 					$task_field_values[] = $this->get_field_value( $single_value, $field );
 				}
 			} else {
-				$task_field_values[] = $this->get_field_value( $values_by_field_id[ $field->id ], $field );
+				$task_field_values[] = $this->get_field_value( $values[ $field->id ], $field );
 			}
 
 			$task_fields[] = array_merge( $field->to_array(), array( 'values' => $task_field_values ) );
@@ -512,8 +511,16 @@ final class TaskManagerService {
 	 * @return array<int, TaskFieldValue>
 	 */
 	public function get_field_values_for_task( int $task_id ): array {
-		$values = $this->task_field_value_repository->find_all_by( 'task_id', $task_id );
-		return array_column( $values, null, 'field_id' );
+		$values  = $this->task_field_value_repository->find_all_by( 'task_id', $task_id );
+		$grouped = array();
+		foreach ( $values as $value ) {
+			if ( ! isset( $grouped[ $value->field_id ] ) ) {
+				$grouped[ $value->field_id ] = array();
+			}
+			$grouped[ $value->field_id ][] = $value;
+		}
+
+		return $grouped;
 	}
 
 	/**
