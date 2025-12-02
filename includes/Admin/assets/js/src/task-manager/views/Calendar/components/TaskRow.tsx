@@ -48,13 +48,19 @@ const TaskRow: React.FC<TaskRowProps> = ({
 			</td>
 
 			<td className="task-priority">
-				<span className="wpo-tag" style={getColorStyle(priorityColor)}>
+				<span
+					className="wpo-aom-tag"
+					style={getColorStyle(priorityColor)}
+				>
 					{priorityLabel}
 				</span>
 			</td>
 
 			<td className="task-status">
-				<span className="wpo-tag" style={getColorStyle(statusColor)}>
+				<span
+					className="wpo-aom-tag"
+					style={getColorStyle(statusColor)}
+				>
 					{statusLabel}
 				</span>
 			</td>

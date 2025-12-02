@@ -120,6 +120,7 @@ export const CalendarContent: React.FC = () => {
 		openEditTaskModal({
 			task,
 			onTaskSaved: (updatedTask) => {
+				// Update local tasks state to reflect the changes
 				setTasks((prevTasks) =>
 					prevTasks.map((t) =>
 						t.id === updatedTask.id ? updatedTask : t

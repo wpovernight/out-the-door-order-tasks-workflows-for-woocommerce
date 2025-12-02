@@ -167,7 +167,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 				<ul className="task-card-tags">
 					{priorityValue && isFieldOption(priorityValue) && (
 						<li
-							className={`wpo-tag task-card-priority priority-${priorityValue?.slug}`}
+							className={`wpo-aom-tag task-card-priority priority-${priorityValue?.slug}`}
 							style={getColorStyle(priorityValue.color)}
 						>
 							{priorityValue.label}

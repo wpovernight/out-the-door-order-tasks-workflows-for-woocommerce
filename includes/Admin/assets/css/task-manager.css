@@ -269,17 +269,6 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     border-radius: 1px;
 }
 
-.add-task-button {
-    color: #838790;
-    width: 1.3em;
-    height: 1.3em;
-    font-size: 1.5em;
-}
-
-.add-task-button::before {
-    content: '\f543';
-}
-
 /* ========================================
    Calendar View
    ======================================== */

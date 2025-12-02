@@ -4,15 +4,15 @@ import { TaskForm } from '@shared/components/TaskForm';
 import { Task } from '@shared/types/task';
 
 interface CreateTaskModalOptions {
-	columnId?: number;
-	onTaskSaved: (task: Task) => void;
 	title: string;
+	columnId?: number;
+	onTaskSaved?: (task: Task) => void;
 }
 
 interface EditTaskModalOptions {
 	task: Task;
-	onTaskSaved: (task: Task) => void;
 	title: string;
+	onTaskSaved?: (task: Task) => void;
 }
 
 export const useTaskCreation = () => {

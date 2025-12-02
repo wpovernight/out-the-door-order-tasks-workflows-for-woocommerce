@@ -229,6 +229,7 @@ export const Card: React.FC<CardProps> = ({
 		openEditTaskModal({
 			task,
 			onTaskSaved: (updatedTask) => {
+				// Update local view state to reflect the changes
 				setViewTasks((prev) => {
 					const updated = structuredClone(prev);
 					const newStatus = updatedTask.status;

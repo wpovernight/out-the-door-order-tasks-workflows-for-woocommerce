@@ -224,6 +224,7 @@ export const Column: React.FC<ColumnProps> = ({
 		openCreateTaskModal({
 			columnId: column.id,
 			onTaskSaved: (newTask) => {
+				// Update local view state to include the new task
 				setViewTasks((prev) => {
 					const updated = structuredClone(prev);
 					const status = newTask.status || column.slug;
@@ -254,7 +255,7 @@ export const Column: React.FC<ColumnProps> = ({
 					<h2>{column.label}</h2>
 					<button
 						onClick={openTaskCreationModal}
-						className="wpo-button wpo-button-icon add-task-button"
+						className="wpo-button wpo-button-icon wpo-aom-add-button"
 					>
 						<span className="screenReader">
 							{i18n.kanban.create}
