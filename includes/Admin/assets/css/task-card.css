@@ -10,19 +10,22 @@
     gap: 0.8em;
     font-size: 0.9em;
     background: var(--wpo-aom-card-bg);
-    border-radius: 4px;
     padding: .875em;
     margin: .1em;
-    box-shadow: var(--wpo-aom-card-shadow);
-    cursor: grab;
     transition: all .15s ease;
-    border: 1px solid transparent;
+    border: 1px solid #D5D7DA;
+    border-radius: 0.5em;
 }
 
 .task-card > .task-card-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
+}
+
+.task-card-description > p {
+    margin: 0;
+    padding: 0;
 }
 
 .task-card > .task-card-footer {
@@ -43,7 +46,7 @@
     align-items: center;
 }
 
-.task-card-options .wpo-action-menu .card-delete-button::before {
+.task-card-options .wpo-action-menu .task-delete-menu-item::before {
     color: #ef4444;
 }
 
@@ -54,14 +57,10 @@
     font-size: 1.4em;
 }
 
-.task-card-options .card-delete-button::before {
+.task-card-options .task-delete-menu-item::before {
     vertical-align: middle;
     margin-right: 6px;
     color: #59636e;
-}
-
-.task-card:hover {
-    border-color: var(--wpo-aom-primary-color);
 }
 
 .task-card h3,

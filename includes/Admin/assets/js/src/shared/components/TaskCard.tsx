@@ -1,6 +1,7 @@
 import React from 'react';
 import { isFieldOption, Task } from '@shared/types/task';
 import { getColorStyle } from '@shared/utils/colorUtils';
+import { truncateText } from '@shared/utils/textUtils';
 
 type ActionsDisplayMode = 'menu' | 'icons';
 type HeadingLevel = 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
@@ -17,6 +18,7 @@ interface TaskCardProps {
 	innerRef?: React.RefObject<HTMLDivElement | null>;
 	actionsDisplayMode?: ActionsDisplayMode;
 	headingLevel?: HeadingLevel;
+	showDescription?: boolean;
 	i18n: {
 		options?: string;
 		edit?: string;
@@ -36,6 +38,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 	innerRef,
 	actionsDisplayMode = 'menu',
 	headingLevel = 'h3',
+	showDescription = false,
 	i18n,
 }) => {
 	const priorityField = task.fields?.find(
@@ -80,7 +83,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 						<li>
 							<button
 								type="button"
-								className="wpo-button card-edit-button"
+								className="wpo-button task-edit-menu-item"
 								onClick={onEditClick}
 							>
 								{i18n.edit}
@@ -91,7 +94,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 						<li>
 							<button
 								type="button"
-								className="wpo-button card-delete-button"
+								className="wpo-button task-delete-menu-item"
 								onClick={onDeleteClick}
 							>
 								{i18n.delete}
@@ -104,11 +107,11 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 	);
 
 	const renderIconActions = () => (
-		<ul className="task-card-actions">
+		<ul className="wpo-aom-task-actions task-card-actions">
 			{onEditClick && (
 				<li>
 					<button
-						className="wpo-button wpo-button-icon card-edit-button"
+						className="wpo-button wpo-button-icon task-edit"
 						type="button"
 						onClick={onEditClick}
 						title={i18n.edit}
@@ -120,7 +123,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 			{onDeleteClick && (
 				<li>
 					<button
-						className="wpo-button wpo-button-icon card-delete-button"
+						className="wpo-button wpo-button-icon task-delete"
 						type="button"
 						onClick={onDeleteClick}
 						title={i18n.delete}
@@ -155,6 +158,11 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 						? renderMenuActions()
 						: renderIconActions())}
 			</div>
+			{showDescription && task.description && (
+				<div className="task-card-description">
+					<p>{truncateText(task.description, 100)}</p>
+				</div>
+			)}
 			<div className="task-card-footer">
 				<ul className="task-card-tags">
 					{priorityValue && isFieldOption(priorityValue) && (

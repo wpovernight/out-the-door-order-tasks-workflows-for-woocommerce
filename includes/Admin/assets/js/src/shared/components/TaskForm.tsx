@@ -196,7 +196,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 			className={`wpo-aom-task-form ${isSubmitting ? 'submitting' : ''}`}
 		>
 			<fieldset disabled={isSubmitting}>
-				<div className="wpo-aom-task-field-group">
+				<div className="field-group">
 					<div>
 						<label htmlFor="status">
 							{i18n.form.labels.status}
@@ -233,7 +233,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 						/>
 					</div>
 				</div>
-				<div className="wpo-aom-task-field-group">
+				<div className="field-group">
 					<div>
 						<label htmlFor="title">{i18n.form.labels.title}</label>
 						<input
@@ -246,7 +246,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 						/>
 					</div>
 				</div>
-				<div className="wpo-aom-task-field-group">
+				<div className="field-group">
 					<div>
 						<label htmlFor="associated-orders">
 							{i18n.form.labels.associatedOrders}
@@ -271,16 +271,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 									searchLabel: `#${order.id} - ${order.billing?.first_name} ${order.billing?.last_name}`,
 								}));
 							}}
-							onSelect={(option) => {
-								console.log('Selected order:', option);
-							}}
-							onRemove={(optionId) => {
-								console.log('Removed order ID:', optionId);
-							}}
 						/>
 					</div>
 				</div>
-				<div className="wpo-aom-task-field-group">
+				<div className="field-group">
 					<div>
 						<label htmlFor="description">
 							{i18n.form.labels.description}
@@ -295,7 +289,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 					</div>
 				</div>
 			</fieldset>
-			<div className="wpo-aom-actions">
+			<div className="action-group">
 				<button
 					type="button"
 					className="wpo-button"

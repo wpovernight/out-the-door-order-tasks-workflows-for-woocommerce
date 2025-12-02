@@ -3,6 +3,7 @@ import { Task, isFieldOption } from '@shared/types/task';
 import { getTaskDueDate, getFieldValue } from '@shared/utils/fieldUtils';
 import { formatDate } from '../utils';
 import { getColorStyle } from '@shared/utils/colorUtils';
+import { truncateText } from '@shared/utils/textUtils';
 
 interface TaskRowProps {
 	task: Task;
@@ -21,23 +22,6 @@ const TaskRow: React.FC<TaskRowProps> = ({
 
 	const priorityValue = getFieldValue(task, 'priority');
 	const statusValue = getFieldValue(task, 'status');
-
-	const truncateText = (text: string, maxLength: number = 140): string => {
-		if (!text || text.length <= maxLength) {
-			return text;
-		}
-
-		// Find the last space within maxLength.
-		const truncated = text.substring(0, maxLength);
-		const lastSpaceIndex = truncated.lastIndexOf(' ');
-
-		// If there's a space, cut there; otherwise cut at maxLength.
-		if (lastSpaceIndex > 0) {
-			return truncated.substring(0, lastSpaceIndex).trim() + '...';
-		}
-
-		return truncated.trim() + '...';
-	};
 
 	const priorityLabel = isFieldOption(priorityValue)
 		? priorityValue.label
@@ -86,7 +70,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
 			</td>
 
 			<td className="task-actions">
-				<ul className="task-row-actions">
+				<ul className="wpo-aom-task-actions">
 					<li>
 						<button
 							className="task-edit"
