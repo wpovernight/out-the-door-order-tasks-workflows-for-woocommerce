@@ -16,17 +16,28 @@ export const getFieldValue = (
 	return field.values[0].resolved;
 };
 
-export const getFieldRawValue = (
+export const getFieldRawValues = (
 	task: Task,
 	slug: string
-): string | number | boolean | null => {
+): (string | number | boolean)[] | null => {
 	const field = getFieldBySlug(task, slug);
 	if (!field || !field.values || field.values.length === 0) {
 		return null;
 	}
 
-	const rawValue = field.values[0].raw;
-	return Array.isArray(rawValue) ? rawValue[0] : rawValue;
+	return field.values
+		.map((value) => value.raw)
+		.filter(
+			(raw): raw is string | number | boolean =>
+				raw !== null && raw !== undefined
+		);
+};
+
+export const getFieldRawValue = (
+	task: Task,
+	slug: string
+): string | number | boolean | null => {
+	return getFieldRawValues(task, slug)?.[0] ?? null;
 };
 
 export const getTaskDueDate = (task: Task): Date | null => {
