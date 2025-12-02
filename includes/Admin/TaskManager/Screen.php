@@ -46,19 +46,20 @@ final class Screen {
 				'apiNamespace' => 'wpo/aom',
 				'nonce'        => wp_create_nonce( 'wp_rest' ),
 				'i18n'         => array(
-					'loading'      => esc_html__( 'Loading...', 'wpo-aom' ),
-					'errorLoading' => esc_html__( 'Error loading tasks. Please try again.', 'wpo-aom' ),
-					'views'        => array(
+					'loading'          => esc_html__( 'Loading...', 'wpo-aom' ),
+					'errorLoading'     => esc_html__( 'Error loading tasks. Please try again.', 'wpo-aom' ),
+					'confirmationText' => esc_html__( 'Are you sure?' ),
+					'views'            => array(
 						'kanban'   => esc_html__( 'Kanban', 'wpo-aom' ),
 						'calendar' => esc_html__( 'Calendar', 'wpo-aom' ),
 					),
-					'kanban'       => array(
-						'addTask'      => esc_html__( 'Add Task', 'wpo-aom' ),
-						'editTask'     => esc_html__( 'Edit Task', 'wpo-aom' ),
-						'options'      => esc_html__( 'Options', 'wpo-aom' ),
-						'create'       => esc_html__( 'Create', 'wpo-aom' ),
+					'kanban'           => array(
+						'addTask'  => esc_html__( 'Add Task', 'wpo-aom' ),
+						'editTask' => esc_html__( 'Edit Task', 'wpo-aom' ),
+						'options'  => esc_html__( 'Options', 'wpo-aom' ),
+						'create'   => esc_html__( 'Create', 'wpo-aom' ),
 					),
-					'calendar'     => array(
+					'calendar'         => array(
 						'task'             => esc_html__( 'Task', 'wpo-aom' ),
 						'tasks'            => esc_html__( 'Tasks', 'wpo-aom' ),
 						'priority'         => esc_html__( 'Priority', 'wpo-aom' ),
@@ -84,7 +85,7 @@ final class Screen {
 						'previousMonth'    => esc_html__( 'Previous month', 'wpo-aom' ),
 						'nextMonth'        => esc_html__( 'Next month', 'wpo-aom' ),
 					),
-					'form'         => array(
+					'form'             => array(
 						'labels'       => array(
 							'status'           => esc_html__( 'Status', 'wpo-aom' ),
 							'priority'         => esc_html__( 'Priority', 'wpo-aom' ),
@@ -100,7 +101,7 @@ final class Screen {
 							'searchOrders'    => esc_html__( 'Search orders by number, customer, address...', 'wpo-aom' ),
 						),
 					),
-					'actions'      => array(
+					'actions'          => array(
 						'edit'       => esc_html__( 'Edit', 'wpo-aom' ),
 						'editTask'   => esc_html__( 'Edit task', 'wpo-aom' ),
 						'delete'     => esc_html__( 'Delete', 'wpo-aom' ),

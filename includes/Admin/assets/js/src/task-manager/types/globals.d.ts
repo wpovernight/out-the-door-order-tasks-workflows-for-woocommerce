@@ -10,6 +10,7 @@ export interface WpoAomTaskManagerData {
 		loading: string;
 		errorLoading: string;
 		views: Record<string, string>;
+		confirmationText: string;
 		calendar: {
 			task: string;
 			tasks: string;

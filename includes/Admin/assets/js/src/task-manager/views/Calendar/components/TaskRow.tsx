@@ -4,6 +4,7 @@ import { getTaskDueDate, getFieldValue } from '@shared/utils/fieldUtils';
 import { formatDate } from '../utils';
 import { getColorStyle } from '@shared/utils/colorUtils';
 import { truncateText } from '@shared/utils/textUtils';
+import { useTaskManagerData } from '@taskManager/hooks/useTaskManagerData';
 
 interface TaskRowProps {
 	task: Task;
@@ -18,6 +19,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
 	onTaskEdit,
 	onTaskDelete,
 }) => {
+	const { i18n } = useTaskManagerData();
 	const dueDate = getTaskDueDate(task);
 
 	const priorityValue = getFieldValue(task, 'priority');
@@ -91,8 +93,11 @@ const TaskRow: React.FC<TaskRowProps> = ({
 							className="task-delete"
 							onClick={(e) => {
 								e.stopPropagation();
-								const confirmed =
-									window.confirm(`Are you sure?`);
+								// ToDo: Update to use custom modal
+								// eslint-disable-next-line no-alert
+								const confirmed = window.confirm(
+									i18n.confirmationText
+								);
 								if (confirmed) {
 									onTaskDelete?.(task.id);
 								}
