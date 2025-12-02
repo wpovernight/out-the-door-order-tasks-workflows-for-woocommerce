@@ -102,6 +102,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 	const deleteTask = useCallback(async (taskId: number): Promise<void> => {
 		try {
 			await deleteTaskAPI(taskId);
+			setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
 		} catch (error) {
 			console.error('Failed to delete task:', error);
 			throw error;

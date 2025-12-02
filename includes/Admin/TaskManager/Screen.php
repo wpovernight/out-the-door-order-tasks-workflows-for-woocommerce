@@ -57,7 +57,6 @@ final class Screen {
 						'editTask'     => esc_html__( 'Edit Task', 'wpo-aom' ),
 						'options'      => esc_html__( 'Options', 'wpo-aom' ),
 						'create'       => esc_html__( 'Create', 'wpo-aom' ),
-						'dueDateLabel' => esc_html__( 'Due date', 'wpo-aom' ),
 					),
 					'calendar'     => array(
 						'task'             => esc_html__( 'Task', 'wpo-aom' ),
@@ -115,6 +114,27 @@ final class Screen {
 					),
 				),
 			)
+		);
+
+		wp_enqueue_style(
+			'wpo-aom-admin-task-general',
+			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/task-general.css',
+			array(),
+			WPO_AOM_VERSION
+		);
+
+		wp_enqueue_style(
+			'wpo-aom-admin-task-card',
+			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/task-card.css',
+			array(),
+			WPO_AOM_VERSION
+		);
+
+		wp_enqueue_style(
+			'wpo-aom-admin-sidebar-modal',
+			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/sidebar-modal.css',
+			array(),
+			WPO_AOM_VERSION
 		);
 
 		wp_enqueue_style(

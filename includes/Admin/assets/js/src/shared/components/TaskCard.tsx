@@ -66,7 +66,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 	};
 
 	const renderMenuActions = () => (
-		<div className="kanban-card-options">
+		<div className="task-card-options">
 			<button
 				className="wpo-button wpo-button-icon wpo-options-button"
 				type="button"
@@ -104,7 +104,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 	);
 
 	const renderIconActions = () => (
-		<ul className="kanban-card-actions">
+		<ul className="task-card-actions">
 			{onEditClick && (
 				<li>
 					<button
@@ -140,7 +140,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 	return (
 		<div
 			ref={innerRef}
-			className={`kanban-card ${className} ${isSelected ? 'selected' : ''}`}
+			className={`task-card ${className} ${isSelected ? 'selected' : ''}`}
 			onClick={handleCardClick}
 			onKeyDown={(e) => {
 				if (e.key === 'Enter' || e.key === ' ') {
@@ -148,18 +148,18 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 				}
 			}}
 		>
-			<div className="kanban-card-header">
+			<div className="task-card-header">
 				<HeadingTag>{task.title}</HeadingTag>
 				{hasActions &&
 					(actionsDisplayMode === 'menu'
 						? renderMenuActions()
 						: renderIconActions())}
 			</div>
-			<div className="kanban-card-footer">
-				<ul className="kanban-card-tags">
+			<div className="task-card-footer">
+				<ul className="task-card-tags">
 					{priorityValue && isFieldOption(priorityValue) && (
 						<li
-							className={`wpo-tag kanban-card-priority priority-${priorityValue?.slug}`}
+							className={`wpo-tag task-card-priority priority-${priorityValue?.slug}`}
 							style={getColorStyle(priorityValue.color)}
 						>
 							{priorityValue.label}
@@ -167,7 +167,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 					)}
 				</ul>
 				{dueDateValue && (
-					<span className="kanban-card-due-date">{dueDate}</span>
+					<span className="task-card-due-date">{dueDate}</span>
 				)}
 			</div>
 		</div>

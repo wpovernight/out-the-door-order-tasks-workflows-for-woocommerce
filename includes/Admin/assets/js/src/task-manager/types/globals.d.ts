@@ -41,7 +41,6 @@ export interface WpoAomTaskManagerData {
 			editTask: string;
 			options: string;
 			create: string;
-			dueDateLabel: string;
 		};
 		form: {
 			labels: {

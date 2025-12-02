@@ -259,7 +259,7 @@ export const Card: React.FC<CardProps> = ({
 	return (
 		<div
 			ref={outerRef}
-			className={`kanban-card-wrapper ${
+			className={`task-card-wrapper ${
 				state.type === 'over' && state.closestEdge === 'top'
 					? 'drop-indicator-top'
 					: ''
@@ -285,7 +285,6 @@ export const Card: React.FC<CardProps> = ({
 					options: i18n.kanban.options,
 					edit: i18n.actions.edit,
 					delete: i18n.actions.delete,
-					dueDateLabel: i18n.kanban.dueDateLabel,
 				}}
 			/>
 		</div>

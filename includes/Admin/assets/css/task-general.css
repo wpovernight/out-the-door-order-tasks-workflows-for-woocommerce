@@ -1,0 +1,84 @@
+:root {
+    --wpo-aom-primary-color: #0079bf;
+    --wpo-aom-bg-light: #f5f6f7;
+    --wpo-aom-card-bg: #fff;
+    --wpo-aom-text-primary: #333;
+    --wpo-aom-card-shadow: 0px 1px 1px #1E1F2140, 0px 0px 1px #1E1F214F;
+    --wpo-aom-border-color: #d5d7da;
+    --wpo-aom-floating-shadow: 0px 0px 0px 1px #d1d9e080, 0px 6px 12px -3px #25292e0a, 0px 6px 18px 0px #25292e1f;
+}
+
+.screenReader {
+    display: none;
+}
+
+.wpo-aom-actions {
+    display: flex;
+    gap: 0.6em;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.wpo-aom-actions > .wpo-button {
+    flex: 1;
+    border: 1px solid #dadcde;
+    height: 2.5em;
+}
+
+.wpo-tag {
+    display: inline-block;
+    border-radius: 1em;
+    padding: 0 0.7em;
+    font-size: 0.9em;
+    font-weight: 600;
+    margin: 0;
+    white-space: nowrap;
+}
+
+.wpo-options-button {
+    width: 2em;
+    height: 2em;
+}
+
+.wpo-options-button::before {
+    content: '\f11c';
+    font-family: 'dashicons';
+    font-size: 1.2em;
+    color: #59636e;
+}
+
+.wpo-button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    border-radius: 0.3em;
+}
+
+.wpo-button:disabled {
+    cursor: not-allowed;
+}
+
+.wpo-button-primary {
+    background-color: #6e1edc;
+    color: #fff;
+}
+
+.wpo-button-primary:disabled {
+    background-color: #bfa3ec;
+    color: #f2f2f2;
+}
+
+.wpo-button-icon {
+    padding: 0;
+    margin: 0;
+}
+
+.wpo-button-icon::before {
+    font-family: 'dashicons';
+    display: block;
+}
+
+.wpo-button-icon:hover {
+    background-color: #0000000d;
+}
