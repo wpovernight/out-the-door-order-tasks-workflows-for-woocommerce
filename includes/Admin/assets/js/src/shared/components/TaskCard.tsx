@@ -18,10 +18,9 @@ interface TaskCardProps {
 	actionsDisplayMode?: ActionsDisplayMode;
 	headingLevel?: HeadingLevel;
 	i18n: {
-		options: string;
-		edit: string;
-		delete: string;
-		dueDateLabel: string;
+		options?: string;
+		edit?: string;
+		delete?: string;
 	};
 }
 
@@ -156,21 +155,21 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 						? renderMenuActions()
 						: renderIconActions())}
 			</div>
-			<ul className="kanban-card-tags">
-				{priorityValue && isFieldOption(priorityValue) && (
-					<li
-						className={`wpo-tag kanban-card-priority priority-${priorityValue?.slug}`}
-						style={getColorStyle(priorityValue.color)}
-					>
-						{priorityValue.label}
-					</li>
+			<div className="kanban-card-footer">
+				<ul className="kanban-card-tags">
+					{priorityValue && isFieldOption(priorityValue) && (
+						<li
+							className={`wpo-tag kanban-card-priority priority-${priorityValue?.slug}`}
+							style={getColorStyle(priorityValue.color)}
+						>
+							{priorityValue.label}
+						</li>
+					)}
+				</ul>
+				{dueDateValue && (
+					<span className="kanban-card-due-date">{dueDate}</span>
 				)}
-			</ul>
-			{dueDateValue && (
-				<span className="kanban-card-due-date">
-					{i18n.dueDateLabel}: {dueDate}
-				</span>
-			)}
+			</div>
 		</div>
 	);
 };
