@@ -3,6 +3,7 @@
 namespace WPO\AOM\Core;
 
 use InvalidArgumentException;
+use WPO\AOM\Admin\OrderEdit\MetaBox;
 use WPO\AOM\Admin\TaskManager\Screen;
 use WPO\AOM\Models\Task;
 use WPO\AOM\Models\TaskField;
@@ -38,9 +39,13 @@ final class ServiceContainer {
 	 * @var array
 	 */
 	private static array $service_map = array(
+		// Services
 		'TaskManagerService' => TaskManagerService::class,
+		// REST Controllers
 		'TaskController'     => TaskController::class,
+		// Admin Screens
 		'TaskManager_Screen' => Screen::class,
+		'OrderEdit_MetaBox'  => MetaBox::class,
 	);
 
 	/**

@@ -84,6 +84,7 @@
     line-height: 1;
     display: flex;
     gap: 0.3em;
+    width: 8em;
 }
 
 .task-card span.task-card-due-date::before {

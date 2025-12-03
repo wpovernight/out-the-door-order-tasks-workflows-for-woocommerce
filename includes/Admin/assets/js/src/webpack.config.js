@@ -8,7 +8,7 @@ module.exports = (env, argv) => {
 		mode,
 		entry: {
 			'task-manager': path.resolve(__dirname, 'task-manager/index.tsx'),
-			// 'order-edit': path.resolve(__dirname, 'order-edit/index.tsx'),
+			'order-edit': path.resolve(__dirname, 'order-edit/index.tsx'),
 		},
 		output: {
 			filename: '[name].js',
