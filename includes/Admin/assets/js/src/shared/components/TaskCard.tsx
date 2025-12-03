@@ -3,7 +3,7 @@ import { isFieldOption, Task } from '@shared/types/task';
 import { getColorStyle } from '@shared/utils/colorUtils';
 import { truncateText } from '@shared/utils/textUtils';
 
-type ActionsDisplayMode = 'menu' | 'icons';
+type ActionsDisplayMode = 'menu' | 'icons' | 'none';
 type HeadingLevel = 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 
 interface TaskCardProps {
@@ -19,6 +19,7 @@ interface TaskCardProps {
 	actionsDisplayMode?: ActionsDisplayMode;
 	headingLevel?: HeadingLevel;
 	showDescription?: boolean;
+	isCompact?: boolean;
 	i18n: {
 		options?: string;
 		edit?: string;
@@ -39,6 +40,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 	actionsDisplayMode = 'menu',
 	headingLevel = 'h3',
 	showDescription = false,
+	isCompact = false,
 	i18n,
 }) => {
 	const priorityField = task.fields?.find(
@@ -140,30 +142,9 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 	// Create dynamic heading element
 	const HeadingTag = headingLevel;
 
-	return (
-		<div
-			ref={innerRef}
-			className={`task-card ${className} ${isSelected ? 'selected' : ''}`}
-			onClick={handleCardClick}
-			onKeyDown={(e) => {
-				if (e.key === 'Enter' || e.key === ' ') {
-					handleCardClick();
-				}
-			}}
-		>
-			<div className="task-card-header">
-				<HeadingTag>{task.title}</HeadingTag>
-				{hasActions &&
-					(actionsDisplayMode === 'menu'
-						? renderMenuActions()
-						: renderIconActions())}
-			</div>
-			{showDescription && task.description && (
-				<div className="task-card-description">
-					<p>{truncateText(task.description, 100)}</p>
-				</div>
-			)}
-			<div className="task-card-footer">
+	const renderInfo = () => {
+		return (
+			<>
 				<ul className="task-card-tags">
 					{priorityValue && isFieldOption(priorityValue) && (
 						<li
@@ -174,10 +155,45 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 						</li>
 					)}
 				</ul>
-				{dueDateValue && (
+				{dueDate && (
 					<span className="task-card-due-date">{dueDate}</span>
 				)}
+			</>
+		);
+	};
+
+	return (
+		<div
+			ref={innerRef}
+			className={`task-card ${isCompact ? 'compact': ''} ${className} ${isSelected ? 'selected' : ''}`}
+			onClick={handleCardClick}
+			onKeyDown={(e) => {
+				if (e.key === 'Enter' || e.key === ' ') {
+					handleCardClick();
+				}
+			}}
+		>
+			<div className="task-card-header">
+				<HeadingTag>{task.title}</HeadingTag>
+				{isCompact && (
+                    <div className="task-card-info">{renderInfo()}</div>
+                )}
+				{!isCompact &&
+					hasActions &&
+					(actionsDisplayMode === 'menu'
+						? renderMenuActions()
+						: actionsDisplayMode === 'icons'
+							? renderIconActions()
+							: null)}
 			</div>
+			{showDescription && task.description && (
+				<div className="task-card-description">
+					<p>{truncateText(task.description, 100)}</p>
+				</div>
+			)}
+			{!isCompact && (
+				<div className="task-card-footer">{renderInfo()}</div>
+			)}
 		</div>
 	);
 };

@@ -99,3 +99,8 @@
     -webkit-mask-size: contain;
     -webkit-mask-repeat: no-repeat;
 }
+
+.task-card .task-card-info {
+    display: flex;
+    gap: 3em;
+}

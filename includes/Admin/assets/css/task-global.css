@@ -145,8 +145,3 @@
 .wpo-aom-add-button::before {
     content: '\f543';
 }
-
-.wpo-aom-button-link {
-    color: #2271b1;
-    text-decoration: underline;
-}
