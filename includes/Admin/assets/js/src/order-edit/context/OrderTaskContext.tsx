@@ -66,23 +66,9 @@ export const OrderTaskProvider: React.FC<{
 		// Automatically add the order ID to field_values if not present
 		const existingFieldValues = taskData.field_values || [];
 
-		// Check if order field already exists
-		const hasOrderField = existingFieldValues.some(
-			(fv) => fv.field_slug === 'order'
-		);
-
 		const taskWithOrder: TaskPayload = {
 			...taskData,
-			field_values: hasOrderField
-				? existingFieldValues
-				: [
-						...existingFieldValues,
-						{
-							field_id: 0, // Will be determined by backend
-							field_slug: 'order',
-							value: orderId,
-						},
-					],
+			field_values: existingFieldValues
 		};
 
 		return await saveTask(taskWithOrder);

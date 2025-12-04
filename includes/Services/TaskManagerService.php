@@ -202,7 +202,7 @@ final class TaskManagerService {
 			$field_values_array[ $field_id ] = $value;
 
 			if ( $field_value['field_slug'] === 'status' ) {
-				$status_id       = $value;
+				$status_id = $value;
 			}
 		}
 
