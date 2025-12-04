@@ -16,13 +16,13 @@ const TaskSection: React.FC = () => {
 
 	const totalTasks = activeCount + finishedCount;
 	const completionPercentage =
-		totalTasks > 0 ? (finishedCount / totalTasks) * 100 : 0;
+		totalTasks > 0 ? (finishedCount / totalTasks) * 100 : null;
 
 	return (
 		<SectionHeader
 			title="Tasks"
 			details={`${activeCount} ${i18n.tasks.active}`}
-			progressValue={completionPercentage}
+			progressValue={completionPercentage !== null ? completionPercentage : undefined}
 			actionButtons={[
 				<button
 					key="add-task"
