@@ -1,9 +1,9 @@
-div#order-tasks {
+.wpo-aom-metabox-section {
     border: 1px solid #D5D7DA;
     border-radius: 0.5em;
 }
 
-#order-tasks .header {
+.wpo-aom-metabox-section .header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -11,19 +11,19 @@ div#order-tasks {
     padding: 1em;
 }
 
-#order-tasks .header .progress-actions {
+.wpo-aom-metabox-section .header .progress-actions {
     display: flex;
     align-items: center;
     gap: 2em;
 }
 
-#order-tasks .header .progress-actions > .actions,
-#order-tasks .header .progress-actions > .actions > li {
+.wpo-aom-metabox-section .header .actions,
+.wpo-aom-metabox-section .header .actions > li {
     padding: 0;
     margin: 0;
 }
 
-#order-tasks .header .progress-actions > .actions .add-button {
+.wpo-aom-metabox-section .header .actions .add-button {
     color: #3858E9;
     width: 2em;
     height: 2em;
@@ -31,13 +31,13 @@ div#order-tasks {
     border: 1px solid #3858E9;
 }
 
-#order-tasks .header .progress-actions > .actions .add-button::before {
+.wpo-aom-metabox-section .header .actions .add-button::before {
     content: '\f543';
     font-family: 'dashicons';
     display: block;
 }
 
-#order-tasks .header .title-details {
+.wpo-aom-metabox-section .header .title-details {
     display: flex;
     align-items: center;
     gap: 1em;
@@ -53,12 +53,22 @@ div#order-tasks {
     background-image: url(data:image/svg+xml,%3Csvg%20width%3D%2238%22%20height%3D%2238%22%20viewBox%3D%220%200%2038%2038%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Crect%20width%3D%2238%22%20height%3D%2238%22%20rx%3D%225%22%20fill%3D%22%23DFCDF9%22/%3E%3Crect%20x%3D%2211.75%22%20y%3D%2211.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20rx%3D%227.25%22%20stroke%3D%22%236E1EDC%22%20stroke-width%3D%221.5%22/%3E%3C/svg%3E);
 }
 
-#order-tasks .header .title-details > h3 {
+#order-fulfillments .header .title-details::before {
+    content: '';
+    display: inline-block;
+    width: 3em;
+    height: 3em;
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-image: url(data:image/svg+xml,%3Csvg%20width%3D%2238%22%20height%3D%2238%22%20viewBox%3D%220%200%2038%2038%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2238%22%20height%3D%2238%22%20rx%3D%225%22%20fill%3D%22%23E0F2FE%22%2F%3E%0A%3Cpath%20d%3D%22M22.75%2016.8333L15.25%2012.5083M11.725%2014.8L19%2019.0083L26.275%2014.8M19%2027.4V19M26.5%2022.3333V15.6666C26.4997%2015.3744%2026.4225%2015.0873%2026.2763%2014.8343C26.13%2014.5812%2025.9198%2014.3711%2025.6667%2014.225L19.8333%2010.8916C19.58%2010.7453%2019.2926%2010.6683%2019%2010.6683C18.7074%2010.6683%2018.42%2010.7453%2018.1667%2010.8916L12.3333%2014.225C12.0802%2014.3711%2011.87%2014.5812%2011.7237%2014.8343C11.5775%2015.0873%2011.5003%2015.3744%2011.5%2015.6666V22.3333C11.5003%2022.6256%2011.5775%2022.9126%2011.7237%2023.1657C11.87%2023.4187%2012.0802%2023.6288%2012.3333%2023.775L18.1667%2027.1083C18.42%2027.2546%2018.7074%2027.3316%2019%2027.3316C19.2926%2027.3316%2019.58%2027.2546%2019.8333%2027.1083L25.6667%2023.775C25.9198%2023.6288%2026.13%2023.4187%2026.2763%2023.1657C26.4225%2022.9126%2026.4997%2022.6256%2026.5%2022.3333Z%22%20stroke%3D%22%230086C9%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%3C%2Fsvg%3E%0A);
+}
+
+.wpo-aom-metabox-section .header .title-details > h3 {
     margin: 0;
     padding: 0;
 }
 
-#order-tasks .header .title-details > span {
+.wpo-aom-metabox-section .header .title-details > span {
     display: inline-block;
     border-radius: 1em;
     padding: 0.3em 0.7em;
@@ -66,6 +76,10 @@ div#order-tasks {
     white-space: nowrap;
     background: #F5F5F5;
 }
+
+/********************************
+ * Task List Styles
+ ******************************/
 
 .task-list-container {
     margin: 1em;
