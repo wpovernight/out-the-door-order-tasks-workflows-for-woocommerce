@@ -7,6 +7,7 @@ export interface WpoAomOrderEditData {
     apiNamespace: string;
     nonce: string;
     orderId: number;
+    isFulfillmentsEnabled: boolean;
     i18n: {
         loading: string;
         errorLoading: string;
@@ -22,6 +23,9 @@ export interface WpoAomOrderEditData {
             hideFinished: string;
             activeTasksHeading: string;
             finishedTasksHeading: string;
+        };
+        fulfillments: {
+            addFulfillment: string;
         };
         form: {
             labels: {

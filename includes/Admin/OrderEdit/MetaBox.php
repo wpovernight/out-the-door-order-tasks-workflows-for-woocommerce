@@ -84,11 +84,12 @@ final class MetaBox {
 			'wpo-aom-order-edit',
 			'WPO_AOM_OrderEdit',
 			array(
-				'orderId'      => absint( $order_id ),
-				'apiRoot'      => esc_url_raw( rest_url( '/wc/v3' ) ),
-				'apiNamespace' => 'wpo/aom',
-				'nonce'        => wp_create_nonce( 'wp_rest' ),
-				'i18n' => array(
+				'orderId'               => absint( $order_id ),
+				'apiRoot'               => esc_url_raw( rest_url( '/wc/v3' ) ),
+				'apiNamespace'          => 'wpo/aom',
+				'nonce'                 => wp_create_nonce( 'wp_rest' ),
+				'isFulfillmentsEnabled' => get_option( 'woocommerce_feature_fulfillments_enabled', 'no' ) === 'yes',
+				'i18n'                  => array(
 					'loading'          => esc_html__( 'Loading...', 'wpo-aom' ),
 					'errorLoading'     => esc_html__( 'Error loading tasks. Please try again.', 'wpo-aom' ),
 					'confirmationText' => esc_html__( 'Are you sure?' ),
@@ -104,6 +105,9 @@ final class MetaBox {
 						'hideFinished'         => esc_html__( 'Hide Completed Tasks', 'wpo-aom' ),
 						'activeTasksHeading'   => esc_html__( 'Active Tasks', 'wpo-aom' ),
 						'finishedTasksHeading' => esc_html__( 'Completed Tasks', 'wpo-aom' ),
+					),
+					'fulfillments'     => array(
+						'addFulfillment' => esc_html__( 'Add Fulfillment', 'wpo-aom' ),
 					),
 					'form'             => array(
 						'labels'       => array(
@@ -134,7 +138,7 @@ final class MetaBox {
 						'updateTask' => esc_html__( 'Update Task', 'wpo-aom' ),
 					),
 				),
-			)
+			),
 		);
 
 		wp_enqueue_style(
@@ -168,6 +172,13 @@ final class MetaBox {
 		wp_enqueue_style(
 			'wpo-aom-admin-order-edit',
 			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/order-edit.css',
+			array(),
+			WPO_AOM_VERSION
+		);
+
+		wp_enqueue_style(
+			'wpo-aom-admin-fulfillment',
+			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/fulfillment.css',
 			array(),
 			WPO_AOM_VERSION
 		);

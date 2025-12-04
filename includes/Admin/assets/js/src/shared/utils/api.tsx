@@ -1,4 +1,5 @@
 import { Task, FieldOption, TaskField } from '../types/task';
+import { Fulfillment } from '../types/fulfillment';
 
 function getApiConfig() {
 	const taskManagerData = (window as any).WPO_AOM_TaskManager;
@@ -282,3 +283,25 @@ export const searchOrders = (
 		signal,
 	}).then(handleResponse<any[]>);
 };
+
+/**
+ * Fetches fulfillments for a specific order.
+ *
+ * @param {number} orderId - The order ID to fetch fulfillments for.
+ * @return {Promise<Fulfillment[]>} A promise that resolves to an array of fulfillments.
+ * @throws Will throw an error if the API request fails.
+ */
+export async function fetchFulfillments(
+	orderId: number
+): Promise<Fulfillment[]> {
+	const response = await fetch(`${apiRoot}/orders/${orderId}/fulfillments`, {
+		method: 'GET',
+		credentials: 'include',
+		headers: {
+			'Content-Type': 'application/json',
+			'X-WP-Nonce': nonce,
+		},
+	});
+
+	return handleResponse<Fulfillment[]>(response);
+}
