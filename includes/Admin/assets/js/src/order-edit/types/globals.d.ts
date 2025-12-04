@@ -20,6 +20,8 @@ export interface WpoAomOrderEditData {
             active: string;
             viewFinished: string;
             hideFinished: string;
+            activeTasksHeading: string;
+            finishedTasksHeading: string;
         };
         form: {
             labels: {

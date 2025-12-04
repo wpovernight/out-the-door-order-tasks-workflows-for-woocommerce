@@ -83,6 +83,7 @@ const ActiveTasks: React.FC<ActiveTasksProps> = ({
 
 	return (
 		<div className="task-list-container active-tasks-container">
+			<h4 className="screenReader">{i18n.tasks.activeTasksHeading}</h4>
 			<ul className="task-list">
 				{activeTasks.map((task) => (
 					<li>
@@ -98,8 +99,9 @@ const ActiveTasks: React.FC<ActiveTasksProps> = ({
 								handleDeleteClick(task.id);
 							}}
 							actionsDisplayMode="icons"
-							headingLevel="h4"
+							headingLevel="h5"
 							showDescription={true}
+							descriptionMaxLength={150}
 							i18n={{
 								edit: i18n.actions.edit,
 								delete: i18n.actions.delete,

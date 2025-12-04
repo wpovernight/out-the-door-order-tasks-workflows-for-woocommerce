@@ -71,6 +71,11 @@ div#order-tasks {
     margin: 1em;
 }
 
+.task-list-container h4 {
+    margin: 0;
+    padding: 0;
+}
+
 .task-list {
     display: flex;
     flex-direction: column;
@@ -86,17 +91,13 @@ div#order-tasks {
     margin: 1em;
 }
 
-.task-list-container:not(:last-child) {
-    margin: 1em;
-    border-bottom: 1px solid #D5D7DA;
+.finished-tasks-container {
+    border-top: 1px solid #D5D7DA;
+    padding-top: 1em;
 }
 
 .finished-tasks-toggle {
     color: #2271b1;
-}
-
-.finished-tasks-toggle.expanded {
-    margin-top: 1em;
 }
 
 .finished-tasks-toggle::after {

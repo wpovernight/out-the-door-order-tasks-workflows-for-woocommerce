@@ -1,4 +1,4 @@
-import React, {CSSProperties, ReactNode} from 'react';
+import React, { CSSProperties } from 'react';
 
 interface SkeletonLineProps {
 	width?: string;
@@ -10,11 +10,11 @@ interface SkeletonLineProps {
 /**
  * Basic skeleton line/box element with shimmer effect.
  *
- * @param {Object}          props
- * @param {string}          [props.width='100%'] - Width of the skeleton line
- * @param {string}          [props.height='1em'] - Height of the skeleton line
- * @param {string}          [props.className]    - Additional CSS classes
- * @param {CSSProperties}   [props.style]        - Inline styles
+ * @param {Object}        props
+ * @param {string}        [props.width='100%'] - Width of the skeleton line
+ * @param {string}        [props.height='1em'] - Height of the skeleton line
+ * @param {string}        [props.className]    - Additional CSS classes
+ * @param {CSSProperties} [props.style]        - Inline styles
  */
 export const SkeletonLine: React.FC<SkeletonLineProps> = ({
 	width = '100%',
@@ -41,12 +41,12 @@ interface SkeletonBoxProps {
 /**
  * Container for skeleton content with shimmer animation.
  *
- * @param {Object}          props
- * @param {string}          [props.width='100%']  - Width of the skeleton box
- * @param {string}          [props.height='auto'] - Height of the skeleton box
- * @param {string}          [props.className]     - Additional CSS classes
- * @param {CSSProperties}   [props.style]         - Inline styles
- * @param {ReactNode}       [props.children]      - Child elements (skeleton lines, etc.)
+ * @param {Object}        props
+ * @param {string}        [props.width='100%']  - Width of the skeleton box
+ * @param {string}        [props.height='auto'] - Height of the skeleton box
+ * @param {string}        [props.className]     - Additional CSS classes
+ * @param {CSSProperties} [props.style]         - Inline styles
+ * @param {ReactNode}     [props.children]      - Child elements (skeleton lines, etc.)
  */
 export const SkeletonBox: React.FC<SkeletonBoxProps> = ({
 	width = '100%',
@@ -75,10 +75,10 @@ interface LoadingSkeletonProps {
  * Generic loading skeleton container that renders children multiple times.
  * Use this to wrap any custom skeleton layout.
  *
- * @param {Object}        props
- * @param {number}        [props.count=1]      - Number of skeleton items to render
- * @param {string}        [props.className]    - Additional CSS classes
- * @param {ReactNode}     props.children       - Child elements representing the skeleton layout
+ * @param {Object}    props
+ * @param {number}    [props.count=1]   - Number of skeleton items to render
+ * @param {string}    [props.className] - Additional CSS classes
+ * @param {ReactNode} props.children    - Child elements representing the skeleton layout
  *
  * @example
  * <LoadingSkeleton count={3}>
@@ -113,11 +113,11 @@ interface EmptyStateProps {
 /**
  * Empty state component for when there are no items.
  *
- * @param {Object}        props
- * @param {string}        [props.icon='📋']        - Icon to display
- * @param {string}        props.message            - Message to display (required)
- * @param {string}        [props.actionText]       - Text for the action button
- * @param {Function}      [props.onAction]         - Callback when action button is clicked
+ * @param {Object}   props
+ * @param {string}   [props.icon='📋']  - Icon to display
+ * @param {string}   props.message      - Message to display (required)
+ * @param {string}   [props.actionText] - Text for the action button
+ * @param {Function} [props.onAction]   - Callback when action button is clicked
  */
 export const EmptyState: React.FC<EmptyStateProps> = ({
 	icon = '📋',
@@ -151,10 +151,10 @@ interface ErrorStateProps {
 /**
  * Error state component for when loading fails.
  *
- * @param {Object}        props
- * @param {string}        props.message                 - Error message to display (required)
- * @param {Function}      [props.onRetry]               - Callback when retry button is clicked
- * @param {string}        [props.retryText='Try Again'] - Text for the retry button
+ * @param {Object}   props
+ * @param {string}   props.message                 - Error message to display (required)
+ * @param {Function} [props.onRetry]               - Callback when retry button is clicked
+ * @param {string}   [props.retryText='Try Again'] - Text for the retry button
  */
 export const ErrorState: React.FC<ErrorStateProps> = ({
 	message,

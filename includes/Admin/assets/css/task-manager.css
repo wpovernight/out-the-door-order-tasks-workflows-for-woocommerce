@@ -66,6 +66,7 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
 
 .kanban-board .kanban-column {
     flex: 0 0 23em;
+    width: 23em;
     display: flex;
     flex-direction: column;
     transition: opacity 0.2s, box-shadow 0.2s;

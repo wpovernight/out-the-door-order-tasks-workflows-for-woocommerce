@@ -99,19 +99,24 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 		[]
 	);
 
-	const deleteTask = useCallback(async (taskId: number): Promise<void> => {
-		// Remove task from UI immediately
-		setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+	const deleteTask = useCallback(
+		async (taskId: number): Promise<void> => {
+			// Remove task from UI immediately
+			setTasks((prevTasks) =>
+				prevTasks.filter((task) => task.id !== taskId)
+			);
 
-		try {
-			await deleteTaskAPI(taskId);
-		} catch (error) {
-			console.error('Failed to delete task:', error);
-			// Revert the update by reloading tasks
-			loadTasks(true);
-			throw error;
-		}
-	}, [loadTasks]);
+			try {
+				await deleteTaskAPI(taskId);
+			} catch (error) {
+				console.error('Failed to delete task:', error);
+				// Revert the update by reloading tasks
+				loadTasks(true);
+				throw error;
+			}
+		},
+		[loadTasks]
+	);
 
 	const saveTask = useCallback(
 		async (data: Partial<Task>, taskId?: number): Promise<Task> => {

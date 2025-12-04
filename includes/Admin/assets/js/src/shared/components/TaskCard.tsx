@@ -19,7 +19,9 @@ interface TaskCardProps {
 	actionsDisplayMode?: ActionsDisplayMode;
 	headingLevel?: HeadingLevel;
 	showDescription?: boolean;
+	descriptionMaxLength?: number;
 	isCompact?: boolean;
+	excludeTags?: string[];
 	i18n: {
 		options?: string;
 		edit?: string;
@@ -40,9 +42,12 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 	actionsDisplayMode = 'menu',
 	headingLevel = 'h3',
 	showDescription = false,
+	descriptionMaxLength = 100,
 	isCompact = false,
+	excludeTags = [],
 	i18n,
 }) => {
+	const statusField = task.fields?.find((field) => field.slug === 'status');
 	const priorityField = task.fields?.find(
 		(field) => field.slug === 'priority'
 	);
@@ -50,6 +55,9 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 		(field) => field.slug === 'due-date'
 	);
 
+	const statusValue = statusField?.values
+		? statusField.values[0]?.resolved
+		: null;
 	const priorityValue = priorityField?.values
 		? priorityField.values[0]?.resolved
 		: null;
@@ -142,22 +150,33 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 	// Create dynamic heading element
 	const HeadingTag = headingLevel;
 
-	const renderInfo = () => {
+	const renderTags = () => {
 		return (
 			<>
 				<ul className="task-card-tags">
-					{priorityValue && isFieldOption(priorityValue) && (
-						<li
-							className={`wpo-aom-tag task-card-priority priority-${priorityValue?.slug}`}
-							style={getColorStyle(priorityValue.color)}
-						>
-							{priorityValue.label}
-						</li>
-					)}
+					{/* Status Tags */}
+					{statusValue &&
+						isFieldOption(statusValue) &&
+						!excludeTags?.includes(statusField?.slug || '') && (
+							<li
+								className={`wpo-aom-tag task-card-status status-${statusValue.slug}`}
+								style={getColorStyle(statusValue.color)}
+							>
+								{statusValue.label}
+							</li>
+						)}
+					{/* Priority Tag */}
+					{priorityValue &&
+						isFieldOption(priorityValue) &&
+						!excludeTags?.includes(priorityField?.slug || '') && (
+							<li
+								className={`wpo-aom-tag task-card-priority priority-${priorityValue.slug}`}
+								style={getColorStyle(priorityValue.color)}
+							>
+								{priorityValue.label}
+							</li>
+						)}
 				</ul>
-				{dueDate && (
-					<span className="task-card-due-date">{dueDate}</span>
-				)}
 			</>
 		);
 	};
@@ -165,7 +184,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 	return (
 		<div
 			ref={innerRef}
-			className={`task-card ${isCompact ? 'compact' : ''} ${className} ${isSelected ? 'selected' : ''}`}
+			className={`task-card ${className} ${isSelected ? 'selected' : ''}`}
 			onClick={handleCardClick}
 			onKeyDown={(e) => {
 				if (e.key === 'Enter' || e.key === ' ') {
@@ -175,24 +194,50 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 		>
 			<div className="task-card-header">
 				<HeadingTag>{task.title}</HeadingTag>
-				{isCompact && (
-					<div className="task-card-info">{renderInfo()}</div>
-				)}
-				{!isCompact &&
-					hasActions &&
-					(actionsDisplayMode === 'menu'
+				<div className="task-card-info">
+					{/* Tags for compact mode */}
+					{isCompact && renderTags()}
+					{/* Actions */}
+					{hasActions && actionsDisplayMode === 'menu'
 						? renderMenuActions()
-						: actionsDisplayMode === 'icons'
-							? renderIconActions()
-							: null)}
+						: null}
+					{hasActions && actionsDisplayMode === 'icons'
+						? renderIconActions()
+						: null}
+				</div>
 			</div>
-			{showDescription && task.description && (
+			{/* Description for non-compact mode */}
+			{!isCompact && showDescription && task.description && (
 				<div className="task-card-description">
-					<p>{truncateText(task.description, 100)}</p>
+					<p>
+						{truncateText(task.description, descriptionMaxLength)}
+					</p>
 				</div>
 			)}
+			{/* Footer for compact mode, shows description and due date */}
+			{isCompact && showDescription && task.description && (
+				<div className="task-card-footer">
+					<div className="task-card-description">
+						<p>
+							{truncateText(
+								task.description,
+								descriptionMaxLength
+							)}
+						</p>
+					</div>
+					{dueDate && (
+						<span className="task-card-due-date">{dueDate}</span>
+					)}
+				</div>
+			)}
+			{/* Footer for non-compact mode, shows tags and due date */}
 			{!isCompact && (
-				<div className="task-card-footer">{renderInfo()}</div>
+				<div className="task-card-footer">
+					{renderTags()}
+					{dueDate && (
+						<span className="task-card-due-date">{dueDate}</span>
+					)}
+				</div>
 			)}
 		</div>
 	);

@@ -292,6 +292,7 @@ export const Card: React.FC<CardProps> = ({
 				innerRef={innerRef}
 				actionsDisplayMode="menu"
 				headingLevel="h3"
+				excludeTags={['status']}
 				i18n={{
 					options: i18n.kanban.options,
 					edit: i18n.actions.edit,

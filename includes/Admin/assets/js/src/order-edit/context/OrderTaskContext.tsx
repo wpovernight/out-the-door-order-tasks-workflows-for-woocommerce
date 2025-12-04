@@ -68,7 +68,7 @@ export const OrderTaskProvider: React.FC<{
 
 		const taskWithOrder: TaskPayload = {
 			...taskData,
-			field_values: existingFieldValues
+			field_values: existingFieldValues,
 		};
 
 		return await saveTask(taskWithOrder);

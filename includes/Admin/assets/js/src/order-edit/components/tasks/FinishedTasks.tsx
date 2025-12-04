@@ -57,32 +57,39 @@ const FinishedTasks: React.FC<FinishedTasksProps> = ({ loadingStatus }) => {
 	return (
 		<div className="task-list-container finished-tasks-container">
 			<div
-				className="task-list finished-task-list"
+				className="finished-tasks-list-container"
 				style={!isExpanded ? { display: 'none' } : {}}
 			>
-				{finishedTasks.map((task) => (
-					<TaskCard
-						key={task.id}
-						task={task}
-						onEditClick={(e) => {
-							e.stopPropagation();
-							handleEditClick(task.id);
-						}}
-						onDeleteClick={(e) => {
-							e.stopPropagation();
-							handleDeleteClick(task.id);
-						}}
-						actionsDisplayMode="icons"
-						headingLevel="h4"
-						showDescription={true}
-						isCompact={true}
-						i18n={{
-							options: i18n.actions.actions,
-							edit: i18n.actions.edit,
-							delete: i18n.actions.delete,
-						}}
-					/>
-				))}
+				<h4>
+					{i18n.tasks.finishedTasksHeading} ({finishedCount})
+				</h4>
+				<ul className="task-list">
+					{finishedTasks.map((task) => (
+						<TaskCard
+							key={task.id}
+							task={task}
+							onEditClick={(e) => {
+								e.stopPropagation();
+								handleEditClick(task.id);
+							}}
+							onDeleteClick={(e) => {
+								e.stopPropagation();
+								handleDeleteClick(task.id);
+							}}
+							actionsDisplayMode="icons"
+							headingLevel="h5"
+							showDescription={true}
+							descriptionMaxLength={150}
+							isCompact={true}
+							excludeTags={['status']}
+							i18n={{
+								options: i18n.actions.actions,
+								edit: i18n.actions.edit,
+								delete: i18n.actions.delete,
+							}}
+						/>
+					))}
+				</ul>
 			</div>
 
 			<button

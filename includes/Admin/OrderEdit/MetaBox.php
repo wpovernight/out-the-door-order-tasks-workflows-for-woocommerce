@@ -93,15 +93,17 @@ final class MetaBox {
 					'errorLoading'     => esc_html__( 'Error loading tasks. Please try again.', 'wpo-aom' ),
 					'confirmationText' => esc_html__( 'Are you sure?' ),
 					'tasks'            => array(
-						'sectionTitle' => esc_html__( 'Tasks', 'wpo-aom' ),
-						'addTask'      => esc_html__( 'Add Task', 'wpo-aom' ),
-						'editTask'     => esc_html__( 'Edit Task', 'wpo-aom' ),
-						'deleteTask'   => esc_html__( 'Delete Task', 'wpo-aom' ),
-						'noTasks'      => esc_html__( 'No tasks found.', 'wpo-aom' ),
-						'active'       => esc_html__( 'Active Tasks', 'wpo-aom' ),
+						'sectionTitle'         => esc_html__( 'Tasks', 'wpo-aom' ),
+						'addTask'              => esc_html__( 'Add Task', 'wpo-aom' ),
+						'editTask'             => esc_html__( 'Edit Task', 'wpo-aom' ),
+						'deleteTask'           => esc_html__( 'Delete Task', 'wpo-aom' ),
+						'noTasks'              => esc_html__( 'No tasks found.', 'wpo-aom' ),
+						'active'               => esc_html__( 'Active Tasks', 'wpo-aom' ),
 						// ToDo: Finished status should be dynamic.
-						'viewFinished' => esc_html__( 'View Completed Tasks', 'wpo-aom' ),
-						'hideFinished' => esc_html__( 'Hide Completed Tasks', 'wpo-aom' ),
+						'viewFinished'         => esc_html__( 'View Completed Tasks', 'wpo-aom' ),
+						'hideFinished'         => esc_html__( 'Hide Completed Tasks', 'wpo-aom' ),
+						'activeTasksHeading'   => esc_html__( 'Active Tasks', 'wpo-aom' ),
+						'finishedTasksHeading' => esc_html__( 'Completed Tasks', 'wpo-aom' ),
 					),
 					'form'             => array(
 						'labels'       => array(
