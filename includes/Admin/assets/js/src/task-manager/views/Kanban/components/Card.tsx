@@ -232,21 +232,31 @@ export const Card: React.FC<CardProps> = ({
 				// Update local view state to reflect the changes
 				setViewTasks((prev) => {
 					const updated = structuredClone(prev);
+					const oldStatus = task.status;
 					const newStatus = updatedTask.status;
 
-					// Remove task from all columns (in case status changed)
-					for (const status in updated) {
-						updated[status] = updated[status].filter(
-							(t) => t.id !== updatedTask.id
+					// If status didn't change, update in place to preserve position
+					if (oldStatus === newStatus && updated[oldStatus]) {
+						updated[oldStatus] = updated[oldStatus].map((t) =>
+							t.id === updatedTask.id
+								? { ...updatedTask, status: newStatus }
+								: t
 						);
-					}
+					} else {
+						// Status changed - remove from old column and add to new column
+						for (const status in updated) {
+							updated[status] = updated[status].filter(
+								(t) => t.id !== updatedTask.id
+							);
+						}
 
-					// Add task to the correct column
-					if (updated[newStatus]) {
-						updated[newStatus].push({
-							...updatedTask,
-							status: newStatus,
-						});
+						// Add task to the end of the new column
+						if (updated[newStatus]) {
+							updated[newStatus].push({
+								...updatedTask,
+								status: newStatus,
+							});
+						}
 					}
 
 					return updated;
