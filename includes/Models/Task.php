@@ -21,7 +21,7 @@ class Task extends BaseModel {
 	 * @throws Exception
 	 */
 	public function __construct( array $data = array() ) {
-		$this->id          = $data['id'] > 0 ? (int) $data['id'] : 0;
+		$this->id          = isset( $data['id'] ) && $data['id'] > 0 ? (int) $data['id'] : 0;
 		$this->title       = $data['title'];
 		$this->description = $data['description'] ?? '';
 		$this->created_at  = new DateTime( $data['created_at'] ?? 'now' );

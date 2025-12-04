@@ -17,7 +17,7 @@ const ActiveTasks: React.FC<ActiveTasksProps> = ({
 	loadingError,
 }) => {
 	const { activeTasks, deleteTask } = useOrderTask();
-	const { i18n } = useOrderEditData();
+	const { i18n, orderId } = useOrderEditData();
 	const { openEditTaskModal } = useTaskEdit();
 	const { openCreateTaskModal } = useTaskCreation();
 
@@ -48,7 +48,7 @@ const ActiveTasks: React.FC<ActiveTasksProps> = ({
 	};
 
 	const handleAddTask = () => {
-		openCreateTaskModal({ title: i18n.tasks.addTask });
+		openCreateTaskModal({ title: i18n.tasks.addTask, orderId });
 	};
 
 	// Show loading state
