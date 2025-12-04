@@ -35,12 +35,12 @@
     align-items: flex-end;
 }
 
-.task-card > .task-card-header > .task-card-options > ul {
+.task-card-options .wpo-action-menu {
     width: 15em;
     right: 1em;
 }
 
-.task-card > .task-card-header > .task-card-options > ul > li > button {
+.task-card-options .wpo-action-menu button {
     padding: 0.7em 1em;
     display: flex;
     align-items: center;

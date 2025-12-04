@@ -145,3 +145,35 @@
 .wpo-aom-add-button::before {
     content: '\f543';
 }
+
+.wpo-action-menu {
+    position: absolute;
+    box-shadow: var(--wpo-aom-floating-shadow);
+    padding: 0;
+    margin: 5px 0 0;
+    border-radius: 0.5em;
+    overflow: hidden;
+    background: #fff;
+    width: 100%;
+    z-index: 1;
+}
+
+.wpo-action-menu > li {
+    margin: 0;
+    padding: 0;
+}
+
+.wpo-action-menu > li > button {
+    cursor: pointer;
+    margin: 0;
+    border: none;
+    width: 100%;
+    text-align: left;
+    background: none;
+}
+
+.wpo-action-menu > li > button:hover,
+.wpo-action-menu > li > button:focus {
+    background-color: #00000012;
+    outline: none;
+}
