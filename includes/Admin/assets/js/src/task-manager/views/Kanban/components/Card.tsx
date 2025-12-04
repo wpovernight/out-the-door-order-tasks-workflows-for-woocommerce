@@ -207,9 +207,15 @@ export const Card: React.FC<CardProps> = ({
 		onOptionsToggle(isOptionsOpen ? null : task.id);
 	};
 
-	const handleRemoveTask = (e: React.MouseEvent) => {
-		e.preventDefault();
+	const handleDeleteClick = () => {
+		// ToDo: Update to use custom modal
+		// eslint-disable-next-line no-alert
+		if (!window.confirm(i18n.confirmationText)) {
+			return;
+		}
+
 		deleteTask(task.id);
+
 		setViewTasks((prev) => {
 			const updated = structuredClone(prev);
 			for (const status in updated) {
@@ -287,7 +293,11 @@ export const Card: React.FC<CardProps> = ({
 				onCardClick={handleCardClick}
 				onOptionsClick={handleOptionsClick}
 				onEditClick={handleEditTask}
-				onDeleteClick={handleRemoveTask}
+				onDeleteClick={(e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					handleDeleteClick();
+				}}
 				className={state.type !== 'idle' ? state.type : ''}
 				innerRef={innerRef}
 				actionsDisplayMode="menu"
