@@ -2,12 +2,24 @@ import React from 'react';
 import { TaskCard } from '@shared/components/TaskCard';
 import { useOrderTask } from '@orderEdit/context/OrderTaskContext';
 import { useOrderEditData } from '@orderEdit/hooks/useOrderEditData';
-import { useTaskEdit } from '@shared/hooks/useTaskFormModal';
+import { useTaskEdit, useTaskCreation } from '@shared/hooks/useTaskFormModal';
+import { EmptyState, ErrorState } from '@shared/components/LoadingSkeleton';
+import { TaskCardSkeleton } from '@shared/components/TaskCardSkeleton';
+import { AsyncLoaderStatus } from '@shared/hooks/useAsyncLoader';
 
-const ActiveTasks: React.FC = () => {
+interface ActiveTasksProps {
+	loadingStatus: AsyncLoaderStatus;
+	loadingError: Error | null;
+}
+
+const ActiveTasks: React.FC<ActiveTasksProps> = ({
+	loadingStatus,
+	loadingError,
+}) => {
 	const { activeTasks, deleteTask } = useOrderTask();
 	const { i18n } = useOrderEditData();
 	const { openEditTaskModal } = useTaskEdit();
+	const { openCreateTaskModal } = useTaskCreation();
 
 	const handleEditClick = (taskId: number) => {
 		const task = activeTasks.find((t) => t.id === taskId);
@@ -35,11 +47,37 @@ const ActiveTasks: React.FC = () => {
 		}
 	};
 
-	if (activeTasks.length === 0) {
+	const handleAddTask = () => {
+		openCreateTaskModal({ title: i18n.tasks.addTask });
+	};
+
+	// Show loading state
+	if (loadingStatus === 'loading') {
+		return <TaskCardSkeleton count={1} showDescription={true} />;
+	}
+
+	// Show error state
+	if (loadingStatus === 'error') {
 		return (
-			<div className="task-list task-list-empty">
-				<p>{i18n.tasks.noTasks}</p>
-			</div>
+			<ErrorState
+				message={
+					loadingError?.message ||
+					'Failed to load tasks. Please try again.'
+				}
+				onRetry={() => window.location.reload()}
+			/>
+		);
+	}
+
+	// Show empty state only after data is loaded
+	if (loadingStatus === 'loaded' && activeTasks.length === 0) {
+		return (
+			<EmptyState
+				icon="📋"
+				message={i18n.tasks.noTasks || 'No active tasks yet.'}
+				actionText={i18n.tasks.addTask || 'Add Task'}
+				onAction={handleAddTask}
+			/>
 		);
 	}
 

@@ -22,7 +22,9 @@ const TaskSection: React.FC = () => {
 		<SectionHeader
 			title="Tasks"
 			details={`${activeCount} ${i18n.tasks.active}`}
-			progressValue={completionPercentage !== null ? completionPercentage : undefined}
+			progressValue={
+				completionPercentage !== null ? completionPercentage : undefined
+			}
 			actionButtons={[
 				<button
 					key="add-task"

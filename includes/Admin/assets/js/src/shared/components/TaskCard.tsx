@@ -165,7 +165,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 	return (
 		<div
 			ref={innerRef}
-			className={`task-card ${isCompact ? 'compact': ''} ${className} ${isSelected ? 'selected' : ''}`}
+			className={`task-card ${isCompact ? 'compact' : ''} ${className} ${isSelected ? 'selected' : ''}`}
 			onClick={handleCardClick}
 			onKeyDown={(e) => {
 				if (e.key === 'Enter' || e.key === ' ') {
@@ -176,8 +176,8 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 			<div className="task-card-header">
 				<HeadingTag>{task.title}</HeadingTag>
 				{isCompact && (
-                    <div className="task-card-info">{renderInfo()}</div>
-                )}
+					<div className="task-card-info">{renderInfo()}</div>
+				)}
 				{!isCompact &&
 					hasActions &&
 					(actionsDisplayMode === 'menu'

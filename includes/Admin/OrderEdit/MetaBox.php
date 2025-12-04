@@ -143,6 +143,13 @@ final class MetaBox {
 		);
 
 		wp_enqueue_style(
+			'wpo-aom-admin-skeleton',
+			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/skeleton.css',
+			array(),
+			WPO_AOM_VERSION
+		);
+
+		wp_enqueue_style(
 			'wpo-aom-admin-task-card',
 			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/task-card.css',
 			array(),

@@ -1,0 +1,118 @@
+/* ============================================
+   Loading Skeleton Components
+   ============================================ */
+
+.wpo-aom-loading-skeleton-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+.wpo-aom-skeleton-box {
+    background: #f5f5f5;
+    border-radius: 0.5em;
+    padding: 1em;
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.wpo-aom-skeleton-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(255, 255, 255, 0.8),
+            transparent
+    );
+    animation: skeleton-loading 1.5s infinite;
+    z-index: 1;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+.wpo-aom-skeleton-line {
+    background: #ddd;
+    border-radius: 0.5em;
+    position: relative;
+}
+
+/* ============================================
+   Empty State Component
+   ============================================ */
+
+.wpo-aom-empty-state {
+    text-align: center;
+    padding: 1em 1em;
+}
+
+.wpo-aom-empty-state-icon {
+    font-size: 3em;
+    margin-bottom: 0.5em;
+    opacity: 0.5;
+}
+
+.wpo-aom-empty-state-message {
+    margin: 0.5em 0 1em;
+    font-size: 1em;
+}
+
+.wpo-aom-empty-state-action {
+    background: #2271b1;
+    color: #fff;
+    border: none;
+    border-radius: 0.5em;
+    padding: 0.5em 1.5em;
+    cursor: pointer;
+    font-size: 1em;
+}
+
+.wpo-aom-empty-state-action:hover {
+    background: #135e96;
+}
+
+/* ============================================
+   Error State Component
+   ============================================ */
+
+.wpo-aom-error-state {
+    text-align: center;
+    padding: 2em 1em;
+    color: #d63638;
+}
+
+.wpo-aom-error-state-icon {
+    font-size: 3em;
+    margin-bottom: 0.5em;
+}
+
+.wpo-aom-error-state-message {
+    margin: 0.5em 0 1em;
+    font-size: 1em;
+}
+
+.wpo-aom-error-state-retry {
+    background: #d63638;
+    color: #fff;
+    border: none;
+    border-radius: 0.5em;
+    padding: 0.5em 1.5em;
+    cursor: pointer;
+    font-size: 1em;
+}
+
+.wpo-aom-error-state-retry:hover {
+    background: #b32d2e;
+}

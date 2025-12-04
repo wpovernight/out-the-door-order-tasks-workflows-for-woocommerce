@@ -19,8 +19,11 @@ const TaskList: React.FC = () => {
 	return (
 		<div id="order-tasks">
 			<TaskSection />
-			<ActiveTasks />
-			<FinishedTasks />
+			<ActiveTasks
+				loadingStatus={loadingStatus}
+				loadingError={loadingError}
+			/>
+			<FinishedTasks loadingStatus={loadingStatus} />
 		</div>
 	);
 };

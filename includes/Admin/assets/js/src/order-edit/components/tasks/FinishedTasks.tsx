@@ -3,8 +3,13 @@ import { TaskCard } from '@shared/components/TaskCard';
 import { useOrderTask } from '@orderEdit/context/OrderTaskContext';
 import { useOrderEditData } from '@orderEdit/hooks/useOrderEditData';
 import { useTaskEdit } from '@shared/hooks/useTaskFormModal';
+import { AsyncLoaderStatus } from '@shared/hooks/useAsyncLoader';
 
-const FinishedTasks: React.FC = () => {
+interface FinishedTasksProps {
+	loadingStatus: AsyncLoaderStatus;
+}
+
+const FinishedTasks: React.FC<FinishedTasksProps> = ({ loadingStatus }) => {
 	const { finishedTasks, finishedCount, deleteTask } = useOrderTask();
 	const { i18n } = useOrderEditData();
 	const { openEditTaskModal } = useTaskEdit();
@@ -39,7 +44,13 @@ const FinishedTasks: React.FC = () => {
 		}
 	};
 
-	if (finishedCount === 0) {
+	// Don't show anything while loading
+	if (loadingStatus === 'loading') {
+		return null;
+	}
+
+	// Hide if no finished tasks after loading
+	if (loadingStatus === 'loaded' && finishedCount === 0) {
 		return null;
 	}
 
@@ -61,10 +72,10 @@ const FinishedTasks: React.FC = () => {
 							e.stopPropagation();
 							handleDeleteClick(task.id);
 						}}
-                        actionsDisplayMode="icons"
-                        headingLevel="h4"
-                        showDescription={true}
-                        isCompact={true}
+						actionsDisplayMode="icons"
+						headingLevel="h4"
+						showDescription={true}
+						isCompact={true}
 						i18n={{
 							options: i18n.actions.actions,
 							edit: i18n.actions.edit,

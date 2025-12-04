@@ -72,6 +72,10 @@
     margin: 0;
 }
 
+.task-card .task-card-description > p {
+    font-size: 1em;
+}
+
 .task-card ul.task-card-tags {
     display: flex;
     gap: 5px;
