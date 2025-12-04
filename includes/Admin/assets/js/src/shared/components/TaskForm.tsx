@@ -12,6 +12,7 @@ import type { WpoAomOrderEditData } from '@orderEdit/types/globals';
 interface TaskFormProps {
 	task?: Task;
 	columnId?: number;
+	orderId?: number;
 	onDone?: () => void;
 	onTaskSaved?: (task: Task) => void;
 }
@@ -19,6 +20,7 @@ interface TaskFormProps {
 export const TaskForm: React.FC<TaskFormProps> = ({
 	task,
 	columnId,
+	orderId,
 	onDone,
 	onTaskSaved,
 }) => {
@@ -175,7 +177,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 	const associatedOrders = task?.fields.find(
 		(field) => field.slug === 'order'
 	)?.values;
-	const associatedOrderIds = associatedOrders
+	let associatedOrderIds = associatedOrders
 		?.map((v) => {
 			const raw = v?.raw;
 			if (raw === null || raw === '') {
@@ -188,6 +190,11 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 			return { id: num, label: `#${raw}` };
 		})
 		.filter((item): item is { id: number; label: string } => item !== null);
+
+	// If creating a new task and orderId is provided, pre-select it
+	if (!task && orderId) {
+		associatedOrderIds = [{ id: orderId, label: `#${orderId}` }];
+	}
 
 	// The form field name should follow the pattern: field_{field_slug}
 	return (

@@ -6,6 +6,7 @@ import { Task } from '@shared/types/task';
 interface CreateTaskModalOptions {
 	title: string;
 	columnId?: number;
+	orderId?: number;
 	onTaskSaved?: (task: Task) => void;
 }
 
@@ -22,6 +23,7 @@ export const useTaskCreation = () => {
 		openSidebar(
 			<TaskForm
 				columnId={options.columnId}
+				orderId={options.orderId}
 				onDone={closeSidebar}
 				onTaskSaved={options.onTaskSaved}
 			/>,

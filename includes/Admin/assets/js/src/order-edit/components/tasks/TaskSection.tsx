@@ -5,13 +5,13 @@ import { useOrderTask } from '@orderEdit/context/OrderTaskContext';
 import { useTaskCreation } from '@shared/hooks/useTaskFormModal';
 
 const TaskSection: React.FC = () => {
-	const { i18n } = useOrderEditData();
+	const { i18n, orderId } = useOrderEditData();
 	const { activeCount, finishedCount } = useOrderTask();
 	const { openCreateTaskModal } = useTaskCreation();
 
 	const handleAddTask = (e: React.MouseEvent) => {
 		e.preventDefault();
-		openCreateTaskModal({ title: i18n.tasks.addTask });
+		openCreateTaskModal({ title: i18n.tasks.addTask, orderId });
 	};
 
 	const totalTasks = activeCount + finishedCount;
