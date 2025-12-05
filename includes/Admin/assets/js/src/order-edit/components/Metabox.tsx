@@ -1,11 +1,15 @@
 import React from 'react';
-import TaskList from '@orderEdit/components/tasks/TaskList';
+import TaskSection from '@orderEdit/components/tasks/TaskSection';
+import FulfillmentSection from '@orderEdit/components/fulfillments/FulfillmentSection';
+import { useOrderEditData } from '@orderEdit/hooks/useOrderEditData';
 
 export const MetaBox: React.FC = () => {
+	const { isFulfillmentsEnabled } = useOrderEditData();
+
 	return (
 		<>
-			<TaskList />
-			{/*<FulfillmentSection />*/}
+			<TaskSection />
+			{isFulfillmentsEnabled && <FulfillmentSection />}
 		</>
 	);
 };

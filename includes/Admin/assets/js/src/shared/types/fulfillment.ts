@@ -10,6 +10,7 @@ export type FulfillmentMetaItem = {
 export type FulfillmentItem = {
 	item_id: number;
 	qty: number;
+	name?: string;
 };
 
 export type Fulfillment = {
@@ -66,13 +67,4 @@ export function getFulfillmentMeta(
 	});
 
 	return meta;
-}
-
-export function getItemsDisplayText(items?: FulfillmentItem[]): string {
-	if (!items || items.length === 0) {
-		return '';
-	}
-
-	const totalQty = items.reduce((sum, item) => sum + item.qty, 0);
-	return `x${totalQty}`;
 }

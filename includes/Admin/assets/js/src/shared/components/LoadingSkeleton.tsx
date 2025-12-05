@@ -1,4 +1,4 @@
-import React, { CSSProperties } from 'react';
+import React, { CSSProperties, ReactNode } from 'react';
 
 interface SkeletonLineProps {
 	width?: string;
@@ -108,23 +108,33 @@ interface EmptyStateProps {
 	message: string;
 	actionText?: string;
 	onAction?: () => void;
+	actionButtonProps?: React.ButtonHTMLAttributes<HTMLButtonElement>;
 }
 
 /**
  * Empty state component for when there are no items.
  *
  * @param {Object}   props
- * @param {string}   [props.icon='📋']  - Icon to display
- * @param {string}   props.message      - Message to display (required)
- * @param {string}   [props.actionText] - Text for the action button
- * @param {Function} [props.onAction]   - Callback when action button is clicked
+ * @param {string}   [props.icon='📋']         - Icon to display
+ * @param {string}   props.message             - Message to display (required)
+ * @param {string}   [props.actionText]        - Text for the action button
+ * @param {Function} [props.onAction]          - Callback when action button is clicked
+ * @param {Object}   [props.actionButtonProps] - Additional props for the action button (data attributes, etc.)
  */
 export const EmptyState: React.FC<EmptyStateProps> = ({
 	icon = '📋',
 	message,
 	actionText,
 	onAction,
+	actionButtonProps,
 }) => {
+	// Extract className from actionButtonProps to merge with default
+	const { className: customClassName, ...restButtonProps } =
+		actionButtonProps || {};
+	const buttonClassName = customClassName
+		? `wpo-aom-empty-state-action ${customClassName}`
+		: 'wpo-aom-empty-state-action';
+
 	return (
 		<div className="wpo-aom-empty-state">
 			<div className="wpo-aom-empty-state-icon">{icon}</div>
@@ -132,8 +142,9 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 			{actionText && onAction && (
 				<button
 					type="button"
-					className="wpo-aom-empty-state-action"
+					className={buttonClassName}
 					onClick={() => onAction()}
+					{...restButtonProps}
 				>
 					{actionText}
 				</button>

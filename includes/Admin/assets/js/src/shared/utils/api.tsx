@@ -305,3 +305,23 @@ export async function fetchFulfillments(
 
 	return handleResponse<Fulfillment[]>(response);
 }
+
+/**
+ * Fetches a specific order by ID.
+ *
+ * @param  orderId
+ * @return {Promise<any>} A promise that resolves to the order data.
+ * @throws Will throw an error if the API request fails.
+ */
+export async function fetchOrder(orderId: number): Promise<any> {
+	const response = await fetch(`${apiRoot}/orders/${orderId}`, {
+		method: 'GET',
+		credentials: 'include',
+		headers: {
+			'Content-Type': 'application/json',
+			'X-WP-Nonce': nonce,
+		},
+	});
+
+	return handleResponse(response);
+}

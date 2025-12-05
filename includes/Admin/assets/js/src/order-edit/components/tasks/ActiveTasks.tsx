@@ -86,7 +86,7 @@ const ActiveTasks: React.FC<ActiveTasksProps> = ({
 			<h4 className="screenReader">{i18n.tasks.activeTasksHeading}</h4>
 			<ul className="task-list">
 				{activeTasks.map((task) => (
-					<li>
+					<li key={task.id}>
 						<TaskCard
 							key={task.id}
 							task={task}

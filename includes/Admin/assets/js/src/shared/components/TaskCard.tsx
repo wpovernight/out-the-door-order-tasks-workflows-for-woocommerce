@@ -182,6 +182,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 	};
 
 	return (
+		// eslint-disable-next-line jsx-a11y/no-static-element-interactions
 		<div
 			ref={innerRef}
 			className={`task-card ${className} ${isSelected ? 'selected' : ''}`}

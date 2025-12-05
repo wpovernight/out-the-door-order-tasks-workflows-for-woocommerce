@@ -1,6 +1,7 @@
 .wpo-aom-metabox-section {
     border: 1px solid #D5D7DA;
     border-radius: 0.5em;
+    margin-top: 1em;
 }
 
 .wpo-aom-metabox-section .header {
@@ -129,4 +130,111 @@
 
 .task-list .task-list-empty > p {
     margin-left: 1em;
+}
+
+#order-tasks .wpo-aom-loading-skeleton-container {
+    padding: 1em;
+}
+
+/********************************
+ * Fulfillment List Styles
+ ******************************/
+
+#order-fulfillments .wpo-aom-loading-skeleton-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 1em;
+}
+
+.fulfillments-list-container {
+    margin: 1em;
+}
+
+.fulfillments-list-container h4 {
+    margin: 0;
+    padding: 0;
+}
+
+.fulfillments-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1em;
+    margin: 0;
+    padding: 0;
+}
+
+.fulfillments-list > li {
+    margin: 0;
+    padding: 0;
+}
+
+.fulfillment-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6em;
+    background: var(--wpo-aom-card-bg, #fff);
+    padding: 0.875em;
+    border: 1px solid #D5D7DA;
+    border-radius: 0.5em;
+}
+
+.fulfillment-card h4 {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: var(--wpo-aom-text-primary, #1F2937);
+    margin: 0;
+}
+
+.fulfillment-card-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+
+.fulfillment-card-items {
+    margin: 0;
+    padding: 0;
+}
+
+.fulfillment-card-tracking {
+    font-family: monospace;
+}
+
+.fulfillment-card-link {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.fulfillment-card-link::before {
+    content: '\f504';
+    font-family: 'dashicons';
+    margin-left: 0.5em;
+}
+
+.fulfillment-card-tracking-container {
+    display: flex;
+}
+
+.fulfillment-card-details {
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    row-gap: 1em;
+    column-gap: 1em;
+    align-items: center;
+}
+
+.fulfillment-card-details dt {
+    font-weight: 500;
+    margin: 0;
+}
+
+.fulfillment-card-details dd {
+    margin: 0;
+}
+
+.fulfillment-card-details > dd {
+    display: flex;
+    justify-content: flex-end;
+    border-left: 1px solid #D5D7DA;
 }

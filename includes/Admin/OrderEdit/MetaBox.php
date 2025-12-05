@@ -175,13 +175,6 @@ final class MetaBox {
 			array(),
 			WPO_AOM_VERSION
 		);
-
-		wp_enqueue_style(
-			'wpo-aom-admin-fulfillment',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/fulfillment.css',
-			array(),
-			WPO_AOM_VERSION
-		);
 	}
 
 	/**
