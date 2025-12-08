@@ -93,7 +93,7 @@ final class DependencyChecker {
 	 */
 	private function is_active( string $plugin_slug ): bool {
 		return in_array( $plugin_slug, $this->activated_plugins, true ) ||
-		       array_key_exists( $plugin_slug, $this->activated_plugins, true );
+		       array_key_exists( $plugin_slug, $this->activated_plugins );
 	}
 
 	/**
