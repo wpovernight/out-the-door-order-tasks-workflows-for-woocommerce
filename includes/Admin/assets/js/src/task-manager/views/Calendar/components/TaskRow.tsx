@@ -67,7 +67,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
 				</span>
 			</td>
 
-			<td className="task-due-date">
+			<td className="task-due_date">
 				<time dateTime={dueDate ? dueDate.toISOString() : ''}>
 					{dueDate ? formatDate(dueDate) : '-'}
 				</time>

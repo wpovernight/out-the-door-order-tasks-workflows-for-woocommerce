@@ -41,7 +41,7 @@ export const getFieldRawValue = (
 };
 
 export const getTaskDueDate = (task: Task): Date | null => {
-	const dueDateValue = getFieldRawValue(task, 'due-date');
+	const dueDateValue = getFieldRawValue(task, 'due_date');
 	if (!dueDateValue || typeof dueDateValue !== 'string') {
 		return null;
 	}

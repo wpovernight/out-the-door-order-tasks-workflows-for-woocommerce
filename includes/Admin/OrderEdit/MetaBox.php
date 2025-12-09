@@ -88,7 +88,7 @@ final class MetaBox {
 				'apiRoot'               => esc_url_raw( rest_url( '/wc/v3' ) ),
 				'apiNamespace'          => 'wpo/aom',
 				'nonce'                 => wp_create_nonce( 'wp_rest' ),
-				'isFulfillmentsEnabled' => get_option( 'woocommerce_feature_fulfillments_enabled', 'no' ) === 'yes',
+				'isFulfillmentsEnabled' => wc_string_to_bool( get_option( 'woocommerce_feature_fulfillments_enabled', 'no' ) ),
 				'i18n'                  => array(
 					'loading'          => esc_html__( 'Loading...', 'wpo-aom' ),
 					'errorLoading'     => esc_html__( 'Error loading tasks. Please try again.', 'wpo-aom' ),

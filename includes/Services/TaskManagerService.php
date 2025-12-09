@@ -513,6 +513,7 @@ final class TaskManagerService {
 	public function get_field_values_for_task( int $task_id ): array {
 		$values  = $this->task_field_value_repository->find_all_by( 'task_id', $task_id );
 		$grouped = array();
+
 		foreach ( $values as $value ) {
 			if ( ! isset( $grouped[ $value->field_id ] ) ) {
 				$grouped[ $value->field_id ] = array();
@@ -705,11 +706,12 @@ final class TaskManagerService {
 						$user = get_userdata( (int) $raw );
 						if ( $user ) {
 							$resolved = array(
-								'id'         => $user->ID,
-								'username'   => $user->user_login,
-								'email'      => $user->user_email,
-								'first_name' => $user->first_name,
-								'last_name'  => $user->last_name,
+								'id'           => $user->ID,
+								'username'     => $user->user_login,
+								'email'        => $user->user_email,
+								'first_name'   => $user->first_name,
+								'last_name'    => $user->last_name,
+								'display_name' => $user->display_name,
 							);
 						}
 						break;

@@ -170,7 +170,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 			: fieldOptions?.priority?.[0];
 
 	const dueDate = task
-		? (task.fields.find((field) => field.slug === 'due-date')?.values?.[0]
+		? (task.fields.find((field) => field.slug === 'due_date')?.values?.[0]
 				?.raw as string)
 		: undefined;
 

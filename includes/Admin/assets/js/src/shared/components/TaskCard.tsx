@@ -52,7 +52,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 		(field) => field.slug === 'priority'
 	);
 	const dueDateField = task.fields?.find(
-		(field) => field.slug === 'due-date'
+		(field) => field.slug === 'due_date'
 	);
 
 	const statusValue = statusField?.values
