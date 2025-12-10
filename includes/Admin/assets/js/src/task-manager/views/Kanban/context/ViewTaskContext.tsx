@@ -1,5 +1,9 @@
 import React, { useContext, useEffect, useState, useCallback } from 'react';
-import { Task, TASK_FINISH_STATUS_SLUG } from '@shared/types/task';
+import {
+	Task,
+	TASK_FINISH_STATUS_SLUG,
+	TASK_UNFINISHED_STATUS_SLUG,
+} from '@shared/types/task';
 import { useTasks } from '@shared/context/TaskContext';
 import { groupAndSortTasks } from '../../../utils/task-sort';
 
@@ -10,6 +14,7 @@ interface ViewTaskContextType {
 	selectTask: (task: Task) => void;
 	clearSelectedTask: () => void;
 	finishTask: (taskId: number) => Promise<boolean>;
+	unfinishTask: (taskId: number) => Promise<boolean>;
 }
 
 const ViewTaskContext = React.createContext<ViewTaskContextType | undefined>(
@@ -19,7 +24,12 @@ const ViewTaskContext = React.createContext<ViewTaskContextType | undefined>(
 export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 	children,
 }) => {
-	const { tasks, fieldOptions, finishTask: globalFinishTask } = useTasks();
+	const {
+		tasks,
+		fieldOptions,
+		finishTask: globalFinishTask,
+		unfinishTask: globalUnfinishTask,
+	} = useTasks();
 	const [viewTasks, setViewTasks] = useState<Record<string, Task[]>>({});
 	const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
@@ -31,25 +41,25 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 		setSelectedTask(null);
 	};
 
-	// Wrapper function that updates both global state and local viewTasks
+	// Wrapper function that updates both global state and local viewTasks.
 	const finishTask = useCallback(
 		async (taskId: number): Promise<boolean> => {
 			let previousState: Record<string, Task[]> | null = null;
 			let taskToMove: Task | null = null;
 
-            // Update UI immediately before API call.
-            setViewTasks((prev) => {
-                previousState = structuredClone(prev);
-                const updated = structuredClone(prev);
+			// Update UI immediately before API call.
+			setViewTasks((prev) => {
+				previousState = structuredClone(prev);
+				const updated = structuredClone(prev);
 
-                // Find and remove the task from its current column.
-                for (const status in updated) {
-                    const taskIndex = updated[status].findIndex(
-                        (t) => t.id === taskId
-                    );
-                    if (taskIndex !== -1) {
-                        [taskToMove] = updated[status].splice(taskIndex, 1);
-                        break;
+				// Find and remove the task from its current column.
+				for (const status in updated) {
+					const taskIndex = updated[status].findIndex(
+						(t) => t.id === taskId
+					);
+					if (taskIndex !== -1) {
+						[taskToMove] = updated[status].splice(taskIndex, 1);
+						break;
 					}
 				}
 
@@ -91,6 +101,68 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 		[globalFinishTask]
 	);
 
+	// Wrapper function for unfinishing tasks
+	const unfinishTask = useCallback(
+		async (taskId: number): Promise<boolean> => {
+			let previousState: Record<string, Task[]> | null = null;
+			let taskToMove: Task | null = null;
+
+			// Update UI immediately before API call.
+			setViewTasks((prev) => {
+				previousState = structuredClone(prev);
+				const updated = structuredClone(prev);
+
+				// Find and remove the task from FINISHED column.
+				if (updated[TASK_FINISH_STATUS_SLUG]) {
+					const taskIndex = updated[
+						TASK_FINISH_STATUS_SLUG
+					].findIndex((t) => t.id === taskId);
+					if (taskIndex !== -1) {
+						[taskToMove] = updated[TASK_FINISH_STATUS_SLUG].splice(
+							taskIndex,
+							1
+						);
+					}
+				}
+
+				// Add task to the UNFINISHED column if found
+				if (taskToMove && updated[TASK_UNFINISHED_STATUS_SLUG]) {
+					const unfinishedTask: Task = {
+						...taskToMove,
+						status: TASK_UNFINISHED_STATUS_SLUG,
+					};
+
+					updated[TASK_UNFINISHED_STATUS_SLUG].push(unfinishedTask);
+				}
+
+				return updated;
+			});
+
+			try {
+				const success = await globalUnfinishTask(taskId);
+
+				if (!success) {
+					// Rollback if API call failed
+					if (previousState) {
+						setViewTasks(previousState);
+					}
+				}
+
+				return success;
+			} catch (error) {
+				console.error('Failed to unfinish task:', error);
+
+				// Rollback on error
+				if (previousState) {
+					setViewTasks(previousState);
+				}
+
+				throw error;
+			}
+		},
+		[globalUnfinishTask]
+	);
+
 	useEffect(() => {
 		const statuses = fieldOptions.status || [];
 		if (
@@ -115,6 +187,7 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				selectTask,
 				clearSelectedTask,
 				finishTask,
+				unfinishTask,
 			}}
 		>
 			{children}
