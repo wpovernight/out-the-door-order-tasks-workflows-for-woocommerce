@@ -86,6 +86,7 @@ const FinishedTasks: React.FC<FinishedTasksProps> = ({ loadingStatus }) => {
 								options: i18n.actions.actions,
 								edit: i18n.actions.edit,
 								delete: i18n.actions.delete,
+								markFinished: i18n.actions.markFinished,
 							}}
 						/>
 					))}

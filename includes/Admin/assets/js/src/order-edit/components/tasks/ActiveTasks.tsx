@@ -105,6 +105,7 @@ const ActiveTasks: React.FC<ActiveTasksProps> = ({
 							i18n={{
 								edit: i18n.actions.edit,
 								delete: i18n.actions.delete,
+								markFinished: i18n.actions.markFinished,
 							}}
 						/>
 					</li>
