@@ -71,6 +71,7 @@ export interface WpoAomTaskManagerData {
 			createTask: string;
 			updateTask: string;
 			markFinished: string;
+            markUnfinished: string;
 		};
 	};
 }

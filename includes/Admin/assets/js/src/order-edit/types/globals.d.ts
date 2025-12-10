@@ -55,6 +55,7 @@ export interface WpoAomOrderEditData {
 			createTask: string;
 			updateTask: string;
 			markFinished: string;
+			markUnfinished: string;
 		};
 	};
 }
