@@ -33,7 +33,7 @@ class TaskField extends BaseModel {
 
 		$this->type         = $type;
 		$this->is_required  = isset( $data['is_required'] ) && $data['is_required'];
-		$this->is_editable   = ! isset( $data['is_visible'] ) || $data['is_visible'];
+		$this->is_editable  = ! isset( $data['is_visible'] ) || $data['is_visible'];
 		$this->is_protected = isset( $data['is_protected'] ) && $data['is_protected'];
 	}
 
@@ -45,7 +45,9 @@ class TaskField extends BaseModel {
 	 * @return string
 	 */
 	private function sanitize_slug( string $slug ): string {
-		return strtolower( preg_replace( '/[^a-zA-Z0-9_]/', '_', $slug ) );
+		$sanitized = sanitize_title( $slug );
+
+		return str_replace( '-', '_', $sanitized );
 	}
 
 	/**
