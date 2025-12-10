@@ -23,17 +23,17 @@ class TaskRepository extends BaseRepository {
 	/**
 	 * Get the position of the next task based on the given task ID.
 	 *
-	 * @param int|null $given_task_id
-	 * @param int|null $status_id
-	 * @param float|null $given_task_position
-	 * @param int|null $moving_task_id
+	 * @param int|null   $given_task_id       The ID of the reference task.
+	 * @param int|null   $target_status_id    The status ID to filter tasks.
+	 * @param float|null $given_task_position The position of the reference task. (Optional if given_task_id is provided)
+	 * @param int|null   $moving_task_id      The ID of the task being moved (to exclude from results)
 	 *
 	 * @return float|null
 	 * @throws InvalidArgumentException
 	 */
 	public function get_next_task_position(
 		?int $given_task_id,
-		int $status_id,
+		int $target_status_id,
 		?float $given_task_position = null,
 		?int $moving_task_id = null
 	): ?float {
@@ -55,15 +55,25 @@ class TaskRepository extends BaseRepository {
 			->alias( 'position' )
 			->join( "{$task_field_value_table_name} AS status", 'position.task_id', '=', 'status.task_id' )
 			->where( 'status.field_id', DefaultTaskFields::STATUS )
-			->where( 'status.value', $status_id )
-			->where( 'position.field_id', DefaultTaskFields::POSITION )
-			->where( 'position.task_id', '!=', $given_task_id ?? 0 )
-			->where_raw( "CAST(position.value AS DECIMAL(10,5)) > {$given_task_position}" );
+			->where( 'status.value', $target_status_id )
+			->where( 'position.field_id', DefaultTaskFields::POSITION );
 
+		// Exclude the given task ID if provided.
+		if ( ! empty( $given_task_id ) ) {
+			$query->where( 'position.task_id', '!=', $given_task_id );
+		}
+
+		// Filter for positions greater than the given task position.
+		if ( ! empty( $given_task_position ) ) {
+			$query->where_raw( "CAST(position.value AS DECIMAL(10,5)) > {$given_task_position}" );
+		}
+
+		// Exclude the moving task ID if provided.
 		if ( $moving_task_id ) {
 			$query->where( 'position.task_id', '!=', $moving_task_id );
 		}
 
+		// Order by position ascending to get the next task.
 		$next_task_value_field = $query
 			->order_by_raw( 'CAST(position.value AS DECIMAL(10,5)) ASC' )
 			->first();
@@ -74,14 +84,14 @@ class TaskRepository extends BaseRepository {
 	/**
 	 * Get the position of the last task in a given status.
 	 *
-	 * @param int|null $given_task_id
-	 * @param int $status_id
+	 * @param int|null $given_task_id    The ID of the reference task to exclude.
+	 * @param int      $target_status_id The status ID to filter tasks.
 	 *
 	 * @return float|null
 	 */
 	public function get_last_task_position(
 		?int $given_task_id,
-		int $status_id
+		int $target_status_id
 	): ?float {
 		$task_field_value_repository = RepositoryRegistry::get( TaskFieldValue::class );
 		$task_field_value_table_name = $task_field_value_repository->get_table_full_name();
@@ -91,7 +101,7 @@ class TaskRepository extends BaseRepository {
 			->alias( 'position' )
 			->join( "{$task_field_value_table_name} AS status", 'position.task_id', '=', 'status.task_id' )
 			->where( 'status.field_id', DefaultTaskFields::STATUS )
-			->where( 'status.value', $status_id )
+			->where( 'status.value', $target_status_id )
 			->where( 'position.field_id', DefaultTaskFields::POSITION )
 			->where( 'position.task_id', '!=', $given_task_id ?? 0 )
 			->order_by_raw( 'CAST(position.value AS DECIMAL(10,5)) DESC' )
