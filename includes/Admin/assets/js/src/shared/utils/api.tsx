@@ -325,3 +325,27 @@ export async function fetchOrder(orderId: number): Promise<any> {
 
 	return handleResponse(response);
 }
+
+/**
+ * Marks a task as finished.
+ *
+ * @param  taskId - The ID of the task to finish.
+ * @return {Promise<boolean>} A promise that resolves to true if the task was successfully finished.
+ * @throws Will throw an error if the API request fails.
+ */
+export async function finishTask(taskId: number): Promise<boolean> {
+	const response = await fetch(
+		`${apiRoot}/${apiNamespace}/tasks/${taskId}/finish`,
+		{
+			method: 'POST',
+			credentials: 'include',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-WP-Nonce': nonce,
+			},
+		}
+	);
+
+	const data = await handleResponse<{ success: boolean }>(response);
+	return data.success;
+}

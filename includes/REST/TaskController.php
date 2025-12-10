@@ -536,6 +536,7 @@ class TaskController extends BaseRestController {
 	 * @param WP_REST_Request $request
 	 *
 	 * @return WP_REST_Response|WP_Error
+	 * @throws \Exception
 	 */
 	public function move_task( WP_REST_Request $request ) {
 		$task_id          = (int) $request->get_param( 'id' );
@@ -576,6 +577,9 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'task_finish_failed', 'Failed to finish task', array( 'status' => 500 ) );
 		}
 
-		return rest_ensure_response( array( 'message' => 'Task marked as finished' ) );
+		return rest_ensure_response( array(
+			'success' => true,
+			'message' => 'Task marked as finished' )
+		);
 	}
 }
