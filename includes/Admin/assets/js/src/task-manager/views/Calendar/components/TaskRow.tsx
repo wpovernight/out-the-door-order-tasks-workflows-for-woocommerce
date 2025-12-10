@@ -1,10 +1,15 @@
 import React from 'react';
-import { Task, isFieldOption } from '@shared/types/task';
+import {
+	Task,
+	isFieldOption,
+	TASK_FINISH_STATUS_SLUG,
+} from '@shared/types/task';
 import { getTaskDueDate, getFieldValue } from '@shared/utils/fieldUtils';
 import { formatDate } from '../utils';
 import { getColorStyle } from '@shared/utils/colorUtils';
 import { truncateText } from '@shared/utils/textUtils';
 import { useTaskManagerData } from '@taskManager/hooks/useTaskManagerData';
+import { useTasks } from '@shared/context/TaskContext';
 
 interface TaskRowProps {
 	task: Task;
@@ -21,6 +26,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
 }) => {
 	const { i18n } = useTaskManagerData();
 	const dueDate = getTaskDueDate(task);
+	const { finishTask } = useTasks();
 
 	const priorityValue = getFieldValue(task, 'priority');
 	const statusValue = getFieldValue(task, 'status');
@@ -81,12 +87,29 @@ const TaskRow: React.FC<TaskRowProps> = ({
 				<ul className="wpo-aom-task-actions">
 					<li>
 						<button
+							className={`task-finish ${task.status === TASK_FINISH_STATUS_SLUG ? 'finished' : ''}`}
+							onClick={(e) => {
+								e.stopPropagation();
+								finishTask(task.id);
+							}}
+						>
+							<span className="screenReader">
+								{i18n.actions.markFinished}
+							</span>
+						</button>
+					</li>
+					<li>
+						<button
 							className="task-edit"
 							onClick={(e) => {
 								e.stopPropagation();
 								onTaskEdit?.(task);
 							}}
-						/>
+						>
+							<span className="screenReader">
+								{i18n.actions.edit}
+							</span>
+						</button>
 					</li>
 					<li>
 						<button
@@ -102,7 +125,11 @@ const TaskRow: React.FC<TaskRowProps> = ({
 									onTaskDelete?.(task.id);
 								}
 							}}
-						/>
+						>
+							<span className="screenReader">
+								{i18n.actions.delete}
+							</span>
+						</button>
 					</li>
 				</ul>
 			</td>
