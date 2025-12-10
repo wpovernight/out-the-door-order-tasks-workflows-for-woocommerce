@@ -579,39 +579,57 @@ final class TaskManagerService {
 	/**
 	 * Move a task to a different position.
 	 *
-	 * @param int $task_id
-	 * @param int $target_status_id
-	 * @param int|null $previous_task_id
+	 * @param int      $task_id           The ID of the task to move.
+	 * @param int      $target_status_id  The ID of the target status to move the task to.
+	 * @param int|null $previous_task_id  The ID of the task that should precede the moved task in the new status. If null, the task will be placed at the start.
+	 * @param string   $fallback_placement  The default position to use if no previous task is specified.
+	 *
 	 *
 	 * @return float
+	 * @throws Exception
 	 */
-	public function move_task( int $task_id, int $target_status_id, ?int $previous_task_id = null ): float {
+	public function move_task(
+		int $task_id,
+		int $target_status_id,
+		?int $previous_task_id = null,
+		string $fallback_placement = 'first'
+	): float {
+		if ( ! in_array( $fallback_placement, array( 'first', 'last' ), true ) ) {
+			throw new InvalidArgumentException( 'Invalid default position. Must be "first" or "last".' );
+		}
+
 		// Check if the new status ID is valid.
 		$target_status_option_field = $this->get_field_option( $target_status_id );
 		if ( ! $target_status_option_field || $target_status_option_field->field_id !== DefaultTaskFields::STATUS ) {
-			return false;
+			throw new InvalidArgumentException( 'Invalid target status ID.' );
 		}
 
-		// If no previous task is specified, place at the start.
-		$previous_position = 0.0;
+		// Determine new position based on previous task ID or default position.
+		if ( ! empty( $previous_task_id ) || 'first' === $fallback_placement ) {
+			// Get the position of the previous task, or start at 0.0 if placing first.
+			$previous_position = 0.0;
+			if ( ! empty( $previous_task_id ) ) {
+				$previous_task_position_value = $this
+					->task_field_value_repository
+					->find_by_task_and_field( $previous_task_id, DefaultTaskFields::POSITION );
+				$previous_position = (float) ( $previous_task_position_value->value ?? 0.0 );
+			}
 
-		// Determine new position.
-		if ( ! empty( $previous_task_id ) ) {
-			$previous_task_position_value = $this
-				->task_field_value_repository
-				->find_by_task_and_field( $previous_task_id, DefaultTaskFields::POSITION );
-			$previous_position = (float) ( $previous_task_position_value->value ?? 0.0 );
+			$next_position_value = $this->task_repository->get_next_task_position(
+				$previous_task_id,
+				$target_status_id,
+				$previous_position,
+				$task_id
+			);
+
+			$new_position = $next_position_value
+				? $this->calculate_fractional_position( $previous_position, $next_position_value, $target_status_id )
+				: $previous_position + 1.0;
+		} else {
+			// Place at the end.
+			$last_position = $this->task_repository->get_last_task_position( $task_id, $target_status_id );
+			$new_position  = $last_position ? $last_position + 1.0 : 1.0;
 		}
-
-		$next_position_value = $this->task_repository->get_next_task_position(
-			$previous_task_id,
-			$target_status_id,
-			$previous_position,
-			$task_id
-		);
-		$new_position        = $next_position_value
-			? $this->calculate_fractional_position( $previous_position, $next_position_value, $target_status_id )
-			: $previous_position + 1.0;
 
 		$new_position = apply_filters(
 			'wpo_aom_task_calculated_new_position',
@@ -622,7 +640,7 @@ final class TaskManagerService {
 		);
 
 		$update_data = array(
-			DefaultTaskFields::STATUS => $target_status_id,
+			DefaultTaskFields::STATUS   => $target_status_id,
 			DefaultTaskFields::POSITION => $new_position,
 		);
 
@@ -660,6 +678,32 @@ final class TaskManagerService {
 		}
 
 		return $position;
+	}
+
+	/**
+	 * Mark a task as finished.
+	 *
+	 * @param int $task_id
+	 *
+	 * @return bool
+	 * @throws Exception
+	 */
+	public function mark_task_finished( int $task_id ): bool {
+		$task = $this->task_repository->find( $task_id );
+		if ( ! $task ) {
+			return false;
+		}
+
+		$finished_status_option = $this->task_field_option_repository
+			->where( 'field_id', DefaultTaskFields::STATUS )
+			->where( 'slug', 'completed' )
+			->first();
+
+		if ( ! $finished_status_option ) {
+			return false;
+		}
+
+		return (bool) $this->move_task( $task_id, $finished_status_option->id, null, 'last' );
 	}
 
 	/** ================================
