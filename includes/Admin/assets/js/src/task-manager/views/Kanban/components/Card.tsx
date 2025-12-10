@@ -50,7 +50,8 @@ export const Card: React.FC<CardProps> = ({
 
 	const { i18n } = useTaskManagerData();
 	const { deleteTask } = useTasks();
-	const { selectedTask, selectTask, setViewTasks } = useViewTasks();
+	const { selectedTask, selectTask, setViewTasks, finishTask, unfinishTask } =
+		useViewTasks();
 	const { openEditTaskModal } = useTaskEdit();
 
 	const taskRef = useRef(task);
@@ -298,6 +299,8 @@ export const Card: React.FC<CardProps> = ({
 					e.stopPropagation();
 					handleDeleteClick();
 				}}
+				onFinishClick={finishTask}
+				onUnfinishClick={unfinishTask}
 				className={state.type !== 'idle' ? state.type : ''}
 				innerRef={innerRef}
 				actionsDisplayMode="menu"
@@ -307,6 +310,8 @@ export const Card: React.FC<CardProps> = ({
 					options: i18n.kanban.options,
 					edit: i18n.actions.edit,
 					delete: i18n.actions.delete,
+					markFinished: i18n.actions.markFinished,
+					markUnfinished: i18n.actions.markUnfinished,
 				}}
 			/>
 		</div>
