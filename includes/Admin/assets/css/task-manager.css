@@ -16,6 +16,14 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     border-bottom: 1px solid #091E4224;
 }
 
+#wpo-aom-task-manager-container .view {
+    display: none;
+}
+
+#wpo-aom-task-manager-container .view.active {
+    display: block;
+}
+
 #wpo-aom-task-manager-container .view.calendar-view {
     padding: 0 1em;
 }
