@@ -168,15 +168,58 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 		if (
 			!fieldOptions.status ||
 			tasks.length === 0 ||
-			statuses.length === 0 ||
-			Object.keys(viewTasks).length > 0
+			statuses.length === 0
 		) {
 			return;
 		}
 
 		const grouped = groupAndSortTasks(tasks, statuses);
-		setViewTasks(grouped);
-	}, [tasks, viewTasks, fieldOptions]);
+
+		// Only update if the grouped tasks are actually different
+		// This prevents unnecessary rerenders when global tasks update
+		// with the same data that's already in local viewTasks
+		setViewTasks((prev) => {
+			// If prev is empty, always update
+			if (Object.keys(prev).length === 0) {
+				return grouped;
+			}
+
+			// If the number of columns has been changed, update.
+			if (Object.keys(prev).length !== Object.keys(grouped).length) {
+				return grouped;
+			}
+
+			// Check if any column has changed
+			let hasChanges = false;
+			for (const column in grouped) {
+				const prevColumn = prev[column] || [];
+				const newColumn = grouped[column] || [];
+
+				// Check if lengths differ
+				if (prevColumn.length !== newColumn.length) {
+					hasChanges = true;
+					break;
+				}
+
+				// Check if task IDs or positions differ
+				for (let i = 0; i < newColumn.length; i++) {
+					if (
+						prevColumn[i]?.id !== newColumn[i]?.id ||
+						prevColumn[i]?.position !== newColumn[i]?.position
+					) {
+						hasChanges = true;
+						break;
+					}
+				}
+
+				if (hasChanges) {
+					break;
+				}
+			}
+
+			return hasChanges ? grouped : prev;
+		});
+	}, [tasks, fieldOptions]);
 
 	return (
 		<ViewTaskContext.Provider
