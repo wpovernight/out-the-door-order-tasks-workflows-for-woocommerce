@@ -26,7 +26,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
 }) => {
 	const { i18n } = useTaskManagerData();
 	const dueDate = getTaskDueDate(task);
-	const { finishTask } = useTasks();
+	const { finishTask, unfinishTask } = useTasks();
 
 	const priorityValue = getFieldValue(task, 'priority');
 	const statusValue = getFieldValue(task, 'status');
@@ -48,6 +48,8 @@ const TaskRow: React.FC<TaskRowProps> = ({
 	const statusColor = isFieldOption(statusValue)
 		? statusValue.color
 		: undefined;
+
+	const isCompleted = task.status === TASK_FINISH_STATUS_SLUG;
 
 	return (
 		<tr onClick={() => onTaskClick?.(task)}>
@@ -87,10 +89,14 @@ const TaskRow: React.FC<TaskRowProps> = ({
 				<ul className="wpo-aom-task-actions">
 					<li>
 						<button
-							className={`task-finish ${task.status === TASK_FINISH_STATUS_SLUG ? 'finished' : ''}`}
+							className={`task-finish ${isCompleted ? 'finished' : ''}`}
 							onClick={(e) => {
 								e.stopPropagation();
-								finishTask(task.id);
+								if (isCompleted) {
+									unfinishTask(task.id);
+								} else {
+									finishTask(task.id);
+								}
 							}}
 						>
 							<span className="screenReader">

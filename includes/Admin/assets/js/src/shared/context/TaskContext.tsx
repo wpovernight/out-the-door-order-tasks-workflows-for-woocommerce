@@ -244,51 +244,70 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 
 	const finishTask = useCallback(
 		async (taskId: number): Promise<boolean> => {
+			let previousState: Task[] | null = null;
+
+			// Get the completed status option ID
+			const completedOption = fieldOptions.status?.find(
+				(opt) => opt.slug === TASK_FINISH_STATUS_SLUG
+			);
+
+			if (!completedOption) {
+				console.error('Finished status option not found');
+				return false;
+			}
+
+			// Update the UI immediately before API call.
+			setTasks((prevTasks) => {
+				previousState = structuredClone(prevTasks);
+				const updated = structuredClone(prevTasks);
+
+				return updated.map((task) => {
+					if (task.id !== taskId) {
+						return task;
+					}
+
+					// Update the status field in the fields array
+					const updatedFields = task.fields?.map((field) => {
+						if (field.slug === 'status' && completedOption) {
+							return {
+								...field,
+								values: [
+									{
+										raw: completedOption.id,
+										resolved: completedOption,
+									},
+								],
+							};
+						}
+						return field;
+					});
+
+					return {
+						...task,
+						fields: updatedFields,
+						status: TASK_FINISH_STATUS_SLUG,
+					};
+				});
+			});
+
 			try {
 				const result = await finishTaskAPI(taskId);
 
-				if (result) {
-					// Get the completed status option ID
-					const completedOption = fieldOptions.status?.find(
-						(opt) => opt.slug === TASK_FINISH_STATUS_SLUG
-					);
-
-					setTasks((prevTasks) =>
-						prevTasks.map((task) => {
-							if (task.id !== taskId) {
-								return task;
-							}
-
-							// Update the status field in the fields array
-							const updatedFields = task.fields?.map((field) => {
-								if (
-									field.slug === 'status' &&
-									completedOption
-								) {
-									return {
-										...field,
-										values: [
-											{
-												raw: completedOption.id,
-												resolved: completedOption,
-											},
-										],
-									};
-								}
-								return field;
-							});
-
-							return {
-								...task,
-								fields: updatedFields,
-								status: TASK_FINISH_STATUS_SLUG,
-							};
-						})
-					);
+				if (!result) {
+					// Rollback if API call failed
+					if (previousState) {
+						setTasks(previousState);
+					}
 				}
 				return result;
 			} catch (error) {
 				console.error('Failed to finish task:', error);
+
+				// Rollback if API call failed
+				if (previousState) {
+					setTasks(previousState);
+				}
+
 				throw error;
 			}
 		},
@@ -301,54 +320,64 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 
 	const unfinishTask = useCallback(
 		async (taskId: number): Promise<boolean> => {
-			try {
-				// Get the default "unfinished" status option.
-				const unfinishedOption = fieldOptions.status?.find(
-					(fo) => fo.slug === TASK_UNFINISHED_STATUS_SLUG
-				);
+			let previousState: Task[] | null = null;
 
-				if (!unfinishedOption) {
-					console.error('Unfinished status option not found');
-					return false;
-				}
+			// Get the default "unfinished" status option.
+			const unfinishedOption = fieldOptions.status?.find(
+				(fo) => fo.slug === TASK_UNFINISHED_STATUS_SLUG
+			);
 
-				await moveTaskAPI(taskId, null, unfinishedOption.id);
+			if (!unfinishedOption) {
+				console.error('Unfinished status option not found');
+				return false;
+			}
 
-				// Update local state
-				setTasks((prevTasks) =>
-					prevTasks.map((task) => {
-						if (task.id !== taskId) {
-							return task;
+			// Update the UI immediately before API call.
+			setTasks((prevTasks) => {
+				previousState = structuredClone(prevTasks);
+
+				return prevTasks.map((task) => {
+					if (task.id !== taskId) {
+						return task;
+					}
+
+					// Update the status field in the fields array
+					const updatedFields = task.fields?.map((field) => {
+						if (field.slug !== 'status') {
+							return field;
 						}
 
-						// Update the status field in the fields array
-						const updatedFields = task.fields?.map((field) => {
-							if (field.slug !== 'status') {
-								return field;
-							}
-
-							return {
-								...field,
-								values: [
-									{
-										raw: unfinishedOption.id,
-										resolved: unfinishedOption,
-									},
-								],
-							};
-						});
-
 						return {
-							...task,
-							fields: updatedFields,
-							status: TASK_UNFINISHED_STATUS_SLUG,
+							...field,
+							values: [
+								{
+									raw: unfinishedOption.id,
+									resolved: unfinishedOption,
+								},
+							],
 						};
-					})
-				);
+					});
+
+					return {
+						...task,
+						fields: updatedFields,
+						status: TASK_UNFINISHED_STATUS_SLUG,
+					};
+				});
+			});
+
+			try {
+				await moveTaskAPI(taskId, null, unfinishedOption.id);
 
 				return true;
 			} catch (error) {
 				console.error('Failed to unfinish task:', error);
+
+				// Rollback if API call failed
+				if (previousState) {
+					setTasks(previousState);
+				}
+
 				throw error;
 			}
 		},
