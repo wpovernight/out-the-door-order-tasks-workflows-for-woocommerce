@@ -160,14 +160,14 @@ export async function deleteTask(taskId: number): Promise<void> {
  * @param {number | null} previousTaskId - The ID of the task that will precede the moved task in the new status, or null if it will be the first task.
  * @param {number}        targetStatusId - The ID of the target status.
  *
- * @return {Promise<void>} A promise that resolves when the task has been moved.
+ * @return {Promise<{ new_position: number }>} A promise that resolves with the new position when the task has been moved.
  * @throws Will throw an error if the API request fails.
  */
 export async function moveTask(
 	taskId: number,
 	previousTaskId: number | null,
 	targetStatusId: number
-): Promise<void> {
+): Promise<{ new_position: number }> {
 	const response = await fetch(
 		`${apiRoot}/${apiNamespace}/tasks/${taskId}/move`,
 		{
@@ -184,7 +184,7 @@ export async function moveTask(
 		}
 	);
 
-	return handleResponse<void>(response);
+	return handleResponse<{ new_position: number }>(response);
 }
 
 /**
