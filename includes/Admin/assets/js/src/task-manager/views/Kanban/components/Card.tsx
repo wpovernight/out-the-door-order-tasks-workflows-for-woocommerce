@@ -92,6 +92,10 @@ export const Card: React.FC<CardProps> = ({
 						fromColumn: taskRef.current.status,
 						rect: element.getBoundingClientRect(),
 					}),
+				onGenerateDragPreview() {
+					// Close options menu before drag preview is generated
+					onOptionsToggle(null);
+				},
 				onDragStart() {
 					updateState({ type: 'dragging' });
 				},

@@ -593,7 +593,6 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
 
 .calendar-task-table-wrapper > table > tbody > tr {
     border-bottom: 0.0625em solid #e5e7eb;
-    cursor: pointer;
     transition: background-color 0.2s;
     height: 5em;
     vertical-align: middle;
