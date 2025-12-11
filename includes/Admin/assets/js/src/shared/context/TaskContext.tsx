@@ -59,12 +59,16 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 	// ---------------------
 	const [tasks, setTasks] = useState<Task[]>([]);
 	const tasksLoadedRef = useRef(false);
+	// To prevent race condition when call to fetch is received
+	const tasksLoadingRef = useRef(false);
 
 	const loadTasks = useCallback(
 		async (force = false) => {
-			if (tasksLoadedRef.current && !force) {
+			if ((tasksLoadedRef.current || tasksLoadingRef.current) && !force) {
 				return;
 			}
+
+			tasksLoadingRef.current = true;
 
 			try {
 				const data = await fetchTasks();
@@ -72,6 +76,8 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				tasksLoadedRef.current = true;
 			} catch (error) {
 				console.error('Failed to fetch tasks:', error);
+			} finally {
+				tasksLoadingRef.current = false;
 			}
 		},
 		[] // Stable reference
