@@ -49,3 +49,49 @@ export const getTaskDueDate = (task: Task): Date | null => {
 	const date = new Date(dueDateValue);
 	return isNaN(date.getTime()) ? null : date;
 };
+
+/**
+ * Updates a task's field values and corresponding top-level properties. (only in local)
+ *
+ * @param task    - The task to update
+ * @param updates - Record of field slugs to their new values (raw and resolved)
+ * @return A new task object with updated fields
+ *
+ * @example
+ * updateTaskFields(task, {
+ *   status: { raw: 1, resolved: statusOption },
+ *   position: { raw: 0.5, resolved: null }
+ * })
+ */
+export const updateTaskFields = (
+	task: Task,
+	updates: Record<string, { raw: any; resolved: any }>
+): Task => {
+	const updatedFields = task.fields?.map((field) => {
+		if (updates[field.slug]) {
+			return {
+				...field,
+				values: [updates[field.slug]],
+			};
+		}
+		return field;
+	});
+
+	// Extract top-level properties from the updates
+	const topLevelUpdates: Partial<Task> = {};
+	if (updates.status) {
+		topLevelUpdates.status =
+			typeof updates.status.resolved === 'object'
+				? updates.status.resolved.slug
+				: updates.status.resolved;
+	}
+	if (updates.position) {
+		topLevelUpdates.position = updates.position.raw;
+	}
+
+	return {
+		...task,
+		...topLevelUpdates,
+		fields: updatedFields,
+	};
+};

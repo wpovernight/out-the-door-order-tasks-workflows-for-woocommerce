@@ -22,6 +22,7 @@ import {
 	deleteTask as deleteTaskAPI,
 	finishTask as finishTaskAPI,
 } from '@shared/utils/api';
+import { updateTaskFields } from '@shared/utils/fieldUtils';
 
 interface TaskContextType {
 	tasks: Task[];
@@ -232,6 +233,9 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 			previousTaskId: number | null,
 			targetStatusId: number
 		): Promise<void> => {
+			let previousState: Task[] | null = null;
+			let optimisticPosition: number;
+
 			const targetStatusOption = fieldOptions.status?.find(
 				(opt) => opt.id === targetStatusId
 			);
@@ -241,6 +245,39 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				return;
 			}
 
+			// Optimistically update the global state immediately before API call
+			setTasks((prevTasks) => {
+				previousState = structuredClone(prevTasks);
+
+				// Calculate optimistic position
+				optimisticPosition = 0;
+				if (previousTaskId !== null) {
+					const previousTask = prevTasks.find(
+						(t) => t.id === previousTaskId
+					);
+					if (previousTask && previousTask.position !== undefined) {
+						optimisticPosition = previousTask.position + 0.0001;
+					}
+				}
+
+				return prevTasks.map((task) => {
+					if (task.id !== taskId) {
+						return task;
+					}
+
+					return updateTaskFields(task, {
+						status: {
+							raw: targetStatusOption.id,
+							resolved: targetStatusOption,
+						},
+						position: {
+							raw: optimisticPosition,
+							resolved: null,
+						},
+					});
+				});
+			});
+
 			try {
 				const result = await moveTaskAPI(
 					taskId,
@@ -248,50 +285,29 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 					targetStatusId
 				);
 
-				// Update the global state after API call succeeds
-				setTasks((prevTasks) => {
-					return prevTasks.map((task) => {
+				// Update with the actual position from the API.
+				setTasks((prevTasks) =>
+					prevTasks.map((task) => {
 						if (task.id !== taskId) {
 							return task;
 						}
 
-						// Update both status and position fields
-						const updatedFields = task.fields?.map((field) => {
-							if (field.slug === 'status') {
-								return {
-									...field,
-									values: [
-										{
-											raw: targetStatusOption.id,
-											resolved: targetStatusOption,
-										},
-									],
-								};
-							}
-							if (field.slug === 'position') {
-								return {
-									...field,
-									values: [
-										{
-											raw: result.new_position,
-											resolved: result.new_position,
-										},
-									],
-								};
-							}
-							return field;
+						return updateTaskFields(task, {
+							position: {
+								raw: result.new_position,
+								resolved: null,
+							},
 						});
-
-						return {
-							...task,
-							fields: updatedFields,
-							status: targetStatusOption.slug,
-							position: result.new_position,
-						};
-					});
-				});
+					})
+				);
 			} catch (error) {
 				console.error('Failed to move task:', error);
+
+				// Rollback if API call failed
+				if (previousState) {
+					setTasks(previousState);
+				}
+
 				throw error;
 			}
 		},
@@ -302,12 +318,12 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 		async (taskId: number): Promise<boolean> => {
 			let previousState: Task[] | null = null;
 
-			// Get the completed status option ID
-			const completedOption = fieldOptions.status?.find(
+			// Get the finish status option ID
+			const finishedOption = fieldOptions.status?.find(
 				(opt) => opt.slug === TASK_FINISH_STATUS_SLUG
 			);
 
-			if (!completedOption) {
+			if (!finishedOption) {
 				console.error('Finished status option not found');
 				return false;
 			}
@@ -321,27 +337,12 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 						return task;
 					}
 
-					// Update the status field in the fields array
-					const updatedFields = task.fields?.map((field) => {
-						if (field.slug === 'status' && completedOption) {
-							return {
-								...field,
-								values: [
-									{
-										raw: completedOption.id,
-										resolved: completedOption,
-									},
-								],
-							};
-						}
-						return field;
+					return updateTaskFields(task, {
+						status: {
+							raw: finishedOption.id,
+							resolved: finishedOption,
+						},
 					});
-
-					return {
-						...task,
-						fields: updatedFields,
-						status: TASK_FINISH_STATUS_SLUG,
-					};
 				});
 			});
 
@@ -392,28 +393,12 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 						return task;
 					}
 
-					// Update the status field in the fields array
-					const updatedFields = task.fields?.map((field) => {
-						if (field.slug !== 'status') {
-							return field;
-						}
-
-						return {
-							...field,
-							values: [
-								{
-									raw: unfinishedOption.id,
-									resolved: unfinishedOption,
-								},
-							],
-						};
+					return updateTaskFields(task, {
+						status: {
+							raw: unfinishedOption.id,
+							resolved: unfinishedOption,
+						},
 					});
-
-					return {
-						...task,
-						fields: updatedFields,
-						status: TASK_UNFINISHED_STATUS_SLUG,
-					};
 				});
 			});
 
