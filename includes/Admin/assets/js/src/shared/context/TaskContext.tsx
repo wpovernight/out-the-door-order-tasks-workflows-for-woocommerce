@@ -226,21 +226,77 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 	// ---------------------
 	// MOVE TASK
 	// ---------------------
-	const moveTask = async (
-		taskId: number,
-		previousTaskId: number | null,
-		targetStatusId: number
-	) => {
-		try {
-			await moveTaskAPI(taskId, previousTaskId, targetStatusId);
-		} catch (error) {
-			console.error('Failed to move task:', error);
-		}
-	};
+	const moveTask = useCallback(
+		async (
+			taskId: number,
+			previousTaskId: number | null,
+			targetStatusId: number
+		): Promise<void> => {
+			const targetStatusOption = fieldOptions.status?.find(
+				(opt) => opt.id === targetStatusId
+			);
 
-	// ---------------------
-	// FINISH TASK
-	// ---------------------
+			if (!targetStatusOption) {
+				console.error('Target status option not found');
+				return;
+			}
+
+			try {
+				const result = await moveTaskAPI(
+					taskId,
+					previousTaskId,
+					targetStatusId
+				);
+
+				// Update the global state after API call succeeds
+				setTasks((prevTasks) => {
+					return prevTasks.map((task) => {
+						if (task.id !== taskId) {
+							return task;
+						}
+
+						// Update both status and position fields
+						const updatedFields = task.fields?.map((field) => {
+							if (field.slug === 'status') {
+								return {
+									...field,
+									values: [
+										{
+											raw: targetStatusOption.id,
+											resolved: targetStatusOption,
+										},
+									],
+								};
+							}
+							if (field.slug === 'position') {
+								return {
+									...field,
+									values: [
+										{
+											raw: result.new_position,
+											resolved: result.new_position,
+										},
+									],
+								};
+							}
+							return field;
+						});
+
+						return {
+							...task,
+							fields: updatedFields,
+							status: targetStatusOption.slug,
+							position: result.new_position,
+						};
+					});
+				});
+			} catch (error) {
+				console.error('Failed to move task:', error);
+				throw error;
+			}
+		},
+		[fieldOptions]
+	);
 
 	const finishTask = useCallback(
 		async (taskId: number): Promise<boolean> => {
@@ -259,9 +315,8 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 			// Update the UI immediately before API call.
 			setTasks((prevTasks) => {
 				previousState = structuredClone(prevTasks);
-				const updated = structuredClone(prevTasks);
 
-				return updated.map((task) => {
+				return prevTasks.map((task) => {
 					if (task.id !== taskId) {
 						return task;
 					}
@@ -313,10 +368,6 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 		},
 		[fieldOptions]
 	);
-
-	// ---------------------
-	// UNFINISH TASK
-	// ---------------------
 
 	const unfinishTask = useCallback(
 		async (taskId: number): Promise<boolean> => {
