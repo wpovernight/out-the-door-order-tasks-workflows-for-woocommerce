@@ -141,7 +141,7 @@
 }
 
 /********************************
- * Fulfillment List Styles
+ * Fulfillment List Styles (Woo)
  ******************************/
 
 #order-fulfillments .wpo-aom-loading-skeleton-container {
@@ -241,4 +241,35 @@
     display: flex;
     justify-content: flex-end;
     border-left: 1px solid #D5D7DA;
+}
+
+/********************************
+ * Fulfillment Status
+ ******************************/
+
+td.wpo-aom-fulfillment-status > div {
+    display: flex;
+    gap: 0.5em;
+    justify-content: flex-end;
+}
+
+.wpo-aom-fulfillment-status span.wpo-aom-tag.not-shipped {
+    background-color: #FEE2E2;
+    color: #B91C1C;
+}
+
+.wpo-aom-fulfillment-status span.wpo-aom-tag.fully-shipped {
+    background-color: #D1FAE5;
+    color: #065F46;
+}
+
+.wpo-aom-fulfillment-status span.wpo-aom-tag.partially-shipped {
+    background-color: #FEF3C7;
+    color: #92400E;
+}
+
+.wpo-aom-edit-fulfillment::before {
+    content: '\f464';
+    font-family: 'dashicons';
+    display: block;
 }

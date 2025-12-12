@@ -4,14 +4,36 @@ namespace WPO\AOM\Admin\OrderEdit;
 
 defined( 'ABSPATH' ) || exit;
 
+use WPO\AOM\Enums\FulfillmentStatuses;
+use WPO\AOM\Services\FulfillmentService;
+
 final class MetaBox {
+	private FulfillmentService $fulfillment_service;
+
+	/**
+	 * Constructor
+	 *
+	 * @param FulfillmentService $fulfillment_service
+	 */
+	public function __construct( FulfillmentService $fulfillment_service ) {
+		$this->fulfillment_service = $fulfillment_service;
+	}
+
 	/**
 	 * Register meta box.
 	 *
 	 * @return void
 	 */
 	public function register(): void {
+		// Add meta box to order edit screen.
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ), 10, 2 );
+
+		// Add fulfillment column header in order items table.
+		add_action( 'woocommerce_admin_order_item_headers', array( $this, 'order_items_headers' ) );
+
+		// Add fulfillment column values in order items table.
+		add_action( 'woocommerce_admin_order_item_values', array( $this, 'order_items_values' ), 10, 3 );
+
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 	}
 
@@ -19,7 +41,7 @@ final class MetaBox {
 	 * Add meta box to the order edit screen.
 	 *
 	 * @param string $post_type
-	 * @param \WP_Post|\Automattic\WooCommerce\Admin\Overrides\Order
+	 * @param \WP_Post|\Automattic\WooCommerce\Admin\Overrides\Order $post
 	 *
 	 * @return void
 	 */
@@ -48,7 +70,7 @@ final class MetaBox {
 	 * @return void
 	 */
 	public function enqueue_scripts( string $hook ): void {
-		$screen = get_current_screen();
+		$screen          = get_current_screen();
 		$valid_screen_id = is_callable( 'wc_get_page_screen_id' ) ? wc_get_page_screen_id( 'shop-order' ) : 'shop_order';
 
 		if ( ! $screen || $valid_screen_id !== $screen->id ) {
@@ -186,5 +208,89 @@ final class MetaBox {
 	 */
 	public function render_meta_box(): void {
 		echo '<div id="wpo-aom-order-meta-box-content"></div>';
+	}
+
+	/**************************
+	 * Fulfillment
+	 **************************/
+
+	/**
+	 * Add fulfillment status column header in order items table.
+	 *
+	 * @return void
+	 */
+	public function order_items_headers(): void {
+		echo '<th>' . __( 'Fulfillment Status', 'woocommerce-product-batch-numbers' ) . '</th>';
+	}
+
+	/**
+	 * Add fulfillment status column values in order items table.
+	 *
+	 * @param \WC_Product|bool $product
+	 * @param \WC_Order_Item $item
+	 * @param int $item_id
+	 *
+	 * @return void
+	 */
+	public function order_items_values( $product, \WC_Order_Item $item, int $item_id ) {
+		$fulfillment_data = $this->fulfillment_service->get_fulfillment_data( $item );
+
+		// For MVP, we only store one fulfillment entry per item.
+		$fulfillment = $fulfillment_data[0] ?? null;
+
+		$fulfillment_status = $fulfillment ?
+			$this->fulfillment_service->get_order_item_fulfillment_status( $item, $fulfillment_data[0] )
+			: FulfillmentStatuses::NOT_FULFILLED;
+
+		$fulfillment_quantity    = $fulfillment ? (int) $fulfillment->quantity : 0;
+		$total_quantity          = (int) $item->get_quantity();
+		$fulfillment_status_html = $this->get_fulfillment_status_html( $fulfillment_status, $fulfillment_quantity, $total_quantity );
+
+		$edit_button = sprintf(
+			'<button type="button" class="wpo-button wpo-button-icon wpo-aom-edit-fulfillment" data-item-id="%1$d">
+				<span class="screenReader">%2$s</span>
+			</button>',
+			esc_attr( $item_id ),
+			esc_html__( 'Edit', 'wpo-aom' )
+		);
+
+		printf( '<td class="wpo-aom-fulfillment-status"><div>%s%s</div></td>', $fulfillment_status_html, $edit_button );
+	}
+
+	/**
+	 * Get fulfillment status HTML.
+	 *
+	 * @param string $fulfillment_status
+	 * @param int|null $shipped_quantity
+	 * @param int|null $total_quantity
+	 *
+	 * @return string
+	 */
+	public function get_fulfillment_status_html( string $fulfillment_status, ?int $shipped_quantity, ?int $total_quantity ): string {
+		switch ( $fulfillment_status ) {
+			case FulfillmentStatuses::FULFILLED:
+				$class = 'fully-shipped';
+				$label = esc_html__( 'Fully Shipped', 'wpo-aom' );
+				break;
+			case FulfillmentStatuses::PARTIALLY_FULFILLED:
+				$class = 'partially-shipped';
+				$label = esc_html__( 'Partially Shipped', 'wpo-aom' );
+
+				if ( ! is_null( $total_quantity ) && ! is_null( $shipped_quantity ) ) {
+					$label .= sprintf( ' (%1$d/%2$d)', esc_html( $shipped_quantity ), esc_html( $total_quantity ) );
+				}
+				break;
+			default:
+			case FulfillmentStatuses::NOT_FULFILLED:
+				$class = 'not-shipped';
+				$label = esc_html__( 'Not Shipped', 'wpo-aom' );
+				break;
+		}
+
+		return sprintf(
+			'<span class="wpo-aom-tag %1$s">%2$s</span>',
+			esc_attr( $class ),
+			$label // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		);
 	}
 }

@@ -212,4 +212,15 @@ final class ServiceContainer {
 			new TaskFieldValueRepository()
 		);
 	}
+
+	/**
+	 * Build and return an instance of OrderEdit MetaBox.
+	 *
+	 * @return MetaBox
+	 */
+	private function build_OrderEdit_MetaBox(): MetaBox {
+		return new MetaBox(
+			$this->resolve_service( 'FulfillmentService', FulfillmentService::class )
+		);
+	}
 }
