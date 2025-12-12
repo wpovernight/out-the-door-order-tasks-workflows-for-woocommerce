@@ -144,8 +144,8 @@ final class MetaBox {
 		);
 
 		wp_enqueue_style(
-			'wpo-aom-admin-task-global',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/task-global.css',
+			'wpo-aom-admin-common',
+			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/common.css',
 			array(),
 			WPO_AOM_VERSION
 		);
