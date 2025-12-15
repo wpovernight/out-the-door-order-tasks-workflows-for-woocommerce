@@ -251,11 +251,17 @@ td.wpo-aom-fulfillment-status > div {
     display: flex;
     gap: 0.5em;
     justify-content: flex-end;
+    align-items: center;
+}
+
+.wpo-aom-fulfillment-status span.wpo-aom-tag {
+    border-radius: 12em;
+    padding: 0.2em 0.9em;
 }
 
 .wpo-aom-fulfillment-status span.wpo-aom-tag.not-shipped {
-    background-color: #FEE2E2;
-    color: #B91C1C;
+    background-color: #f5f5f5;
+    color: #414651;
 }
 
 .wpo-aom-fulfillment-status span.wpo-aom-tag.fully-shipped {
@@ -268,8 +274,75 @@ td.wpo-aom-fulfillment-status > div {
     color: #92400E;
 }
 
+#woocommerce-order-items tbody tr:hover .wpo-aom-edit-fulfillment {
+    opacity: 1;
+}
+
+.wpo-aom-edit-fulfillment {
+    color: #ccc;
+    font-size: 1.2em;
+    opacity: 0;
+}
+
 .wpo-aom-edit-fulfillment::before {
     content: '\f464';
     font-family: 'dashicons';
     display: block;
+}
+
+.wpo-aom-edit-fulfillment:hover {
+    color: #999;
+    background-color: transparent;
+}
+
+.wpo-aom-fulfillment-actions {
+    display: flex;
+    gap: 0.3em;
+}
+
+.wpo-aom-fulfillment-actions,
+.wpo-aom-fulfillment-actions > li {
+    margin: 0;
+    padding: 0;
+}
+
+.wpo-aom-fulfillment-actions button {
+    border-radius: 2px;
+    width: 1.8em;
+    height: 1.8em;
+}
+
+.wpo-aom-save-fulfillment {
+    background-color: #6E1EDC;
+}
+
+.wpo-aom-save-fulfillment:hover {
+    background-color: #411282;
+}
+
+.wpo-aom-save-fulfillment::before {
+    content: '';
+    display: inline-block;
+    width: 1.1em;
+    height: 1.1em;
+    background-color: #fff;
+    mask-image: url('data:image/svg+xml,<svg width="11" height="8" viewBox="0 0 11 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.67685 0.585938L3.42685 6.83594L0.585938 3.99503" stroke="white" stroke-width="1.17188" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    -webkit-mask-image: url('data:image/svg+xml,<svg width="11" height="8" viewBox="0 0 11 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.67685 0.585938L3.42685 6.83594L0.585938 3.99503" stroke="white" stroke-width="1.17188" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    text-align: center;
+    vertical-align: bottom;
+}
+
+.wpo-aom-cancel-fulfillment {
+    border: 1px solid #D5D7DA;
+}
+
+.wpo-aom-cancel-fulfillment::before {
+    content: '\f335';
+    font-family: 'dashicons';
+    display: block;
+    font-size: 1.6em;
 }

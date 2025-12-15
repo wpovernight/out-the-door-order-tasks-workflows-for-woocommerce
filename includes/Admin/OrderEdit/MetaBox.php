@@ -34,6 +34,12 @@ final class MetaBox {
 		// Add fulfillment column values in order items table.
 		add_action( 'woocommerce_admin_order_item_values', array( $this, 'order_items_values' ), 10, 3 );
 
+		// Save fulfillment quantity changes.
+		add_action( 'woocommerce_before_save_order_items', array( $this, 'on_save_order_items' ), 10, 2 );
+
+		// Cleanup fulfillment data on order item deletion.
+		add_action( 'woocommerce_before_delete_order_item', array( $this, 'on_delete_order_item' ), 10, 2 );
+
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 	}
 
@@ -215,16 +221,16 @@ final class MetaBox {
 	 **************************/
 
 	/**
-	 * Add fulfillment status column header in order items table.
+	 * Add fulfillment column header in order items table.
 	 *
 	 * @return void
 	 */
 	public function order_items_headers(): void {
-		echo '<th>' . __( 'Fulfillment Status', 'woocommerce-product-batch-numbers' ) . '</th>';
+		echo '<th>' . __( 'Fulfillments', 'woocommerce-product-batch-numbers' ) . '</th>';
 	}
 
 	/**
-	 * Add fulfillment status column values in order items table.
+	 * Add fulfillment column values in order items table.
 	 *
 	 * @param \WC_Product|bool $product
 	 * @param \WC_Order_Item $item
@@ -233,7 +239,12 @@ final class MetaBox {
 	 * @return void
 	 */
 	public function order_items_values( $product, \WC_Order_Item $item, int $item_id ) {
-		$fulfillment_data = $this->fulfillment_service->get_fulfillment_data( $item );
+		// Display only for product line items.
+		if ( ! $product instanceof \WC_Product ) {
+			return;
+		}
+
+		$fulfillment_data = $this->fulfillment_service->get_order_item_fulfillment_data( $item );
 
 		// For MVP, we only store one fulfillment entry per item.
 		$fulfillment = $fulfillment_data[0] ?? null;
@@ -244,17 +255,77 @@ final class MetaBox {
 
 		$fulfillment_quantity    = $fulfillment ? (int) $fulfillment->quantity : 0;
 		$total_quantity          = (int) $item->get_quantity();
-		$fulfillment_status_html = $this->get_fulfillment_status_html( $fulfillment_status, $fulfillment_quantity, $total_quantity );
 
-		$edit_button = sprintf(
-			'<button type="button" class="wpo-button wpo-button-icon wpo-aom-edit-fulfillment" data-item-id="%1$d">
+		// View mode
+		$fulfillment_status_html = $this->get_fulfillment_status_html( $fulfillment_status, $fulfillment_quantity, $total_quantity );
+		$edit_button_html        = sprintf(
+			'<button type="button" class="wpo-button wpo-button-icon wpo-aom-edit-fulfillment" data-item-id="%1$d" title="%2$s">
 				<span class="screenReader">%2$s</span>
 			</button>',
 			esc_attr( $item_id ),
-			esc_html__( 'Edit', 'wpo-aom' )
+			esc_html__( 'Edit fulfillment quantity', 'wpo-aom' )
+		);
+		$view_html               = sprintf( '<div class="view">%s%s</div>', $fulfillment_status_html, $edit_button_html );
+
+		// Edit mode
+		$edit_input_html  = sprintf(
+			'<label>
+				<input
+					type="number"
+					name="wpo-aom-fulfillment-quantity[%1$d][%4$s]"
+					min="0"
+					max="%2$d"
+					class="wpo-aom-fulfillment-quantity"
+					value="%3$d"
+					data-fulfillment-id="%4$s"
+				/>
+				<span class="screenReader">%5$s</span>
+			</label>',
+			esc_attr( $item_id ),
+			esc_attr( $total_quantity ),
+			esc_attr( $fulfillment_quantity ),
+			esc_attr( $fulfillment ? $fulfillment->id : '' ),
+			esc_html__( 'Fulfillment Quantity', 'wpo-aom' )
+		);
+		$edit_button_html = sprintf(
+			'<ul class="wpo-aom-fulfillment-actions" style="display: none;">
+					<li>
+						<button
+							type="button"
+							class="wpo-button wpo-button-icon wpo-aom-save-fulfillment"
+							data-item-id="%1$d"
+							data-fulfillment-id="%2$s"
+							title="%3$s"
+						>
+							<span class="screenReader">%3$s</span>
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							class="wpo-button wpo-button-icon wpo-aom-cancel-fulfillment"
+							data-item-id="%1$d"
+							data-fulfillment-id="%2$s"
+							title="%4$s"
+						>
+							<span class="screenReader">%4$s</span>
+						</button>
+					</li>
+				</ul>',
+			esc_attr( $item_id ),
+			esc_attr( $fulfillment ? $fulfillment->id : '' ),
+			esc_html__( 'Save fulfillment quantity', 'wpo-aom' ),
+			esc_html__( 'Cancel fulfillment edit', 'wpo-aom' )
+		);
+		$edit_html        = sprintf(
+			'<div class="edit" style="display:none;">%s%s</div>',
+			$edit_input_html,
+			$edit_button_html
 		);
 
-		printf( '<td class="wpo-aom-fulfillment-status"><div>%s%s</div></td>', $fulfillment_status_html, $edit_button );
+
+		// Output the fulfillment cell.
+		printf( '<td class="wpo-aom-fulfillment-status">%s%s</td>', $view_html, $edit_html );
 	}
 
 	/**
@@ -266,31 +337,72 @@ final class MetaBox {
 	 *
 	 * @return string
 	 */
-	public function get_fulfillment_status_html( string $fulfillment_status, ?int $shipped_quantity, ?int $total_quantity ): string {
+	public function get_fulfillment_status_html( string $fulfillment_status, int $shipped_quantity, int $total_quantity ): string {
 		switch ( $fulfillment_status ) {
 			case FulfillmentStatuses::FULFILLED:
 				$class = 'fully-shipped';
-				$label = esc_html__( 'Fully Shipped', 'wpo-aom' );
 				break;
 			case FulfillmentStatuses::PARTIALLY_FULFILLED:
 				$class = 'partially-shipped';
-				$label = esc_html__( 'Partially Shipped', 'wpo-aom' );
-
-				if ( ! is_null( $total_quantity ) && ! is_null( $shipped_quantity ) ) {
-					$label .= sprintf( ' (%1$d/%2$d)', esc_html( $shipped_quantity ), esc_html( $total_quantity ) );
-				}
 				break;
 			default:
 			case FulfillmentStatuses::NOT_FULFILLED:
 				$class = 'not-shipped';
-				$label = esc_html__( 'Not Shipped', 'wpo-aom' );
 				break;
 		}
+
+		$label = sprintf(
+			'%1$d / %2$d %3$s',
+			esc_html( $shipped_quantity ),
+			esc_html( $total_quantity ),
+			esc_html__( 'fulfilled', 'wpo-aom' )
+		);
+
 
 		return sprintf(
 			'<span class="wpo-aom-tag %1$s">%2$s</span>',
 			esc_attr( $class ),
 			$label // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		);
+	}
+
+	/**
+	 * Handle saving of fulfillment quantities for order items.
+	 *
+	 * @param int   $order_id Order ID.
+	 * @param array $items Order items to save.
+	 *
+	 * @return void
+	 */
+	public function on_save_order_items( int $order_id, array $items ): void {
+		if ( ! isset( $items['wpo-aom-fulfillment-quantity'] ) || ! is_array( $items['wpo-aom-fulfillment-quantity'] ) ) {
+			return;
+		}
+
+		foreach ( $items['wpo-aom-fulfillment-quantity'] as $item_id => $fulfillment_data ) {
+			if ( ! is_array( $fulfillment_data ) || empty( $fulfillment_data ) ) {
+				continue;
+			}
+
+			$fulfillment_id       = array_key_first( $fulfillment_data );
+			$fulfillment_quantity = isset( $fulfillment_data[ $fulfillment_id ] ) ? absint( $fulfillment_data[ $fulfillment_id ] ) : 0;
+
+			$this->fulfillment_service->save_order_item_fulfillment_quantity(
+				$item_id,
+				$fulfillment_quantity,
+				$fulfillment_id > 0 ? $fulfillment_id : null
+			);
+		}
+	}
+
+	/**
+	 * Handle cleanup of fulfillment data when an order item is deleted.
+	 *
+	 * @param int $item_id Order item ID.
+	 *
+	 * @return void
+	 */
+	public function on_delete_order_item( int $item_id ): void {
+		$this->fulfillment_service->delete_order_item_fulfillment_data( $item_id );
 	}
 }
