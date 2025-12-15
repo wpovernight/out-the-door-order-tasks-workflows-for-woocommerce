@@ -13,13 +13,24 @@ final class FulfillmentService {
 	/**
 	 * Get fulfillment data for an order item.
 	 *
-	 * @param \WC_Order_Item $item
+	 * @param int|\WC_Order_Item $item
 	 *
 	 * @return Fulfillment[]|null
 	 */
-	public function get_fulfillment_data( \WC_Order_Item $item ): ?array {
-		$fulfillment_meta = $item->get_meta( self::FULFILLMENT_DATA_META_KEY, true );
-		if ( empty( $fulfillment_meta ) ) {
+	public function get_order_item_fulfillment_data( $item ): ?array {
+		if ( is_numeric( $item ) ) {
+			if ( $item <= 0 ) {
+				return null;
+			}
+
+			$fulfillment_meta = wc_get_order_item_meta( intval( $item ), self::FULFILLMENT_DATA_META_KEY, true );
+		} elseif ( $item instanceof \WC_Order_Item ) {
+			$fulfillment_meta = $item->get_meta( self::FULFILLMENT_DATA_META_KEY, true );
+		} else {
+			return null;
+		}
+
+		if ( empty( $fulfillment_meta ) || ! is_array( $fulfillment_meta ) ) {
 			return null;
 		}
 
@@ -42,7 +53,7 @@ final class FulfillmentService {
 			$item_quantity  = (int) $item->get_quantity();
 			$total_quantity += $item_quantity;
 
-			$fulfillment_data = $fulfillment_data ?? $this->get_fulfillment_data( $item );
+			$fulfillment_data = $fulfillment_data ?? $this->get_order_item_fulfillment_data( $item );
 			if ( empty( $fulfillment_data ) ) {
 				continue;
 			}
@@ -83,5 +94,61 @@ final class FulfillmentService {
 		} else {
 			return FulfillmentStatuses::PARTIALLY_FULFILLED;
 		}
+	}
+
+	/**
+	 * Save fulfillment quantity for an order item.
+	 *
+	 * @param int $item_id
+	 * @param int $quantity
+	 * @param int|null $fulfillment_id
+	 *
+	 * @return bool
+	 */
+	public function save_order_item_fulfillment_quantity( int $item_id, int $quantity, ?int $fulfillment_id ): bool {
+		$fulfillment_data = $this->get_order_item_fulfillment_data( $item_id ) ?? [];
+
+		$is_updated = false;
+		foreach ( $fulfillment_data as $index => $fulfillment ) {
+			if ( $fulfillment->id === $fulfillment_id ) {
+				$fulfillment->quantity      = $quantity;
+				$is_updated                 = true;
+				$fulfillment_data[ $index ] = $fulfillment;
+				break;
+			}
+		}
+
+		// If not updated, create a new fulfillment entry.
+		if ( ! $is_updated ) {
+			// Find the next available ID.
+			$new_id = empty( $fulfillment_data ) ? 1 : max( array_map( fn( $f ) => $f->id, $fulfillment_data ) );
+
+			$new_fulfillment    = new Fulfillment(
+				array(
+					'id'       => $new_id,
+					'quantity' => $quantity,
+				)
+			);
+			$fulfillment_data[] = $new_fulfillment;
+		}
+
+		$fulfillment_data_array = array_map( fn( $f ) => $f->to_array(), $fulfillment_data );
+
+		if ( $is_updated ) {
+			return wc_update_order_item_meta( $item_id, self::FULFILLMENT_DATA_META_KEY, $fulfillment_data_array );
+		} else {
+			return wc_add_order_item_meta( $item_id, self::FULFILLMENT_DATA_META_KEY, $fulfillment_data_array, true );
+		}
+	}
+
+	/**
+	 * Delete fulfillment data for an order item.
+	 *
+	 * @param int $item_id
+	 *
+	 * @return bool
+	 */
+	public function delete_order_item_fulfillment_data( int $item_id ): bool {
+		return wc_delete_order_item_meta( $item_id, self::FULFILLMENT_DATA_META_KEY );
 	}
 }
