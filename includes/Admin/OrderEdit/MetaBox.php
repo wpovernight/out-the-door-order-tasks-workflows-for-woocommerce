@@ -102,7 +102,7 @@ final class MetaBox {
 
 		wp_enqueue_script(
 			'wpo-aom-order-edit',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/js/order-edit.js',
+			WPO_AOM()->plugin_url() . '/includes/Admin/assets/js/order-edit-metabox.js',
 			array( 'wp-element', 'wp-components' ),
 			WPO_AOM_VERSION,
 			true
