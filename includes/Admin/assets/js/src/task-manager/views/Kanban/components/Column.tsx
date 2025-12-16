@@ -114,6 +114,10 @@ export const Column: React.FC<ColumnProps> = ({
 						updateState({ type: 'column-drag-over', edge });
 					}
 				},
+				onGenerateDragPreview() {
+					// Close options menu before drag preview is generated
+					onOptionToggle(null);
+				},
 				onDrag: ({ source, self }) => {
 					if (
 						isColumnData(source.data) &&
@@ -241,6 +245,10 @@ export const Column: React.FC<ColumnProps> = ({
 		});
 	};
 
+	const onOptionToggle = (taskId: number | null) => {
+		setOpenOptionsCardId(taskId);
+	};
+
 	return (
 		<div
 			ref={columnWrapperRef}
@@ -276,9 +284,7 @@ export const Column: React.FC<ColumnProps> = ({
 								key={task.id}
 								task={task}
 								isOptionsOpen={openOptionsCardId === task.id}
-								onOptionsToggle={(id: number | null) =>
-									setOpenOptionsCardId(id)
-								}
+								onOptionsToggle={onOptionToggle}
 							/>
 						))}
 					</div>

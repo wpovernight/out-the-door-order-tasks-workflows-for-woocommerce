@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 // Define all available views.
 export const AVAILABLE_VIEWS = ['kanban', 'calendar'];
@@ -15,7 +16,21 @@ const ViewContext = createContext<ViewContextType | undefined>(undefined);
 export const ViewProvider: React.FC<{ children: React.ReactNode }> = ({
 	children,
 }) => {
-	const [view, setView] = useState<View>('kanban');
+	const navigate = useNavigate();
+	const location = useLocation();
+
+	// Extract view from URL hash path (e.g., "/kanban" -> "kanban")
+	const view = useMemo<View>(() => {
+		const pathView = location.pathname.slice(1); // Remove leading "/"
+		return AVAILABLE_VIEWS.includes(pathView)
+			? (pathView as View)
+			: 'kanban';
+	}, [location.pathname]);
+
+	// Navigate to new view instead of setting state
+	const setView = (newView: View) => {
+		navigate(`/${newView}`);
+	};
 
 	return (
 		<ViewContext.Provider value={{ view, setView }}>

@@ -102,24 +102,26 @@ final class Screen {
 						),
 					),
 					'actions'          => array(
-						'edit'       => esc_html__( 'Edit', 'wpo-aom' ),
-						'editTask'   => esc_html__( 'Edit task', 'wpo-aom' ),
-						'delete'     => esc_html__( 'Delete', 'wpo-aom' ),
-						'deleteTask' => esc_html__( 'Delete task', 'wpo-aom' ),
-						'cancel'     => esc_html__( 'Cancel', 'wpo-aom' ),
-						'clear'      => esc_html__( 'Clear', 'wpo-aom' ),
-						'apply'      => esc_html__( 'Apply', 'wpo-aom' ),
-						'actions'    => esc_html__( 'Actions', 'wpo-aom' ),
-						'createTask' => esc_html__( 'Create Task', 'wpo-aom' ),
-						'updateTask' => esc_html__( 'Update Task', 'wpo-aom' ),
+						'edit'           => esc_html__( 'Edit', 'wpo-aom' ),
+						'editTask'       => esc_html__( 'Edit task', 'wpo-aom' ),
+						'delete'         => esc_html__( 'Delete', 'wpo-aom' ),
+						'deleteTask'     => esc_html__( 'Delete task', 'wpo-aom' ),
+						'cancel'         => esc_html__( 'Cancel', 'wpo-aom' ),
+						'clear'          => esc_html__( 'Clear', 'wpo-aom' ),
+						'apply'          => esc_html__( 'Apply', 'wpo-aom' ),
+						'actions'        => esc_html__( 'Actions', 'wpo-aom' ),
+						'createTask'     => esc_html__( 'Create Task', 'wpo-aom' ),
+						'updateTask'     => esc_html__( 'Update Task', 'wpo-aom' ),
+						'markFinished'   => esc_html__( 'Mark as Completed', 'wpo-aom' ), // ToDo: Finished status should be dynamic.
+						'markUnfinished' => esc_html__( 'Mark as In Progress', 'wpo-aom' ), // ToDo: Finished status should be dynamic.
 					),
 				),
 			)
 		);
 
 		wp_enqueue_style(
-			'wpo-aom-admin-task-global',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/task-global.css',
+			'wpo-aom-admin-common',
+			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/common.css',
 			array(),
 			WPO_AOM_VERSION
 		);

@@ -1,7 +1,12 @@
 import React from 'react';
-import { isFieldOption, Task } from '@shared/types/task';
+import {
+	isFieldOption,
+	Task,
+	TASK_FINISH_STATUS_SLUG,
+} from '@shared/types/task';
 import { getColorStyle } from '@shared/utils/colorUtils';
 import { truncateText } from '@shared/utils/textUtils';
+import { useTasks } from '@shared/context/TaskContext';
 
 type ActionsDisplayMode = 'menu' | 'icons' | 'none';
 type HeadingLevel = 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
@@ -14,6 +19,8 @@ interface TaskCardProps {
 	onOptionsClick?: (e: React.MouseEvent) => void;
 	onEditClick?: (e: React.MouseEvent) => void;
 	onDeleteClick?: (e: React.MouseEvent) => void;
+	onFinishClick?: (taskId: number) => Promise<boolean>;
+	onUnfinishClick?: (taskId: number) => Promise<boolean>;
 	className?: string;
 	innerRef?: React.RefObject<HTMLDivElement | null>;
 	actionsDisplayMode?: ActionsDisplayMode;
@@ -26,6 +33,8 @@ interface TaskCardProps {
 		options?: string;
 		edit?: string;
 		delete?: string;
+		markFinished?: string;
+		markUnfinished?: string;
 	};
 }
 
@@ -37,6 +46,8 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 	onOptionsClick,
 	onEditClick,
 	onDeleteClick,
+	onFinishClick,
+	onUnfinishClick,
 	className = '',
 	innerRef,
 	actionsDisplayMode = 'menu',
@@ -47,6 +58,10 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 	excludeTags = [],
 	i18n,
 }) => {
+	const { finishTask: globalFinishTask, unfinishTask: globalUnfinishTask } =
+		useTasks();
+	const finishTask = onFinishClick || globalFinishTask;
+	const unfinishTask = onUnfinishClick || globalUnfinishTask;
 	const statusField = task.fields?.find((field) => field.slug === 'status');
 	const priorityField = task.fields?.find(
 		(field) => field.slug === 'priority'
@@ -78,6 +93,28 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 		}
 	};
 
+	const handleOnFinishClick = (e: React.MouseEvent) => {
+		e.stopPropagation();
+		finishTask(task.id);
+
+		// close the option menu if open
+		if (isOptionsOpen && onOptionsClick) {
+			onOptionsClick(e);
+		}
+	};
+
+	const handleOnUnfinishClick = (e: React.MouseEvent) => {
+		e.stopPropagation();
+		unfinishTask(task.id);
+
+		// close the option menu if open
+		if (isOptionsOpen && onOptionsClick) {
+			onOptionsClick(e);
+		}
+	};
+
+	const isCompleted = task.status === TASK_FINISH_STATUS_SLUG;
+
 	const renderMenuActions = () => (
 		<div className="task-card-options">
 			<button
@@ -89,6 +126,21 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 			</button>
 			{isOptionsOpen && (
 				<ul className="wpo-action-menu">
+					<li>
+						<button
+							type="button"
+							className={`wpo-button task-finish-menu-item ${isCompleted ? 'finished' : ''}`}
+							onClick={
+								isCompleted
+									? handleOnUnfinishClick
+									: handleOnFinishClick
+							}
+						>
+							{isCompleted
+								? i18n.markUnfinished
+								: i18n.markFinished}
+						</button>
+					</li>
 					{onEditClick && (
 						<li>
 							<button
@@ -118,6 +170,24 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 
 	const renderIconActions = () => (
 		<ul className="wpo-aom-task-actions task-card-actions">
+			<li>
+				<button
+					className={`wpo-button wpo-button-icon task-finish ${isCompleted ? 'finished' : ''}`}
+					type="button"
+					onClick={
+						isCompleted
+							? handleOnUnfinishClick
+							: handleOnFinishClick
+					}
+					title={
+						isCompleted ? i18n.markUnfinished : i18n.markFinished
+					}
+				>
+					<span className="screenReader">
+						{isCompleted ? i18n.markUnfinished : i18n.markFinished}
+					</span>
+				</button>
+			</li>
 			{onEditClick && (
 				<li>
 					<button

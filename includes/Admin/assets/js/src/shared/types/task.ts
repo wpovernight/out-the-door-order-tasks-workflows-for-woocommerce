@@ -54,3 +54,6 @@ export type Task = {
 	position: number;
 	previous_task_id?: number | null;
 };
+
+export const TASK_FINISH_STATUS_SLUG = 'completed'; // ToDo: make dynamic based on field options
+export const TASK_UNFINISHED_STATUS_SLUG = 'in_progress'; // ToDo: make dynamic based on field options

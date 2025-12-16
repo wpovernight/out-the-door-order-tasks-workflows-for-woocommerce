@@ -7,7 +7,7 @@ import { searchOrders } from '@shared/utils/api';
 import { isFieldOption, Task } from '@shared/types/task';
 import { useLocalized } from '@shared/hooks/useLocalized';
 import type { WpoAomTaskManagerData } from '@taskManager/types/globals';
-import type { WpoAomOrderEditData } from '@orderEdit/types/globals';
+import type { WpoAomOrderEditMetaBoxData } from '@orderEdit/types/globals';
 
 interface TaskFormProps {
 	task?: Task;
@@ -35,17 +35,17 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 	// Get localized data from whichever app is active (task-manager or order-edit)
 	const globalKey = (window as any).WPO_AOM_TaskManager
 		? 'WPO_AOM_TaskManager'
-		: (window as any).WPO_AOM_OrderEdit
-			? 'WPO_AOM_OrderEdit'
+		: (window as any).WPO_AOM_OrderEdit_MetaBox
+			? 'WPO_AOM_OrderEdit_MetaBox'
 			: null;
 
 	if (!globalKey) {
 		throw new Error(
-			'TaskForm requires either WPO_AOM_TaskManager or WPO_AOM_OrderEdit to be localized on the window object'
+			'TaskForm requires either WPO_AOM_TaskManager or WPO_AOM_OrderEdit_MetaBox to be localized on the window object'
 		);
 	}
 
-	const data = useLocalized<WpoAomTaskManagerData | WpoAomOrderEditData>(
+	const data = useLocalized<WpoAomTaskManagerData | WpoAomOrderEditMetaBoxData>(
 		globalKey
 	);
 	const i18n = data.i18n;

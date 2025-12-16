@@ -15,6 +15,7 @@ use WPO\AOM\Repositories\TaskFieldRepository;
 use WPO\AOM\Repositories\TaskFieldOptionRepository;
 use WPO\AOM\Repositories\TaskFieldValueRepository;
 use WPO\AOM\REST\TaskController;
+use WPO\AOM\Services\FulfillmentService;
 use WPO\AOM\Services\EmailService;
 use WPO\AOM\Services\TaskManagerService;
 
@@ -42,6 +43,7 @@ final class ServiceContainer {
 	private static array $service_map = array(
 		// Services
 		'TaskManagerService' => TaskManagerService::class,
+		'FulfillmentService' => FulfillmentService::class,
 		'EmailService'       => EmailService::class,
 		// REST Controllers
 		'TaskController'     => TaskController::class,
@@ -210,6 +212,17 @@ final class ServiceContainer {
 			new TaskFieldRepository(),
 			new TaskFieldOptionRepository(),
 			new TaskFieldValueRepository()
+		);
+	}
+
+	/**
+	 * Build and return an instance of OrderEdit MetaBox.
+	 *
+	 * @return MetaBox
+	 */
+	private function build_OrderEdit_MetaBox(): MetaBox {
+		return new MetaBox(
+			$this->resolve_service( 'FulfillmentService', FulfillmentService::class )
 		);
 	}
 }

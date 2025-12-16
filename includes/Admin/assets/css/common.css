@@ -84,7 +84,8 @@
 }
 
 .wpo-aom-task-actions > li .task-edit,
-.wpo-aom-task-actions > li .task-delete {
+.wpo-aom-task-actions > li .task-delete,
+.wpo-aom-task-actions > li .task-finish {
     border: none;
     background: none;
     cursor: pointer;
@@ -107,8 +108,18 @@
     background-color: #fee2e2;
 }
 
+.wpo-aom-task-actions > li .task-finish:hover {
+    color: #6E1EDC;
+    background-color: #F0E8FC;
+}
+
+.wpo-aom-task-actions > li .task-finish.finished {
+    color: #6E1EDC;
+}
+
 .wpo-aom-task-actions > li .task-edit::before,
-.wpo-aom-task-actions > li .task-delete::before {
+.wpo-aom-task-actions > li .task-delete::before,
+.wpo-aom-task-actions > li .task-finish::before {
     content: '';
     position: absolute;
     top: 50%;
@@ -133,6 +144,11 @@
 .wpo-aom-task-actions > li .task-delete::before {
     mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='black' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'/%3E%3C/svg%3E");
     -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='black' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'/%3E%3C/svg%3E");
+}
+
+.wpo-aom-task-actions > li .task-finish::before {
+    mask-image: url(data:image/svg+xml,%3Csvg%20width%3D%2218%22%20height%3D%2218%22%20viewBox%3D%220%200%2018%2018%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Cg%20clip-path%3D%22url%28%23clip0_1976_33751%29%22%3E%0A%3Cpath%20d%3D%22M9%2016.5C9.98512%2016.5012%2010.9607%2016.3078%2011.8708%2015.9308C12.7809%2015.5538%2013.6075%2015.0007%2014.3032%2014.3032C15.0007%2013.6075%2015.5538%2012.7809%2015.9308%2011.8708C16.3078%2010.9607%2016.5012%209.98512%2016.5%209C16.5012%208.01495%2016.3078%207.03929%2015.9308%206.12919C15.5538%205.21908%2015.0007%204.39244%2014.3032%203.69676C13.6075%202.99932%2012.7809%202.44621%2011.8708%202.06923C10.9607%201.69223%209.98512%201.49879%209%201.50001C8.01495%201.49879%207.03929%201.69223%206.12919%202.06923C5.21908%202.44621%204.39244%202.99932%203.69676%203.69676C2.99932%204.39244%202.44621%205.21908%202.06923%206.12919C1.69223%207.03929%201.49879%208.01495%201.50001%209C1.49879%209.98512%201.69223%2010.9607%202.06923%2011.8708C2.44621%2012.7809%202.99932%2013.6075%203.69676%2014.3032C4.39244%2015.0007%205.21908%2015.5538%206.12919%2015.9308C7.03929%2016.3078%208.01495%2016.5012%209%2016.5Z%22%20stroke%3D%22%23535862%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%3Cpath%20d%3D%22M6%209L8.25%2011.25L12.75%206.75%22%20stroke%3D%22%23535862%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%3C%2Fg%3E%0A%3Cdefs%3E%0A%3CclipPath%20id%3D%22clip0_1976_33751%22%3E%0A%3Crect%20width%3D%2218%22%20height%3D%2218%22%20fill%3D%22white%22%2F%3E%0A%3C%2FclipPath%3E%0A%3C%2Fdefs%3E%0A%3C%2Fsvg%3E%0A);
+    -webkit-mask-image: url(data:image/svg+xml,%3Csvg%20width%3D%2218%22%20height%3D%2218%22%20viewBox%3D%220%200%2018%2018%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Cg%20clip-path%3D%22url%28%23clip0_1976_33751%29%22%3E%0A%3Cpath%20d%3D%22M9%2016.5C9.98512%2016.5012%2010.9607%2016.3078%2011.8708%2015.9308C12.7809%2015.5538%2013.6075%2015.0007%2014.3032%2014.3032C15.0007%2013.6075%2015.5538%2012.7809%2015.9308%2011.8708C16.3078%2010.9607%2016.5012%209.98512%2016.5%209C16.5012%208.01495%2016.3078%207.03929%2015.9308%206.12919C15.5538%205.21908%2015.0007%204.39244%2014.3032%203.69676C13.6075%202.99932%2012.7809%202.44621%2011.8708%202.06923C10.9607%201.69223%209.98512%201.49879%209%201.50001C8.01495%201.49879%207.03929%201.69223%206.12919%202.06923C5.21908%202.44621%204.39244%202.99932%203.69676%203.69676C2.99932%204.39244%202.44621%205.21908%202.06923%206.12919C1.69223%207.03929%201.49879%208.01495%201.50001%209C1.49879%209.98512%201.69223%2010.9607%202.06923%2011.8708C2.44621%2012.7809%202.99932%2013.6075%203.69676%2014.3032C4.39244%2015.0007%205.21908%2015.5538%206.12919%2015.9308C7.03929%2016.3078%208.01495%2016.5012%209%2016.5Z%22%20stroke%3D%22%23535862%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%3Cpath%20d%3D%22M6%209L8.25%2011.25L12.75%206.75%22%20stroke%3D%22%23535862%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%3C%2Fg%3E%0A%3Cdefs%3E%0A%3CclipPath%20id%3D%22clip0_1976_33751%22%3E%0A%3Crect%20width%3D%2218%22%20height%3D%2218%22%20fill%3D%22white%22%2F%3E%0A%3C%2FclipPath%3E%0A%3C%2Fdefs%3E%0A%3C%2Fsvg%3E%0A);
 }
 
 .wpo-aom-add-button {
