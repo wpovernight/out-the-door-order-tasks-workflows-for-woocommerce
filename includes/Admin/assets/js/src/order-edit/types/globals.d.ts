@@ -2,7 +2,7 @@
  * Global type declarations for the WPO AOM Order Edit metabox.
  */
 
-export interface WpoAomOrderEditData {
+export interface WpoAomOrderEditMetaBoxData {
 	apiRoot: string;
 	apiNamespace: string;
 	nonce: string;
@@ -62,7 +62,7 @@ export interface WpoAomOrderEditData {
 
 declare global {
 	interface Window {
-		WPO_AOM_OrderEdit: WpoAomOrderEditData;
+        WPO_AOM_OrderEdit_MetaBox: WpoAomOrderEditMetaBoxData;
 	}
 }
 

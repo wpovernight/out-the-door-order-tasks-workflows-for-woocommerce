@@ -100,8 +100,9 @@ final class MetaBox {
 			}
 		}
 
+		// Load metabox react app.
 		wp_enqueue_script(
-			'wpo-aom-order-edit',
+			'wpo-aom-order-edit-metabox',
 			WPO_AOM()->plugin_url() . '/includes/Admin/assets/js/order-edit-metabox.js',
 			array( 'wp-element', 'wp-components' ),
 			WPO_AOM_VERSION,
@@ -109,8 +110,8 @@ final class MetaBox {
 		);
 
 		wp_localize_script(
-			'wpo-aom-order-edit',
-			'WPO_AOM_OrderEdit',
+			'wpo-aom-order-edit-metabox',
+			'WPO_AOM_OrderEdit_MetaBox',
 			array(
 				'orderId'               => absint( $order_id ),
 				'apiRoot'               => esc_url_raw( rest_url( '/wc/v3' ) ),

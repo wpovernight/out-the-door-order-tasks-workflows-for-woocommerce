@@ -3,9 +3,9 @@ import { Fulfillment } from '../types/fulfillment';
 
 function getApiConfig() {
 	const taskManagerData = (window as any).WPO_AOM_TaskManager;
-	const orderEditData = (window as any).WPO_AOM_OrderEdit;
+	const orderEditMetaBoxData = (window as any).WPO_AOM_OrderEdit_MetaBox;
 
-	const config = taskManagerData || orderEditData;
+	const config = taskManagerData || orderEditMetaBoxData;
 
 	if (!config) {
 		console.warn('⚠️ API configuration not found. API calls will fail.');
