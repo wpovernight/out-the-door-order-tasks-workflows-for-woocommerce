@@ -5,6 +5,7 @@ namespace WPO\AOM\Admin\OrderEdit;
 defined( 'ABSPATH' ) || exit;
 
 use WPO\AOM\Enums\FulfillmentStatuses;
+use WPO\AOM\Models\Fulfillment;
 use WPO\AOM\Services\FulfillmentService;
 
 final class MetaBox {
@@ -41,6 +42,9 @@ final class MetaBox {
 		add_action( 'woocommerce_before_delete_order_item', array( $this, 'on_delete_order_item' ), 10, 2 );
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+
+		// AJAX handler for saving fulfillment.
+		add_action( 'wp_ajax_wpo_aom_save_fulfillment', array( $this, 'ajax_save_fulfillment' ) );
 	}
 
 	/**
@@ -170,6 +174,22 @@ final class MetaBox {
 					),
 				),
 			),
+		);
+
+		wp_enqueue_script(
+			'wpo-aom-order-edit',
+			WPO_AOM()->plugin_url() . '/includes/Admin/assets/js/order-edit.js',
+			array(),
+			WPO_AOM_VERSION,
+			true
+		);
+
+		wp_localize_script(
+			'wpo-aom-order-edit',
+			'WPO_AOM_OrderEdit',
+			array(
+				'nonce' => wp_create_nonce( 'wpo_aom_order_edit' ),
+			)
 		);
 
 		wp_enqueue_style(
@@ -326,7 +346,11 @@ final class MetaBox {
 
 
 		// Output the fulfillment cell.
-		printf( '<td class="wpo-aom-fulfillment-status">%s%s</td>', $view_html, $edit_html );
+		printf(
+			'<td class="wpo-aom-fulfillment">%s%s</td>',
+			$view_html, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			$edit_html  // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		);
 	}
 
 	/**
@@ -405,5 +429,102 @@ final class MetaBox {
 	 */
 	public function on_delete_order_item( int $item_id ): void {
 		$this->fulfillment_service->delete_order_item_fulfillment_data( $item_id );
+	}
+
+	/**
+	 * AJAX handler for saving fulfillment quantity.
+	 *
+	 * @return void
+	 */
+	public function ajax_save_fulfillment(): void {
+		// Check nonce for security.
+		if (
+			! isset( $_POST['nonce'] ) ||
+			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'wpo_aom_order_edit' )
+		) {
+			wp_send_json_error(
+				array(
+					'message' => esc_html__( 'Security verification failed.', 'wpo-aom' ),
+				)
+			);
+		}
+
+		// Check user capabilities.
+		if ( ! current_user_can( 'edit_shop_orders' ) ) {
+			wp_send_json_error(
+				array(
+					'message' => esc_html__( 'You do not have permission to perform this action.', 'wpo-aom' ),
+				)
+			);
+		}
+
+		// Get and validate parameters.
+		$item_id        = isset( $_POST['item_id'] ) ? absint( $_POST['item_id'] ) : 0;
+		$fulfillment_id = isset( $_POST['fulfillment_id'] ) ? absint( $_POST['fulfillment_id'] ) : 0;
+		$quantity       = isset( $_POST['quantity'] ) ? absint( $_POST['quantity'] ) : 0;
+
+		if ( $item_id <= 0 ) {
+			wp_send_json_error(
+				array(
+					'message' => esc_html__( 'Invalid item ID.', 'wpo-aom' ),
+				)
+			);
+		}
+
+		// Get the order item to validate and get total quantity.
+		$order_item = \WC_Order_Factory::get_order_item( $item_id );
+		if ( ! $order_item ) {
+			wp_send_json_error(
+				array(
+					'message' => esc_html__( 'Order item not found.', 'wpo-aom' ),
+				)
+			);
+		}
+
+		$total_quantity = (int) $order_item->get_quantity();
+		if ( $quantity > $total_quantity ) {
+			wp_send_json_error(
+				array(
+					'message' => sprintf(
+						/* translators: %d: total quantity */
+						esc_html__( 'Fulfillment quantity cannot exceed %d.', 'wpo-aom' ),
+						$total_quantity
+					),
+				)
+			);
+		}
+
+		// Save the fulfillment quantity.
+		$result = $this->fulfillment_service->save_order_item_fulfillment_quantity(
+			$item_id,
+			$quantity,
+			$fulfillment_id
+		);
+
+		if ( ! $result ) {
+			wp_send_json_error(
+				array(
+					'message' => esc_html__( 'Failed to save fulfillment quantity.', 'wpo-aom' ),
+				)
+			);
+		}
+
+		// Temporarily create a fulfillment object to get updated status.
+		$fulfillment = new Fulfillment(
+			array(
+				'id' => $fulfillment_id,
+				'quantity' => $quantity,
+			)
+		);
+
+		$fulfillment_status = $this->fulfillment_service->get_order_item_fulfillment_status( $order_item, $fulfillment );
+
+		// Return the updated HTML.
+		wp_send_json_success(
+			array(
+				'message' => esc_html__( 'Fulfillment quantity saved successfully.', 'wpo-aom' ),
+				'html'    => $this->get_fulfillment_status_html( $fulfillment_status, $quantity, $total_quantity ),
+			)
+		);
 	}
 }
