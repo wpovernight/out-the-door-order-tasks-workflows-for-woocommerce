@@ -36,84 +36,88 @@ function toggleFulfillmentMode(fulfillmentCell, mode) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+	// Use event delegation to handle dynamically loaded content
+
 	// Toggle edit mode when edit button is clicked.
-	const editButtons = document.querySelectorAll('.wpo-aom-edit-fulfillment');
-	editButtons.forEach(function (button) {
-		button.addEventListener('click', function () {
-			const fulfillmentCell = button.closest('.wpo-aom-fulfillment');
+	document.addEventListener('click', function (event) {
+		const editButton = event.target.closest('.wpo-aom-edit-fulfillment');
+		if (editButton) {
+			const fulfillmentCell = editButton.closest('.wpo-aom-fulfillment');
 			toggleFulfillmentMode(fulfillmentCell, 'edit');
-		});
+		}
 	});
 
 	// Toggle edit mode off when cancel button is clicked.
-	const cancelButtons = document.querySelectorAll('.wpo-aom-cancel-fulfillment');
-	cancelButtons.forEach(function (button) {
-		button.addEventListener('click', function () {
-			const fulfillmentCell = button.closest('.wpo-aom-fulfillment');
+	document.addEventListener('click', function (event) {
+		const cancelButton = event.target.closest('.wpo-aom-cancel-fulfillment');
+		if (cancelButton) {
+			const fulfillmentCell = cancelButton.closest('.wpo-aom-fulfillment');
 			toggleFulfillmentMode(fulfillmentCell, 'view');
-		});
+		}
 	});
 
 	// Save fulfillment when save button is clicked.
-	const saveButtons = document.querySelectorAll('.wpo-aom-save-fulfillment');
-	saveButtons.forEach(function (button) {
-		button.addEventListener('click', function () {
-			const fulfillmentCell = button.closest('.wpo-aom-fulfillment');
-			const itemId = button.getAttribute('data-item-id');
-			const fulfillmentId = button.getAttribute('data-fulfillment-id');
-			const quantityInput = fulfillmentCell.querySelector('.wpo-aom-fulfillment-quantity');
+	document.addEventListener('click', function (event) {
+		const saveButton = event.target.closest('.wpo-aom-save-fulfillment');
+		if (!saveButton) {
+			return;
+		}
 
-			if (!quantityInput) {
-				return;
-			}
+		const fulfillmentCell = saveButton.closest('.wpo-aom-fulfillment');
+		const itemId = saveButton.getAttribute('data-item-id');
+		const fulfillmentId = saveButton.getAttribute('data-fulfillment-id');
+		const quantityInput = fulfillmentCell.querySelector('.wpo-aom-fulfillment-quantity');
 
-			const quantity = quantityInput.value;
+		if (!quantityInput) {
+			return;
+		}
 
-			// Send AJAX request
-			const formData = new FormData();
-			formData.append('action', 'wpo_aom_save_fulfillment');
-			formData.append('nonce', WPO_AOM_OrderEdit.nonce);
-			formData.append('item_id', itemId);
-			formData.append('fulfillment_id', fulfillmentId);
-			formData.append('quantity', quantity);
+		const quantity = quantityInput.value;
 
-			// Disable button during request
-			button.disabled = true;
+		// Send AJAX request
+		const formData = new FormData();
+		formData.append('action', 'wpo_aom_save_fulfillment');
+		formData.append('nonce', WPO_AOM_OrderEdit.nonce);
+		formData.append('item_id', itemId);
+		formData.append('fulfillment_id', fulfillmentId);
+		formData.append('quantity', quantity);
 
-			fetch(ajaxurl, {
-				method: 'POST',
-				body: formData
+		// Disable button during request
+		saveButton.disabled = true;
+
+		fetch(ajaxurl, {
+			method: 'POST',
+			body: formData
+		})
+			.then(function (response) {
+				return response.json();
 			})
-				.then(function (response) {
-					return response.json();
-				})
-				.then(function (data) {
-					if (data.success) {
-						// Update view mode with new quantity
-						const viewDiv = fulfillmentCell.querySelector('.view');
-						if (viewDiv && data.data.html) {
-							const statusTag = viewDiv.querySelector('.wpo-aom-tag');
-							if (statusTag) {
-								statusTag.outerHTML = data.data.html;
-							}
+			.then(function (data) {
+				if (data.success) {
+					// Update view mode with new quantity
+					const viewDiv = fulfillmentCell.querySelector('.view');
+					if (viewDiv && data.data.html) {
+						const statusTag = viewDiv.querySelector('.wpo-aom-tag');
+						if (statusTag) {
+							statusTag.outerHTML = data.data.html;
 						}
-
-						// Toggle back to view mode
-						toggleFulfillmentMode(fulfillmentCell, 'view');
-
-						// Update quantity input value
-						quantityInput.value = quantity;
-					} else {
-						alert(data.data.message || 'Error saving fulfillment');
 					}
-				})
-				.catch(function (error) {
-					console.error('Error:', error);
-					alert('Error saving fulfillment');
-				})
-				.finally(function () {
-					button.disabled = false;
-				});
-		});
+
+					// Toggle back to view mode
+					toggleFulfillmentMode(fulfillmentCell, 'view');
+
+					// Update quantity input value
+					quantityInput.value = quantity;
+				} else {
+					alert(data.data.message || 'Error saving fulfillment');
+				}
+			})
+			.catch(function (error) {
+				console.error('Error:', error);
+				alert('Error saving fulfillment');
+			})
+			.finally(function () {
+				saveButton.disabled = false;
+			});
 	});
 });
