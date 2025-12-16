@@ -232,7 +232,7 @@ final class TaskManagerService {
 	public function update_task( int $task_id, array $task_data, ?array $field_values = array() ): ?array {
 		$task = $this->task_repository->find( $task_id );
 		if ( ! $task ) {
-			return false;
+			throw new RuntimeException( 'Task not found.' );
 		}
 
 		$task->fill( $task_data );
@@ -594,6 +594,7 @@ final class TaskManagerService {
 		?int $previous_task_id = null,
 		string $fallback_placement = 'first'
 	): float {
+		// Validate fallback placement.
 		if ( ! in_array( $fallback_placement, array( 'first', 'last' ), true ) ) {
 			throw new InvalidArgumentException( 'Invalid default position. Must be "first" or "last".' );
 		}
