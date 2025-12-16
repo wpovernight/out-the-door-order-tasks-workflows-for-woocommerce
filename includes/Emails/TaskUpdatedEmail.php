@@ -29,6 +29,7 @@ class TaskUpdatedEmail extends WC_Email {
 
 		// Triggers for this email.
 		add_action( 'wpo_aom_task_updated', array( $this, 'trigger' ), 10, 3 );
+		add_action( 'wpo_aom_task_moved', array( $this, 'trigger_on_task_moved' ), 10, 4 );
 
 		parent::__construct();
 
@@ -63,6 +64,10 @@ class TaskUpdatedEmail extends WC_Email {
 	 *                                with 'old_value' and 'new_value' for each.
 	 */
 	public function trigger( int $task_id, array $task_with_fields, array $updated_fields = array() ): void {
+		if ( ! $this->is_enabled() ) {
+			return;
+		}
+
 		$this->setup_locale();
 
 		$this->task_data = $task_with_fields;
@@ -107,6 +112,47 @@ class TaskUpdatedEmail extends WC_Email {
 		 * @param array $updated_fields   Array of updated field slugs with old and new values.
 		 */
 		do_action( 'wpo_aom_task_updated_email_sent', $task_id, $task_with_fields, $updated_fields );
+	}
+
+	/**
+	 * Trigger email when a task is moved (with lazy loading).
+	 *
+	 * @param int   $task_id          The task ID.
+	 * @param int   $target_status_id The new status ID.
+	 * @param float $new_position     The new position.
+	 * @param array $updated_fields   Array of fields that changed with old/new values.
+	 *
+	 * @return void
+	 */
+	public function trigger_on_task_moved(
+		int $task_id,
+		int $target_status_id,
+		float $new_position,
+		array $updated_fields
+	): void {
+		if ( ! $this->is_enabled() ) {
+			return;
+		}
+
+		// Check if status actually changed.
+		if (
+			! isset( $updated_fields['status'] ) ||
+			$updated_fields['status']['old_value'] === $updated_fields['status']['new_value']
+		) {
+			return;
+		}
+
+		// Check if status is in monitored fields.
+		$monitored_fields = $this->get_monitored_fields();
+		if ( ! empty( $monitored_fields ) && ! in_array( 'status', $monitored_fields, true ) ) {
+			return;
+		}
+
+		// Fetch full task data.
+		$task_service     = WPO_AOM()->get_service( 'TaskManagerService' );
+		$task_with_fields = $task_service->get_task_with_fields( $task_id );
+
+		$this->trigger( $task_id, $task_with_fields, $updated_fields );
 	}
 
 	/**

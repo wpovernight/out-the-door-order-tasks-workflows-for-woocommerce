@@ -722,7 +722,29 @@ final class TaskManagerService {
 			DefaultTaskFields::POSITION => $new_position,
 		);
 
+		$old_status    = $this->task_field_value_repository
+			->find_by_task_and_field( $task_id, DefaultTaskFields::STATUS );
+		$old_status_id = $old_status ? (int) $old_status->value : null;
+
+		$updated_fields = array(
+			'status' => array(
+				'old_value' => $old_status_id,
+				'new_value' => $target_status_id,
+			),
+		);
+
 		$this->task_field_value_repository->update_task_multiple_field_values( $task_id, $update_data );
+
+		/**
+		 * Fires after a task has been moved to a new position.
+		 *
+		 * @param int   $task_id          The ID of the moved task.
+		 * @param int   $target_status_id The ID of the target status.
+		 * @param float $new_position     The new calculated position of the task.
+		 * @param array $updated_fields   Associative array of fields that were changed,
+		 *                                with 'old_value' and 'new_value' for each.
+		 */
+		do_action( 'wpo_aom_task_moved', $task_id, $target_status_id, $new_position, $updated_fields );
 
 		return $new_position;
 	}
@@ -736,7 +758,11 @@ final class TaskManagerService {
 	 *
 	 * @return float
 	 */
-	private function calculate_fractional_position( float $previous_position, float $next_position, int $status_id ): float {
+	private function calculate_fractional_position(
+		float $previous_position,
+		float $next_position,
+		int $status_id
+	): float {
 		if ( $previous_position >= $next_position ) {
 			throw new InvalidArgumentException( 'Previous position must be less than next position.' );
 		}

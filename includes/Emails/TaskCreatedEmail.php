@@ -61,6 +61,10 @@ class TaskCreatedEmail extends WC_Email {
 	 * @param array $field_values      Field values set on creation.
 	 */
 	public function trigger( int $task_id, array $task_with_fields, array $field_values ): void {
+		if ( ! $this->is_enabled() ) {
+			return;
+		}
+
 		$this->setup_locale();
 
 		$this->task_data = $task_with_fields;
