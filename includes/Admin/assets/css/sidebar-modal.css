@@ -233,3 +233,31 @@
 .wpo-aom-async-multi-select-container > ul.wpo-aom-async-multi-select-selected-options > li > .wpo-button:hover {
     border-radius: 5em;
 }
+
+/* Task form Skeleton */
+.wpo-aom-task-form-skeleton {
+    padding: 0 1em;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5em;
+}
+
+.wpo-aom-task-form-skeleton .skeleton-field-group {
+    display: flex;
+    gap: 1em;
+}
+
+.wpo-aom-task-form-skeleton .skeleton-field-group > * {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+
+.wpo-aom-task-form-skeleton .skeleton-action-group {
+    display: flex;
+    gap: 1em;
+    margin-top: auto;
+    margin-bottom: 2em;
+}
