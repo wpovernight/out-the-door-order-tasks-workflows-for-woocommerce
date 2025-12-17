@@ -640,3 +640,7 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     color: #6b7280;
     font-size: 0.875em;
 }
+
+.kanban-view .wpo-aom-loading-skeleton-container {
+    flex-direction: row;
+}

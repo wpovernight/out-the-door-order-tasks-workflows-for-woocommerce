@@ -8,5 +8,7 @@ import { WpoAomOrderEditMetaBoxData } from '@orderEdit/types/globals';
  * @throws {Error} If the Order Edit data is not found on the window object.
  */
 export function useOrderEditData(): WpoAomOrderEditMetaBoxData {
-	return useLocalized<WpoAomOrderEditMetaBoxData>('WPO_AOM_OrderEdit_MetaBox');
+	return useLocalized<WpoAomOrderEditMetaBoxData>(
+		'WPO_AOM_OrderEdit_MetaBox'
+	);
 }

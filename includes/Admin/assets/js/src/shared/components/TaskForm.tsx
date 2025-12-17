@@ -45,9 +45,9 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 		);
 	}
 
-	const data = useLocalized<WpoAomTaskManagerData | WpoAomOrderEditMetaBoxData>(
-		globalKey
-	);
+	const data = useLocalized<
+		WpoAomTaskManagerData | WpoAomOrderEditMetaBoxData
+	>(globalKey);
 	const i18n = data.i18n;
 
 	const [isSubmitting, setIsSubmitting] = useState(false);
