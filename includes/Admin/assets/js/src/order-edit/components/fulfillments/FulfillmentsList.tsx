@@ -17,10 +17,6 @@ const FulfillmentsList: React.FC<FulfillmentsListProps> = ({
 	const { fulfillments, refreshFulfillments, orderId } =
 		useOrderFulfillment();
 
-	const handleAddFulfillment = () => {
-		// ToDo: Open fulfillment creation modal
-	};
-
 	// Show loading state
 	if (loadingStatus === 'loading') {
 		return <FulfillmentCardSkeleton count={2} />;
@@ -46,11 +42,10 @@ const FulfillmentsList: React.FC<FulfillmentsListProps> = ({
 				icon="📦"
 				message="No fulfillments yet." // ToDo: i18n
 				actionText="Add Fulfillment" // ToDo: i18n
-				onAction={handleAddFulfillment}
 				actionButtonProps={
 					{
 						'data-order-id': orderId,
-						className: 'fulfillments-trigger',
+						className: 'fulfillments-trigger', // This class is used to bind the click event
 					} as React.ButtonHTMLAttributes<HTMLButtonElement>
 				}
 			/>

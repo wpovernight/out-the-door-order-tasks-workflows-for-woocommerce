@@ -7,12 +7,6 @@ const Header: React.FC = () => {
 	const { i18n, orderId } = useOrderEditData();
 	const { fulfillments } = useOrderFulfillment();
 
-	const handleAddFulfillment = (e: React.MouseEvent) => {
-		e.preventDefault();
-
-		// ToDo: Trigger WooCommerce's native fulfillment modal - need to use orderId
-	};
-
 	const fulfillmentCount = fulfillments.length;
 
 	return (
@@ -22,8 +16,7 @@ const Header: React.FC = () => {
 			actionButtons={[
 				<button
 					key="add-fulfillment"
-					className="wpo-button wpo-button-icon add-button fulfillments-trigger"
-					onClick={handleAddFulfillment}
+					className="wpo-button wpo-button-icon add-button fulfillments-trigger" // This "fulfillments-trigger" class is used to bind the click event
 					data-order-id={orderId}
 				>
 					<span className="screenReader">
