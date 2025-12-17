@@ -632,6 +632,16 @@ final class TaskManagerService {
 			$new_position  = $last_position ? $last_position + 1.0 : 1.0;
 		}
 
+		/**
+		 * Filters the calculated new position for a moved task.
+		 *
+		 * @param float    $new_position     The calculated new position.
+		 * @param int      $task_id          The ID of the task being moved.
+		 * @param int|null $previous_task_id The ID of the previous task, if any.
+		 * @param int      $target_status_id The ID of the target status.
+		 *
+		 * @return float The new position.
+		 */
 		$new_position = apply_filters(
 			'wpo_aom_task_calculated_new_position',
 			(float) number_format( $new_position, 5, '.', '' ),

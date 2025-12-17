@@ -191,6 +191,13 @@ final class ServiceContainer {
 		 * Filters the Advanced Order Manager repository bindings.
 		 *
 		 * @param array<string, class-string> $bindings Repository bindings.
+		 *
+		 * @example
+		 * array(
+		 *    ModelClass::class => CustomRepositoryClass::class,
+		 * );
+		 *
+		 * @return array<string, class-string>
 		 */
 		$bindings = (array) apply_filters( 'wpo_aom_repository_bindings', self::$default_bindings );
 

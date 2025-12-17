@@ -26,6 +26,14 @@ abstract class BaseRestController {
 	 * @return bool True if the user has permission, false otherwise
 	 */
 	public function check_permissions( WP_REST_Request $request ): bool {
+		/**
+		 * Filter to modify the permission check for the REST API endpoint.
+		 *
+		 * @param bool $has_permission Whether the user has permission
+		 * @param WP_REST_Request $request The REST request
+		 *
+		 * @return bool Modified permission check result
+		 */
 		return apply_filters( 'wpo_aom_rest_api_permissions_check', wc_rest_check_manager_permissions( 'settings', 'edit' ), $request );
 	}
 
