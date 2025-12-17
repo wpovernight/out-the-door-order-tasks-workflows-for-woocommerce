@@ -34,7 +34,6 @@ const FinishedTasks: React.FC = () => {
 			await deleteTask(taskId);
 		} catch (error) {
 			console.error('Failed to delete task:', error);
-			// ToDo: Improve it
 			// eslint-disable-next-line no-alert
 			alert('Failed to delete task. Please try again.');
 		}

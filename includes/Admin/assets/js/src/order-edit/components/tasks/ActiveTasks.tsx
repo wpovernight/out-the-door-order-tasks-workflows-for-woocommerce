@@ -57,10 +57,7 @@ const ActiveTasks: React.FC = () => {
 	if (loadingStatus === 'error') {
 		return (
 			<ErrorState
-				message={
-					loadingError?.message ||
-					'Failed to load tasks. Please try again.' // ToDo: i18n
-				}
+				message={loadingError?.message || i18n.errorLoading}
 				onRetry={refreshTasks}
 			/>
 		);

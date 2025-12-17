@@ -124,7 +124,7 @@ final class MetaBox {
 				'isFulfillmentsEnabled' => wc_string_to_bool( get_option( 'woocommerce_feature_fulfillments_enabled', 'no' ) ),
 				'i18n'                  => array(
 					'loading'          => esc_html__( 'Loading...', 'wpo-aom' ),
-					'errorLoading'     => esc_html__( 'Error loading tasks. Please try again.', 'wpo-aom' ),
+					'errorLoading'     => esc_html__( 'Error loading data. Please try again.', 'wpo-aom' ),
 					'confirmationText' => esc_html__( 'Are you sure?' ),
 					'tasks'            => array(
 						'sectionTitle'         => esc_html__( 'Tasks', 'wpo-aom' ),
@@ -140,7 +140,8 @@ final class MetaBox {
 						'finishedTasksHeading' => esc_html__( 'Completed Tasks', 'wpo-aom' ),
 					),
 					'fulfillments'     => array(
-						'addFulfillment' => esc_html__( 'Add Fulfillment', 'wpo-aom' ),
+						'addFulfillment'  => esc_html__( 'Add Fulfillment', 'wpo-aom' ),
+						'noFulfillments' => esc_html__( 'No fulfillments yet.', 'wpo-aom' ),
 					),
 					'form'             => array(
 						'labels'       => array(

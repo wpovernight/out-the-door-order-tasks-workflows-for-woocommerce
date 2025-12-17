@@ -26,6 +26,7 @@ export interface WpoAomOrderEditMetaBoxData {
 		};
 		fulfillments: {
 			addFulfillment: string;
+			noFulfillments: string;
 		};
 		form: {
 			labels: {
