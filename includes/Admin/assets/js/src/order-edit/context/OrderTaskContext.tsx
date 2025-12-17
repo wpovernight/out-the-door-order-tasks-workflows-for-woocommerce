@@ -1,7 +1,14 @@
-import React, { useContext, useMemo } from 'react';
+import React, {
+	useContext,
+	useMemo,
+	useState,
+	useCallback,
+	useRef,
+} from 'react';
 import { useTasks } from '@shared/context/TaskContext';
 import { getFieldRawValues } from '@shared/utils/fieldUtils';
 import { Task } from '@shared/types/task';
+import { AsyncLoaderStatus } from '@shared/hooks/useAsyncLoader';
 
 // Type for creating/updating tasks via API
 export type TaskPayload = Partial<Task> & {
@@ -19,6 +26,10 @@ interface OrderTaskContextType {
 	activeCount: number;
 	finishedTasks: Task[];
 	finishedCount: number;
+	loadingStatus: AsyncLoaderStatus;
+	loadingError: Error | null;
+	loadTaskData: (force?: boolean) => Promise<void>;
+	refreshTasks: () => Promise<void>;
 	createTask: (taskData: TaskPayload) => Promise<Task>;
 	updateTask: (taskId: number, taskData: TaskPayload) => Promise<Task>;
 	deleteTask: (taskId: number) => Promise<void>;
@@ -33,7 +44,21 @@ export const OrderTaskProvider: React.FC<{
 	orderId: number;
 	children: React.ReactNode;
 }> = ({ orderId, children }) => {
-	const { tasks, saveTask, deleteTask: deleteTaskFromGlobal } = useTasks();
+	const {
+		tasks,
+		saveTask,
+		deleteTask: deleteTaskFromGlobal,
+		loadTasks,
+		loadTaskFields,
+		loadFieldOptions,
+	} = useTasks();
+
+	// Loading state management
+	const [loadingStatus, setLoadingStatus] =
+		useState<AsyncLoaderStatus>('idle');
+	const [loadingError, setLoadingError] = useState<Error | null>(null);
+	const [hasLoaded, setHasLoaded] = useState<boolean>(false);
+	const isLoadingRef = useRef<boolean>(false);
 
 	const orderTasks = useMemo(() => {
 		return tasks.filter((task) => {
@@ -60,6 +85,46 @@ export const OrderTaskProvider: React.FC<{
 			(task: { status: string }) => task.status === finishedTaskStatus
 		);
 	}, [orderTasks]);
+
+	// Load all task-related data
+	const loadTaskData = useCallback(
+		async (force: boolean = false) => {
+			// Prevent concurrent calls
+			if (isLoadingRef.current || (hasLoaded && !force)) {
+				return;
+			}
+
+			isLoadingRef.current = true;
+			setLoadingStatus('loading');
+			setLoadingError(null);
+
+			try {
+				await Promise.all([
+					loadTasks(force),
+					loadTaskFields(force),
+					loadFieldOptions('status', force),
+				]);
+
+				setHasLoaded(true);
+				setLoadingStatus('loaded');
+			} catch (err) {
+				setLoadingStatus('error');
+				setLoadingError(
+					err instanceof Error
+						? err
+						: new Error('Failed to load tasks')
+				);
+				console.error('Error loading tasks:', err);
+			} finally {
+				isLoadingRef.current = false;
+			}
+		},
+		[loadTasks, loadTaskFields, loadFieldOptions, hasLoaded]
+	);
+
+	const refreshTasks = useCallback(async () => {
+		await loadTaskData(true);
+	}, [loadTaskData]);
 
 	// Create a new task for this order
 	const createTask = async (taskData: TaskPayload): Promise<Task> => {
@@ -108,6 +173,10 @@ export const OrderTaskProvider: React.FC<{
 				activeCount: activeTasks.length,
 				finishedTasks,
 				finishedCount: finishedTasks.length,
+				loadingStatus,
+				loadingError,
+				loadTaskData,
+				refreshTasks,
 				createTask,
 				updateTask,
 				deleteTask,

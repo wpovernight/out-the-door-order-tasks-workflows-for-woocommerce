@@ -3,14 +3,10 @@ import { TaskCard } from '@shared/components/TaskCard';
 import { useOrderTask } from '@orderEdit/context/OrderTaskContext';
 import { useOrderEditData } from '@orderEdit/hooks/useOrderEditData';
 import { useTaskEdit } from '@shared/hooks/useTaskFormModal';
-import { AsyncLoaderStatus } from '@shared/hooks/useAsyncLoader';
 
-interface FinishedTasksProps {
-	loadingStatus: AsyncLoaderStatus;
-}
-
-const FinishedTasks: React.FC<FinishedTasksProps> = ({ loadingStatus }) => {
-	const { finishedTasks, finishedCount, deleteTask } = useOrderTask();
+const FinishedTasks: React.FC = () => {
+	const { finishedTasks, finishedCount, deleteTask, loadingStatus } =
+		useOrderTask();
 	const { i18n } = useOrderEditData();
 	const { openEditTaskModal } = useTaskEdit();
 	const [isExpanded, setIsExpanded] = useState(false);

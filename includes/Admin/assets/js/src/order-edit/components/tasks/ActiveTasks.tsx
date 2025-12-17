@@ -5,18 +5,15 @@ import { useOrderEditData } from '@orderEdit/hooks/useOrderEditData';
 import { useTaskEdit, useTaskCreation } from '@shared/hooks/useTaskFormModal';
 import { EmptyState, ErrorState } from '@shared/components/LoadingSkeleton';
 import { TaskCardSkeleton } from '@shared/components/TaskCardSkeleton';
-import { AsyncLoaderStatus } from '@shared/hooks/useAsyncLoader';
 
-interface ActiveTasksProps {
-	loadingStatus: AsyncLoaderStatus;
-	loadingError: Error | null;
-}
-
-const ActiveTasks: React.FC<ActiveTasksProps> = ({
-	loadingStatus,
-	loadingError,
-}) => {
-	const { activeTasks, deleteTask } = useOrderTask();
+const ActiveTasks: React.FC = () => {
+	const {
+		activeTasks,
+		deleteTask,
+		loadingStatus,
+		loadingError,
+		refreshTasks,
+	} = useOrderTask();
 	const { i18n, orderId } = useOrderEditData();
 	const { openEditTaskModal } = useTaskEdit();
 	const { openCreateTaskModal } = useTaskCreation();
@@ -64,7 +61,7 @@ const ActiveTasks: React.FC<ActiveTasksProps> = ({
 					loadingError?.message ||
 					'Failed to load tasks. Please try again.' // ToDo: i18n
 				}
-				onRetry={() => window.location.reload()} // ToDo: Replace with proper refresh function
+				onRetry={refreshTasks}
 			/>
 		);
 	}
