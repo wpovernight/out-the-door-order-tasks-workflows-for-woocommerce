@@ -4,7 +4,7 @@ import { Board } from './components/Board';
 import { ViewTaskProvider } from './context/ViewTaskContext';
 import { useAsyncLoader } from '@shared/hooks/useAsyncLoader';
 import { useTaskManagerData } from '@taskManager/hooks/useTaskManagerData';
-import {BoardSkeleton} from "@taskManager/views/Kanban/components/BoardSkeleton";
+import { BoardSkeleton } from '@taskManager/views/Kanban/components/BoardSkeleton';
 
 export const KanbanView: React.FC = () => {
 	const { loadTasks, loadTaskFields, loadFieldOptions } = useTasks();
@@ -24,7 +24,7 @@ export const KanbanView: React.FC = () => {
 	}, [loadingStatus, loadFieldOptions, loadTaskFields]);
 
 	if (loadingStatus === 'loading') {
-		return <BoardSkeleton />
+		return <BoardSkeleton />;
 	}
 
 	// ToDo: Improve error handling UI

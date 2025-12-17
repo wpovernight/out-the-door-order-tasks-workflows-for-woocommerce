@@ -1,5 +1,8 @@
 import React from 'react';
-import { LoadingSkeleton, SkeletonBox } from '@shared/components/LoadingSkeleton';
+import {
+	LoadingSkeleton,
+	SkeletonBox,
+} from '@shared/components/LoadingSkeleton';
 
 interface BoardSkeletonProps {
 	count?: number;
@@ -17,7 +20,7 @@ export const BoardSkeleton: React.FC<BoardSkeletonProps> = ({
 				width="23em"
 				className="kanban-board-skeleton"
 			>
-                {/* Empty - just the column structure */}
+				{/* Empty - just the column structure */}
 			</SkeletonBox>
 		</LoadingSkeleton>
 	);

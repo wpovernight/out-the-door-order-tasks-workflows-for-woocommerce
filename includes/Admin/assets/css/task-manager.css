@@ -641,6 +641,17 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     font-size: 0.875em;
 }
 
-.kanban-view .wpo-aom-loading-skeleton-container {
+.kanban-view .wpo-aom-loading-skeleton-container,
+.calendar-view .wpo-aom-loading-skeleton-container {
     flex-direction: row;
+}
+
+.calendar-view .wpo-aom-loading-skeleton-container > .task-list-container {
+    margin-top: 1em;
+    flex: 1;
+}
+
+.calendar-view .wpo-aom-skeleton-box.calendar-task-list {
+    margin-top: 1em;
+    margin-left: -1em;
 }
