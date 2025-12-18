@@ -27,7 +27,7 @@ export const ViewProvider: React.FC<{ children: React.ReactNode }> = ({
 			: 'kanban';
 	}, [location.pathname]);
 
-	// Navigate to new view instead of setting state
+	// Navigate to new view instead of setting state.
 	const setView = (newView: View) => {
 		navigate(`/${newView}`);
 	};
