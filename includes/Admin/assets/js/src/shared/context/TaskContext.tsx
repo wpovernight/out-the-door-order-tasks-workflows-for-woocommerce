@@ -299,7 +299,10 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				);
 
 				// Collect the position update
-				pendingPositionUpdatesRef.current.set(taskId, result.new_position);
+				pendingPositionUpdatesRef.current.set(
+					taskId,
+					result.new_position
+				);
 
 				// Decrement pending counter
 				pendingMovesCountRef.current -= 1;
@@ -307,7 +310,9 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				// Only apply position updates when all pending moves are complete
 				// This prevents race conditions when multiple tasks are moved quickly
 				if (pendingMovesCountRef.current === 0) {
-					const positionUpdates = new Map(pendingPositionUpdatesRef.current);
+					const positionUpdates = new Map(
+						pendingPositionUpdatesRef.current
+					);
 					pendingPositionUpdatesRef.current.clear();
 
 					// Apply all collected position updates at once
