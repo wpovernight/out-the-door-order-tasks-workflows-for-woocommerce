@@ -1,0 +1,45 @@
+name: Lint and Build
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'includes/Admin/assets/js/src/**'
+  pull_request:
+    paths:
+      - 'includes/Admin/assets/js/src/**'
+
+jobs:
+  lint-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'includes/Admin/assets/js/src/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: includes/Admin/assets/js/src
+        run: npm ci
+
+      - name: Run ESLint with auto-fix
+        working-directory: includes/Admin/assets/js/src
+        run: npm run lint:fix
+
+      - name: Build production files
+        working-directory: includes/Admin/assets/js/src
+        run: npm run build
+
+      - name: Auto committing linted and built files
+        uses: stefanzweifel/git-auto-commit-action@v4
+        if: github.event_name == 'push'
+        with:
+          commit_message: "Lint and build JS/TS assets"
+          file_pattern: 'includes/Admin/assets/js/*.js includes/Admin/assets/js/src/**'
