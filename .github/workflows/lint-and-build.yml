@@ -22,7 +22,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: includes/Admin/assets/js/src
-        run: npm ci
+        run: npm install
 
       - name: Run ESLint with auto-fix
         working-directory: includes/Admin/assets/js/src
