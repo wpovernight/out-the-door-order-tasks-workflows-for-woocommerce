@@ -68,6 +68,11 @@ export const Board: React.FC = () => {
 							return;
 						}
 
+						// Variables to store API parameters
+						let previousTaskId: number | null = null;
+						let targetStatusId: number = 0;
+
+						// Compute the new state and extract API parameters in one go
 						setViewTasks((prev) => {
 							const updated = structuredClone(prev);
 							const fromList = updated[fromColumn] || [];
@@ -97,17 +102,22 @@ export const Board: React.FC = () => {
 							updated[fromColumn] = fromList;
 							updated[toColumn] = toList;
 
-							// Persist the move via API
-							const previousTaskId =
+							// Compute API parameters based on UPDATED state
+							previousTaskId =
 								insertAt > 0 ? toList[insertAt - 1].id : null;
-							const targetStatusId =
+							targetStatusId =
 								statusesRef.current.find(
 									(s) => s.slug === toColumn
 								)?.id || 0;
-							moveTask(task.id, previousTaskId, targetStatusId);
 
 							return updated;
 						});
+
+						// Defer API call to after render cycle to avoid React warnings
+						queueMicrotask(() => {
+							moveTask(task.id, previousTaskId, targetStatusId);
+						});
+
 						return;
 					}
 
@@ -117,6 +127,10 @@ export const Board: React.FC = () => {
 						if (fromColumn === toColumn) {
 							return;
 						}
+
+						// Variables to store API parameters
+						let previousTaskId: number | null = null;
+						let targetStatusId: number = 0;
 
 						setViewTasks((prev) => {
 							const updated = structuredClone(prev);
@@ -137,20 +151,24 @@ export const Board: React.FC = () => {
 							updated[fromColumn] = fromList;
 							updated[toColumn] = toList;
 
-							// Persist the move via API
+							// Compute API parameters based on UPDATED state
 							// Get the last task in the target column to set as previousTaskId
 							// - 2 is used because we just pushed the task to the end of the list
-							const previousTaskId =
+							previousTaskId =
 								toList.length > 1
 									? toList[toList.length - 2].id
 									: null;
-							const targetStatusId =
+							targetStatusId =
 								statusesRef.current.find(
 									(s) => s.slug === toColumn
 								)?.id || 0;
-							moveTask(task.id, previousTaskId, targetStatusId);
 
 							return updated;
+						});
+
+						// Defer API call to after render cycle to avoid React warnings
+						queueMicrotask(() => {
+							moveTask(task.id, previousTaskId, targetStatusId);
 						});
 					}
 				},

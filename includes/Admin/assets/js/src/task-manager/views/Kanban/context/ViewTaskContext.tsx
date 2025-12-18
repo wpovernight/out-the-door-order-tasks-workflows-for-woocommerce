@@ -33,13 +33,13 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 	const [viewTasks, setViewTasks] = useState<Record<string, Task[]>>({});
 	const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
-	const selectTask = (task: Task) => {
+	const selectTask = useCallback((task: Task) => {
 		setSelectedTask(task);
-	};
+	}, []);
 
-	const clearSelectedTask = () => {
+	const clearSelectedTask = useCallback(() => {
 		setSelectedTask(null);
-	};
+	}, []);
 
 	// Wrapper function that updates both global state and local viewTasks.
 	const finishTask = useCallback(
