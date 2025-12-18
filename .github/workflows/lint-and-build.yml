@@ -2,6 +2,9 @@ name: Lint and Build
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - 'includes/Admin/assets/js/src/**'
   pull_request:
     paths:
       - 'includes/Admin/assets/js/src/**'
