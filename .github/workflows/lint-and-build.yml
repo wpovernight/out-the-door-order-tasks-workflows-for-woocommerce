@@ -2,9 +2,6 @@ name: Lint and Build
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - 'includes/Admin/assets/js/src/**'
   pull_request:
     paths:
       - 'includes/Admin/assets/js/src/**'
@@ -22,8 +19,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: 'includes/Admin/assets/js/src/package-lock.json'
 
       - name: Install dependencies
         working-directory: includes/Admin/assets/js/src
