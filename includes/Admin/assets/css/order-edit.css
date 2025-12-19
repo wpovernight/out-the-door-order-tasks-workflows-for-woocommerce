@@ -1,6 +1,6 @@
 .wpo-aom-metabox-section {
-    border: 1px solid #D5D7DA;
-    border-radius: 0.5em;
+    border: 1px solid var(--wpo-aom-border-color);
+    border-radius: var(--wpo-aom-radius-m);
     margin-top: 1em;
 }
 
@@ -8,7 +8,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid #D5D7DA;
+    border-bottom: 1px solid var(--wpo-aom-border-color);
     padding: 1em;
 }
 
@@ -25,11 +25,11 @@
 }
 
 .wpo-aom-metabox-section .header .actions .add-button {
-    color: #3858E9;
+    color: var(--wpo-aom-purple-primary);
     width: 2em;
     height: 2em;
     font-size: 1.5em;
-    border: 1px solid #3858E9;
+    border: 1px solid var(--wpo-aom-purple-primary);
 }
 
 .wpo-aom-metabox-section .header .actions .add-button::before {
@@ -71,11 +71,11 @@
 
 .wpo-aom-metabox-section .header .title-details > span {
     display: inline-block;
-    border-radius: 1em;
+    border-radius: var(--wpo-aom-radius-l);
     padding: 0.3em 0.7em;
     margin: 0;
     white-space: nowrap;
-    background: #F5F5F5;
+    background: var(--wpo-aom-bg-lighter);
 }
 
 /********************************
@@ -107,12 +107,12 @@
 }
 
 .finished-tasks-container {
-    border-top: 1px solid #D5D7DA;
+    border-top: 1px solid var(--wpo-aom-border-color);
     padding-top: 1em;
 }
 
 .finished-tasks-toggle {
-    color: #2271b1;
+    color: var(--wpo-aom-wp-blue);
 }
 
 .finished-tasks-toggle::after {
@@ -125,11 +125,11 @@
 
 .finished-tasks-toggle.expanded::after {
     content: "\f343";
-    transition: transform 0.3s;
+    transition: transform var(--wpo-aom-transition-normal);
 }
 
 .finished-tasks-list-container .task-card {
-    background-color: #FAFAFA;
+    background-color: var(--wpo-aom-bg-gray-alt);
 }
 
 .task-list .task-list-empty > p {
@@ -176,16 +176,16 @@
     display: flex;
     flex-direction: column;
     gap: 0.6em;
-    background: var(--wpo-aom-card-bg, #fff);
+    background: var(--wpo-aom-card-bg);
     padding: 0.875em;
-    border: 1px solid #D5D7DA;
-    border-radius: 0.5em;
+    border: 1px solid var(--wpo-aom-border-color);
+    border-radius: var(--wpo-aom-radius-m);
 }
 
 .fulfillment-card h4 {
     font-size: 1.1em;
     font-weight: 600;
-    color: var(--wpo-aom-text-primary, #1F2937);
+    color: var(--wpo-aom-text-primary);
     margin: 0;
 }
 
@@ -240,7 +240,7 @@
 .fulfillment-card-details > dd {
     display: flex;
     justify-content: flex-end;
-    border-left: 1px solid #D5D7DA;
+    border-left: 1px solid var(--wpo-aom-border-color);
 }
 
 /********************************
@@ -255,23 +255,23 @@ td.wpo-aom-fulfillment > div {
 }
 
 .wpo-aom-fulfillment span.wpo-aom-tag {
-    border-radius: 12em;
+    border-radius: var(--wpo-aom-radius-l);
     padding: 0.2em 0.9em;
 }
 
-.wpo-aom-fulfillment span.wpo-aom-tag.not-shipped {
-    background-color: #f5f5f5;
+.wpo-aom-fulfillment span.wpo-aom-tag.not-fulfilled {
+    background-color: var(--wpo-aom-bg-lighter);
     color: #414651;
 }
 
-.wpo-aom-fulfillment span.wpo-aom-tag.fully-shipped {
-    background-color: #D1FAE5;
-    color: #065F46;
+.wpo-aom-fulfillment span.wpo-aom-tag.fully-fulfilled {
+    background-color: var(--wpo-aom-success-bg);
+    color: var(--wpo-aom-success-text);
 }
 
-.wpo-aom-fulfillment span.wpo-aom-tag.partially-shipped {
-    background-color: #FEF3C7;
-    color: #92400E;
+.wpo-aom-fulfillment span.wpo-aom-tag.partially-fulfilled {
+    background-color: var(--wpo-aom-warning-bg);
+    color: var(--wpo-aom-warning-text);
 }
 
 #woocommerce-order-items tbody tr:hover .wpo-aom-edit-fulfillment {
@@ -279,7 +279,7 @@ td.wpo-aom-fulfillment > div {
 }
 
 .wpo-aom-edit-fulfillment {
-    color: #ccc;
+    color: var(--wpo-aom-gray-medium);
     font-size: 1.2em;
     opacity: 0;
 }
@@ -291,7 +291,7 @@ td.wpo-aom-fulfillment > div {
 }
 
 .wpo-aom-edit-fulfillment:hover {
-    color: #999;
+    color: var(--wpo-aom-gray-dark);
     background-color: transparent;
 }
 
@@ -313,11 +313,11 @@ td.wpo-aom-fulfillment > div {
 }
 
 .wpo-aom-save-fulfillment {
-    background-color: #6E1EDC;
+    background-color: var(--wpo-aom-purple-primary);
 }
 
 .wpo-aom-save-fulfillment:hover {
-    background-color: #411282;
+    background-color: var(--wpo-aom-purple-dark);
 }
 
 .wpo-aom-save-fulfillment::before {
@@ -337,7 +337,7 @@ td.wpo-aom-fulfillment > div {
 }
 
 .wpo-aom-cancel-fulfillment {
-    border: 1px solid #D5D7DA;
+    border: 1px solid var(--wpo-aom-border-color);
 }
 
 .wpo-aom-cancel-fulfillment::before {

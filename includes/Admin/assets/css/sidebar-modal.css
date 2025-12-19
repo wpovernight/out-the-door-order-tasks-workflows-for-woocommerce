@@ -20,8 +20,8 @@
     width: 40em;
     overflow: hidden;
     overscroll-behavior-y: none;
-    border-left: 1px solid #ddd;
-    background: #fff;
+    border-left: 1px solid var(--wpo-aom-border-light);
+    background: var(--wpo-aom-card-bg);
 }
 
 .wpo-aom-sidebar-modal > .inner {
@@ -58,13 +58,13 @@
 
 .wpo-aom-task-form > .action-group > .wpo-button {
     flex: 1;
-    border: 1px solid #dadcde;
+    border: 1px solid var(--wpo-aom-border-light);
     height: 2.5em;
 }
 
 .wpo-aom-sidebar-backdrop {
     inset: 0;
-    background: rgba(0, 0, 0, 0.4);
+    background: var(--wpo-aom-backdrop);
     position: fixed;
     top: 0;
     height: 100%;
@@ -104,7 +104,7 @@
 .field-group textarea {
     font-size: inherit;
     border-color: var(--wpo-aom-border-color);
-    border-radius: 0.5em;
+    border-radius: var(--wpo-aom-radius-m);
 }
 
 .field-group > * {
@@ -121,7 +121,7 @@
 .wpo-aom-field-option-dropdown-container > button {
     background: transparent;
     border: 1px solid var(--wpo-aom-border-color);
-    border-radius: 8px;
+    border-radius: var(--wpo-aom-radius-m);
     width: 100%;
     height: 2.31em;
     text-align: left;
@@ -131,8 +131,8 @@
 }
 
 .wpo-aom-field-option-dropdown-container > button:focus {
-    border-color: #2271b1;
-    box-shadow: 0 0 0 1px #2271b1;
+    border-color: var(--wpo-aom-wp-blue);
+    box-shadow: 0 0 0 1px var(--wpo-aom-wp-blue);
     /* Only visible in Windows High Contrast mode */
     outline: 2px solid transparent;
 }
@@ -141,19 +141,12 @@
     font-family: 'dashicons';
     content: "\f347";
     margin-left: auto;
-    color: #535862;
+    color: var(--wpo-aom-text-gray);
     font-size: 1.2em;
 }
 
 .wpo-aom-field-option-dropdown-container > ul > li > button {
     padding: 0.7em 1em;
-}
-
-.wpo-aom-label {
-    border-radius: 1em;
-    padding: 2px 0.7em;
-    font-size: 0.90em;
-    font-weight: 600;
 }
 
 .wpo-aom-async-multi-select-container {
@@ -169,10 +162,10 @@
     cursor: pointer;
     box-shadow: var(--wpo-aom-floating-shadow);
     padding: 0;
-    border-radius: 8px;
+    border-radius: var(--wpo-aom-radius-m);
     overflow: hidden;
     margin: 5px 0 0;
-    background: #fff;
+    background: var(--wpo-aom-card-bg);
     width: 100%;
     z-index: 1;
 }
@@ -180,10 +173,10 @@
 .wpo-aom-async-multi-select-container > .wpo-aom-async-multi-select-message {
     position: absolute;
     box-shadow: var(--wpo-aom-floating-shadow);
-    border-radius: 8px;
+    border-radius: var(--wpo-aom-radius-m);
     overflow: hidden;
     margin: 5px 0 0;
-    background: #fff;
+    background: var(--wpo-aom-card-bg);
     width: 100%;
     z-index: 1;
 }
@@ -194,7 +187,7 @@
 
 .wpo-aom-async-multi-select-container > ul.wpo-aom-async-multi-select-options > li > button:hover,
 .wpo-aom-async-multi-select-container > ul.wpo-aom-async-multi-select-options > li > button:focus {
-    background-color: #00000012;
+    background-color: var(--wpo-aom-hover-overlay);
     outline: none;
 }
 
@@ -223,15 +216,15 @@
 
 .wpo-aom-async-multi-select-container > ul.wpo-aom-async-multi-select-selected-options > li {
     background: var(--wpo-aom-bg-light);
-    border-radius: 5em;
+    border-radius: var(--wpo-aom-radius-l);
     padding: 0 0 0 0.7em;
     display: flex;
     align-items: center;
     font-size: 0.9em;
 }
 
-.wpo-aom-async-multi-select-container > ul.wpo-aom-async-multi-select-selected-options > li > .wpo-button:hover {
-    border-radius: 5em;
+.wpo-aom-async-multi-select-container > ul.wpo-aom-async-multi-select-selected-options > li > .wpo-button {
+    border-radius: var(--wpo-aom-radius-l);
 }
 
 /* Task form Skeleton */

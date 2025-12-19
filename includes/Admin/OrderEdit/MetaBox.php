@@ -366,14 +366,14 @@ final class MetaBox {
 	public function get_fulfillment_status_html( string $fulfillment_status, int $shipped_quantity, int $total_quantity ): string {
 		switch ( $fulfillment_status ) {
 			case FulfillmentStatuses::FULFILLED:
-				$class = 'fully-shipped';
+				$class = 'fully-fulfilled';
 				break;
 			case FulfillmentStatuses::PARTIALLY_FULFILLED:
-				$class = 'partially-shipped';
+				$class = 'partially-fulfilled';
 				break;
 			default:
 			case FulfillmentStatuses::NOT_FULFILLED:
-				$class = 'not-shipped';
+				$class = 'not-fulfilled';
 				break;
 		}
 
