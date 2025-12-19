@@ -35,6 +35,10 @@ jobs:
         working-directory: includes/Admin/assets/js/src
         run: npm run build
 
+      - name: Remove package-lock.json files if generated
+        run: |
+          find . -name "package-lock.json" -type f -delete
+
       - name: Auto committing linted and built files
         uses: stefanzweifel/git-auto-commit-action@v4
         if: github.event_name == 'push'
