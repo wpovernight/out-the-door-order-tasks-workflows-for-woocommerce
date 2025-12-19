@@ -24,7 +24,9 @@ jobs:
         run: |
           find includes/Admin/assets -type f -name "*.js" \
             ! -name "*.min.js" \
-            ! -path "*/build/*" \
+            ! -name "task-manager.js" \
+            ! -name "order-edit-metabox.js" \
+            ! -path "*/assets/js/src/*" \
             ! -name "webpack.config.js" \
             ! -name ".eslintrc.js" \
             -exec bash -c 'terser "$0" -o "${0%.js}.min.js" --compress --mangle' {} \;
