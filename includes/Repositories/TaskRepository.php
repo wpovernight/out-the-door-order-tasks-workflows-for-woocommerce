@@ -113,23 +113,52 @@ class TaskRepository extends BaseRepository {
 	/**
 	 * Rebalance positions of tasks, optionally within a specific status.
 	 *
-	 * @param int|null $status_id
+	 * @param int $status_id
 	 *
-	 * @return void
+	 * @return bool
+	 * @throws \Throwable
 	 */
-	public function rebalance_positions( ?int $status_id = null ): void {
-		$task_field_value_repository = RepositoryRegistry::get( TaskFieldValue::class );
+	public function rebalance_positions( int $status_id ): bool {
+		return $this->transaction( function () use ( $status_id ) {
+			$task_field_value_repository = RepositoryRegistry::get( TaskFieldValue::class );
+			$task_field_value_table_name = $task_field_value_repository->get_table_full_name();
 
-		$status_field_id       = DefaultTaskFields::STATUS;
-		$position_field_id     = DefaultTaskFields::POSITION;
+			$status_field_id   = DefaultTaskFields::STATUS;
+			$position_field_id = DefaultTaskFields::POSITION;
 
-		$task_field_value_table_name = $task_field_value_repository->get_table_full_name();
-		$ranked_cte                  = "
+			// Lock the relevant rows (prevents concurrent updates to these rows until COMMIT).
+			$lock_query = "
+				SELECT
+					position.id
+				FROM
+					{$task_field_value_table_name} AS position
+					INNER JOIN {$task_field_value_table_name} AS status ON position.task_id = status.task_id
+				WHERE
+					status.field_id = '{$status_field_id}'
+					AND position.field_id = '{$position_field_id}'
+					AND status.value = '%d'
+					FOR UPDATE;
+				";
+
+			$locked = $task_field_value_repository
+				->execute_raw( $lock_query, array( $status_id ) );
+
+			// If lock query failed (not 0 rows, but actual failure), return false.
+			if ( false === $locked ) {
+				return false;
+			}
+
+			// If no rows found (empty status), return true (success - nothing to rebalance).
+			if ( 0 === $locked ) {
+				return true;
+			}
+
+			// CTE to rank and update positions.
+			$ranked_cte = "
 			WITH ranked AS (
 				SELECT
 					position.id,
 					ROW_NUMBER() OVER (
-						PARTITION BY status.value
 						ORDER BY
 							CAST(position.value AS DECIMAL(10, 5))
 					) AS new_position
@@ -139,13 +168,7 @@ class TaskRepository extends BaseRepository {
 				WHERE
 					status.field_id = '{$status_field_id}'
 					AND position.field_id = '{$position_field_id}'
-		";
-
-		if ( $status_id ) {
-			$ranked_cte .= " AND status.value = '{$status_id}' ";
-		}
-
-		$ranked_cte .= "
+					AND status.value = '%d'
 			)
 			UPDATE
 				{$task_field_value_table_name} AS p
@@ -154,6 +177,11 @@ class TaskRepository extends BaseRepository {
 				p.value = r.new_position;
 		";
 
-		$task_field_value_repository->execute_raw( $ranked_cte );
+			$affected_rows = $task_field_value_repository
+				->execute_raw( $ranked_cte, array( $status_id ) );
+
+			// Return true even if 0 rows were affected (positions were already correct)
+			return false !== $affected_rows;
+		} );
 	}
 }

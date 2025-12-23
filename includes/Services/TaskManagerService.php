@@ -39,6 +39,16 @@ final class TaskManagerService {
 		$this->task_field_value_repository  = $task_field_value_repository;
 	}
 
+	/**
+	 * Register hooks and filters.
+	 *
+	 * @return void
+	 */
+	public function register() {
+		// Rebalance task positions hook.
+		add_action( 'wpo_aom_rebalance_task_positions', array( $this, 'rebalance_task_positions' ) );
+	}
+
 	/** ================================
 	 *   Task Methods
 	 *  ================================ */
@@ -579,9 +589,10 @@ final class TaskManagerService {
 	/**
 	 * Move a task to a different position.
 	 *
-	 * @param int      $task_id           The ID of the task to move.
-	 * @param int      $target_status_id  The ID of the target status to move the task to.
-	 * @param int|null $previous_task_id  The ID of the task that should precede the moved task in the new status. If null, the task will be placed at the start.
+	 * @param int      $task_id             The ID of the task to move.
+	 * @param int      $target_status_id    The ID of the target status to move the task to.
+	 * @param int|null $previous_task_id    The ID of the task that should precede the moved task in the new status.
+	 *                                      If null, the task will be placed at the start.
 	 * @param string   $fallback_placement  The default position to use if no previous task is specified.
 	 *
 	 *
@@ -681,11 +692,19 @@ final class TaskManagerService {
 
 		$position = ( $previous_position + $next_position ) / 2;
 
-		$precision = 0.0001;
-		// Check for precision issues.
-		if ( abs( $next_position - $previous_position ) < $precision ) {
-			// ToDo: Improve this part by considering async rebalancing, locks, etc.
-			$this->task_repository->rebalance_positions( $status_id );
+		/**
+		 * Filters the precision threshold for task position calculations.
+		 *
+		 * @param float $precision_threshold The precision threshold.
+		 *
+		 * @return float The precision threshold.
+		 */
+		$precision_threshold = apply_filters( 'wpo_aom_task_position_precision_threshold', 0.0001 );
+
+		// Check for precision.
+		if ( abs( $next_position - $previous_position ) < $precision_threshold ) {
+			// Schedule a rebalance task positions job.
+			$this->schedule_rebalance_task_job( $status_id );
 		}
 
 		return $position;
@@ -815,5 +834,66 @@ final class TaskManagerService {
 		 * @param TaskField      $field       Field definition object.
 		 */
 		return apply_filters( 'wpo_aom_task_get_field_value', $value, $field_value, $field );
+	}
+
+	/**
+	 * Schedule a rebalance task positions job for a specific status.
+	 *
+	 * @param int $status_id
+	 *
+	 * @return void
+	 */
+	public function schedule_rebalance_task_job( int $status_id ): void {
+		if ( $status_id <= 0 ||
+		     ! function_exists( 'as_has_scheduled_action' ) ||
+		     ! function_exists( 'as_schedule_single_action' )
+		) {
+			// ToDo: Use proper logging mechanism.
+			error_log('WPO AOM: Invalid status ID or Action Scheduler not available. Cannot schedule rebalance task positions job.');
+			return;
+		}
+
+		$hook_key = 'wpo_aom_rebalance_task_positions';
+
+		if (
+			\as_has_scheduled_action(
+				$hook_key,
+				array( 'status_id' => $status_id ),
+				'wpo_aom'
+			)
+		) {
+			return;
+		}
+
+		/**
+		 * Filters the scheduled time for the rebalance task positions action.
+		 *
+		 * @param int $timestamp The scheduled timestamp.
+		 *
+		 * @return int The modified timestamp.
+		 */
+		$timestamp = apply_filters(
+			'wpo_aom_rebalance_task_positions_scheduled_time',
+			strtotime( '+1 minute' )
+		);
+
+		\as_schedule_single_action(
+			$timestamp,
+			$hook_key,
+			array( 'status_id' => $status_id ),
+			'wpo_aom'
+		);
+	}
+
+	/**
+	 * Rebalance task positions within a specific status.
+	 *
+	 * @param int $status_id
+	 *
+	 * @return void
+	 * @throws \Throwable
+	 */
+	public function rebalance_task_positions( int $status_id ): void {
+		$this->task_repository->rebalance_positions( $status_id );
 	}
 }
