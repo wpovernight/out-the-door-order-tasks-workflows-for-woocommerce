@@ -116,7 +116,7 @@ final class Install {
 	 *
 	 * @return void
 	 */
-	private static function create_tables(): void {
+	public static function create_tables(): void {
 		global $wpdb;
 
 		$were_showing_errors = $wpdb->hide_errors();
