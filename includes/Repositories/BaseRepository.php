@@ -460,10 +460,10 @@ abstract class BaseRepository {
 	 *
 	 * @param callable $callback
 	 *
-	 * @return bool Result of the callback, or false on failure.
+	 * @return mixed Result of the callback, or false on failure.
 	 * @throws \Throwable
 	 */
-	public function transaction( callable $callback ): bool {
+	public function transaction( callable $callback ) {
 		$this->wpdb->query( 'START TRANSACTION' );
 
 		try {
