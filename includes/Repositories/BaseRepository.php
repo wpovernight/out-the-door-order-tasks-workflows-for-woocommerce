@@ -233,9 +233,9 @@ abstract class BaseRepository {
 	 * @param array<int, mixed> $bindings
 	 * @param bool $reset
 	 *
-	 * @return int Number of rows affected.
+	 * @return int|bool Number of rows affected.
 	 */
-	public function execute_raw( string $query, array $bindings = array(), bool $reset = true ): int {
+	public function execute_raw( string $query, array $bindings = array(), bool $reset = true ) {
 		if ( ! empty( $bindings ) ) {
 			$query = $this->wpdb->prepare( $query, ...array_values( $bindings ) );
 		}
@@ -460,10 +460,10 @@ abstract class BaseRepository {
 	 *
 	 * @param callable $callback
 	 *
-	 * @return mixed Result of the callback, or false on failure.
-	 * @throws \Exception
+	 * @return bool Result of the callback, or false on failure.
+	 * @throws \Throwable
 	 */
-	public function transaction( callable $callback ) {
+	public function transaction( callable $callback ): bool {
 		$this->wpdb->query( 'START TRANSACTION' );
 
 		try {
@@ -475,9 +475,10 @@ abstract class BaseRepository {
 			}
 
 			$this->wpdb->query( 'COMMIT' );
+
 			return $result;
 
-		} catch ( \Exception $e ) {
+		} catch ( \Throwable $e ) {
 			$this->wpdb->query( 'ROLLBACK' );
 			throw $e;
 		}
@@ -828,7 +829,11 @@ abstract class BaseRepository {
 	private function compile_limit_offset(): string {
 		$limit_offset = '';
 
-		if ( $this->limit > 0 ) {
+		// If offset is set but no limit, use a very large default limit
+		// This is because MySQL requires LIMIT before OFFSET
+		if ( $this->offset > 0 && $this->limit === 0 ) {
+			$limit_offset .= ' LIMIT 18446744073709551615'; // Max MySQL BIGINT value
+		} elseif ( $this->limit > 0 ) {
 			$limit_offset .= ' LIMIT ' . $this->limit;
 		}
 
