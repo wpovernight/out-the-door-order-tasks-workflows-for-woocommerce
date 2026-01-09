@@ -249,7 +249,7 @@ final class TaskManagerService {
 
 		$result = $this->task_repository->save( $task );
 
-		if ( ! $result ) {
+		if ( false === $result ) {
 			throw new RuntimeException( 'Failed to update task.' );
 		}
 
@@ -336,7 +336,7 @@ final class TaskManagerService {
 
 		$field->fill( $data );
 
-		return (bool) $this->task_field_repository->save( $field );
+		return false !== $this->task_field_repository->save( $field );
 	}
 
 	/**
@@ -432,7 +432,7 @@ final class TaskManagerService {
 
 		$option->fill( $option_data );
 
-		return (bool) $this->task_field_option_repository->save( $option );
+		return false !== $this->task_field_option_repository->save( $option );
 	}
 
 	/**
@@ -549,7 +549,7 @@ final class TaskManagerService {
 		if ( $field_value ) {
 			$field_value->value = maybe_serialize( $value );
 
-			return (bool) $this->task_field_value_repository->save( $field_value );
+			return false !== $this->task_field_value_repository->save( $field_value );
 		}
 
 		$new_value = array(
@@ -558,7 +558,7 @@ final class TaskManagerService {
 			'value'    => maybe_serialize( $value ),
 		);
 
-		return $this->task_field_value_repository->insert( $new_value );
+		return false !== $this->task_field_value_repository->insert( $new_value );
 	}
 
 	/**

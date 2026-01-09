@@ -313,11 +313,11 @@ abstract class BaseRepository {
 	 *
 	 * @param array<string, mixed> $data Columns to set.
 	 *
-	 * @return bool
+	 * @return int|false Number of rows updated, or false on error. Returns 0 if no rows were affected (data unchanged).
 	 * @throws RuntimeException If no WHERE clause is specified.
 	 * @throws InvalidArgumentException If data is empty or columns are invalid.
 	 */
-	public function update( array $data ): bool {
+	public function update( array $data ) {
 		// Validate the data array.
 		if ( empty( $data ) ) {
 			throw new InvalidArgumentException( 'Data must be a non-empty array.' );
@@ -343,7 +343,7 @@ abstract class BaseRepository {
 
 		$this->reset_query();
 
-		return (bool) $this->wpdb->update( $this->get_table_full_name(), $data, $where );
+		return $this->wpdb->update( $this->get_table_full_name(), $data, $where );
 	}
 
 	/**
