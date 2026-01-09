@@ -47,11 +47,36 @@ abstract class BaseModel {
 	 * @return array<string, mixed>
 	 */
 	public function to_db_array(): array {
-		$data = $this->to_array();
+		$data = get_object_vars( $this );
 
 		// Exclude non-DB properties
 		foreach ( $this->non_db_properties as $property ) {
 			unset( $data[ $property ] );
+		}
+
+		unset( $data['non_db_properties'] );
+
+		// Never include id in INSERT (will be auto-generated) or UPDATE (primary key)
+		// For updates, the id is used in WHERE clause, not SET clause
+		if ( isset( $data['id'] ) && $data['id'] > 0 ) {
+			unset( $data['id'] );
+		}
+
+		// Never update created_at (set once on creation)
+		if ( isset( $data['created_at'] ) && property_exists( $this, 'id' ) && isset( $this->id ) && $this->id > 0 ) {
+			unset( $data['created_at'] );
+		}
+
+		// Let database auto-handle updated_at via ON UPDATE CURRENT_TIMESTAMP
+		if ( isset( $data['updated_at'] ) ) {
+			unset( $data['updated_at'] );
+		}
+
+		// Convert any remaining DateTime properties to MySQL DATETIME format
+		foreach ( $data as $key => $value ) {
+			if ( $value instanceof \DateTimeInterface ) {
+				$data[ $key ] = $value->format( 'Y-m-d H:i:s' ); // MySQL DATETIME format
+			}
 		}
 
 		return $data;
