@@ -168,6 +168,19 @@ class CustomOrderStatusService {
 	public function create( array $data ) {
 		$status = new CustomOrderStatus( $data );
 
+		// Ensure the status key is unique.
+		$existing = $this->repository->find_by_key( $status->status_key );
+		if ( $existing ) {
+			// Append a number to make it unique.
+			$base_key = $status->status_key;
+			$counter  = 2;
+			do {
+				$status->status_key = $base_key . '-' . $counter;
+				$existing           = $this->repository->find_by_key( $status->status_key );
+				$counter++;
+			} while ( $existing );
+		}
+
 		return $this->repository->insert_status( $status );
 	}
 

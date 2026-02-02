@@ -21,8 +21,10 @@ class CustomOrderStatus implements ArraySerializableModel {
 	 */
 	public function __construct( array $data = array() ) {
 		$this->id         = absint( $data['id'] ?? 0 );
-		$this->status_key = $data['status_key'] ?? '';
 		$this->label      = $data['label'] ?? '';
+		$this->status_key = $data['status_key']
+			? sanitize_title( $data['status_key'] )
+			: sanitize_title( $this->label );
 		$this->background = $data['background'] ?? '#ccc';
 		$this->foreground = $data['foreground'] ?? $this->get_foreground_color( $this->background );
 	}
