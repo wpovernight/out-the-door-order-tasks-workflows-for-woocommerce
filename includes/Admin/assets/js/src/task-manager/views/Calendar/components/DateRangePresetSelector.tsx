@@ -26,17 +26,26 @@ const DateRangePresetSelector: React.FC<DateRangePresetSelectorProps> = ({
 				<option value="today">
 					{i18n.calendar.dateRangePresets.today}
 				</option>
+				<option value="tomorrow">
+					{i18n.calendar.dateRangePresets.tomorrow}
+				</option>
 				<option value="yesterday">
 					{i18n.calendar.dateRangePresets.yesterday}
 				</option>
 				<option value="current-week">
 					{i18n.calendar.dateRangePresets.currentWeek}
 				</option>
+				<option value="next-week">
+					{i18n.calendar.dateRangePresets.nextWeek}
+				</option>
 				<option value="last-week">
 					{i18n.calendar.dateRangePresets.lastWeek}
 				</option>
 				<option value="current-month">
 					{i18n.calendar.dateRangePresets.currentMonth}
+				</option>
+				<option value="next-month">
+					{i18n.calendar.dateRangePresets.nextMonth}
 				</option>
 				<option value="last-month">
 					{i18n.calendar.dateRangePresets.lastMonth}
