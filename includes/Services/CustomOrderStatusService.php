@@ -30,6 +30,9 @@ class CustomOrderStatusService {
 
 		// Add dynamic styles for custom order statuses in the orders page.
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_dynamic_style' ), 99 );
+
+		// Reassign orders when a custom status is deleted.
+		add_action( 'wpo_aom_reassign_orders', array( $this, 'reassign_orders' ), 10, 2 );
 	}
 
 	/** ================================
@@ -206,13 +209,64 @@ class CustomOrderStatusService {
 
 	/**
 	 * Delete a custom order status by ID.
+	 * Updates all orders with the deleted status to a fallback status before deletion.
 	 *
-	 * @param int $id
+	 * @param int    $id
+	 * @param string $fallback_status The status to assign to affected orders (default: 'on-hold').
 	 *
 	 * @return bool
 	 */
-	public function delete( int $id ): bool {
+	public function delete( int $id, string $fallback_status = 'on-hold' ): bool {
+		$status = $this->find( $id );
+		if ( ! $status ) {
+			return false;
+		}
+
+		// Update all orders with this custom status to the fallback status.
+		as_schedule_single_action(
+			time(),
+			'wpo_aom_reassign_orders',
+			array( $status->status_key, $fallback_status ),
+			'wpo-aom'
+		);
+
 		return $this->repository->delete_status( $id );
 	}
 
+	/**
+	 * Reassign orders from one status to another.
+	 *
+	 * @param string $from_status The status key to reassign from (without 'wc-' prefix).
+	 * @param string $to_status   The status key to reassign to (without 'wc-' prefix).
+	 *
+	 * @return void
+	 */
+	public function reassign_orders( string $from_status, string $to_status ): void {
+		$limit  = apply_filters( 'wpo_aom_reassign_orders_batch_size', 50 );
+		$orders = wc_get_orders(
+			array(
+				'status' => $from_status,
+				'limit'  => $limit,
+			)
+		);
+
+		foreach ( $orders as $order ) {
+			$resolved_to_status = apply_filters( 'wpo_aom_reassign_orders_to_status', $to_status, $order );
+
+			$order->update_status(
+				$resolved_to_status,
+				'WPO AOM: ' . __( 'Status changed due to custom order status deletion.', 'wpo-aom' )
+			);
+		}
+
+		// Schedule next batch if there might be more orders.
+		if ( count( $orders ) === $limit ) {
+			as_schedule_single_action(
+				time(),
+				'wpo_aom_reassign_orders',
+				array( $from_status, $to_status ),
+				'wpo-aom'
+			);
+		}
+	}
 }
