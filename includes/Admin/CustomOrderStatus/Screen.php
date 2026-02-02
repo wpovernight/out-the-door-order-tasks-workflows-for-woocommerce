@@ -133,6 +133,12 @@ final class Screen {
 	 * @return void
 	 */
 	private function render_create_screen(): void {
+		wc_back_header(
+			__( 'Add Custom Order Status', 'wpo-aom' ),
+			__( 'Custom Order Statuses', 'wpo-aom' ),
+			admin_url( 'admin.php?page=wc-settings&tab=wpo_aom_custom_status_tab' )
+		);
+
 		woocommerce_admin_fields( $this->get_edit_settings_fields() );
 	}
 
@@ -167,7 +173,13 @@ final class Screen {
 			return;
 		}
 
-		// Display the edit form.
+		// Display back header and edit form.
+		wc_back_header(
+			__( 'Edit Custom Order Status', 'wpo-aom' ),
+			__( 'Custom Order Statuses', 'wpo-aom' ),
+			admin_url( 'admin.php?page=wc-settings&tab=wpo_aom_custom_status_tab' )
+		);
+
 		woocommerce_admin_fields( $this->get_edit_settings_fields( $status ) );
 	}
 
@@ -183,9 +195,8 @@ final class Screen {
 
 		return array(
 			array(
-				'title' => esc_html__( 'Edit Custom Order Status', 'wpo-aom' ),
-				'type'  => 'title',
-				'id'    => $option_name,
+				'type' => 'title',
+				'id'   => $option_name,
 			),
 			array(
 				'title'    => esc_html__( 'Label', 'wpo-aom' ),
