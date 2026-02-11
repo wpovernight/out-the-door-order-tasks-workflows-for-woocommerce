@@ -2,20 +2,20 @@
 
 namespace WPO\AOM;
 
+use InvalidArgumentException;
 use WPO\AOM\Core\Install;
 use WPO\AOM\Core\DependencyChecker;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
-use WPO\AOM\Services\CustomOrderStatusService;
+use WPO\AOM\Core\ServiceContainer;
 
 defined( 'ABSPATH' ) || exit;
 
 final class AdvancedOrderManager {
 
 	public const VERSION = '1.0.0';
+	public ServiceContainer $service_container;
 
 	protected static ?self $_instance = null;
-
-	public ?CustomOrderStatusService $custom_order_status = null;
 
 	/**
 	 * Get the instance of the class.
@@ -40,15 +40,6 @@ final class AdvancedOrderManager {
 	}
 
 	/**
-	 * Prevent unserialization.
-	 *
-	 * @return void
-	 */
-	public function __wakeup() {
-		_doing_it_wrong( __FUNCTION__, esc_html__( 'Unserializing is forbidden.', 'wpo-aom' ), '1.0.0' );
-	}
-
-	/**
 	 * Constructor.
 	 */
 	private function __construct() {
@@ -66,8 +57,9 @@ final class AdvancedOrderManager {
 		$this->define_constants();
 		$this->init_hooks();
 
-		// Register services.
-		$this->register_services();
+		// Register services and repositories.
+		$this->service_container = new ServiceContainer();
+		$this->service_container->register();
 	}
 
 	/**
@@ -106,63 +98,6 @@ final class AdvancedOrderManager {
 		load_textdomain( $text_domain, $custom_translation_path );
 		load_textdomain( $text_domain, $plugin_translation_path );
 		load_plugin_textdomain( $text_domain, false, dirname( plugin_basename( WPO_AOM_PLUGIN_FILE ) ) . '/languages' );
-	}
-
-	/**
-	 * Return the map of service properties to class names.
-	 *
-	 * @return array<string,class-string>
-	 */
-	private function service_map(): array {
-		$map = array(
-			'custom_order_status'       => array( CustomOrderStatusService::class, true ),
-			'custom_order_status_admin' => array( \WPO\AOM\Admin\CustomOrderStatus\Screen::class, false ),
-		);
-
-		/**
-		 * Filters the Advanced Order Manager service map.
-		 *
-		 * @param array<string,array> $map Service map.
-		 */
-		return (array) apply_filters( 'wpo_aom_service_map', $map );
-	}
-
-	/**
-	 * Instantiate and store services (singleton- or constructor-based).
-	 *
-	 * @return void
-	 */
-	private function register_services(): void {
-		foreach ( $this->service_map() as $property => $definition ) {
-			[ $class, $store ] = $definition;
-
-			$service = $this->resolve_service( $class );
-
-			if ( method_exists( $service, 'register' ) ) {
-				$service->register();
-			}
-
-			// Store the service in a dynamic property if specified.
-			if ( $store && ( ! property_exists( $this, $property ) || is_null( $this->$property ) ) ) {
-				/* @phpstan-ignore-next-line Suppressing type warning for dynamic property assignment. */
-				$this->{$property} = $service;
-			}
-		}
-	}
-
-	/**
-	 * Resolve a service instance (supports overrides, ::instance(), or new).
-	 *
-	 * @param string $class
-	 *
-	 * @return object
-	 */
-	private function resolve_service( string $class ): object {
-		if ( is_callable( array( $class, 'instance' ) ) ) {
-			return $class::instance();
-		}
-
-		return new $class();
 	}
 
 	/**
@@ -209,4 +144,16 @@ final class AdvancedOrderManager {
 		return untrailingslashit( plugin_dir_path( WPO_AOM_PLUGIN_FILE ) );
 	}
 
+	/**
+	 * Get a service instance from the service container.
+	 *
+	 * @param string $id Service ID.
+	 *
+	 * @return object
+	 *
+	 * @throws InvalidArgumentException If the service ID is not defined.
+	 */
+	public function get_service( string $id ): object {
+		return $this->service_container->resolve_service( $id );
+	}
 }

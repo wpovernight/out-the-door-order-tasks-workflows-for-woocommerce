@@ -3,11 +3,12 @@
 namespace WPO\AOM\Core;
 
 use WPO\AOM\AdvancedOrderManager;
+use WPO\AOM\Repositories\TaskFieldOptionRepository;
+use WPO\AOM\Repositories\TaskFieldRepository;
 
 defined( 'ABSPATH' ) || exit;
 
 final class Install {
-
 	private static string $option_version      = 'wpo_aom_version';
 	private static string $option_upgrade_lock = 'wpo_aom_upgrade_lock';
 
@@ -56,7 +57,13 @@ final class Install {
 	 * @return void
 	 */
 	public static function install(): void {
+		if ( get_option( self::$option_version ) ) {
+			// Already installed.
+			return;
+		}
+
 		self::create_tables();
+		self::insert_default_data();
 
 		// Store the plugin version in the options table.
 		update_option( self::$option_version, AdvancedOrderManager::VERSION, true );
@@ -77,12 +84,12 @@ final class Install {
 			return;
 		}
 
-		if ( version_compare( $current_version, AdvancedOrderManager::VERSION, '>=' ) ) {
-			return; // No upgrade needed.
-		}
-
-		if ( ! self::acquire_upgrade_lock() ) {
-			return; // Another process is already running migrations.
+		// If the current version is the same or higher, or if we can't acquire the lock, do nothing.
+		if (
+			version_compare( $current_version, AdvancedOrderManager::VERSION, '>=' ) ||
+			! self::acquire_upgrade_lock()
+		) {
+			return;
 		}
 
 		try {
@@ -109,7 +116,7 @@ final class Install {
 	 *
 	 * @return void
 	 */
-	private static function create_tables(): void {
+	public static function create_tables(): void {
 		global $wpdb;
 
 		$were_showing_errors = $wpdb->hide_errors();
@@ -133,8 +140,46 @@ final class Install {
 
 		$charset_collate = $wpdb->get_charset_collate();
 
-		// ToDo: Update the table columns
-		return "CREATE TABLE `{$wpdb->prefix}wpo_aom_custom_statuses` (
+		return "
+		CREATE TABLE `{$wpdb->prefix}wpo_aom_tasks` (
+			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+			title VARCHAR(255) NOT NULL,
+			description TEXT DEFAULT NULL,
+			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			PRIMARY KEY  (id)
+		) {$charset_collate};
+		CREATE TABLE `{$wpdb->prefix}wpo_aom_task_fields` (
+			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+			label VARCHAR(255) NOT NULL,
+			type VARCHAR(20) NOT NULL,
+			slug VARCHAR(255) NOT NULL,
+			is_required TINYINT(1) NOT NULL DEFAULT 0,
+			is_editable TINYINT(1) NOT NULL DEFAULT 1,
+			is_protected TINYINT(1) NOT NULL DEFAULT 0,
+			PRIMARY KEY  (id)
+		) {$charset_collate};
+		CREATE TABLE `{$wpdb->prefix}wpo_aom_task_field_options` (
+			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+			field_id BIGINT(20) UNSIGNED NOT NULL,
+			slug VARCHAR(255) NOT NULL,
+			label VARCHAR(255) NOT NULL,
+			color VARCHAR(7) DEFAULT NULL,
+			position INT NOT NULL DEFAULT 0,
+			PRIMARY KEY  (id),
+			FOREIGN KEY (field_id) REFERENCES {$wpdb->prefix}wpo_aom_task_fields(id) ON DELETE CASCADE
+		) {$charset_collate};
+		CREATE TABLE `{$wpdb->prefix}wpo_aom_task_field_values` (
+			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+			task_id BIGINT(20) UNSIGNED NOT NULL,
+			field_id BIGINT(20) UNSIGNED NOT NULL,
+			value TEXT DEFAULT NULL,
+			PRIMARY KEY  (id),
+			KEY idx_task_field_lookup (task_id, field_id),
+			FOREIGN KEY (task_id) REFERENCES {$wpdb->prefix}wpo_aom_tasks(id) ON DELETE CASCADE,
+			FOREIGN KEY (field_id) REFERENCES {$wpdb->prefix}wpo_aom_task_fields(id) ON DELETE CASCADE
+		) {$charset_collate};
+		CREATE TABLE `{$wpdb->prefix}wpo_aom_custom_statuses` (
 			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			status_key VARCHAR(64) NOT NULL,
 			label VARCHAR(255) NOT NULL,
@@ -143,6 +188,176 @@ final class Install {
 			UNIQUE KEY (status_key)
 		) {$charset_collate};
 		";
+	}
+
+	/**
+	 * Insert default data into the database.
+	 *
+	 * @return void
+	 */
+	private static function insert_default_data(): void {
+		global $wpdb;
+
+		$default_fields = array(
+			/*
+			 * Default fields: Non-editable and protected fields.
+			 */
+			// Status(column in Kanban view) field.
+			array(
+				'id'           => 1,
+				'label'        => 'Status',
+				'type'         => 'select',
+				'slug'         => 'status',
+				'is_required'  => true,
+				'is_editable'  => true,
+				'is_protected' => true,
+				'options'      => array(
+					array(
+						'label'    => 'To Do',
+						'slug'     => 'to_do',
+						'color'    => '#6c757d',
+						'position' => 1,
+					),
+					array(
+						'label'    => 'In Progress',
+						'slug'     => 'in_progress',
+						'color'    => '#17a2b8',
+						'position' => 2,
+					),
+					array(
+						'label'    => 'Completed',
+						'slug'     => 'completed',
+						'color'    => '#28a745',
+						'position' => 3,
+					),
+				),
+			),
+			// Position within status - used for ordering tasks within a status column in Kanban view
+			array(
+				'id'           => 2,
+				'label'        => 'Position',
+				'type'         => 'number',
+				'slug'         => 'position',
+				'is_required'  => true,
+				'is_editable'  => false,
+				'is_protected' => true,
+			),
+			array(
+				'id'           => 3,
+				'label'        => 'Creator',
+				'type'         => 'number',
+				'slug'         => 'creator',
+				'is_required'  => false,
+				'is_editable'  => false,
+				'is_protected' => true,
+			),
+			array(
+				'id'           => 4,
+				'label'        => 'Order',
+				'type'         => 'number',
+				'slug'         => 'order',
+				'is_required'  => false,
+				'is_editable'  => false,
+				'is_protected' => true,
+			),
+			array(
+				'id'           => 5,
+				'label'        => 'Due Date',
+				'type'         => 'date',
+				'slug'         => 'due_date',
+				'is_required'  => false,
+				'is_editable'  => false,
+				'is_protected' => true,
+			),
+			/*
+			 * Editable and non-protected fields.
+			 */
+			array(
+				'id'           => 6,
+				'label'        => 'Priority',
+				'type'         => 'select',
+				'slug'         => 'priority',
+				'is_required'  => false,
+				'is_editable'  => true,
+				'is_protected' => false,
+				'options'      => array(
+					array(
+						'label'    => 'Low',
+						'slug'     => 'low',
+						'color'    => '#34c38f',
+						'position' => 1,
+					),
+					array(
+						'label'    => 'Medium',
+						'slug'     => 'medium',
+						'color'    => '#f1b44c',
+						'position' => 2,
+					),
+					array(
+						'label'    => 'High',
+						'slug'     => 'high',
+						'color'    => '#f46a6a',
+						'position' => 3,
+					),
+					array(
+						'label'    => 'Critical',
+						'slug'     => 'critical',
+						'color'    => '#f46a6a',
+						'position' => 4,
+					)
+				),
+			),
+		);
+
+		$task_field_repository        = new TaskFieldRepository();
+		$task_field_option_repository = new TaskFieldOptionRepository();
+
+		foreach ( $default_fields as $field_data ) {
+			$field_id = $field_data['id'];
+
+			// Check if field with this specific ID already exists.
+			$existing_field = $task_field_repository->find( $field_id );
+
+			if ( ! $existing_field ) {
+				$field_options = $field_data['options'] ?? array();
+				unset( $field_data['options'] );
+
+				// Use raw INSERT to ensure the exact ID is used.
+				$table_name = $wpdb->prefix . 'wpo_aom_task_fields';
+				$result     = $wpdb->insert( $table_name, $field_data );
+
+				if ( $result ) {
+					$inserted_id = (int) $wpdb->insert_id;
+
+					// Verify the ID matches what we expected.
+					if ( $inserted_id !== $field_id ) {
+						// Log error or throw exception - ID mismatch is critical.
+						error_log(
+							sprintf(
+								'WPO AOM: Failed to insert field with ID %d. Got ID %d instead.',
+								$field_id,
+								$inserted_id
+							)
+						);
+						continue;
+					}
+
+					// Insert options if it's a select field.
+					if ( ! empty( $field_options ) ) {
+						foreach ( $field_options as $option ) {
+							$task_field_option_repository
+								->insert( array_merge( $option, array( 'field_id' => $inserted_id ) ) );
+						}
+					}
+				}
+			}
+		}
+
+		// Reset auto-increment to prevent gaps if needed.
+		$max_id = $wpdb->get_var( "SELECT MAX(id) FROM {$wpdb->prefix}wpo_aom_task_fields" );
+		if ( $max_id ) {
+			$wpdb->query( $wpdb->prepare( "ALTER TABLE {$wpdb->prefix}wpo_aom_task_fields AUTO_INCREMENT = %d", $max_id + 1 ) );
+		}
 	}
 
 	/**
@@ -174,5 +389,4 @@ final class Install {
 	private static function release_upgrade_lock(): void {
 		delete_option( self::$option_upgrade_lock );
 	}
-
 }
