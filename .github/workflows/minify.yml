@@ -12,14 +12,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.head_ref }}
 
-      - name: Auto Minify
-        uses: nizarmah/auto-minify@v2.1
-        with:
-          directory: 'includes/Admin/assets'
+      - name: Install Node tools
+        run: |
+          npm install -g terser clean-css-cli
+
+      - name: Minify JS files
+        run: |
+          find includes/Admin/assets -type f -name "*.js" \
+            ! -name "*.min.js" \
+            ! -name "task-manager.js" \
+            ! -name "order-edit-metabox.js" \
+            ! -path "*/assets/js/src/*" \
+            ! -name "webpack.config.js" \
+            ! -name ".eslintrc.js" \
+            -exec bash -c 'terser "$0" -o "${0%.js}.min.js" --compress --mangle' {} \;
+
+      - name: Minify CSS files
+        run: |
+          find includes/Admin/assets -type f -name "*.css" \
+            ! -name "*.min.css" \
+            ! -path "*/build/*" \
+            -exec bash -c 'cleancss -o "${0%.css}.min.css" "$0"' {} \;
 
       - name: Auto committing minified files
         uses: stefanzweifel/git-auto-commit-action@v4
