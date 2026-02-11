@@ -196,13 +196,19 @@ export const Card: React.FC<CardProps> = ({
 		);
 	}, [updateState, resetState, taskRef, selectTask]);
 
-	// ToDo: Fix
 	const [isSelected, setIsSelected] = useState(false);
 	useEffect(() => {
 		setIsSelected(selectedTask?.id === task.id);
 	}, [selectedTask, task.id]);
 
-	const handleCardClick = () => {
+	const handleCardClick = (e?: React.MouseEvent) => {
+		// Prevent selecting during drag operations
+		if (state.type === 'dragging') {
+			return;
+		}
+
+		// Stop event from bubbling to Board which would clear selection
+		e?.stopPropagation();
 		selectTask(task);
 	};
 

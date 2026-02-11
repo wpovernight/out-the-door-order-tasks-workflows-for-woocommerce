@@ -4,6 +4,7 @@ import { ViewTaskProvider } from './context/ViewTaskContext';
 import { CalendarContent } from './components/CalendarContent';
 import { useAsyncLoader } from '@shared/hooks/useAsyncLoader';
 import { useTaskManagerData } from '@taskManager/hooks/useTaskManagerData';
+import { CalendarSkeleton } from '@taskManager/views/Calendar/components/CalendarSkeleton';
 
 export const CalendarView: React.FC = () => {
 	const { loadTasks, loadTaskFields, loadFieldOptions } = useTasks();
@@ -22,9 +23,8 @@ export const CalendarView: React.FC = () => {
 		}
 	}, [loadingStatus, loadFieldOptions, loadTaskFields]);
 
-	// ToDo: Use a skeleton loader instead of a simple loading spinner
 	if (loadingStatus === 'loading') {
-		return <div className="loading-spinner">{i18n.loading}</div>;
+		return <CalendarSkeleton />;
 	}
 
 	// ToDo: Improve error handling UI

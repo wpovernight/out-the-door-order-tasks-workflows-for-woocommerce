@@ -74,10 +74,13 @@ final class Screen {
 						),
 						'dateRangePresets' => array(
 							'today'        => esc_html__( 'Today', 'wpo-aom' ),
+							'tomorrow'     => esc_html__( 'Tomorrow', 'wpo-aom' ),
 							'yesterday'    => esc_html__( 'Yesterday', 'wpo-aom' ),
 							'currentWeek'  => esc_html__( 'Current Week', 'wpo-aom' ),
+							'nextWeek'     => esc_html__( 'Next Week', 'wpo-aom' ),
 							'lastWeek'     => esc_html__( 'Last Week', 'wpo-aom' ),
 							'currentMonth' => esc_html__( 'Current Month', 'wpo-aom' ),
+							'nextMonth'    => esc_html__( 'Next Month', 'wpo-aom' ),
 							'lastMonth'    => esc_html__( 'Last Month', 'wpo-aom' ),
 							'custom'       => esc_html__( 'Custom', 'wpo-aom' ),
 						),
@@ -143,6 +146,13 @@ final class Screen {
 		wp_enqueue_style(
 			'wpo-aom-admin-task-manager',
 			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/task-manager.css',
+			array(),
+			WPO_AOM_VERSION
+		);
+
+		wp_enqueue_style(
+			'wpo-aom-admin-skeleton',
+			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/skeleton.css',
 			array(),
 			WPO_AOM_VERSION
 		);

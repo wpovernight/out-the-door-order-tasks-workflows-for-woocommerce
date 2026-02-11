@@ -1,11 +1,67 @@
 :root {
+    /* Primary Colors */
     --wpo-aom-primary-color: #0079bf;
-    --wpo-aom-bg-light: #f5f6f7;
+    --wpo-aom-purple-primary: #6E1EDC;
+    --wpo-aom-purple-dark: #411282;
+    --wpo-aom-purple-light: #7c3aed;
+    --wpo-aom-purple-lighter: #5818AF;
+    --wpo-aom-purple-bg: #F0E8FC;
+
+    /* Background Colors */
+    --wpo-aom-bg-light: #f8f8f8;
+    --wpo-aom-bg-lighter: #F5F5F5;
+    --wpo-aom-bg-gray: #f9fafb;
+    --wpo-aom-bg-gray-alt: #FAFAFA;
+    --wpo-aom-bg-gray-medium: #f3f4f6;
     --wpo-aom-card-bg: #fff;
+
+    /* Text Colors */
     --wpo-aom-text-primary: #333;
-    --wpo-aom-card-shadow: 0px 1px 1px #1E1F2140, 0px 0px 1px #1E1F214F;
+    --wpo-aom-text-gray: #535862;
+    --wpo-aom-text-gray-light: #a1a1aa;
+
+    /* Border Colors */
     --wpo-aom-border-color: #d5d7da;
+    --wpo-aom-border-light: #e5e7eb;
+
+    /* State Colors */
+    --wpo-aom-danger: #ef4444;
+    --wpo-aom-danger-dark: #b32d2e;
+    --wpo-aom-error: #d63638;
+    --wpo-aom-wp-blue: #2271b1;
+    --wpo-aom-wp-blue-dark: #135e96;
+
+    /* Success Colors */
+    --wpo-aom-success-bg: #D1FAE5;
+    --wpo-aom-success-text: #065F46;
+
+    /* Warning Colors */
+    --wpo-aom-warning-bg: #FEF3C7;
+    --wpo-aom-warning-text: #92400E;
+
+    /* Neutral Gray Scale */
+    --wpo-aom-gray-light: #ddd;
+    --wpo-aom-gray-medium: #ccc;
+    --wpo-aom-gray-dark: #999;
+    --wpo-aom-gray-icon: #9ca3af;
+
+    /* Hover/Focus States */
+    --wpo-aom-hover-overlay: #00000012;
+    --wpo-aom-hover-overlay-alt: #0000000d;
+    --wpo-aom-backdrop: rgba(0, 0, 0, 0.4);
+
+    /* Shadows */
+    --wpo-aom-card-shadow: 0px 1px 1px #1E1F2140, 0px 0px 1px #1E1F214F;
     --wpo-aom-floating-shadow: 0px 0px 0px 1px #d1d9e080, 0px 6px 12px -3px #25292e0a, 0px 6px 18px 0px #25292e1f;
+
+    /* Border Radius */
+    --wpo-aom-radius-s: 0.3em;
+    --wpo-aom-radius-m: 0.5em;
+    --wpo-aom-radius-l: 1em;
+
+    /* Transitions */
+    --wpo-aom-transition-fast: 0.2s;
+    --wpo-aom-transition-normal: 0.3s;
 }
 
 .screenReader {
@@ -14,7 +70,7 @@
 
 .wpo-aom-tag {
     display: inline-block;
-    border-radius: 0.3em;
+    border-radius: var(--wpo-aom-radius-s);
     padding: 0.2em 0.6em;
     font-size: 0.9em;
     font-weight: 600;
@@ -31,15 +87,15 @@
     content: '\f11c';
     font-family: 'dashicons';
     font-size: 1.2em;
-    color: #59636e;
+    color: var(--wpo-aom-text-gray);
 }
 
 .wpo-button {
     background: transparent;
     border: none;
     cursor: pointer;
-    transition: all 0.3s;
-    border-radius: 0.3em;
+    transition: all var(--wpo-aom-transition-fast);
+    border-radius: var(--wpo-aom-radius-s);
 }
 
 .wpo-button:disabled {
@@ -47,7 +103,7 @@
 }
 
 .wpo-button-primary {
-    background-color: #6e1edc;
+    background-color: var(--wpo-aom-purple-primary);
     color: #fff;
 }
 
@@ -67,7 +123,7 @@
 }
 
 .wpo-button-icon:hover {
-    background-color: #0000000d;
+    background-color: var(--wpo-aom-hover-overlay-alt);
 }
 
 .wpo-aom-task-actions {
@@ -89,10 +145,10 @@
     border: none;
     background: none;
     cursor: pointer;
-    color: #535862;
+    color: var(--wpo-aom-text-gray);
     padding: 0.25em;
-    border-radius: 0.25em;
-    transition: color 0.2s, background-color 0.2s;
+    border-radius: var(--wpo-aom-radius-s);
+    transition: background-color var(--wpo-aom-transition-fast), color var(--wpo-aom-transition-fast);
     width: 1.5em;
     height: 1.5em;
     position: relative;
@@ -104,7 +160,7 @@
 }
 
 .wpo-aom-task-actions > li .task-delete:hover {
-    color: #ef4444;
+    color: var(--wpo-aom-danger);
     background-color: #fee2e2;
 }
 
@@ -152,7 +208,7 @@
 }
 
 .wpo-aom-add-button {
-    color: #838790;
+    color: var(--wpo-aom-gray-icon);
     width: 1.3em;
     height: 1.3em;
     font-size: 1.5em;
@@ -167,9 +223,9 @@
     box-shadow: var(--wpo-aom-floating-shadow);
     padding: 0;
     margin: 5px 0 0;
-    border-radius: 0.5em;
+    border-radius: var(--wpo-aom-radius-m);
     overflow: hidden;
-    background: #fff;
+    background: var(--wpo-aom-card-bg);
     width: 100%;
     z-index: 1;
 }
@@ -190,6 +246,6 @@
 
 .wpo-action-menu > li > button:hover,
 .wpo-action-menu > li > button:focus {
-    background-color: #00000012;
+    background-color: var(--wpo-aom-hover-overlay);
     outline: none;
 }

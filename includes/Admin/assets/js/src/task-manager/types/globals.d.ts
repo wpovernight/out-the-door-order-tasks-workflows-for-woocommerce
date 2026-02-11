@@ -26,10 +26,13 @@ export interface WpoAomTaskManagerData {
 			};
 			dateRangePresets: {
 				today: string;
+				tomorrow: string;
 				yesterday: string;
 				currentWeek: string;
+				nextWeek: string;
 				lastWeek: string;
 				currentMonth: string;
+				nextMonth: string;
 				lastMonth: string;
 				custom: string;
 			};

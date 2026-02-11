@@ -3,6 +3,7 @@ import { useTasks } from '@shared/context/TaskContext';
 import { useAsyncLoader } from '@shared/hooks/useAsyncLoader';
 import { FieldOptionDropdown } from '@shared/components/FieldOptionDropdownField';
 import { AsyncMultiSelectField } from '@shared/components/AsyncMultiSelectField';
+import { TaskFormSkeleton } from '@shared/components/TaskFormSkeleton';
 import { searchOrders } from '@shared/utils/api';
 import { isFieldOption, Task } from '@shared/types/task';
 import { useLocalized } from '@shared/hooks/useLocalized';
@@ -45,9 +46,9 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 		);
 	}
 
-	const data = useLocalized<WpoAomTaskManagerData | WpoAomOrderEditMetaBoxData>(
-		globalKey
-	);
+	const data = useLocalized<
+		WpoAomTaskManagerData | WpoAomOrderEditMetaBoxData
+	>(globalKey);
 	const i18n = data.i18n;
 
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -140,11 +141,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 		fieldOptions.priority?.length > 0;
 
 	if (loadingStatus === 'loading' || !isDataReady) {
-		return (
-			<div className="loading-spinner" style={{ padding: '0 1em' }}>
-				{i18n.loading}
-			</div>
-		);
+		return <TaskFormSkeleton />;
 	}
 
 	if (loadingStatus === 'error') {

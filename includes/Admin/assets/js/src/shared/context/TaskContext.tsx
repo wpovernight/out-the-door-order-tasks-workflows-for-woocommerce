@@ -233,6 +233,10 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 	// ---------------------
 	// MOVE TASK
 	// ---------------------
+	// Track pending move operations globally to prevent race conditions.
+	const pendingMovesCountRef = useRef<number>(0);
+	const pendingPositionUpdatesRef = useRef<Map<number, number>>(new Map());
+
 	const moveTask = useCallback(
 		async (
 			taskId: number,
@@ -250,6 +254,9 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				console.error('Target status option not found');
 				return;
 			}
+
+			// Increment global pending moves counter
+			pendingMovesCountRef.current += 1;
 
 			// Optimistically update the global state immediately before API call
 			setTasks((prevTasks) => {
@@ -291,23 +298,47 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 					targetStatusId
 				);
 
-				// Update with the actual position from the API.
-				setTasks((prevTasks) =>
-					prevTasks.map((task) => {
-						if (task.id !== taskId) {
-							return task;
-						}
-
-						return updateTaskFields(task, {
-							position: {
-								raw: result.new_position,
-								resolved: null,
-							},
-						});
-					})
+				// Collect the position update
+				pendingPositionUpdatesRef.current.set(
+					taskId,
+					result.new_position
 				);
+
+				// Decrement pending counter
+				pendingMovesCountRef.current -= 1;
+
+				// Only apply position updates when all pending moves are complete
+				// This prevents race conditions when multiple tasks are moved quickly
+				if (pendingMovesCountRef.current === 0) {
+					const positionUpdates = new Map(
+						pendingPositionUpdatesRef.current
+					);
+					pendingPositionUpdatesRef.current.clear();
+
+					// Apply all collected position updates at once
+					setTasks((prevTasks) =>
+						prevTasks.map((task) => {
+							const newPosition = positionUpdates.get(task.id);
+							if (newPosition !== undefined) {
+								return updateTaskFields(task, {
+									position: {
+										raw: newPosition,
+										resolved: null,
+									},
+								});
+							}
+							return task;
+						})
+					);
+				}
 			} catch (error) {
 				console.error('Failed to move task:', error);
+
+				// Decrement pending counter even on error
+				pendingMovesCountRef.current -= 1;
+
+				// Remove from pending updates
+				pendingPositionUpdatesRef.current.delete(taskId);
 
 				// Rollback if API call failed
 				if (previousState) {

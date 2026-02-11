@@ -15,7 +15,7 @@ interface TaskCardProps {
 	task: Task;
 	isOptionsOpen?: boolean;
 	isSelected?: boolean;
-	onCardClick?: () => void;
+	onCardClick?: (e?: React.MouseEvent) => void;
 	onOptionsClick?: (e: React.MouseEvent) => void;
 	onEditClick?: (e: React.MouseEvent) => void;
 	onDeleteClick?: (e: React.MouseEvent) => void;
@@ -87,9 +87,9 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 			})
 		: null;
 
-	const handleCardClick = () => {
+	const handleCardClick = (e: React.MouseEvent) => {
 		if (onCardClick) {
-			onCardClick();
+			onCardClick(e);
 		}
 	};
 
@@ -259,7 +259,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 			onClick={handleCardClick}
 			onKeyDown={(e) => {
 				if (e.key === 'Enter' || e.key === ' ') {
-					handleCardClick();
+					handleCardClick(e as unknown as React.MouseEvent);
 				}
 			}}
 		>

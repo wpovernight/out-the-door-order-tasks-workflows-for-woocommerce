@@ -106,10 +106,13 @@ export interface DateRange {
 
 export type DateRangePreset =
 	| 'today'
+	| 'tomorrow'
 	| 'yesterday'
 	| 'current-week'
+	| 'next-week'
 	| 'last-week'
 	| 'current-month'
+	| 'next-month'
 	| 'last-month'
 	| 'custom';
 
@@ -120,6 +123,12 @@ export const getDateRangeFromPreset = (preset: DateRangePreset): DateRange => {
 	switch (preset) {
 		case 'today':
 			return { start: new Date(today), end: null };
+
+		case 'tomorrow': {
+			const tomorrow = new Date(today);
+			tomorrow.setDate(tomorrow.getDate() + 1);
+			return { start: tomorrow, end: null };
+		}
 
 		case 'yesterday': {
 			const yesterday = new Date(today);
@@ -137,6 +146,18 @@ export const getDateRangeFromPreset = (preset: DateRangePreset): DateRange => {
 			endOfWeek.setDate(endOfWeek.getDate() + 6);
 
 			return { start: startOfWeek, end: endOfWeek };
+		}
+
+		case 'next-week': {
+			const startOfNextWeek = new Date(today);
+			const day = startOfNextWeek.getDay();
+			const diff = day === 0 ? -6 : 1 - day;
+			startOfNextWeek.setDate(startOfNextWeek.getDate() + diff + 7);
+
+			const endOfNextWeek = new Date(startOfNextWeek);
+			endOfNextWeek.setDate(endOfNextWeek.getDate() + 6);
+
+			return { start: startOfNextWeek, end: endOfNextWeek };
 		}
 
 		case 'last-week': {
@@ -164,6 +185,21 @@ export const getDateRangeFromPreset = (preset: DateRangePreset): DateRange => {
 			);
 
 			return { start: startOfMonth, end: endOfMonth };
+		}
+
+		case 'next-month': {
+			const startOfNextMonth = new Date(
+				today.getFullYear(),
+				today.getMonth() + 1,
+				1
+			);
+			const endOfNextMonth = new Date(
+				today.getFullYear(),
+				today.getMonth() + 2,
+				0
+			);
+
+			return { start: startOfNextMonth, end: endOfNextMonth };
 		}
 
 		case 'last-month': {

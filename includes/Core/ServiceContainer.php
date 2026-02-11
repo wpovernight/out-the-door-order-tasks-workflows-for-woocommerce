@@ -3,8 +3,6 @@
 namespace WPO\AOM\Core;
 
 use InvalidArgumentException;
-use WPO\AOM\Admin\OrderEdit\MetaBox;
-use WPO\AOM\Admin\TaskManager\Screen;
 use WPO\AOM\Models\Task;
 use WPO\AOM\Models\TaskField;
 use WPO\AOM\Models\TaskFieldOption;
@@ -15,9 +13,11 @@ use WPO\AOM\Repositories\TaskFieldRepository;
 use WPO\AOM\Repositories\TaskFieldOptionRepository;
 use WPO\AOM\Repositories\TaskFieldValueRepository;
 use WPO\AOM\REST\TaskController;
+use WPO\AOM\Services\CustomOrderStatusService;
 use WPO\AOM\Services\FulfillmentService;
 use WPO\AOM\Services\EmailService;
 use WPO\AOM\Services\TaskManagerService;
+use WPO\AOM\Admin as Admin;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -42,14 +42,16 @@ final class ServiceContainer {
 	 */
 	private static array $service_map = array(
 		// Services
-		'TaskManagerService' => TaskManagerService::class,
-		'FulfillmentService' => FulfillmentService::class,
-		'EmailService'       => EmailService::class,
+		'TaskManagerService'       => TaskManagerService::class,
+		'FulfillmentService'       => FulfillmentService::class,
+		'CustomOrderStatusService' => CustomOrderStatusService::class,
+		'EmailService'             => EmailService::class,
 		// REST Controllers
-		'TaskController'     => TaskController::class,
+		'TaskController'           => TaskController::class,
 		// Admin Screens
-		'TaskManager_Screen' => Screen::class,
-		'OrderEdit_MetaBox'  => MetaBox::class,
+		'TaskManager_Screen'       => Admin\TaskManager\Screen::class,
+		'OrderEdit_MetaBox'        => Admin\OrderEdit\MetaBox::class,
+		'CustomOrderStatus_Admin'  => Admin\CustomOrderStatus\Screen::class,
 	);
 
 	/**
@@ -193,6 +195,13 @@ final class ServiceContainer {
 		 * Filters the Advanced Order Manager repository bindings.
 		 *
 		 * @param array<string, class-string> $bindings Repository bindings.
+		 *
+		 * @example
+		 * array(
+		 *    ModelClass::class => CustomRepositoryClass::class,
+		 * );
+		 *
+		 * @return array<string, class-string>
 		 */
 		$bindings = (array) apply_filters( 'wpo_aom_repository_bindings', self::$default_bindings );
 
@@ -218,10 +227,10 @@ final class ServiceContainer {
 	/**
 	 * Build and return an instance of OrderEdit MetaBox.
 	 *
-	 * @return MetaBox
+	 * @return Admin\OrderEdit\MetaBox
 	 */
-	private function build_OrderEdit_MetaBox(): MetaBox {
-		return new MetaBox(
+	private function build_OrderEdit_MetaBox(): Admin\OrderEdit\MetaBox {
+		return new Admin\OrderEdit\MetaBox(
 			$this->resolve_service( 'FulfillmentService', FulfillmentService::class )
 		);
 	}

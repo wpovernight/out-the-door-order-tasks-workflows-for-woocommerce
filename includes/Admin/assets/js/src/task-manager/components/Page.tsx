@@ -28,7 +28,10 @@ export default function Page() {
 							</div>
 						}
 					/>
-					<Route path="/" element={<Navigate to="/kanban" replace />} />
+					<Route
+						path="/"
+						element={<Navigate to="/kanban" replace />}
+					/>
 				</Routes>
 			</div>
 		</div>

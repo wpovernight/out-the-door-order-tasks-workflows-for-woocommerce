@@ -4,6 +4,7 @@ import { Board } from './components/Board';
 import { ViewTaskProvider } from './context/ViewTaskContext';
 import { useAsyncLoader } from '@shared/hooks/useAsyncLoader';
 import { useTaskManagerData } from '@taskManager/hooks/useTaskManagerData';
+import { BoardSkeleton } from '@taskManager/views/Kanban/components/BoardSkeleton';
 
 export const KanbanView: React.FC = () => {
 	const { loadTasks, loadTaskFields, loadFieldOptions } = useTasks();
@@ -22,9 +23,8 @@ export const KanbanView: React.FC = () => {
 		}
 	}, [loadingStatus, loadFieldOptions, loadTaskFields]);
 
-	// ToDo: Use a skeleton loader instead of a simple loading spinner
 	if (loadingStatus === 'loading') {
-		return <div className="loading-spinner">{i18n.loading}</div>;
+		return <BoardSkeleton />;
 	}
 
 	// ToDo: Improve error handling UI

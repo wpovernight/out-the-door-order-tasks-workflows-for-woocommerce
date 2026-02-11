@@ -130,7 +130,7 @@ export const FieldOptionDropdown: React.FC<DropdownProps> = ({
 				onClick={toggleOpen}
 				onKeyDown={handleButtonKeyDown}
 			>
-				<span className="wpo-aom-label" style={selectedStyle}>
+				<span className="wpo-aom-tag" style={selectedStyle}>
 					{selectedOption ? selectedOption.label : placeholder}
 				</span>
 			</button>
@@ -147,7 +147,7 @@ export const FieldOptionDropdown: React.FC<DropdownProps> = ({
 								onKeyDown={handleOptionKeyDown}
 							>
 								<span
-									className="wpo-aom-label"
+									className="wpo-aom-tag"
 									style={getColorStyle(option.color)}
 								>
 									{option.label}

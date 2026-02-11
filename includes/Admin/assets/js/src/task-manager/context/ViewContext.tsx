@@ -19,7 +19,7 @@ export const ViewProvider: React.FC<{ children: React.ReactNode }> = ({
 	const navigate = useNavigate();
 	const location = useLocation();
 
-	// Extract view from URL hash path (e.g., "/kanban" -> "kanban")
+	// Extract view from URL hash path (e.g., "/kanban" -> "kanban").
 	const view = useMemo<View>(() => {
 		const pathView = location.pathname.slice(1); // Remove leading "/"
 		return AVAILABLE_VIEWS.includes(pathView)
@@ -27,7 +27,7 @@ export const ViewProvider: React.FC<{ children: React.ReactNode }> = ({
 			: 'kanban';
 	}, [location.pathname]);
 
-	// Navigate to new view instead of setting state
+	// Navigate to new view instead of setting state.
 	const setView = (newView: View) => {
 		navigate(`/${newView}`);
 	};

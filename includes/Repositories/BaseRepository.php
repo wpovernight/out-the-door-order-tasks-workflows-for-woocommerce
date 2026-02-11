@@ -233,9 +233,9 @@ abstract class BaseRepository {
 	 * @param array<int, mixed> $bindings
 	 * @param bool $reset
 	 *
-	 * @return int Number of rows affected.
+	 * @return int|bool Number of rows affected.
 	 */
-	public function execute_raw( string $query, array $bindings = array(), bool $reset = true ): int {
+	public function execute_raw( string $query, array $bindings = array(), bool $reset = true ) {
 		if ( ! empty( $bindings ) ) {
 			$query = $this->wpdb->prepare( $query, ...array_values( $bindings ) );
 		}
@@ -313,11 +313,11 @@ abstract class BaseRepository {
 	 *
 	 * @param array<string, mixed> $data Columns to set.
 	 *
-	 * @return bool
+	 * @return int|false Number of rows updated, or false on error. Returns 0 if no rows were affected (data unchanged).
 	 * @throws RuntimeException If no WHERE clause is specified.
 	 * @throws InvalidArgumentException If data is empty or columns are invalid.
 	 */
-	public function update( array $data ): bool {
+	public function update( array $data ) {
 		// Validate the data array.
 		if ( empty( $data ) ) {
 			throw new InvalidArgumentException( 'Data must be a non-empty array.' );
@@ -343,7 +343,7 @@ abstract class BaseRepository {
 
 		$this->reset_query();
 
-		return (bool) $this->wpdb->update( $this->get_table_full_name(), $data, $where );
+		return $this->wpdb->update( $this->get_table_full_name(), $data, $where );
 	}
 
 	/**
@@ -461,7 +461,7 @@ abstract class BaseRepository {
 	 * @param callable $callback
 	 *
 	 * @return mixed Result of the callback, or false on failure.
-	 * @throws \Exception
+	 * @throws \Throwable
 	 */
 	public function transaction( callable $callback ) {
 		$this->wpdb->query( 'START TRANSACTION' );
@@ -475,9 +475,10 @@ abstract class BaseRepository {
 			}
 
 			$this->wpdb->query( 'COMMIT' );
+
 			return $result;
 
-		} catch ( \Exception $e ) {
+		} catch ( \Throwable $e ) {
 			$this->wpdb->query( 'ROLLBACK' );
 			throw $e;
 		}
@@ -828,7 +829,11 @@ abstract class BaseRepository {
 	private function compile_limit_offset(): string {
 		$limit_offset = '';
 
-		if ( $this->limit > 0 ) {
+		// If offset is set but no limit, use a very large default limit
+		// This is because MySQL requires LIMIT before OFFSET
+		if ( $this->offset > 0 && $this->limit === 0 ) {
+			$limit_offset .= ' LIMIT 18446744073709551615'; // Max MySQL BIGINT value
+		} elseif ( $this->limit > 0 ) {
 			$limit_offset .= ' LIMIT ' . $this->limit;
 		}
 

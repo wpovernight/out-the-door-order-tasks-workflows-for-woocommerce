@@ -61,8 +61,8 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
 
 #wpo-aom-task-manager-container > .inner > .header > .views-filter > ul > li.active,
 #wpo-aom-task-manager-container > .inner > .header > .views-filter > ul > li:hover {
-    color: var(--wpo-aom-primary-color);
-    border-bottom: 2px solid var(--wpo-aom-primary-color);
+    color: var(--wpo-aom-purple-primary);
+    border-bottom: 2px solid var(--wpo-aom-purple-primary);
 }
 
 .kanban-board {
@@ -86,7 +86,7 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     background: var(--wpo-aom-bg-light);
     border-radius: 6px;
     padding-bottom: 1em;
-    border: 1px solid #d1d9e0;
+    border: 1px solid var(--wpo-aom-border-light);
     display: flex;
     flex-direction: column;
     position: relative;
@@ -109,7 +109,7 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     bottom: 0;
     width: 3px;
     background: var(--wpo-aom-primary-color);
-    border-radius: 2px;
+    border-radius: var(--wpo-aom-radius-l);
     z-index: 100;
 }
 
@@ -121,14 +121,14 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     bottom: 0;
     width: 3px;
     background: var(--wpo-aom-primary-color);
-    border-radius: 2px;
+    border-radius: var(--wpo-aom-radius-l);
     z-index: 100;
 }
 
 .kanban-board .kanban-column-scrollable {
     flex: 1;
     overflow-y: auto;
-    scrollbar-color: #ccc transparent;
+    scrollbar-color: var(--wpo-aom-gray-medium) transparent;
     margin-right: 4px;
     padding: 4px 1px 0 5px;
 }
@@ -142,12 +142,12 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
 }
 
 .kanban-board .kanban-column-scrollable::-webkit-scrollbar-thumb {
-    background-color: #ccc;
+    background-color: var(--wpo-aom-gray-medium);
     border-radius: 3px;
 }
 
 .kanban-board .kanban-column-scrollable::-webkit-scrollbar-thumb:hover {
-    background-color: #999;
+    background-color: var(--wpo-aom-gray-dark);
 }
 
 .kanban-board .kanban-column-container {
@@ -211,7 +211,7 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
 }
 
 .task-delete-menu-item {
-    color: #ef4444;
+    color: var(--wpo-aom-danger);
 }
 
 .task-delete-menu-item::before {
@@ -258,7 +258,7 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     right: 0;
     height: 3px;
     background: var(--wpo-aom-primary-color);
-    border-radius: 2px;
+    border-radius: var(--wpo-aom-radius-l);
     z-index: 10;
     top: -4px;
 }
@@ -271,7 +271,7 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     right: 0;
     height: 3px;
     background: var(--wpo-aom-primary-color);
-    border-radius: 2px;
+    border-radius: var(--wpo-aom-radius-l);
     z-index: 10;
     bottom: -4px;
 }
@@ -280,7 +280,7 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     content: "";
     height: 3px;
     background: var(--wpo-aom-primary-color);
-    border-radius: 2px;
+    border-radius: var(--wpo-aom-radius-l);
     z-index: 10;
 }
 
@@ -304,8 +304,8 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
 .calendar-sidebar {
     display: flex;
     flex-direction: column;
-    background: #F5F5F5;
-    border-right: 1px solid #e5e7eb;
+    background: var(--wpo-aom-bg-lighter);
+    border-right: 1px solid var(--wpo-aom-border-light);
     width: 25em;
     height: 100%;
 }
@@ -317,14 +317,14 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
 
 .calendar-date-range-preset-selector > select {
     width: 100%;
-    border: 1px solid #D5D7DA;
-    border-radius: 0.5em;
+    border: 1px solid var(--wpo-aom-border-color);
+    border-radius: var(--wpo-aom-radius-m);
     outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition: border-color var(--wpo-aom-transition-fast), box-shadow var(--wpo-aom-transition-fast);
 }
 
 .calendar-date-range-preset-selector:focus {
-    border-color: #7c3aed;
+    border-color: var(--wpo-aom-purple-light);
     box-shadow: 0 0 0 0.1875em rgba(124, 58, 237, 0.1);
 }
 
@@ -408,35 +408,20 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     min-width: 2em;
     flex: 1;
     width: 100%;
-    border: 1px solid #D5D7DA;
-    border-radius: 0.5em;
+    border: 1px solid var(--wpo-aom-border-color);
+    border-radius: var(--wpo-aom-radius-m);
     outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition: border-color var(--wpo-aom-transition-fast), box-shadow var(--wpo-aom-transition-fast);
 }
 
 .date-range-inputs > input:focus {
-    border-color: #7c3aed;
+    border-color: var(--wpo-aom-purple-light);
     box-shadow: 0 0 0 0.1875em rgba(124, 58, 237, 0.1);
 }
 
 
 .calendar-grid {
     width: 100%;
-}
-
-.calendar-weekday-header {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 0.25em;
-    margin-bottom: 0.5em;
-}
-
-.calendar-weekday-header > .calendar-weekday {
-    text-align: center;
-    font-size: 0.75em;
-    font-weight: 500;
-    color: #6b7280;
-    padding: 0.5em 0;
 }
 
 .calendar-days-grid {
@@ -449,18 +434,18 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     aspect-ratio: 1;
     border: none;
     background: transparent;
-    border-radius: 2em;
+    border-radius: 50%;
     cursor: pointer;
-    color: #374151;
-    transition: background-color 0.2s;
+    color: var(--wpo-aom-text-primary);
+    transition: background-color var(--wpo-aom-transition-fast);
     width: 2.5em;
     height: 2.5em;
     line-height: 1;
 }
 
 .calendar-day:hover:not(:disabled) {
-    background-color: #F0E8FC;
-    color: #5818AF;
+    background-color: var(--wpo-aom-purple-bg);
+    color: var(--wpo-aom-purple-lighter);
 }
 
 .calendar-day:disabled {
@@ -468,24 +453,24 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
 }
 
 .calendar-day.calendar-day-other-month {
-    color: #d1d5db;
+    color: var(--wpo-aom-text-gray-light);
     cursor: default;
 }
 
 .calendar-day.calendar-day-today:not(.calendar-day-selected) {
-    border: 0.125em solid #7c3aed;
+    border: 0.125em solid var(--wpo-aom-purple-light);
     font-weight: 600;
 }
 
 .calendar-day.calendar-day-selected {
-    background-color: #6E1EDC;
+    background-color: var(--wpo-aom-purple-primary);
     color: white;
     font-weight: 600;
 }
 
 .calendar-day.calendar-day-in-range:not(.calendar-day-selected) {
-    background-color: #F0E8FC;
-    color: #5818AF;
+    background-color: var(--wpo-aom-purple-bg);
+    color: var(--wpo-aom-purple-lighter);
 }
 
 
@@ -500,27 +485,27 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
 .calendar-actions > button {
     font-weight: 500;
     flex: 1;
-    transition: all 0.2s;
-    border-radius: 0.5em;
+    transition: all var(--wpo-aom-transition-fast);
+    border-radius: var(--wpo-aom-radius-m);
     padding: 0.75em 0;
 }
 
 .calendar-actions > .wpo-clear-button {
     background: white;
-    border: 1px solid #D5D7DA;
+    border: 1px solid var(--wpo-aom-border-color);
 }
 
 .calendar-actions > .wpo-clear-button:hover {
-    background-color: #f9fafb;
+    background-color: var(--wpo-aom-bg-gray);
 }
 
 .calendar-actions > .wpo-apply-button {
-    background: #7c3aed;
+    background: var(--wpo-aom-purple-primary);
     color: white;
 }
 
 .calendar-actions > .wpo-apply-button:hover {
-    background-color: #6d28d9;
+    background-color: var(--wpo-aom-purple-dark);
 }
 
 
@@ -532,14 +517,6 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     flex: 1;
 }
 
-.calendar-task-list-title {
-    font-size: 1.5em;
-    font-weight: 700;
-    color: #111827;
-    margin: 0 0 1.5em 0;
-}
-
-
 .calendar-task-table-wrapper {
     overflow: hidden;
 }
@@ -547,13 +524,13 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
 .calendar-task-table-wrapper > table {
     width: 100%;
     border-collapse: collapse;
-    border-left: 0.0625em solid #e5e7eb;
-    border-right: 0.0625em solid #e5e7eb;
+    border-left: 0.0625em solid var(--wpo-aom-border-light);
+    border-right: 0.0625em solid var(--wpo-aom-border-light);
 }
 
 .calendar-task-table-wrapper > table > thead {
-    background-color: #f9fafb;
-    border-bottom: 0.0625em solid #e5e7eb;
+    background-color: var(--wpo-aom-bg-gray);
+    border-bottom: 0.0625em solid var(--wpo-aom-border-light);
 }
 
 .calendar-task-table-wrapper > table > thead th {
@@ -571,44 +548,44 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
 .calendar-task-th-sortable {
     cursor: pointer;
     user-select: none;
-    transition: background-color 0.3s;
+    transition: background-color var(--wpo-aom-transition-normal);
 }
 
 .calendar-task-th-sortable:hover {
-    background-color: #f3f4f6;
+    background-color: var(--wpo-aom-bg-gray-medium);
 }
 
 .calendar-sort-icon {
     margin-left: 0.25em;
-    color: #9ca3af;
+    color: var(--wpo-aom-gray-icon);
     font-size: 0.75em;
     display: inline-block;
-    transition: color 0.2s;
+    transition: color var(--wpo-aom-transition-fast);
 }
 
 .calendar-sort-icon-active {
-    color: #7c3aed;
+    color: var(--wpo-aom-purple-light);
     font-weight: bold;
 }
 
 .calendar-task-table-wrapper > table > tbody > tr {
-    border-bottom: 0.0625em solid #e5e7eb;
-    transition: background-color 0.2s;
+    border-bottom: 0.0625em solid var(--wpo-aom-border-light);
+    transition: background-color var(--wpo-aom-transition-fast);
     height: 5em;
     vertical-align: middle;
 }
 
 .calendar-task-table-wrapper > table > tbody > tr:hover {
-    background-color: #f9fafb;
+    background-color: var(--wpo-aom-bg-gray);
 }
 
 .calendar-task-table-wrapper > table > tbody > tr:nth-child(even) {
-    background-color: #FAFAFA;
+    background-color: var(--wpo-aom-bg-gray-alt);
 }
 
 .calendar-task-table-wrapper > table > tbody > tr > td {
     padding: 1em;
-    color: #374151;
+    color: var(--wpo-aom-text-primary);
 }
 
 .calendar-task-table-wrapper > table > tbody > tr > td.task-due-date {
@@ -620,15 +597,10 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     padding-left: 1.5em;
 }
 
-.calendar-task-table-wrapper > table > tbody > tr > td:last-child,
-.calendar-task-table-wrapper > table > thead > tr > th:last-child {
-    color: #6b7280;
-}
-
 .calendar-task-table-wrapper > table > tbody > td > span {
     display: inline-block;
     padding: 0.125em 0.7em;
-    border-radius: 1em;
+    border-radius: var(--wpo-aom-radius-l);
     font-size: 0.9em;
     font-weight: 600;
     white-space: nowrap;
@@ -637,6 +609,21 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
 .calendar-task-empty-state {
     padding: 2em 1em;
     text-align: center;
-    color: #6b7280;
+    color: var(--wpo-aom-text-gray);
     font-size: 0.875em;
+}
+
+.kanban-view .wpo-aom-loading-skeleton-container,
+.calendar-view .wpo-aom-loading-skeleton-container {
+    flex-direction: row;
+}
+
+.calendar-view .wpo-aom-loading-skeleton-container > .task-list-container {
+    margin-top: 1em;
+    flex: 1;
+}
+
+.calendar-view .wpo-aom-skeleton-box.calendar-task-list {
+    margin-top: 1em;
+    margin-left: -1em;
 }

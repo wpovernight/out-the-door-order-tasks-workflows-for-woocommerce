@@ -58,3 +58,6 @@ docs/
 # Languages
 /languages/cache/
 languages.json
+
+# Source maps (debugging only)
+*.js.map

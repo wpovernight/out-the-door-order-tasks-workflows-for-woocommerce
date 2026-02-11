@@ -12,9 +12,9 @@
     background: var(--wpo-aom-card-bg);
     padding: .875em;
     margin: .1em;
-    transition: all .15s ease;
-    border: 1px solid #D5D7DA;
-    border-radius: 0.5em;
+    transition: all var(--wpo-aom-transition-fast) ease;
+    border: 1px solid var(--wpo-aom-border-color);
+    border-radius: var(--wpo-aom-radius-m);
 }
 
 .task-card > .task-card-header {
@@ -46,21 +46,20 @@
     align-items: center;
 }
 
-.task-card-options .wpo-action-menu .task-delete-menu-item::before {
-    color: #ef4444;
-}
-
-
 .task-card-options .wpo-action-menu button::before {
     margin-right: 6px;
-    color: #59636e;
+    color: var(--wpo-aom-text-gray);
     font-size: 1.4em;
 }
 
 .task-card-options .task-delete-menu-item::before {
     vertical-align: middle;
     margin-right: 6px;
-    color: #59636e;
+    color: var(--wpo-aom-text-gray);
+}
+
+.task-card-options .wpo-action-menu .task-delete-menu-item::before {
+    color: var(--wpo-aom-danger);
 }
 
 .task-card h3,
@@ -85,7 +84,7 @@
 }
 
 .task-card span.task-card-due-date {
-    color: #535862;
+    color: var(--wpo-aom-text-gray);
     line-height: 1;
     display: flex;
     gap: 0.3em;

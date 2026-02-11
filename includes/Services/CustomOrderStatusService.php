@@ -1,0 +1,261 @@
+<?php
+
+namespace WPO\AOM\Services;
+
+use WPO\AOM\Models\CustomOrderStatus;
+use WPO\AOM\Repositories\CustomOrderStatusRepository;
+
+defined( 'ABSPATH' ) || exit;
+
+class CustomOrderStatusService {
+
+	protected CustomOrderStatusRepository $repository;
+
+	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		$this->repository = new CustomOrderStatusRepository();
+	}
+
+	/**
+	 * Register the service.
+	 */
+	public function register(): void {
+		// Add custom order statuses to WooCommerce.
+		add_filter( 'wc_order_statuses', array( $this, 'add_to_order_statuses' ) );
+		add_filter( 'woocommerce_register_shop_order_post_statuses', array( $this, 'register_order_statuses' ) );
+		add_filter( 'bulk_actions-edit-shop_order', array( $this, 'add_to_bulk_action' ) );
+		add_filter( 'bulk_actions-woocommerce_page_wc-orders', array( $this, 'add_to_bulk_action' ) ); // HPOS support
+
+		// Add dynamic styles for custom order statuses in the orders page.
+		add_action( 'admin_enqueue_scripts', array( $this, 'add_dynamic_style' ), 99 );
+
+		// Reassign orders when a custom status is deleted.
+		add_action( 'wpo_aom_reassign_orders', array( $this, 'reassign_orders' ), 10, 2 );
+	}
+
+	/** ================================
+	 *   Integration with WooCommerce
+	 *  ================================ */
+
+	/**
+	 * Add custom order statuses to the list of WooCommerce order statuses.
+	 *
+	 * @param array $order_statuses
+	 *
+	 * @return array
+	 */
+	public function add_to_order_statuses( array $order_statuses ): array {
+		$statuses = $this->all();
+
+		foreach ( $statuses as $status ) {
+			$order_statuses[ $status->get_prefixed_status_key() ] = esc_html__( $status->label, 'wpo-aom' );
+		}
+
+		return $order_statuses;
+	}
+
+	/**
+	 * Register custom order statuses with WooCommerce.
+	 *
+	 * @param array $order_statuses
+	 *
+	 * @return array
+	 */
+	public function register_order_statuses( array $order_statuses ): array {
+		$statuses = $this->all();
+
+		foreach ( $statuses as $status ) {
+			$label = esc_html__( $status->label, 'wpo-aom' );
+
+			$order_statuses[ $status->get_prefixed_status_key() ] = array(
+				'label'                     => $label,
+				'public'                    => true,
+				'exclude_from_search'       => false,
+				'show_in_admin_all_list'    => true,
+				'show_in_admin_status_list' => true,
+				/* translators: %s: number of orders */
+				'label_count'               => _n_noop(
+					$label . ' <span class="count">(%s)</span>',
+					$label . ' <span class="count">(%s)</span>',
+					'wpo-aom'
+				)
+			);
+		}
+
+		return $order_statuses;
+	}
+
+	/**
+	 * Add custom order statuses to bulk actions dropdown.
+	 *
+	 * @param array $bulk_actions
+	 *
+	 * @return array
+	 */
+	public function add_to_bulk_action( array $bulk_actions ): array {
+		// We can introduce a new setting to toggle this feature if needed.
+		$statuses = $this->all();
+
+		foreach ( $statuses as $status ) {
+			$bulk_actions[ 'mark_' . $status->get_prefixed_status_key() ] = sprintf( __( 'Change status to %s', 'wpo-aom' ), esc_html__( $status->label, 'wpo-aom' ) );
+		}
+
+		return $bulk_actions;
+	}
+
+	/**
+	 * Add dynamic styles for custom order statuses colors.
+	 *
+	 * @return void
+	 */
+	public function add_dynamic_style() {
+		$statuses   = $this->all();
+		$custom_css = '';
+
+		foreach ( $statuses as $status ) {
+			$custom_css .= sprintf(
+				'mark.status-%s { background-color: %s; color: %s; }',
+				esc_attr( $status->status_key ),
+				esc_attr( $status->background ),
+				esc_attr( $status->foreground )
+			);
+		}
+
+		wp_add_inline_style( 'woocommerce_admin_styles', $custom_css );
+	}
+
+	/** ================================
+	 *   CRUD Operations
+	 *  ================================ */
+
+	/**
+	 * Return all statuses.
+	 *
+	 * @return CustomOrderStatus[]
+	 */
+	public function all(): array {
+		return $this->repository->get();
+	}
+
+	/**
+	 * Get a custom status by ID.
+	 *
+	 * @param int $id
+	 *
+	 * @return CustomOrderStatus|null
+	 */
+	public function find( int $id ): ?CustomOrderStatus {
+		return $this->repository->find( $id );
+	}
+
+	/**
+	 * Create a new custom order status.
+	 *
+	 * @param array<string, mixed> $data
+	 *
+	 * @return int|false Inserted ID or false on failure
+	 */
+	public function create( array $data ) {
+		$status = new CustomOrderStatus( $data );
+
+		// Ensure the status key is unique.
+		$existing = $this->repository->where( 'status_key', $status->status_key )->first();
+		if ( $existing ) {
+			// Append a number to make it unique.
+			$base_key = $status->status_key;
+			$counter  = 2;
+			do {
+				$status->status_key = $base_key . '-' . $counter;
+				$existing           = $this->repository->where( 'status_key', $status->status_key )->first();
+				$counter++;
+			} while ( $existing );
+		}
+
+		return $this->repository->insert( $status->to_db_array() );
+	}
+
+	/**
+	 * Update a custom order status by ID.
+	 *
+	 * @param int $id
+	 * @param array<string, mixed> $data
+	 *
+	 * @return bool
+	 */
+	public function update( int $id, array $data ): bool {
+		$existing = $this->repository->find( $id );
+		if ( ! $existing ) {
+			return false;
+		}
+
+		$model     = new CustomOrderStatus( array_merge( $existing->to_array(), $data ) );
+		$model->id = $id;
+
+		return $this->repository->where( 'id', $id )->update( $model->to_db_array() );
+	}
+
+	/**
+	 * Delete a custom order status by ID.
+	 * Updates all orders with the deleted status to a fallback status before deletion.
+	 *
+	 * @param int    $id
+	 * @param string $fallback_status The status to assign to affected orders (default: 'on-hold').
+	 *
+	 * @return bool
+	 */
+	public function delete( int $id, string $fallback_status = 'on-hold' ): bool {
+		$status = $this->find( $id );
+		if ( ! $status ) {
+			return false;
+		}
+
+		// Update all orders with this custom status to the fallback status.
+		as_schedule_single_action(
+			time(),
+			'wpo_aom_reassign_orders',
+			array( $status->status_key, $fallback_status ),
+			'wpo-aom'
+		);
+
+		return $this->repository->where( 'id', $id )->delete();
+	}
+
+	/**
+	 * Reassign orders from one status to another.
+	 *
+	 * @param string $from_status The status key to reassign from (without 'wc-' prefix).
+	 * @param string $to_status   The status key to reassign to (without 'wc-' prefix).
+	 *
+	 * @return void
+	 */
+	public function reassign_orders( string $from_status, string $to_status ): void {
+		$limit  = apply_filters( 'wpo_aom_reassign_orders_batch_size', 50 );
+		$orders = wc_get_orders(
+			array(
+				'status' => $from_status,
+				'limit'  => $limit,
+			)
+		);
+
+		foreach ( $orders as $order ) {
+			$resolved_to_status = apply_filters( 'wpo_aom_reassign_orders_to_status', $to_status, $order );
+
+			$order->update_status(
+				$resolved_to_status,
+				'WPO AOM: ' . __( 'Status changed due to custom order status deletion.', 'wpo-aom' )
+			);
+		}
+
+		// Schedule next batch if there might be more orders.
+		if ( count( $orders ) === $limit ) {
+			as_schedule_single_action(
+				time(),
+				'wpo_aom_reassign_orders',
+				array( $from_status, $to_status ),
+				'wpo-aom'
+			);
+		}
+	}
+}

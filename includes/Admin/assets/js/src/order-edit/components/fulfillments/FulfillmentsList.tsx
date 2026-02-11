@@ -1,5 +1,6 @@
 import React from 'react';
 import { useOrderFulfillment } from '@orderEdit/context/OrderFulfillmentContext';
+import { useOrderEditData } from '@orderEdit/hooks/useOrderEditData';
 import { FulfillmentCard } from './FulfillmentCard';
 import { FulfillmentCardSkeleton } from './FulfillmentCardSkeleton';
 import { EmptyState, ErrorState } from '@shared/components/LoadingSkeleton';
@@ -16,10 +17,7 @@ const FulfillmentsList: React.FC<FulfillmentsListProps> = ({
 }) => {
 	const { fulfillments, refreshFulfillments, orderId } =
 		useOrderFulfillment();
-
-	const handleAddFulfillment = () => {
-		// ToDo: Open fulfillment creation modal
-	};
+	const { i18n } = useOrderEditData();
 
 	// Show loading state
 	if (loadingStatus === 'loading') {
@@ -30,10 +28,7 @@ const FulfillmentsList: React.FC<FulfillmentsListProps> = ({
 	if (loadingStatus === 'error') {
 		return (
 			<ErrorState
-				message={
-					loadingError?.message ||
-					'Failed to load fulfillments. Please try again.' // ToDo: i18n
-				}
+				message={loadingError?.message || i18n.errorLoading}
 				onRetry={refreshFulfillments}
 			/>
 		);
@@ -44,13 +39,12 @@ const FulfillmentsList: React.FC<FulfillmentsListProps> = ({
 		return (
 			<EmptyState
 				icon="📦"
-				message="No fulfillments yet." // ToDo: i18n
-				actionText="Add Fulfillment" // ToDo: i18n
-				onAction={handleAddFulfillment}
+				message={i18n.fulfillments.noFulfillments}
+				actionText={i18n.fulfillments.addFulfillment}
 				actionButtonProps={
 					{
 						'data-order-id': orderId,
-						className: 'fulfillments-trigger',
+						className: 'fulfillments-trigger', // This class is used to bind the click event
 					} as React.ButtonHTMLAttributes<HTMLButtonElement>
 				}
 			/>
