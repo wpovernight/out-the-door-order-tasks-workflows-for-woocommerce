@@ -224,9 +224,20 @@ final class TaskManagerService {
 		// Set field values.
 		$this->task_field_value_repository->update_task_multiple_field_values( $task->id, $field_values_array );
 
-		$task_with_data = $this->get_task_fields_and_values( $task->id );
+		$fields_and_values = $this->get_task_fields_and_values( $task->id );
 
-		return array_merge( $task->to_array(), array( 'fields' => $task_with_data ) );
+		$task_with_fields = array_merge( $task->to_array(), array( 'fields' => $fields_and_values ) );
+
+		/**
+		 * Fires after a task has been created.
+		 *
+		 * @param int   $task_id          The ID of the created task.
+		 * @param array $task_with_fields Complete task data with fields and values.
+		 * @param array $field_values     Field values that were set on creation.
+		 */
+		do_action( 'wpo_aom_task_created', $task->id, $task_with_fields, $field_values_array );
+
+		return $task_with_fields;
 	}
 
 	/**
@@ -245,6 +256,20 @@ final class TaskManagerService {
 			throw new RuntimeException( 'Task not found.' );
 		}
 
+		// Track which fields were actually updated with old and new values.
+		$updated_fields = array();
+
+		// Check for task data changes (title, description).
+		$original_task_data = $task->to_array();
+		foreach ( $task_data as $key => $new_value ) {
+			if ( isset( $original_task_data[ $key ] ) && $original_task_data[ $key ] !== $new_value ) {
+				$updated_fields[ $key ] = array(
+					'old_value' => $original_task_data[ $key ],
+					'new_value' => $new_value,
+				);
+			}
+		}
+
 		$task->fill( $task_data );
 
 		$result = $this->task_repository->save( $task );
@@ -255,14 +280,54 @@ final class TaskManagerService {
 
 		// Update field values if provided.
 		if ( ! empty( $field_values ) ) {
+			// Fetch all current field values at once to avoid N+1 queries.
+			$current_field_values = $this->get_field_values_for_task( $task_id );
+
 			$field_values_array = array();
 			foreach ( $field_values as $field_value ) {
 				$field_id                        = $field_value['field_id'];
 				$value                           = $field_value['value'];
+				$field_slug                      = $field_value['field_slug'];
 				$field_values_array[ $field_id ] = $value;
 
-				// Check if status field is being updated
-				if ( $field_value['field_slug'] === 'status' ) {
+				$current_value = null;
+				if ( isset( $current_field_values[ $field_id ] ) ) {
+					$current_values_objects = $current_field_values[ $field_id ];
+					// Extract the actual values from TaskFieldValue objects.
+					if ( is_array( $current_values_objects ) ) {
+						$current_value = array_map(
+							function ( $obj ) {
+								return $obj->value;
+							},
+							$current_values_objects
+						);
+
+						if ( count( $current_value ) === 1 ) {
+							$current_value = $current_value[0];
+						}
+					}
+				}
+
+				// Normalize both values to arrays for consistent comparison.
+				$current_normalized = (array) $current_value;
+				$new_normalized     = (array) $value;
+
+				// Sort arrays to handle order differences.
+				sort( $current_normalized );
+				sort( $new_normalized );
+
+				// Check if the field value actually changed.
+				$has_changed = wp_json_encode( $current_normalized ) !== wp_json_encode( $new_normalized );
+
+				if ( $has_changed ) {
+					$updated_fields[ $field_slug ] = array(
+						'old_value' => $current_value,
+						'new_value' => $value,
+					);
+				}
+
+				// Check if status field is being updated to handle position update later.
+				if ( $field_slug === 'status' ) {
 					$current_status_value = $this
 						->task_field_value_repository
 						->find_by_task_and_field( $task_id, DefaultTaskFields::STATUS );
@@ -285,9 +350,21 @@ final class TaskManagerService {
 			$this->task_field_value_repository->update_task_multiple_field_values( $task_id, $field_values_array );
 		}
 
-		$task_with_data = $this->get_task_fields_and_values( $task_id );
+		$fields_and_values = $this->get_task_fields_and_values( $task_id );
 
-		return array_merge( $task->to_array(), array( 'fields' => $task_with_data ) );
+		$task_with_fields = array_merge( $task->to_array(), array( 'fields' => $fields_and_values ) );
+
+		/**
+		 * Fires after a task has been updated.
+		 *
+		 * @param int   $task_id          The ID of the updated task.
+		 * @param array $task_with_fields Complete updated task data with fields and values.
+		 * @param array $updated_fields   Associative array of field slugs that were changed,
+		 *                                with 'old_value' and 'new_value' for each.
+		 */
+		do_action( 'wpo_aom_task_updated', $task_id, $task_with_fields, $updated_fields );
+
+		return $task_with_fields;
 	}
 
 	/**
@@ -666,7 +743,29 @@ final class TaskManagerService {
 			DefaultTaskFields::POSITION => $new_position,
 		);
 
+		$old_status    = $this->task_field_value_repository
+			->find_by_task_and_field( $task_id, DefaultTaskFields::STATUS );
+		$old_status_id = $old_status ? (int) $old_status->value : null;
+
+		$updated_fields = array(
+			'status' => array(
+				'old_value' => $old_status_id,
+				'new_value' => $target_status_id,
+			),
+		);
+
 		$this->task_field_value_repository->update_task_multiple_field_values( $task_id, $update_data );
+
+		/**
+		 * Fires after a task has been moved to a new position.
+		 *
+		 * @param int   $task_id          The ID of the moved task.
+		 * @param int   $target_status_id The ID of the target status.
+		 * @param float $new_position     The new calculated position of the task.
+		 * @param array $updated_fields   Associative array of fields that were changed,
+		 *                                with 'old_value' and 'new_value' for each.
+		 */
+		do_action( 'wpo_aom_task_moved', $task_id, $target_status_id, $new_position, $updated_fields );
 
 		return $new_position;
 	}
@@ -680,7 +779,11 @@ final class TaskManagerService {
 	 *
 	 * @return float
 	 */
-	private function calculate_fractional_position( float $previous_position, float $next_position, int $status_id ): float {
+	private function calculate_fractional_position(
+		float $previous_position,
+		float $next_position,
+		int $status_id
+	): float {
 		if ( $previous_position >= $next_position ) {
 			throw new InvalidArgumentException( 'Previous position must be less than next position.' );
 		}
