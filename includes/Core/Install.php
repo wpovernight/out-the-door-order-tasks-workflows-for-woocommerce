@@ -179,6 +179,14 @@ final class Install {
 			FOREIGN KEY (task_id) REFERENCES {$wpdb->prefix}wpo_aom_tasks(id) ON DELETE CASCADE,
 			FOREIGN KEY (field_id) REFERENCES {$wpdb->prefix}wpo_aom_task_fields(id) ON DELETE CASCADE
 		) {$charset_collate};
+		CREATE TABLE `{$wpdb->prefix}wpo_aom_custom_statuses` (
+			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+			status_key VARCHAR(64) NOT NULL,
+			label VARCHAR(255) NOT NULL,
+			background VARCHAR(32) DEFAULT NULL,
+			PRIMARY KEY (id),
+			UNIQUE KEY (status_key)
+		) {$charset_collate};
 		";
 	}
 
