@@ -136,7 +136,7 @@ class CustomOrderStatusService {
 	 * @return CustomOrderStatus[]
 	 */
 	public function all(): array {
-		return $this->repository->all();
+		return $this->repository->get();
 	}
 
 	/**
@@ -147,18 +147,7 @@ class CustomOrderStatusService {
 	 * @return CustomOrderStatus|null
 	 */
 	public function find( int $id ): ?CustomOrderStatus {
-		return $this->repository->find_by_id( $id );
-	}
-
-	/**
-	 * Get a custom status by its key.
-	 *
-	 * @param string $status_key
-	 *
-	 * @return CustomOrderStatus|null
-	 */
-	public function find_by_key( string $status_key ): ?CustomOrderStatus {
-		return $this->repository->find_by_key( $status_key );
+		return $this->repository->find( $id );
 	}
 
 	/**
@@ -172,19 +161,19 @@ class CustomOrderStatusService {
 		$status = new CustomOrderStatus( $data );
 
 		// Ensure the status key is unique.
-		$existing = $this->repository->find_by_key( $status->status_key );
+		$existing = $this->repository->where( 'status_key', $status->status_key )->first();
 		if ( $existing ) {
 			// Append a number to make it unique.
 			$base_key = $status->status_key;
 			$counter  = 2;
 			do {
 				$status->status_key = $base_key . '-' . $counter;
-				$existing           = $this->repository->find_by_key( $status->status_key );
+				$existing           = $this->repository->where( 'status_key', $status->status_key )->first();
 				$counter++;
 			} while ( $existing );
 		}
 
-		return $this->repository->insert_status( $status );
+		return $this->repository->insert( $status->to_db_array() );
 	}
 
 	/**
@@ -196,7 +185,7 @@ class CustomOrderStatusService {
 	 * @return bool
 	 */
 	public function update( int $id, array $data ): bool {
-		$existing = $this->repository->find_by_id( $id );
+		$existing = $this->repository->find( $id );
 		if ( ! $existing ) {
 			return false;
 		}
@@ -204,7 +193,7 @@ class CustomOrderStatusService {
 		$model     = new CustomOrderStatus( array_merge( $existing->to_array(), $data ) );
 		$model->id = $id;
 
-		return $this->repository->update_status( $model );
+		return $this->repository->where( 'id', $id )->update( $model->to_db_array() );
 	}
 
 	/**
@@ -230,7 +219,7 @@ class CustomOrderStatusService {
 			'wpo-aom'
 		);
 
-		return $this->repository->delete_status( $id );
+		return $this->repository->where( 'id', $id )->delete();
 	}
 
 	/**

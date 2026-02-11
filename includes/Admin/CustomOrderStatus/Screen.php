@@ -3,6 +3,7 @@
 namespace WPO\AOM\Admin\CustomOrderStatus;
 
 use WPO\AOM\Models\CustomOrderStatus;
+use WPO\AOM\Services\CustomOrderStatusService;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -161,8 +162,10 @@ final class Screen {
 			return;
 		}
 
-		$status_id = absint( $_GET['status_id'] );
-		$status    = WPO_AOM()->custom_order_status->find( $status_id );
+		/** @var CustomOrderStatusService $custom_statuses_service */
+		$custom_statuses_service = WPO_AOM()->get_service( CustomOrderStatusService::class );
+		$status_id               = absint( $_GET['status_id'] );
+		$status                  = $custom_statuses_service->find( $status_id );
 
 		if ( ! $status ) {
 			printf(
@@ -274,13 +277,16 @@ final class Screen {
 			'background' => sanitize_hex_color( $_POST['wpo_aom_custom_order_status_background'] ?? '' ),
 		);
 
+		/** @var CustomOrderStatusService $custom_statuses_service */
+		$custom_statuses_service = WPO_AOM()->get_service( CustomOrderStatusService::class );
+
 		switch ( $this->get_current_action() ) {
 			case 'edit':
 				$status_id = absint( $_GET['status_id'] ?? 0 );
-				WPO_AOM()->custom_order_status->update( $status_id, $data );
+				$custom_statuses_service->update( $status_id, $data );
 				break;
 			case 'create':
-				WPO_AOM()->custom_order_status->create( $data );
+				$custom_statuses_service->create( $data );
 				wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=wpo_aom_custom_status_tab' ) );
 				break;
 		}
@@ -301,8 +307,10 @@ final class Screen {
 			wp_send_json_error( array( 'message' => esc_html__( 'Invalid request.', 'wpo-aom' ) ) );
 		}
 
-		$status_id = absint( $_POST['status_id'] );
-		$deleted   = WPO_AOM()->custom_order_status->delete( $status_id );
+		/** @var CustomOrderStatusService $custom_statuses_service */
+		$custom_statuses_service = WPO_AOM()->get_service( CustomOrderStatusService::class );
+		$status_id               = absint( $_POST['status_id'] );
+		$deleted                 = $custom_statuses_service->delete( $status_id );
 
 		if ( $deleted ) {
 			wp_send_json_success( array( 'message' => esc_html__( 'Custom order status deleted successfully.', 'wpo-aom' ) ) );

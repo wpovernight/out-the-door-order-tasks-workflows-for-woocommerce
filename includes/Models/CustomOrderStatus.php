@@ -6,7 +6,7 @@ use WPO\AOM\Contracts\ArraySerializableModel;
 
 defined( 'ABSPATH' ) || exit;
 
-class CustomOrderStatus implements ArraySerializableModel {
+class CustomOrderStatus extends BaseModel implements ArraySerializableModel {
 
 	public int $id;
 	public string $status_key;

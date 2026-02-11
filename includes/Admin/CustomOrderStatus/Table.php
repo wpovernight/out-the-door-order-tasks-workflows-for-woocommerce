@@ -65,9 +65,10 @@ class Table extends WP_List_Table {
 		$per_page            = $this->get_items_per_page( 'report_items_per_page', 20 );
 		$current_page_number = $this->get_pagenum();
 
-		/** @var CustomOrderStatusService $custom_statuses */
-		$custom_statuses     = WPO_AOM()->custom_order_status->all();
-		$total_items         = count( $custom_statuses );
+		/** @var CustomOrderStatusService $custom_statuses_service */
+		$custom_statuses_service = WPO_AOM()->get_service( CustomOrderStatusService::class );
+		$all_custom_statuses     = $custom_statuses_service->all();
+		$total_items             = count( $all_custom_statuses );
 
 		$this->set_pagination_args( array(
 			'total_items' => $total_items,
@@ -77,7 +78,7 @@ class Table extends WP_List_Table {
 		$this->_column_headers = array( $columns, array(), array() );
 		$this->items           = apply_filters(
 			'wpo_aom_custom_order_statuses_table_items',
-			array_slice( $custom_statuses, ( ( $current_page_number - 1 ) * $per_page ), $per_page )
+			array_slice( $all_custom_statuses, ( ( $current_page_number - 1 ) * $per_page ), $per_page )
 		);
 	}
 
