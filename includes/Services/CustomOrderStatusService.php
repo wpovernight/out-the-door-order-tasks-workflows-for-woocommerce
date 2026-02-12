@@ -99,7 +99,11 @@ class CustomOrderStatusService {
 		$statuses = $this->all();
 
 		foreach ( $statuses as $status ) {
-			$bulk_actions[ 'mark_' . $status->get_prefixed_status_key() ] = sprintf( __( 'Change status to %s', 'wpo-aom' ), esc_html__( $status->label, 'wpo-aom' ) );
+			$bulk_actions[ 'mark_' . $status->get_prefixed_status_key() ] = sprintf(
+				/* translators: %s: status label */
+				__( 'Change status to %s', 'wpo-aom' ),
+				esc_html__( $status->label, 'wpo-aom' )
+			);
 		}
 
 		return $bulk_actions;
