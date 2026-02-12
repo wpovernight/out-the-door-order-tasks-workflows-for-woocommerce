@@ -1,10 +1,14 @@
 import React from 'react';
+import { __ } from '@wordpress/i18n';
 import { AVAILABLE_VIEWS, useView } from '../context/ViewContext';
-import { useTaskManagerData } from '@taskManager/hooks/useTaskManagerData';
+
+const viewLabels: Record<string, string> = {
+	kanban: __( 'Kanban', 'wpo-aom' ),
+	calendar: __( 'Calendar', 'wpo-aom' ),
+};
 
 export default function Header() {
 	const { view, setView } = useView();
-	const { i18n } = useTaskManagerData();
 
 	return (
 		<div className="header">
@@ -20,7 +24,7 @@ export default function Header() {
 								onClick={() => setView(availableView)}
 								className="view-button"
 							>
-								{i18n.views[availableView]}
+								{viewLabels[availableView]}
 							</button>
 						</li>
 					))}

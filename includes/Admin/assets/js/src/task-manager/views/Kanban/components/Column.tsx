@@ -20,9 +20,9 @@ import {
 	isColumnData,
 } from '../data';
 import { Card } from './Card';
+import { __ } from '@wordpress/i18n';
 import { useTaskCreation } from '@shared/hooks/useTaskFormModal';
 import { useViewTasks } from '@taskManager/views/Kanban/context/ViewTaskContext';
-import { useTaskManagerData } from '@taskManager/hooks/useTaskManagerData';
 
 interface ColumnProps {
 	column: FieldOption;
@@ -50,7 +50,6 @@ export const Column: React.FC<ColumnProps> = ({
 	const headerRef = useRef<HTMLDivElement | null>(null);
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const columnWrapperRef = useRef<HTMLDivElement | null>(null);
-	const { i18n } = useTaskManagerData();
 	const { openCreateTaskModal } = useTaskCreation();
 
 	const [state, setState] = useState<ColumnState>(IDLE);
@@ -241,7 +240,7 @@ export const Column: React.FC<ColumnProps> = ({
 					return updated;
 				});
 			},
-			title: i18n.kanban.addTask,
+			title: __( 'Add Task', 'wpo-aom' ),
 		});
 	};
 
@@ -266,7 +265,7 @@ export const Column: React.FC<ColumnProps> = ({
 						className="wpo-button wpo-button-icon wpo-aom-add-button"
 					>
 						<span className="screenReader">
-							{i18n.kanban.create}
+							{__( 'Create', 'wpo-aom' )}
 						</span>
 					</button>
 				</div>

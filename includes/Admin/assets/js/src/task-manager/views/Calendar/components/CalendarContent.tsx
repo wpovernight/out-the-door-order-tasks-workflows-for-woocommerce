@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { useViewTasks } from '../context/ViewTaskContext';
+import { __ } from '@wordpress/i18n';
 import { useTasks } from '@shared/context/TaskContext';
 import { useTaskEdit } from '@shared/hooks/useTaskFormModal';
-import { useTaskManagerData } from '@taskManager/hooks/useTaskManagerData';
 import { Task } from '@shared/types/task';
 import { CalendarDay } from '../data';
 import {
@@ -34,7 +34,6 @@ export const CalendarContent: React.FC = () => {
 
 	const { deleteTask, setTasks } = useTasks();
 	const { openEditTaskModal } = useTaskEdit();
-	const { i18n } = useTaskManagerData();
 
 	// Generate calendar data
 	const { monthName } = useMemo(
@@ -127,7 +126,7 @@ export const CalendarContent: React.FC = () => {
 					)
 				);
 			},
-			title: `${i18n.actions.edit}: ${task.title}`,
+			title: `${__( 'Edit', 'wpo-aom' )}: ${task.title}`,
 		});
 	};
 

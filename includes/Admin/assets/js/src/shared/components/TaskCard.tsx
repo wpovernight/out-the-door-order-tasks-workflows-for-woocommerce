@@ -1,4 +1,5 @@
 import React from 'react';
+import { __ } from '@wordpress/i18n';
 import {
 	isFieldOption,
 	Task,
@@ -29,13 +30,6 @@ interface TaskCardProps {
 	descriptionMaxLength?: number;
 	isCompact?: boolean;
 	excludeTags?: string[];
-	i18n: {
-		options?: string;
-		edit?: string;
-		delete?: string;
-		markFinished?: string;
-		markUnfinished?: string;
-	};
 }
 
 export const TaskCard: React.FC<TaskCardProps> = ({
@@ -56,7 +50,6 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 	descriptionMaxLength = 100,
 	isCompact = false,
 	excludeTags = [],
-	i18n,
 }) => {
 	const { finishTask: globalFinishTask, unfinishTask: globalUnfinishTask } =
 		useTasks();
@@ -122,7 +115,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 				type="button"
 				onClick={onOptionsClick}
 			>
-				<span className="screenReader">{i18n.options}</span>
+				<span className="screenReader">{__( 'Options', 'wpo-aom' )}</span>
 			</button>
 			{isOptionsOpen && (
 				<ul className="wpo-action-menu">
@@ -137,8 +130,8 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 							}
 						>
 							{isCompleted
-								? i18n.markUnfinished
-								: i18n.markFinished}
+								? __( 'Mark as In Progress', 'wpo-aom' )
+								: __( 'Mark as Completed', 'wpo-aom' )}
 						</button>
 					</li>
 					{onEditClick && (
@@ -148,7 +141,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 								className="wpo-button task-edit-menu-item"
 								onClick={onEditClick}
 							>
-								{i18n.edit}
+								{__( 'Edit', 'wpo-aom' )}
 							</button>
 						</li>
 					)}
@@ -159,7 +152,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 								className="wpo-button task-delete-menu-item"
 								onClick={onDeleteClick}
 							>
-								{i18n.delete}
+								{__( 'Delete', 'wpo-aom' )}
 							</button>
 						</li>
 					)}
@@ -180,11 +173,11 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 							: handleOnFinishClick
 					}
 					title={
-						isCompleted ? i18n.markUnfinished : i18n.markFinished
+						isCompleted ? __( 'Mark as In Progress', 'wpo-aom' ) : __( 'Mark as Completed', 'wpo-aom' )
 					}
 				>
 					<span className="screenReader">
-						{isCompleted ? i18n.markUnfinished : i18n.markFinished}
+						{isCompleted ? __( 'Mark as In Progress', 'wpo-aom' ) : __( 'Mark as Completed', 'wpo-aom' )}
 					</span>
 				</button>
 			</li>
@@ -194,9 +187,9 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 						className="wpo-button wpo-button-icon task-edit"
 						type="button"
 						onClick={onEditClick}
-						title={i18n.edit}
+						title={__( 'Edit', 'wpo-aom' )}
 					>
-						<span className="screenReader">{i18n.edit}</span>
+						<span className="screenReader">{__( 'Edit', 'wpo-aom' )}</span>
 					</button>
 				</li>
 			)}
@@ -206,9 +199,9 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 						className="wpo-button wpo-button-icon task-delete"
 						type="button"
 						onClick={onDeleteClick}
-						title={i18n.delete}
+						title={__( 'Delete', 'wpo-aom' )}
 					>
-						<span className="screenReader">{i18n.delete}</span>
+						<span className="screenReader">{__( 'Delete', 'wpo-aom' )}</span>
 					</button>
 				</li>
 			)}

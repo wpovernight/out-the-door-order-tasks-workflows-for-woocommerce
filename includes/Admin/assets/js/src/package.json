@@ -16,6 +16,7 @@
     "@atlaskit/pragmatic-drag-and-drop-auto-scroll": "^2.1.2",
     "@atlaskit/pragmatic-drag-and-drop-hitbox": "^1.1.0",
     "@wordpress/hooks": "^4.36.0",
+    "@wordpress/i18n": "^5.15.0",
     "css-minimizer-webpack-plugin": "^7.0.2",
     "framer-motion": "^11.15.0",
     "react": "^18.3.1",

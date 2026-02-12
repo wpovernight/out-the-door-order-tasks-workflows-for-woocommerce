@@ -33,10 +33,12 @@ final class Screen {
 		wp_enqueue_script(
 			'wpo-aom-admin-task-manager',
 			WPO_AOM()->plugin_url() . '/includes/Admin/assets/js/task-manager.js',
-			array( 'wp-element', 'wp-components' ),
+			array( 'wp-element', 'wp-components', 'wp-i18n' ),
 			WPO_AOM_VERSION,
 			true
 		);
+
+		wp_set_script_translations( 'wpo-aom-admin-task-manager', 'wpo-aom', WPO_AOM()->plugin_path() . '/languages' );
 
 		wp_localize_script(
 			'wpo-aom-admin-task-manager',
@@ -45,80 +47,6 @@ final class Screen {
 				'apiRoot'      => esc_url_raw( rest_url( '/wc/v3' ) ),
 				'apiNamespace' => 'wpo/aom',
 				'nonce'        => wp_create_nonce( 'wp_rest' ),
-				'i18n'         => array(
-					'loading'          => esc_html__( 'Loading...', 'wpo-aom' ),
-					'errorLoading'     => esc_html__( 'Error loading tasks. Please try again.', 'wpo-aom' ),
-					'confirmationText' => esc_html__( 'Are you sure?' ),
-					'views'            => array(
-						'kanban'   => esc_html__( 'Kanban', 'wpo-aom' ),
-						'calendar' => esc_html__( 'Calendar', 'wpo-aom' ),
-					),
-					'kanban'           => array(
-						'addTask'  => esc_html__( 'Add Task', 'wpo-aom' ),
-						'editTask' => esc_html__( 'Edit Task', 'wpo-aom' ),
-						'options'  => esc_html__( 'Options', 'wpo-aom' ),
-						'create'   => esc_html__( 'Create', 'wpo-aom' ),
-					),
-					'calendar'         => array(
-						'task'             => esc_html__( 'Task', 'wpo-aom' ),
-						'tasks'            => esc_html__( 'Tasks', 'wpo-aom' ),
-						'priority'         => esc_html__( 'Priority', 'wpo-aom' ),
-						'status'           => esc_html__( 'Status', 'wpo-aom' ),
-						'dueDate'          => esc_html__( 'Due date', 'wpo-aom' ),
-						'description'      => esc_html__( 'Description', 'wpo-aom' ),
-						'noTasksFound'     => esc_html__( 'No tasks found for the selected date range', 'wpo-aom' ),
-						'viewModes'        => array(
-							'byDay'   => esc_html__( 'By day', 'wpo-aom' ),
-							'byWeek'  => esc_html__( 'By week', 'wpo-aom' ),
-							'byMonth' => esc_html__( 'By month', 'wpo-aom' ),
-						),
-						'dateRangePresets' => array(
-							'today'        => esc_html__( 'Today', 'wpo-aom' ),
-							'tomorrow'     => esc_html__( 'Tomorrow', 'wpo-aom' ),
-							'yesterday'    => esc_html__( 'Yesterday', 'wpo-aom' ),
-							'currentWeek'  => esc_html__( 'Current Week', 'wpo-aom' ),
-							'nextWeek'     => esc_html__( 'Next Week', 'wpo-aom' ),
-							'lastWeek'     => esc_html__( 'Last Week', 'wpo-aom' ),
-							'currentMonth' => esc_html__( 'Current Month', 'wpo-aom' ),
-							'nextMonth'    => esc_html__( 'Next Month', 'wpo-aom' ),
-							'lastMonth'    => esc_html__( 'Last Month', 'wpo-aom' ),
-							'custom'       => esc_html__( 'Custom', 'wpo-aom' ),
-						),
-						'selectDate'       => esc_html__( 'Select a date', 'wpo-aom' ),
-						'previousMonth'    => esc_html__( 'Previous month', 'wpo-aom' ),
-						'nextMonth'        => esc_html__( 'Next month', 'wpo-aom' ),
-					),
-					'form'             => array(
-						'labels'       => array(
-							'status'           => esc_html__( 'Status', 'wpo-aom' ),
-							'priority'         => esc_html__( 'Priority', 'wpo-aom' ),
-							'dueDate'          => esc_html__( 'Due Date', 'wpo-aom' ),
-							'title'            => esc_html__( 'Title', 'wpo-aom' ),
-							'description'      => esc_html__( 'Description', 'wpo-aom' ),
-							'associatedOrders' => esc_html__( 'Associated Orders', 'wpo-aom' ),
-						),
-						'placeholders' => array(
-							'select'          => esc_html__( 'Select', 'wpo-aom' ),
-							'taskName'        => esc_html__( 'Write a name for your task.', 'wpo-aom' ),
-							'taskDescription' => esc_html__( 'Describe the task.', 'wpo-aom' ),
-							'searchOrders'    => esc_html__( 'Search orders by number, customer, address...', 'wpo-aom' ),
-						),
-					),
-					'actions'          => array(
-						'edit'           => esc_html__( 'Edit', 'wpo-aom' ),
-						'editTask'       => esc_html__( 'Edit task', 'wpo-aom' ),
-						'delete'         => esc_html__( 'Delete', 'wpo-aom' ),
-						'deleteTask'     => esc_html__( 'Delete task', 'wpo-aom' ),
-						'cancel'         => esc_html__( 'Cancel', 'wpo-aom' ),
-						'clear'          => esc_html__( 'Clear', 'wpo-aom' ),
-						'apply'          => esc_html__( 'Apply', 'wpo-aom' ),
-						'actions'        => esc_html__( 'Actions', 'wpo-aom' ),
-						'createTask'     => esc_html__( 'Create Task', 'wpo-aom' ),
-						'updateTask'     => esc_html__( 'Update Task', 'wpo-aom' ),
-						'markFinished'   => esc_html__( 'Mark as Completed', 'wpo-aom' ), // ToDo: Finished status should be dynamic.
-						'markUnfinished' => esc_html__( 'Mark as In Progress', 'wpo-aom' ), // ToDo: Finished status should be dynamic.
-					),
-				),
 			)
 		);
 

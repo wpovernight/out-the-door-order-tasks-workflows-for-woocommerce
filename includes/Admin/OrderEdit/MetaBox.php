@@ -108,10 +108,12 @@ final class MetaBox {
 		wp_enqueue_script(
 			'wpo-aom-order-edit-metabox',
 			WPO_AOM()->plugin_url() . '/includes/Admin/assets/js/order-edit-metabox.js',
-			array( 'wp-element', 'wp-components' ),
+			array( 'wp-element', 'wp-components', 'wp-i18n' ),
 			WPO_AOM_VERSION,
 			true
 		);
+
+		wp_set_script_translations( 'wpo-aom-order-edit-metabox', 'wpo-aom', WPO_AOM()->plugin_path() . '/languages' );
 
 		wp_localize_script(
 			'wpo-aom-order-edit-metabox',
@@ -122,59 +124,7 @@ final class MetaBox {
 				'apiNamespace'          => 'wpo/aom',
 				'nonce'                 => wp_create_nonce( 'wp_rest' ),
 				'isFulfillmentsEnabled' => wc_string_to_bool( get_option( 'woocommerce_feature_fulfillments_enabled', 'no' ) ),
-				'i18n'                  => array(
-					'loading'          => esc_html__( 'Loading...', 'wpo-aom' ),
-					'errorLoading'     => esc_html__( 'Error loading data. Please try again.', 'wpo-aom' ),
-					'confirmationText' => esc_html__( 'Are you sure?' ),
-					'tasks'            => array(
-						'sectionTitle'         => esc_html__( 'Tasks', 'wpo-aom' ),
-						'addTask'              => esc_html__( 'Add Task', 'wpo-aom' ),
-						'editTask'             => esc_html__( 'Edit Task', 'wpo-aom' ),
-						'deleteTask'           => esc_html__( 'Delete Task', 'wpo-aom' ),
-						'noTasks'              => esc_html__( 'No tasks found.', 'wpo-aom' ),
-						'active'               => esc_html__( 'Active Tasks', 'wpo-aom' ),
-						// ToDo: Finished status should be dynamic.
-						'viewFinished'         => esc_html__( 'View Completed Tasks', 'wpo-aom' ),
-						'hideFinished'         => esc_html__( 'Hide Completed Tasks', 'wpo-aom' ),
-						'activeTasksHeading'   => esc_html__( 'Active Tasks', 'wpo-aom' ),
-						'finishedTasksHeading' => esc_html__( 'Completed Tasks', 'wpo-aom' ),
-					),
-					'fulfillments'     => array(
-						'addFulfillment'  => esc_html__( 'Add Fulfillment', 'wpo-aom' ),
-						'noFulfillments' => esc_html__( 'No fulfillments yet.', 'wpo-aom' ),
-					),
-					'form'             => array(
-						'labels'       => array(
-							'status'           => esc_html__( 'Status', 'wpo-aom' ),
-							'priority'         => esc_html__( 'Priority', 'wpo-aom' ),
-							'dueDate'          => esc_html__( 'Due Date', 'wpo-aom' ),
-							'title'            => esc_html__( 'Title', 'wpo-aom' ),
-							'description'      => esc_html__( 'Description', 'wpo-aom' ),
-							'associatedOrders' => esc_html__( 'Associated Orders', 'wpo-aom' ),
-						),
-						'placeholders' => array(
-							'select'          => esc_html__( 'Select', 'wpo-aom' ),
-							'taskName'        => esc_html__( 'Write a name for your task.', 'wpo-aom' ),
-							'taskDescription' => esc_html__( 'Describe the task.', 'wpo-aom' ),
-							'searchOrders'    => esc_html__( 'Search orders by number, customer, address...', 'wpo-aom' ),
-						),
-					),
-					'actions'          => array(
-						'edit'           => esc_html__( 'Edit', 'wpo-aom' ),
-						'editTask'       => esc_html__( 'Edit task', 'wpo-aom' ),
-						'delete'         => esc_html__( 'Delete', 'wpo-aom' ),
-						'deleteTask'     => esc_html__( 'Delete task', 'wpo-aom' ),
-						'cancel'         => esc_html__( 'Cancel', 'wpo-aom' ),
-						'clear'          => esc_html__( 'Clear', 'wpo-aom' ),
-						'apply'          => esc_html__( 'Apply', 'wpo-aom' ),
-						'actions'        => esc_html__( 'Actions', 'wpo-aom' ),
-						'createTask'     => esc_html__( 'Create Task', 'wpo-aom' ),
-						'updateTask'     => esc_html__( 'Update Task', 'wpo-aom' ),
-						'markFinished'   => esc_html__( 'Mark as Completed', 'wpo-aom' ), // ToDo: Finished status should be dynamic.
-						'markUnfinished' => esc_html__( 'Mark as In Progress', 'wpo-aom' ), // ToDo: Finished status should be dynamic.
-					),
-				),
-			),
+			)
 		);
 
 		wp_enqueue_script(

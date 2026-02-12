@@ -1,8 +1,8 @@
 import React from 'react';
+import { __ } from '@wordpress/i18n';
 import { DateRange } from '../context/ViewTaskContext';
 import { CalendarDay } from '../data';
 import CalendarGrid from './CalendarGrid';
-import { useTaskManagerData } from '@taskManager/hooks/useTaskManagerData';
 
 interface DateRangeSelectorProps {
 	currentDate: Date;
@@ -31,8 +31,6 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 	onApply,
 	monthName,
 }) => {
-	const { i18n } = useTaskManagerData();
-
 	// Format date for input field (YYYY-MM-DD)
 	const formatDateForInput = (date: Date | null): string => {
 		if (!date) {
@@ -111,13 +109,13 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 					className="wpo-button wpo-clear-button"
 					onClick={onCancel}
 				>
-					{i18n.actions.clear}
+					{__( 'Clear', 'wpo-aom' )}
 				</button>
 				<button
 					className="wpo-button wpo-apply-button"
 					onClick={onApply}
 				>
-					{i18n.actions.apply}
+					{__( 'Apply', 'wpo-aom' )}
 				</button>
 			</div>
 		</div>

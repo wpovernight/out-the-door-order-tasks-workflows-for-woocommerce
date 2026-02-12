@@ -1,6 +1,6 @@
 import React from 'react';
+import { __ } from '@wordpress/i18n';
 import { useOrderFulfillment } from '@orderEdit/context/OrderFulfillmentContext';
-import { useOrderEditData } from '@orderEdit/hooks/useOrderEditData';
 import { FulfillmentCard } from './FulfillmentCard';
 import { FulfillmentCardSkeleton } from './FulfillmentCardSkeleton';
 import { EmptyState, ErrorState } from '@shared/components/LoadingSkeleton';
@@ -17,7 +17,6 @@ const FulfillmentsList: React.FC<FulfillmentsListProps> = ({
 }) => {
 	const { fulfillments, refreshFulfillments, orderId } =
 		useOrderFulfillment();
-	const { i18n } = useOrderEditData();
 
 	// Show loading state
 	if (loadingStatus === 'loading') {
@@ -28,7 +27,7 @@ const FulfillmentsList: React.FC<FulfillmentsListProps> = ({
 	if (loadingStatus === 'error') {
 		return (
 			<ErrorState
-				message={loadingError?.message || i18n.errorLoading}
+				message={loadingError?.message || __( 'Error loading data. Please try again.', 'wpo-aom' )}
 				onRetry={refreshFulfillments}
 			/>
 		);
@@ -39,8 +38,8 @@ const FulfillmentsList: React.FC<FulfillmentsListProps> = ({
 		return (
 			<EmptyState
 				icon="📦"
-				message={i18n.fulfillments.noFulfillments}
-				actionText={i18n.fulfillments.addFulfillment}
+				message={__( 'No fulfillments yet.', 'wpo-aom' )}
+				actionText={__( 'Add Fulfillment', 'wpo-aom' )}
 				actionButtonProps={
 					{
 						'data-order-id': orderId,
@@ -53,7 +52,7 @@ const FulfillmentsList: React.FC<FulfillmentsListProps> = ({
 
 	return (
 		<div className="fulfillments-list-container">
-			<h4 className="screenReader">Fulfillments</h4>
+			<h4 className="screenReader">{__( 'Fulfillments', 'wpo-aom' )}</h4>
 			<ul className="fulfillments-list">
 				{fulfillments.map((fulfillment, index) => (
 					<li key={fulfillment.id}>

@@ -14,9 +14,9 @@ import { Task } from '@shared/types/task';
 import { getCardData, getCardDropTargetData, isCardData } from '../data';
 import { useViewTasks } from '../context/ViewTaskContext';
 import { useTaskEdit } from '@shared/hooks/useTaskFormModal';
+import { __ } from '@wordpress/i18n';
 import { TaskCard } from '@shared/components/TaskCard';
 import { useTasks } from '@shared/context/TaskContext';
-import { useTaskManagerData } from '@taskManager/hooks/useTaskManagerData';
 
 // ------------------------------
 // Visual state
@@ -48,7 +48,6 @@ export const Card: React.FC<CardProps> = ({
 	const innerRef = useRef<HTMLDivElement | null>(null);
 	const [state, setState] = useState<CardState>(IDLE);
 
-	const { i18n } = useTaskManagerData();
 	const { deleteTask } = useTasks();
 	const { selectedTask, selectTask, setViewTasks, finishTask, unfinishTask } =
 		useViewTasks();
@@ -221,7 +220,7 @@ export const Card: React.FC<CardProps> = ({
 	const handleDeleteClick = () => {
 		// ToDo: Update to use custom modal
 		// eslint-disable-next-line no-alert
-		if (!window.confirm(i18n.confirmationText)) {
+		if (!window.confirm(__( 'Are you sure?', 'wpo-aom' ))) {
 			return;
 		}
 
@@ -279,7 +278,7 @@ export const Card: React.FC<CardProps> = ({
 					return updated;
 				});
 			},
-			title: `${i18n.kanban.editTask}: ${task.title}`,
+			title: `${__( 'Edit Task', 'wpo-aom' )}: ${task.title}`,
 		});
 	};
 
@@ -316,13 +315,6 @@ export const Card: React.FC<CardProps> = ({
 				actionsDisplayMode="menu"
 				headingLevel="h3"
 				excludeTags={['status']}
-				i18n={{
-					options: i18n.kanban.options,
-					edit: i18n.actions.edit,
-					delete: i18n.actions.delete,
-					markFinished: i18n.actions.markFinished,
-					markUnfinished: i18n.actions.markUnfinished,
-				}}
 			/>
 		</div>
 	);

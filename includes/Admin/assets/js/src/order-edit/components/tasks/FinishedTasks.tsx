@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
+import { __ } from '@wordpress/i18n';
 import { TaskCard } from '@shared/components/TaskCard';
 import { useOrderTask } from '@orderEdit/context/OrderTaskContext';
-import { useOrderEditData } from '@orderEdit/hooks/useOrderEditData';
 import { useTaskEdit } from '@shared/hooks/useTaskFormModal';
 
 const FinishedTasks: React.FC = () => {
 	const { finishedTasks, finishedCount, deleteTask, loadingStatus } =
 		useOrderTask();
-	const { i18n } = useOrderEditData();
 	const { openEditTaskModal } = useTaskEdit();
 	const [isExpanded, setIsExpanded] = useState(false);
 
@@ -19,14 +18,14 @@ const FinishedTasks: React.FC = () => {
 
 		openEditTaskModal({
 			task,
-			title: i18n.actions.editTask,
+			title: __( 'Edit task', 'wpo-aom' ),
 		});
 	};
 
 	const handleDeleteClick = async (taskId: number) => {
 		// ToDo: Update to use custom modal
 		// eslint-disable-next-line no-alert
-		if (!window.confirm(i18n.confirmationText)) {
+		if (!window.confirm(__( 'Are you sure?', 'wpo-aom' ))) {
 			return;
 		}
 
@@ -56,7 +55,7 @@ const FinishedTasks: React.FC = () => {
 				style={!isExpanded ? { display: 'none' } : {}}
 			>
 				<h4>
-					{i18n.tasks.finishedTasksHeading} ({finishedCount})
+					{__( 'Completed Tasks', 'wpo-aom' )} ({finishedCount})
 				</h4>
 				<ul className="task-list">
 					{finishedTasks.map((task) => (
@@ -77,12 +76,6 @@ const FinishedTasks: React.FC = () => {
 							descriptionMaxLength={150}
 							isCompact={true}
 							excludeTags={['status']}
-							i18n={{
-								options: i18n.actions.actions,
-								edit: i18n.actions.edit,
-								delete: i18n.actions.delete,
-								markFinished: i18n.actions.markFinished,
-							}}
 						/>
 					))}
 				</ul>
@@ -93,7 +86,7 @@ const FinishedTasks: React.FC = () => {
 				onClick={() => setIsExpanded(!isExpanded)}
 				type="button"
 			>
-				{isExpanded ? i18n.tasks.hideFinished : i18n.tasks.viewFinished}{' '}
+				{isExpanded ? __( 'Hide Completed Tasks', 'wpo-aom' ) : __( 'View Completed Tasks', 'wpo-aom' )}{' '}
 				({finishedCount})
 			</button>
 		</div>

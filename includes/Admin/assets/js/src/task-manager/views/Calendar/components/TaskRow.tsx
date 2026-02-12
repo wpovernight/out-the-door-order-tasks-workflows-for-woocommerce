@@ -7,8 +7,8 @@ import {
 import { getTaskDueDate, getFieldValue } from '@shared/utils/fieldUtils';
 import { formatDate } from '../utils';
 import { getColorStyle } from '@shared/utils/colorUtils';
+import { __ } from '@wordpress/i18n';
 import { truncateText } from '@shared/utils/textUtils';
-import { useTaskManagerData } from '@taskManager/hooks/useTaskManagerData';
 import { useTasks } from '@shared/context/TaskContext';
 
 interface TaskRowProps {
@@ -24,7 +24,6 @@ const TaskRow: React.FC<TaskRowProps> = ({
 	onTaskEdit,
 	onTaskDelete,
 }) => {
-	const { i18n } = useTaskManagerData();
 	const dueDate = getTaskDueDate(task);
 	const { finishTask, unfinishTask } = useTasks();
 
@@ -100,7 +99,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
 							}}
 						>
 							<span className="screenReader">
-								{i18n.actions.markFinished}
+								{__( 'Mark as Completed', 'wpo-aom' )}
 							</span>
 						</button>
 					</li>
@@ -113,7 +112,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
 							}}
 						>
 							<span className="screenReader">
-								{i18n.actions.edit}
+								{__( 'Edit', 'wpo-aom' )}
 							</span>
 						</button>
 					</li>
@@ -125,7 +124,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
 								// ToDo: Update to use custom modal
 								// eslint-disable-next-line no-alert
 								const confirmed = window.confirm(
-									i18n.confirmationText
+									__( 'Are you sure?', 'wpo-aom' )
 								);
 								if (confirmed) {
 									onTaskDelete?.(task.id);
@@ -133,7 +132,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
 							}}
 						>
 							<span className="screenReader">
-								{i18n.actions.delete}
+								{__( 'Delete', 'wpo-aom' )}
 							</span>
 						</button>
 					</li>

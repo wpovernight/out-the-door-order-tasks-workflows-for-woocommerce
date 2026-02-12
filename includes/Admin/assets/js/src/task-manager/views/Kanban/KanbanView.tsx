@@ -1,14 +1,13 @@
 import React, { useEffect } from 'react';
+import { __ } from '@wordpress/i18n';
 import { useTasks } from '@shared/context/TaskContext';
 import { Board } from './components/Board';
 import { ViewTaskProvider } from './context/ViewTaskContext';
 import { useAsyncLoader } from '@shared/hooks/useAsyncLoader';
-import { useTaskManagerData } from '@taskManager/hooks/useTaskManagerData';
 import { BoardSkeleton } from '@taskManager/views/Kanban/components/BoardSkeleton';
 
 export const KanbanView: React.FC = () => {
 	const { loadTasks, loadTaskFields, loadFieldOptions } = useTasks();
-	const { i18n } = useTaskManagerData();
 
 	const { loadingStatus, loadingError } = useAsyncLoader(async () => {
 		await Promise.all([loadTasks(), loadFieldOptions('status')]);
@@ -29,7 +28,7 @@ export const KanbanView: React.FC = () => {
 
 	// ToDo: Improve error handling UI
 	if (loadingStatus === 'error') {
-		return <div className="error-message">{i18n.errorLoading}</div>;
+		return <div className="error-message">{__( 'Error loading tasks. Please try again.', 'wpo-aom' )}</div>;
 	}
 
 	return (

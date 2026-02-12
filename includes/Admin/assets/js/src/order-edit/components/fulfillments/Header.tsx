@@ -1,17 +1,18 @@
 import React from 'react';
+import { __ } from '@wordpress/i18n';
 import SectionHeader from '@orderEdit/components/common/SectionHeader';
 import { useOrderEditData } from '@orderEdit/hooks/useOrderEditData';
 import { useOrderFulfillment } from '@orderEdit/context/OrderFulfillmentContext';
 
 const Header: React.FC = () => {
-	const { i18n, orderId } = useOrderEditData();
+	const { orderId } = useOrderEditData();
 	const { fulfillments } = useOrderFulfillment();
 
 	const fulfillmentCount = fulfillments.length;
 
 	return (
 		<SectionHeader
-			title="Fulfillments"
+			title={__( 'Fulfillments', 'wpo-aom' )}
 			details={`${fulfillmentCount}`}
 			actionButtons={[
 				<button
@@ -20,8 +21,7 @@ const Header: React.FC = () => {
 					data-order-id={orderId}
 				>
 					<span className="screenReader">
-						{i18n?.fulfillments?.addFulfillment ||
-							'Add Fulfillment'}
+						{__( 'Add Fulfillment', 'wpo-aom' )}
 					</span>
 				</button>,
 			]}

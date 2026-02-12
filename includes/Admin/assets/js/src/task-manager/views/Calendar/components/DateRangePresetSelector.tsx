@@ -1,6 +1,6 @@
 import React from 'react';
+import { __ } from '@wordpress/i18n';
 import { DateRangePreset } from '../context/ViewTaskContext';
-import { useTaskManagerData } from '@taskManager/hooks/useTaskManagerData';
 
 interface DateRangePresetSelectorProps {
 	value: DateRangePreset;
@@ -11,12 +11,10 @@ const DateRangePresetSelector: React.FC<DateRangePresetSelectorProps> = ({
 	value,
 	onChange,
 }) => {
-	const { i18n } = useTaskManagerData();
-
 	return (
 		<div className="calendar-date-range-preset-selector">
 			<label htmlFor="date-range-preset-select">
-				<span className="screenReader">Date Range Preset</span>
+				<span className="screenReader">{__( 'Date Range Preset', 'wpo-aom' )}</span>
 			</label>
 			<select
 				id="date-range-preset-select"
@@ -24,34 +22,34 @@ const DateRangePresetSelector: React.FC<DateRangePresetSelectorProps> = ({
 				onChange={(e) => onChange(e.target.value as DateRangePreset)}
 			>
 				<option value="today">
-					{i18n.calendar.dateRangePresets.today}
+					{__( 'Today', 'wpo-aom' )}
 				</option>
 				<option value="tomorrow">
-					{i18n.calendar.dateRangePresets.tomorrow}
+					{__( 'Tomorrow', 'wpo-aom' )}
 				</option>
 				<option value="yesterday">
-					{i18n.calendar.dateRangePresets.yesterday}
+					{__( 'Yesterday', 'wpo-aom' )}
 				</option>
 				<option value="current-week">
-					{i18n.calendar.dateRangePresets.currentWeek}
+					{__( 'Current Week', 'wpo-aom' )}
 				</option>
 				<option value="next-week">
-					{i18n.calendar.dateRangePresets.nextWeek}
+					{__( 'Next Week', 'wpo-aom' )}
 				</option>
 				<option value="last-week">
-					{i18n.calendar.dateRangePresets.lastWeek}
+					{__( 'Last Week', 'wpo-aom' )}
 				</option>
 				<option value="current-month">
-					{i18n.calendar.dateRangePresets.currentMonth}
+					{__( 'Current Month', 'wpo-aom' )}
 				</option>
 				<option value="next-month">
-					{i18n.calendar.dateRangePresets.nextMonth}
+					{__( 'Next Month', 'wpo-aom' )}
 				</option>
 				<option value="last-month">
-					{i18n.calendar.dateRangePresets.lastMonth}
+					{__( 'Last Month', 'wpo-aom' )}
 				</option>
 				<option value="custom">
-					{i18n.calendar.dateRangePresets.custom}
+					{__( 'Custom', 'wpo-aom' )}
 				</option>
 			</select>
 		</div>

@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
+import { __ } from '@wordpress/i18n';
 import { Task, isFieldOption } from '@shared/types/task';
 import TaskRow from './TaskRow';
-import { useTaskManagerData } from '@taskManager/hooks/useTaskManagerData';
 import { getTaskDueDate, getFieldValue } from '@shared/utils/fieldUtils';
 import { formatDate, DateRange, DateRangePreset } from '../utils';
 
@@ -25,7 +25,6 @@ const TaskList: React.FC<TaskListProps> = ({
 	onTaskEdit,
 	onTaskDelete,
 }) => {
-	const { i18n } = useTaskManagerData();
 	const [sortColumn, setSortColumn] = useState<SortColumn>('dueDate');
 	const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
@@ -34,21 +33,21 @@ const TaskList: React.FC<TaskListProps> = ({
 		const taskCount = tasks.length;
 		const taskCountText =
 			taskCount === 1
-				? `1 ${i18n.calendar.task.toLowerCase()}`
-				: `${taskCount} ${i18n.calendar.tasks}`;
+				? `1 ${__( 'Task', 'wpo-aom' ).toLowerCase()}`
+				: `${taskCount} ${__( 'Tasks', 'wpo-aom' )}`;
 
 		if (dateRangePreset !== 'custom') {
 			const presetLabels: Record<string, string> = {
-				today: i18n.calendar.dateRangePresets.today,
-				yesterday: i18n.calendar.dateRangePresets.yesterday,
-				'current-week': i18n.calendar.dateRangePresets.currentWeek,
-				'last-week': i18n.calendar.dateRangePresets.lastWeek,
-				'current-month': i18n.calendar.dateRangePresets.currentMonth,
-				'last-month': i18n.calendar.dateRangePresets.lastMonth,
+				today: __( 'Today', 'wpo-aom' ),
+				yesterday: __( 'Yesterday', 'wpo-aom' ),
+				'current-week': __( 'Current Week', 'wpo-aom' ),
+				'last-week': __( 'Last Week', 'wpo-aom' ),
+				'current-month': __( 'Current Month', 'wpo-aom' ),
+				'last-month': __( 'Last Month', 'wpo-aom' ),
 			};
 			const presetLabel =
 				presetLabels[dateRangePreset] ||
-				i18n.calendar.dateRangePresets.today;
+				__( 'Today', 'wpo-aom' );
 			return `${presetLabel}'s tasks - ${taskCountText}`;
 		}
 
@@ -65,7 +64,7 @@ const TaskList: React.FC<TaskListProps> = ({
 		}
 
 		// Fallback
-		return `${i18n.calendar.tasks} - ${taskCountText}`;
+		return `${__( 'Tasks', 'wpo-aom' )} - ${taskCountText}`;
 	};
 
 	const handleSort = (column: SortColumn) => {
@@ -165,31 +164,31 @@ const TaskList: React.FC<TaskListProps> = ({
 								className="calendar-task-title calendar-task-th-sortable"
 								onClick={() => handleSort('title')}
 							>
-								{i18n.calendar.task} {renderSortIcon('title')}
+								{__( 'Task', 'wpo-aom' )} {renderSortIcon('title')}
 							</th>
 							<th
 								className="calendar-task-th-sortable"
 								onClick={() => handleSort('priority')}
 							>
-								{i18n.calendar.priority}{' '}
+								{__( 'Priority', 'wpo-aom' )}{' '}
 								{renderSortIcon('priority')}
 							</th>
 							<th
 								className="calendar-task-th-sortable"
 								onClick={() => handleSort('status')}
 							>
-								{i18n.calendar.status}{' '}
+								{__( 'Status', 'wpo-aom' )}{' '}
 								{renderSortIcon('status')}
 							</th>
 							<th
 								className="calendar-task-th-sortable"
 								onClick={() => handleSort('dueDate')}
 							>
-								{i18n.calendar.dueDate}{' '}
+								{__( 'Due date', 'wpo-aom' )}{' '}
 								{renderSortIcon('dueDate')}
 							</th>
-							<th>{i18n.calendar.description}</th>
-							<th>{i18n.actions.actions}</th>
+							<th>{__( 'Description', 'wpo-aom' )}</th>
+							<th>{__( 'Actions', 'wpo-aom' )}</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -199,7 +198,7 @@ const TaskList: React.FC<TaskListProps> = ({
 									colSpan={6}
 									className="calendar-task-empty-state"
 								>
-									{i18n.calendar.noTasksFound}
+									{__( 'No tasks found for the selected date range', 'wpo-aom' )}
 								</td>
 							</tr>
 						) : (

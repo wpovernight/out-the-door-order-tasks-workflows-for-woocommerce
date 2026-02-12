@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { __ } from '@wordpress/i18n';
 import { useTasks } from '@shared/context/TaskContext';
 import { useAsyncLoader } from '@shared/hooks/useAsyncLoader';
 import { FieldOptionDropdown } from '@shared/components/FieldOptionDropdownField';
@@ -6,9 +7,6 @@ import { AsyncMultiSelectField } from '@shared/components/AsyncMultiSelectField'
 import { TaskFormSkeleton } from '@shared/components/TaskFormSkeleton';
 import { searchOrders } from '@shared/utils/api';
 import { isFieldOption, Task } from '@shared/types/task';
-import { useLocalized } from '@shared/hooks/useLocalized';
-import type { WpoAomTaskManagerData } from '@taskManager/types/globals';
-import type { WpoAomOrderEditMetaBoxData } from '@orderEdit/types/globals';
 
 interface TaskFormProps {
 	task?: Task;
@@ -32,24 +30,6 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 		fieldOptions,
 		loadFieldOptions,
 	} = useTasks();
-
-	// Get localized data from whichever app is active (task-manager or order-edit)
-	const globalKey = (window as any).WPO_AOM_TaskManager
-		? 'WPO_AOM_TaskManager'
-		: (window as any).WPO_AOM_OrderEdit_MetaBox
-			? 'WPO_AOM_OrderEdit_MetaBox'
-			: null;
-
-	if (!globalKey) {
-		throw new Error(
-			'TaskForm requires either WPO_AOM_TaskManager or WPO_AOM_OrderEdit_MetaBox to be localized on the window object'
-		);
-	}
-
-	const data = useLocalized<
-		WpoAomTaskManagerData | WpoAomOrderEditMetaBoxData
-	>(globalKey);
-	const i18n = data.i18n;
 
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const { loadingStatus, loadingError } = useAsyncLoader(async () => {
@@ -145,7 +125,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 	}
 
 	if (loadingStatus === 'error') {
-		return <div className="error-message">{i18n.errorLoading}</div>;
+		return <div className="error-message">{__( 'Error loading data. Please try again.', 'wpo-aom' )}</div>;
 	}
 
 	let statusOption = task
@@ -203,10 +183,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				<div className="field-group">
 					<div>
 						<label htmlFor="status">
-							{i18n.form.labels.status}
+							{__( 'Status', 'wpo-aom' )}
 						</label>
 						<FieldOptionDropdown
-							placeholder={i18n.form.placeholders.select}
+							placeholder={__( 'Select', 'wpo-aom' )}
 							options={fieldOptions.status}
 							id="status"
 							name="field_status"
@@ -215,10 +195,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 					</div>
 					<div>
 						<label htmlFor="priority">
-							{i18n.form.labels.priority}
+							{__( 'Priority', 'wpo-aom' )}
 						</label>
 						<FieldOptionDropdown
-							placeholder={i18n.form.placeholders.select}
+							placeholder={__( 'Select', 'wpo-aom' )}
 							options={fieldOptions?.priority || []}
 							id="priority"
 							name="field_priority"
@@ -227,7 +207,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 					</div>
 					<div>
 						<label htmlFor="due-date">
-							{i18n.form.labels.dueDate}
+							{__( 'Due Date', 'wpo-aom' )}
 						</label>
 						<input
 							id="due-date"
@@ -239,13 +219,13 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				</div>
 				<div className="field-group">
 					<div>
-						<label htmlFor="title">{i18n.form.labels.title}</label>
+						<label htmlFor="title">{__( 'Title', 'wpo-aom' )}</label>
 						<input
 							id="title"
 							name="title"
 							type="text"
 							defaultValue={task ? task.title : ''}
-							placeholder={i18n.form.placeholders.taskName}
+							placeholder={__( 'Write a name for your task.', 'wpo-aom' )}
 							required
 						/>
 					</div>
@@ -253,10 +233,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				<div className="field-group">
 					<div>
 						<label htmlFor="associated-orders">
-							{i18n.form.labels.associatedOrders}
+							{__( 'Associated Orders', 'wpo-aom' )}
 						</label>
 						<AsyncMultiSelectField
-							placeholder={i18n.form.placeholders.searchOrders}
+							placeholder={__( 'Search orders by number, customer, address...', 'wpo-aom' )}
 							selectedOptions={associatedOrderIds}
 							id="associated-orders"
 							name="field_order"
@@ -281,13 +261,13 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				<div className="field-group">
 					<div>
 						<label htmlFor="description">
-							{i18n.form.labels.description}
+							{__( 'Description', 'wpo-aom' )}
 						</label>
 						<textarea
 							id="description"
 							name="description"
 							rows={4}
-							placeholder={i18n.form.placeholders.taskDescription}
+							placeholder={__( 'Describe the task.', 'wpo-aom' )}
 							defaultValue={task ? task.description : ''}
 						/>
 					</div>
@@ -300,7 +280,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 					onClick={onDone}
 					disabled={isSubmitting}
 				>
-					{i18n.actions.cancel}
+					{__( 'Cancel', 'wpo-aom' )}
 				</button>
 				<button
 					type="submit"
@@ -308,7 +288,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 					disabled={isSubmitting}
 				>
 					{isSubmitting && <span className="wpo-aom-spinner"></span>}
-					{task ? i18n.actions.updateTask : i18n.actions.createTask}
+					{task ? __( 'Update Task', 'wpo-aom' ) : __( 'Create Task', 'wpo-aom' )}
 				</button>
 			</div>
 		</form>
