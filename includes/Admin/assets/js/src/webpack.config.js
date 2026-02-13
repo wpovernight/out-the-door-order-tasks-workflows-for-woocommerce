@@ -7,6 +7,7 @@ module.exports = (env, argv) => {
 	return {
 		mode,
 		entry: {
+			'order-manager': path.resolve(__dirname, 'order-manager/index.tsx'),
 			'order-edit-metabox': path.resolve(__dirname, 'order-edit/index.tsx'),
 		},
 		output: {
@@ -18,6 +19,7 @@ module.exports = (env, argv) => {
 			extensions: ['.ts', '.tsx', '.js'],
 			alias: {
 				'@shared': path.resolve(__dirname, 'shared/'),
+				'@orderManager': path.resolve(__dirname, 'order-manager/'),
 				'@taskManager': path.resolve(__dirname, 'task-manager/'),
 				'@orderEdit': path.resolve(__dirname, 'order-edit/'),
 			},
@@ -35,6 +37,7 @@ module.exports = (env, argv) => {
 		externals: {
 			react: 'React',
 			'react-dom': 'ReactDOM',
+			'@wordpress/i18n': ['wp', 'i18n'],
 		},
 		devtool: isProduction ? false : 'source-map',
 		optimization: {

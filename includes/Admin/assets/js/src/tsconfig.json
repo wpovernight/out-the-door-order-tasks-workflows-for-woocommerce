@@ -3,6 +3,7 @@
 		"baseUrl": "./",
 		"paths": {
 			"@shared/*": ["shared/*"],
+			"@orderManager/*": ["order-manager/*"],
 			"@taskManager/*": ["task-manager/*"],
 			"@orderEdit/*": ["order-edit/*"]
 		},

@@ -2,10 +2,10 @@ import { Task, FieldOption, TaskField } from '../types/task';
 import { Fulfillment } from '../types/fulfillment';
 
 function getApiConfig() {
-	const taskManagerData = (window as any).WPO_AOM_TaskManager;
+	const orderManagerData = (window as any).WPO_AOM_OrderManager;
 	const orderEditMetaBoxData = (window as any).WPO_AOM_OrderEdit_MetaBox;
 
-	const config = taskManagerData || orderEditMetaBoxData;
+	const config = orderManagerData || orderEditMetaBoxData;
 
 	if (!config) {
 		console.warn('⚠️ API configuration not found. API calls will fail.');

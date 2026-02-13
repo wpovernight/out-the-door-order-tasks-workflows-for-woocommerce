@@ -11,10 +11,9 @@
 }
 
 #wpo-aom-order-manager .task-manager-tab .view.kanban-view {
-    height: calc(100vh - 14em);
+    height: calc(100vh - 17em);
     padding: 1em;
 }
-
 
 .kanban-board {
     display: flex;
