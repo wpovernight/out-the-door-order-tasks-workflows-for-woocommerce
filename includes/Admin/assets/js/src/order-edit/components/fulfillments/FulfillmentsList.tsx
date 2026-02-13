@@ -27,7 +27,10 @@ const FulfillmentsList: React.FC<FulfillmentsListProps> = ({
 	if (loadingStatus === 'error') {
 		return (
 			<ErrorState
-				message={loadingError?.message || __( 'Error loading data. Please try again.', 'wpo-aom' )}
+				message={
+					loadingError?.message ||
+					__('Error loading data. Please try again.', 'wpo-aom')
+				}
 				onRetry={refreshFulfillments}
 			/>
 		);
@@ -38,8 +41,8 @@ const FulfillmentsList: React.FC<FulfillmentsListProps> = ({
 		return (
 			<EmptyState
 				icon="📦"
-				message={__( 'No fulfillments yet.', 'wpo-aom' )}
-				actionText={__( 'Add Fulfillment', 'wpo-aom' )}
+				message={__('No fulfillments yet.', 'wpo-aom')}
+				actionText={__('Add Fulfillment', 'wpo-aom')}
 				actionButtonProps={
 					{
 						'data-order-id': orderId,
@@ -52,7 +55,7 @@ const FulfillmentsList: React.FC<FulfillmentsListProps> = ({
 
 	return (
 		<div className="fulfillments-list-container">
-			<h4 className="screenReader">{__( 'Fulfillments', 'wpo-aom' )}</h4>
+			<h4 className="screenReader">{__('Fulfillments', 'wpo-aom')}</h4>
 			<ul className="fulfillments-list">
 				{fulfillments.map((fulfillment, index) => (
 					<li key={fulfillment.id}>

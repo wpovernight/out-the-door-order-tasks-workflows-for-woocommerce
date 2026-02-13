@@ -12,7 +12,7 @@ const Header: React.FC = () => {
 
 	const handleAddTask = (e: React.MouseEvent) => {
 		e.preventDefault();
-		openCreateTaskModal({ title: __( 'Add Task', 'wpo-aom' ), orderId });
+		openCreateTaskModal({ title: __('Add Task', 'wpo-aom'), orderId });
 	};
 
 	const totalTasks = activeCount + finishedCount;
@@ -21,8 +21,8 @@ const Header: React.FC = () => {
 
 	return (
 		<SectionHeader
-			title={__( 'Tasks', 'wpo-aom' )}
-			details={`${activeCount} ${__( 'Active Tasks', 'wpo-aom' )}`}
+			title={__('Tasks', 'wpo-aom')}
+			details={`${activeCount} ${__('Active Tasks', 'wpo-aom')}`}
 			progressValue={
 				completionPercentage !== null ? completionPercentage : undefined
 			}
@@ -32,7 +32,9 @@ const Header: React.FC = () => {
 					className="wpo-button wpo-button-icon add-button"
 					onClick={handleAddTask}
 				>
-					<span className="screenReader">{__( 'Add Task', 'wpo-aom' )}</span>
+					<span className="screenReader">
+						{__('Add Task', 'wpo-aom')}
+					</span>
 				</button>,
 			]}
 		/>

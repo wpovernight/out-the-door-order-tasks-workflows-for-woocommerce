@@ -18,14 +18,14 @@ const FinishedTasks: React.FC = () => {
 
 		openEditTaskModal({
 			task,
-			title: __( 'Edit task', 'wpo-aom' ),
+			title: __('Edit task', 'wpo-aom'),
 		});
 	};
 
 	const handleDeleteClick = async (taskId: number) => {
 		// ToDo: Update to use custom modal
 		// eslint-disable-next-line no-alert
-		if (!window.confirm(__( 'Are you sure?', 'wpo-aom' ))) {
+		if (!window.confirm(__('Are you sure?', 'wpo-aom'))) {
 			return;
 		}
 
@@ -55,7 +55,7 @@ const FinishedTasks: React.FC = () => {
 				style={!isExpanded ? { display: 'none' } : {}}
 			>
 				<h4>
-					{__( 'Completed Tasks', 'wpo-aom' )} ({finishedCount})
+					{__('Completed Tasks', 'wpo-aom')} ({finishedCount})
 				</h4>
 				<ul className="task-list">
 					{finishedTasks.map((task) => (
@@ -86,7 +86,9 @@ const FinishedTasks: React.FC = () => {
 				onClick={() => setIsExpanded(!isExpanded)}
 				type="button"
 			>
-				{isExpanded ? __( 'Hide Completed Tasks', 'wpo-aom' ) : __( 'View Completed Tasks', 'wpo-aom' )}{' '}
+				{isExpanded
+					? __('Hide Completed Tasks', 'wpo-aom')
+					: __('View Completed Tasks', 'wpo-aom')}{' '}
 				({finishedCount})
 			</button>
 		</div>

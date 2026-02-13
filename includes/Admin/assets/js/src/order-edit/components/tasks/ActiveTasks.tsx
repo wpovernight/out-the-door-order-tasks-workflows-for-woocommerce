@@ -27,14 +27,14 @@ const ActiveTasks: React.FC = () => {
 
 		openEditTaskModal({
 			task,
-			title: __( 'Edit task', 'wpo-aom' ),
+			title: __('Edit task', 'wpo-aom'),
 		});
 	};
 
 	const handleDeleteClick = async (taskId: number) => {
 		// ToDo: Update to use custom modal
 		// eslint-disable-next-line no-alert
-		if (!window.confirm(__( 'Are you sure?', 'wpo-aom' ))) {
+		if (!window.confirm(__('Are you sure?', 'wpo-aom'))) {
 			return;
 		}
 
@@ -46,7 +46,7 @@ const ActiveTasks: React.FC = () => {
 	};
 
 	const handleAddTask = () => {
-		openCreateTaskModal({ title: __( 'Add Task', 'wpo-aom' ), orderId });
+		openCreateTaskModal({ title: __('Add Task', 'wpo-aom'), orderId });
 	};
 
 	// Show loading state
@@ -58,7 +58,10 @@ const ActiveTasks: React.FC = () => {
 	if (loadingStatus === 'error') {
 		return (
 			<ErrorState
-				message={loadingError?.message || __( 'Error loading data. Please try again.', 'wpo-aom' )}
+				message={
+					loadingError?.message ||
+					__('Error loading data. Please try again.', 'wpo-aom')
+				}
 				onRetry={refreshTasks}
 			/>
 		);
@@ -69,8 +72,8 @@ const ActiveTasks: React.FC = () => {
 		return (
 			<EmptyState
 				icon="📋"
-				message={__( 'No tasks found.', 'wpo-aom' )}
-				actionText={__( 'Add Task', 'wpo-aom' )}
+				message={__('No tasks found.', 'wpo-aom')}
+				actionText={__('Add Task', 'wpo-aom')}
 				onAction={handleAddTask}
 			/>
 		);
@@ -78,7 +81,7 @@ const ActiveTasks: React.FC = () => {
 
 	return (
 		<div className="task-list-container active-tasks-container">
-			<h4 className="screenReader">{__( 'Active Tasks', 'wpo-aom' )}</h4>
+			<h4 className="screenReader">{__('Active Tasks', 'wpo-aom')}</h4>
 			<ul className="task-list">
 				{activeTasks.map((task) => (
 					<li key={task.id}>

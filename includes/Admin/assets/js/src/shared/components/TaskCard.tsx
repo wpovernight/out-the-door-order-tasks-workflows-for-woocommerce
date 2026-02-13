@@ -115,7 +115,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 				type="button"
 				onClick={onOptionsClick}
 			>
-				<span className="screenReader">{__( 'Options', 'wpo-aom' )}</span>
+				<span className="screenReader">{__('Options', 'wpo-aom')}</span>
 			</button>
 			{isOptionsOpen && (
 				<ul className="wpo-action-menu">
@@ -130,8 +130,8 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 							}
 						>
 							{isCompleted
-								? __( 'Mark as In Progress', 'wpo-aom' )
-								: __( 'Mark as Completed', 'wpo-aom' )}
+								? __('Mark as In Progress', 'wpo-aom')
+								: __('Mark as Completed', 'wpo-aom')}
 						</button>
 					</li>
 					{onEditClick && (
@@ -141,7 +141,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 								className="wpo-button task-edit-menu-item"
 								onClick={onEditClick}
 							>
-								{__( 'Edit', 'wpo-aom' )}
+								{__('Edit', 'wpo-aom')}
 							</button>
 						</li>
 					)}
@@ -152,7 +152,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 								className="wpo-button task-delete-menu-item"
 								onClick={onDeleteClick}
 							>
-								{__( 'Delete', 'wpo-aom' )}
+								{__('Delete', 'wpo-aom')}
 							</button>
 						</li>
 					)}
@@ -173,11 +173,15 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 							: handleOnFinishClick
 					}
 					title={
-						isCompleted ? __( 'Mark as In Progress', 'wpo-aom' ) : __( 'Mark as Completed', 'wpo-aom' )
+						isCompleted
+							? __('Mark as In Progress', 'wpo-aom')
+							: __('Mark as Completed', 'wpo-aom')
 					}
 				>
 					<span className="screenReader">
-						{isCompleted ? __( 'Mark as In Progress', 'wpo-aom' ) : __( 'Mark as Completed', 'wpo-aom' )}
+						{isCompleted
+							? __('Mark as In Progress', 'wpo-aom')
+							: __('Mark as Completed', 'wpo-aom')}
 					</span>
 				</button>
 			</li>
@@ -187,9 +191,11 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 						className="wpo-button wpo-button-icon task-edit"
 						type="button"
 						onClick={onEditClick}
-						title={__( 'Edit', 'wpo-aom' )}
+						title={__('Edit', 'wpo-aom')}
 					>
-						<span className="screenReader">{__( 'Edit', 'wpo-aom' )}</span>
+						<span className="screenReader">
+							{__('Edit', 'wpo-aom')}
+						</span>
 					</button>
 				</li>
 			)}
@@ -199,9 +205,11 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 						className="wpo-button wpo-button-icon task-delete"
 						type="button"
 						onClick={onDeleteClick}
-						title={__( 'Delete', 'wpo-aom' )}
+						title={__('Delete', 'wpo-aom')}
 					>
-						<span className="screenReader">{__( 'Delete', 'wpo-aom' )}</span>
+						<span className="screenReader">
+							{__('Delete', 'wpo-aom')}
+						</span>
 					</button>
 				</li>
 			)}

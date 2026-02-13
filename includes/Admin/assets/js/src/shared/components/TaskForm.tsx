@@ -125,7 +125,11 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 	}
 
 	if (loadingStatus === 'error') {
-		return <div className="error-message">{__( 'Error loading data. Please try again.', 'wpo-aom' )}</div>;
+		return (
+			<div className="error-message">
+				{__('Error loading data. Please try again.', 'wpo-aom')}
+			</div>
+		);
 	}
 
 	let statusOption = task
@@ -183,10 +187,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				<div className="field-group">
 					<div>
 						<label htmlFor="status">
-							{__( 'Status', 'wpo-aom' )}
+							{__('Status', 'wpo-aom')}
 						</label>
 						<FieldOptionDropdown
-							placeholder={__( 'Select', 'wpo-aom' )}
+							placeholder={__('Select', 'wpo-aom')}
 							options={fieldOptions.status}
 							id="status"
 							name="field_status"
@@ -195,10 +199,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 					</div>
 					<div>
 						<label htmlFor="priority">
-							{__( 'Priority', 'wpo-aom' )}
+							{__('Priority', 'wpo-aom')}
 						</label>
 						<FieldOptionDropdown
-							placeholder={__( 'Select', 'wpo-aom' )}
+							placeholder={__('Select', 'wpo-aom')}
 							options={fieldOptions?.priority || []}
 							id="priority"
 							name="field_priority"
@@ -207,7 +211,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 					</div>
 					<div>
 						<label htmlFor="due-date">
-							{__( 'Due Date', 'wpo-aom' )}
+							{__('Due Date', 'wpo-aom')}
 						</label>
 						<input
 							id="due-date"
@@ -219,13 +223,16 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				</div>
 				<div className="field-group">
 					<div>
-						<label htmlFor="title">{__( 'Title', 'wpo-aom' )}</label>
+						<label htmlFor="title">{__('Title', 'wpo-aom')}</label>
 						<input
 							id="title"
 							name="title"
 							type="text"
 							defaultValue={task ? task.title : ''}
-							placeholder={__( 'Write a name for your task.', 'wpo-aom' )}
+							placeholder={__(
+								'Write a name for your task.',
+								'wpo-aom'
+							)}
 							required
 						/>
 					</div>
@@ -233,10 +240,13 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				<div className="field-group">
 					<div>
 						<label htmlFor="associated-orders">
-							{__( 'Associated Orders', 'wpo-aom' )}
+							{__('Associated Orders', 'wpo-aom')}
 						</label>
 						<AsyncMultiSelectField
-							placeholder={__( 'Search orders by number, customer, address...', 'wpo-aom' )}
+							placeholder={__(
+								'Search orders by number, customer, address…',
+								'wpo-aom'
+							)}
 							selectedOptions={associatedOrderIds}
 							id="associated-orders"
 							name="field_order"
@@ -261,13 +271,13 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				<div className="field-group">
 					<div>
 						<label htmlFor="description">
-							{__( 'Description', 'wpo-aom' )}
+							{__('Description', 'wpo-aom')}
 						</label>
 						<textarea
 							id="description"
 							name="description"
 							rows={4}
-							placeholder={__( 'Describe the task.', 'wpo-aom' )}
+							placeholder={__('Describe the task.', 'wpo-aom')}
 							defaultValue={task ? task.description : ''}
 						/>
 					</div>
@@ -280,7 +290,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 					onClick={onDone}
 					disabled={isSubmitting}
 				>
-					{__( 'Cancel', 'wpo-aom' )}
+					{__('Cancel', 'wpo-aom')}
 				</button>
 				<button
 					type="submit"
@@ -288,7 +298,9 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 					disabled={isSubmitting}
 				>
 					{isSubmitting && <span className="wpo-aom-spinner"></span>}
-					{task ? __( 'Update Task', 'wpo-aom' ) : __( 'Create Task', 'wpo-aom' )}
+					{task
+						? __('Update Task', 'wpo-aom')
+						: __('Create Task', 'wpo-aom')}
 				</button>
 			</div>
 		</form>

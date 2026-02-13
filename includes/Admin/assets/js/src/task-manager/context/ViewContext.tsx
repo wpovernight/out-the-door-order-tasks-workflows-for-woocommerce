@@ -2,7 +2,7 @@ import React, { createContext, useContext, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 // Define all available views.
-export const AVAILABLE_VIEWS = ['kanban', 'calendar'];
+export const AVAILABLE_VIEWS = ['kanban', 'calendar', 'archive'];
 
 type View = (typeof AVAILABLE_VIEWS)[number];
 
@@ -19,17 +19,18 @@ export const ViewProvider: React.FC<{ children: React.ReactNode }> = ({
 	const navigate = useNavigate();
 	const location = useLocation();
 
-	// Extract view from URL hash path (e.g., "/kanban" -> "kanban").
+	// Extract view from the path segment after "/task-manager/" (e.g., "/task-manager/kanban" -> "kanban").
 	const view = useMemo<View>(() => {
-		const pathView = location.pathname.slice(1); // Remove leading "/"
-		return AVAILABLE_VIEWS.includes(pathView)
-			? (pathView as View)
+		const segments = location.pathname.split('/').filter(Boolean);
+		const viewSegment = segments[1] || '';
+		return AVAILABLE_VIEWS.includes(viewSegment)
+			? (viewSegment as View)
 			: 'kanban';
 	}, [location.pathname]);
 
-	// Navigate to new view instead of setting state.
+	// Navigate to new view within the task-manager section.
 	const setView = (newView: View) => {
-		navigate(`/${newView}`);
+		navigate(`/task-manager/${newView}`);
 	};
 
 	return (

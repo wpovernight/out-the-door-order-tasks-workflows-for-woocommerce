@@ -12,7 +12,7 @@ const Header: React.FC = () => {
 
 	return (
 		<SectionHeader
-			title={__( 'Fulfillments', 'wpo-aom' )}
+			title={__('Fulfillments', 'wpo-aom')}
 			details={`${fulfillmentCount}`}
 			actionButtons={[
 				<button
@@ -21,7 +21,7 @@ const Header: React.FC = () => {
 					data-order-id={orderId}
 				>
 					<span className="screenReader">
-						{__( 'Add Fulfillment', 'wpo-aom' )}
+						{__('Add Fulfillment', 'wpo-aom')}
 					</span>
 				</button>,
 			]}
