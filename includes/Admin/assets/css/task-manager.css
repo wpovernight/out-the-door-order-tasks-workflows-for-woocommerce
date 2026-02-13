@@ -1,43 +1,25 @@
-body.woocommerce_page_wpo_aom_task_manager #wpcontent {
-    background-color: #fff;
-    padding-left: 0;
-}
-
-#wpo-aom-task-management > h1 {
-    font-size: 1.5em;
-    margin: 1.3em;
-}
-
-#wpo-aom-task-manager-container {
-    margin-top: 3em;
-}
-
-#wpo-aom-task-manager-container > .inner > .header {
-    border-bottom: 1px solid #091E4224;
-}
-
-#wpo-aom-task-manager-container .view {
+#wpo-aom-order-manager .task-manager-tab .view {
     display: none;
 }
 
-#wpo-aom-task-manager-container .view.active {
+#wpo-aom-order-manager .task-manager-tab .view.active {
     display: block;
 }
 
-#wpo-aom-task-manager-container .view.calendar-view {
+#wpo-aom-order-manager .task-manager-tab .view.calendar-view {
     padding: 0 1em;
 }
 
-#wpo-aom-task-manager-container .view.kanban-view {
+#wpo-aom-order-manager .task-manager-tab .view.kanban-view {
     height: calc(100vh - 14em);
     padding: 1em;
 }
 
-#wpo-aom-task-manager-container > .inner > .header > .views-filter {
+#wpo-aom-order-manager .task-manager-tab .views-filter {
     margin-left: 2em;
 }
 
-#wpo-aom-task-manager-container > .inner > .header > .views-filter > ul {
+#wpo-aom-order-manager .task-manager-tab .views-filter > ul {
     font-size: 1.1em;
     display: flex;
     gap: 2em;
@@ -47,11 +29,11 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     margin: 0;
 }
 
-#wpo-aom-task-manager-container > .inner > .header > .views-filter > ul > li {
+#wpo-aom-order-manager .task-manager-tab .views-filter > ul > li {
     margin-bottom: 0;
 }
 
-#wpo-aom-task-manager-container > .inner > .header > .views-filter > ul > li > button {
+#wpo-aom-order-manager .task-manager-tab .views-filter > ul > li > button {
     background: 0 0;
     border: none;
     cursor: pointer;
@@ -59,8 +41,8 @@ body.woocommerce_page_wpo_aom_task_manager #wpcontent {
     margin-bottom: 0;
 }
 
-#wpo-aom-task-manager-container > .inner > .header > .views-filter > ul > li.active,
-#wpo-aom-task-manager-container > .inner > .header > .views-filter > ul > li:hover {
+#wpo-aom-order-manager .task-manager-tab .views-filter > ul > li.active,
+#wpo-aom-order-manager .task-manager-tab .views-filter > ul > li:hover {
     color: var(--wpo-aom-purple-primary);
     border-bottom: 2px solid var(--wpo-aom-purple-primary);
 }
