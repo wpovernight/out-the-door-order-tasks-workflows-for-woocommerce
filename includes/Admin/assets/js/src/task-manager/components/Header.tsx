@@ -3,8 +3,8 @@ import { __ } from '@wordpress/i18n';
 import { AVAILABLE_VIEWS, useView } from '../context/ViewContext';
 
 const viewLabels: Record<string, string> = {
-	kanban: __( 'Kanban', 'wpo-aom' ),
-	calendar: __( 'Calendar', 'wpo-aom' ),
+	kanban: __('Kanban', 'wpo-aom'),
+	calendar: __('Calendar', 'wpo-aom'),
 };
 
 export default function Header() {

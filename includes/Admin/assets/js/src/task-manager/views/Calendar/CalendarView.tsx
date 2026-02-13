@@ -28,7 +28,11 @@ export const CalendarView: React.FC = () => {
 
 	// ToDo: Improve error handling UI
 	if (loadingStatus === 'error') {
-		return <div className="error-message">{__( 'Error loading tasks. Please try again.', 'wpo-aom' )}</div>;
+		return (
+			<div className="error-message">
+				{__('Error loading tasks. Please try again.', 'wpo-aom')}
+			</div>
+		);
 	}
 
 	return (

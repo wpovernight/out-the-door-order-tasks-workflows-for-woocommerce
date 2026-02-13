@@ -7,7 +7,6 @@ module.exports = (env, argv) => {
 	return {
 		mode,
 		entry: {
-			'task-manager': path.resolve(__dirname, 'task-manager/index.tsx'),
 			'order-edit-metabox': path.resolve(__dirname, 'order-edit/index.tsx'),
 		},
 		output: {

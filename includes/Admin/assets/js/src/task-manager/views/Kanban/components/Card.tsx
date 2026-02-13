@@ -220,7 +220,7 @@ export const Card: React.FC<CardProps> = ({
 	const handleDeleteClick = () => {
 		// ToDo: Update to use custom modal
 		// eslint-disable-next-line no-alert
-		if (!window.confirm(__( 'Are you sure?', 'wpo-aom' ))) {
+		if (!window.confirm(__('Are you sure?', 'wpo-aom'))) {
 			return;
 		}
 
@@ -278,7 +278,7 @@ export const Card: React.FC<CardProps> = ({
 					return updated;
 				});
 			},
-			title: `${__( 'Edit Task', 'wpo-aom' )}: ${task.title}`,
+			title: `${__('Edit Task', 'wpo-aom')}: ${task.title}`,
 		});
 	};
 

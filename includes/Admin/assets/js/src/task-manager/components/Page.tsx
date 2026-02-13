@@ -13,7 +13,7 @@ export default function Page() {
 			<div className="views">
 				<Routes>
 					<Route
-						path="/kanban"
+						path="kanban"
 						element={
 							<div className="view kanban-view active">
 								<KanbanView />
@@ -21,17 +21,14 @@ export default function Page() {
 						}
 					/>
 					<Route
-						path="/calendar"
+						path="calendar"
 						element={
 							<div className="view calendar-view active">
 								<CalendarView />
 							</div>
 						}
 					/>
-					<Route
-						path="/"
-						element={<Navigate to="/kanban" replace />}
-					/>
+					<Route path="" element={<Navigate to="kanban" replace />} />
 				</Routes>
 			</div>
 		</div>

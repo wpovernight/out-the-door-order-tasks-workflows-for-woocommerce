@@ -126,7 +126,7 @@ export const CalendarContent: React.FC = () => {
 					)
 				);
 			},
-			title: `${__( 'Edit', 'wpo-aom' )}: ${task.title}`,
+			title: `${__('Edit', 'wpo-aom')}: ${task.title}`,
 		});
 	};
 

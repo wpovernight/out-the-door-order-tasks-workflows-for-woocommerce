@@ -99,7 +99,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
 							}}
 						>
 							<span className="screenReader">
-								{__( 'Mark as Completed', 'wpo-aom' )}
+								{__('Mark as Completed', 'wpo-aom')}
 							</span>
 						</button>
 					</li>
@@ -112,7 +112,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
 							}}
 						>
 							<span className="screenReader">
-								{__( 'Edit', 'wpo-aom' )}
+								{__('Edit', 'wpo-aom')}
 							</span>
 						</button>
 					</li>
@@ -124,7 +124,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
 								// ToDo: Update to use custom modal
 								// eslint-disable-next-line no-alert
 								const confirmed = window.confirm(
-									__( 'Are you sure?', 'wpo-aom' )
+									__('Are you sure?', 'wpo-aom')
 								);
 								if (confirmed) {
 									onTaskDelete?.(task.id);
@@ -132,7 +132,7 @@ const TaskRow: React.FC<TaskRowProps> = ({
 							}}
 						>
 							<span className="screenReader">
-								{__( 'Delete', 'wpo-aom' )}
+								{__('Delete', 'wpo-aom')}
 							</span>
 						</button>
 					</li>

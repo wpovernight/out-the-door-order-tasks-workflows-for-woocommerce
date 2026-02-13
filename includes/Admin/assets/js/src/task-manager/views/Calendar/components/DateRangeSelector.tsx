@@ -109,13 +109,13 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 					className="wpo-button wpo-clear-button"
 					onClick={onCancel}
 				>
-					{__( 'Clear', 'wpo-aom' )}
+					{__('Clear', 'wpo-aom')}
 				</button>
 				<button
 					className="wpo-button wpo-apply-button"
 					onClick={onApply}
 				>
-					{__( 'Apply', 'wpo-aom' )}
+					{__('Apply', 'wpo-aom')}
 				</button>
 			</div>
 		</div>

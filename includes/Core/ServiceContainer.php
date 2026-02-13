@@ -49,7 +49,6 @@ final class ServiceContainer {
 		// REST Controllers
 		'TaskController'           => TaskController::class,
 		// Admin Screens
-		'TaskManager_Screen'       => Admin\TaskManager\Screen::class,
 		'OrderEdit_MetaBox'        => Admin\OrderEdit\MetaBox::class,
 		'CustomOrderStatus_Admin'  => Admin\CustomOrderStatus\Screen::class,
 	);

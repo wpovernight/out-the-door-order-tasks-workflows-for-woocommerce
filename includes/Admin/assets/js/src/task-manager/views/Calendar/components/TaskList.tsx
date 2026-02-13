@@ -33,21 +33,20 @@ const TaskList: React.FC<TaskListProps> = ({
 		const taskCount = tasks.length;
 		const taskCountText =
 			taskCount === 1
-				? `1 ${__( 'Task', 'wpo-aom' ).toLowerCase()}`
-				: `${taskCount} ${__( 'Tasks', 'wpo-aom' )}`;
+				? `1 ${__('Task', 'wpo-aom').toLowerCase()}`
+				: `${taskCount} ${__('Tasks', 'wpo-aom')}`;
 
 		if (dateRangePreset !== 'custom') {
 			const presetLabels: Record<string, string> = {
-				today: __( 'Today', 'wpo-aom' ),
-				yesterday: __( 'Yesterday', 'wpo-aom' ),
-				'current-week': __( 'Current Week', 'wpo-aom' ),
-				'last-week': __( 'Last Week', 'wpo-aom' ),
-				'current-month': __( 'Current Month', 'wpo-aom' ),
-				'last-month': __( 'Last Month', 'wpo-aom' ),
+				today: __('Today', 'wpo-aom'),
+				yesterday: __('Yesterday', 'wpo-aom'),
+				'current-week': __('Current Week', 'wpo-aom'),
+				'last-week': __('Last Week', 'wpo-aom'),
+				'current-month': __('Current Month', 'wpo-aom'),
+				'last-month': __('Last Month', 'wpo-aom'),
 			};
 			const presetLabel =
-				presetLabels[dateRangePreset] ||
-				__( 'Today', 'wpo-aom' );
+				presetLabels[dateRangePreset] || __('Today', 'wpo-aom');
 			return `${presetLabel}'s tasks - ${taskCountText}`;
 		}
 
@@ -64,7 +63,7 @@ const TaskList: React.FC<TaskListProps> = ({
 		}
 
 		// Fallback
-		return `${__( 'Tasks', 'wpo-aom' )} - ${taskCountText}`;
+		return `${__('Tasks', 'wpo-aom')} - ${taskCountText}`;
 	};
 
 	const handleSort = (column: SortColumn) => {
@@ -164,31 +163,32 @@ const TaskList: React.FC<TaskListProps> = ({
 								className="calendar-task-title calendar-task-th-sortable"
 								onClick={() => handleSort('title')}
 							>
-								{__( 'Task', 'wpo-aom' )} {renderSortIcon('title')}
+								{__('Task', 'wpo-aom')}{' '}
+								{renderSortIcon('title')}
 							</th>
 							<th
 								className="calendar-task-th-sortable"
 								onClick={() => handleSort('priority')}
 							>
-								{__( 'Priority', 'wpo-aom' )}{' '}
+								{__('Priority', 'wpo-aom')}{' '}
 								{renderSortIcon('priority')}
 							</th>
 							<th
 								className="calendar-task-th-sortable"
 								onClick={() => handleSort('status')}
 							>
-								{__( 'Status', 'wpo-aom' )}{' '}
+								{__('Status', 'wpo-aom')}{' '}
 								{renderSortIcon('status')}
 							</th>
 							<th
 								className="calendar-task-th-sortable"
 								onClick={() => handleSort('dueDate')}
 							>
-								{__( 'Due date', 'wpo-aom' )}{' '}
+								{__('Due date', 'wpo-aom')}{' '}
 								{renderSortIcon('dueDate')}
 							</th>
-							<th>{__( 'Description', 'wpo-aom' )}</th>
-							<th>{__( 'Actions', 'wpo-aom' )}</th>
+							<th>{__('Description', 'wpo-aom')}</th>
+							<th>{__('Actions', 'wpo-aom')}</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -198,7 +198,10 @@ const TaskList: React.FC<TaskListProps> = ({
 									colSpan={6}
 									className="calendar-task-empty-state"
 								>
-									{__( 'No tasks found for the selected date range', 'wpo-aom' )}
+									{__(
+										'No tasks found for the selected date range',
+										'wpo-aom'
+									)}
 								</td>
 							</tr>
 						) : (
