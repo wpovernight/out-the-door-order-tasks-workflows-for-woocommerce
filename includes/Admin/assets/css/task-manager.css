@@ -15,37 +15,6 @@
     padding: 1em;
 }
 
-#wpo-aom-order-manager .task-manager-tab .views-filter {
-    margin-left: 2em;
-}
-
-#wpo-aom-order-manager .task-manager-tab .views-filter > ul {
-    font-size: 1.1em;
-    display: flex;
-    gap: 2em;
-    font-weight: 600;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-#wpo-aom-order-manager .task-manager-tab .views-filter > ul > li {
-    margin-bottom: 0;
-}
-
-#wpo-aom-order-manager .task-manager-tab .views-filter > ul > li > button {
-    background: 0 0;
-    border: none;
-    cursor: pointer;
-    padding-bottom: .7em;
-    margin-bottom: 0;
-}
-
-#wpo-aom-order-manager .task-manager-tab .views-filter > ul > li.active,
-#wpo-aom-order-manager .task-manager-tab .views-filter > ul > li:hover {
-    color: var(--wpo-aom-purple-primary);
-    border-bottom: 2px solid var(--wpo-aom-purple-primary);
-}
 
 .kanban-board {
     display: flex;

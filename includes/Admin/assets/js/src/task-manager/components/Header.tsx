@@ -3,8 +3,9 @@ import { __ } from '@wordpress/i18n';
 import { AVAILABLE_VIEWS, useView } from '../context/ViewContext';
 
 const viewLabels: Record<string, string> = {
-	kanban: __('Kanban', 'wpo-aom'),
+	kanban: __('Board', 'wpo-aom'),
 	calendar: __('Calendar', 'wpo-aom'),
+	archive: __('Archive', 'wpo-aom'),
 };
 
 export default function Header() {
@@ -12,7 +13,7 @@ export default function Header() {
 
 	return (
 		<div className="header">
-			<nav className="views-filter">
+			<nav className="tabs" id="view-tabs">
 				<ul>
 					{AVAILABLE_VIEWS.map((availableView) => (
 						<li
