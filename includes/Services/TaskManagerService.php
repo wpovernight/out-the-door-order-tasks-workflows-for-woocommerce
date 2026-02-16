@@ -824,7 +824,7 @@ final class TaskManagerService {
 	public function mark_task_finished( int $task_id ): bool {
 		$task = $this->task_repository->find( $task_id );
 		if ( ! $task ) {
-			return false;
+			throw new RuntimeException( 'Task not found.' );
 		}
 
 		$finished_status_option = $this->task_field_option_repository
@@ -833,10 +833,36 @@ final class TaskManagerService {
 			->first();
 
 		if ( ! $finished_status_option ) {
-			return false;
+			throw new RuntimeException( 'Finished status option not found. Please ensure a "completed" status option exists.' );
 		}
 
 		return (bool) $this->move_task( $task_id, $finished_status_option->id, null, 'last' );
+	}
+
+	/**
+	 * Mark a task as finished.
+	 *
+	 * @param int $task_id
+	 *
+	 * @return bool
+	 * @throws Exception
+	 */
+	public function archive_task( int $task_id ): bool {
+		$task = $this->task_repository->find( $task_id );
+		if ( ! $task ) {
+			throw new RuntimeException( 'Task not found.' );
+		}
+
+		$archived_status_option = $this->task_field_option_repository
+			->where( 'field_id', DefaultTaskFields::STATUS )
+			->where( 'slug', 'archived' )
+			->first();
+
+		if ( ! $archived_status_option ) {
+			throw new RuntimeException( 'Archived status option not found. Please ensure an "archived" status option exists.' );
+		}
+
+		return (bool) $this->move_task( $task_id, $archived_status_option->id, null, 'last' );
 	}
 
 	/** ================================

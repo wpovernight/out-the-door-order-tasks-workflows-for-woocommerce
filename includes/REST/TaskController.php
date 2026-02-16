@@ -115,6 +115,22 @@ class TaskController extends BaseRestController {
 		);
 
 		/**
+		 * Task archive endpoint:
+		 * POST /{namespace}/tasks/{id}/archive -> archives a task.
+		 */
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->resource_name . '/(?P<id>[\d]+)/archive',
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'archive_task' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+				)
+			)
+		);
+
+		/**
 		 * Field endpoints:
 		 * GET /{namespace}/tasks/fields -> returns all task fields.
 		 */
@@ -571,15 +587,50 @@ class TaskController extends BaseRestController {
 
 		/** @var TaskManagerService $task_service */
 		$task_service = WPO_AOM()->get_service( TaskManagerService::class );
-		$success      = $task_service->mark_task_finished( $task_id );
 
-		if ( ! $success ) {
-			return new WP_Error( 'task_finish_failed', 'Failed to finish task', array( 'status' => 500 ) );
+		try {
+			$task_service->mark_task_finished( $task_id );
+		} catch ( \RuntimeException $e ) {
+			return new WP_Error( 'task_finish_failed', $e->getMessage(), array( 'status' => 404 ) );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'task_finish_failed', $e->getMessage(), array( 'status' => 500 ) );
 		}
 
 		return rest_ensure_response( array(
 			'success' => true,
-			'message' => 'Task marked as finished' )
-		);
+			'message' => 'Task marked as finished',
+		) );
+	}
+
+	/**
+	 * Archive a task.
+	 *
+	 * @param WP_REST_Request $request
+	 *
+	 * @return WP_REST_Response|WP_Error
+	 * @throws \Exception
+	 */
+	public function archive_task( WP_REST_Request $request ) {
+		$task_id = (int) $request->get_param( 'id' );
+
+		if ( $task_id <= 0 ) {
+			return new WP_Error( 'invalid_id', 'Invalid task ID provided', array( 'status' => 400 ) );
+		}
+
+		/** @var TaskManagerService $task_service */
+		$task_service = WPO_AOM()->get_service( TaskManagerService::class );
+
+		try {
+			$task_service->archive_task( $task_id );
+		} catch ( \RuntimeException $e ) {
+			return new WP_Error( 'task_archive_failed', $e->getMessage(), array( 'status' => 404 ) );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'task_archive_failed', $e->getMessage(), array( 'status' => 500 ) );
+		}
+
+		return rest_ensure_response( array(
+			'success' => true,
+			'message' => 'Task archived',
+		) );
 	}
 }
