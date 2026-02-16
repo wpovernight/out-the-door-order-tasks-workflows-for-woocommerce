@@ -10,17 +10,19 @@ export const KanbanView: React.FC = () => {
 	const { loadTasks, loadTaskFields, loadFieldOptions } = useTasks();
 
 	const { loadingStatus, loadingError } = useAsyncLoader(async () => {
-		await Promise.all([loadTasks(), loadFieldOptions('status')]);
+		await Promise.all([
+			loadTasks(),
+			loadFieldOptions('status'),
+			loadFieldOptions('priority'),
+		]);
 	}, [loadTasks, loadFieldOptions]);
 
 	// Lazy load - Prefetch form data after board is displayed
 	useEffect(() => {
 		if (loadingStatus === 'loaded') {
-			// These run in background, no need to await
-			loadFieldOptions('priority');
 			loadTaskFields();
 		}
-	}, [loadingStatus, loadFieldOptions, loadTaskFields]);
+	}, [loadingStatus, loadTaskFields]);
 
 	if (loadingStatus === 'loading') {
 		return <BoardSkeleton />;
