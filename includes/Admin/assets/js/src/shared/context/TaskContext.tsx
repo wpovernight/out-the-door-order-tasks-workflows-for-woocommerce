@@ -11,6 +11,8 @@ import {
 	TaskField,
 	TASK_FINISH_STATUS_SLUG,
 	TASK_UNFINISHED_STATUS_SLUG,
+	TASK_ARCHIVE_STATUS_SLUG,
+	TASK_UNARCHIVE_STATUS_SLUG,
 } from '@shared/types/task';
 import {
 	fetchTasks,
@@ -21,6 +23,7 @@ import {
 	updateTask as updateTaskAPI,
 	deleteTask as deleteTaskAPI,
 	finishTask as finishTaskAPI,
+	archiveTask as archiveTaskAPI,
 } from '@shared/utils/api';
 import { updateTaskFields } from '@shared/utils/fieldUtils';
 
@@ -47,6 +50,8 @@ interface TaskContextType {
 	) => Promise<void>;
 	finishTask: (taskId: number) => Promise<boolean>;
 	unfinishTask: (taskId: number) => Promise<boolean>;
+	archiveTask: (taskId: number) => Promise<boolean>;
+	unarchiveTask: (taskId: number) => Promise<boolean>;
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
@@ -457,6 +462,114 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 		[fieldOptions]
 	);
 
+	const archiveTask = useCallback(
+		async (taskId: number): Promise<boolean> => {
+			let previousState: Task[] | null = null;
+
+			// Get the archive status option ID.
+			const archivedOption = fieldOptions.status?.find(
+				(opt) => opt.slug === TASK_ARCHIVE_STATUS_SLUG
+			);
+
+			if (!archivedOption) {
+				console.error('Archived status option not found');
+				return false;
+			}
+
+			// Update the UI immediately before API call.
+			setTasks((prevTasks) => {
+				previousState = structuredClone(prevTasks);
+
+				return prevTasks.map((task) => {
+					if (task.id !== taskId) {
+						return task;
+					}
+
+					// Update the task's status to "archived" in the UI immediately.
+					return updateTaskFields(task, {
+						status: {
+							raw: archivedOption.id,
+							resolved: archivedOption,
+						},
+					});
+				});
+			});
+
+			try {
+				const result = await archiveTaskAPI(taskId);
+
+				if (!result) {
+					// Rollback if API call failed
+					if (previousState) {
+						setTasks(previousState);
+					}
+				}
+				return result;
+			} catch (error) {
+				console.error('Failed to archive task:', error);
+
+				// Rollback if API call failed
+				if (previousState) {
+					setTasks(previousState);
+				}
+
+				throw error;
+			}
+		},
+		[fieldOptions]
+	);
+
+	const unarchiveTask = useCallback(
+		async (taskId: number): Promise<boolean> => {
+			let previousState: Task[] | null = null;
+
+			// Get the default "unarchived" status option.
+			const unrchivedOption = fieldOptions.status?.find(
+				(fo) => fo.slug === TASK_UNARCHIVE_STATUS_SLUG
+			);
+
+			if (!unrchivedOption) {
+				console.error('Unarchived status option not found');
+				return false;
+			}
+
+			// Update the UI immediately before API call.
+			setTasks((prevTasks) => {
+				previousState = structuredClone(prevTasks);
+
+				return prevTasks.map((task) => {
+					if (task.id !== taskId) {
+						return task;
+					}
+
+					// Update the task's status to "unarchived" in the UI immediately.
+					return updateTaskFields(task, {
+						status: {
+							raw: unrchivedOption.id,
+							resolved: unrchivedOption,
+						},
+					});
+				});
+			});
+
+			try {
+				await moveTaskAPI(taskId, null, unrchivedOption.id);
+
+				return true;
+			} catch (error) {
+				console.error('Failed to unarchive task:', error);
+
+				// Rollback if API call failed
+				if (previousState) {
+					setTasks(previousState);
+				}
+
+				throw error;
+			}
+		},
+		[fieldOptions]
+	);
+
 	return (
 		<TaskContext.Provider
 			value={{
@@ -474,6 +587,8 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				moveTask,
 				finishTask,
 				unfinishTask,
+				archiveTask,
+				unarchiveTask,
 			}}
 		>
 			{children}

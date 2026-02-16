@@ -349,3 +349,27 @@ export async function finishTask(taskId: number): Promise<boolean> {
 	const data = await handleResponse<{ success: boolean }>(response);
 	return data.success;
 }
+
+/**
+ * Archive a task.
+ *
+ * @param  taskId - The ID of the task to archive.
+ * @return {Promise<boolean>} A promise that resolves to true if the task was successfully finished.
+ * @throws Will throw an error if the API request fails.
+ */
+export async function archiveTask(taskId: number): Promise<boolean> {
+	const response = await fetch(
+		`${apiRoot}/${apiNamespace}/tasks/${taskId}/archive`,
+		{
+			method: 'POST',
+			credentials: 'include',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-WP-Nonce': nonce,
+			},
+		}
+	);
+
+	const data = await handleResponse<{ success: boolean }>(response);
+	return data.success;
+}
