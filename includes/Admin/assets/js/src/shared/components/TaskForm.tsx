@@ -92,7 +92,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 		};
 	};
 
-	const submit = async (e: React.FormEvent) => {
+	const submit = async (e: React.SubmitEvent) => {
 		e.preventDefault();
 		if (isSubmitting) {
 			return; // Prevent multiple submissions
@@ -155,27 +155,27 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				?.raw as string)
 		: undefined;
 
-	const associatedOrders = task?.fields.find(
-		(field) => field.slug === 'order'
-	)?.values;
-	let associatedOrderIds = associatedOrders
-		?.map((v) => {
-			const raw = v?.raw;
-			if (raw === null || raw === '') {
-				return null;
-			}
-			const num = Number(raw);
-			if (Number.isNaN(num)) {
-				return null;
-			}
-			return { id: num, label: `#${raw}` };
-		})
-		.filter((item): item is { id: number; label: string } => item !== null);
-
-	// If creating a new task and orderId is provided, pre-select it
-	if (!task && orderId) {
-		associatedOrderIds = [{ id: orderId, label: `#${orderId}` }];
-	}
+	// const associatedOrders = task?.fields.find(
+	// 	(field) => field.slug === 'order'
+	// )?.values;
+	// let associatedOrderIds = associatedOrders
+	// 	?.map((v) => {
+	// 		const raw = v?.raw;
+	// 		if (raw === null || raw === '') {
+	// 			return null;
+	// 		}
+	// 		const num = Number(raw);
+	// 		if (Number.isNaN(num)) {
+	// 			return null;
+	// 		}
+	// 		return { id: num, label: `#${raw}` };
+	// 	})
+	// 	.filter((item): item is { id: number; label: string } => item !== null);
+    //
+	// // If creating a new task and orderId is provided, pre-select it
+	// if (!task && orderId) {
+	// 	associatedOrderIds = [{ id: orderId, label: `#${orderId}` }];
+	// }
 
 	// The form field name should follow the pattern: field_{field_slug}
 	return (
@@ -237,37 +237,39 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 						/>
 					</div>
 				</div>
-				<div className="field-group">
-					<div>
-						<label htmlFor="associated-orders">
-							{__('Associated Orders', 'wpo-aom')}
-						</label>
-						<AsyncMultiSelectField
-							placeholder={__(
-								'Search orders by number, customer, address…',
-								'wpo-aom'
-							)}
-							selectedOptions={associatedOrderIds}
-							id="associated-orders"
-							name="field_order"
-							// ToDo: Lazy load for next pages
-							onSearch={async (
-								query: string,
-								signal?: AbortSignal
-							) => {
-								const results = await searchOrders(
-									query,
-									signal
-								);
-								return results.map((order) => ({
-									id: order.id,
-									label: `#${order.id}`,
-									searchLabel: `#${order.id} - ${order.billing?.first_name} ${order.billing?.last_name}`,
-								}));
-							}}
-						/>
-					</div>
-				</div>
+                {/*For now, we will hide the associated orders field as it has been decided to automatically link order*/}
+                {/*to the task when created from order edit page.*/}
+				{/*<div className="field-group">*/}
+				{/*	<div>*/}
+				{/*		<label htmlFor="associated-orders">*/}
+				{/*			{__('Associated Orders', 'wpo-aom')}*/}
+				{/*		</label>*/}
+				{/*		<AsyncMultiSelectField*/}
+				{/*			placeholder={__(*/}
+				{/*				'Search orders by number, customer, address…',*/}
+				{/*				'wpo-aom'*/}
+				{/*			)}*/}
+				{/*			selectedOptions={associatedOrderIds}*/}
+				{/*			id="associated-orders"*/}
+				{/*			name="field_order"*/}
+				{/*			// ToDo: Lazy load for next pages*/}
+				{/*			onSearch={async (*/}
+				{/*				query: string,*/}
+				{/*				signal?: AbortSignal*/}
+				{/*			) => {*/}
+				{/*				const results = await searchOrders(*/}
+				{/*					query,*/}
+				{/*					signal*/}
+				{/*				);*/}
+				{/*				return results.map((order) => ({*/}
+				{/*					id: order.id,*/}
+				{/*					label: `#${order.id}`,*/}
+				{/*					searchLabel: `#${order.id} - ${order.billing?.first_name} ${order.billing?.last_name}`,*/}
+				{/*				}));*/}
+				{/*			}}*/}
+				{/*		/>*/}
+				{/*	</div>*/}
+				{/*</div>*/}
 				<div className="field-group">
 					<div>
 						<label htmlFor="description">
