@@ -1,9 +1,10 @@
 import React from 'react';
 import { __ } from '@wordpress/i18n';
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import Header from '@orderManager/components/Header';
 import { TaskView } from '@orderManager/views/TaskView';
 import { useTab } from '@orderManager/context/TabContext';
+import { DashboardView } from '@orderManager/views/Dashboard/DashboardView';
 
 export default function Page() {
 	const { tab } = useTab();
@@ -14,20 +15,13 @@ export default function Page() {
 			<div className={`content ${tab}-tab`}>
 				<Routes>
 					<Route
-						path="/dashboard/"
-						element={
-							<div className="tab-content dashboard-view active">
-								<h2>
-									<span className="screenReader">
-										{__('Dashboard', 'wpo-aom')}
-									</span>
-								</h2>
-							</div>
-						}
+						index
+						element={<Navigate to="/dashboard" replace />}
 					/>
+					<Route path="/dashboard" element={<DashboardView />} />
 					<Route path="/task-manager/*" element={<TaskView />} />
 					<Route
-						path="/custom-order-status/"
+						path="/custom-order-status"
 						element={
 							<div className="tab-content custom-order-statuses-view active">
 								<h2>
