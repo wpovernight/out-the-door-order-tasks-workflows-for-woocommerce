@@ -230,6 +230,12 @@ final class Install {
 						'color'    => '#28a745',
 						'position' => 3,
 					),
+					array(
+						'label'    => 'Archived',
+						'slug'     => 'archived',
+						'color'    => '#6c757d',
+						'position' => 4,
+					),
 				),
 			),
 			// Position within status - used for ordering tasks within a status column in Kanban view
