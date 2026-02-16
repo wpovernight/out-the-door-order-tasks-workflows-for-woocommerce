@@ -51,7 +51,7 @@
     height: 3em;
     background-repeat: no-repeat;
     background-size: contain;
-    background-image: url(data:image/svg+xml,%3Csvg%20width%3D%2238%22%20height%3D%2238%22%20viewBox%3D%220%200%2038%2038%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Crect%20width%3D%2238%22%20height%3D%2238%22%20rx%3D%225%22%20fill%3D%22%23DFCDF9%22/%3E%3Crect%20x%3D%2211.75%22%20y%3D%2211.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20rx%3D%227.25%22%20stroke%3D%22%236E1EDC%22%20stroke-width%3D%221.5%22/%3E%3C/svg%3E);
+    background-image: var(--wpo-aom-icon-task-header);
 }
 
 #order-fulfillments .header .title-details::before {
@@ -61,7 +61,7 @@
     height: 3em;
     background-repeat: no-repeat;
     background-size: contain;
-    background-image: url(data:image/svg+xml,%3Csvg%20width%3D%2238%22%20height%3D%2238%22%20viewBox%3D%220%200%2038%2038%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2238%22%20height%3D%2238%22%20rx%3D%225%22%20fill%3D%22%23E0F2FE%22%2F%3E%0A%3Cpath%20d%3D%22M22.75%2016.8333L15.25%2012.5083M11.725%2014.8L19%2019.0083L26.275%2014.8M19%2027.4V19M26.5%2022.3333V15.6666C26.4997%2015.3744%2026.4225%2015.0873%2026.2763%2014.8343C26.13%2014.5812%2025.9198%2014.3711%2025.6667%2014.225L19.8333%2010.8916C19.58%2010.7453%2019.2926%2010.6683%2019%2010.6683C18.7074%2010.6683%2018.42%2010.7453%2018.1667%2010.8916L12.3333%2014.225C12.0802%2014.3711%2011.87%2014.5812%2011.7237%2014.8343C11.5775%2015.0873%2011.5003%2015.3744%2011.5%2015.6666V22.3333C11.5003%2022.6256%2011.5775%2022.9126%2011.7237%2023.1657C11.87%2023.4187%2012.0802%2023.6288%2012.3333%2023.775L18.1667%2027.1083C18.42%2027.2546%2018.7074%2027.3316%2019%2027.3316C19.2926%2027.3316%2019.58%2027.2546%2019.8333%2027.1083L25.6667%2023.775C25.9198%2023.6288%2026.13%2023.4187%2026.2763%2023.1657C26.4225%2022.9126%2026.4997%2022.6256%2026.5%2022.3333Z%22%20stroke%3D%22%230086C9%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%3C%2Fsvg%3E%0A);
+    background-image: var(--wpo-aom-icon-fulfillment-header);
 }
 
 .wpo-aom-metabox-section .header .title-details > h3 {
@@ -326,10 +326,10 @@ td.wpo-aom-fulfillment > div {
     width: 1.1em;
     height: 1.1em;
     background-color: #fff;
-    mask-image: url('data:image/svg+xml,<svg width="11" height="8" viewBox="0 0 11 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.67685 0.585938L3.42685 6.83594L0.585938 3.99503" stroke="white" stroke-width="1.17188" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+    mask-image: var(--wpo-aom-icon-checkmark);
     mask-size: contain;
     mask-repeat: no-repeat;
-    -webkit-mask-image: url('data:image/svg+xml,<svg width="11" height="8" viewBox="0 0 11 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.67685 0.585938L3.42685 6.83594L0.585938 3.99503" stroke="white" stroke-width="1.17188" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+    -webkit-mask-image: var(--wpo-aom-icon-checkmark);
     -webkit-mask-size: contain;
     -webkit-mask-repeat: no-repeat;
     text-align: center;
