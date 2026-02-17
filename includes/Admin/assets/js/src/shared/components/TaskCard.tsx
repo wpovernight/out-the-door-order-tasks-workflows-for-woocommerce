@@ -1,30 +1,25 @@
 import React from 'react';
-import { __ } from '@wordpress/i18n';
 import {
 	isFieldOption,
 	Task,
-	TASK_FINISH_STATUS_SLUG,
 } from '@shared/types/task';
 import { getColorStyle } from '@shared/utils/colorUtils';
 import { truncateText } from '@shared/utils/textUtils';
-import { useTasks } from '@shared/context/TaskContext';
+import { TaskActionMenu } from '@shared/components/TaskActionMenu';
 
-type ActionsDisplayMode = 'menu' | 'icons' | 'none';
 type HeadingLevel = 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 
 interface TaskCardProps {
 	task: Task;
-	isOptionsOpen?: boolean;
 	isSelected?: boolean;
 	onCardClick?: (e?: React.MouseEvent) => void;
-	onOptionsClick?: (e: React.MouseEvent) => void;
-	onEditClick?: (e: React.MouseEvent) => void;
-	onDeleteClick?: (e: React.MouseEvent) => void;
+	onEditClick?: (taskId: number) => void;
+	onDeleteClick?: (taskId: number) => void;
 	onFinishClick?: (taskId: number) => Promise<boolean>;
 	onUnfinishClick?: (taskId: number) => Promise<boolean>;
+	onArchiveClick?: (taskId: number) => Promise<boolean>;
 	className?: string;
 	innerRef?: React.RefObject<HTMLDivElement | null>;
-	actionsDisplayMode?: ActionsDisplayMode;
 	headingLevel?: HeadingLevel;
 	showDescription?: boolean;
 	descriptionMaxLength?: number;
@@ -34,27 +29,21 @@ interface TaskCardProps {
 
 export const TaskCard: React.FC<TaskCardProps> = ({
 	task,
-	isOptionsOpen = false,
 	isSelected = false,
 	onCardClick,
-	onOptionsClick,
 	onEditClick,
 	onDeleteClick,
 	onFinishClick,
 	onUnfinishClick,
+	onArchiveClick,
 	className = '',
 	innerRef,
-	actionsDisplayMode = 'menu',
 	headingLevel = 'h3',
 	showDescription = false,
 	descriptionMaxLength = 100,
 	isCompact = false,
 	excludeTags = [],
 }) => {
-	const { finishTask: globalFinishTask, unfinishTask: globalUnfinishTask } =
-		useTasks();
-	const finishTask = onFinishClick || globalFinishTask;
-	const unfinishTask = onUnfinishClick || globalUnfinishTask;
 	const statusField = task.fields?.find((field) => field.slug === 'status');
 	const priorityField = task.fields?.find(
 		(field) => field.slug === 'priority'
@@ -86,137 +75,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 		}
 	};
 
-	const handleOnFinishClick = (e: React.MouseEvent) => {
-		e.stopPropagation();
-		finishTask(task.id);
-
-		// close the option menu if open
-		if (isOptionsOpen && onOptionsClick) {
-			onOptionsClick(e);
-		}
-	};
-
-	const handleOnUnfinishClick = (e: React.MouseEvent) => {
-		e.stopPropagation();
-		unfinishTask(task.id);
-
-		// close the option menu if open
-		if (isOptionsOpen && onOptionsClick) {
-			onOptionsClick(e);
-		}
-	};
-
-	const isCompleted = task.status === TASK_FINISH_STATUS_SLUG;
-
-	const renderMenuActions = () => (
-		<div className="task-card-options">
-			<button
-				className="wpo-button wpo-button-icon wpo-options-button"
-				type="button"
-				onClick={onOptionsClick}
-			>
-				<span className="screenReader">{__('Options', 'wpo-aom')}</span>
-			</button>
-			{isOptionsOpen && (
-				<ul className="wpo-action-menu">
-					<li>
-						<button
-							type="button"
-							className={`wpo-button task-finish-menu-item ${isCompleted ? 'finished' : ''}`}
-							onClick={
-								isCompleted
-									? handleOnUnfinishClick
-									: handleOnFinishClick
-							}
-						>
-							{isCompleted
-								? __('Mark as In Progress', 'wpo-aom')
-								: __('Mark as Completed', 'wpo-aom')}
-						</button>
-					</li>
-					{onEditClick && (
-						<li>
-							<button
-								type="button"
-								className="wpo-button task-edit-menu-item"
-								onClick={onEditClick}
-							>
-								{__('Edit', 'wpo-aom')}
-							</button>
-						</li>
-					)}
-					{onDeleteClick && (
-						<li>
-							<button
-								type="button"
-								className="wpo-button task-delete-menu-item"
-								onClick={onDeleteClick}
-							>
-								{__('Delete', 'wpo-aom')}
-							</button>
-						</li>
-					)}
-				</ul>
-			)}
-		</div>
-	);
-
-	const renderIconActions = () => (
-		<ul className="wpo-aom-task-actions task-card-actions">
-			<li>
-				<button
-					className={`wpo-button wpo-button-icon task-finish ${isCompleted ? 'finished' : ''}`}
-					type="button"
-					onClick={
-						isCompleted
-							? handleOnUnfinishClick
-							: handleOnFinishClick
-					}
-					title={
-						isCompleted
-							? __('Mark as In Progress', 'wpo-aom')
-							: __('Mark as Completed', 'wpo-aom')
-					}
-				>
-					<span className="screenReader">
-						{isCompleted
-							? __('Mark as In Progress', 'wpo-aom')
-							: __('Mark as Completed', 'wpo-aom')}
-					</span>
-				</button>
-			</li>
-			{onEditClick && (
-				<li>
-					<button
-						className="wpo-button wpo-button-icon task-edit"
-						type="button"
-						onClick={onEditClick}
-						title={__('Edit', 'wpo-aom')}
-					>
-						<span className="screenReader">
-							{__('Edit', 'wpo-aom')}
-						</span>
-					</button>
-				</li>
-			)}
-			{onDeleteClick && (
-				<li>
-					<button
-						className="wpo-button wpo-button-icon task-delete"
-						type="button"
-						onClick={onDeleteClick}
-						title={__('Delete', 'wpo-aom')}
-					>
-						<span className="screenReader">
-							{__('Delete', 'wpo-aom')}
-						</span>
-					</button>
-				</li>
-			)}
-		</ul>
-	);
-
-	const hasActions = onEditClick || onDeleteClick || onOptionsClick;
+	const hasActions = onEditClick || onDeleteClick;
 
 	// Create dynamic heading element
 	const HeadingTag = headingLevel;
@@ -270,12 +129,18 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 					{/* Tags for compact mode */}
 					{isCompact && renderTags()}
 					{/* Actions */}
-					{hasActions && actionsDisplayMode === 'menu'
-						? renderMenuActions()
-						: null}
-					{hasActions && actionsDisplayMode === 'icons'
-						? renderIconActions()
-						: null}
+					{hasActions && (
+						<TaskActionMenu
+							task={task}
+							onEdit={onEditClick}
+							onDelete={onDeleteClick}
+							onFinish={onFinishClick}
+							onUnfinish={onUnfinishClick}
+							onArchive={onArchiveClick}
+							showEdit={!!onEditClick}
+							showDelete={!!onDeleteClick}
+						/>
+					)}
 				</div>
 			</div>
 			{/* Description for non-compact mode */}
