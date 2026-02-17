@@ -46,7 +46,7 @@
     --wpo-aom-gray-icon: #9ca3af;
 
     /* Hover/Focus States */
-    --wpo-aom-hover-overlay: #00000012;
+    --wpo-aom-hover-overlay: #00000010;
     --wpo-aom-hover-overlay-alt: #0000000d;
     --wpo-aom-backdrop: rgba(0, 0, 0, 0.4);
 
@@ -246,9 +246,10 @@
 }
 
 .wpo-action-menu > li {
+    display: flex;
     margin: 0;
     padding: 0;
-    border-bottom: 1px solid #E5E7E9;
+    /*border-bottom: 1px solid #E5E7E9;*/
 }
 
 .wpo-action-menu > li > button {
