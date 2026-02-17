@@ -384,6 +384,10 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 							raw: finishedOption.id,
 							resolved: finishedOption,
 						},
+						position: {
+							raw: Number.MAX_SAFE_INTEGER,
+							resolved: null,
+						},
 					});
 				});
 			});
@@ -440,6 +444,10 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 							raw: unfinishedOption.id,
 							resolved: unfinishedOption,
 						},
+						position: {
+							raw: Number.MAX_SAFE_INTEGER,
+							resolved: null,
+						},
 					});
 				});
 			});
@@ -490,6 +498,10 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 						status: {
 							raw: archivedOption.id,
 							resolved: archivedOption,
+						},
+						position: {
+							raw: Number.MAX_SAFE_INTEGER,
+							resolved: null,
 						},
 					});
 				});
@@ -547,6 +559,10 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 						status: {
 							raw: unrchivedOption.id,
 							resolved: unrchivedOption,
+						},
+						position: {
+							raw: Number.MAX_SAFE_INTEGER,
+							resolved: null,
 						},
 					});
 				});
