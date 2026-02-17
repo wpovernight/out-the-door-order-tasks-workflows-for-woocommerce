@@ -62,15 +62,8 @@ const FinishedTasks: React.FC = () => {
 						<TaskCard
 							key={task.id}
 							task={task}
-							onEditClick={(e) => {
-								e.stopPropagation();
-								handleEditClick(task.id);
-							}}
-							onDeleteClick={(e) => {
-								e.stopPropagation();
-								handleDeleteClick(task.id);
-							}}
-							actionsDisplayMode="icons"
+							onEditClick={handleEditClick}
+							onDeleteClick={handleDeleteClick}
 							headingLevel="h5"
 							showDescription={true}
 							descriptionMaxLength={150}
