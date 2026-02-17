@@ -15,7 +15,7 @@ import {
 } from '../data';
 import { Column } from './Column';
 import { useViewTasks } from '../context/ViewTaskContext';
-import {FieldOption, TASK_ARCHIVE_STATUS_SLUG} from '@shared/types/task';
+import { FieldOption, TASK_ARCHIVE_STATUS_SLUG } from '@shared/types/task';
 import { reorderFieldOptions } from '@shared/utils/api';
 
 export const Board: React.FC = () => {

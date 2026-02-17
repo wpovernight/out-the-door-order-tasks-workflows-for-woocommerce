@@ -1,5 +1,5 @@
 import React, { useContext, useState, useMemo } from 'react';
-import { Task } from '@shared/types/task';
+import { Task, TASK_ARCHIVE_STATUS_SLUG } from '@shared/types/task';
 import { useTasks } from '@shared/context/TaskContext';
 import { getTaskDueDate } from '@shared/utils/fieldUtils';
 import { getDateRangeFromPreset, DateRange, DateRangePreset } from '../utils';
@@ -97,6 +97,11 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 		endOfDay.setHours(23, 59, 59, 999);
 
 		return tasks.filter((task) => {
+			// Filter out tasks with "archived" status.
+			if (task.status === TASK_ARCHIVE_STATUS_SLUG) {
+				return false;
+			}
+
 			const taskDueDate = getTaskDueDate(task);
 			if (!taskDueDate) {
 				return false;
