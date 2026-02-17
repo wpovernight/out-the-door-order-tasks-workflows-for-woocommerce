@@ -155,27 +155,27 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				?.raw as string)
 		: undefined;
 
-	// const associatedOrders = task?.fields.find(
-	// 	(field) => field.slug === 'order'
-	// )?.values;
-	// let associatedOrderIds = associatedOrders
-	// 	?.map((v) => {
-	// 		const raw = v?.raw;
-	// 		if (raw === null || raw === '') {
-	// 			return null;
-	// 		}
-	// 		const num = Number(raw);
-	// 		if (Number.isNaN(num)) {
-	// 			return null;
-	// 		}
-	// 		return { id: num, label: `#${raw}` };
-	// 	})
-	// 	.filter((item): item is { id: number; label: string } => item !== null);
-	//
-	// // If creating a new task and orderId is provided, pre-select it
-	// if (!task && orderId) {
-	// 	associatedOrderIds = [{ id: orderId, label: `#${orderId}` }];
-	// }
+	const associatedOrders = task?.fields.find(
+		(field) => field.slug === 'order'
+	)?.values;
+	let associatedOrderIds = associatedOrders
+		?.map((v) => {
+			const raw = v?.raw;
+			if (raw === null || raw === '') {
+				return null;
+			}
+			const num = Number(raw);
+			if (Number.isNaN(num)) {
+				return null;
+			}
+			return { id: num, label: `#${raw}` };
+		})
+		.filter((item): item is { id: number; label: string } => item !== null);
+
+	// If creating a new task and orderId is provided, pre-select it
+	if (!task && orderId) {
+		associatedOrderIds = [{ id: orderId, label: `#${orderId}` }];
+	}
 
 	// The form field name should follow the pattern: field_{field_slug}
 	return (
@@ -270,6 +270,17 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				{/*		/>*/}
 				{/*	</div>*/}
 				{/*</div>*/}
+
+				{/* Add associated order IDs as a hidden field to be processed on submit */}
+				{associatedOrderIds && associatedOrderIds.length > 0 && (
+					<input
+						type="hidden"
+						name="field_order"
+						value={associatedOrderIds
+							.map((order) => order.id)
+							.join(',')}
+					/>
+				)}
 				<div className="field-group">
 					<div>
 						<label htmlFor="description">

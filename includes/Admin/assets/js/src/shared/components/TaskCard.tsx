@@ -1,8 +1,5 @@
 import React from 'react';
-import {
-	isFieldOption,
-	Task,
-} from '@shared/types/task';
+import { isFieldOption, Task } from '@shared/types/task';
 import { getColorStyle } from '@shared/utils/colorUtils';
 import { truncateText } from '@shared/utils/textUtils';
 import { TaskActionMenu } from '@shared/components/TaskActionMenu';
