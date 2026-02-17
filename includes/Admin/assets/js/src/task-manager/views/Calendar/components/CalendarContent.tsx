@@ -1,9 +1,5 @@
 import React, { useMemo } from 'react';
 import { useViewTasks } from '../context/ViewTaskContext';
-import { __ } from '@wordpress/i18n';
-import { useTasks } from '@shared/context/TaskContext';
-import { useTaskEdit } from '@shared/hooks/useTaskFormModal';
-import { Task } from '@shared/types/task';
 import { CalendarDay } from '../data';
 import {
 	generateCalendarDays,
@@ -31,9 +27,6 @@ export const CalendarContent: React.FC = () => {
 		goToPreviousMonth,
 		goToNextMonth,
 	} = useViewTasks();
-
-	const { deleteTask, setTasks } = useTasks();
-	const { openEditTaskModal } = useTaskEdit();
 
 	// Generate calendar data
 	const { monthName } = useMemo(
@@ -115,30 +108,6 @@ export const CalendarContent: React.FC = () => {
 		applyDateRange();
 	};
 
-	const handleTaskEdit = (task: Task) => {
-		openEditTaskModal({
-			task,
-			onTaskSaved: (updatedTask) => {
-				// Update local tasks state to reflect the changes
-				setTasks((prevTasks) =>
-					prevTasks.map((t) =>
-						t.id === updatedTask.id ? updatedTask : t
-					)
-				);
-			},
-			title: `${__('Edit', 'wpo-aom')}: ${task.title}`,
-		});
-	};
-
-	const handleTaskDelete = async (taskId: number) => {
-		try {
-			await deleteTask(taskId);
-			setTasks((prevTasks) => prevTasks.filter((t) => t.id !== taskId));
-		} catch (error) {
-			console.error('Failed to delete task:', error);
-		}
-	};
-
 	return (
 		<div className="calendar-view-container">
 			<div className="calendar-sidebar">
@@ -167,8 +136,6 @@ export const CalendarContent: React.FC = () => {
 				dateRange={dateRange}
 				dateRangePreset={appliedDateRangePreset}
 				onTaskClick={selectTask}
-				onTaskEdit={handleTaskEdit}
-				onTaskDelete={handleTaskDelete}
 			/>
 		</div>
 	);

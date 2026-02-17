@@ -13,8 +13,6 @@ interface TaskListProps {
 	dateRange: DateRange;
 	dateRangePreset: DateRangePreset;
 	onTaskClick?: (task: Task) => void;
-	onTaskEdit?: (task: Task) => void;
-	onTaskDelete?: (taskId: number) => void;
 }
 
 const TaskList: React.FC<TaskListProps> = ({
@@ -22,8 +20,6 @@ const TaskList: React.FC<TaskListProps> = ({
 	dateRange,
 	dateRangePreset,
 	onTaskClick,
-	onTaskEdit,
-	onTaskDelete,
 }) => {
 	const [sortColumn, setSortColumn] = useState<SortColumn>('dueDate');
 	const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
@@ -210,8 +206,6 @@ const TaskList: React.FC<TaskListProps> = ({
 									key={task.id}
 									task={task}
 									onTaskClick={onTaskClick}
-									onTaskEdit={onTaskEdit}
-									onTaskDelete={onTaskDelete}
 								/>
 							))
 						)}
