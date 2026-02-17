@@ -27,8 +27,6 @@ import { useViewTasks } from '@taskManager/views/Kanban/context/ViewTaskContext'
 interface ColumnProps {
 	column: FieldOption;
 	tasks: Task[];
-	openOptionsCardId: number | null;
-	setOpenOptionsCardId: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 type ColumnState =
@@ -43,8 +41,6 @@ const IDLE: ColumnState = { type: 'idle' };
 export const Column: React.FC<ColumnProps> = ({
 	column,
 	tasks,
-	openOptionsCardId,
-	setOpenOptionsCardId,
 }) => {
 	const scrollableRef = useRef<HTMLDivElement | null>(null);
 	const headerRef = useRef<HTMLDivElement | null>(null);
@@ -113,10 +109,7 @@ export const Column: React.FC<ColumnProps> = ({
 						updateState({ type: 'column-drag-over', edge });
 					}
 				},
-				onGenerateDragPreview() {
-					// Close options menu before drag preview is generated
-					onOptionToggle(null);
-				},
+
 				onDrag: ({ source, self }) => {
 					if (
 						isColumnData(source.data) &&
@@ -244,10 +237,6 @@ export const Column: React.FC<ColumnProps> = ({
 		});
 	};
 
-	const onOptionToggle = (taskId: number | null) => {
-		setOpenOptionsCardId(taskId);
-	};
-
 	return (
 		<div
 			ref={columnWrapperRef}
@@ -282,8 +271,6 @@ export const Column: React.FC<ColumnProps> = ({
 							<Card
 								key={task.id}
 								task={task}
-								isOptionsOpen={openOptionsCardId === task.id}
-								onOptionsToggle={onOptionToggle}
 							/>
 						))}
 					</div>

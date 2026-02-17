@@ -21,9 +21,6 @@ import { reorderFieldOptions } from '@shared/utils/api';
 export const Board: React.FC = () => {
 	const { fieldOptions, moveTask } = useTasks();
 	const { viewTasks, setViewTasks, clearSelectedTask } = useViewTasks();
-	const [openOptionsCardId, setOpenOptionsCardId] = useState<number | null>(
-		null
-	);
 	const [columnOrder, setColumnOrder] = useState<FieldOption[]>([]);
 
 	const scrollableRef = useRef<HTMLDivElement | null>(null);
@@ -265,7 +262,6 @@ export const Board: React.FC = () => {
 	// Clear highlight when clicking anywhere on the board background
 	const handleClick = () => {
 		clearSelectedTask();
-		setOpenOptionsCardId(null);
 	};
 
 	return (
@@ -286,8 +282,6 @@ export const Board: React.FC = () => {
 					key={col.id}
 					column={col}
 					tasks={viewTasks[col.slug] || []}
-					openOptionsCardId={openOptionsCardId}
-					setOpenOptionsCardId={setOpenOptionsCardId}
 				/>
 			))}
 		</div>

@@ -35,14 +35,10 @@ const IDLE: CardState = { type: 'idle' };
 
 interface CardProps {
 	task: Task;
-	isOptionsOpen: boolean;
-	onOptionsToggle: (id: number | null) => void;
 }
 
 export const Card: React.FC<CardProps> = ({
 	task,
-	isOptionsOpen,
-	onOptionsToggle,
 }) => {
 	const outerRef = useRef<HTMLDivElement | null>(null);
 	const innerRef = useRef<HTMLDivElement | null>(null);
@@ -91,10 +87,6 @@ export const Card: React.FC<CardProps> = ({
 						fromColumn: taskRef.current.status,
 						rect: element.getBoundingClientRect(),
 					}),
-				onGenerateDragPreview() {
-					// Close options menu before drag preview is generated
-					onOptionsToggle(null);
-				},
 				onDragStart() {
 					updateState({ type: 'dragging' });
 				},
@@ -211,12 +203,6 @@ export const Card: React.FC<CardProps> = ({
 		selectTask(task);
 	};
 
-	const handleOptionsClick = (e: React.MouseEvent) => {
-		e.preventDefault();
-		e.stopPropagation();
-		onOptionsToggle(isOptionsOpen ? null : task.id);
-	};
-
 	const handleDeleteClick = () => {
 		// ToDo: Update to use custom modal
 		// eslint-disable-next-line no-alert
@@ -237,11 +223,7 @@ export const Card: React.FC<CardProps> = ({
 		});
 	};
 
-	const handleEditTask = (e: React.MouseEvent) => {
-		e.preventDefault();
-		e.stopPropagation();
-		onOptionsToggle(null);
-
+	const handleEditTask = () => {
 		openEditTaskModal({
 			task,
 			onTaskSaved: (updatedTask) => {
@@ -298,21 +280,14 @@ export const Card: React.FC<CardProps> = ({
 		>
 			<TaskCard
 				task={task}
-				isOptionsOpen={isOptionsOpen}
 				isSelected={isSelected}
 				onCardClick={handleCardClick}
-				onOptionsClick={handleOptionsClick}
 				onEditClick={handleEditTask}
-				onDeleteClick={(e) => {
-					e.preventDefault();
-					e.stopPropagation();
-					handleDeleteClick();
-				}}
+				onDeleteClick={handleDeleteClick}
 				onFinishClick={finishTask}
 				onUnfinishClick={unfinishTask}
 				className={state.type !== 'idle' ? state.type : ''}
 				innerRef={innerRef}
-				actionsDisplayMode="menu"
 				headingLevel="h3"
 				excludeTags={['status']}
 			/>
