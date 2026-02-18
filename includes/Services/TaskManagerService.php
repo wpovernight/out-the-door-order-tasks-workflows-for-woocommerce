@@ -924,6 +924,8 @@ final class TaskManagerService {
 						if ( $order ) {
 							$resolved = array(
 								'id'           => $order->get_id(),
+								'full_name'    => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
+								'url'          => admin_url( 'post.php?post=' . $order->get_id() . '&action=edit' ),
 								'status'       => $order->get_status(),
 								'total'        => $order->get_total(),
 								'currency'     => $order->get_currency(),
