@@ -198,6 +198,16 @@ final class Install {
 	private static function insert_default_data(): void {
 		global $wpdb;
 
+		/**
+		 * Note: When adding new default fields, ensure that the ID is unique and does not conflict with existing fields.
+		 *       Also, update the DefaultTaskFields enum class accordingly to maintain a single source of truth for default field IDs.
+		 *
+		 * Default fields to be inserted on plugin activation.
+		 * The IDs are hardcoded to ensure consistency across installations and to allow referencing in code.
+		 * Protected fields (is_protected = true) cannot be deleted by users and are essential for the plugin's core functionality.
+		 * Editable fields (is_editable = true) can be modified by users, but protected fields cannot be deleted to ensure the integrity.
+		 * The 'options' key is only applicable for 'select' type fields and defines the available options for that field.
+		 */
 		$default_fields = array(
 			/*
 			 * Default fields: Non-editable and protected fields.
@@ -248,6 +258,7 @@ final class Install {
 				'is_editable'  => false,
 				'is_protected' => true,
 			),
+			// User ID of the creator - used to store which user created the task.
 			array(
 				'id'           => 3,
 				'label'        => 'Creator',
@@ -257,6 +268,7 @@ final class Install {
 				'is_editable'  => false,
 				'is_protected' => true,
 			),
+			// Order ID - used to associate the task with a specific order.
 			array(
 				'id'           => 4,
 				'label'        => 'Order',
@@ -266,6 +278,7 @@ final class Install {
 				'is_editable'  => false,
 				'is_protected' => true,
 			),
+			// Due date - used to store the deadline for the task.
 			array(
 				'id'           => 5,
 				'label'        => 'Due Date',
@@ -275,11 +288,21 @@ final class Install {
 				'is_editable'  => false,
 				'is_protected' => true,
 			),
+			// Completed date - used to store the date when a task is marked as completed (status changed to "Completed")
+			array(
+				'id'           => 6,
+				'label'        => 'Completed Date',
+				'type'         => 'date',
+				'slug'         => 'completed_date',
+				'is_required'  => false,
+				'is_editable'  => false,
+				'is_protected' => true,
+			),
 			/*
 			 * Editable and non-protected fields.
 			 */
 			array(
-				'id'           => 6,
+				'id'           => 7,
 				'label'        => 'Priority',
 				'type'         => 'select',
 				'slug'         => 'priority',

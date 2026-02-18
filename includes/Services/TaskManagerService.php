@@ -671,7 +671,8 @@ final class TaskManagerService {
 	 * @param int|null $previous_task_id    The ID of the task that should precede the moved task in the new status.
 	 *                                      If null, the task will be placed at the start.
 	 * @param string   $fallback_placement  The default position to use if no previous task is specified.
-	 *
+	 * @param array    $extra_field_values  Additional field values to update when moving the task (e.g., completed_date).
+	 *                                      Only should be used for internal operations like marking as completed, not for general uses.
 	 *
 	 * @return float
 	 * @throws Exception
@@ -680,7 +681,8 @@ final class TaskManagerService {
 		int $task_id,
 		int $target_status_id,
 		?int $previous_task_id = null,
-		string $fallback_placement = 'first'
+		string $fallback_placement = 'first',
+		array $extra_field_values = array()
 	): float {
 		// Validate fallback placement.
 		if ( ! in_array( $fallback_placement, array( 'first', 'last' ), true ) ) {
@@ -741,7 +743,7 @@ final class TaskManagerService {
 		$update_data = array(
 			DefaultTaskFields::STATUS   => $target_status_id,
 			DefaultTaskFields::POSITION => $new_position,
-		);
+		) + $extra_field_values;
 
 		$old_status    = $this->task_field_value_repository
 			->find_by_task_and_field( $task_id, DefaultTaskFields::STATUS );
@@ -836,7 +838,13 @@ final class TaskManagerService {
 			throw new RuntimeException( 'Finished status option not found. Please ensure a "completed" status option exists.' );
 		}
 
-		return (bool) $this->move_task( $task_id, $finished_status_option->id, null, 'last' );
+		return (bool) $this->move_task(
+			$task_id,
+			$finished_status_option->id,
+			null,
+			'last',
+			array( DefaultTaskFields::COMPLETED_DATE => gmdate( 'Y-m-d H:i:s' ) ),
+		);
 	}
 
 	/**

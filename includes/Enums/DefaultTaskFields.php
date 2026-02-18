@@ -12,14 +12,15 @@ defined( 'ABSPATH' ) || exit;
  */
 final class DefaultTaskFields {
 	// Protected system fields
-	public const STATUS   = 1;
-	public const POSITION = 2;
-	public const CREATOR  = 3;
-	public const ORDER    = 4;
-	public const DUE_DATE = 5;
+	public const STATUS         = 1;
+	public const POSITION       = 2;
+	public const CREATOR        = 3;
+	public const ORDER          = 4;
+	public const DUE_DATE       = 5;
+	public const COMPLETED_DATE = 6;
 
 	// User-editable default fields
-	public const PRIORITY = 6;
+	public const PRIORITY = 7;
 
 	/**
 	 * Get all default field IDs.
@@ -33,6 +34,7 @@ final class DefaultTaskFields {
 			self::CREATOR,
 			self::ORDER,
 			self::DUE_DATE,
+			self::COMPLETED_DATE,
 			self::PRIORITY,
 		);
 	}
@@ -49,6 +51,7 @@ final class DefaultTaskFields {
 			self::CREATOR,
 			self::ORDER,
 			self::DUE_DATE,
+			self::COMPLETED_DATE,
 		);
 	}
 
