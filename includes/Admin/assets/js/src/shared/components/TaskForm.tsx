@@ -132,22 +132,22 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 		);
 	}
 
-	let statusOption = task
+	const statusResolved = task
 		? task.fields.find((field) => field.slug === 'status')?.values?.[0]
 				?.resolved
 		: null;
-	statusOption =
-		statusOption && isFieldOption(statusOption)
-			? statusOption
+	const statusOption =
+		statusResolved && isFieldOption(statusResolved)
+			? statusResolved
 			: fieldOptions?.status?.[(columnId ?? 1) - 1];
 
-	let priorityOption = task
+	const priorityResolved = task
 		? task.fields.find((field) => field.slug === 'priority')?.values?.[0]
 				?.resolved
 		: null;
-	priorityOption =
-		priorityOption && isFieldOption(priorityOption)
-			? priorityOption
+	const priorityOption =
+		priorityResolved && isFieldOption(priorityResolved)
+			? priorityResolved
 			: fieldOptions?.priority?.[0];
 
 	const dueDate = task

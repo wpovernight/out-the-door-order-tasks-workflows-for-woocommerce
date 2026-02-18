@@ -3,8 +3,10 @@ import { isFieldOption, Task } from '@shared/types/task';
 import { getColorStyle } from '@shared/utils/colorUtils';
 import { truncateText } from '@shared/utils/textUtils';
 import { TaskActionMenu } from '@shared/components/TaskActionMenu';
+import { getFieldValue } from '@shared/utils/fieldUtils';
 
 type HeadingLevel = 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+type TagsPosition = 'top' | 'bottom';
 
 interface TaskCardProps {
 	task: Task;
@@ -20,7 +22,8 @@ interface TaskCardProps {
 	headingLevel?: HeadingLevel;
 	showDescription?: boolean;
 	descriptionMaxLength?: number;
-	isCompact?: boolean;
+	tagsPosition?: TagsPosition;
+	showOrder?: boolean;
 	excludeTags?: string[];
 }
 
@@ -37,8 +40,9 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 	innerRef,
 	headingLevel = 'h3',
 	showDescription = false,
-	descriptionMaxLength = 100,
-	isCompact = false,
+	descriptionMaxLength = 70,
+	tagsPosition = 'bottom',
+	showOrder = true,
 	excludeTags = [],
 }) => {
 	const statusField = task.fields?.find((field) => field.slug === 'status');
@@ -108,6 +112,53 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 		);
 	};
 
+	const renderDescription = () => {
+		if (!task.description) {
+			return null;
+		}
+
+		return (
+			<div className="task-card-description">
+				<p>{truncateText(task.description, descriptionMaxLength)}</p>
+			</div>
+		);
+	};
+
+	const renderDueDate = () => {
+		if (!dueDate) {
+			return null;
+		}
+
+		return <span className="task-card-due-date">{dueDate}</span>;
+	};
+
+	const renderAssociatedOrder = () => {
+		const orderValue = getFieldValue(task, 'order');
+
+		if (
+			!orderValue ||
+			typeof orderValue !== 'object' ||
+			Array.isArray(orderValue)
+		) {
+			return null;
+		}
+
+		const order = orderValue as Record<string, unknown>;
+
+		return (
+			<div className="task-card-order">
+				<a
+					href={order.url as string}
+					target="_blank"
+					rel="noopener noreferrer"
+					onClick={(e) => e.stopPropagation()}
+				>
+					{order.full_name as string} • #{order.id as number}
+				</a>
+			</div>
+		);
+	};
+
 	return (
 		// eslint-disable-next-line jsx-a11y/no-static-element-interactions
 		<div
@@ -122,9 +173,9 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 		>
 			<div className="task-card-header">
 				<HeadingTag>{task.title}</HeadingTag>
-				<div className="task-card-info">
+				<div className="task-card-header-info">
 					{/* Tags for compact mode */}
-					{isCompact && renderTags()}
+					{tagsPosition === 'top' && renderTags()}
 					{/* Actions */}
 					{hasActions && (
 						<TaskActionMenu
@@ -140,39 +191,15 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 					)}
 				</div>
 			</div>
-			{/* Description for non-compact mode */}
-			{!isCompact && showDescription && task.description && (
-				<div className="task-card-description">
-					<p>
-						{truncateText(task.description, descriptionMaxLength)}
-					</p>
+			{showDescription && renderDescription()}
+
+			<div className="task-card-footer">
+				<div className="task-card-info">
+					{tagsPosition === 'bottom' && renderTags()}
+					{showOrder && renderAssociatedOrder()}
 				</div>
-			)}
-			{/* Footer for compact mode, shows description and due date */}
-			{isCompact && showDescription && task.description && (
-				<div className="task-card-footer">
-					<div className="task-card-description">
-						<p>
-							{truncateText(
-								task.description,
-								descriptionMaxLength
-							)}
-						</p>
-					</div>
-					{dueDate && (
-						<span className="task-card-due-date">{dueDate}</span>
-					)}
-				</div>
-			)}
-			{/* Footer for non-compact mode, shows tags and due date */}
-			{!isCompact && (
-				<div className="task-card-footer">
-					{renderTags()}
-					{dueDate && (
-						<span className="task-card-due-date">{dueDate}</span>
-					)}
-				</div>
-			)}
+				{renderDueDate()}
+			</div>
 		</div>
 	);
 };

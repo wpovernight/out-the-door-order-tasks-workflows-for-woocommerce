@@ -38,10 +38,7 @@ type ColumnState =
 
 const IDLE: ColumnState = { type: 'idle' };
 
-export const Column: React.FC<ColumnProps> = ({
-	column,
-	tasks,
-}) => {
+export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 	const scrollableRef = useRef<HTMLDivElement | null>(null);
 	const headerRef = useRef<HTMLDivElement | null>(null);
 	const containerRef = useRef<HTMLDivElement | null>(null);
@@ -268,10 +265,7 @@ export const Column: React.FC<ColumnProps> = ({
 						}`}
 					>
 						{tasks.map((task) => (
-							<Card
-								key={task.id}
-								task={task}
-							/>
+							<Card key={task.id} task={task} />
 						))}
 					</div>
 				</div>

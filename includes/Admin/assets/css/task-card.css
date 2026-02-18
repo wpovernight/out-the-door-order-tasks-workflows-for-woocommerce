@@ -7,7 +7,6 @@
 .task-card {
     display: flex;
     flex-direction: column;
-    gap: 0.8em;
     font-size: 0.9em;
     background: var(--wpo-aom-card-bg);
     padding: .875em;
@@ -33,6 +32,7 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
+    margin-top: 0.5em;
 }
 
 .task-card-options .wpo-action-menu {
@@ -158,11 +158,11 @@
 
 .task-card span.task-card-due-date {
     color: var(--wpo-aom-text-gray);
-    line-height: 1;
     display: flex;
     gap: 0.3em;
     min-width: 8em;
     justify-content: flex-end;
+    align-items: center;
 }
 
 .task-card span.task-card-due-date::before {
@@ -179,7 +179,36 @@
     -webkit-mask-repeat: no-repeat;
 }
 
+.task-card .task-card-order a {
+    display: flex;
+    justify-content: center;
+    align-items: anchor-center;
+    gap: 0.3em;
+    font-size: 0.9em;
+    text-decoration: none;
+}
+
+.task-card .task-card-order a::before {
+    content: '';
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    background-color: currentColor;
+    mask-image: var(--wpo-aom-icon-person);
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    -webkit-mask-image: var(--wpo-aom-icon-person);
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+}
+
 .task-card .task-card-info {
     display: flex;
-    gap: 3em;
+    flex-direction: column;
+    gap: 0.5em;
+}
+
+.task-card .task-card-header-info {
+    display: flex;
+    gap: 0.3em;
 }

@@ -286,6 +286,7 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 				className={state.type !== 'idle' ? state.type : ''}
 				innerRef={innerRef}
 				headingLevel="h3"
+				showDescription={true}
 				excludeTags={['status']}
 			/>
 		</div>

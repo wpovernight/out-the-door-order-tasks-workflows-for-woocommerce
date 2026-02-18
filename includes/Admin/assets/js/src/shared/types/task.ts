@@ -12,7 +12,8 @@ export type FieldResolved =
 	| FieldPrimitive
 	| FieldPrimitive[]
 	| FieldOption
-	| FieldOption[];
+	| FieldOption[]
+	| Record<string, unknown>;
 
 export type FieldValue = {
 	raw: FieldPrimitive | FieldPrimitive[];

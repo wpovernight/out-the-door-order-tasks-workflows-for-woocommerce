@@ -23,8 +23,8 @@
 }
 
 .kanban-board .kanban-column {
-    flex: 0 0 23em;
-    width: 23em;
+    flex: 1 0 25em;
+    width: 25em;
     display: flex;
     flex-direction: column;
     transition: opacity 0.2s, box-shadow 0.2s;

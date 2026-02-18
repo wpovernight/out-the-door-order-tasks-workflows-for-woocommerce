@@ -67,7 +67,8 @@ const FinishedTasks: React.FC = () => {
 							headingLevel="h5"
 							showDescription={true}
 							descriptionMaxLength={150}
-							isCompact={true}
+							tagsPosition="top"
+							showOrder={false}
 							excludeTags={['status']}
 						/>
 					))}
