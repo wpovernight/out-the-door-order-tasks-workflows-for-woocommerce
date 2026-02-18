@@ -205,14 +205,14 @@ final class MetaBox {
 	 * Add fulfillment column values in order items table.
 	 *
 	 * @param \WC_Product|bool $product
-	 * @param \WC_Order_Item $item
+	 * @param \OrderRefund|\WC_Order_Item $item
 	 * @param int $item_id
 	 *
 	 * @return void
 	 */
-	public function order_items_values( $product, \WC_Order_Item $item, int $item_id ) {
+	public function order_items_values( $product, $item, int $item_id ) {
 		// Display only for product line items.
-		if ( ! $product instanceof \WC_Product ) {
+		if ( ! $product instanceof \WC_Product || ! $item instanceof \WC_Order_Item ) {
 			return;
 		}
 
