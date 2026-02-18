@@ -37,9 +37,7 @@ interface CardProps {
 	task: Task;
 }
 
-export const Card: React.FC<CardProps> = ({
-	task,
-}) => {
+export const Card: React.FC<CardProps> = ({ task }) => {
 	const outerRef = useRef<HTMLDivElement | null>(null);
 	const innerRef = useRef<HTMLDivElement | null>(null);
 	const [state, setState] = useState<CardState>(IDLE);
@@ -198,9 +196,8 @@ export const Card: React.FC<CardProps> = ({
 			return;
 		}
 
-		// Stop event from bubbling to Board which would clear selection
 		e?.stopPropagation();
-		selectTask(task);
+		handleEditTask();
 	};
 
 	const handleDeleteClick = () => {
