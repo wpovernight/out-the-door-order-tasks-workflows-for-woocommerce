@@ -740,6 +740,22 @@ final class TaskManagerService {
 			$target_status_id
 		);
 
+		// Update "completed_date" automatically, if moving to "completed" status and not already set.
+		if (
+			$target_status_option_field->slug === 'completed' &&
+			! isset( $extra_field_values[ DefaultTaskFields::COMPLETED_DATE ] )
+		) {
+			$extra_field_values[ DefaultTaskFields::COMPLETED_DATE ] = gmdate( 'Y-m-d H:i:s' );
+		}
+
+		// Clear "completed_date" if moving out of "completed" status and not already set to null.
+		if (
+			$target_status_option_field->slug !== 'completed' &&
+			! isset( $extra_field_values[ DefaultTaskFields::COMPLETED_DATE ] )
+		) {
+			$extra_field_values[ DefaultTaskFields::COMPLETED_DATE ] = null;
+		}
+
 		$update_data = array(
 			DefaultTaskFields::STATUS   => $target_status_id,
 			DefaultTaskFields::POSITION => $new_position,
@@ -838,13 +854,7 @@ final class TaskManagerService {
 			throw new RuntimeException( 'Finished status option not found. Please ensure a "completed" status option exists.' );
 		}
 
-		return (bool) $this->move_task(
-			$task_id,
-			$finished_status_option->id,
-			null,
-			'last',
-			array( DefaultTaskFields::COMPLETED_DATE => gmdate( 'Y-m-d H:i:s' ) ),
-		);
+		return (bool) $this->move_task( $task_id, $finished_status_option->id, null, 'last' );
 	}
 
 	/**
