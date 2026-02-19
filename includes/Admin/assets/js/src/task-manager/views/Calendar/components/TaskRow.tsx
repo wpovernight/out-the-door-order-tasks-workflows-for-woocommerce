@@ -1,6 +1,10 @@
 import React from 'react';
 import { Task, isFieldOption } from '@shared/types/task';
-import { getTaskDueDate, getFieldValue } from '@shared/utils/fieldUtils';
+import {
+	getTaskDueDate,
+	getFieldValue,
+	getCompletedDate,
+} from '@shared/utils/fieldUtils';
 import { formatDate } from '../utils';
 import { getColorStyle } from '@shared/utils/colorUtils';
 import { __ } from '@wordpress/i18n';
@@ -16,6 +20,7 @@ interface TaskRowProps {
 
 const TaskRow: React.FC<TaskRowProps> = ({ task, onTaskClick }) => {
 	const dueDate = getTaskDueDate(task);
+	const completedDate = getCompletedDate(task);
 	const { deleteTask, setTasks } = useTasks();
 	const { openEditTaskModal } = useTaskEdit();
 
@@ -62,10 +67,37 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onTaskClick }) => {
 		}
 	};
 
+	const renderAssociatedOrder = () => {
+		const orderValue = getFieldValue(task, 'order');
+
+		if (
+			!orderValue ||
+			typeof orderValue !== 'object' ||
+			Array.isArray(orderValue)
+		) {
+			return null;
+		}
+
+		const order = orderValue as Record<string, unknown>;
+
+		return (
+			<a
+				href={order.url as string}
+				target="_blank"
+				rel="noopener noreferrer"
+				onClick={(e) => e.stopPropagation()}
+			>
+				{order.full_name as string} • #{order.id as number}
+			</a>
+		);
+	};
+
 	return (
 		<tr onClick={() => onTaskClick?.(task)}>
-			<td className="task-title">
-				<div>{truncateText(task.title, 40)}</div>
+			<td className="task-info">
+				<h4>{truncateText(task.title, 60)}</h4>
+				<p>{truncateText(task.description, 90)}</p>
+				{renderAssociatedOrder()}
 			</td>
 
 			<td className="task-priority">
@@ -86,14 +118,18 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onTaskClick }) => {
 				</span>
 			</td>
 
-			<td className="task-due_date">
+			<td className="task-due-date">
 				<time dateTime={dueDate ? dueDate.toISOString() : ''}>
 					{dueDate ? formatDate(dueDate) : '-'}
 				</time>
 			</td>
 
-			<td className="task-description" title={task.description || ''}>
-				{truncateText(task.description || '')}
+			<td className="task-completed-date">
+				<time
+					dateTime={completedDate ? completedDate.toISOString() : ''}
+				>
+					{completedDate ? formatDate(completedDate) : '-'}
+				</time>
 			</td>
 
 			<td className="task-actions" onClick={(e) => e.stopPropagation()}>

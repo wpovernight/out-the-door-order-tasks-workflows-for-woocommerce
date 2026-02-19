@@ -283,7 +283,10 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 						return task;
 					}
 
-					return updateTaskFields(task, {
+					const fieldUpdates: Record<
+						string,
+						{ raw: any; resolved: any }
+					> = {
 						status: {
 							raw: targetStatusOption.id,
 							resolved: targetStatusOption,
@@ -292,7 +295,24 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 							raw: optimisticPosition,
 							resolved: null,
 						},
-					});
+					};
+
+					if (targetStatusOption.slug === TASK_FINISH_STATUS_SLUG) {
+						fieldUpdates.completed_date = {
+							raw: new Date()
+								.toISOString()
+								.replace('T', ' ')
+								.slice(0, 19),
+							resolved: null,
+						};
+					} else if (task.status === TASK_FINISH_STATUS_SLUG) {
+						fieldUpdates.completed_date = {
+							raw: null,
+							resolved: null,
+						};
+					}
+
+					return updateTaskFields(task, fieldUpdates);
 				});
 			});
 
@@ -388,6 +408,13 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 							raw: Number.MAX_SAFE_INTEGER,
 							resolved: null,
 						},
+						completed_date: {
+							raw: new Date()
+								.toISOString()
+								.replace('T', ' ')
+								.slice(0, 19),
+							resolved: null,
+						},
 					});
 				});
 			});
@@ -448,6 +475,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 							raw: Number.MAX_SAFE_INTEGER,
 							resolved: null,
 						},
+						completed_date: { raw: null, resolved: null },
 					});
 				});
 			});

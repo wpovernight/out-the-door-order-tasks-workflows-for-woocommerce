@@ -93,7 +93,7 @@ const ActiveTasks: React.FC = () => {
 							headingLevel="h5"
 							showDescription={true}
 							descriptionMaxLength={150}
-                            showOrder={false}
+							showOrder={false}
 						/>
 					</li>
 				))}

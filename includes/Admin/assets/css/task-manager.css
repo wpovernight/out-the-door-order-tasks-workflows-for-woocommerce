@@ -408,8 +408,7 @@
     background-color: var(--wpo-aom-purple-dark);
 }
 
-
-.calendar-task-list-container > h2 {
+.calendar-task-list-container > .calendar-task-list-title {
     margin-left: 1em;
 }
 
@@ -439,10 +438,11 @@
     font-weight: 500;
     white-space: nowrap;
     user-select: none;
+    min-width: 6em;
 }
 
-.calendar-task-table-wrapper > table > thead th.calendar-task-title {
-    width: 12em;
+.calendar-task-table-wrapper > table > thead th.calendar-task-info {
+    /*width: 38em;*/
 }
 
 .calendar-task-th-sortable {
@@ -479,7 +479,7 @@
     background-color: var(--wpo-aom-bg-gray);
 }
 
-.calendar-task-table-wrapper > table > tbody > tr:nth-child(even) {
+.calendar-task-table-wrapper > table > tbody > tr:nth-child(odd) {
     background-color: var(--wpo-aom-bg-gray-alt);
 }
 
@@ -495,6 +495,45 @@
 .calendar-task-table-wrapper > table > tbody > tr > td:first-child,
 .calendar-task-table-wrapper > table > thead > tr > th:first-child {
     padding-left: 1.5em;
+}
+
+.calendar-task-table-wrapper > table > tbody > tr > td.task-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+    align-items: flex-start;
+}
+
+.calendar-task-table-wrapper > table > tbody > tr > td.task-info > h4,
+.calendar-task-table-wrapper > table > tbody > tr > td.task-info > p {
+    margin: 0;
+}
+
+.calendar-task-table-wrapper > table > tbody > tr > td.task-info > a {
+    font-size: 0.8em;
+    display: flex;
+    align-items: anchor-center;
+    gap: 0.3em;
+    text-decoration: none;
+}
+
+.calendar-task-table-wrapper > table > tbody > tr > td.task-info > a::before {
+    content: '';
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    background-color: currentColor;
+    mask-image: var(--wpo-aom-icon-person);
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    -webkit-mask-image: var(--wpo-aom-icon-person);
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+}
+
+.calendar-task-table-wrapper > table > tbody > tr > td.task-info > p {
+    color: var(--wpo-aom-text-gray);
+    font-size: 0.9em;
 }
 
 .calendar-task-table-wrapper > table > tbody > td > span {

@@ -50,6 +50,16 @@ export const getTaskDueDate = (task: Task): Date | null => {
 	return isNaN(date.getTime()) ? null : date;
 };
 
+export const getCompletedDate = (task: Task): Date | null => {
+	const completedDateValue = getFieldRawValue(task, 'completed_date');
+	if (!completedDateValue || typeof completedDateValue !== 'string') {
+		return null;
+	}
+
+	const date = new Date(completedDateValue);
+	return isNaN(date.getTime()) ? null : date;
+};
+
 /**
  * Updates a task's field values and corresponding top-level properties. (only in local)
  *

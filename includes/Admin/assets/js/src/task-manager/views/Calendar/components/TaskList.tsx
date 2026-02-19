@@ -2,10 +2,14 @@ import React, { useState, useMemo } from 'react';
 import { __ } from '@wordpress/i18n';
 import { Task, isFieldOption } from '@shared/types/task';
 import TaskRow from './TaskRow';
-import { getTaskDueDate, getFieldValue } from '@shared/utils/fieldUtils';
+import {
+	getTaskDueDate,
+	getFieldValue,
+	getCompletedDate,
+} from '@shared/utils/fieldUtils';
 import { formatDate, DateRange, DateRangePreset } from '../utils';
 
-type SortColumn = 'title' | 'priority' | 'status' | 'dueDate';
+type SortColumn = 'title' | 'priority' | 'status' | 'dueDate' | 'completedDate';
 type SortDirection = 'asc' | 'desc';
 
 interface TaskListProps {
@@ -37,8 +41,10 @@ const TaskList: React.FC<TaskListProps> = ({
 				today: __('Today', 'wpo-aom'),
 				yesterday: __('Yesterday', 'wpo-aom'),
 				'current-week': __('Current Week', 'wpo-aom'),
+				'next-week': __('Next Week', 'wpo-aom'),
 				'last-week': __('Last Week', 'wpo-aom'),
 				'current-month': __('Current Month', 'wpo-aom'),
+				'next-month': __('Next Month', 'wpo-aom'),
 				'last-month': __('Last Month', 'wpo-aom'),
 			};
 			const presetLabel =
@@ -75,7 +81,7 @@ const TaskList: React.FC<TaskListProps> = ({
 
 	// Sort tasks based on current sort column and direction
 	const sortedTasks = useMemo(() => {
-		const sorted = [...tasks].sort((a, b) => {
+		return [...tasks].sort((a, b) => {
 			let aValue: any;
 			let bValue: any;
 
@@ -119,6 +125,24 @@ const TaskList: React.FC<TaskListProps> = ({
 					break;
 				}
 
+				case 'completedDate': {
+					const aCompletedDateValue = getCompletedDate(a);
+					const bCompletedDateValue = getCompletedDate(b);
+					// Handle null dates (put them at the end)
+					if (!aCompletedDateValue && !bCompletedDateValue) {
+						return 0;
+					}
+					if (!aCompletedDateValue) {
+						return 1;
+					}
+					if (!bCompletedDateValue) {
+						return -1;
+					}
+					aValue = aCompletedDateValue.getTime();
+					bValue = bCompletedDateValue.getTime();
+					break;
+				}
+
 				default:
 					return 0;
 			}
@@ -132,8 +156,6 @@ const TaskList: React.FC<TaskListProps> = ({
 			}
 			return 0;
 		});
-
-		return sorted;
 	}, [tasks, sortColumn, sortDirection]);
 
 	const renderSortIcon = (column: SortColumn) => {
@@ -149,14 +171,14 @@ const TaskList: React.FC<TaskListProps> = ({
 
 	return (
 		<div className="calendar-task-list-container">
-			<h2>{getTitle()}</h2>
+			<h3 className="calendar-task-list-title">{getTitle()}</h3>
 
 			<div className="calendar-task-table-wrapper">
 				<table>
 					<thead>
 						<tr>
 							<th
-								className="calendar-task-title calendar-task-th-sortable"
+								className="calendar-task-info calendar-task-th-sortable"
 								onClick={() => handleSort('title')}
 							>
 								{__('Task', 'wpo-aom')}{' '}
@@ -183,7 +205,13 @@ const TaskList: React.FC<TaskListProps> = ({
 								{__('Due date', 'wpo-aom')}{' '}
 								{renderSortIcon('dueDate')}
 							</th>
-							<th>{__('Description', 'wpo-aom')}</th>
+							<th
+								className="calendar-task-th-sortable"
+								onClick={() => handleSort('completedDate')}
+							>
+								{__('Completed at', 'wpo-aom')}
+								{renderSortIcon('completedDate')}
+							</th>
 							<th>{__('Actions', 'wpo-aom')}</th>
 						</tr>
 					</thead>
