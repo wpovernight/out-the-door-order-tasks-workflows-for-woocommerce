@@ -99,7 +99,7 @@ final class EmailService {
 	 *
 	 * @return string Formatted value.
 	 */
-	public function format_by_field_type( string $field_slug, $field_value, array $field_object ): string {
+	public function format_by_field_type( string $field_slug, $field_value, array $field_object ): ?string {
 		/**
 		 * Define field types for formatting.
 		 *
@@ -109,7 +109,7 @@ final class EmailService {
 			'wpo_aom_email_task_updated_field_types',
 			array(
 				'select' => array( 'status', 'priority' ),
-				'date'   => array( 'due_date' ),
+				'date'   => array( 'due_date', 'completed_date' ),
 				'user'   => array( 'creator' ),
 				'number' => array( 'order' ),
 			)
@@ -135,7 +135,7 @@ final class EmailService {
 			return $this->format_number_field( $field_value );
 		}
 
-		return is_array( $field_value ) ? $field_value[0] : $field_value;
+		return is_array( $field_value ) && ! empty( $field_value ) ? $field_value[0] : $field_value;
 	}
 
 	/**
