@@ -2,7 +2,8 @@ import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { Task } from '@shared/types/task';
 import TaskRow from './TaskRow';
-import { SortColumn, useTaskSort } from '@shared/hooks/useTaskSort';
+import { useTaskSort } from '@shared/hooks/useTaskSort';
+import SortIcon from '@shared/components/SortIcon';
 
 interface TaskDayGroupProps {
 	date: Date | null;
@@ -26,17 +27,6 @@ const TaskDayGroup: React.FC<TaskDayGroupProps> = ({
 		? date.toLocaleDateString('en-US', { weekday: 'long' })
 		: null;
 
-	const renderSortIcon = (column: SortColumn) => {
-		if (sortColumn !== column) {
-			return <span className="calendar-sort-icon">↕</span>;
-		}
-		return (
-			<span className="calendar-sort-icon calendar-sort-icon-active">
-				{sortDirection === 'asc' ? '↑' : '↓'}
-			</span>
-		);
-	};
-
 	return (
 		<div className="calendar-task-day-group">
 			<div className="calendar-task-day-header">
@@ -58,21 +48,33 @@ const TaskDayGroup: React.FC<TaskDayGroupProps> = ({
 								onClick={() => handleSort('title')}
 							>
 								{__('Task', 'wpo-aom')}{' '}
-								{renderSortIcon('title')}
+								<SortIcon
+									column="title"
+									sortColumn={sortColumn}
+									sortDirection={sortDirection}
+								/>
 							</th>
 							<th
 								className="calendar-task-th-sortable"
 								onClick={() => handleSort('priority')}
 							>
 								{__('Priority', 'wpo-aom')}{' '}
-								{renderSortIcon('priority')}
+								<SortIcon
+									column="priority"
+									sortColumn={sortColumn}
+									sortDirection={sortDirection}
+								/>
 							</th>
 							<th
 								className="calendar-task-th-sortable"
 								onClick={() => handleSort('status')}
 							>
 								{__('Status', 'wpo-aom')}{' '}
-								{renderSortIcon('status')}
+								<SortIcon
+									column="status"
+									sortColumn={sortColumn}
+									sortDirection={sortDirection}
+								/>
 							</th>
 							<th>{__('Due date', 'wpo-aom')}</th>
 							<th
@@ -80,7 +82,11 @@ const TaskDayGroup: React.FC<TaskDayGroupProps> = ({
 								onClick={() => handleSort('completedDate')}
 							>
 								{__('Completed at', 'wpo-aom')}
-								{renderSortIcon('completedDate')}
+								<SortIcon
+									column="completedDate"
+									sortColumn={sortColumn}
+									sortDirection={sortDirection}
+								/>
 							</th>
 							<th>{__('Actions', 'wpo-aom')}</th>
 						</tr>

@@ -454,7 +454,7 @@
     background-color: var(--wpo-aom-bg-gray-medium);
 }
 
-.calendar-sort-icon {
+.sort-icon {
     margin-left: 0.25em;
     color: var(--wpo-aom-gray-icon);
     font-size: 0.75em;
@@ -462,7 +462,7 @@
     transition: color var(--wpo-aom-transition-fast);
 }
 
-.calendar-sort-icon-active {
+.sort-icon-active {
     color: var(--wpo-aom-purple-light);
     font-weight: bold;
 }
