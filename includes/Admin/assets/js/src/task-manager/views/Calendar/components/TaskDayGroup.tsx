@@ -135,7 +135,7 @@ const TaskDayGroup: React.FC<TaskDayGroupProps> = ({
 			<div className="calendar-task-day-header">
 				<h4 className="calendar-task-day-label">{dayLabel}</h4>
 				{weekdayLabel && (
-                    <span className="calendar-task-day-weekday">
+					<span className="calendar-task-day-weekday">
 						{weekdayLabel}
 					</span>
 				)}
@@ -167,9 +167,7 @@ const TaskDayGroup: React.FC<TaskDayGroupProps> = ({
 								{__('Status', 'wpo-aom')}{' '}
 								{renderSortIcon('status')}
 							</th>
-							<th>
-								{__('Due date', 'wpo-aom')}
-							</th>
+							<th>{__('Due date', 'wpo-aom')}</th>
 							<th
 								className="calendar-task-th-sortable"
 								onClick={() => handleSort('completedDate')}
