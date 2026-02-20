@@ -1,16 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { __ } from '@wordpress/i18n';
-import { Task, isFieldOption } from '@shared/types/task';
-import TaskRow from './TaskRow';
-import {
-	getTaskDueDate,
-	getFieldValue,
-	getCompletedDate,
-} from '@shared/utils/fieldUtils';
+import { Task } from '@shared/types/task';
+import TaskDayGroup from './TaskDayGroup';
+import { getTaskDueDate } from '@shared/utils/fieldUtils';
 import { formatDate, DateRange, DateRangePreset } from '../utils';
-
-type SortColumn = 'title' | 'priority' | 'status' | 'dueDate' | 'completedDate';
-type SortDirection = 'asc' | 'desc';
 
 interface TaskListProps {
 	tasks: Task[];
@@ -19,15 +12,22 @@ interface TaskListProps {
 	onTaskClick?: (task: Task) => void;
 }
 
+const getDateKey = (date: Date | null): string => {
+	if (!date) {
+		return 'no-date';
+	}
+	const y = date.getFullYear();
+	const m = String(date.getMonth() + 1).padStart(2, '0');
+	const d = String(date.getDate()).padStart(2, '0');
+	return `${y}-${m}-${d}`;
+};
+
 const TaskList: React.FC<TaskListProps> = ({
 	tasks,
 	dateRange,
 	dateRangePreset,
 	onTaskClick,
 }) => {
-	const [sortColumn, setSortColumn] = useState<SortColumn>('dueDate');
-	const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
-
 	// Generate dynamic title based on preset or date range
 	const getTitle = (): string => {
 		const taskCount = tasks.length;
@@ -68,178 +68,54 @@ const TaskList: React.FC<TaskListProps> = ({
 		return `${__('Tasks', 'wpo-aom')} - ${taskCountText}`;
 	};
 
-	const handleSort = (column: SortColumn) => {
-		if (sortColumn === column) {
-			// Toggle direction if same column
-			setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-		} else {
-			// New column, default to ascending
-			setSortColumn(column);
-			setSortDirection('asc');
+	// Group tasks by due date day; groups are ordered chronologically, no-date last.
+	const groupedTasks = useMemo(() => {
+		const groups = new Map<string, { date: Date | null; tasks: Task[] }>();
+
+		for (const task of tasks) {
+			const dueDate = getTaskDueDate(task);
+			const key = getDateKey(dueDate);
+
+			if (!groups.has(key)) {
+				groups.set(key, { date: dueDate, tasks: [] });
+			}
+			groups.get(key)!.tasks.push(task);
 		}
-	};
 
-	// Sort tasks based on current sort column and direction
-	const sortedTasks = useMemo(() => {
-		return [...tasks].sort((a, b) => {
-			let aValue: any;
-			let bValue: any;
-
-			switch (sortColumn) {
-				case 'title':
-					aValue = a.title.toLowerCase();
-					bValue = b.title.toLowerCase();
-					break;
-
-				case 'priority': {
-					const aPriority = getFieldValue(a, 'priority');
-					const bPriority = getFieldValue(b, 'priority');
-					aValue = isFieldOption(aPriority) ? aPriority.position : 1;
-					bValue = isFieldOption(bPriority) ? bPriority.position : 1;
-					break;
+		return Array.from(groups.entries())
+			.sort(([keyA], [keyB]) => {
+				if (keyA === 'no-date') {
+					return 1;
 				}
-
-				case 'status': {
-					const aStatus = getFieldValue(a, 'status');
-					const bStatus = getFieldValue(b, 'status');
-					aValue = isFieldOption(aStatus) ? aStatus.position : 1;
-					bValue = isFieldOption(bStatus) ? bStatus.position : 1;
-					break;
+				if (keyB === 'no-date') {
+					return -1;
 				}
-
-				case 'dueDate': {
-					const aDueDate = getTaskDueDate(a);
-					const bDueDate = getTaskDueDate(b);
-					// Handle null dates (put them at the end)
-					if (!aDueDate && !bDueDate) {
-						return 0;
-					}
-					if (!aDueDate) {
-						return 1;
-					}
-					if (!bDueDate) {
-						return -1;
-					}
-					aValue = aDueDate.getTime();
-					bValue = bDueDate.getTime();
-					break;
-				}
-
-				case 'completedDate': {
-					const aCompletedDateValue = getCompletedDate(a);
-					const bCompletedDateValue = getCompletedDate(b);
-					// Handle null dates (put them at the end)
-					if (!aCompletedDateValue && !bCompletedDateValue) {
-						return 0;
-					}
-					if (!aCompletedDateValue) {
-						return 1;
-					}
-					if (!bCompletedDateValue) {
-						return -1;
-					}
-					aValue = aCompletedDateValue.getTime();
-					bValue = bCompletedDateValue.getTime();
-					break;
-				}
-
-				default:
-					return 0;
-			}
-
-			// Compare values
-			if (aValue < bValue) {
-				return sortDirection === 'asc' ? -1 : 1;
-			}
-			if (aValue > bValue) {
-				return sortDirection === 'asc' ? 1 : -1;
-			}
-			return 0;
-		});
-	}, [tasks, sortColumn, sortDirection]);
-
-	const renderSortIcon = (column: SortColumn) => {
-		if (sortColumn !== column) {
-			return <span className="calendar-sort-icon">↕</span>;
-		}
-		return (
-			<span className="calendar-sort-icon calendar-sort-icon-active">
-				{sortDirection === 'asc' ? '↑' : '↓'}
-			</span>
-		);
-	};
+				return keyA.localeCompare(keyB);
+			})
+			.map(([, group]) => group);
+	}, [tasks]);
 
 	return (
 		<div className="calendar-task-list-container">
 			<h3 className="calendar-task-list-title">{getTitle()}</h3>
 
-			<div className="calendar-task-table-wrapper">
-				<table>
-					<thead>
-						<tr>
-							<th
-								className="calendar-task-info calendar-task-th-sortable"
-								onClick={() => handleSort('title')}
-							>
-								{__('Task', 'wpo-aom')}{' '}
-								{renderSortIcon('title')}
-							</th>
-							<th
-								className="calendar-task-th-sortable"
-								onClick={() => handleSort('priority')}
-							>
-								{__('Priority', 'wpo-aom')}{' '}
-								{renderSortIcon('priority')}
-							</th>
-							<th
-								className="calendar-task-th-sortable"
-								onClick={() => handleSort('status')}
-							>
-								{__('Status', 'wpo-aom')}{' '}
-								{renderSortIcon('status')}
-							</th>
-							<th
-								className="calendar-task-th-sortable"
-								onClick={() => handleSort('dueDate')}
-							>
-								{__('Due date', 'wpo-aom')}{' '}
-								{renderSortIcon('dueDate')}
-							</th>
-							<th
-								className="calendar-task-th-sortable"
-								onClick={() => handleSort('completedDate')}
-							>
-								{__('Completed at', 'wpo-aom')}
-								{renderSortIcon('completedDate')}
-							</th>
-							<th>{__('Actions', 'wpo-aom')}</th>
-						</tr>
-					</thead>
-					<tbody>
-						{sortedTasks.length === 0 ? (
-							<tr>
-								<td
-									colSpan={6}
-									className="calendar-task-empty-state"
-								>
-									{__(
-										'No tasks found for the selected date range',
-										'wpo-aom'
-									)}
-								</td>
-							</tr>
-						) : (
-							sortedTasks.map((task) => (
-								<TaskRow
-									key={task.id}
-									task={task}
-									onTaskClick={onTaskClick}
-								/>
-							))
-						)}
-					</tbody>
-				</table>
-			</div>
+			{groupedTasks.length === 0 ? (
+				<div className="calendar-task-empty-state">
+					{__(
+						'No tasks found for the selected date range',
+						'wpo-aom'
+					)}
+				</div>
+			) : (
+				groupedTasks.map((group) => (
+					<TaskDayGroup
+						key={group.date ? getDateKey(group.date) : 'no-date'}
+						date={group.date}
+						tasks={group.tasks}
+						onTaskClick={onTaskClick}
+					/>
+				))
+			)}
 		</div>
 	);
 };

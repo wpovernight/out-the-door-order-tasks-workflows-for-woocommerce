@@ -427,9 +427,8 @@
     border-right: 0.0625em solid var(--wpo-aom-border-light);
 }
 
-.calendar-task-table-wrapper > table > thead {
-    background-color: var(--wpo-aom-bg-gray);
-    border-bottom: 0.0625em solid var(--wpo-aom-border-light);
+.calendar-task-table-wrapper > table > tbody {
+    border: 0.0625em solid var(--wpo-aom-border-light);
 }
 
 .calendar-task-table-wrapper > table > thead th {
@@ -438,11 +437,11 @@
     font-weight: 500;
     white-space: nowrap;
     user-select: none;
-    min-width: 6em;
+    width: 7em;
 }
 
 .calendar-task-table-wrapper > table > thead th.calendar-task-info {
-    /*width: 38em;*/
+    width: auto;
 }
 
 .calendar-task-th-sortable {
@@ -550,6 +549,55 @@
     text-align: center;
     color: var(--wpo-aom-text-gray);
     font-size: 0.875em;
+}
+
+.calendar-task-day-group {
+    border: 1px solid var(--wpo-aom-border-light);
+    border-radius: var(--wpo-aom-radius-l);
+    margin-bottom: 1.5em;
+    overflow: hidden;
+    margin-left: 1em;
+}
+
+.calendar-task-day-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+    padding: 0.9em 1.5em;
+    border-bottom: 1px solid var(--wpo-aom-border-light);
+}
+
+.calendar-task-table-wrapper {
+    margin: 1em;
+}
+
+.calendar-task-day-label {
+    font-size: 1.1em;
+    color: var(--wpo-aom-text-primary);
+    margin: 0;
+}
+
+.calendar-task-day-label:after {
+    content: '|';
+    padding-left: 0.6em;
+}
+
+.calendar-task-day-weekday {
+    font-size: 0.9em;
+    color: var(--wpo-aom-text-gray);
+}
+
+.calendar-task-day-count {
+    font-size: 0.9em;
+    padding: 0 0.4em;
+    border-radius: 0.5em;
+    border: 1px solid #CED1D3;
+}
+
+/* Remove redundant left/right borders from table inside the card */
+.calendar-task-day-group .calendar-task-table-wrapper > table {
+    border-left: none;
+    border-right: none;
 }
 
 .kanban-view .wpo-aom-loading-skeleton-container,
