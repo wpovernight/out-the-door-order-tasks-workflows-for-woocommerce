@@ -1,9 +1,9 @@
 import React from 'react';
 import { Task, isFieldOption } from '@shared/types/task';
 import {
-	getTaskDueDate,
 	getFieldValue,
-	getCompletedDate,
+	getTaskDateField,
+	getFieldObjectValue,
 } from '@shared/utils/fieldUtils';
 import { formatDate } from '../utils';
 import { getColorStyle } from '@shared/utils/colorUtils';
@@ -19,8 +19,8 @@ interface TaskRowProps {
 }
 
 const TaskRow: React.FC<TaskRowProps> = ({ task, onTaskClick }) => {
-	const dueDate = getTaskDueDate(task);
-	const completedDate = getCompletedDate(task);
+	const dueDate = getTaskDateField(task, 'due_date');
+	const completedDate = getTaskDateField(task, 'completed_date');
 	const { deleteTask, setTasks } = useTasks();
 	const { openEditTaskModal } = useTaskEdit();
 
@@ -68,17 +68,11 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onTaskClick }) => {
 	};
 
 	const renderAssociatedOrder = () => {
-		const orderValue = getFieldValue(task, 'order');
+		const order = getFieldObjectValue(task, 'order');
 
-		if (
-			!orderValue ||
-			typeof orderValue !== 'object' ||
-			Array.isArray(orderValue)
-		) {
+		if (!order) {
 			return null;
 		}
-
-		const order = orderValue as Record<string, unknown>;
 
 		return (
 			<a

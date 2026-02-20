@@ -1,7 +1,7 @@
 import React, { useContext, useState, useMemo } from 'react';
 import { Task, TASK_ARCHIVE_STATUS_SLUG } from '@shared/types/task';
 import { useTasks } from '@shared/context/TaskContext';
-import { getTaskDueDate } from '@shared/utils/fieldUtils';
+import { getTaskDateField } from '@shared/utils/fieldUtils';
 import { getDateRangeFromPreset, DateRange, DateRangePreset } from '../utils';
 
 export type { DateRangePreset, DateRange };
@@ -102,7 +102,7 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				return false;
 			}
 
-			const taskDueDate = getTaskDueDate(task);
+			const taskDueDate = getTaskDateField(task, 'due_date');
 			if (!taskDueDate) {
 				return false;
 			}

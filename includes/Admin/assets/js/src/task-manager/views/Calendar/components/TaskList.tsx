@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { __ } from '@wordpress/i18n';
 import { Task } from '@shared/types/task';
 import TaskDayGroup from './TaskDayGroup';
-import { getTaskDueDate } from '@shared/utils/fieldUtils';
+import { getTaskDateField } from '@shared/utils/fieldUtils';
 import { formatDate, DateRange, DateRangePreset } from '../utils';
 
 interface TaskListProps {
@@ -73,7 +73,7 @@ const TaskList: React.FC<TaskListProps> = ({
 		const groups = new Map<string, { date: Date | null; tasks: Task[] }>();
 
 		for (const task of tasks) {
-			const dueDate = getTaskDueDate(task);
+			const dueDate = getTaskDateField(task, 'due_date');
 			const key = getDateKey(dueDate);
 
 			if (!groups.has(key)) {

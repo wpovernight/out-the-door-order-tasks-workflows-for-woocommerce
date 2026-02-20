@@ -40,23 +40,33 @@ export const getFieldRawValue = (
 	return getFieldRawValues(task, slug)?.[0] ?? null;
 };
 
-export const getTaskDueDate = (task: Task): Date | null => {
-	const dueDateValue = getFieldRawValue(task, 'due_date');
-	if (!dueDateValue || typeof dueDateValue !== 'string') {
+export const getFieldObjectValue = (
+	task: Task,
+	slug: string
+): Record<string, unknown> | null => {
+	const fieldValue = getFieldValue(task, slug);
+
+	if (
+		!fieldValue ||
+		typeof fieldValue !== 'object' ||
+		Array.isArray(fieldValue)
+	) {
 		return null;
 	}
 
-	const date = new Date(dueDateValue);
-	return isNaN(date.getTime()) ? null : date;
+	return fieldValue as Record<string, unknown>;
 };
 
-export const getCompletedDate = (task: Task): Date | null => {
-	const completedDateValue = getFieldRawValue(task, 'completed_date');
-	if (!completedDateValue || typeof completedDateValue !== 'string') {
+export const getTaskDateField = (
+	task: Task,
+	fieldSlug: string
+): Date | null => {
+	const dateValue = getFieldRawValue(task, fieldSlug);
+	if (!dateValue || typeof dateValue !== 'string') {
 		return null;
 	}
 
-	const date = new Date(completedDateValue);
+	const date = new Date(dateValue);
 	return isNaN(date.getTime()) ? null : date;
 };
 

@@ -3,7 +3,7 @@ import { isFieldOption, Task } from '@shared/types/task';
 import { getColorStyle } from '@shared/utils/colorUtils';
 import { truncateText } from '@shared/utils/textUtils';
 import { TaskActionMenu } from '@shared/components/TaskActionMenu';
-import { getFieldValue } from '@shared/utils/fieldUtils';
+import { getFieldObjectValue } from '@shared/utils/fieldUtils';
 
 type HeadingLevel = 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 type TagsPosition = 'top' | 'bottom';
@@ -133,17 +133,11 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 	};
 
 	const renderAssociatedOrder = () => {
-		const orderValue = getFieldValue(task, 'order');
+		const order = getFieldObjectValue(task, 'order');
 
-		if (
-			!orderValue ||
-			typeof orderValue !== 'object' ||
-			Array.isArray(orderValue)
-		) {
+		if (!order) {
 			return null;
 		}
-
-		const order = orderValue as Record<string, unknown>;
 
 		return (
 			<div className="task-card-order">
