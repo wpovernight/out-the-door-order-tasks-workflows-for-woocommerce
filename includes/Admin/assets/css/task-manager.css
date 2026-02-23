@@ -34,7 +34,7 @@
 
 .kanban-board .kanban-column .kanban-column-inner {
     background: var(--wpo-aom-bg-light);
-    border-radius: 6px;
+    border-radius: var(--wpo-aom-radius-l);
     padding-bottom: 1em;
     border: 1px solid var(--wpo-aom-border-light);
     display: flex;
@@ -440,17 +440,20 @@
     width: 7em;
 }
 
-.calendar-task-table-wrapper > table > thead th.calendar-task-info {
+.calendar-task-table-wrapper > table > thead th.task-info {
     width: auto;
 }
 
-.calendar-task-th-sortable {
+.th-sortable {
     cursor: pointer;
     user-select: none;
+}
+
+.calendar-task-table-wrapper .th-sortable {
     transition: background-color var(--wpo-aom-transition-normal);
 }
 
-.calendar-task-th-sortable:hover {
+.calendar-task-table-wrapper .th-sortable:hover {
     background-color: var(--wpo-aom-bg-gray-medium);
 }
 
@@ -470,7 +473,6 @@
 .calendar-task-table-wrapper > table > tbody > tr {
     border-bottom: 0.0625em solid var(--wpo-aom-border-light);
     transition: background-color var(--wpo-aom-transition-fast);
-    height: 5em;
     vertical-align: middle;
 }
 
@@ -496,19 +498,19 @@
     padding-left: 1.5em;
 }
 
-.calendar-task-table-wrapper > table > tbody > tr > td.task-info {
+.calendar-task-table-wrapper > table > tbody > tr > td.task-info > div {
     display: flex;
     flex-direction: column;
     gap: 0.5em;
     align-items: flex-start;
 }
 
-.calendar-task-table-wrapper > table > tbody > tr > td.task-info > h4,
-.calendar-task-table-wrapper > table > tbody > tr > td.task-info > p {
+.calendar-task-table-wrapper > table > tbody > tr > td.task-info > div > h4,
+.calendar-task-table-wrapper > table > tbody > tr > td.task-info > div > p {
     margin: 0;
 }
 
-.calendar-task-table-wrapper > table > tbody > tr > td.task-info > a {
+.calendar-task-table-wrapper > table > tbody > tr > td.task-info > div > a {
     font-size: 0.8em;
     display: flex;
     align-items: anchor-center;
@@ -516,7 +518,7 @@
     text-decoration: none;
 }
 
-.calendar-task-table-wrapper > table > tbody > tr > td.task-info > a::before {
+.calendar-task-table-wrapper > table > tbody > tr > td.task-info > div > a::before {
     content: '';
     display: inline-block;
     width: 1em;
@@ -530,9 +532,12 @@
     -webkit-mask-repeat: no-repeat;
 }
 
-.calendar-task-table-wrapper > table > tbody > tr > td.task-info > p {
+.calendar-task-table-wrapper > table > tbody > tr > td.task-info > div > h4 {
+    font-size: 1em;
+}
+
+.calendar-task-table-wrapper > table > tbody > tr > td.task-info > div > p {
     color: var(--wpo-aom-text-gray);
-    font-size: 0.9em;
 }
 
 .calendar-task-table-wrapper > table > tbody > td > span {
@@ -613,4 +618,113 @@
 .calendar-view .wpo-aom-skeleton-box.calendar-task-list {
     margin-top: 1em;
     margin-left: -1em;
+}
+
+/* ========================================
+   Archive View
+   ======================================== */
+
+#wpo-aom-order-manager .task-manager-tab .view.archive-view {
+    padding: 1em 1.5em;
+}
+
+.archive-view-container {
+    width: 100%;
+}
+
+.archive-view-container .no-tasks {
+    padding: 3em;
+    text-align: center;
+    color: var(--wpo-aom-text-gray);
+}
+
+.archived-task-table-wrapper > table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.archived-task-table-wrapper > table > thead > tr > th {
+    padding: 0.75em 1em;
+    text-align: left;
+    font-weight: 500;
+    white-space: nowrap;
+    user-select: none;
+    background-color: var(--wpo-aom-bg-gray-alt);
+    border-bottom: 1px solid var(--wpo-aom-border-light);
+    color: var(--wpo-aom-text-gray);
+    width: 7em;
+}
+
+.archived-task-table-wrapper > table > thead > tr > th.task-info {
+    width: auto;
+}
+
+.archived-task-table-wrapper .th-sortable {
+    transition: background-color var(--wpo-aom-transition-normal);
+}
+
+.archived-task-table-wrapper .th-sortable:hover {
+    background-color: var(--wpo-aom-bg-gray);
+}
+
+.archived-task-table-wrapper > table > tbody > tr {
+    border-bottom: 1px solid var(--wpo-aom-border-light);
+    transition: background-color var(--wpo-aom-transition-fast);
+    vertical-align: top;
+}
+
+.archived-task-table-wrapper > table > tbody > tr:last-child {
+    border-bottom: none;
+}
+
+.archived-task-table-wrapper > table > tbody > tr:nth-child(even) {
+    background-color: var(--wpo-aom-bg-gray-alt);
+}
+
+.archived-task-table-wrapper > table > tbody > tr:hover {
+    background-color: var(--wpo-aom-bg-gray);
+}
+
+.archived-task-table-wrapper > table > tbody > tr > td {
+    padding: 1em;
+    color: var(--wpo-aom-text-primary);
+    vertical-align: middle;
+}
+
+.archived-task-table-wrapper > table > tbody > tr > td.task-info > div > h3,
+.archived-task-table-wrapper > table > tbody > tr > td.task-info > div > p {
+    margin: 0;
+}
+
+.archived-task-table-wrapper > table > tbody > tr > td.task-info > div > h3 {
+    color: var(--wpo-aom-text-primary);
+    font-weight: 500;
+    font-size: 1em;
+}
+
+.archived-task-table-wrapper > table > tbody > tr > td.task-info > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+    align-items: flex-start;
+}
+
+.archived-task-table-wrapper > table > tbody > tr > td.order-id > a,
+.archived-task-table-wrapper > table > tbody > tr > td.customer-name > a {
+    text-decoration: none;
+}
+
+.archived-task-table-wrapper > table > tbody > tr > td.order-id > a:hover,
+.archived-task-table-wrapper > table > tbody > tr > td.customer-name > a:hover {
+    text-decoration: underline;
+}
+
+.archived-task-table-wrapper > table > tbody > tr > td.task-completed-date,
+.archived-task-table-wrapper > table > tbody > tr > td.task-archived-date {
+    white-space: nowrap;
+    color: var(--wpo-aom-text-gray);
+}
+
+.archived-task-table-wrapper > table > tbody > tr > td.task-actions {
+    white-space: nowrap;
 }

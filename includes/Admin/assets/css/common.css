@@ -78,6 +78,7 @@
     --wpo-aom-icon-task-header: url(data:image/svg+xml,%3Csvg%20width%3D%2238%22%20height%3D%2238%22%20viewBox%3D%220%200%2038%2038%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Crect%20width%3D%2238%22%20height%3D%2238%22%20rx%3D%225%22%20fill%3D%22%23DFCDF9%22/%3E%3Crect%20x%3D%2211.75%22%20y%3D%2211.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20rx%3D%227.25%22%20stroke%3D%22%236E1EDC%22%20stroke-width%3D%221.5%22/%3E%3C/svg%3E);
     --wpo-aom-icon-fulfillment-header: url(data:image/svg+xml,%3Csvg%20width%3D%2238%22%20height%3D%2238%22%20viewBox%3D%220%200%2038%2038%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2238%22%20height%3D%2238%22%20rx%3D%225%22%20fill%3D%22%23E0F2FE%22%2F%3E%0A%3Cpath%20d%3D%22M22.75%2016.8333L15.25%2012.5083M11.725%2014.8L19%2019.0083L26.275%2014.8M19%2027.4V19M26.5%2022.3333V15.6666C26.4997%2015.3744%2026.4225%2015.0873%2026.2763%2014.8343C26.13%2014.5812%2025.9198%2014.3711%2025.6667%2014.225L19.8333%2010.8916C19.58%2010.7453%2019.2926%2010.6683%2019%2010.6683C18.7074%2010.6683%2018.42%2010.7453%2018.1667%2010.8916L12.3333%2014.225C12.0802%2014.3711%2011.87%2014.5812%2011.7237%2014.8343C11.5775%2015.0873%2011.5003%2015.3744%2011.5%2015.6666V22.3333C11.5003%2022.6256%2011.5775%2022.9126%2011.7237%2023.1657C11.87%2023.4187%2012.0802%2023.6288%2012.3333%2023.775L18.1667%2027.1083C18.42%2027.2546%2018.7074%2027.3316%2019%2027.3316C19.2926%2027.3316%2019.58%2027.2546%2019.8333%2027.1083L25.6667%2023.775C25.9198%2023.6288%2026.13%2023.4187%2026.2763%2023.1657C26.4225%2022.9126%2026.4997%2022.6256%2026.5%2022.3333Z%22%20stroke%3D%22%230086C9%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%3C%2Fsvg%3E%0A);
     --wpo-aom-icon-person: url(data:image/svg+xml,%3Csvg%20width%3D%228%22%20height%3D%228%22%20viewBox%3D%220%200%208%208%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Cpath%20d%3D%22M4%204C3.45%204%202.97917%203.80417%202.5875%203.4125C2.19583%203.02083%202%202.55%202%202C2%201.45%202.19583%200.979167%202.5875%200.5875C2.97917%200.195833%203.45%200%204%200C4.55%200%205.02083%200.195833%205.4125%200.5875C5.80417%200.979167%206%201.45%206%202C6%202.55%205.80417%203.02083%205.4125%203.4125C5.02083%203.80417%204.55%204%204%204ZM0%207V6.6C0%206.31667%200.0729167%206.05625%200.21875%205.81875C0.364583%205.58125%200.558333%205.4%200.8%205.275C1.31667%205.01667%201.84167%204.82292%202.375%204.69375C2.90833%204.56458%203.45%204.5%204%204.5C4.55%204.5%205.09167%204.56458%205.625%204.69375C6.15833%204.82292%206.68333%205.01667%207.2%205.275C7.44167%205.4%207.63542%205.58125%207.78125%205.81875C7.92708%206.05625%208%206.31667%208%206.6V7C8%207.275%207.90208%207.51042%207.70625%207.70625C7.51042%207.90208%207.275%208%207%208H1C0.725%208%200.489583%207.90208%200.29375%207.70625C0.0979167%207.51042%200%207.275%200%207ZM1%207H7V6.6C7%206.50833%206.97708%206.425%206.93125%206.35C6.88542%206.275%206.825%206.21667%206.75%206.175C6.3%205.95%205.84583%205.78125%205.3875%205.66875C4.92917%205.55625%204.46667%205.5%204%205.5C3.53333%205.5%203.07083%205.55625%202.6125%205.66875C2.15417%205.78125%201.7%205.95%201.25%206.175C1.175%206.21667%201.11458%206.275%201.06875%206.35C1.02292%206.425%201%206.50833%201%206.6V7ZM4%203C4.275%203%204.51042%202.90208%204.70625%202.70625C4.90208%202.51042%205%202.275%205%202C5%201.725%204.90208%201.48958%204.70625%201.29375C4.51042%201.09792%204.275%201%204%201C3.725%201%203.48958%201.09792%203.29375%201.29375C3.09792%201.48958%203%201.725%203%202C3%202.275%203.09792%202.51042%203.29375%202.70625C3.48958%202.90208%203.725%203%204%203Z%22%20fill%3D%22%23717680%22%2F%3E%0A%3C%2Fsvg%3E%0A);
+    --wpo-aom-icon-restore: url(data:image/svg+xml,%3Csvg%20width%3D%2215%22%20height%3D%2218%22%20viewBox%3D%220%200%2015%2018%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Cpath%20d%3D%22M7.5%2017.1358C6.45833%2017.1358%205.48264%2016.9379%204.57292%2016.5421C3.66319%2016.1463%202.87153%2015.6115%202.19792%2014.9379C1.52431%2014.2643%200.989583%2013.4726%200.59375%2012.5629C0.197917%2011.6532%200%2010.6775%200%209.63583C0%209.39972%200.0798611%209.20181%200.239583%209.04208C0.399306%208.88236%200.597222%208.8025%200.833333%208.8025C1.06944%208.8025%201.26736%208.88236%201.42708%209.04208C1.58681%209.20181%201.66667%209.39972%201.66667%209.63583C1.66667%2011.2608%202.23264%2012.6393%203.36458%2013.7713C4.49653%2014.9032%205.875%2015.4692%207.5%2015.4692C9.125%2015.4692%2010.5035%2014.9032%2011.6354%2013.7713C12.7674%2012.6393%2013.3333%2011.2608%2013.3333%209.63583C13.3333%208.01083%2012.7674%206.63236%2011.6354%205.50042C10.5035%204.36847%209.125%203.8025%207.5%203.8025H7.375L8.08333%204.51083C8.25%204.6775%208.32986%204.87194%208.32292%205.09417C8.31597%205.31639%208.23611%205.51083%208.08333%205.6775C7.91667%205.84417%207.71875%205.93097%207.48958%205.93792C7.26042%205.94486%207.0625%205.865%206.89583%205.69833L4.75%203.5525C4.58333%203.38583%204.5%203.19139%204.5%202.96917C4.5%202.74694%204.58333%202.5525%204.75%202.38583L6.89583%200.24C7.0625%200.0733333%207.26042%20-0.00652778%207.48958%200.000416667C7.71875%200.00736111%207.91667%200.0941667%208.08333%200.260833C8.23611%200.4275%208.31597%200.621944%208.32292%200.844167C8.32986%201.06639%208.25%201.26083%208.08333%201.4275L7.375%202.13583H7.5C8.54167%202.13583%209.51736%202.33375%2010.4271%202.72958C11.3368%203.12542%2012.1285%203.66014%2012.8021%204.33375C13.4757%205.00736%2014.0104%205.79903%2014.4063%206.70875C14.8021%207.61847%2015%208.59417%2015%209.63583C15%2010.6775%2014.8021%2011.6532%2014.4063%2012.5629C14.0104%2013.4726%2013.4757%2014.2643%2012.8021%2014.9379C12.1285%2015.6115%2011.3368%2016.1463%2010.4271%2016.5421C9.51736%2016.9379%208.54167%2017.1358%207.5%2017.1358Z%22%20fill%3D%22%23888D91%22%2F%3E%0A%3C%2Fsvg%3E);
 }
 
 .screenReader {
@@ -155,9 +156,9 @@
     padding: 0;
 }
 
-.wpo-aom-task-actions > li .task-edit,
-.wpo-aom-task-actions > li .task-delete,
-.wpo-aom-task-actions > li .task-finish {
+.wpo-aom-task-actions .task-edit,
+.wpo-aom-task-actions .task-delete,
+.wpo-aom-task-actions .task-finish {
     border: none;
     background: none;
     cursor: pointer;
@@ -170,28 +171,28 @@
     position: relative;
 }
 
-.wpo-aom-task-actions > li .task-edit:hover {
+.wpo-aom-task-actions .task-edit:hover {
     color: #7c3aed;
     background-color: #ede9fe;
 }
 
-.wpo-aom-task-actions > li .task-delete:hover {
+.wpo-aom-task-actions .task-delete:hover {
     color: var(--wpo-aom-danger);
     background-color: #fee2e2;
 }
 
-.wpo-aom-task-actions > li .task-finish:hover {
+.wpo-aom-task-actions .task-finish:hover {
     color: #6E1EDC;
     background-color: #F0E8FC;
 }
 
-.wpo-aom-task-actions > li .task-finish.finished {
+.wpo-aom-task-actions .task-finish.finished {
     color: #6E1EDC;
 }
 
-.wpo-aom-task-actions > li .task-edit::before,
-.wpo-aom-task-actions > li .task-delete::before,
-.wpo-aom-task-actions > li .task-finish::before {
+.wpo-aom-task-actions .task-edit::before,
+.wpo-aom-task-actions .task-delete::before,
+.wpo-aom-task-actions .task-finish::before {
     content: '';
     position: absolute;
     top: 50%;
@@ -208,17 +209,17 @@
     -webkit-mask-position: center;
 }
 
-.wpo-aom-task-actions > li .task-edit::before {
+.wpo-aom-task-actions .task-edit::before {
     mask-image: var(--wpo-aom-icon-edit);
     -webkit-mask-image: var(--wpo-aom-icon-edit);
 }
 
-.wpo-aom-task-actions > li .task-delete::before {
+.wpo-aom-task-actions .task-delete::before {
     mask-image: var(--wpo-aom-icon-delete);
     -webkit-mask-image: var(--wpo-aom-icon-delete);
 }
 
-.wpo-aom-task-actions > li .task-finish::before {
+.wpo-aom-task-actions .task-finish::before {
     mask-image: var(--wpo-aom-icon-finish);
     -webkit-mask-image: var(--wpo-aom-icon-finish);
 }
@@ -266,4 +267,61 @@
 .wpo-action-menu > li > button:focus {
     background-color: var(--wpo-aom-hover-overlay);
     outline: none;
+}
+
+
+.wpo-aom-row-actions {
+    display: flex;
+    margin: 0;
+    padding: 0;
+}
+
+.wpo-aom-row-actions > li {
+    margin: 0;
+    padding: 0;
+}
+
+.wpo-aom-row-actions button {
+    width: 1.75em;
+    height: 1.75em;
+    position: relative;
+    border-radius: var(--wpo-aom-radius-s);
+    color: var(--wpo-aom-text-gray);
+    padding: 0.25em;
+}
+
+.wpo-aom-row-actions .wpo-aom-delete-button {
+    color: var(--wpo-aom-danger);
+}
+
+.wpo-aom-row-actions .wpo-aom-delete-button:hover {
+    color: var(--wpo-aom-danger);
+    background-color: #fee2e2;
+}
+
+.wpo-aom-row-actions button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 1.1em;
+    height: 1.1em;
+    background-color: currentColor;
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+}
+
+.wpo-aom-row-actions button.wpo-aom-delete-button::before {
+    mask-image: var(--wpo-aom-icon-delete);
+    -webkit-mask-image: var(--wpo-aom-icon-delete);
+}
+
+.wpo-aom-row-actions button.wpo-aom-restore-button::before {
+    mask-image: var(--wpo-aom-icon-restore);
+    -webkit-mask-image: var(--wpo-aom-icon-restore);
 }
