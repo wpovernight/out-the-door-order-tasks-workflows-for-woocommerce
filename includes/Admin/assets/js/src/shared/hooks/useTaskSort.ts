@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react';
-import { isFieldOption, Task } from '@shared/types/task';
+import { Task } from '@shared/types/task';
 import {
-	getCompletedDate,
+	getTaskDateField,
+	getFieldObjectValue,
+	getFieldRawValues,
 	getFieldValue,
-	getTaskDueDate,
 } from '@shared/utils/fieldUtils';
 
 export type SortColumn =
@@ -11,7 +12,10 @@ export type SortColumn =
 	| 'priority'
 	| 'status'
 	| 'dueDate'
-	| 'completedDate';
+	| 'completedDate'
+	| 'archivedDate'
+	| 'orderID'
+	| 'customerName';
 export type SortDirection = 'asc' | 'desc';
 
 interface UseTaskSortResult {
@@ -51,54 +55,86 @@ export const useTaskSort = (
 					break;
 
 				case 'priority': {
-					const aPriority = getFieldValue(a, 'priority');
-					const bPriority = getFieldValue(b, 'priority');
-					aValue = isFieldOption(aPriority) ? aPriority.position : 1;
-					bValue = isFieldOption(bPriority) ? bPriority.position : 1;
+					const aValueOption = getFieldValue(
+						a,
+						'priority',
+						'position',
+						1
+					);
+					const bValueOption = getFieldValue(
+						b,
+						'priority',
+						'position',
+						1
+					);
+					aValue =
+						typeof aValueOption === 'number' ? aValueOption : 1;
+					bValue =
+						typeof bValueOption === 'number' ? bValueOption : 1;
 					break;
 				}
 
 				case 'status': {
-					const aStatus = getFieldValue(a, 'status');
-					const bStatus = getFieldValue(b, 'status');
-					aValue = isFieldOption(aStatus) ? aStatus.position : 1;
-					bValue = isFieldOption(bStatus) ? bStatus.position : 1;
+					const aValueOption = getFieldValue(
+						a,
+						'status',
+						'position',
+						1
+					);
+					const bValueOption = getFieldValue(
+						b,
+						'status',
+						'position',
+						1
+					);
+					aValue =
+						typeof aValueOption === 'number' ? aValueOption : 1;
+					bValue =
+						typeof bValueOption === 'number' ? bValueOption : 1;
 					break;
 				}
 
-				case 'dueDate': {
-					const aDueDate = getTaskDueDate(a);
-					const bDueDate = getTaskDueDate(b);
+				case 'dueDate':
+				case 'completedDate':
+				case 'archivedDate': {
+					const fieldMap: Record<string, string> = {
+						dueDate: 'due_date',
+						completedDate: 'completed_date',
+						archivedDate: 'archived_date',
+					};
+
+					const mappedField = fieldMap[sortColumn];
+
+					const aDate = getTaskDateField(a, mappedField);
+					const bDate = getTaskDateField(b, mappedField);
 					// Handle null dates (put them at the end)
-					if (!aDueDate && !bDueDate) {
+					if (!aDate && !bDate) {
 						return 0;
 					}
-					if (!aDueDate) {
+					if (!aDate) {
 						return 1;
 					}
-					if (!bDueDate) {
+					if (!bDate) {
 						return -1;
 					}
-					aValue = aDueDate.getTime();
-					bValue = bDueDate.getTime();
+					aValue = aDate.getTime();
+					bValue = bDate.getTime();
 					break;
 				}
 
-				case 'completedDate': {
-					const aCompletedDate = getCompletedDate(a);
-					const bCompletedDate = getCompletedDate(b);
-					// Handle null dates (put them at the end)
-					if (!aCompletedDate && !bCompletedDate) {
-						return 0;
-					}
-					if (!aCompletedDate) {
-						return 1;
-					}
-					if (!bCompletedDate) {
-						return -1;
-					}
-					aValue = aCompletedDate.getTime();
-					bValue = bCompletedDate.getTime();
+				case 'orderID': {
+					const aOrder = getFieldRawValues(a, 'order')?.[0] ?? 0;
+					const bOrder = getFieldRawValues(b, 'order')?.[0] ?? 0;
+					aValue = typeof aOrder === 'number' ? aOrder : 0;
+					bValue = typeof bOrder === 'number' ? bOrder : 0;
+					break;
+				}
+
+				case 'customerName': {
+					const aOrder = getFieldObjectValue(a, 'order');
+					const bOrder = getFieldObjectValue(b, 'order');
+					aValue = (aOrder?.full_name as string)?.toLowerCase() ?? '';
+					bValue = (bOrder?.full_name as string)?.toLowerCase() ?? '';
 					break;
 				}
 
