@@ -26,25 +26,25 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onTaskClick }) => {
 
 	const priorityLabel = getFieldValue(
 		task,
-		'priority_label',
+		'priority',
 		'label',
 		'-'
 	) as string;
 	const priorityColor = getFieldValue(
 		task,
-		'priority_color',
+		'priority',
 		'color',
 		undefined
 	) as string | undefined;
 	const statusLabel = getFieldValue(
 		task,
-		'status_label',
+		'status',
 		'label',
 		'-'
 	) as string;
 	const statusColor = getFieldValue(
 		task,
-		'status_color',
+		'status',
 		'color',
 		undefined
 	) as string | undefined;
