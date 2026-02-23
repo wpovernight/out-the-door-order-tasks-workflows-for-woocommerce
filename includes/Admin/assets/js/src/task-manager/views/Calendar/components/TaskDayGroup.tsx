@@ -44,7 +44,7 @@ const TaskDayGroup: React.FC<TaskDayGroupProps> = ({
 					<thead>
 						<tr>
 							<th
-								className="calendar-task-info calendar-task-th-sortable"
+								className="task-info th-sortable"
 								onClick={() => handleSort('title')}
 							>
 								{__('Task', 'wpo-aom')}{' '}
@@ -55,7 +55,7 @@ const TaskDayGroup: React.FC<TaskDayGroupProps> = ({
 								/>
 							</th>
 							<th
-								className="calendar-task-th-sortable"
+								className="task-priority th-sortable"
 								onClick={() => handleSort('priority')}
 							>
 								{__('Priority', 'wpo-aom')}{' '}
@@ -66,7 +66,7 @@ const TaskDayGroup: React.FC<TaskDayGroupProps> = ({
 								/>
 							</th>
 							<th
-								className="calendar-task-th-sortable"
+								className="task-status th-sortable"
 								onClick={() => handleSort('status')}
 							>
 								{__('Status', 'wpo-aom')}{' '}
@@ -76,9 +76,11 @@ const TaskDayGroup: React.FC<TaskDayGroupProps> = ({
 									sortDirection={sortDirection}
 								/>
 							</th>
-							<th>{__('Due date', 'wpo-aom')}</th>
+							<th className="task-due-date">
+								{__('Due date', 'wpo-aom')}
+							</th>
 							<th
-								className="calendar-task-th-sortable"
+								className="task-completed-date th-sortable"
 								onClick={() => handleSort('completedDate')}
 							>
 								{__('Completed at', 'wpo-aom')}
@@ -88,7 +90,9 @@ const TaskDayGroup: React.FC<TaskDayGroupProps> = ({
 									sortDirection={sortDirection}
 								/>
 							</th>
-							<th>{__('Actions', 'wpo-aom')}</th>
+							<th className="task-actions">
+								{__('Actions', 'wpo-aom')}
+							</th>
 						</tr>
 					</thead>
 					<tbody>
