@@ -36,18 +36,10 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onTaskClick }) => {
 		'color',
 		undefined
 	) as string | undefined;
-	const statusLabel = getFieldValue(
-		task,
-		'status',
-		'label',
-		'-'
-	) as string;
-	const statusColor = getFieldValue(
-		task,
-		'status',
-		'color',
-		undefined
-	) as string | undefined;
+	const statusLabel = getFieldValue(task, 'status', 'label', '-') as string;
+	const statusColor = getFieldValue(task, 'status', 'color', undefined) as
+		| string
+		| undefined;
 
 	const handleEdit = () => {
 		openEditTaskModal({
@@ -95,7 +87,7 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onTaskClick }) => {
 			<td className="task-info">
 				<div>
 					<h4>{truncateText(task.title, 60)}</h4>
-					{task.description ?? (
+					{task.description && (
 						<p>{truncateText(task.description, 90)}</p>
 					)}
 					{renderAssociatedOrder()}
