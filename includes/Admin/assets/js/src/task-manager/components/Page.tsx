@@ -4,6 +4,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Header from './Header';
 import { CalendarView } from '../views/Calendar/CalendarView';
 import { KanbanView } from '../views/Kanban/KanbanView';
+import { ArchiveView } from '@taskManager/views/Archive/ArchiveView';
 
 export default function Page() {
 	return (
@@ -25,6 +26,14 @@ export default function Page() {
 						element={
 							<div className="view calendar-view active">
 								<CalendarView />
+							</div>
+						}
+					/>
+					<Route
+						path="archive"
+						element={
+							<div className="view archive-view active">
+								<ArchiveView />
 							</div>
 						}
 					/>
