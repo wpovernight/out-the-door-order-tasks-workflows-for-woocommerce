@@ -966,6 +966,7 @@ final class TaskManagerService {
 								'id'           => $order->get_id(),
 								'full_name'    => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
 								'url'          => admin_url( 'post.php?post=' . $order->get_id() . '&action=edit' ),
+								'profile_url'  => admin_url( 'user-edit.php?user_id=' . $order->get_customer_id() ),
 								'status'       => $order->get_status(),
 								'total'        => $order->get_total(),
 								'currency'     => $order->get_currency(),
