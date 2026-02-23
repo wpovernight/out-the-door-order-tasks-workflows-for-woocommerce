@@ -7,6 +7,7 @@ import {
 import { useTasks } from '@shared/context/TaskContext';
 import { groupAndSortTasks } from '../../../utils/task-sort';
 import { isTaskArchived } from '@shared/utils/fieldUtils';
+import { useView } from '@taskManager/context/ViewContext';
 
 interface ViewTaskContextType {
 	viewTasks: Record<string, Task[]>;
@@ -31,6 +32,7 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 		finishTask: globalFinishTask,
 		unfinishTask: globalUnfinishTask,
 	} = useTasks();
+	const { searchQuery } = useView();
 	const [viewTasks, setViewTasks] = useState<Record<string, Task[]>>({});
 	const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
@@ -174,7 +176,19 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 			return;
 		}
 
-		const activeTasks = tasks.filter((task) => !isTaskArchived(task));
+		const query = searchQuery.toLowerCase();
+		const activeTasks = tasks.filter((task) => {
+			if (isTaskArchived(task)) {
+				return false;
+			}
+			if (!query) {
+				return true;
+			}
+			return (
+				task.title.toLowerCase().includes(query) ||
+				(task.description ?? '').toLowerCase().includes(query)
+			);
+		});
 		const grouped = groupAndSortTasks(activeTasks, statuses);
 
 		// Only update if the grouped tasks are actually different
@@ -221,7 +235,7 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 
 			return hasChanges ? grouped : prev;
 		});
-	}, [tasks, fieldOptions]);
+	}, [tasks, fieldOptions, searchQuery]);
 
 	return (
 		<ViewTaskContext.Provider

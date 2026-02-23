@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useMemo } from 'react';
+import React, {
+	createContext,
+	useContext,
+	useEffect,
+	useMemo,
+	useState,
+} from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 // Define all available views.
@@ -9,6 +15,8 @@ type View = (typeof AVAILABLE_VIEWS)[number];
 interface ViewContextType {
 	view: View;
 	setView: (view: View) => void;
+	searchQuery: string;
+	setSearchQuery: (query: string) => void;
 }
 
 const ViewContext = createContext<ViewContextType | undefined>(undefined);
@@ -18,6 +26,7 @@ export const ViewProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
 	const navigate = useNavigate();
 	const location = useLocation();
+	const [searchQuery, setSearchQuery] = useState('');
 
 	// Extract view from the path segment after "/task-manager/" (e.g., "/task-manager/kanban" -> "kanban").
 	const view = useMemo<View>(() => {
@@ -28,13 +37,20 @@ export const ViewProvider: React.FC<{ children: React.ReactNode }> = ({
 			: 'kanban';
 	}, [location.pathname]);
 
+	// Reset search when switching views.
+	useEffect(() => {
+		setSearchQuery('');
+	}, [view]);
+
 	// Navigate to new view within the task-manager section.
 	const setView = (newView: View) => {
 		navigate(`/task-manager/${newView}`);
 	};
 
 	return (
-		<ViewContext.Provider value={{ view, setView }}>
+		<ViewContext.Provider
+			value={{ view, setView, searchQuery, setSearchQuery }}
+		>
 			{children}
 		</ViewContext.Provider>
 	);

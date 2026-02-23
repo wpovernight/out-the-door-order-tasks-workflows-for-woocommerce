@@ -3,6 +3,7 @@ import { Task } from '@shared/types/task';
 import { useTasks } from '@shared/context/TaskContext';
 import { getTaskDateField, isTaskArchived } from '@shared/utils/fieldUtils';
 import { getDateRangeFromPreset, DateRange, DateRangePreset } from '../utils';
+import { useView } from '@taskManager/context/ViewContext';
 
 export type { DateRangePreset, DateRange };
 
@@ -42,6 +43,7 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 	children,
 }) => {
 	const { tasks } = useTasks();
+	const { searchQuery } = useView();
 
 	// Date state
 	const [currentDate, setCurrentDate] = useState(new Date());
@@ -96,8 +98,8 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 		const endOfDay = new Date(endDate);
 		endOfDay.setHours(23, 59, 59, 999);
 
+		const query = searchQuery.toLowerCase();
 		return tasks.filter((task) => {
-			// Filter out archived tasks.
 			if (isTaskArchived(task)) {
 				return false;
 			}
@@ -107,9 +109,19 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				return false;
 			}
 
-			return taskDueDate >= startOfDay && taskDueDate <= endOfDay;
+			if (taskDueDate < startOfDay || taskDueDate > endOfDay) {
+				return false;
+			}
+
+			if (!query) {
+				return true;
+			}
+			return (
+				task.title.toLowerCase().includes(query) ||
+				(task.description ?? '').toLowerCase().includes(query)
+			);
 		});
-	}, [tasks, dateRange]);
+	}, [tasks, dateRange, searchQuery]);
 
 	const selectTask = (task: Task) => {
 		setSelectedTask(task);

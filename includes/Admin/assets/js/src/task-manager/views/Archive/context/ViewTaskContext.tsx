@@ -2,6 +2,7 @@ import React, { useContext, useMemo } from 'react';
 import { Task } from '@shared/types/task';
 import { useTasks } from '@shared/context/TaskContext';
 import { isTaskArchived } from '@shared/utils/fieldUtils';
+import { useView } from '@taskManager/context/ViewContext';
 
 interface ViewTaskContextType {
 	archivedTasks: Task[];
@@ -15,10 +16,23 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 	children,
 }) => {
 	const { tasks } = useTasks();
+	const { searchQuery } = useView();
 
 	const archivedTasks = useMemo(() => {
-		return tasks.filter((task) => isTaskArchived(task));
-	}, [tasks]);
+		return tasks.filter((task) => {
+			if (!isTaskArchived(task)) {
+				return false;
+			}
+			if (!searchQuery) {
+				return true;
+			}
+			const query = searchQuery.toLowerCase();
+			return (
+				task.title.toLowerCase().includes(query) ||
+				(task.description ?? '').toLowerCase().includes(query)
+			);
+		});
+	}, [tasks, searchQuery]);
 
 	return (
 		<ViewTaskContext.Provider

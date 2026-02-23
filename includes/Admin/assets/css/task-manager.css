@@ -15,6 +15,52 @@
     padding: 1em;
 }
 
+#wpo-aom-order-manager .content .header {
+    display: flex;
+}
+
+#wpo-aom-order-manager .content .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    margin-top: 1em;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75em;
+    margin-right: 1em;
+}
+
+.header-actions .header-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.header-actions #header-search-input {
+    padding: 0.3em 1em;
+    border: 1px solid var(--wpo-aom-border-color);
+    border-radius: var(--wpo-aom-radius-m);
+    font-size: 0.95em;
+    width: 20em;
+    color: var(--wpo-aom-text-primary);
+    outline: none;
+    transition: border-color var(--wpo-aom-transition-fast);
+    margin: 0.5em 0;
+}
+
+#header-search-input:focus {
+    border-color: var(--wpo-aom-purple-primary);
+}
+
+.header-actions .add-task {
+    padding: 0.6em 1em;
+    border-radius: var(--wpo-aom-radius-m);
+}
+
+
 .kanban-board {
     display: flex;
     gap: 0;
@@ -625,7 +671,7 @@
    ======================================== */
 
 #wpo-aom-order-manager .task-manager-tab .view.archive-view {
-    padding: 1em 1.5em;
+    padding: 1em 1em;
 }
 
 .archive-view-container {
