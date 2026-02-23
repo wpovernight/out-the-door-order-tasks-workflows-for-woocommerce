@@ -17,7 +17,7 @@ export const BoardSkeleton: React.FC<BoardSkeletonProps> = ({
 		<LoadingSkeleton count={count} className={className}>
 			<SkeletonBox
 				height="calc(100vh - 14em)"
-				width="23em"
+				width="33%"
 				className="kanban-board-skeleton"
 			>
 				{/* Empty - just the column structure */}
