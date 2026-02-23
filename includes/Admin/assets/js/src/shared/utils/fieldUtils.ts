@@ -6,14 +6,33 @@ export const getFieldBySlug = (task: Task, slug: string) => {
 
 export const getFieldValue = (
 	task: Task,
-	slug: string
+	slug: string,
+	property: string | null = null,
+	defaultValue: FieldResolved | null = null
 ): FieldResolved | null => {
 	const field = getFieldBySlug(task, slug);
 	if (!field || !field.values || field.values.length === 0) {
 		return null;
 	}
 
-	return field.values[0].resolved;
+	const resolved = field.values[0].resolved;
+
+	if (property !== null) {
+		if (
+			resolved !== null &&
+			typeof resolved === 'object' &&
+			!Array.isArray(resolved)
+		) {
+			return (
+				((resolved as Record<string, unknown>)[
+					property
+				] as FieldResolved) ?? defaultValue
+			);
+		}
+		return defaultValue;
+	}
+
+	return resolved;
 };
 
 export const getFieldRawValues = (
@@ -114,4 +133,8 @@ export const updateTaskFields = (
 		...topLevelUpdates,
 		fields: updatedFields,
 	};
+};
+
+export const isTaskArchived = (task: Task): boolean => {
+	return getFieldRawValue(task, 'archived_date') !== null;
 };
