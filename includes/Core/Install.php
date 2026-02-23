@@ -298,11 +298,21 @@ final class Install {
 				'is_editable'  => false,
 				'is_protected' => true,
 			),
+			// Archived date - used to store the date when a task is archived (status changed to "Archived")
+			array(
+				'id'           => 7,
+				'label'        => 'Archived Date',
+				'type'         => 'date',
+				'slug'         => 'archived_date',
+				'is_required'  => false,
+				'is_editable'  => false,
+				'is_protected' => true,
+			),
 			/*
 			 * Editable and non-protected fields.
 			 */
 			array(
-				'id'           => 7,
+				'id'           => 8,
 				'label'        => 'Priority',
 				'type'         => 'select',
 				'slug'         => 'priority',

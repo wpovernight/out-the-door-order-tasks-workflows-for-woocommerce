@@ -24,26 +24,30 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onTaskClick }) => {
 	const { deleteTask, setTasks } = useTasks();
 	const { openEditTaskModal } = useTaskEdit();
 
-	const priorityValue = getFieldValue(task, 'priority');
-	const statusValue = getFieldValue(task, 'status');
-
-	const priorityLabel = isFieldOption(priorityValue)
-		? priorityValue.label
-		: typeof priorityValue === 'string'
-			? priorityValue
-			: '-';
-	const priorityColor = isFieldOption(priorityValue)
-		? priorityValue.color
-		: undefined;
-
-	const statusLabel = isFieldOption(statusValue)
-		? statusValue.label
-		: typeof statusValue === 'string'
-			? statusValue
-			: task.status || '-';
-	const statusColor = isFieldOption(statusValue)
-		? statusValue.color
-		: undefined;
+	const priorityLabel = getFieldValue(
+		task,
+		'priority_label',
+		'label',
+		'-'
+	) as string;
+	const priorityColor = getFieldValue(
+		task,
+		'priority_color',
+		'color',
+		undefined
+	) as string | undefined;
+	const statusLabel = getFieldValue(
+		task,
+		'status_label',
+		'label',
+		'-'
+	) as string;
+	const statusColor = getFieldValue(
+		task,
+		'status_color',
+		'color',
+		undefined
+	) as string | undefined;
 
 	const handleEdit = () => {
 		openEditTaskModal({
@@ -89,9 +93,13 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onTaskClick }) => {
 	return (
 		<tr onClick={() => onTaskClick?.(task)}>
 			<td className="task-info">
-				<h4>{truncateText(task.title, 60)}</h4>
-				<p>{truncateText(task.description, 90)}</p>
-				{renderAssociatedOrder()}
+				<div>
+					<h4>{truncateText(task.title, 60)}</h4>
+					{task.description ?? (
+						<p>{truncateText(task.description, 90)}</p>
+					)}
+					{renderAssociatedOrder()}
+				</div>
 			</td>
 
 			<td className="task-priority">

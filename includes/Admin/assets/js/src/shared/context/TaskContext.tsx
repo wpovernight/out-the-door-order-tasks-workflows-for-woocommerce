@@ -315,6 +315,21 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 						};
 					}
 
+					if (targetStatusOption.slug === TASK_ARCHIVE_STATUS_SLUG) {
+						fieldUpdates.archived_date = {
+							raw: new Date()
+								.toISOString()
+								.replace('T', ' ')
+								.slice(0, 19),
+							resolved: null,
+						};
+					} else if (task.status === TASK_ARCHIVE_STATUS_SLUG) {
+						fieldUpdates.archived_date = {
+							raw: null,
+							resolved: null,
+						};
+					}
+
 					return updateTaskFields(task, fieldUpdates);
 				});
 			});
@@ -534,6 +549,13 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 							raw: Number.MAX_SAFE_INTEGER,
 							resolved: null,
 						},
+						archived_date: {
+							raw: new Date()
+								.toISOString()
+								.replace('T', ' ')
+								.slice(0, 19),
+							resolved: null,
+						},
 					});
 				});
 			});
@@ -595,6 +617,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 							raw: Number.MAX_SAFE_INTEGER,
 							resolved: null,
 						},
+						archived_date: { raw: null, resolved: null },
 					});
 				});
 			});

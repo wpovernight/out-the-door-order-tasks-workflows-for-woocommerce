@@ -671,7 +671,7 @@ final class TaskManagerService {
 	 * @param int|null $previous_task_id    The ID of the task that should precede the moved task in the new status.
 	 *                                      If null, the task will be placed at the start.
 	 * @param string   $fallback_placement  The default position to use if no previous task is specified.
-	 * @param array    $extra_field_values  Additional field values to update when moving the task (e.g., completed_date).
+	 * @param array    $extra_field_values  Additional field values to update when moving the task.
 	 *                                      Only should be used for internal operations like marking as completed, not for general uses.
 	 *
 	 * @return float
@@ -756,6 +756,22 @@ final class TaskManagerService {
 			! isset( $extra_field_values[ DefaultTaskFields::COMPLETED_DATE ] )
 		) {
 			$extra_field_values[ DefaultTaskFields::COMPLETED_DATE ] = null;
+		}
+
+		// Update "archived_date" automatically, if moving to "archived" status and not already set.
+		if (
+			$target_status_option_field->slug === 'archived' &&
+			! isset( $extra_field_values[ DefaultTaskFields::ARCHIVED_DATE ] )
+		) {
+			$extra_field_values[ DefaultTaskFields::ARCHIVED_DATE ] = gmdate( 'Y-m-d H:i:s' );
+		}
+
+		// Clear "archived_date" if moving out of "archived" status and not already set to null.
+		if (
+			$target_status_option_field->slug !== 'archived' &&
+			! isset( $extra_field_values[ DefaultTaskFields::ARCHIVED_DATE ] )
+		) {
+			$extra_field_values[ DefaultTaskFields::ARCHIVED_DATE ] = null;
 		}
 
 		$update_data = array(
