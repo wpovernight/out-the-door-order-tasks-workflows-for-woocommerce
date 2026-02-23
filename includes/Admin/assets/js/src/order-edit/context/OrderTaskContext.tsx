@@ -6,8 +6,8 @@ import React, {
 	useRef,
 } from 'react';
 import { useTasks } from '@shared/context/TaskContext';
-import { getFieldRawValues } from '@shared/utils/fieldUtils';
-import { Task, TASK_ARCHIVE_STATUS_SLUG } from '@shared/types/task';
+import { getFieldRawValues, isTaskArchived } from '@shared/utils/fieldUtils';
+import { Task } from '@shared/types/task';
 import { AsyncLoaderStatus } from '@shared/hooks/useAsyncLoader';
 
 // Type for creating/updating tasks via API
@@ -62,8 +62,8 @@ export const OrderTaskProvider: React.FC<{
 
 	const orderTasks = useMemo(() => {
 		return tasks.filter((task) => {
-			// Exclude it if the status is archived.
-			if (task.status === TASK_ARCHIVE_STATUS_SLUG) {
+			// Exclude archived tasks.
+			if (isTaskArchived(task)) {
 				return false;
 			}
 

@@ -33,6 +33,20 @@ class TaskFieldValueRepository extends BaseRepository {
 	}
 
 	/**
+	 * Delete a field value by task ID and field ID. No-op if it doesn't exist.
+	 *
+	 * @param int $task_id
+	 * @param int $field_id
+	 *
+	 * @return void
+	 */
+	public function delete_by_task_and_field( int $task_id, int $field_id ): void {
+		$this->where( 'task_id', $task_id )
+		     ->where( 'field_id', $field_id )
+		     ->delete_raw();
+	}
+
+	/**
 	 * Update multiple field values for a task.
 	 * Deletes existing values and inserts new ones in a transaction.
 	 *
@@ -40,7 +54,7 @@ class TaskFieldValueRepository extends BaseRepository {
 	 * @param array<int, mixed> $field_values Field ID => value (string or array of strings)
 	 *
 	 * @return int|false Number of rows inserted or false on failure.
-	 * @throws \Exception
+	 * @throws \Exception|\Throwable
 	 */
 	public function update_task_multiple_field_values( int $task_id, array $field_values ) {
 		if ( empty( $field_values ) ) {
@@ -54,6 +68,11 @@ class TaskFieldValueRepository extends BaseRepository {
 		$bindings = array();
 
 		foreach ( $field_values as $field_id => $value ) {
+			// null means "delete this field value without re-inserting".
+			if ( is_null( $value ) ) {
+				continue;
+			}
+
 			$field_id = (int) $field_id;
 
 			foreach ( (array) $value as $single ) {
@@ -68,6 +87,11 @@ class TaskFieldValueRepository extends BaseRepository {
 			$this->where( 'task_id', $task_id )
 			     ->where( 'field_id', 'IN', $field_ids )
 			     ->delete_raw();
+
+			// If all values were null (delete-only), skip the insert.
+			if ( empty( $rows ) ) {
+				return 0;
+			}
 
 			return $this->insert_raw(
 				'`task_id`, `field_id`, `value`',

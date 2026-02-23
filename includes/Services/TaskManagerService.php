@@ -749,29 +749,11 @@ final class TaskManagerService {
 		}
 
 		// Clear "completed_date" if moving out of "completed" status and not already set to null.
-		// Archiving a completed task preserves the completed_date — it does not undo completion.
 		if (
 			$target_status_option_field->slug !== 'completed' &&
-			$target_status_option_field->slug !== 'archived' &&
 			! isset( $extra_field_values[ DefaultTaskFields::COMPLETED_DATE ] )
 		) {
 			$extra_field_values[ DefaultTaskFields::COMPLETED_DATE ] = null;
-		}
-
-		// Update "archived_date" automatically, if moving to "archived" status and not already set.
-		if (
-			$target_status_option_field->slug === 'archived' &&
-			! isset( $extra_field_values[ DefaultTaskFields::ARCHIVED_DATE ] )
-		) {
-			$extra_field_values[ DefaultTaskFields::ARCHIVED_DATE ] = gmdate( 'Y-m-d H:i:s' );
-		}
-
-		// Clear "archived_date" if moving out of "archived" status and not already set to null.
-		if (
-			$target_status_option_field->slug !== 'archived' &&
-			! isset( $extra_field_values[ DefaultTaskFields::ARCHIVED_DATE ] )
-		) {
-			$extra_field_values[ DefaultTaskFields::ARCHIVED_DATE ] = null;
 		}
 
 		$update_data = array(
@@ -876,7 +858,7 @@ final class TaskManagerService {
 	}
 
 	/**
-	 * Mark a task as finished.
+	 * Archive a task by setting its archived_date. Status is preserved.
 	 *
 	 * @param int $task_id
 	 *
@@ -889,16 +871,38 @@ final class TaskManagerService {
 			throw new RuntimeException( 'Task not found.' );
 		}
 
-		$archived_status_option = $this->task_field_option_repository
-			->where( 'field_id', DefaultTaskFields::STATUS )
-			->where( 'slug', 'archived' )
-			->first();
-
-		if ( ! $archived_status_option ) {
-			throw new RuntimeException( 'Archived status option not found. Please ensure an "archived" status option exists.' );
+		$existing = $this->task_field_value_repository->find_by_task_and_field(
+			$task_id,
+			DefaultTaskFields::ARCHIVED_DATE
+		);
+		if ( ! $existing ) {
+			$this->task_field_value_repository->insert( array(
+				'task_id'  => $task_id,
+				'field_id' => DefaultTaskFields::ARCHIVED_DATE,
+				'value'    => gmdate( 'Y-m-d H:i:s' ),
+			) );
 		}
 
-		return (bool) $this->move_task( $task_id, $archived_status_option->id, null, 'last' );
+		return true;
+	}
+
+	/**
+	 * Unarchive a task by clearing its archived_date. Status is preserved.
+	 *
+	 * @param int $task_id
+	 *
+	 * @return bool
+	 * @throws Exception
+	 */
+	public function unarchive_task( int $task_id ): bool {
+		$task = $this->task_repository->find( $task_id );
+		if ( ! $task ) {
+			throw new RuntimeException( 'Task not found.' );
+		}
+
+		$this->task_field_value_repository->delete_by_task_and_field( $task_id, DefaultTaskFields::ARCHIVED_DATE );
+
+		return true;
 	}
 
 	/** ================================

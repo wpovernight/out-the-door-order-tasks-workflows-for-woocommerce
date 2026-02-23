@@ -6,6 +6,7 @@ import {
 } from '@shared/types/task';
 import { useTasks } from '@shared/context/TaskContext';
 import { groupAndSortTasks } from '../../../utils/task-sort';
+import { isTaskArchived } from '@shared/utils/fieldUtils';
 
 interface ViewTaskContextType {
 	viewTasks: Record<string, Task[]>;
@@ -173,7 +174,8 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 			return;
 		}
 
-		const grouped = groupAndSortTasks(tasks, statuses);
+		const activeTasks = tasks.filter((task) => !isTaskArchived(task));
+		const grouped = groupAndSortTasks(activeTasks, statuses);
 
 		// Only update if the grouped tasks are actually different
 		// This prevents unnecessary rerenders when global tasks update

@@ -373,3 +373,20 @@ export async function archiveTask(taskId: number): Promise<boolean> {
 	const data = await handleResponse<{ success: boolean }>(response);
 	return data.success;
 }
+
+export async function unarchiveTask(taskId: number): Promise<boolean> {
+	const response = await fetch(
+		`${apiRoot}/${apiNamespace}/tasks/${taskId}/unarchive`,
+		{
+			method: 'POST',
+			credentials: 'include',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-WP-Nonce': nonce,
+			},
+		}
+	);
+
+	const data = await handleResponse<{ success: boolean }>(response);
+	return data.success;
+}
