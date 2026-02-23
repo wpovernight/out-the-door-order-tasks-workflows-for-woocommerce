@@ -749,8 +749,10 @@ final class TaskManagerService {
 		}
 
 		// Clear "completed_date" if moving out of "completed" status and not already set to null.
+		// Archiving a completed task preserves the completed_date — it does not undo completion.
 		if (
 			$target_status_option_field->slug !== 'completed' &&
+			$target_status_option_field->slug !== 'archived' &&
 			! isset( $extra_field_values[ DefaultTaskFields::COMPLETED_DATE ] )
 		) {
 			$extra_field_values[ DefaultTaskFields::COMPLETED_DATE ] = null;

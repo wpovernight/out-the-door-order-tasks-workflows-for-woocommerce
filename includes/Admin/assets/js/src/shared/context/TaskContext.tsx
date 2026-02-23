@@ -305,7 +305,10 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 								.slice(0, 19),
 							resolved: null,
 						};
-					} else if (task.status === TASK_FINISH_STATUS_SLUG) {
+					} else if (
+						task.status === TASK_FINISH_STATUS_SLUG &&
+						targetStatusOption.slug !== TASK_ARCHIVE_STATUS_SLUG
+					) {
 						fieldUpdates.completed_date = {
 							raw: null,
 							resolved: null,
