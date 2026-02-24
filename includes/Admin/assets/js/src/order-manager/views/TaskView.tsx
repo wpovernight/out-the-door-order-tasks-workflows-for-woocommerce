@@ -2,11 +2,15 @@ import React from 'react';
 import Page from '@taskManager/components/Page';
 import { ViewProvider } from '@taskManager/context/ViewContext';
 import { SidebarModalProvider } from '@shared/context/SidebarModalContext';
+import { __ } from '@wordpress/i18n';
 
 export const TaskView = () => (
-	<ViewProvider>
-		<SidebarModalProvider>
-			<Page />
-		</SidebarModalProvider>
-	</ViewProvider>
+	<>
+		<h2 className="screenReader">{__('Task Manager', 'wpo-aom')}</h2>
+		<ViewProvider>
+			<SidebarModalProvider>
+				<Page />
+			</SidebarModalProvider>
+		</ViewProvider>
+	</>
 );
