@@ -1,12 +1,15 @@
 import React from 'react';
-import { isFieldOption, Task } from '@shared/types/task';
+import {isFieldOption, Task, TASK_FINISH_STATUS_SLUG} from '@shared/types/task';
 import { getColorStyle } from '@shared/utils/colorUtils';
 import { truncateText } from '@shared/utils/textUtils';
 import { TaskActionMenu } from '@shared/components/TaskActionMenu';
 import { getFieldObjectValue } from '@shared/utils/fieldUtils';
+import {__} from "@wordpress/i18n";
+import {useTasks} from "@shared/context/TaskContext";
 
 type HeadingLevel = 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 type TagsPosition = 'top' | 'bottom';
+type ActionDisplayMode = 'dropdown' | 'inline';
 
 interface TaskCardProps {
 	task: Task;
@@ -24,6 +27,8 @@ interface TaskCardProps {
 	descriptionMaxLength?: number;
 	tagsPosition?: TagsPosition;
 	showOrder?: boolean;
+	ActionDisplayMode?: ActionDisplayMode;
+	IncludedActions?: ('edit' | 'delete' | 'finish' | 'unfinish' | 'archive')[];
 	excludeTags?: string[];
 }
 
@@ -43,8 +48,15 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 	descriptionMaxLength = 70,
 	tagsPosition = 'bottom',
 	showOrder = true,
+	ActionDisplayMode = 'dropdown',
+	IncludedActions = ['edit', 'delete', 'finish', 'unfinish', 'archive'],
 	excludeTags = [],
 }) => {
+    const { finishTask: globalFinishTask, unfinishTask: globalUnfinishTask } =
+        useTasks();
+    const finishTask = onFinishClick || globalFinishTask;
+    const unfinishTask = onUnfinishClick || globalUnfinishTask;
+
 	const statusField = task.fields?.find((field) => field.slug === 'status');
 	const priorityField = task.fields?.find(
 		(field) => field.slug === 'priority'
@@ -153,6 +165,79 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 		);
 	};
 
+    const handleFinishClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        finishTask(task.id);
+    };
+
+    const handleUnfinishClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        unfinishTask(task.id);
+    };
+
+    const isCompleted = task.status === TASK_FINISH_STATUS_SLUG;
+
+    const renderActionInline = () => (
+        <ul className="wpo-aom-task-actions task-card-actions">
+            <li>
+                <button
+                    className={`wpo-button wpo-button-icon task-finish ${isCompleted ? 'finished' : ''}`}
+                    type="button"
+                    onClick={
+                        isCompleted
+                            ? handleUnfinishClick
+                            : handleFinishClick
+                    }
+                    title={
+                        isCompleted
+                            ? __('Mark as In Progress', 'wpo-aom')
+                            : __('Mark as Completed', 'wpo-aom')
+                    }
+                >
+					<span className="screenReader">
+						{isCompleted
+                            ? __('Mark as In Progress', 'wpo-aom')
+                            : __('Mark as Completed', 'wpo-aom')}
+					</span>
+                </button>
+            </li>
+            {onEditClick && (
+                <li>
+                    <button
+                        className="wpo-button wpo-button-icon task-edit"
+                        type="button"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onEditClick(task.id);
+                        }}
+                        title={__('Edit', 'wpo-aom')}
+                    >
+						<span className="screenReader">
+							{__('Edit', 'wpo-aom')}
+						</span>
+                    </button>
+                </li>
+            )}
+            {onDeleteClick && (
+                <li>
+                    <button
+                        className="wpo-button wpo-button-icon task-delete"
+                        type="button"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteClick(task.id);
+                        }}
+                        title={__('Delete', 'wpo-aom')}
+                    >
+						<span className="screenReader">
+							{__('Delete', 'wpo-aom')}
+						</span>
+                    </button>
+                </li>
+            )}
+        </ul>
+    );
+
 	return (
 		// eslint-disable-next-line jsx-a11y/no-static-element-interactions
 		<div
@@ -171,7 +256,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 					{/* Tags for compact mode */}
 					{tagsPosition === 'top' && renderTags()}
 					{/* Actions */}
-					{hasActions && (
+					{hasActions && ActionDisplayMode === 'dropdown' && (
 						<TaskActionMenu
 							task={task}
 							onEdit={onEditClick}
@@ -183,6 +268,8 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 							showDelete={!!onDeleteClick}
 						/>
 					)}
+
+                    {hasActions && ActionDisplayMode === 'inline' && renderActionInline()}
 				</div>
 			</div>
 			{showDescription && renderDescription()}
