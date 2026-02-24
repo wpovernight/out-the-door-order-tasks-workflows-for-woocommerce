@@ -15,15 +15,15 @@
     padding: 1em;
 }
 
-#wpo-aom-order-manager .content .header {
-    display: flex;
+#wpo-aom-order-manager .task-manager-tab .header {
+    margin-top: 1em;
+    align-items: end;
+    border-bottom: 1px solid #091E4224;
 }
 
 #wpo-aom-order-manager .content .header {
     display: flex;
     justify-content: space-between;
-    align-items: end;
-    margin-top: 1em;
 }
 
 .header-actions {
@@ -638,13 +638,6 @@
 .calendar-task-day-weekday {
     font-size: 0.9em;
     color: var(--wpo-aom-text-gray);
-}
-
-.calendar-task-day-count {
-    font-size: 0.9em;
-    padding: 0 0.4em;
-    border-radius: 0.5em;
-    border: 1px solid #CED1D3;
 }
 
 /* Remove redundant left/right borders from table inside the card */

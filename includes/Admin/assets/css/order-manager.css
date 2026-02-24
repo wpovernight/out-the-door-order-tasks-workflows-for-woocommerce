@@ -6,13 +6,14 @@ body.woocommerce_page_wpo_aom_order_manager #wpcontent {
 #wpo-aom-order-manager h1 {
     font-size: 1.5em;
     margin: 1.3em;
+    user-select: none;
 }
 
 #wpo-aom-order-manager {
     margin-top: 3em;
 }
 
-#wpo-aom-order-manager .header > nav {
+#wpo-aom-order-manager > .inner > .header {
     border-bottom: 1px solid #091E4224;
 }
 
