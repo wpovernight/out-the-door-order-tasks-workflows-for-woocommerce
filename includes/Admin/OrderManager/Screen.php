@@ -79,6 +79,13 @@ final class Screen {
 		);
 
 		wp_enqueue_style(
+			'wpo-aom-admin-dashboard',
+			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/dashboard.css',
+			array(),
+			WPO_AOM_VERSION
+		);
+
+		wp_enqueue_style(
 			'wpo-aom-admin-task-manager',
 			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/task-manager.css',
 			array(),
