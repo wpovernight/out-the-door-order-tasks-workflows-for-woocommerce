@@ -34,8 +34,11 @@ export const ArchiveView: React.FC = () => {
 	}
 
 	return (
-		<ViewTaskProvider>
-			<ArchiveContent />
-		</ViewTaskProvider>
+		<>
+			<h3 className="screenReader">{__('Task Archive', 'wpo-aom')}</h3>
+			<ViewTaskProvider>
+				<ArchiveContent />
+			</ViewTaskProvider>
+		</>
 	);
 };

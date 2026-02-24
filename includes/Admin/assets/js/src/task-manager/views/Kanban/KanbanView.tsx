@@ -38,8 +38,11 @@ export const KanbanView: React.FC = () => {
 	}
 
 	return (
-		<ViewTaskProvider>
-			<Board />
-		</ViewTaskProvider>
+		<>
+			<h3 className="screenReader">{__('Task Board', 'wpo-aom')}</h3>
+			<ViewTaskProvider>
+				<Board />
+			</ViewTaskProvider>
+		</>
 	);
 };

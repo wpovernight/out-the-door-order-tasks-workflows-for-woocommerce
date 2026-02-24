@@ -86,7 +86,7 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onTaskClick }) => {
 		<tr onClick={() => onTaskClick?.(task)}>
 			<td className="task-info">
 				<div>
-					<h4>{truncateText(task.title, 60)}</h4>
+					<span>{truncateText(task.title, 60)}</span>
 					{task.description && (
 						<p>{truncateText(task.description, 90)}</p>
 					)}

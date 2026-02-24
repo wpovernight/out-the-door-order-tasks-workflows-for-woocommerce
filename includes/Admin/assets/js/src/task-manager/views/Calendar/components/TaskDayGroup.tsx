@@ -30,7 +30,7 @@ const TaskDayGroup: React.FC<TaskDayGroupProps> = ({
 	return (
 		<div className="calendar-task-day-group">
 			<div className="calendar-task-day-header">
-				<h4 className="calendar-task-day-label">{dayLabel}</h4>
+				<h5 className="calendar-task-day-label">{dayLabel}</h5>
 				{weekdayLabel && (
 					<span className="calendar-task-day-weekday">
 						{weekdayLabel}

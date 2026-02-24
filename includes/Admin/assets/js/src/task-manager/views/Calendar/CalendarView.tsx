@@ -38,8 +38,11 @@ export const CalendarView: React.FC = () => {
 	}
 
 	return (
-		<ViewTaskProvider>
-			<CalendarContent />
-		</ViewTaskProvider>
+		<>
+			<h3 className="screenReader">{__('Task Calendar', 'wpo-aom')}</h3>
+			<ViewTaskProvider>
+				<CalendarContent />
+			</ViewTaskProvider>
+		</>
 	);
 };

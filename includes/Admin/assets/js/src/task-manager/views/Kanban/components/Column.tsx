@@ -245,7 +245,7 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 					className="kanban-column-header"
 					tabIndex={0}
 				>
-					<h2>{column.label}</h2>
+					<h4>{column.label}</h4>
 					<button
 						onClick={openTaskCreationModal}
 						className="wpo-button wpo-button-icon wpo-aom-add-button"

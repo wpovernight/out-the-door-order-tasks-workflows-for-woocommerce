@@ -67,7 +67,7 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 	return (
 		<div className="calendar-selector">
 			<div className="calendar-navigation">
-				<h2>{monthName}</h2>
+				<span>{monthName}</span>
 				<button
 					className="wpo-button wpo-navigate-previous"
 					onClick={onPreviousMonth}

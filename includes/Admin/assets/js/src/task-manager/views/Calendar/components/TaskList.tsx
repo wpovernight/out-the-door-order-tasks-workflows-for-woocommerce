@@ -29,12 +29,11 @@ const TaskList: React.FC<TaskListProps> = ({
 	onTaskClick,
 }) => {
 	// Generate dynamic title based on preset or date range
-	const getTitle = (): string => {
+	const getTitle = (): React.ReactNode => {
 		const taskCount = tasks.length;
-		const taskCountText =
-			taskCount === 1
-				? `1 ${__('Task', 'wpo-aom').toLowerCase()}`
-				: `${taskCount} ${__('Tasks', 'wpo-aom')}`;
+		const taskCountBadge = (
+			<span className="calendar-task-day-count">{taskCount}</span>
+		);
 
 		if (dateRangePreset !== 'custom') {
 			const presetLabels: Record<string, string> = {
@@ -49,7 +48,11 @@ const TaskList: React.FC<TaskListProps> = ({
 			};
 			const presetLabel =
 				presetLabels[dateRangePreset] || __('Today', 'wpo-aom');
-			return `${presetLabel}'s tasks - ${taskCountText}`;
+			return (
+				<>
+					{presetLabel}'s tasks {taskCountBadge}
+				</>
+			);
 		}
 
 		if (dateRange.start) {
@@ -59,13 +62,25 @@ const TaskList: React.FC<TaskListProps> = ({
 				: startDate;
 
 			if (startDate === endDate) {
-				return `${startDate} - ${taskCountText}`;
+				return (
+					<>
+						{startDate} {taskCountBadge}
+					</>
+				);
 			}
-			return `${startDate} - ${endDate} (${taskCountText})`;
+			return (
+				<>
+					{startDate} - {endDate} {taskCountBadge}
+				</>
+			);
 		}
 
 		// Fallback
-		return `${__('Tasks', 'wpo-aom')} - ${taskCountText}`;
+		return (
+			<>
+				{__('Tasks', 'wpo-aom')} - {taskCountBadge}
+			</>
+		);
 	};
 
 	// Group tasks by due date day; groups are ordered chronologically, no-date last.
@@ -97,7 +112,7 @@ const TaskList: React.FC<TaskListProps> = ({
 
 	return (
 		<div className="calendar-task-list-container">
-			<h3 className="calendar-task-list-title">{getTitle()}</h3>
+			<h4 className="calendar-task-list-title">{getTitle()}</h4>
 
 			{groupedTasks.length === 0 ? (
 				<div className="calendar-task-empty-state">

@@ -167,9 +167,7 @@
     cursor: grabbing;
 }
 
-.kanban-board .kanban-column h2 {
-    font-size: .95em;
-    font-weight: 600;
+.kanban-board .kanban-column h4 {
     margin: 0;
     text-transform: uppercase;
     letter-spacing: .5px;
@@ -290,10 +288,11 @@
     margin-bottom: 0.5em;
 }
 
-.calendar-navigation h2 {
-    font-size: 1em;
+.calendar-navigation > span {
+    font-size: 1.2em;
     margin: 0;
     order: 2;
+    font-weight: 600;
 }
 
 .wpo-navigate-previous,
@@ -368,6 +367,7 @@
 
 .calendar-grid {
     width: 100%;
+    user-select: none;
 }
 
 .calendar-days-grid {
@@ -456,6 +456,7 @@
 
 .calendar-task-list-container > .calendar-task-list-title {
     margin-left: 1em;
+    font-size: 1.5em;
 }
 
 .calendar-task-list-container {
@@ -557,7 +558,7 @@
 }
 
 .calendar-task-table-wrapper > table > tbody > tr > td.task-info > div > a {
-    font-size: 0.8em;
+    font-size: 0.9em;
     display: flex;
     align-items: anchor-center;
     gap: 0.3em;
@@ -578,8 +579,9 @@
     -webkit-mask-repeat: no-repeat;
 }
 
-.calendar-task-table-wrapper > table > tbody > tr > td.task-info > div > h4 {
-    font-size: 1em;
+.calendar-task-table-wrapper > table > tbody > tr > td.task-info > div > span {
+    font-size: 1.1em;
+    font-weight: 600;
 }
 
 .calendar-task-table-wrapper > table > tbody > tr > td.task-info > div > p {
@@ -623,7 +625,7 @@
 }
 
 .calendar-task-day-label {
-    font-size: 1.1em;
+    font-size: 1.2em;
     color: var(--wpo-aom-text-primary);
     margin: 0;
 }
@@ -741,7 +743,7 @@
     margin: 0;
 }
 
-.archived-task-table-wrapper > table > tbody > tr > td.task-info > div > h3 {
+.archived-task-table-wrapper > table > tbody > tr > td.task-info > div > span {
     color: var(--wpo-aom-text-primary);
     font-weight: 500;
     font-size: 1em;

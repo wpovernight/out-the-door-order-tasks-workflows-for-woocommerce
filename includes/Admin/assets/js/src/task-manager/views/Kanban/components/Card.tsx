@@ -285,7 +285,7 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 				onUnfinishClick={unfinishTask}
 				className={state.type !== 'idle' ? state.type : ''}
 				innerRef={innerRef}
-				headingLevel="h3"
+				headingLevel="h5"
 				showDescription={true}
 				excludeTags={['status']}
 			/>

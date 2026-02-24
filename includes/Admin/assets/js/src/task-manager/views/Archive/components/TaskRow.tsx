@@ -65,7 +65,7 @@ const TaskRow: React.FC<TaskRowProps> = ({ task }) => {
 		<tr>
 			<td className="task-info">
 				<div>
-					<h3>{truncateText(task.title, 60)}</h3>
+					<span>{truncateText(task.title, 60)}</span>
 					{task.description && (
 						<p>{truncateText(task.description, 90)}</p>
 					)}
