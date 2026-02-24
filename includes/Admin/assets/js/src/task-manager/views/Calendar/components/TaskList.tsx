@@ -32,7 +32,7 @@ const TaskList: React.FC<TaskListProps> = ({
 	const getTitle = (): React.ReactNode => {
 		const taskCount = tasks.length;
 		const taskCountBadge = (
-			<span className="calendar-task-day-count">{taskCount}</span>
+			<span className="wpo-count-badge">{taskCount}</span>
 		);
 
 		if (dateRangePreset !== 'custom') {

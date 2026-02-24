@@ -325,3 +325,11 @@
     mask-image: var(--wpo-aom-icon-restore);
     -webkit-mask-image: var(--wpo-aom-icon-restore);
 }
+
+.wpo-count-badge {
+    font-size: 0.9em;
+    padding: 0 0.4em;
+    border-radius: 0.5em;
+    line-height: 1.2em;
+    border: 1px solid #CED1D3;
+}

@@ -36,7 +36,7 @@ const TaskDayGroup: React.FC<TaskDayGroupProps> = ({
 						{weekdayLabel}
 					</span>
 				)}
-				<span className="calendar-task-day-count">{tasks.length}</span>
+				<span className="wpo-count-badge">{tasks.length}</span>
 			</div>
 
 			<div className="calendar-task-table-wrapper">
