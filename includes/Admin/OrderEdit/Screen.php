@@ -119,11 +119,11 @@ final class Screen {
 			'wpo-aom-order-edit-metabox',
 			'WPO_AOM_OrderEdit_MetaBox',
 			array(
-				'orderId'               => absint( $order_id ),
-				'apiRoot'               => esc_url_raw( rest_url( '/wc/v3' ) ),
-				'apiNamespace'          => 'wpo/aom',
-				'nonce'                 => wp_create_nonce( 'wp_rest' ),
-				'isFulfillmentsEnabled' => wc_string_to_bool( get_option( 'woocommerce_feature_fulfillments_enabled', 'no' ) ),
+				'orderId'                  => absint( $order_id ),
+				'apiRoot'                  => esc_url_raw( rest_url( '/wc/v3' ) ),
+				'apiNamespace'             => 'wpo/aom',
+				'nonce'                    => wp_create_nonce( 'wp_rest' ),
+				'isWooFulfillmentsEnabled' => wc_string_to_bool( get_option( 'woocommerce_feature_fulfillments_enabled', 'no' ) ),
 			)
 		);
 

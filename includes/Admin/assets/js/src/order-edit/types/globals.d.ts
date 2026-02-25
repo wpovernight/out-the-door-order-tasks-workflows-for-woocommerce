@@ -7,7 +7,7 @@ export interface WpoAomOrderEditMetaBoxData {
 	apiNamespace: string;
 	nonce: string;
 	orderId: number;
-	isFulfillmentsEnabled: boolean;
+	isWooFulfillmentsEnabled: boolean;
 }
 
 declare global {

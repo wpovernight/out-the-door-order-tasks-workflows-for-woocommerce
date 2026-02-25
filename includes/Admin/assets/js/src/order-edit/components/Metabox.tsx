@@ -4,12 +4,12 @@ import FulfillmentSection from '@orderEdit/components/fulfillments/FulfillmentSe
 import { useOrderEditData } from '@orderEdit/hooks/useOrderEditData';
 
 export const MetaBox: React.FC = () => {
-	const { isFulfillmentsEnabled } = useOrderEditData();
+	const { isWooFulfillmentsEnabled } = useOrderEditData();
 
 	return (
 		<>
 			<TaskSection />
-			{isFulfillmentsEnabled && <FulfillmentSection />}
+			{isWooFulfillmentsEnabled && <FulfillmentSection />}
 		</>
 	);
 };
