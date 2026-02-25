@@ -50,7 +50,7 @@ final class ServiceContainer {
 		'TaskController'           => TaskController::class,
 		// Admin Screens
 		'OrderManager_Screen'      => Admin\OrderManager\Screen::class,
-		'OrderEdit_MetaBox'        => Admin\OrderEdit\MetaBox::class,
+		'OrderEdit_Screen'         => Admin\OrderEdit\Screen::class,
 		'CustomOrderStatus_Admin'  => Admin\CustomOrderStatus\Screen::class,
 	);
 
@@ -121,7 +121,10 @@ final class ServiceContainer {
 		$build_method = 'build_' . $id;
 
 		if ( method_exists( $this, $build_method ) ) {
-			/** @uses build_TaskManagerService() */
+			/**
+			 * @uses build_TaskManagerService()
+			 * @uses build_OrderEdit_Screen()
+			 */
 			$this->instances[ $id ] = $this->{$build_method}();
 
 			return $this->instances[ $id ];
@@ -227,10 +230,10 @@ final class ServiceContainer {
 	/**
 	 * Build and return an instance of OrderEdit MetaBox.
 	 *
-	 * @return Admin\OrderEdit\MetaBox
+	 * @return Admin\OrderEdit\Screen
 	 */
-	private function build_OrderEdit_MetaBox(): Admin\OrderEdit\MetaBox {
-		return new Admin\OrderEdit\MetaBox(
+	private function build_OrderEdit_Screen(): Admin\OrderEdit\Screen {
+		return new Admin\OrderEdit\Screen(
 			$this->resolve_service( 'FulfillmentService', FulfillmentService::class )
 		);
 	}

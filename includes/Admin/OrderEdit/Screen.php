@@ -8,7 +8,7 @@ use WPO\AOM\Enums\FulfillmentStatuses;
 use WPO\AOM\Models\Fulfillment;
 use WPO\AOM\Services\FulfillmentService;
 
-final class MetaBox {
+final class Screen {
 	private FulfillmentService $fulfillment_service;
 
 	/**
@@ -351,7 +351,9 @@ final class MetaBox {
 	 * @return void
 	 */
 	public function on_save_order_items( int $order_id, array $items ): void {
-		if ( ! isset( $items['wpo-aom-fulfillment-quantity'] ) || ! is_array( $items['wpo-aom-fulfillment-quantity'] ) ) {
+		if (
+			! isset( $items['wpo-aom-fulfillment-quantity'] ) ||
+			! is_array( $items['wpo-aom-fulfillment-quantity'] ) ) {
 			return;
 		}
 
@@ -361,7 +363,9 @@ final class MetaBox {
 			}
 
 			$fulfillment_id       = array_key_first( $fulfillment_data );
-			$fulfillment_quantity = isset( $fulfillment_data[ $fulfillment_id ] ) ? absint( $fulfillment_data[ $fulfillment_id ] ) : 0;
+			$fulfillment_quantity = isset( $fulfillment_data[ $fulfillment_id ] )
+				? absint( $fulfillment_data[ $fulfillment_id ] )
+				: 0;
 
 			$this->fulfillment_service->save_order_item_fulfillment_quantity(
 				$item_id,
