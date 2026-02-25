@@ -373,6 +373,9 @@ final class Screen {
 				$fulfillment_id > 0 ? $fulfillment_id : null
 			);
 		}
+
+		// Update the order-level fulfillment status cache.
+		$this->fulfillment_service->update_order_fulfillment_status_meta( $order_id );
 	}
 
 	/**
@@ -383,7 +386,14 @@ final class Screen {
 	 * @return void
 	 */
 	public function on_delete_order_item( int $item_id ): void {
-		$this->fulfillment_service->delete_order_item_fulfillment_data( $item_id );
+		// Resolve the order before deleting fulfillment data.
+		$order_item = \WC_Order_Factory::get_order_item( $item_id );
+		$order_id   = $order_item ? $order_item->get_order_id() : 0;
+
+		if ( $order_id > 0 ) {
+			$this->fulfillment_service->delete_order_item_fulfillment_data( $item_id );
+			$this->fulfillment_service->update_order_fulfillment_status_meta( $order_id );
+		}
 	}
 
 	/**
@@ -463,6 +473,9 @@ final class Screen {
 				)
 			);
 		}
+
+		// Update the order-level fulfillment status cache.
+		$this->fulfillment_service->update_order_fulfillment_status_meta( $order_item->get_order_id() );
 
 		// Temporarily create a fulfillment object to get updated status.
 		$fulfillment = new Fulfillment(

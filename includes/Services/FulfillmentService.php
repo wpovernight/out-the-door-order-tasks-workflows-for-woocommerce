@@ -8,7 +8,8 @@ use WPO\AOM\Models\Fulfillment;
 defined( 'ABSPATH' ) || exit;
 
 final class FulfillmentService {
-	public const FULFILLMENT_DATA_META_KEY = '_wpo_aom_fulfillment_data';
+	public const FULFILLMENT_DATA_META_KEY            = '_wpo_aom_fulfillment_data';
+	public const ORDER_FULFILLMENT_STATUS_META_KEY   = '_wpo_aom_fulfillment_status';
 
 	/**
 	 * Get fulfillment data for an order item.
@@ -150,5 +151,73 @@ final class FulfillmentService {
 	 */
 	public function delete_order_item_fulfillment_data( int $item_id ): bool {
 		return wc_delete_order_item_meta( $item_id, self::FULFILLMENT_DATA_META_KEY );
+	}
+
+	/**
+	 * Recalculate and persist the order-level fulfillment status as order meta.
+	 *
+	 * This is a denormalized cache that enables efficient queries.
+	 *
+	 * @param \WC_Abstract_Order|int $order_or_id Order object or order ID.
+	 *
+	 * @return string The computed fulfillment status, or empty string on failure.
+	 */
+	public function update_order_fulfillment_status_meta( $order ): string {
+		$order = $order instanceof \WC_Abstract_Order
+			? $order
+			: wc_get_order( $order );
+
+		if ( ! $order ) {
+			return '';
+		}
+
+		$status = $this->get_order_fulfillment_status( $order );
+
+		$order->update_meta_data( self::ORDER_FULFILLMENT_STATUS_META_KEY, $status );
+		$order->save_meta_data();
+
+		return $status;
+	}
+
+	/**
+	 * Query orders by their cached fulfillment status.
+	 *
+	 * @param string $status
+	 * @param array  $args
+	 *
+	 * @return \WC_Order[]
+	 */
+	public function get_orders_by_fulfillment_status( string $status, array $args = array() ): array {
+		if ( ! FulfillmentStatuses::is_valid( $status ) ) {
+			return array();
+		}
+
+		/**
+		 * Filter the number of days to look back when querying orders by fulfillment status.
+		 *
+		 * @param int $days Number of days. Default 60. Set to 0 for no date limit.
+		 */
+		$days = (int) apply_filters( 'wpo_aom_fulfillment_status_query_days', 60 );
+
+		$defaults = array(
+			'meta_key'   => self::ORDER_FULFILLMENT_STATUS_META_KEY, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_value' => $status, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			'limit'      => -1,
+			'status'     => 'any',
+		);
+
+		if ( $days > 0 ) {
+			$defaults['date_created'] = '>' . gmdate( 'Y-m-d', strtotime( "-{$days} days" ) );
+		}
+
+		/**
+		 * Filter the wc_get_orders() arguments for fulfillment status queries.
+		 *
+		 * @param array  $query_args The merged query arguments.
+		 * @param string $status     The fulfillment status being queried.
+		 */
+		$query_args = apply_filters( 'wpo_aom_fulfillment_status_query_args', wp_parse_args( $args, $defaults ), $status );
+
+		return wc_get_orders( $query_args );
 	}
 }
