@@ -1,11 +1,15 @@
 import React from 'react';
-import {isFieldOption, Task, TASK_FINISH_STATUS_SLUG} from '@shared/types/task';
+import {
+	isFieldOption,
+	Task,
+	TASK_FINISH_STATUS_SLUG,
+} from '@shared/types/task';
 import { getColorStyle } from '@shared/utils/colorUtils';
 import { truncateText } from '@shared/utils/textUtils';
 import { TaskActionMenu } from '@shared/components/TaskActionMenu';
 import { getFieldObjectValue } from '@shared/utils/fieldUtils';
-import {__} from "@wordpress/i18n";
-import {useTasks} from "@shared/context/TaskContext";
+import { __ } from '@wordpress/i18n';
+import { useTasks } from '@shared/context/TaskContext';
 
 type HeadingLevel = 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 type TagsPosition = 'top' | 'bottom';
@@ -29,6 +33,7 @@ interface TaskCardProps {
 	showOrder?: boolean;
 	ActionDisplayMode?: ActionDisplayMode;
 	IncludedActions?: ('edit' | 'delete' | 'finish' | 'unfinish' | 'archive')[];
+	FinishAsCheckbox?: boolean;
 	excludeTags?: string[];
 }
 
@@ -50,12 +55,17 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 	showOrder = true,
 	ActionDisplayMode = 'dropdown',
 	IncludedActions = ['edit', 'delete', 'finish', 'unfinish', 'archive'],
+	FinishAsCheckbox = false,
 	excludeTags = [],
 }) => {
-    const { finishTask: globalFinishTask, unfinishTask: globalUnfinishTask } =
-        useTasks();
-    const finishTask = onFinishClick || globalFinishTask;
-    const unfinishTask = onUnfinishClick || globalUnfinishTask;
+	const {
+		finishTask: globalFinishTask,
+		unfinishTask: globalUnfinishTask,
+		archiveTask: globalArchiveTask,
+	} = useTasks();
+	const finishTask = onFinishClick || globalFinishTask;
+	const unfinishTask = onUnfinishClick || globalUnfinishTask;
+	const archiveTask = onArchiveClick || globalArchiveTask;
 
 	const statusField = task.fields?.find((field) => field.slug === 'status');
 	const priorityField = task.fields?.find(
@@ -141,7 +151,17 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 			return null;
 		}
 
-		return <span className="task-card-due-date">{dueDate}</span>;
+		let classes = 'task-card-due-date';
+
+		if (
+			new Date(dueDateValue as string).setHours(0, 0, 0, 0) <
+				new Date().setHours(0, 0, 0, 0) &&
+			task.status !== TASK_FINISH_STATUS_SLUG
+		) {
+			classes += ' overdue';
+		}
+
+		return <span className={classes}>{dueDate}</span>;
 	};
 
 	const renderAssociatedOrder = () => {
@@ -165,78 +185,107 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 		);
 	};
 
-    const handleFinishClick = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        finishTask(task.id);
-    };
+	const handleFinishClick = (e: React.SyntheticEvent) => {
+		e.stopPropagation();
+		finishTask(task.id);
+	};
 
-    const handleUnfinishClick = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        unfinishTask(task.id);
-    };
+	const handleUnfinishClick = (e: React.SyntheticEvent) => {
+		e.stopPropagation();
+		unfinishTask(task.id);
+	};
 
-    const isCompleted = task.status === TASK_FINISH_STATUS_SLUG;
+	const handleArchiveClick = (e: React.SyntheticEvent) => {
+		e.stopPropagation();
+		archiveTask(task.id);
+	};
 
-    const renderActionInline = () => (
-        <ul className="wpo-aom-task-actions task-card-actions">
-            <li>
-                <button
-                    className={`wpo-button wpo-button-icon task-finish ${isCompleted ? 'finished' : ''}`}
-                    type="button"
-                    onClick={
-                        isCompleted
-                            ? handleUnfinishClick
-                            : handleFinishClick
-                    }
-                    title={
-                        isCompleted
-                            ? __('Mark as In Progress', 'wpo-aom')
-                            : __('Mark as Completed', 'wpo-aom')
-                    }
-                >
-					<span className="screenReader">
-						{isCompleted
-                            ? __('Mark as In Progress', 'wpo-aom')
-                            : __('Mark as Completed', 'wpo-aom')}
-					</span>
-                </button>
-            </li>
-            {onEditClick && (
-                <li>
-                    <button
-                        className="wpo-button wpo-button-icon task-edit"
-                        type="button"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onEditClick(task.id);
-                        }}
-                        title={__('Edit', 'wpo-aom')}
-                    >
-						<span className="screenReader">
-							{__('Edit', 'wpo-aom')}
-						</span>
-                    </button>
-                </li>
-            )}
-            {onDeleteClick && (
-                <li>
-                    <button
-                        className="wpo-button wpo-button-icon task-delete"
-                        type="button"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onDeleteClick(task.id);
-                        }}
-                        title={__('Delete', 'wpo-aom')}
-                    >
-						<span className="screenReader">
-							{__('Delete', 'wpo-aom')}
-						</span>
-                    </button>
-                </li>
-            )}
-        </ul>
-    );
+	const isCompleted = task.status === TASK_FINISH_STATUS_SLUG;
+
+	const renderActionInline = () => {
+		if (IncludedActions.length === 0) {
+			return null;
+		}
+
+		return (
+			<ul className="wpo-aom-task-actions task-card-actions">
+				{IncludedActions.includes('archive') && (
+					<li>
+						<button
+							className="wpo-button wpo-button-icon task-archive"
+							type="button"
+							onClick={handleArchiveClick}
+							title={__('Archive', 'wpo-aom')}
+						>
+							<span className="screenReader">
+								{__('Archive', 'wpo-aom')}
+							</span>
+						</button>
+					</li>
+				)}
+				{(IncludedActions.includes('finish') ||
+					IncludedActions.includes('unfinish')) &&
+					!FinishAsCheckbox && (
+						<li>
+							<button
+								className={`wpo-button wpo-button-icon task-finish ${isCompleted ? 'finished' : ''}`}
+								type="button"
+								onClick={
+									isCompleted
+										? handleUnfinishClick
+										: handleFinishClick
+								}
+								title={
+									isCompleted
+										? __('Mark as In Progress', 'wpo-aom')
+										: __('Mark as Completed', 'wpo-aom')
+								}
+							>
+								<span className="screenReader">
+									{isCompleted
+										? __('Mark as In Progress', 'wpo-aom')
+										: __('Mark as Completed', 'wpo-aom')}
+								</span>
+							</button>
+						</li>
+					)}
+				{IncludedActions.includes('edit') && onEditClick && (
+					<li>
+						<button
+							className="wpo-button wpo-button-icon task-edit"
+							type="button"
+							onClick={(e) => {
+								e.stopPropagation();
+								onEditClick(task.id);
+							}}
+							title={__('Edit', 'wpo-aom')}
+						>
+							<span className="screenReader">
+								{__('Edit', 'wpo-aom')}
+							</span>
+						</button>
+					</li>
+				)}
+				{IncludedActions.includes('delete') && onDeleteClick && (
+					<li>
+						<button
+							className="wpo-button wpo-button-icon task-delete"
+							type="button"
+							onClick={(e) => {
+								e.stopPropagation();
+								onDeleteClick(task.id);
+							}}
+							title={__('Delete', 'wpo-aom')}
+						>
+							<span className="screenReader">
+								{__('Delete', 'wpo-aom')}
+							</span>
+						</button>
+					</li>
+				)}
+			</ul>
+		);
+	};
 
 	return (
 		// eslint-disable-next-line jsx-a11y/no-static-element-interactions
@@ -251,6 +300,24 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 			}}
 		>
 			<div className="task-card-header">
+				{FinishAsCheckbox && (
+					<label
+						className={`task-finish-checkbox ${isCompleted ? 'finished' : ''}`}
+					>
+						<input
+							type="checkbox"
+							checked={isCompleted}
+							onChange={(e) => {
+								e.stopPropagation();
+								if (e.target.checked) {
+									handleFinishClick(e);
+								} else {
+									handleUnfinishClick(e);
+								}
+							}}
+						/>
+					</label>
+				)}
 				<HeadingTag>{task.title}</HeadingTag>
 				<div className="task-card-header-info">
 					{/* Tags for compact mode */}
@@ -269,7 +336,9 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 						/>
 					)}
 
-                    {hasActions && ActionDisplayMode === 'inline' && renderActionInline()}
+					{hasActions &&
+						ActionDisplayMode === 'inline' &&
+						renderActionInline()}
 				</div>
 			</div>
 			{showDescription && renderDescription()}

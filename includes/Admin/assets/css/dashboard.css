@@ -152,4 +152,7 @@
     background-color: var(--wpo-aom-text-gray);
 }
 
+#today-tasks .task-card {
+    cursor: initial;
+}
 

@@ -18,7 +18,6 @@
 
 .task-card > .task-card-header {
     display: flex;
-    justify-content: space-between;
     align-items: flex-start;
     gap: 0.5em;
 }
@@ -50,6 +49,7 @@
 .task-card-options .wpo-action-menu > li:first-child > button {
     margin-top: 0.5em;
 }
+
 .task-card-options .wpo-action-menu > li:last-child > button {
     margin-bottom: 0.5em;
 }
@@ -145,6 +145,7 @@
 
 .task-card .task-card-description > p {
     font-size: 1em;
+    color: var(--wpo-aom-text-gray);
 }
 
 .task-card ul.task-card-tags {
@@ -163,6 +164,10 @@
     min-width: 8em;
     justify-content: flex-end;
     align-items: center;
+}
+
+.task-card span.task-card-due-date.overdue {
+    color: var(--wpo-aom-error);
 }
 
 .task-card span.task-card-due-date::before {
@@ -211,4 +216,11 @@
 .task-card .task-card-header-info {
     display: flex;
     gap: 0.3em;
+    margin-left: auto;
+}
+
+.task-card .task-finish-checkbox > input {
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--wpo-aom-border-color);
 }

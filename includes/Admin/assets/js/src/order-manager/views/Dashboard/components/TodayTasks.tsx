@@ -3,7 +3,7 @@ import { __ } from '@wordpress/i18n';
 import { useTasks } from '@shared/context/TaskContext';
 import { TaskCard } from '@shared/components/TaskCard';
 import { useTaskCreation, useTaskEdit } from '@shared/hooks/useTaskFormModal';
-import { getTaskDateField } from '@shared/utils/fieldUtils';
+import { getTaskDateField, isTaskArchived } from '@shared/utils/fieldUtils';
 import { TASK_FINISH_STATUS_SLUG, Task } from '@shared/types/task';
 import { EmptyState } from '@shared/components/LoadingSkeleton';
 
@@ -96,7 +96,9 @@ export const TodayTasks = () => {
 						descriptionMaxLength={120}
 						onEditClick={handleEditClick}
 						onDeleteClick={handleDeleteClick}
-                        ActionDisplayMode="inline"
+						ActionDisplayMode="inline"
+						IncludedActions={['edit', 'archive', 'delete']}
+						FinishAsCheckbox={true}
 					/>
 				</li>
 			))}
@@ -107,11 +109,11 @@ export const TodayTasks = () => {
 		<div className="dashboard-widget" id="today-tasks">
 			<div className="header">
 				<h3>
-                    {__("Today's tasks", 'wpo-aom')}{' '}
-                    <span className="wpo-count-badge">
-                        {todayActive.length}
-                    </span>
-                </h3>
+					{__("Today's tasks", 'wpo-aom')}{' '}
+					<span className="wpo-count-badge">
+						{todayActive.length}
+					</span>
+				</h3>
 				<button
 					type="button"
 					className="wpo-button wpo-button-icon wpo-aom-add-button"

@@ -159,6 +159,7 @@
 
 .wpo-aom-task-actions .task-edit,
 .wpo-aom-task-actions .task-delete,
+.wpo-aom-task-actions .task-archive,
 .wpo-aom-task-actions .task-finish {
     border: none;
     background: none;
@@ -193,6 +194,7 @@
 
 .wpo-aom-task-actions .task-edit::before,
 .wpo-aom-task-actions .task-delete::before,
+.wpo-aom-task-actions .task-archive::before,
 .wpo-aom-task-actions .task-finish::before {
     content: '';
     position: absolute;
@@ -223,6 +225,11 @@
 .wpo-aom-task-actions .task-finish::before {
     mask-image: var(--wpo-aom-icon-finish);
     -webkit-mask-image: var(--wpo-aom-icon-finish);
+}
+
+.wpo-aom-task-actions .task-archive::before {
+    mask-image: var(--wpo-aom-icon-archive);
+    -webkit-mask-image: var(--wpo-aom-icon-archive);
 }
 
 .wpo-aom-add-button {
