@@ -14,7 +14,7 @@ final class FulfillmentService {
 	/**
 	 * Get fulfillment data for an order item.
 	 *
-	 * @param int|\WC_Order_Item $item
+	 * @param int|\WC_Order_Item|\WC_Order_Item_Product $item
 	 *
 	 * @return Fulfillment[]|null
 	 */
@@ -25,7 +25,7 @@ final class FulfillmentService {
 			}
 
 			$fulfillment_meta = wc_get_order_item_meta( intval( $item ), self::FULFILLMENT_DATA_META_KEY, true );
-		} elseif ( $item instanceof \WC_Order_Item ) {
+		} elseif ( $item instanceof \WC_Order_Item || $item instanceof \WC_Order_Item_Product ) {
 			$fulfillment_meta = $item->get_meta( self::FULFILLMENT_DATA_META_KEY, true );
 		} else {
 			return null;
@@ -182,13 +182,15 @@ final class FulfillmentService {
 	/**
 	 * Query orders by their cached fulfillment status.
 	 *
-	 * @param string $status
-	 * @param array  $args
+	 * Pass an empty string to retrieve all orders that have any fulfillment data.
+	 *
+	 * @param string $status One of FulfillmentStatuses constants, or empty for all.
+	 * @param array  $args   Additional wc_get_orders() arguments.
 	 *
 	 * @return \WC_Order[]
 	 */
-	public function get_orders_by_fulfillment_status( string $status, array $args = array() ): array {
-		if ( ! FulfillmentStatuses::is_valid( $status ) ) {
+	public function get_orders_by_fulfillment_status( string $status = '', array $args = array() ): array {
+		if ( ! empty( $status ) && ! FulfillmentStatuses::is_valid( $status ) ) {
 			return array();
 		}
 
@@ -200,11 +202,16 @@ final class FulfillmentService {
 		$days = (int) apply_filters( 'wpo_aom_fulfillment_status_query_days', 60 );
 
 		$defaults = array(
-			'meta_key'   => self::ORDER_FULFILLMENT_STATUS_META_KEY, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-			'meta_value' => $status, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-			'limit'      => -1,
-			'status'     => 'any',
+			'meta_key' => self::ORDER_FULFILLMENT_STATUS_META_KEY, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'limit'    => -1,
+			'status'   => 'any',
 		);
+
+		if ( ! empty( $status ) ) {
+			$defaults['meta_value'] = $status; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		} else {
+			$defaults['meta_compare'] = 'EXISTS'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		}
 
 		if ( $days > 0 ) {
 			$defaults['date_created'] = '>' . gmdate( 'Y-m-d', strtotime( "-{$days} days" ) );
@@ -214,7 +221,7 @@ final class FulfillmentService {
 		 * Filter the wc_get_orders() arguments for fulfillment status queries.
 		 *
 		 * @param array  $query_args The merged query arguments.
-		 * @param string $status     The fulfillment status being queried.
+		 * @param string $status     The fulfillment status being queried (empty = all).
 		 */
 		$query_args = apply_filters( 'wpo_aom_fulfillment_status_query_args', wp_parse_args( $args, $defaults ), $status );
 
