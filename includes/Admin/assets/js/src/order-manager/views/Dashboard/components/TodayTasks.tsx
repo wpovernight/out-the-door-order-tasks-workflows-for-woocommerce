@@ -36,6 +36,11 @@ export const TodayTasks = () => {
 				return;
 			}
 
+			// Skip if is Archived.
+			if (isTaskArchived(task)) {
+				return;
+			}
+
 			const isCompleted = task.status === TASK_FINISH_STATUS_SLUG;
 
 			if (isCompleted && dueDate >= todayStart && dueDate <= todayEnd) {
