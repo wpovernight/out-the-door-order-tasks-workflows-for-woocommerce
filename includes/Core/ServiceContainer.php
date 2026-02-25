@@ -12,6 +12,7 @@ use WPO\AOM\Repositories\TaskRepository;
 use WPO\AOM\Repositories\TaskFieldRepository;
 use WPO\AOM\Repositories\TaskFieldOptionRepository;
 use WPO\AOM\Repositories\TaskFieldValueRepository;
+use WPO\AOM\REST\FulfillmentController;
 use WPO\AOM\REST\TaskController;
 use WPO\AOM\Services\CustomOrderStatusService;
 use WPO\AOM\Services\FulfillmentService;
@@ -48,6 +49,7 @@ final class ServiceContainer {
 		'EmailService'             => EmailService::class,
 		// REST Controllers
 		'TaskController'           => TaskController::class,
+		'FulfillmentController'    => FulfillmentController::class,
 		// Admin Screens
 		'OrderManager_Screen'      => Admin\OrderManager\Screen::class,
 		'OrderEdit_Screen'         => Admin\OrderEdit\Screen::class,
