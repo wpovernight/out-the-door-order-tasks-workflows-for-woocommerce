@@ -1,11 +1,11 @@
 import React from 'react';
 import Header from '@orderEdit/components/fulfillments/Header';
-import FulfillmentsList from '@orderEdit/components/fulfillments/FulfillmentsList';
+import WooFulfillmentsList from '@orderEdit/components/fulfillments/WooFulfillmentsList';
 import { useAsyncLoader } from '@shared/hooks/useAsyncLoader';
-import { useOrderFulfillment } from '@orderEdit/context/OrderFulfillmentContext';
+import { useOrderWooFulfillment } from '@orderEdit/context/OrderWooFulfillmentContext';
 
-const FulfillmentSection: React.FC = () => {
-	const { loadFulfillments } = useOrderFulfillment();
+const WooFulfillmentSection: React.FC = () => {
+	const { loadFulfillments } = useOrderWooFulfillment();
 
 	// loadFulfillments now handles loading the order internally
 	const { loadingStatus, loadingError } = useAsyncLoader(async () => {
@@ -15,7 +15,7 @@ const FulfillmentSection: React.FC = () => {
 	return (
 		<div className="wpo-aom-metabox-section" id="order-fulfillments">
 			<Header />
-			<FulfillmentsList
+			<WooFulfillmentsList
 				loadingStatus={loadingStatus}
 				loadingError={loadingError}
 			/>
@@ -23,4 +23,4 @@ const FulfillmentSection: React.FC = () => {
 	);
 };
 
-export default FulfillmentSection;
+export default WooFulfillmentSection;

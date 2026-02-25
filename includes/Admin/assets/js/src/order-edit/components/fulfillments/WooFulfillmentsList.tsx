@@ -1,26 +1,26 @@
 import React from 'react';
 import { __ } from '@wordpress/i18n';
-import { useOrderFulfillment } from '@orderEdit/context/OrderFulfillmentContext';
-import { FulfillmentCard } from './FulfillmentCard';
-import { FulfillmentCardSkeleton } from './FulfillmentCardSkeleton';
+import { useOrderWooFulfillment } from '@orderEdit/context/OrderWooFulfillmentContext';
+import { WooFulfillmentCard } from './WooFulfillmentCard';
+import { WooFulfillmentCardSkeleton } from './WooFulfillmentCardSkeleton';
 import { EmptyState, ErrorState } from '@shared/components/LoadingSkeleton';
 import { AsyncLoaderStatus } from '@shared/hooks/useAsyncLoader';
 
-interface FulfillmentsListProps {
+interface WooFulfillmentsListProps {
 	loadingStatus: AsyncLoaderStatus;
 	loadingError: Error | null;
 }
 
-const FulfillmentsList: React.FC<FulfillmentsListProps> = ({
+const WooFulfillmentsList: React.FC<WooFulfillmentsListProps> = ({
 	loadingStatus,
 	loadingError,
 }) => {
 	const { fulfillments, refreshFulfillments, orderId } =
-		useOrderFulfillment();
+		useOrderWooFulfillment();
 
 	// Show loading state
 	if (loadingStatus === 'loading') {
-		return <FulfillmentCardSkeleton count={2} />;
+		return <WooFulfillmentCardSkeleton count={2} />;
 	}
 
 	// Show error state
@@ -59,7 +59,7 @@ const FulfillmentsList: React.FC<FulfillmentsListProps> = ({
 			<ul className="fulfillments-list">
 				{fulfillments.map((fulfillment, index) => (
 					<li key={fulfillment.id}>
-						<FulfillmentCard
+						<WooFulfillmentCard
 							fulfillment={fulfillment}
 							index={index}
 						/>
@@ -70,4 +70,4 @@ const FulfillmentsList: React.FC<FulfillmentsListProps> = ({
 	);
 };
 
-export default FulfillmentsList;
+export default WooFulfillmentsList;

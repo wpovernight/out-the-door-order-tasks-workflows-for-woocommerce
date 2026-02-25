@@ -5,13 +5,13 @@ import {
 	SkeletonLine,
 } from '@shared/components/LoadingSkeleton';
 
-interface FulfillmentCardSkeletonProps {
+interface WooFulfillmentCardSkeletonProps {
 	count?: number;
 	className?: string;
 }
 
-export const FulfillmentCardSkeleton: React.FC<
-	FulfillmentCardSkeletonProps
+export const WooFulfillmentCardSkeleton: React.FC<
+	WooFulfillmentCardSkeletonProps
 > = ({ count = 2, className = '' }) => {
 	return (
 		<LoadingSkeleton count={count} className={className}>

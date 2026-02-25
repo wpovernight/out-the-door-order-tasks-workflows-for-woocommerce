@@ -1,6 +1,6 @@
 import React from 'react';
 import TaskSection from '@orderEdit/components/tasks/TaskSection';
-import FulfillmentSection from '@orderEdit/components/fulfillments/FulfillmentSection';
+import WooFulfillmentSection from '@orderEdit/components/fulfillments/WooFulfillmentSection';
 import { useOrderEditData } from '@orderEdit/hooks/useOrderEditData';
 
 export const MetaBox: React.FC = () => {
@@ -9,7 +9,7 @@ export const MetaBox: React.FC = () => {
 	return (
 		<>
 			<TaskSection />
-			{isWooFulfillmentsEnabled && <FulfillmentSection />}
+			{isWooFulfillmentsEnabled && <WooFulfillmentSection />}
 		</>
 	);
 };

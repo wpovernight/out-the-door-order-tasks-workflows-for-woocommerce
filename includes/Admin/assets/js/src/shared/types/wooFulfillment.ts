@@ -1,49 +1,49 @@
-export type FulfillmentStatus = 'fulfilled' | 'unfulfilled';
-export type ShippingOption = 'tracking-number' | 'manual-entry' | 'no-info';
+export type WooFulfillmentStatus = 'fulfilled' | 'unfulfilled';
+export type WooShippingOption = 'tracking-number' | 'manual-entry' | 'no-info';
 
-export type FulfillmentMetaItem = {
+export type WooFulfillmentMetaItem = {
 	id: number;
 	key: string;
 	value: any;
 };
 
-export type FulfillmentItem = {
+export type WooFulfillmentItem = {
 	item_id: number;
 	qty: number;
 	name?: string;
 };
 
-export type Fulfillment = {
+export type WooFulfillment = {
 	id: number;
 	entity_type: string;
 	entity_id: string;
 	is_fulfilled: boolean;
-	status: FulfillmentStatus;
+	status: WooFulfillmentStatus;
 	date_updated: string;
-	meta_data: FulfillmentMetaItem[];
+	meta_data: WooFulfillmentMetaItem[];
 };
 
-export interface FulfillmentMetaData {
-	shipping_option?: ShippingOption;
+export interface WooFulfillmentMetaData {
+	shipping_option?: WooShippingOption;
 	tracking_number?: string;
 	tracking_url?: string;
 	shipment_provider?: string;
 	provider_name?: string;
-	items?: FulfillmentItem[];
+	items?: WooFulfillmentItem[];
 	date_fulfilled?: string;
 }
 
-export function getFulfillmentMeta(
-	fulfillment: Fulfillment
-): FulfillmentMetaData {
-	const meta: FulfillmentMetaData = {};
+export function getWooFulfillmentMeta(
+	fulfillment: WooFulfillment
+): WooFulfillmentMetaData {
+	const meta: WooFulfillmentMetaData = {};
 
 	fulfillment.meta_data.forEach((item) => {
 		const key = item.key.replace(/^_/, ''); // Remove leading underscore
 
 		switch (key) {
 			case 'shipping_option':
-				meta.shipping_option = item.value as ShippingOption;
+				meta.shipping_option = item.value as WooShippingOption;
 				break;
 			case 'tracking_number':
 				meta.tracking_number = item.value;
@@ -58,7 +58,7 @@ export function getFulfillmentMeta(
 				meta.provider_name = item.value;
 				break;
 			case 'items':
-				meta.items = item.value as FulfillmentItem[];
+				meta.items = item.value as WooFulfillmentItem[];
 				break;
 			case 'date_fulfilled':
 				meta.date_fulfilled = item.value;

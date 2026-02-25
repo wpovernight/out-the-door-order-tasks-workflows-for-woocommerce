@@ -2,11 +2,11 @@ import React from 'react';
 import { __ } from '@wordpress/i18n';
 import SectionHeader from '@orderEdit/components/common/SectionHeader';
 import { useOrderEditData } from '@orderEdit/hooks/useOrderEditData';
-import { useOrderFulfillment } from '@orderEdit/context/OrderFulfillmentContext';
+import { useOrderWooFulfillment } from '@orderEdit/context/OrderWooFulfillmentContext';
 
 const Header: React.FC = () => {
 	const { orderId } = useOrderEditData();
-	const { fulfillments } = useOrderFulfillment();
+	const { fulfillments } = useOrderWooFulfillment();
 
 	const fulfillmentCount = fulfillments.length;
 

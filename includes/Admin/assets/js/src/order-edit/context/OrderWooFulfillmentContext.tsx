@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useState } from 'react';
-import { Fulfillment, FulfillmentItem } from '@shared/types/fulfillment';
-import { fetchFulfillments, fetchOrder } from '@shared/utils/api';
+import { WooFulfillment, WooFulfillmentItem } from '@shared/types/wooFulfillment';
+import { fetchWooFulfillments, fetchOrder } from '@shared/utils/api';
 import { AsyncLoaderStatus } from '@shared/hooks/useAsyncLoader';
 
 interface Order {
@@ -10,9 +10,9 @@ interface Order {
 	}>;
 }
 
-interface OrderFulfillmentContextType {
+interface OrderWooFulfillmentContextType {
 	orderId: number;
-	fulfillments: Fulfillment[];
+	fulfillments: WooFulfillment[];
 	loadingStatus: AsyncLoaderStatus;
 	loadingError: Error | null;
 	loadFulfillments: (force?: boolean) => Promise<void>;
@@ -20,16 +20,16 @@ interface OrderFulfillmentContextType {
 	loadOrder: () => Promise<void>;
 }
 
-const OrderFulfillmentContext = React.createContext<
-	OrderFulfillmentContextType | undefined
+const OrderWooFulfillmentContext = React.createContext<
+	OrderWooFulfillmentContextType | undefined
 >(undefined);
 
-export const OrderFulfillmentProvider: React.FC<{
+export const OrderWooFulfillmentProvider: React.FC<{
 	orderId: number;
 	children: React.ReactNode;
 }> = ({ orderId, children }) => {
 	const [order, setOrder] = useState<Order | null>(null);
-	const [fulfillments, setFulfillments] = useState<Fulfillment[]>([]);
+	const [fulfillments, setFulfillments] = useState<WooFulfillment[]>([]);
 	const [loadingStatus, setLoadingStatus] =
 		useState<AsyncLoaderStatus>('idle');
 	const [loadingError, setLoadingError] = useState<Error | null>(null);
@@ -67,7 +67,7 @@ export const OrderFulfillmentProvider: React.FC<{
 					currentOrder = await fetchOrder(orderId);
 				}
 
-				const fulfillmentData = await fetchFulfillments(orderId);
+				const fulfillmentData = await fetchWooFulfillments(orderId);
 
 				// Enrich fulfillments with item names from order data.
 				const enrichedFulfillments = fulfillmentData.map(
@@ -81,7 +81,7 @@ export const OrderFulfillmentProvider: React.FC<{
 								return meta;
 							}
 
-							const items = meta.value as FulfillmentItem[];
+							const items = meta.value as WooFulfillmentItem[];
 							return {
 								...meta,
 								value: items.map((item) => {
@@ -124,7 +124,7 @@ export const OrderFulfillmentProvider: React.FC<{
 	}, [loadFulfillments]);
 
 	return (
-		<OrderFulfillmentContext.Provider
+		<OrderWooFulfillmentContext.Provider
 			value={{
 				orderId,
 				fulfillments,
@@ -136,12 +136,12 @@ export const OrderFulfillmentProvider: React.FC<{
 			}}
 		>
 			{children}
-		</OrderFulfillmentContext.Provider>
+		</OrderWooFulfillmentContext.Provider>
 	);
 };
 
-export const useOrderFulfillment = (): OrderFulfillmentContextType => {
-	const context = useContext(OrderFulfillmentContext);
+export const useOrderWooFulfillment = (): OrderWooFulfillmentContextType => {
+	const context = useContext(OrderWooFulfillmentContext);
 	if (!context) {
 		throw new Error(
 			'useOrderFulfillment must be used within an OrderFulfillmentProvider'

@@ -4,7 +4,7 @@ import { MetaBox } from './components/Metabox';
 import { SidebarModalProvider } from '@shared/context/SidebarModalContext';
 import { TaskProvider } from '@shared/context/TaskContext';
 import { OrderTaskProvider } from './context/OrderTaskContext';
-import { OrderFulfillmentProvider } from './context/OrderFulfillmentContext';
+import { OrderWooFulfillmentProvider } from './context/OrderWooFulfillmentContext';
 
 const container = document.getElementById('wpo-aom-order-meta-box-content');
 
@@ -15,11 +15,11 @@ if (container) {
 	root.render(
 		<TaskProvider>
 			<OrderTaskProvider orderId={orderId}>
-				<OrderFulfillmentProvider orderId={orderId}>
+				<OrderWooFulfillmentProvider orderId={orderId}>
 					<SidebarModalProvider>
 						<MetaBox />
 					</SidebarModalProvider>
-				</OrderFulfillmentProvider>
+				</OrderWooFulfillmentProvider>
 			</OrderTaskProvider>
 		</TaskProvider>
 	);

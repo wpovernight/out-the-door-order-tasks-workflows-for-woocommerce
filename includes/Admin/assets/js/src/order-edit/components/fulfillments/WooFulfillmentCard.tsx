@@ -1,22 +1,22 @@
 import React from 'react';
-import { Fulfillment, getFulfillmentMeta } from '@shared/types/fulfillment';
+import { WooFulfillment, getWooFulfillmentMeta } from '@shared/types/wooFulfillment';
 import {
 	getShippingMethodLabel,
 	getTrackingInfo,
 	formatDate,
-} from '@orderEdit/components/utils/fulfillmentUtils';
+} from '@orderEdit/components/utils/wooFulfillmentUtils';
 import { getColorStyle } from '@shared/utils/colorUtils';
 
-interface FulfillmentCardProps {
-	fulfillment: Fulfillment;
+interface WooFulfillmentCardProps {
+	fulfillment: WooFulfillment;
 	index: number;
 }
 
-export const FulfillmentCard: React.FC<FulfillmentCardProps> = ({
+export const WooFulfillmentCard: React.FC<WooFulfillmentCardProps> = ({
 	fulfillment,
 	index,
 }) => {
-	const meta = getFulfillmentMeta(fulfillment);
+	const meta = getWooFulfillmentMeta(fulfillment);
 	const trackingInfo = getTrackingInfo(meta);
 
 	return (

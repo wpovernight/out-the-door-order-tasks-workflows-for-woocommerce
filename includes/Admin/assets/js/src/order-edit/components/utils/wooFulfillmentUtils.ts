@@ -1,7 +1,7 @@
-import { FulfillmentMetaData } from '@shared/types/fulfillment';
+import { WooFulfillmentMetaData } from '@shared/types/wooFulfillment';
 
 export const getShippingMethodLabel = (
-	fulfillmentMeta: FulfillmentMetaData
+	fulfillmentMeta: WooFulfillmentMetaData
 ): string => {
 	switch (fulfillmentMeta.shipping_option) {
 		case 'tracking-number':
@@ -20,7 +20,7 @@ export const getShippingMethodLabel = (
 };
 
 export const getTrackingInfo = (
-	fulfillmentMeta: FulfillmentMetaData
+	fulfillmentMeta: WooFulfillmentMetaData
 ): string => {
 	if (fulfillmentMeta.tracking_number) {
 		return fulfillmentMeta.tracking_number;
