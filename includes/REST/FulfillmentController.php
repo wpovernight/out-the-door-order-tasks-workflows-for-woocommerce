@@ -200,9 +200,9 @@ class FulfillmentController extends BaseRestController {
 	 * @return array
 	 */
 	private function format_location( \WC_Abstract_Order $order ): array {
-		$city         = $order->get_billing_city();
-		$state_code   = $order->get_billing_state();
-		$country_code = $order->get_billing_country();
+		$city         = $order->get_shipping_city() ?: $order->get_billing_city();
+		$state_code   = $order->get_shipping_state() ?: $order->get_billing_state();
+		$country_code = $order->get_shipping_country() ?: $order->get_billing_country();
 
 		$countries = \WC()->countries->get_countries();
 		$country   = $countries[ $country_code ] ?? $country_code;

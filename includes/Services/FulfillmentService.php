@@ -187,7 +187,7 @@ final class FulfillmentService {
 	 * @param string $status One of FulfillmentStatuses constants, or empty for all.
 	 * @param array  $args   Additional wc_get_orders() arguments.
 	 *
-	 * @return \WC_Order[]
+	 * @return \WC_Abstract_Order[]
 	 */
 	public function get_orders_by_fulfillment_status( string $status = '', array $args = array() ): array {
 		if ( ! empty( $status ) && ! FulfillmentStatuses::is_valid( $status ) ) {
