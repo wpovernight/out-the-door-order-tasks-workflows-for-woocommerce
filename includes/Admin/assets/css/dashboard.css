@@ -156,3 +156,176 @@
     cursor: initial;
 }
 
+/* Partial Fulfillments Widget */
+#partial-fulfillments .fulfillment-order-list {
+    list-style: none;
+    padding: 0;
+    margin: 0.5em 0 0;
+}
+
+#partial-fulfillments .fulfillment-order {
+    border: 1px solid var(--wpo-aom-border-light);
+    border-radius: var(--wpo-aom-radius-s);
+    padding: 0.6em;
+    margin: 0 0 0.6em;
+}
+
+#partial-fulfillments .fulfillment-order > h4 {
+    margin: 0;
+    padding: 0;
+}
+
+#partial-fulfillments .fulfillment-order-toggle {
+    display: flex;
+    padding: 0;
+    gap: 0.3em;
+    width: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+}
+
+#partial-fulfillments .fulfillment-order-toggle::before {
+    content: '';
+    display: inline-block;
+    width: 0.9em;
+    height: 0.9em;
+    margin-top: 0.3em;
+    background-color: var(--wpo-aom-gray-icon);
+    mask-image: var(--wpo-aom-icon-person);
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    -webkit-mask-image: var(--wpo-aom-icon-person);
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+}
+
+#partial-fulfillments .fulfillment-order-toggle::after {
+    content: '';
+    width: 1em;
+    height: 1em;
+    background-color: var(--wpo-aom-text-gray-light);
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    transition: var(--wpo-aom-transition-fast) all;
+    margin-left: auto;
+    mask-image: var(--wpo-aom-icon-chevron-down);
+    -webkit-mask-image: var(--wpo-aom-icon-chevron-down);
+}
+
+#partial-fulfillments .fulfillment-order-toggle.collapsed::after {
+    transform: rotate(-180deg);
+}
+
+#partial-fulfillments .fulfillment-order-toggle:hover::after {
+    background-color: var(--wpo-aom-text-gray);
+}
+
+
+#partial-fulfillments .customer-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3em;
+}
+
+#partial-fulfillments .customer-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-decoration: none;
+    line-height: 1.6em;
+}
+
+#partial-fulfillments .customer-location {
+    font-size: 0.8em;
+    color: var(--wpo-aom-text-gray);
+}
+
+/* Expanded items list */
+#partial-fulfillments .fulfillment-order-items {
+    list-style: none;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8em;
+}
+
+#partial-fulfillments .fulfillment-order-items.collapsed {
+    display: none;
+}
+
+#partial-fulfillments .fulfillment-item {
+    display: flex;
+    align-items: center;
+    gap: 0.8em;
+    padding: 0.8em;
+    border: 1px solid var(--wpo-aom-border-light);
+    border-radius: var(--wpo-aom-radius-m);
+    margin: 0.5em 0 0 1em;
+}
+
+#partial-fulfillments .fulfillment-item > img {
+    width: 4em;
+    height: 4em;
+    min-width: 4em;
+    object-fit: cover;
+    border-radius: var(--wpo-aom-radius-s);
+    border: 1px solid var(--wpo-aom-border-light);
+}
+
+#partial-fulfillments .item-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15em;
+}
+
+#partial-fulfillments .item-name {
+    font-size: 0.9em;
+    font-weight: 600;
+    margin: 0;
+}
+
+#partial-fulfillments .item-name:hover {
+    text-decoration: underline;
+}
+
+#partial-fulfillments .item-attributes {
+    font-size: 0.78em;
+    color: var(--wpo-aom-text-gray-light);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#partial-fulfillments .item-progress {
+    display: flex;
+    align-items: center;
+    gap: 0.8em;
+}
+
+#partial-fulfillments .progress-bar {
+    width: 100%;
+    height: 6px;
+    background-color: var(--wpo-aom-border-light);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+#partial-fulfillments .progress-fill {
+    height: 100%;
+    background-color: var(--wpo-aom-purple-primary);
+    border-radius: 3px;
+    transition: width var(--wpo-aom-transition-normal);
+}
+
+#partial-fulfillments .progress-text {
+    font-size: 0.75em;
+    color: var(--wpo-aom-text-gray);
+    white-space: nowrap;
+}

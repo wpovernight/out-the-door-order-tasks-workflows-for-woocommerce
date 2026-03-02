@@ -173,7 +173,8 @@
     padding: 1em;
 }
 
-.wpo-aom-task-actions .task-edit:hover {
+.wpo-aom-task-actions .task-edit:hover,
+.wpo-aom-task-actions .task-archive:hover {
     color: #7c3aed;
     background-color: #ede9fe;
 }
