@@ -1,5 +1,8 @@
 import React from 'react';
-import { WooFulfillment, getWooFulfillmentMeta } from '@shared/types/wooFulfillment';
+import {
+	WooFulfillment,
+	getWooFulfillmentMeta,
+} from '@shared/types/wooFulfillment';
 import {
 	getShippingMethodLabel,
 	getTrackingInfo,
