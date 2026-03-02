@@ -1,6 +1,6 @@
 import { Task, FieldOption, TaskField } from '../types/task';
 import { WooFulfillment } from '../types/wooFulfillment';
-import {FulfillmentOrder} from "@shared/types/fulfillment";
+import { FulfillmentOrder } from '@shared/types/fulfillment';
 
 function getApiConfig() {
 	const orderManagerData = (window as any).WPO_AOM_OrderManager;
@@ -392,7 +392,9 @@ export async function unarchiveTask(taskId: number): Promise<boolean> {
 	return data.success;
 }
 
-export async function fetchFulfillmentOrders(status?: string): Promise<FulfillmentOrder[]> {
+export async function fetchFulfillmentOrders(
+	status?: string
+): Promise<FulfillmentOrder[]> {
 	const response = await fetch(
 		`${apiRoot}/${apiNamespace}/fulfillments/orders` +
 			(status ? `?status=${encodeURIComponent(status)}` : ''),
