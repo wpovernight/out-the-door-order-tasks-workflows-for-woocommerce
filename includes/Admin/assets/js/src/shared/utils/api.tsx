@@ -1,6 +1,7 @@
 import { Task, FieldOption, TaskField } from '../types/task';
 import { WooFulfillment } from '../types/wooFulfillment';
 import { FulfillmentOrder } from '@shared/types/fulfillment';
+import { CustomOrderStatus } from '@shared/types/customOrderStatus';
 
 function getApiConfig() {
 	const orderManagerData = (window as any).WPO_AOM_OrderManager;
@@ -409,4 +410,75 @@ export async function fetchFulfillmentOrders(
 	);
 
 	return handleResponse<any[]>(response);
+}
+
+export async function fetchCustomOrderStatuses(): Promise<CustomOrderStatus[]> {
+	const response = await fetch(
+		`${apiRoot}/${apiNamespace}/custom-order-statuses`,
+		{
+			method: 'GET',
+			credentials: 'include',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-WP-Nonce': nonce,
+			},
+		}
+	);
+
+	return handleResponse<CustomOrderStatus[]>(response);
+}
+
+export async function createCustomOrderStatus(
+	payload: Partial<CustomOrderStatus>
+): Promise<CustomOrderStatus> {
+	const response = await fetch(
+		`${apiRoot}/${apiNamespace}/custom-order-statuses`,
+		{
+			method: 'POST',
+			credentials: 'include',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-WP-Nonce': nonce,
+			},
+			body: JSON.stringify(payload),
+		}
+	);
+
+	return handleResponse<CustomOrderStatus>(response);
+}
+
+export async function updateCustomOrderStatus(
+	statusId: number,
+	payload: Partial<CustomOrderStatus>
+): Promise<CustomOrderStatus> {
+	const response = await fetch(
+		`${apiRoot}/${apiNamespace}/custom-order-statuses/${statusId}`,
+		{
+			method: 'PUT',
+			credentials: 'include',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-WP-Nonce': nonce,
+			},
+			body: JSON.stringify(payload),
+		}
+	);
+
+	return handleResponse<CustomOrderStatus>(response);
+}
+
+export async function deleteCustomOrderStatus(statusId: number): Promise<void> {
+	const response = await fetch(
+		`${apiRoot}/${apiNamespace}/custom-order-statuses/${statusId}`,
+		{
+			method: 'DELETE',
+			credentials: 'include',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-WP-Nonce': nonce,
+			},
+		}
+	);
+
+	return handleResponse<void>(response);
 }
