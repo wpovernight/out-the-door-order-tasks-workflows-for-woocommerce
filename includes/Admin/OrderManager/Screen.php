@@ -25,6 +25,7 @@ final class Screen {
 	 */
 	public function enqueue_scripts(): void {
 		$screen = get_current_screen();
+		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
 		if ( ! $screen || 'woocommerce_page_wpo_aom_order_manager' !== $screen->id ) {
 			return;
@@ -50,51 +51,61 @@ final class Screen {
 			)
 		);
 
+		/**
+		 * Enqueue styles.
+		 */
 		wp_enqueue_style(
 			'wpo-aom-admin-common',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/common.css',
+			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/common' . $suffix . '.css',
 			array(),
 			WPO_AOM_VERSION
 		);
 
 		wp_enqueue_style(
 			'wpo-aom-admin-order-manager',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/order-manager.css',
+			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/order-manager' . $suffix . '.css',
 			array(),
 			WPO_AOM_VERSION
 		);
 
 		wp_enqueue_style(
 			'wpo-aom-admin-task-card',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/task-card.css',
+			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/task-card' . $suffix . '.css',
 			array(),
 			WPO_AOM_VERSION
 		);
 
 		wp_enqueue_style(
 			'wpo-aom-admin-sidebar-modal',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/sidebar-modal.css',
+			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/sidebar-modal' . $suffix . '.css',
 			array(),
 			WPO_AOM_VERSION
 		);
 
 		wp_enqueue_style(
 			'wpo-aom-admin-dashboard',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/dashboard.css',
+			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/dashboard' . $suffix . '.css',
 			array(),
 			WPO_AOM_VERSION
 		);
 
 		wp_enqueue_style(
 			'wpo-aom-admin-task-manager',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/task-manager.css',
+			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/task-manager' . $suffix . '.css',
+			array(),
+			WPO_AOM_VERSION
+		);
+
+		wp_enqueue_style(
+			'wpo-aom-admin-custom-order-status',
+			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/custom-order-status' . $suffix . '.css',
 			array(),
 			WPO_AOM_VERSION
 		);
 
 		wp_enqueue_style(
 			'wpo-aom-admin-skeleton',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/skeleton.css',
+			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/skeleton' . $suffix . '.css',
 			array(),
 			WPO_AOM_VERSION
 		);
