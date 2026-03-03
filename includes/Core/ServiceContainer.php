@@ -55,7 +55,6 @@ final class ServiceContainer {
 		// Admin Screens
 		'OrderManager_Screen'         => Admin\OrderManager\Screen::class,
 		'OrderEdit_Screen'            => Admin\OrderEdit\Screen::class,
-		'CustomOrderStatus_Admin'     => Admin\CustomOrderStatus\Screen::class,
 	);
 
 	/**
