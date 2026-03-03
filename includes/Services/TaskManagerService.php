@@ -248,7 +248,7 @@ final class TaskManagerService {
 	 * @param array|null $field_values
 	 *
 	 * @return array|null
-	 * @throws Exception
+	 * @throws Exception|\Throwable
 	 */
 	public function update_task( int $task_id, array $task_data, ?array $field_values = array() ): ?array {
 		$task = $this->task_repository->find( $task_id );

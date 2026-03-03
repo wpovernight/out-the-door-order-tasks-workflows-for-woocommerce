@@ -2,6 +2,8 @@
 
 namespace WPO\AOM\Services;
 
+use Exception;
+use RuntimeException;
 use WPO\AOM\Models\CustomOrderStatus;
 use WPO\AOM\Repositories\CustomOrderStatusRepository;
 
@@ -159,9 +161,10 @@ class CustomOrderStatusService {
 	 *
 	 * @param array<string, mixed> $data
 	 *
-	 * @return int|false Inserted ID or false on failure
+	 * @return CustomOrderStatus Inserted ID or false on failure
+	 * @throws Exception
 	 */
-	public function create( array $data ) {
+	public function create( array $data ): CustomOrderStatus {
 		$status = new CustomOrderStatus( $data );
 
 		// Ensure the status key is unique.
@@ -177,7 +180,15 @@ class CustomOrderStatusService {
 			} while ( $existing );
 		}
 
-		return $this->repository->insert( $status->to_db_array() );
+		$result = $this->repository->save( $status );
+
+		if ( ! $result ) {
+			throw new Exception( __( 'Failed to create custom order status', 'wpo-aom' ) );
+		}
+
+		$status->id = $result;
+
+		return $status;
 	}
 
 	/**
@@ -186,18 +197,23 @@ class CustomOrderStatusService {
 	 * @param int $id
 	 * @param array<string, mixed> $data
 	 *
-	 * @return bool
+	 * @return CustomOrderStatus
+	 * @throws Exception
 	 */
-	public function update( int $id, array $data ): bool {
-		$existing = $this->repository->find( $id );
-		if ( ! $existing ) {
-			return false;
+	public function update( int $id, array $data ): CustomOrderStatus {
+		$custom_status = $this->repository->find( $id );
+		if ( ! $custom_status ) {
+			throw new Exception( __( 'Custom order status not found', 'wpo-aom' ) );
 		}
 
-		$model     = new CustomOrderStatus( array_merge( $existing->to_array(), $data ) );
-		$model->id = $id;
+		$custom_status->fill( $data );
+		$result = $this->repository->save( $custom_status );
 
-		return $this->repository->where( 'id', $id )->update( $model->to_db_array() );
+		if ( false === $result ) {
+			throw new RuntimeException( __( 'Failed to update custom order status', 'wpo-aom' ) );
+		}
+
+		return $custom_status;
 	}
 
 	/**
