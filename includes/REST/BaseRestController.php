@@ -53,7 +53,11 @@ abstract class BaseRestController {
 			$value       = $data[ $field ] ?? null;
 
 			foreach ( $rules_array as $rule ) {
-				$error = $this->validate_rule( $field, $value, $rule );
+				// Handle rules with parameters (e.g., regex:/pattern/)
+				[$rule_name, $rule_parameter] = explode( ':', $rule, 2 ) + array( null, null );
+
+				$error = $this->validate_rule( $field, $value, $rule_name, $rule_parameter );
+
 				if ( $error ) {
 					$errors[ $field ][] = $error;
 				}
@@ -68,12 +72,13 @@ abstract class BaseRestController {
 	 *
 	 * @param string $field The field name
 	 * @param mixed $value The value to validate
-	 * @param string $rule The validation rule
+	 * @param string $rule_name The validation rule
+	 * @param string|null $rule_parameter Optional parameter for the rule (e.g., regex pattern)
 	 *
 	 * @return string|null Error message or null if validation passes
 	 */
-	private function validate_rule( string $field, $value, string $rule ): ?string {
-		switch ( $rule ) {
+	private function validate_rule( string $field, $value, string $rule_name, ?string $rule_parameter ): ?string {
+		switch ( $rule_name ) {
 			case 'required':
 				if ( empty( $value ) ) {
 					return $this->format_error_message( $field, 'is required' );
@@ -96,6 +101,11 @@ abstract class BaseRestController {
 					! in_array( $value, array( 0, 1, '0', '1' ), true )
 				) {
 					return $this->format_error_message( $field, 'must be a boolean' );
+				}
+				break;
+			case 'regex':
+				if ( ! is_null( $value ) && ! preg_match( $rule_parameter, $value ) ) {
+					return $this->format_error_message( $field, 'is invalid' );
 				}
 				break;
 		}
