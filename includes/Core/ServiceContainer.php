@@ -12,6 +12,7 @@ use WPO\AOM\Repositories\TaskRepository;
 use WPO\AOM\Repositories\TaskFieldRepository;
 use WPO\AOM\Repositories\TaskFieldOptionRepository;
 use WPO\AOM\Repositories\TaskFieldValueRepository;
+use WPO\AOM\REST\CustomOrderStatusController;
 use WPO\AOM\REST\FulfillmentController;
 use WPO\AOM\REST\TaskController;
 use WPO\AOM\Services\CustomOrderStatusService;
@@ -43,17 +44,18 @@ final class ServiceContainer {
 	 */
 	private static array $service_map = array(
 		// Services
-		'TaskManagerService'       => TaskManagerService::class,
-		'FulfillmentService'       => FulfillmentService::class,
-		'CustomOrderStatusService' => CustomOrderStatusService::class,
-		'EmailService'             => EmailService::class,
+		'TaskManagerService'          => TaskManagerService::class,
+		'FulfillmentService'          => FulfillmentService::class,
+		'CustomOrderStatusService'    => CustomOrderStatusService::class,
+		'EmailService'                => EmailService::class,
 		// REST Controllers
-		'TaskController'           => TaskController::class,
-		'FulfillmentController'    => FulfillmentController::class,
+		'TaskController'              => TaskController::class,
+		'FulfillmentController'       => FulfillmentController::class,
+		'CustomOrderStatusController' => CustomOrderStatusController::class,
 		// Admin Screens
-		'OrderManager_Screen'      => Admin\OrderManager\Screen::class,
-		'OrderEdit_Screen'         => Admin\OrderEdit\Screen::class,
-		'CustomOrderStatus_Admin'  => Admin\CustomOrderStatus\Screen::class,
+		'OrderManager_Screen'         => Admin\OrderManager\Screen::class,
+		'OrderEdit_Screen'            => Admin\OrderEdit\Screen::class,
+		'CustomOrderStatus_Admin'     => Admin\CustomOrderStatus\Screen::class,
 	);
 
 	/**
