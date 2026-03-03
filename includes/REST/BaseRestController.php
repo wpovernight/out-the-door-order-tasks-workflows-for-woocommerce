@@ -49,7 +49,7 @@ abstract class BaseRestController {
 		$errors = array();
 
 		foreach ( $rules as $field => $rule_string ) {
-			$rules_array = explode( '|', $rule_string );
+			$rules_array = explode( '|', $rule_string, 2 );
 			$value       = $data[ $field ] ?? null;
 
 			foreach ( $rules_array as $rule ) {
@@ -104,7 +104,7 @@ abstract class BaseRestController {
 				}
 				break;
 			case 'regex':
-				if ( ! is_null( $value ) && ! preg_match( $rule_parameter, $value ) ) {
+				if ( ! is_null( $value ) && ! empty( $rule_parameter ) && ! preg_match( $rule_parameter, $value ) ) {
 					return $this->format_error_message( $field, 'is invalid' );
 				}
 				break;
