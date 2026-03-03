@@ -183,7 +183,7 @@ final class TaskManagerService {
 	 *
 	 * @return array<string, mixed>|null
 	 *
-	 * @throws Exception
+	 * @throws Exception|\Throwable
 	 */
 	public function create_task( string $title, string $description, ?array $field_values = array() ): ?array {
 		if ( empty( $title ) ) {
@@ -197,13 +197,13 @@ final class TaskManagerService {
 		$task      = new Task( $task_data );
 
 		$result   = $this->task_repository->save( $task );
-		$task->id = $result;
 
 		if ( ! $result ) {
 			throw new Exception( 'Failed to create task.' );
 		}
 
-		$status_id = 1; // Default status ID
+		$task->id           = $result;
+		$status_id          = 1; // Default status ID
 		$field_values_array = array();
 
 		foreach ( $field_values as $field_value ) {
