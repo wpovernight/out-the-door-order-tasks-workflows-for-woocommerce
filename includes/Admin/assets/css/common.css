@@ -125,8 +125,8 @@
 }
 
 .wpo-button-primary:disabled {
-    background-color: #bfa3ec;
-    color: #f2f2f2;
+    background-color: var(--wpo-aom-purple-primary);
+    opacity: 0.5;
 }
 
 .wpo-button-icon {
@@ -308,7 +308,7 @@
     background-color: #fee2e2;
 }
 
-.wpo-aom-row-actions button::before {
+.wpo-aom-row-actions button:not(.no-icon)::before {
     content: '';
     position: absolute;
     top: 50%;
@@ -333,6 +333,26 @@
 .wpo-aom-row-actions button.wpo-aom-restore-button::before {
     mask-image: var(--wpo-aom-icon-restore);
     -webkit-mask-image: var(--wpo-aom-icon-restore);
+}
+
+.wpo-aom-row-actions button.wpo-aom-edit-button::before {
+    mask-image: var(--wpo-aom-icon-edit);
+    -webkit-mask-image: var(--wpo-aom-icon-edit);
+}
+
+.wpo-aom-form-actions {
+    display: flex;
+    gap: 0.5em;
+}
+
+.wpo-aom-form-actions button {
+    padding: 0.5em 1.5em;
+}
+
+.wpo-button-secondary {
+    border: 1px solid var(--wpo-aom-border-color);
+    color: var(--wpo-aom-text-gray);
+    background: #fff;
 }
 
 .wpo-count-badge {
