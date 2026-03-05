@@ -1,8 +1,9 @@
 .dashboard-view {
     padding: 1em;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-gap: 1em;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1em;
 }
 
 .dashboard-widget {
@@ -10,6 +11,12 @@
     border-radius: var(--wpo-aom-radius-l);
     box-shadow: 0 1px 2px 0 #0A0D120D;
     padding: 0 1.5em;
+    flex: 1;
+}
+
+.dashboard-widget .content {
+    max-height: 38em;
+    overflow-y: auto;
 }
 
 .dashboard-widget > .header {
