@@ -205,6 +205,7 @@
     content: '\f531';
     font-family: 'dashicons';
     vertical-align: text-bottom;
+    font-weight: normal;
 }
 
 .task-archived-fadeout {
