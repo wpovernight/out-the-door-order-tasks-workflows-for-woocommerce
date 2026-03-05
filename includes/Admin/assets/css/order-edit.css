@@ -136,6 +136,81 @@
     margin-left: 1em;
 }
 
+/********************************
+ * Task Archived Overlay
+ ******************************/
+
+.task-archived-item {
+    position: relative;
+    transition: opacity 0.3s ease-out;
+    background: var(--wpo-aom-bg-light);
+}
+
+.task-archived-item .task-card {
+    opacity: 0.35;
+    pointer-events: none;
+}
+
+.task-archived-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    gap: 1em;
+    background: #fff;
+    border: 1px solid var(--wpo-aom-purple-primary);
+    border-radius: var(--wpo-aom-radius-m);
+    padding: 0.6em 1em;
+    z-index: 1;
+}
+
+.task-archived-overlay-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15em;
+}
+
+.task-archived-message {
+    font-weight: 600;
+    color: var(--wpo-aom-text-primary);
+}
+
+.task-archived-link {
+    font-size: 0.95em;
+    color: var(--wpo-aom-purple-primary);
+    text-decoration: none;
+}
+
+.task-archived-link:hover {
+    text-decoration: underline;
+}
+
+.task-archived-undo {
+    display: flex;
+    align-items: center;
+    color: var(--wpo-aom-purple-primary);
+    background: #f3eaff;
+    border-radius: var(--wpo-aom-radius-l);
+    padding: 0.4em 1em;
+    font-weight: 600;
+    font-size: 0.95em;
+    cursor: pointer;
+    white-space: nowrap;
+    gap: 0.5em
+}
+
+.task-archived-undo::before {
+    content: '\f531';
+    font-family: 'dashicons';
+    vertical-align: text-bottom;
+}
+
+.task-archived-fadeout {
+    opacity: 0;
+}
+
 #order-tasks .wpo-aom-loading-skeleton-container {
     padding: 1em;
 }
