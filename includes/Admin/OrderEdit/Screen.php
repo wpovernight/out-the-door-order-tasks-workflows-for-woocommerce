@@ -124,6 +124,7 @@ final class Screen {
 				'apiNamespace'             => 'wpo/aom',
 				'nonce'                    => wp_create_nonce( 'wp_rest' ),
 				'isWooFulfillmentsEnabled' => wc_string_to_bool( get_option( 'woocommerce_feature_fulfillments_enabled', 'no' ) ),
+				'archivePageUrl'           => esc_url( admin_url( 'admin.php?page=wpo_aom_order_manager#/task-manager/archive' ) ),
 			)
 		);
 

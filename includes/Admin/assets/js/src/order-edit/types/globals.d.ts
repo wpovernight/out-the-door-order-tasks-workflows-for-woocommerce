@@ -8,6 +8,7 @@ export interface WpoAomOrderEditMetaBoxData {
 	nonce: string;
 	orderId: number;
 	isWooFulfillmentsEnabled: boolean;
+	archivePageUrl: string;
 }
 
 declare global {
