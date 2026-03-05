@@ -692,7 +692,7 @@
     background-color: var(--wpo-aom-bg-gray-alt);
     border-bottom: 1px solid var(--wpo-aom-border-light);
     color: var(--wpo-aom-text-gray);
-    width: 7em;
+    width: 10em;
 }
 
 .archived-task-table-wrapper > table > thead > tr > th.task-actions {
