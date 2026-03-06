@@ -144,14 +144,14 @@ class TaskRepository extends BaseRepository {
 					{$task_field_value_table_name} AS position
 					INNER JOIN {$task_field_value_table_name} AS status ON position.task_id = status.task_id
 				WHERE
-					status.field_id = '{$status_field_id}'
-					AND position.field_id = '{$position_field_id}'
+					status.field_id = %d
+					AND position.field_id = %d
 					AND status.value = %d
 					FOR UPDATE;
 				";
 
 			$locked = $task_field_value_repository
-				->execute_raw( $lock_query, array( $status_id ) );
+				->execute_raw( $lock_query, array( $status_field_id, $position_field_id, $status_id ) );
 
 			// If lock query failed (not 0 rows, but actual failure), return false.
 			if ( false === $locked ) {
@@ -176,8 +176,8 @@ class TaskRepository extends BaseRepository {
 					{$task_field_value_table_name} AS position
 					INNER JOIN {$task_field_value_table_name} AS status ON position.task_id = status.task_id
 				WHERE
-					status.field_id = '{$status_field_id}'
-					AND position.field_id = '{$position_field_id}'
+					status.field_id = %d
+					AND position.field_id = %d
 					AND status.value = %d
 			)
 			UPDATE
@@ -188,7 +188,7 @@ class TaskRepository extends BaseRepository {
 		";
 
 			$affected_rows = $task_field_value_repository
-				->execute_raw( $ranked_cte, array( $status_id ) );
+				->execute_raw( $ranked_cte, array( $status_field_id, $position_field_id, $status_id ) );
 
 			// Return true even if 0 rows were affected (positions were already correct)
 			return false !== $affected_rows;
