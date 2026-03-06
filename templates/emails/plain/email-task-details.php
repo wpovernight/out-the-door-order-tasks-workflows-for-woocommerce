@@ -15,14 +15,14 @@ use WPO\AOM\Services\EmailService;
 defined( 'ABSPATH' ) || exit;
 
 echo "========================================\n";
-echo strtoupper( __( 'Task Details', 'wpo-aom' ) ) . "\n";
+echo strtoupper( esc_html__( 'Task Details', 'wpo-aom' ) ) . "\n";
 echo "========================================\n\n";
 
-echo __( 'Task ID:', 'wpo-aom' ) . ' #' . $task_data['id'] . "\n";
-echo __( 'Title:', 'wpo-aom' ) . ' ' . $task_data['title'] . "\n";
+echo esc_html__( 'Task ID:', 'wpo-aom' ) . ' #' . esc_html( $task_data['id'] ) . "\n";
+echo esc_html__( 'Title:', 'wpo-aom' ) . ' ' . esc_html( $task_data['title'] ) . "\n";
 
 if ( ! empty( $task_data['description'] ) ) {
-	echo __( 'Description:', 'wpo-aom' ) . "\n" . $task_data['description'] . "\n";
+	echo esc_html__( 'Description:', 'wpo-aom' ) . "\n" . esc_html( $task_data['description'] ) . "\n";
 }
 
 /** @var EmailService $email_service */
@@ -37,7 +37,7 @@ if ( ! empty( $task_data['fields'] ) ) {
 		}
 		$value = $email_service->format_by_field_type( $field['slug'], $field['values'][0], $field );
 		if ( ! empty( $value ) ) {
-			echo $field['label'] . ': ' . $value . "\n";
+			echo esc_html( $field['label'] ) . ': ' . esc_html( $value ) . "\n";
 		}
 	}
 }
