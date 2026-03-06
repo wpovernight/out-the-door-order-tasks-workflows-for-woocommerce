@@ -133,7 +133,7 @@ final class Install {
 	/**
 	 * Get tables schema for dbDelta().
 	 *
-	 * @return void
+	 * @return string
 	 */
 	private static function get_schema(): string {
 		global $wpdb;
@@ -404,12 +404,12 @@ final class Install {
 		// Try to acquire a short-lived lock (prevents concurrent requests running migrations twice).
 		$locked_until = (int) get_option( self::$option_upgrade_lock, 0 );
 
-		if ( $locked_until > current_time( 'timestamp' ) ) {
+		if ( $locked_until > time() ) {
 			return false; // Another process is migrating.
 		}
 
 		// Lock the upgrade process for 2 minutes to prevent concurrent migrations.
-		update_option( self::$option_upgrade_lock, current_time( 'timestamp' ) + 120, false );
+		update_option( self::$option_upgrade_lock, time() + 120, false );
 
 		return true;
 	}
