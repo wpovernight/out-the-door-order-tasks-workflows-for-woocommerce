@@ -42,11 +42,10 @@ final class FulfillmentService {
 	 * Get fulfillment status for an order.
 	 *
 	 * @param \WC_Abstract_Order $order
-	 * @param Fulfillment|null $fulfillment_data (Optional) Fulfillment data to avoid fetching it again.
 	 *
 	 * @return string
 	 */
-	public function get_order_fulfillment_status( \WC_Abstract_Order $order, ?Fulfillment $fulfillment_data = null ): string {
+	public function get_order_fulfillment_status( \WC_Abstract_Order $order ): string {
 		$shipped_quantity = 0;
 		$total_quantity   = 0;
 
@@ -54,9 +53,7 @@ final class FulfillmentService {
 			$item_quantity  = (int) $item->get_quantity();
 			$total_quantity += $item_quantity;
 
-			$item_fulfillment_data = $fulfillment_data ?
-				array( $fulfillment_data ):
-				$this->get_order_item_fulfillment_data( $item );
+			$item_fulfillment_data = $this->get_order_item_fulfillment_data( $item );
 
 			if ( empty( $item_fulfillment_data ) ) {
 				continue;
