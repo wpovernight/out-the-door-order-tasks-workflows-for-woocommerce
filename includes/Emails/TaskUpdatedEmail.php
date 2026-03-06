@@ -154,7 +154,9 @@ class TaskUpdatedEmail extends WC_Email {
 		$task_service     = WPO_AOM()->get_service( 'TaskManagerService' );
 		$task_with_fields = $task_service->get_task_with_fields( $task_id );
 
-		$this->trigger( $task_id, $task_with_fields, $updated_fields );
+		if ( ! empty( $task_with_fields ) ) {
+			$this->trigger( $task_id, $task_with_fields, $updated_fields );
+		}
 	}
 
 	/**
