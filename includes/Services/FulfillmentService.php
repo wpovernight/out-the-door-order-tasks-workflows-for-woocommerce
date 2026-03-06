@@ -55,7 +55,7 @@ final class FulfillmentService {
 			$total_quantity += $item_quantity;
 
 			$item_fulfillment_data = $fulfillment_data ?
-				( array ) $fulfillment_data :
+				array( $fulfillment_data ):
 				$this->get_order_item_fulfillment_data( $item );
 
 			if ( empty( $item_fulfillment_data ) ) {
