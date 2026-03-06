@@ -146,7 +146,7 @@ class TaskRepository extends BaseRepository {
 				WHERE
 					status.field_id = '{$status_field_id}'
 					AND position.field_id = '{$position_field_id}'
-					AND status.value = '%d'
+					AND status.value = %d
 					FOR UPDATE;
 				";
 
@@ -178,7 +178,7 @@ class TaskRepository extends BaseRepository {
 				WHERE
 					status.field_id = '{$status_field_id}'
 					AND position.field_id = '{$position_field_id}'
-					AND status.value = '%d'
+					AND status.value = %d
 			)
 			UPDATE
 				{$task_field_value_table_name} AS p
