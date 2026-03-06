@@ -90,7 +90,7 @@ abstract class BaseRestController {
 				}
 				break;
 			case 'integer':
-				if ( ! is_null( $value ) && ! filter_var( $value, FILTER_VALIDATE_INT ) ) {
+				if ( ! is_null( $value ) && false !== filter_var( $value, FILTER_VALIDATE_INT ) ) {
 					return $this->format_error_message( $field, 'must be an integer' );
 				}
 				break;
