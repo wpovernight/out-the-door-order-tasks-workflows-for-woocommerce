@@ -122,7 +122,9 @@ final class FulfillmentService {
 		// If not updated, create a new fulfillment entry.
 		if ( ! $is_updated ) {
 			// Find the next available ID.
-			$new_id = empty( $fulfillment_data ) ? 1 : max( array_map( fn( $f ) => $f->id, $fulfillment_data ) );
+			$new_id = empty( $fulfillment_data )
+				? 1
+				: max( array_map( fn( $f ) => $f->id, $fulfillment_data ) ) + 1;
 
 			$new_fulfillment    = new Fulfillment(
 				array(
