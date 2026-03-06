@@ -58,7 +58,9 @@ abstract class BaseModel {
 			unset( $data[ $property ] );
 		}
 
+		// Exclude class properties that are not meant to be stored in the database.
 		unset( $data['non_db_properties'] );
+		unset( $data['guarded'] );
 
 		// Never include ID in INSERT (auto-generated) or UPDATE (used in WHERE, not SET)
 		if ( isset( $data['id'] ) ) {
