@@ -140,11 +140,7 @@ final class FulfillmentService {
 
 		$fulfillment_data_array = array_map( fn( $f ) => $f->to_array(), $fulfillment_data );
 
-		if ( $is_updated ) {
-			return wc_update_order_item_meta( $item_id, self::FULFILLMENT_DATA_META_KEY, $fulfillment_data_array );
-		} else {
-			return wc_add_order_item_meta( $item_id, self::FULFILLMENT_DATA_META_KEY, $fulfillment_data_array, true );
-		}
+		return (bool) wc_update_order_item_meta( $item_id, self::FULFILLMENT_DATA_META_KEY, $fulfillment_data_array );
 	}
 
 	/**
