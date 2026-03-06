@@ -49,7 +49,7 @@ abstract class BaseRestController {
 		$errors = array();
 
 		foreach ( $rules as $field => $rule_string ) {
-			$rules_array = explode( '|', $rule_string, 2 );
+			$rules_array = $this->parse_rules( $rule_string );
 			$value       = $data[ $field ] ?? null;
 
 			foreach ( $rules_array as $rule ) {
@@ -123,5 +123,53 @@ abstract class BaseRestController {
 	 */
 	private function format_error_message( string $field, string $message ): string {
 		return "The {$field} field {$message}.";
+	}
+
+	/**
+	 * Parse a rule string into individual rules, respecting regex delimiters.
+	 *
+	 * Splits on '|' but not when inside a regex pattern (e.g., regex:/^[a-z0-9_-]+$/i).
+	 *
+	 * @param string $rule_string The pipe-separated rule string.
+	 *
+	 * @return array Array of individual rule strings.
+	 */
+	private function parse_rules( string $rule_string ): array {
+		$rules        = array();
+		$current_rule = '';
+		$in_regex     = false;
+
+		for ( $i = 0, $len = strlen( $rule_string ); $i < $len; $i ++ ) {
+			$char = $rule_string[ $i ];
+
+			// Detect start of regex pattern.
+			if ( ! $in_regex && 'regex:' === substr( $rule_string, $i, 6 ) ) {
+				$in_regex = true;
+			}
+
+			if ( '|' === $char && ! $in_regex ) {
+				$rules[]      = $current_rule;
+				$current_rule = '';
+				continue;
+			}
+
+			$current_rule .= $char;
+
+			// Detect end of regex pattern: closing delimiter followed by optional flags.
+			if ( $in_regex && $i > 0 && '/' === $char && '/' !== $rule_string[ $i - 1 ] ) {
+				// Skip past any trailing regex flags (e.g., 'i', 'm', 's').
+				while ( $i + 1 < $len && ctype_alpha( $rule_string[ $i + 1 ] ) ) {
+					$i++;
+					$current_rule .= $rule_string[ $i ];
+				}
+				$in_regex = false;
+			}
+		}
+
+		if ( '' !== $current_rule ) {
+			$rules[] = $current_rule;
+		}
+
+		return $rules;
 	}
 }
