@@ -550,7 +550,7 @@ abstract class BaseRepository {
 	 */
 	public function get_table_full_name( bool $with_alias = false ): string {
 		$name = $this->wpdb->prefix . $this->plugin_table_prefix . $this->table_name;
-		return esc_sql( $this->alias && $with_alias ? "{$name} AS {$this->alias}" : $name );
+		return $this->alias && $with_alias ? "{$name} AS {$this->alias}" : $name;
 	}
 
 	/**
