@@ -51,7 +51,6 @@ class CustomOrderStatus extends BaseModel implements ArraySerializableModel {
 	 */
 	public function to_db_array(): array {
 		return array(
-			'id'         => $this->id,
 			'status_key' => $this->status_key,
 			'label'      => $this->label,
 			'background' => $this->background,
