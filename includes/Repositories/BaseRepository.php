@@ -951,6 +951,7 @@ abstract class BaseRepository {
 	 * @return void
 	 */
 	private function reset_query(): void {
+		$this->alias    = null;
 		$this->columns  = array( '*' );
 		$this->joins    = array();
 		$this->wheres   = array();
