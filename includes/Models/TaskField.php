@@ -33,7 +33,7 @@ class TaskField extends BaseModel {
 
 		$this->type         = $type;
 		$this->is_required  = isset( $data['is_required'] ) && $data['is_required'];
-		$this->is_editable  = ! isset( $data['is_visible'] ) || $data['is_visible'];
+		$this->is_editable  = ! isset( $data['is_editable'] ) || $data['is_editable'];
 		$this->is_protected = isset( $data['is_protected'] ) && $data['is_protected'];
 	}
 
