@@ -575,6 +575,14 @@ class TaskController extends BaseRestController {
 		$previous_task_id = $request->get_param( 'previous_task_id' ) ? (int) $request->get_param( 'previous_task_id' ) : null;
 		$target_status_id = (int) $request->get_param( 'target_status_id' );
 
+		if ( $task_id <= 0 || $target_status_id <= 0 ) {
+			return new WP_Error(
+				'invalid_params',
+				'Invalid task ID or target status ID provided',
+				array( 'status' => 400 )
+			);
+		}
+
 		/** @var TaskManagerService $task_service */
 		$task_service = WPO_AOM()->get_service( TaskManagerService::class );
 		$new_position = $task_service->move_task( $task_id, $target_status_id, $previous_task_id );
