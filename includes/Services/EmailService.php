@@ -190,7 +190,8 @@ final class EmailService {
 
 		// Handle resolved format.
 		if ( is_array( $field_value ) && isset( $field_value['resolved'] ) ) {
-			return date_i18n( get_option( 'date_format' ), (string) $field_value['resolved'] );
+			$timestamp = strtotime( $field_value['resolved'] );
+			return false !== $timestamp ? date_i18n( get_option( 'date_format' ), $timestamp ) : '';
 		}
 
 		// Handle array format with 'raw' key.
