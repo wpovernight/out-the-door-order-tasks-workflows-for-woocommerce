@@ -5,6 +5,8 @@ namespace WPO\AOM\Models;
 use WPO\AOM\Repositories\BaseRepository;
 use WPO\AOM\Repositories\RepositoryRegistry;
 
+defined( 'ABSPATH' ) || exit;
+
 abstract class BaseModel {
 	protected array $non_db_properties = array();
 	protected array $guarded          = array( 'id' );
