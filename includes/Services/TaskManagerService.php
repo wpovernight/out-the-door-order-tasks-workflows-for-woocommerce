@@ -102,7 +102,7 @@ final class TaskManagerService {
 						}
 					}
 				}
-				$task_fields[] = array_merge( $field->to_array(), array( 'values' => $field_value ?? null ) );
+				$task_fields[] = array_merge( $field->to_array(), array( 'values' => $field_value ?: null ) );
 			}
 
 			$result[] = array_merge( $task->to_array(), array( 'fields' => $task_fields ) );
