@@ -230,10 +230,17 @@ final class EmailService {
 	 */
 	private function format_user_field( $field_value ): string {
 		if ( is_array( $field_value ) && isset( $field_value['resolved'] ) ) {
-			return $field_value['resolved']['display_name'] ?? $field_value['resolved']['username'] ?? __( 'Unassigned', 'wpo-aom' );
+			return $field_value['resolved']['display_name']
+			       ?? $field_value['resolved']['username']
+			          ?? __( 'Unassigned', 'wpo-aom' );
 		}
 
-		$user = get_userdata( $field_value );
+		// Extract raw user ID from array format.
+		if ( is_array( $field_value ) ) {
+			$field_value = $field_value['raw'] ?? 0;
+		}
+
+		$user = get_userdata( absint( $field_value ) );
 
 		return $user ? $user->display_name : __( 'Unassigned', 'wpo-aom' );
 	}
