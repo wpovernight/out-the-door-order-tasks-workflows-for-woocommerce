@@ -352,11 +352,11 @@ abstract class BaseRepository {
 	 * @param string $set_clause Raw SET clause (e.g., "column1 = value1, column2 = value2").
 	 * @param array $bindings
 	 *
-	 * @return int
+	 * @return int|false Number of rows updated, or false on error. Returns 0 if no rows were affected (data unchanged).
 	 * @throws InvalidArgumentException If SET clause is empty.
 	 * @throws RuntimeException If no WHERE clause is specified.
 	 */
-	public function update_raw( string $set_clause, array $bindings ): int {
+	public function update_raw( string $set_clause, array $bindings ) {
 		// Ensure that the SET clause is not empty.
 		if ( '' === trim( $set_clause ) ) {
 			throw new InvalidArgumentException( 'SET clause must not be empty.' );
