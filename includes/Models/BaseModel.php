@@ -56,9 +56,8 @@ abstract class BaseModel {
 
 		unset( $data['non_db_properties'] );
 
-		// Never include id in INSERT (will be auto-generated) or UPDATE (primary key)
-		// For updates, the id is used in WHERE clause, not SET clause
-		if ( isset( $data['id'] ) && $data['id'] > 0 ) {
+		// Never include ID in INSERT (auto-generated) or UPDATE (used in WHERE, not SET)
+		if ( isset( $data['id'] ) ) {
 			unset( $data['id'] );
 		}
 
