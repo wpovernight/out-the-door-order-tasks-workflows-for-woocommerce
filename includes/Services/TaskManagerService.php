@@ -293,6 +293,10 @@ final class TaskManagerService {
 
 			$field_values_array = array();
 			foreach ( $field_values as $field_value ) {
+				if ( ! isset( $field_value['field_id'], $field_value['value'], $field_value['field_slug'] ) ) {
+					continue;
+				}
+
 				$field_id                        = $field_value['field_id'];
 				$value                           = $field_value['value'];
 				$field_slug                      = $field_value['field_slug'];
