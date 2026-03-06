@@ -256,6 +256,14 @@ final class TaskManagerService {
 			throw new RuntimeException( 'Task not found.' );
 		}
 
+		// Sanitize input before filling the model.
+		if ( isset( $task_data['title'] ) ) {
+			$task_data['title'] = sanitize_text_field( $task_data['title'] );
+		}
+		if ( isset( $task_data['description'] ) ) {
+			$task_data['description'] = sanitize_textarea_field( $task_data['description'] );
+		}
+
 		// Track which fields were actually updated with old and new values.
 		$updated_fields = array();
 
@@ -268,14 +276,6 @@ final class TaskManagerService {
 					'new_value' => $new_value,
 				);
 			}
-		}
-
-		// Sanitize input before filling the model.
-		if ( isset( $task_data['title'] ) ) {
-			$task_data['title'] = sanitize_text_field( $task_data['title'] );
-		}
-		if ( isset( $task_data['description'] ) ) {
-			$task_data['description'] = sanitize_textarea_field( $task_data['description'] );
 		}
 
 		$task->fill( $task_data );
