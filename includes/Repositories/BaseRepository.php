@@ -404,7 +404,7 @@ abstract class BaseRepository {
 	 * @throws RuntimeException If no WHERE clause is specified.
 	 * @throws InvalidArgumentException If invalid arguments are sent to where().
 	 */
-	public function delete( ?int $id = null ): int {
+	public function delete( ?int $id = null ) {
 		if ( ! empty( $id ) ) {
 			$this->where( 'id', absint( $id ) );
 		}
@@ -426,7 +426,7 @@ abstract class BaseRepository {
 
 		$this->reset_query();
 
-		return (int) $this->wpdb->delete( $this->get_table_full_name(), $where );
+		return $this->wpdb->delete( $this->get_table_full_name(), $where );
 	}
 
 	/**
