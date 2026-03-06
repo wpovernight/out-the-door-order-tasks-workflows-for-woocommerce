@@ -52,7 +52,7 @@ class CustomOrderStatusService {
 		$statuses = $this->all();
 
 		foreach ( $statuses as $status ) {
-			$order_statuses[ $status->get_prefixed_status_key() ] = esc_html__( $status->label, 'wpo-aom' );
+			$order_statuses[ $status->get_prefixed_status_key() ] = esc_html( $status->label );
 		}
 
 		return $order_statuses;
@@ -69,7 +69,7 @@ class CustomOrderStatusService {
 		$statuses = $this->all();
 
 		foreach ( $statuses as $status ) {
-			$label = esc_html__( $status->label, 'wpo-aom' );
+			$label = esc_html( $status->label );
 
 			$order_statuses[ $status->get_prefixed_status_key() ] = array(
 				'label'                     => $label,
@@ -104,7 +104,7 @@ class CustomOrderStatusService {
 			$bulk_actions[ 'mark_' . $status->get_prefixed_status_key() ] = sprintf(
 				/* translators: %s: status label */
 				__( 'Change status to %s', 'wpo-aom' ),
-				esc_html__( $status->label, 'wpo-aom' )
+				esc_html( $status->label )
 			);
 		}
 
