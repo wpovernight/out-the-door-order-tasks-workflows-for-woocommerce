@@ -54,12 +54,12 @@ final class FulfillmentService {
 			$item_quantity  = (int) $item->get_quantity();
 			$total_quantity += $item_quantity;
 
-			$fulfillment_data = $fulfillment_data ?? $this->get_order_item_fulfillment_data( $item );
-			if ( empty( $fulfillment_data ) ) {
+			$item_fulfillment_data = $fulfillment_data ?? $this->get_order_item_fulfillment_data( $item );
+			if ( empty( $item_fulfillment_data ) ) {
 				continue;
 			}
 
-			foreach ( $fulfillment_data as $fulfillment ) {
+			foreach ( $item_fulfillment_data as $fulfillment ) {
 				$shipped_quantity += (int) $fulfillment->quantity;
 			}
 		}
