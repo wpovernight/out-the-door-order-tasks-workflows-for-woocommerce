@@ -199,7 +199,7 @@ final class Screen {
 	 * @return void
 	 */
 	public function order_items_headers(): void {
-		echo '<th>' . __( 'Fulfillments', 'woocommerce-product-batch-numbers' ) . '</th>';
+		echo '<th>' . __( 'Fulfillments', 'wpo-aom' ) . '</th>';
 	}
 
 	/**

@@ -249,7 +249,7 @@ class TaskCreatedEmail extends WC_Email {
 	public function init_form_fields(): void {
 		$placeholder_text = sprintf(
 			'%s: %s',
-			__( 'Available placeholders', 'wpo_wcpdf_pro' ),
+			__( 'Available placeholders', 'wpo-aom' ),
 			'<code>' . esc_html( implode( '</code>, <code>', array_keys( $this->placeholders ) ) ) . '</code>'
 		);
 
