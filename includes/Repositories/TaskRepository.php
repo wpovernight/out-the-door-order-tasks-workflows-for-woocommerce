@@ -50,6 +50,11 @@ class TaskRepository extends BaseRepository {
 			$given_task_position    = $given_task_field_value ? (float) $given_task_field_value->value : 0.0;
 		}
 
+		// Ensure the given task position is a finite number, defaulting to 0 if not.
+		if ( ! is_finite( $given_task_position ) ) {
+			$given_task_position = 0.0;
+		}
+
 		$query = $task_field_value_repository
 			->select( array( 'position.*' ) )
 			->alias( 'position' )
@@ -65,7 +70,12 @@ class TaskRepository extends BaseRepository {
 
 		// Filter for positions greater than the given task position.
 		if ( ! empty( $given_task_position ) ) {
-			$query->where_raw( "CAST(position.value AS DECIMAL(10,5)) > {$given_task_position}" );
+			$query->where_raw(
+				$this->wpdb->prepare(
+					'CAST(position.value AS DECIMAL(10,5)) > %f',
+					$given_task_position
+				)
+			);
 		}
 
 		// Exclude the moving task ID if provided.
