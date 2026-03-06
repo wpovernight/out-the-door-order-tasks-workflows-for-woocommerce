@@ -15,6 +15,8 @@ class TaskField extends BaseModel {
 	public bool $is_editable;
 	public bool $is_protected;
 
+	protected array $guarded = array( 'id', 'type', 'slug' );
+
 
 	/**
 	 * Constructor.

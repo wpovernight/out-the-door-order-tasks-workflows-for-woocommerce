@@ -7,15 +7,17 @@ use WPO\AOM\Repositories\RepositoryRegistry;
 
 abstract class BaseModel {
 	protected array $non_db_properties = array();
+	protected array $guarded          = array( 'id' );
 
 	/**
 	 * Fill the model with data from an associative array.
+	 * Guarded properties (like 'id') cannot be changed via fill().
 	 *
 	 * @param array<string, mixed> $data
 	 */
 	public function fill( array $data ): void {
 		foreach ( $data as $key => $value ) {
-			if ( property_exists( $this, $key ) ) {
+			if ( property_exists( $this, $key ) && ! in_array( $key, $this->guarded, true ) ) {
 				$this->{$key} = $value;
 			}
 		}
