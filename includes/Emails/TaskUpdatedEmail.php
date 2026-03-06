@@ -369,7 +369,7 @@ class TaskUpdatedEmail extends WC_Email {
 				'default'     => '',
 				'desc_tip'    => true,
 			),
-			'notify_on' => array(
+			'notify_on_fields' => array(
 				'title'       => __( 'Notify On', 'wpo-aom' ),
 				'type'        => 'multiselect',
 				'class'       => 'wc-enhanced-select',
