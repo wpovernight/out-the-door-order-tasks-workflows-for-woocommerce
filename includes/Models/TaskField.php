@@ -22,7 +22,7 @@ class TaskField extends BaseModel {
 	 * @param array $data
 	 */
 	public function __construct( array $data = array() ) {
-		$this->id    = absint( $data['id'] ?? 0 );
+		$this->id    = isset( $data['id'] ) && $data['id'] > 0 ? (int) $data['id'] : 0;
 		$this->label = $data['label'];
 		$this->slug  = $this->sanitize_slug( $data['slug'] ?? $this->label );
 

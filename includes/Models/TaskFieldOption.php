@@ -19,7 +19,7 @@ class TaskFieldOption extends BaseModel {
 	 * @param array $data
 	 */
 	public function __construct( array $data = array() ) {
-		$this->id       = absint( $data['id'] ?? 0 );
+		$this->id       = isset( $data['id'] ) && $data['id'] > 0 ? (int) $data['id'] : 0;
 		$this->field_id = absint( $data['field_id'] );
 		$this->slug     = $data['slug'];
 		$this->label    = $data['label'];
