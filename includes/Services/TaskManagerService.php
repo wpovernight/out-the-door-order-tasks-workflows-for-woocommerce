@@ -347,7 +347,7 @@ final class TaskManagerService {
 		}
 
 		// Update position if the status has been changed.
-		if ( isset( $current_status_value ) && $current_status_value->value !== $new_status_value ) {
+		if ( isset( $current_status_value ) && (string) $current_status_value->value !== (string) $new_status_value ) {
 			$last_position = $this->task_repository->get_last_task_position(
 				$task_id,
 				(int) $field_values_array[ DefaultTaskFields::STATUS ],
