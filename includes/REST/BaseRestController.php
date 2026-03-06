@@ -108,6 +108,11 @@ abstract class BaseRestController {
 					return $this->format_error_message( $field, 'is invalid' );
 				}
 				break;
+			case 'array':
+				if ( ! is_null( $value ) && ! is_array( $value ) ) {
+					return $this->format_error_message( $field, 'must be an array' );
+				}
+				break;
 		}
 
 		return null;
