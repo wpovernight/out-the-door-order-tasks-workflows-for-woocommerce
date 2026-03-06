@@ -267,8 +267,8 @@ class TaskController extends BaseRestController {
 
 		try {
 			$task = $task_manager_service->create_task( $data['title'], $data['description'] ?? '', $data['field_values'] ?? array() );
-		} catch (\Exception|\Throwable $e ) {
-			return new WP_Error( 'task_creation_failed', $e->getMessage(), array( 'status' => 500 ) );
+		} catch ( \Exception|\Throwable $e ) {
+			return new WP_Error( 'task_creation_failed', __( 'Failed to create task.', 'wpo-aom' ), array( 'status' => 500 ) );
 		}
 
 		return rest_ensure_response( $task );
@@ -337,7 +337,7 @@ class TaskController extends BaseRestController {
 		try {
 			$task = $task_manager_service->update_task( $id, $data, $data['field_values'] ?? null );
 		} catch ( \Exception|\Throwable $e ) {
-			return new WP_Error( 'task_update_failed', $e->getMessage(), array( 'status' => 500 ) );
+			return new WP_Error( 'task_update_failed', __( 'Failed to update task.', 'wpo-aom' ), array( 'status' => 500 ) );
 		}
 
 		return rest_ensure_response( $task );
@@ -363,7 +363,7 @@ class TaskController extends BaseRestController {
 		try {
 			$task_manager_service->delete_task( $id );
 		} catch ( \Exception $e ) {
-			return new WP_Error( 'task_deletion_failed', $e->getMessage(), array( 'status' => 500 ) );
+			return new WP_Error( 'task_deletion_failed', __( 'Failed to delete task.', 'wpo-aom' ), array( 'status' => 500 ) );
 		}
 
 		return rest_ensure_response( array( 'message' => 'Task deleted successfully' ) );
@@ -617,7 +617,7 @@ class TaskController extends BaseRestController {
 		} catch ( \RuntimeException $e ) {
 			return new WP_Error( 'task_finish_failed', $e->getMessage(), array( 'status' => 404 ) );
 		} catch ( \Exception $e ) {
-			return new WP_Error( 'task_finish_failed', $e->getMessage(), array( 'status' => 500 ) );
+			return new WP_Error( 'task_finish_failed', __( 'Failed to finish task.', 'wpo-aom' ), array( 'status' => 500 ) );
 		}
 
 		return rest_ensure_response( array(
@@ -649,7 +649,7 @@ class TaskController extends BaseRestController {
 		} catch ( \RuntimeException $e ) {
 			return new WP_Error( 'task_archive_failed', $e->getMessage(), array( 'status' => 404 ) );
 		} catch ( \Exception $e ) {
-			return new WP_Error( 'task_archive_failed', $e->getMessage(), array( 'status' => 500 ) );
+			return new WP_Error( 'task_archive_failed', __( 'Failed to archive task.', 'wpo-aom' ), array( 'status' => 500 ) );
 		}
 
 		return rest_ensure_response( array(
@@ -680,7 +680,7 @@ class TaskController extends BaseRestController {
 		} catch ( \RuntimeException $e ) {
 			return new WP_Error( 'task_unarchive_failed', $e->getMessage(), array( 'status' => 404 ) );
 		} catch ( \Exception $e ) {
-			return new WP_Error( 'task_unarchive_failed', $e->getMessage(), array( 'status' => 500 ) );
+			return new WP_Error( 'task_unarchive_failed', __( 'Failed to unarchive task.', 'wpo-aom' ), array( 'status' => 500 ) );
 		}
 
 		return rest_ensure_response( array(
