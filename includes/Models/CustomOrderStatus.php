@@ -14,6 +14,8 @@ class CustomOrderStatus extends BaseModel implements ArraySerializableModel {
 	public string $background;
 	public string $foreground;
 
+	protected array $non_db_properties = array( 'foreground' );
+
 	/**
 	 * Constructor.
 	 *
