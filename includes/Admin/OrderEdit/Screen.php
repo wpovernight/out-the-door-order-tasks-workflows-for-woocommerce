@@ -359,11 +359,12 @@ final class Screen {
 		}
 
 		foreach ( $items['wpo-aom-fulfillment-quantity'] as $item_id => $fulfillment_data ) {
-			if ( ! is_array( $fulfillment_data ) || empty( $fulfillment_data ) ) {
+			$item_id = absint( $item_id );
+			if ( ! $item_id || ! is_array( $fulfillment_data ) || empty( $fulfillment_data ) ) {
 				continue;
 			}
 
-			$fulfillment_id       = array_key_first( $fulfillment_data );
+			$fulfillment_id       = absint( array_key_first( $fulfillment_data ) );
 			$fulfillment_quantity = isset( $fulfillment_data[ $fulfillment_id ] )
 				? absint( $fulfillment_data[ $fulfillment_id ] )
 				: 0;
