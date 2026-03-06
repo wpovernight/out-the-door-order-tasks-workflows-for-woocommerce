@@ -270,6 +270,14 @@ final class TaskManagerService {
 			}
 		}
 
+		// Sanitize input before filling the model.
+		if ( isset( $task_data['title'] ) ) {
+			$task_data['title'] = sanitize_text_field( $task_data['title'] );
+		}
+		if ( isset( $task_data['description'] ) ) {
+			$task_data['description'] = sanitize_textarea_field( $task_data['description'] );
+		}
+
 		$task->fill( $task_data );
 
 		$result = $this->task_repository->save( $task );

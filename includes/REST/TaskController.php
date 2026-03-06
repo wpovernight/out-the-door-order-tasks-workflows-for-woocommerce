@@ -267,7 +267,7 @@ class TaskController extends BaseRestController {
 
 		try {
 			$task = $task_manager_service->create_task( $data['title'], $data['description'] ?? '', $data['field_values'] ?? array() );
-		} catch ( \Exception $e ) {
+		} catch (\Exception|\Throwable $e ) {
 			return new WP_Error( 'task_creation_failed', $e->getMessage(), array( 'status' => 500 ) );
 		}
 
@@ -336,7 +336,7 @@ class TaskController extends BaseRestController {
 
 		try {
 			$task = $task_manager_service->update_task( $id, $data, $data['field_values'] ?? null );
-		} catch ( \Exception $e ) {
+		} catch ( \Exception|\Throwable $e ) {
 			return new WP_Error( 'task_update_failed', $e->getMessage(), array( 'status' => 500 ) );
 		}
 
