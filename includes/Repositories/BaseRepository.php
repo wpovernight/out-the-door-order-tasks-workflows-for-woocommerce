@@ -638,7 +638,16 @@ abstract class BaseRepository {
 			if ( ! in_array( $operator, array( 'IS', 'IS NOT' ) ) ) {
 				throw new InvalidArgumentException( "Cannot use NULL with operator {$operator}" );
 			}
-			$value = 'NULL';
+
+			// Add IS NULL / IS NOT NULL as a raw clause (no placeholder or binding needed).
+			$this->wheres[] = array(
+				strtolower( $column ) . ' ' . strtoupper( $operator ) . ' NULL',
+				'RAW',
+				null,
+				strtoupper( $logical_operator )
+			);
+
+			return $this;
 		}
 
 		// Add the WHERE clause to the query.
