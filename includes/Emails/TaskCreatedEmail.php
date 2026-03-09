@@ -84,14 +84,16 @@ class TaskCreatedEmail extends WC_Email {
 
 		$this->restore_locale();
 
-		/**
-		 * Action hook after task created email is sent.
-		 *
-		 * @param int   $task_id          The task ID.
-		 * @param array $task_with_fields Complete task data.
-		 * @param array $field_values     Field values set on creation.
-		 */
-		do_action( 'wpo_aom_task_created_email_sent', $task_id, $task_with_fields, $field_values );
+		if ( ! empty( $recipients ) ) {
+			/**
+			 * Action hook after task created email is sent.
+			 *
+			 * @param int   $task_id          The task ID.
+			 * @param array $task_with_fields Complete task data.
+			 * @param array $field_values     Field values set on creation.
+			 */
+			do_action( 'wpo_aom_task_created_email_sent', $task_id, $task_with_fields, $field_values );
+		}
 	}
 
 	/**
