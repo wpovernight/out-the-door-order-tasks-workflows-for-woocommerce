@@ -59,18 +59,19 @@ const FinishedTasks: React.FC = () => {
 				</h4>
 				<ul className="task-list">
 					{finishedTasks.map((task) => (
-						<TaskCard
-							key={task.id}
-							task={task}
-							onEditClick={handleEditClick}
-							onDeleteClick={handleDeleteClick}
-							headingLevel="h5"
-							showDescription={true}
-							descriptionMaxLength={150}
-							tagsPosition="top"
-							showOrder={false}
-							excludeTags={['status']}
-						/>
+						<li key={task.id}>
+							<TaskCard
+								task={task}
+								onEditClick={handleEditClick}
+								onDeleteClick={handleDeleteClick}
+								headingLevel="h5"
+								showDescription={true}
+								descriptionMaxLength={150}
+								tagsPosition="top"
+								showOrder={false}
+								excludeTags={['status']}
+							/>
+						</li>
 					))}
 				</ul>
 			</div>
