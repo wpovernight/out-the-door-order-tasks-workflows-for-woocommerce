@@ -51,6 +51,10 @@ async function handleResponse<T>(response: Response): Promise<T> {
 		throw new Error(`API request failed: ${response.status}: ${errorText}`);
 	}
 
+	if (response.status === 204) {
+		return undefined as T;
+	}
+
 	return response.json() as Promise<T>;
 }
 
