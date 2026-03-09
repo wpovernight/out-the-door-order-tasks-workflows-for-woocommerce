@@ -31,7 +31,7 @@ export const OrderWooFulfillmentProvider: React.FC<{
 	orderId: number;
 	children: React.ReactNode;
 }> = ({ orderId, children }) => {
-	const [order, setOrder] = useState<Order | null>(null);
+	const orderRef = React.useRef<Order | null>(null);
 	const [fulfillments, setFulfillments] = useState<WooFulfillment[]>([]);
 	const [loadingStatus, setLoadingStatus] =
 		useState<AsyncLoaderStatus>('idle');
@@ -40,17 +40,17 @@ export const OrderWooFulfillmentProvider: React.FC<{
 	const isLoadingRef = React.useRef<boolean>(false);
 
 	const loadOrder = useCallback(async () => {
-		if (order) {
+		if (orderRef.current) {
 			return;
 		}
 
 		try {
 			const orderData = await fetchOrder(orderId);
-			setOrder(orderData);
+			orderRef.current = orderData;
 		} catch (err) {
 			console.error('Error loading order:', err);
 		}
-	}, [orderId, order]);
+	}, [orderId]);
 
 	const loadFulfillments = useCallback(
 		async (force: boolean = false) => {
@@ -65,7 +65,7 @@ export const OrderWooFulfillmentProvider: React.FC<{
 
 			try {
 				// Load order first if not loaded
-				let currentOrder = order;
+				let currentOrder = orderRef.current;
 				if (!currentOrder) {
 					currentOrder = await fetchOrder(orderId);
 				}
@@ -103,7 +103,7 @@ export const OrderWooFulfillmentProvider: React.FC<{
 				);
 
 				// Update all state at once to avoid intermediate renders
-				setOrder(currentOrder);
+				orderRef.current = currentOrder;
 				setFulfillments(enrichedFulfillments);
 				setHasLoaded(true);
 				setLoadingStatus('loaded');
@@ -119,7 +119,7 @@ export const OrderWooFulfillmentProvider: React.FC<{
 				isLoadingRef.current = false;
 			}
 		},
-		[orderId, hasLoaded, order]
+		[orderId, hasLoaded]
 	);
 
 	const refreshFulfillments = useCallback(async () => {
