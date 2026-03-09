@@ -97,7 +97,7 @@ final class EmailService {
 	 * @param array|string|int|null $field_value  Field value.
 	 * @param array                 $field_object Field object.
 	 *
-	 * @return string Formatted value.
+	 * @return ?string Formatted value.
 	 */
 	public function format_by_field_type( string $field_slug, $field_value, array $field_object ): ?string {
 		/**
@@ -135,7 +135,9 @@ final class EmailService {
 			return $this->format_number_field( $field_value );
 		}
 
-		return is_array( $field_value ) && ! empty( $field_value ) ? $field_value[0] : $field_value;
+		$value = is_array( $field_value ) && ! empty( $field_value ) ? $field_value[0] : $field_value;
+
+		return ! is_null( $value ) ? (string) $value : null;
 	}
 
 	/**
