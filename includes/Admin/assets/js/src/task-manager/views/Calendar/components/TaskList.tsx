@@ -38,6 +38,7 @@ const TaskList: React.FC<TaskListProps> = ({
 		if (dateRangePreset !== 'custom') {
 			const presetLabels: Record<string, string> = {
 				today: __('Today', 'wpo-aom'),
+				tomorrow: __( 'Tomorrow', 'wpo-aom'),
 				yesterday: __('Yesterday', 'wpo-aom'),
 				'current-week': __('Current Week', 'wpo-aom'),
 				'next-week': __('Next Week', 'wpo-aom'),
