@@ -69,6 +69,7 @@ class TaskRepository extends BaseRepository {
 		}
 
 		// Filter for positions greater than the given task position.
+		// Positions always start at 1.0 or higher. So using `empty()` is fine.
 		if ( ! empty( $given_task_position ) ) {
 			$query->where_raw(
 				$this->wpdb->prepare(

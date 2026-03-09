@@ -490,7 +490,13 @@ abstract class BaseRepository {
 	 * @return void
 	 */
 	public static function clear_cache(): void {
-		self::$cache = array();
+		$prefix = static::class . ':';
+
+		foreach ( array_keys( self::$cache ) as $key ) {
+			if ( strpos( $key, $prefix ) === 0 ) {
+				unset( self::$cache[ $key ] );
+			}
+		}
 	}
 
 	/**
