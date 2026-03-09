@@ -3,7 +3,7 @@ import { Task, FieldResolved } from '@shared/types/task';
 export const getMonthData = (date: Date) => {
 	const year = date.getFullYear();
 	const month = date.getMonth();
-	const monthName = date.toLocaleDateString('en-US', {
+	const monthName = date.toLocaleDateString(undefined, {
 		month: 'long',
 		year: 'numeric',
 	});
@@ -92,7 +92,7 @@ export const isToday = (date: Date): boolean => {
 };
 
 export const formatDate = (date: Date): string => {
-	return date.toLocaleDateString('en-US', {
+	return date.toLocaleDateString(undefined, {
 		month: 'short',
 		day: 'numeric',
 		year: 'numeric',
