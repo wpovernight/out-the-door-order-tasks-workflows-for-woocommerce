@@ -384,11 +384,11 @@ final class TaskManagerService {
 	 *
 	 * @param int $task_id
 	 *
-	 * @return bool
+	 * @return int|false
 	 * @throws RuntimeException
 	 * @throws InvalidArgumentException
 	 */
-	public function delete_task( int $task_id ): bool {
+	public function delete_task( int $task_id ) {
 		return $this->task_repository->delete( $task_id );
 	}
 
