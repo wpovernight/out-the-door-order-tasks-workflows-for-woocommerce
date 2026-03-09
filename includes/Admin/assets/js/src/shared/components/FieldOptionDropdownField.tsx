@@ -113,11 +113,11 @@ export const FieldOptionDropdown: React.FC<DropdownProps> = ({
 			ref={containerRef}
 			className="wpo-aom-field-option-dropdown-container"
 		>
-			{name && (
+			{name && selectedOption && (
 				<input
 					type="hidden"
 					name={name}
-					value={selectedOption?.id || ''}
+					value={selectedOption.id}
 				/>
 			)}
 			<button
