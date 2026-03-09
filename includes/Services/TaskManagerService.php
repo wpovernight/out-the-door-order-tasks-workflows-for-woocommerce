@@ -994,7 +994,7 @@ final class TaskManagerService {
 			case TaskFieldTypes::DATE:
 				$timestamp = strtotime( $raw ) ?: null;
 				if ( $timestamp ) {
-					$resolved = date( 'c', $timestamp );
+					$resolved = wp_date( 'c', $timestamp );
 				}
 				break;
 
