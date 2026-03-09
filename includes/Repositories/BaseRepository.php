@@ -287,7 +287,7 @@ abstract class BaseRepository {
 	 * @return int|false Number of affected rows or false on failure.
 	 * @throws InvalidArgumentException If columns, rows, or bindings are empty.
 	 */
-	public function insert_raw( string $columns, array $rows, array $bindings ) {
+	protected function insert_raw( string $columns, array $rows, array $bindings ) {
 		if ( '' === trim( $columns ) || empty( $rows ) || empty( $bindings ) ) {
 			throw new InvalidArgumentException( 'Columns, rows, and bindings must not be empty.' );
 		}
@@ -356,7 +356,7 @@ abstract class BaseRepository {
 	 * @throws InvalidArgumentException If SET clause is empty.
 	 * @throws RuntimeException If no WHERE clause is specified.
 	 */
-	public function update_raw( string $set_clause, array $bindings ) {
+	protected function update_raw( string $set_clause, array $bindings ) {
 		// Ensure that the SET clause is not empty.
 		if ( '' === trim( $set_clause ) ) {
 			throw new InvalidArgumentException( 'SET clause must not be empty.' );
@@ -602,6 +602,7 @@ abstract class BaseRepository {
 			$on_condition = $first;
 		} elseif ( $operator !== null && $second !== null ) {
 			// Column comparison provided.
+			$this->validate_operator( $operator );
 			$on_condition = "{$first} {$operator} {$second}";
 		} else {
 			throw new InvalidArgumentException( 'Invalid arguments for JOIN clause.' );
@@ -673,7 +674,7 @@ abstract class BaseRepository {
 	 * @return self
 	 * @throws InvalidArgumentException If invalid logical operator is provided.
 	 */
-	public function where_raw( string $condition, string $logical_operator = 'AND' ): self {
+	protected function where_raw( string $condition, string $logical_operator = 'AND' ): self {
 		$this->validate_logical_operator( $logical_operator );
 
 		$this->wheres[] = array(
@@ -715,7 +716,7 @@ abstract class BaseRepository {
 	 * @return self
 	 * @throws InvalidArgumentException If invalid direction is provided.
 	 */
-	public function order_by_raw( string $expression ): self {
+	protected function order_by_raw( string $expression ): self {
 		$this->order_by = " ORDER BY {$expression}";
 
 		return $this;
