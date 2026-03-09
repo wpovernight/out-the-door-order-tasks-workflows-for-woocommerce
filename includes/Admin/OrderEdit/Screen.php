@@ -330,8 +330,8 @@ final class Screen {
 
 		$label = sprintf(
 			'%1$d / %2$d %3$s',
-			esc_html( $shipped_quantity ),
-			esc_html( $total_quantity ),
+			$shipped_quantity,
+			$total_quantity,
 			esc_html__( 'fulfilled', 'wpo-aom' )
 		);
 
