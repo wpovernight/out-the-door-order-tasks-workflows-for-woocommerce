@@ -568,7 +568,7 @@ class TaskController extends BaseRestController {
 	 * @param WP_REST_Request $request
 	 *
 	 * @return WP_REST_Response|WP_Error
-	 * @throws \Exception
+	 * @throws \Exception|\Throwable
 	 */
 	public function move_task( WP_REST_Request $request ) {
 		$task_id          = (int) $request->get_param( 'id' );
@@ -585,10 +585,17 @@ class TaskController extends BaseRestController {
 
 		/** @var TaskManagerService $task_service */
 		$task_service = WPO_AOM()->get_service( TaskManagerService::class );
-		$new_position = $task_service->move_task( $task_id, $target_status_id, $previous_task_id );
+
+		try {
+			$new_position = $task_service->move_task( $task_id, $target_status_id, $previous_task_id );
+		} catch ( \InvalidArgumentException $e ) {
+			return new WP_Error( 'invalid_params', $e->getMessage(), array( 'status' => 400 ) );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'task_move_failed', __( 'Failed to move task.', 'wpo-aom' ), array( 'status' => 500 ) );
+		}
 
 		if ( ! $new_position ) {
-			return new WP_Error( 'task_move_failed', 'Failed to move task', array( 'status' => 500 ) );
+			return new WP_Error( 'task_move_failed', __( 'Failed to move task.', 'wpo-aom' ), array( 'status' => 500 ) );
 		}
 
 		return rest_ensure_response( array( 'new_position' => $new_position ) );

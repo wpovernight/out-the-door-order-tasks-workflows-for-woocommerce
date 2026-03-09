@@ -687,7 +687,7 @@ final class TaskManagerService {
 	 *                                      Only should be used for internal operations like marking as completed, not for general uses.
 	 *
 	 * @return float
-	 * @throws Exception
+	 * @throws Exception|\Throwable
 	 */
 	public function move_task(
 		int $task_id,
