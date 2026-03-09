@@ -3,10 +3,12 @@
 namespace WPO\AOM\Core;
 
 use InvalidArgumentException;
+use WPO\AOM\Models\CustomOrderStatus;
 use WPO\AOM\Models\Task;
 use WPO\AOM\Models\TaskField;
 use WPO\AOM\Models\TaskFieldOption;
 use WPO\AOM\Models\TaskFieldValue;
+use WPO\AOM\Repositories\CustomOrderStatusRepository;
 use WPO\AOM\Repositories\RepositoryRegistry;
 use WPO\AOM\Repositories\TaskRepository;
 use WPO\AOM\Repositories\TaskFieldRepository;
@@ -63,10 +65,11 @@ final class ServiceContainer {
 	 * @var array<string, class-string>
 	 */
 	private static array $default_bindings = array(
-		Task::class            => TaskRepository::class,
-		TaskField::class       => TaskFieldRepository::class,
-		TaskFieldOption::class => TaskFieldOptionRepository::class,
-		TaskFieldValue::class  => TaskFieldValueRepository::class,
+		Task::class              => TaskRepository::class,
+		TaskField::class         => TaskFieldRepository::class,
+		TaskFieldOption::class   => TaskFieldOptionRepository::class,
+		TaskFieldValue::class    => TaskFieldValueRepository::class,
+		CustomOrderStatus::class => CustomOrderStatusRepository::class,
 	);
 
 	/**
