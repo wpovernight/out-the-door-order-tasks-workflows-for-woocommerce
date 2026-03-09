@@ -272,15 +272,16 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				{/*</div>*/}
 
 				{/* Add associated order IDs as a hidden field to be processed on submit */}
-				{associatedOrderIds && associatedOrderIds.length > 0 && (
-					<input
-						type="hidden"
-						name="field_order"
-						value={associatedOrderIds
-							.map((order) => order.id)
-							.join(',')}
-					/>
-				)}
+				{associatedOrderIds &&
+					associatedOrderIds.length > 0 &&
+					associatedOrderIds.map((order) => (
+						<input
+							key={order.id}
+							type="hidden"
+							name="field_order[]"
+							value={order.id}
+						/>
+					))}
 				<div className="field-group">
 					<div>
 						<label htmlFor="description">
