@@ -254,7 +254,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				(opt) => opt.id === targetStatusId
 			);
 
-			if (!targetStatusOption) {
+			if (!targetStatusOption) {;
 				console.error('Target status option not found');
 				return;
 			}
