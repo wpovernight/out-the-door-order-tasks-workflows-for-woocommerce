@@ -114,11 +114,7 @@ export const FieldOptionDropdown: React.FC<DropdownProps> = ({
 			className="wpo-aom-field-option-dropdown-container"
 		>
 			{name && selectedOption && (
-				<input
-					type="hidden"
-					name={name}
-					value={selectedOption.id}
-				/>
+				<input type="hidden" name={name} value={selectedOption.id} />
 			)}
 			<button
 				ref={triggerButtonRef}

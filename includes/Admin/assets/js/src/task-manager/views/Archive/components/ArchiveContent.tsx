@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useViewTasks } from '@taskManager/views/Archive/context/ViewTaskContext';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useTaskSort } from '@shared/hooks/useTaskSort';
 import SortIcon from '@shared/components/SortIcon';
 import TaskRow from '@taskManager/views/Archive/components/TaskRow';
@@ -127,10 +127,11 @@ export const ArchiveContent: React.FC = () => {
 							{__('Previous', 'wpo-aom')}
 						</button>
 						<span>
-							{__(
+							{sprintf(
 								/* translators: 1: current page, 2: total pages */
-								`Page ${currentPage} of ${totalPages}`,
-								'wpo-aom'
+								__('Page %1$d of %2$d', 'wpo-aom'),
+								currentPage,
+								totalPages
 							)}
 						</span>
 						<button
