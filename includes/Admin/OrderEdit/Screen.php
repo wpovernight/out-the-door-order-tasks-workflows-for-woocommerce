@@ -427,7 +427,7 @@ final class Screen {
 
 		// Get and validate parameters.
 		$item_id        = isset( $_POST['item_id'] ) ? absint( $_POST['item_id'] ) : 0;
-		$fulfillment_id = isset( $_POST['fulfillment_id'] ) ? absint( $_POST['fulfillment_id'] ) : 0;
+		$fulfillment_id = isset( $_POST['fulfillment_id'] ) ? absint( $_POST['fulfillment_id'] ) : null;
 		$quantity       = isset( $_POST['quantity'] ) ? absint( $_POST['quantity'] ) : 0;
 
 		if ( $item_id <= 0 ) {

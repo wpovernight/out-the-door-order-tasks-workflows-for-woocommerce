@@ -78,6 +78,9 @@ final class FulfillmentService {
 	/**
 	 * Get fulfillment status for an order item based on a given fulfillment.
 	 *
+	 * For now, each item displays one fulfillment entry at a time, so we don't need to sum across multiple fulfillments.
+	 * In the future, if we support multiple simultaneous fulfillments per item, this logic may need to be updated.
+	 *
 	 * @param \WC_Order_Item $item
 	 * @param Fulfillment $fulfillment
 	 *
