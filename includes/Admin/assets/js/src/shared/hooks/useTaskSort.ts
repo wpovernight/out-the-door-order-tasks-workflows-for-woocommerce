@@ -107,15 +107,15 @@ export const useTaskSort = (
 
 					const aDate = getTaskDateField(a, mappedField);
 					const bDate = getTaskDateField(b, mappedField);
-					// Handle null dates (put them at the end)
+					// Handle null dates (always push to end regardless of sort direction)
 					if (!aDate && !bDate) {
 						return 0;
 					}
 					if (!aDate) {
-						return 1;
+						return sortDirection === 'asc' ? 1 : -1;
 					}
 					if (!bDate) {
-						return -1;
+						return sortDirection === 'asc' ? -1 : 1;
 					}
 					aValue = aDate.getTime();
 					bValue = bDate.getTime();
