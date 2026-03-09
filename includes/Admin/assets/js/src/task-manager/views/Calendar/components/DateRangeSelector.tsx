@@ -42,12 +42,15 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 		return `${year}-${month}-${day}`;
 	};
 
+	const parseDateInput = (value: string): Date => {
+		const [year, month, day] = value.split('-').map(Number);
+		return new Date(year, month - 1, day);
+	};
+
 	const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const value = e.target.value;
 		if (value) {
-			const date = new Date(value);
-			date.setHours(0, 0, 0, 0);
-			onDateInputChange(date, 'start');
+			onDateInputChange(parseDateInput(value), 'start');
 		} else {
 			onDateInputChange(null, 'start');
 		}
@@ -56,9 +59,7 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 	const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const value = e.target.value;
 		if (value) {
-			const date = new Date(value);
-			date.setHours(0, 0, 0, 0);
-			onDateInputChange(date, 'end');
+			onDateInputChange(parseDateInput(value), 'end');
 		} else {
 			onDateInputChange(null, 'end');
 		}
