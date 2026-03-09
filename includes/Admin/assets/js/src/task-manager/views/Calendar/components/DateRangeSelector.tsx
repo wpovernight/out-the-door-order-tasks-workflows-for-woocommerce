@@ -81,7 +81,7 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 
 			<div className="date-range-inputs">
 				<label htmlFor="date-input-start" className="screenReader">
-					From
+					{__('From', 'wpo-aom')}
 				</label>
 				<input
 					id="date-input-start"
@@ -92,7 +92,7 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 				/>
 				<span className="date-separator">-</span>
 				<label htmlFor="date-input-end" className="screenReader">
-					To
+					{__('To', 'wpo-aom')}
 				</label>
 				<input
 					id="date-input-end"

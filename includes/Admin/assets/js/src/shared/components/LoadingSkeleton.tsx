@@ -1,4 +1,5 @@
 import React, { CSSProperties, ReactNode } from 'react';
+import { __ } from '@wordpress/i18n';
 
 interface SkeletonLineProps {
 	width?: string;
@@ -170,8 +171,8 @@ interface ErrorStateProps {
 export const ErrorState: React.FC<ErrorStateProps> = ({
 	message,
 	onRetry,
-	retryText = 'Try Again',
-}) => {
+	retryText = __('Try Again', 'wpo-aom'),
+}: { message: string; onRetry?: Function; retryText?: string; }) => {
 	return (
 		<div className="wpo-aom-error-state">
 			<div className="wpo-aom-error-state-icon">⚠️</div>

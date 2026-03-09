@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { __ } from '@wordpress/i18n';
 
 interface SidebarModalProps {
 	isOpen: boolean;
@@ -46,7 +47,9 @@ export const SidebarModal: React.FC<SidebarModalProps> = ({
 									className="wpo-button wpo-button-icon wpo-aom-sidebar-close"
 									onClick={onClose}
 								>
-									<span className="screenReader">Close</span>
+									<span className="screenReader">
+										{__('Close', 'wpo-aom')}
+									</span>
 								</button>
 							</div>
 

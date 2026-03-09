@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { __, sprintf } from '@wordpress/i18n';
 import { useOnClickOutside } from '@shared/hooks/useOnClickOutside';
 
 interface Option {
@@ -21,7 +22,7 @@ interface AsyncMultiSelectProps {
 }
 
 export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
-	placeholder = 'Search...',
+	placeholder = __('Search…', 'wpo-aom'),
 	selectedOptions = [],
 	id,
 	className,
@@ -201,12 +202,15 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 			<div className="screenReader" aria-live="polite">
 				{(() => {
 					if (loading) {
-						return 'Loading results...';
+						return __('Loading results...', 'wpo-aom');
 					}
 					if (showResults) {
 						return results.length
-							? `${results.length} results found`
-							: 'No results found';
+							? sprintf(
+									__('%d results found', 'wpo-aom'),
+									results.length
+								)
+							: __('No results found', 'wpo-aom');
 					}
 					return '';
 				})()}
@@ -214,13 +218,12 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 
 			{showResults && loading && (
 				<div className="wpo-aom-async-multi-select-message">
-					<p>Loading...</p>
+					<p>{__('Loading...', 'wpo-aom')}</p>
 				</div>
 			)}
 			{showResults && !loading && !Boolean(results.length) && (
-				// ToDo: translatable string
 				<div className="wpo-aom-async-multi-select-message">
-					<p>No results found</p>
+					<p>{__('No results found', 'wpo-aom')}</p>
 				</div>
 			)}
 			{showResults && !loading && Boolean(results.length) && (
@@ -267,7 +270,9 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 								className="wpo-button wpo-button-icon wpo-aom-sidebar-close"
 								onClick={() => handleRemoveOption(option.id)}
 							>
-								<span className="screenReader">Close</span>
+								<span className="screenReader">
+									{__('Close', 'wpo-aom')}
+								</span>
 							</button>
 						</li>
 					))}

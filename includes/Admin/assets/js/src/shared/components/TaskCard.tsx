@@ -85,7 +85,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 		? dueDateField.values[0]?.raw
 		: null;
 	const dueDate = dueDateValue
-		? new Date(dueDateValue.toString()).toLocaleDateString('en-US', {
+		? new Date(dueDateValue.toString()).toLocaleDateString(undefined, {
 				month: 'short',
 				day: 'numeric',
 				year: 'numeric',

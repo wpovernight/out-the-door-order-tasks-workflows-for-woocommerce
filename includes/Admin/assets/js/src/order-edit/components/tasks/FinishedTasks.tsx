@@ -34,7 +34,7 @@ const FinishedTasks: React.FC = () => {
 		} catch (error) {
 			console.error('Failed to delete task:', error);
 			// eslint-disable-next-line no-alert
-			alert('Failed to delete task. Please try again.');
+			alert(__('Failed to delete task. Please try again.', 'wpo-aom'));
 		}
 	};
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import { __ } from '@wordpress/i18n';
 import { CalendarDay } from '../data';
 
 interface CalendarGridProps {
@@ -7,13 +8,13 @@ interface CalendarGridProps {
 }
 
 const WEEKDAYS = [
-	{ abbr: 'Monday', short: 'Mo' },
-	{ abbr: 'Tuesday', short: 'Tu' },
-	{ abbr: 'Wednesday', short: 'We' },
-	{ abbr: 'Thursday', short: 'Th' },
-	{ abbr: 'Friday', short: 'Fr' },
-	{ abbr: 'Saturday', short: 'Sa' },
-	{ abbr: 'Sunday', short: 'Su' },
+	{ abbr: __('Monday', 'wpo-aom'), short: __('Mo', 'wpo-aom') },
+	{ abbr: __('Tuesday', 'wpo-aom'), short: __('Tu', 'wpo-aom') },
+	{ abbr: __('Wednesday', 'wpo-aom'), short: __('We', 'wpo-aom') },
+	{ abbr: __('Thursday', 'wpo-aom'), short: __('Th', 'wpo-aom') },
+	{ abbr: __('Friday', 'wpo-aom'), short: __('Fr', 'wpo-aom') },
+	{ abbr: __('Saturday', 'wpo-aom'), short: __('Sa', 'wpo-aom') },
+	{ abbr: __('Sunday', 'wpo-aom'), short: __('Su', 'wpo-aom') },
 ];
 
 const CalendarGrid: React.FC<CalendarGridProps> = ({ days, onDayClick }) => {

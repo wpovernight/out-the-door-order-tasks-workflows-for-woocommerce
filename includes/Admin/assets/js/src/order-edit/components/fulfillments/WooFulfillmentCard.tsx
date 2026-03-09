@@ -1,4 +1,5 @@
 import React from 'react';
+import { __, sprintf } from '@wordpress/i18n';
 import {
 	WooFulfillment,
 	getWooFulfillmentMeta,
@@ -25,7 +26,7 @@ export const WooFulfillmentCard: React.FC<WooFulfillmentCardProps> = ({
 	return (
 		<div className="fulfillment-card">
 			<div className="fulfillment-card-header">
-				<h4>Fulfillment #{index + 1}</h4>
+				<h4>{sprintf(__('Fulfillment #%d', 'wpo-aom'), index + 1)}</h4>
 				<span
 					className="wpo-aom-tag fulfillment-card-status"
 					style={getColorStyle(
@@ -65,15 +66,14 @@ export const WooFulfillmentCard: React.FC<WooFulfillmentCardProps> = ({
 									onClick={(e) => e.stopPropagation()}
 								>
 									<span className="screenReader">
-										Track Package
+										{__('Track Package', 'wpo-aom')}
 									</span>
 								</a>
 							)}
 						</div>
 					)}
 				</dd>
-				{/*ToDo: i18n*/}
-				<dt>Last Updated</dt>
+				<dt>{__('Last Updated', 'wpo-aom')}</dt>
 				<dd>
 					{fulfillment.status === 'fulfilled' &&
 						meta.date_fulfilled &&

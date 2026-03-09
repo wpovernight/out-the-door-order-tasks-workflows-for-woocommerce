@@ -5,6 +5,7 @@ import {
 } from '@shared/types/wooFulfillment';
 import { fetchWooFulfillments, fetchOrder } from '@shared/utils/api';
 import { AsyncLoaderStatus } from '@shared/hooks/useAsyncLoader';
+import { __ } from '@wordpress/i18n';
 
 interface Order {
 	line_items: Array<{
@@ -94,7 +95,9 @@ export const OrderWooFulfillmentProvider: React.FC<{
 										);
 									return {
 										...item,
-										name: orderItem?.name ?? 'Item',
+										name:
+											orderItem?.name ??
+											__('Item', 'wpo-aom'),
 									};
 								}),
 							};
@@ -112,7 +115,9 @@ export const OrderWooFulfillmentProvider: React.FC<{
 				setLoadingError(
 					err instanceof Error
 						? err
-						: new Error('Failed to load fulfillments')
+						: new Error(
+								__('Failed to load fulfillments', 'wpo-aom')
+							)
 				);
 				console.error('Error loading fulfillments:', err);
 			} finally {

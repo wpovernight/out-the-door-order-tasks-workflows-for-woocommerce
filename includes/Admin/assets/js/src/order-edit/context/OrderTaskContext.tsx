@@ -13,6 +13,7 @@ import {
 	TASK_UNFINISHED_STATUS_SLUG,
 } from '@shared/types/task';
 import { AsyncLoaderStatus } from '@shared/hooks/useAsyncLoader';
+import { __ } from '@wordpress/i18n';
 
 // Type for creating/updating tasks via API
 export type TaskPayload = Partial<Task> & {
@@ -122,7 +123,7 @@ export const OrderTaskProvider: React.FC<{
 				setLoadingError(
 					err instanceof Error
 						? err
-						: new Error('Failed to load tasks')
+						: new Error(__('Failed to load tasks', 'wpo-aom'))
 				);
 				console.error('Error loading tasks:', err);
 			} finally {

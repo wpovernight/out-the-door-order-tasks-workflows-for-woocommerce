@@ -1,3 +1,4 @@
+import { __ } from '@wordpress/i18n';
 import { WooFulfillmentMetaData } from '@shared/types/wooFulfillment';
 
 export const getShippingMethodLabel = (
@@ -8,14 +9,14 @@ export const getShippingMethodLabel = (
 			return (
 				fulfillmentMeta.provider_name?.toUpperCase() ||
 				fulfillmentMeta.shipment_provider?.toUpperCase() ||
-				'Tracking Number' // ToDo: i18n
+				__('Tracking Number', 'wpo-aom')
 			);
 		case 'manual-entry':
-			return 'Manual Entry'; // ToDo: i18n
+			return __('Manual Entry', 'wpo-aom');
 		case 'no-info':
-			return 'No Info'; // ToDo: i18n
+			return __('No Info', 'wpo-aom');
 		default:
-			return 'Unknown'; // ToDo: i18n
+			return __('Unknown', 'wpo-aom');
 	}
 };
 
@@ -38,7 +39,7 @@ export const formatDate = (dateString?: string) => {
 
 	try {
 		const date = new Date(dateString);
-		return date.toLocaleDateString('en-US', {
+		return date.toLocaleDateString(undefined, {
 			month: 'short',
 			day: 'numeric',
 			year: 'numeric',

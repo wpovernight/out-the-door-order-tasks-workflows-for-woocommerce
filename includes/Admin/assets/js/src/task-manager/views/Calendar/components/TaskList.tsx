@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { Task } from '@shared/types/task';
 import TaskDayGroup from './TaskDayGroup';
 import { getTaskDateField } from '@shared/utils/fieldUtils';
@@ -51,7 +51,12 @@ const TaskList: React.FC<TaskListProps> = ({
 				presetLabels[dateRangePreset] || __('Today', 'wpo-aom');
 			return (
 				<>
-					{presetLabel}'s tasks {taskCountBadge}
+					{sprintf(
+						/* translators: %s: date range label (e.g. "Today", "Current Week") */
+						__("%s's tasks", 'wpo-aom'),
+						presetLabel
+					)}{' '}
+					{taskCountBadge}
 				</>
 			);
 		}

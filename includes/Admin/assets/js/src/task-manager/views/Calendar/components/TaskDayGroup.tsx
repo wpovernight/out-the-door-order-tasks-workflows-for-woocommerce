@@ -20,11 +20,11 @@ const TaskDayGroup: React.FC<TaskDayGroupProps> = ({
 		useTaskSort(tasks);
 
 	const dayLabel = date
-		? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+		? date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
 		: __('No due date', 'wpo-aom');
 
 	const weekdayLabel = date
-		? date.toLocaleDateString('en-US', { weekday: 'long' })
+		? date.toLocaleDateString(undefined, { weekday: 'long' })
 		: null;
 
 	return (
