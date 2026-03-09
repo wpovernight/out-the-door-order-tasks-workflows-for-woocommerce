@@ -21,7 +21,20 @@ function getApiConfig() {
 	};
 }
 
-const { apiRoot, apiNamespace, nonce } = getApiConfig();
+function getApiRoot(): string {
+	return getApiConfig().apiRoot;
+}
+
+function getApiNamespace(): string {
+	return getApiConfig().apiNamespace;
+}
+
+function getHeaders(): Record<string, string> {
+	return {
+		'Content-Type': 'application/json',
+		'X-WP-Nonce': getApiConfig().nonce,
+	};
+}
 
 /**
  * Handles the API response, checking for errors and parsing JSON.
@@ -48,13 +61,10 @@ async function handleResponse<T>(response: Response): Promise<T> {
  * @throws Will throw an error if the API request fails.
  */
 export async function fetchTasks(): Promise<Task[]> {
-	const response = await fetch(`${apiRoot}/${apiNamespace}/tasks`, {
+	const response = await fetch(`${getApiRoot()}/${getApiNamespace()}/tasks`, {
 		method: 'GET',
 		credentials: 'include',
-		headers: {
-			'Content-Type': 'application/json',
-			'X-WP-Nonce': nonce,
-		},
+		headers: getHeaders(),
 	});
 
 	const data = await handleResponse<any[]>(response);
@@ -84,13 +94,10 @@ export async function fetchTasks(): Promise<Task[]> {
  * @throws Will throw an error if the API request fails.
  */
 export async function createTask(payload: Partial<Task>): Promise<Task> {
-	const response = await fetch(`${apiRoot}/${apiNamespace}/tasks`, {
+	const response = await fetch(`${getApiRoot()}/${getApiNamespace()}/tasks`, {
 		method: 'POST',
 		credentials: 'include',
-		headers: {
-			'Content-Type': 'application/json',
-			'X-WP-Nonce': nonce,
-		},
+		headers: getHeaders(),
 		body: JSON.stringify(payload),
 	});
 
@@ -115,15 +122,15 @@ export async function updateTask(
 	taskId: number,
 	payload: Partial<Task>
 ): Promise<Task> {
-	const response = await fetch(`${apiRoot}/${apiNamespace}/tasks/${taskId}`, {
-		method: 'PUT',
-		credentials: 'include',
-		headers: {
-			'Content-Type': 'application/json',
-			'X-WP-Nonce': nonce,
-		},
-		body: JSON.stringify(payload),
-	});
+	const response = await fetch(
+		`${getApiRoot()}/${getApiNamespace()}/tasks/${taskId}`,
+		{
+			method: 'PUT',
+			credentials: 'include',
+			headers: getHeaders(),
+			body: JSON.stringify(payload),
+		}
+	);
 
 	const task = await handleResponse<any>(response);
 
@@ -143,14 +150,14 @@ export async function updateTask(
 }
 
 export async function deleteTask(taskId: number): Promise<void> {
-	const response = await fetch(`${apiRoot}/${apiNamespace}/tasks/${taskId}`, {
-		method: 'DELETE',
-		credentials: 'include',
-		headers: {
-			'Content-Type': 'application/json',
-			'X-WP-Nonce': nonce,
-		},
-	});
+	const response = await fetch(
+		`${getApiRoot()}/${getApiNamespace()}/tasks/${taskId}`,
+		{
+			method: 'DELETE',
+			credentials: 'include',
+			headers: getHeaders(),
+		}
+	);
 
 	return handleResponse<void>(response);
 }
@@ -171,14 +178,11 @@ export async function moveTask(
 	targetStatusId: number
 ): Promise<{ new_position: number }> {
 	const response = await fetch(
-		`${apiRoot}/${apiNamespace}/tasks/${taskId}/move`,
+		`${getApiRoot()}/${getApiNamespace()}/tasks/${taskId}/move`,
 		{
 			method: 'POST',
 			credentials: 'include',
-			headers: {
-				'Content-Type': 'application/json',
-				'X-WP-Nonce': nonce,
-			},
+			headers: getHeaders(),
 			body: JSON.stringify({
 				previous_task_id: previousTaskId,
 				target_status_id: targetStatusId,
@@ -196,14 +200,14 @@ export async function moveTask(
  * @throws Will throw an error if the API request fails.
  */
 export async function fetchTaskFields(): Promise<Record<string, TaskField>> {
-	const response = await fetch(`${apiRoot}/${apiNamespace}/tasks/fields`, {
-		method: 'GET',
-		credentials: 'include',
-		headers: {
-			'Content-Type': 'application/json',
-			'X-WP-Nonce': nonce,
-		},
-	});
+	const response = await fetch(
+		`${getApiRoot()}/${getApiNamespace()}/tasks/fields`,
+		{
+			method: 'GET',
+			credentials: 'include',
+			headers: getHeaders(),
+		}
+	);
 
 	return handleResponse<Record<string, TaskField>>(response);
 }
@@ -219,14 +223,11 @@ export async function fetchFieldOptions(
 	fieldSlug: string
 ): Promise<FieldOption[]> {
 	const response = await fetch(
-		`${apiRoot}/${apiNamespace}/tasks/fields/${fieldSlug}/options`,
+		`${getApiRoot()}/${getApiNamespace()}/tasks/fields/${fieldSlug}/options`,
 		{
 			method: 'GET',
 			credentials: 'include',
-			headers: {
-				'Content-Type': 'application/json',
-				'X-WP-Nonce': nonce,
-			},
+			headers: getHeaders(),
 		}
 	);
 
@@ -246,14 +247,11 @@ export async function reorderFieldOptions(
 	orderedOptionIds: number[]
 ): Promise<{ success: boolean; message: string }> {
 	const response = await fetch(
-		`${apiRoot}/${apiNamespace}/tasks/fields/${fieldId}/options/reorder`,
+		`${getApiRoot()}/${getApiNamespace()}/tasks/fields/${fieldId}/options/reorder`,
 		{
 			method: 'POST',
 			credentials: 'include',
-			headers: {
-				'Content-Type': 'application/json',
-				'X-WP-Nonce': nonce,
-			},
+			headers: getHeaders(),
 			body: JSON.stringify({
 				ordered_option_ids: orderedOptionIds,
 			}),
@@ -275,13 +273,10 @@ export const searchOrders = (
 	term: string,
 	signal?: AbortSignal
 ): Promise<any[]> => {
-	return fetch(`${apiRoot}/orders?search=${encodeURIComponent(term)}`, {
+	return fetch(`${getApiRoot()}/orders?search=${encodeURIComponent(term)}`, {
 		method: 'GET',
 		credentials: 'include',
-		headers: {
-			'Content-Type': 'application/json',
-			'X-WP-Nonce': nonce,
-		},
+		headers: getHeaders(),
 		signal,
 	}).then(handleResponse<any[]>);
 };
@@ -296,14 +291,14 @@ export const searchOrders = (
 export async function fetchWooFulfillments(
 	orderId: number
 ): Promise<WooFulfillment[]> {
-	const response = await fetch(`${apiRoot}/orders/${orderId}/fulfillments`, {
-		method: 'GET',
-		credentials: 'include',
-		headers: {
-			'Content-Type': 'application/json',
-			'X-WP-Nonce': nonce,
-		},
-	});
+	const response = await fetch(
+		`${getApiRoot()}/orders/${orderId}/fulfillments`,
+		{
+			method: 'GET',
+			credentials: 'include',
+			headers: getHeaders(),
+		}
+	);
 
 	return handleResponse<WooFulfillment[]>(response);
 }
@@ -316,13 +311,10 @@ export async function fetchWooFulfillments(
  * @throws Will throw an error if the API request fails.
  */
 export async function fetchOrder(orderId: number): Promise<any> {
-	const response = await fetch(`${apiRoot}/orders/${orderId}`, {
+	const response = await fetch(`${getApiRoot()}/orders/${orderId}`, {
 		method: 'GET',
 		credentials: 'include',
-		headers: {
-			'Content-Type': 'application/json',
-			'X-WP-Nonce': nonce,
-		},
+		headers: getHeaders(),
 	});
 
 	return handleResponse(response);
@@ -337,14 +329,11 @@ export async function fetchOrder(orderId: number): Promise<any> {
  */
 export async function finishTask(taskId: number): Promise<boolean> {
 	const response = await fetch(
-		`${apiRoot}/${apiNamespace}/tasks/${taskId}/finish`,
+		`${getApiRoot()}/${getApiNamespace()}/tasks/${taskId}/finish`,
 		{
 			method: 'POST',
 			credentials: 'include',
-			headers: {
-				'Content-Type': 'application/json',
-				'X-WP-Nonce': nonce,
-			},
+			headers: getHeaders(),
 		}
 	);
 
@@ -361,14 +350,11 @@ export async function finishTask(taskId: number): Promise<boolean> {
  */
 export async function archiveTask(taskId: number): Promise<boolean> {
 	const response = await fetch(
-		`${apiRoot}/${apiNamespace}/tasks/${taskId}/archive`,
+		`${getApiRoot()}/${getApiNamespace()}/tasks/${taskId}/archive`,
 		{
 			method: 'POST',
 			credentials: 'include',
-			headers: {
-				'Content-Type': 'application/json',
-				'X-WP-Nonce': nonce,
-			},
+			headers: getHeaders(),
 		}
 	);
 
@@ -378,14 +364,11 @@ export async function archiveTask(taskId: number): Promise<boolean> {
 
 export async function unarchiveTask(taskId: number): Promise<boolean> {
 	const response = await fetch(
-		`${apiRoot}/${apiNamespace}/tasks/${taskId}/unarchive`,
+		`${getApiRoot()}/${getApiNamespace()}/tasks/${taskId}/unarchive`,
 		{
 			method: 'POST',
 			credentials: 'include',
-			headers: {
-				'Content-Type': 'application/json',
-				'X-WP-Nonce': nonce,
-			},
+			headers: getHeaders(),
 		}
 	);
 
@@ -397,15 +380,12 @@ export async function fetchFulfillmentOrders(
 	status?: string
 ): Promise<FulfillmentOrder[]> {
 	const response = await fetch(
-		`${apiRoot}/${apiNamespace}/fulfillments/orders` +
+		`${getApiRoot()}/${getApiNamespace()}/fulfillments/orders` +
 			(status ? `?status=${encodeURIComponent(status)}` : ''),
 		{
 			method: 'GET',
 			credentials: 'include',
-			headers: {
-				'Content-Type': 'application/json',
-				'X-WP-Nonce': nonce,
-			},
+			headers: getHeaders(),
 		}
 	);
 
@@ -414,14 +394,11 @@ export async function fetchFulfillmentOrders(
 
 export async function fetchCustomOrderStatuses(): Promise<CustomOrderStatus[]> {
 	const response = await fetch(
-		`${apiRoot}/${apiNamespace}/custom-order-statuses`,
+		`${getApiRoot()}/${getApiNamespace()}/custom-order-statuses`,
 		{
 			method: 'GET',
 			credentials: 'include',
-			headers: {
-				'Content-Type': 'application/json',
-				'X-WP-Nonce': nonce,
-			},
+			headers: getHeaders(),
 		}
 	);
 
@@ -432,14 +409,11 @@ export async function createCustomOrderStatus(
 	payload: Partial<CustomOrderStatus>
 ): Promise<CustomOrderStatus> {
 	const response = await fetch(
-		`${apiRoot}/${apiNamespace}/custom-order-statuses`,
+		`${getApiRoot()}/${getApiNamespace()}/custom-order-statuses`,
 		{
 			method: 'POST',
 			credentials: 'include',
-			headers: {
-				'Content-Type': 'application/json',
-				'X-WP-Nonce': nonce,
-			},
+			headers: getHeaders(),
 			body: JSON.stringify(payload),
 		}
 	);
@@ -452,14 +426,11 @@ export async function updateCustomOrderStatus(
 	payload: Partial<CustomOrderStatus>
 ): Promise<CustomOrderStatus> {
 	const response = await fetch(
-		`${apiRoot}/${apiNamespace}/custom-order-statuses/${statusId}`,
+		`${getApiRoot()}/${getApiNamespace()}/custom-order-statuses/${statusId}`,
 		{
 			method: 'PUT',
 			credentials: 'include',
-			headers: {
-				'Content-Type': 'application/json',
-				'X-WP-Nonce': nonce,
-			},
+			headers: getHeaders(),
 			body: JSON.stringify(payload),
 		}
 	);
@@ -469,14 +440,11 @@ export async function updateCustomOrderStatus(
 
 export async function deleteCustomOrderStatus(statusId: number): Promise<void> {
 	const response = await fetch(
-		`${apiRoot}/${apiNamespace}/custom-order-statuses/${statusId}`,
+		`${getApiRoot()}/${getApiNamespace()}/custom-order-statuses/${statusId}`,
 		{
 			method: 'DELETE',
 			credentials: 'include',
-			headers: {
-				'Content-Type': 'application/json',
-				'X-WP-Nonce': nonce,
-			},
+			headers: getHeaders(),
 		}
 	);
 
