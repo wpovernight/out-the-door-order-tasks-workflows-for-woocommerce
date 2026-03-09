@@ -14,6 +14,11 @@ class CustomOrderStatusService {
 	protected CustomOrderStatusRepository $repository;
 
 	/**
+	 * @var CustomOrderStatus[]|null
+	 */
+	private ?array $cached_statuses = null;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -142,7 +147,11 @@ class CustomOrderStatusService {
 	 * @return CustomOrderStatus[]
 	 */
 	public function all(): array {
-		return $this->repository->get();
+		if ( null === $this->cached_statuses ) {
+			$this->cached_statuses = $this->repository->get();
+		}
+
+		return $this->cached_statuses;
 	}
 
 	/**
@@ -186,7 +195,8 @@ class CustomOrderStatusService {
 			throw new Exception( __( 'Failed to create custom order status', 'wpo-aom' ) );
 		}
 
-		$status->id = $result;
+		$status->id            = $result;
+		$this->cached_statuses = null;
 
 		return $status;
 	}
@@ -212,6 +222,8 @@ class CustomOrderStatusService {
 		if ( false === $result ) {
 			throw new RuntimeException( __( 'Failed to update custom order status', 'wpo-aom' ) );
 		}
+
+		$this->cached_statuses = null;
 
 		return $custom_status;
 	}
@@ -239,7 +251,10 @@ class CustomOrderStatusService {
 			'wpo-aom'
 		);
 
-		return $this->repository->where( 'id', $id )->delete();
+		$result                = $this->repository->where( 'id', $id )->delete();
+		$this->cached_statuses = null;
+
+		return $result;
 	}
 
 	/**
