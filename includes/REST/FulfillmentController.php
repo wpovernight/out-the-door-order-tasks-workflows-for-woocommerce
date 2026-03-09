@@ -127,7 +127,7 @@ class FulfillmentController extends BaseRestController {
 
 		$product    = $item->get_product();
 		$image_url  = '';
-		$attributes = '';
+		$attributes = array();
 
 		if ( $product ) {
 			$image_id  = $product->get_image_id();
