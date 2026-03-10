@@ -6,6 +6,7 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 use WP_Error;
+use WPO\AOM\Core\Logger;
 use WPO\AOM\Services\TaskManagerService;
 
 defined( 'ABSPATH' ) || exit;
@@ -268,6 +269,7 @@ class TaskController extends BaseRestController {
 		try {
 			$task = $task_manager_service->create_task( $data['title'], $data['description'] ?? '', $data['field_values'] ?? array() );
 		} catch ( \Exception|\Throwable $e ) {
+			Logger::error( 'Task creation failed: ' . $e->getMessage() );
 			return new WP_Error( 'task_creation_failed', __( 'Failed to create task.', 'wpo-aom' ), array( 'status' => 500 ) );
 		}
 
@@ -337,6 +339,7 @@ class TaskController extends BaseRestController {
 		try {
 			$task = $task_manager_service->update_task( $id, $data, $data['field_values'] ?? null );
 		} catch ( \Exception|\Throwable $e ) {
+			Logger::error( 'Task update failed: ' . $e->getMessage() );
 			return new WP_Error( 'task_update_failed', __( 'Failed to update task.', 'wpo-aom' ), array( 'status' => 500 ) );
 		}
 
@@ -363,6 +366,7 @@ class TaskController extends BaseRestController {
 		try {
 			$task_manager_service->delete_task( $id );
 		} catch ( \Exception $e ) {
+			Logger::error( 'Task deletion failed: ' . $e->getMessage() );
 			return new WP_Error( 'task_deletion_failed', __( 'Failed to delete task.', 'wpo-aom' ), array( 'status' => 500 ) );
 		}
 
@@ -510,7 +514,7 @@ class TaskController extends BaseRestController {
 			);
 		} catch ( \Exception $e ) {
 			// Unexpected errors (database issues, etc.).
-			error_log( 'Failed to reorder field options: ' . $e->getMessage() );
+			Logger::error( 'Failed to reorder field options: ' . $e->getMessage() );
 
 			return new WP_Error(
 				'update_failed',
@@ -591,6 +595,7 @@ class TaskController extends BaseRestController {
 		} catch ( \InvalidArgumentException $e ) {
 			return new WP_Error( 'invalid_params', $e->getMessage(), array( 'status' => 400 ) );
 		} catch ( \Exception $e ) {
+			Logger::error( 'Task move failed: ' . $e->getMessage() );
 			return new WP_Error( 'task_move_failed', __( 'Failed to move task.', 'wpo-aom' ), array( 'status' => 500 ) );
 		}
 
@@ -624,6 +629,7 @@ class TaskController extends BaseRestController {
 		} catch ( \RuntimeException $e ) {
 			return new WP_Error( 'task_finish_failed', $e->getMessage(), array( 'status' => 404 ) );
 		} catch ( \Exception $e ) {
+			Logger::error( 'Task finish failed: ' . $e->getMessage() );
 			return new WP_Error( 'task_finish_failed', __( 'Failed to finish task.', 'wpo-aom' ), array( 'status' => 500 ) );
 		}
 
@@ -656,6 +662,7 @@ class TaskController extends BaseRestController {
 		} catch ( \RuntimeException $e ) {
 			return new WP_Error( 'task_archive_failed', $e->getMessage(), array( 'status' => 404 ) );
 		} catch ( \Exception $e ) {
+			Logger::error( 'Task archive failed: ' . $e->getMessage() );
 			return new WP_Error( 'task_archive_failed', __( 'Failed to archive task.', 'wpo-aom' ), array( 'status' => 500 ) );
 		}
 
@@ -687,6 +694,7 @@ class TaskController extends BaseRestController {
 		} catch ( \RuntimeException $e ) {
 			return new WP_Error( 'task_unarchive_failed', $e->getMessage(), array( 'status' => 404 ) );
 		} catch ( \Exception $e ) {
+			Logger::error( 'Task unarchive failed: ' . $e->getMessage() );
 			return new WP_Error( 'task_unarchive_failed', __( 'Failed to unarchive task.', 'wpo-aom' ), array( 'status' => 500 ) );
 		}
 

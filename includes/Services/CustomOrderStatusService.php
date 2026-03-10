@@ -5,6 +5,7 @@ namespace WPO\AOM\Services;
 use Exception;
 use RuntimeException;
 use WPO\AOM\Models\CustomOrderStatus;
+use WPO\AOM\Core\Logger;
 use WPO\AOM\Repositories\CustomOrderStatusRepository;
 
 defined( 'ABSPATH' ) || exit;
@@ -275,12 +276,22 @@ class CustomOrderStatusService {
 		);
 
 		foreach ( $orders as $order ) {
-			$resolved_to_status = apply_filters( 'wpo_aom_reassign_orders_to_status', $to_status, $order );
+			try {
+				$resolved_to_status = apply_filters( 'wpo_aom_reassign_orders_to_status', $to_status, $order );
 
-			$order->update_status(
-				$resolved_to_status,
-				'WPO AOM: ' . __( 'Status changed due to custom order status deletion.', 'wpo-aom' )
-			);
+				$order->update_status(
+					$resolved_to_status,
+					'WPO AOM: ' . __( 'Status changed due to custom order status deletion.', 'wpo-aom' )
+				);
+			} catch ( \Exception $e ) {
+				Logger::warning( sprintf(
+					'Failed to reassign order %d from status "%s" to "%s": %s',
+					$order->get_id(),
+					$from_status,
+					$to_status,
+					$e->getMessage()
+				) );
+			}
 		}
 
 		// Schedule next batch if there might be more orders.

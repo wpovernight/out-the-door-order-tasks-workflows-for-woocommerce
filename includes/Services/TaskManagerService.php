@@ -14,6 +14,7 @@ use WPO\AOM\Models\TaskFieldValue;
 use WPO\AOM\Repositories\TaskFieldOptionRepository;
 use WPO\AOM\Repositories\TaskFieldRepository;
 use WPO\AOM\Repositories\TaskFieldValueRepository;
+use WPO\AOM\Core\Logger;
 use WPO\AOM\Repositories\TaskRepository;
 
 defined( 'ABSPATH' ) || exit;
@@ -664,6 +665,7 @@ final class TaskManagerService {
 		foreach ( $field_data as $field_id => $value ) {
 			$result = $this->set_field_value( $task_id, (int) $field_id, $value );
 			if ( ! $result ) {
+				Logger::warning( sprintf( 'Failed to set field value for task %d, field %d.', $task_id, $field_id ) );
 				$success = false;
 			}
 		}
@@ -1032,8 +1034,7 @@ final class TaskManagerService {
 		     ! function_exists( 'as_has_scheduled_action' ) ||
 		     ! function_exists( 'as_schedule_single_action' )
 		) {
-			// ToDo: Use proper logging mechanism.
-			error_log('WPO AOM: Invalid status ID or Action Scheduler not available. Cannot schedule rebalance task positions job.');
+			Logger::warning( 'Invalid status ID or Action Scheduler not available. Cannot schedule rebalance task positions job.' );
 			return;
 		}
 

@@ -365,9 +365,9 @@ final class Install {
 					// Verify the ID matches what we expected.
 					if ( $inserted_id !== $field_id ) {
 						// Log error or throw exception - ID mismatch is critical.
-						error_log(
+						Logger::critical(
 							sprintf(
-								'WPO AOM: Failed to insert field with ID %d. Got ID %d instead.',
+								'Failed to insert field with ID %d. Got ID %d instead.',
 								$field_id,
 								$inserted_id
 							)
@@ -382,6 +382,8 @@ final class Install {
 								->insert( array_merge( $option, array( 'field_id' => $inserted_id ) ) );
 						}
 					}
+				} else {
+					Logger::critical( sprintf( 'Failed to insert default field "%s". DB error: %s', $field_data['slug'], $wpdb->last_error ) );
 				}
 			}
 		}
