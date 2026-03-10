@@ -272,7 +272,11 @@ class TaskController extends BaseRestController {
 		$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
 
 		try {
-			$task = $task_manager_service->create_task( $data['title'], $data['description'] ?? '', $data['field_values'] ?? array() );
+			$task = $task_manager_service->create_task(
+				$data['title'],
+				$data['description'] ?? '',
+				$data['field_values'] ?? array()
+			);
 		} catch ( \Throwable $e ) {
 			Logger::error( 'Task creation failed: ' . $e->getMessage() );
 			return new WP_Error( 'task_creation_failed', __( 'Failed to create task.', 'wpo-aom' ), array( 'status' => 500 ) );
