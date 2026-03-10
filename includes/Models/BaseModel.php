@@ -41,6 +41,7 @@ abstract class BaseModel {
 		}
 
 		unset( $data['non_db_properties'] );
+		unset( $data['guarded'] );
 
 		return $data;
 	}
