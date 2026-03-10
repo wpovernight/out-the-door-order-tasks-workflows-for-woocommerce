@@ -151,13 +151,15 @@ abstract class BaseRestController {
 		$rules        = array();
 		$current_rule = '';
 		$in_regex     = false;
+		$regex_start  = -1;
 
 		for ( $i = 0, $len = strlen( $rule_string ); $i < $len; $i ++ ) {
 			$char = $rule_string[ $i ];
 
-			// Detect start of regex pattern.
+			// Detect start of regex pattern and record opening delimiter position.
 			if ( ! $in_regex && 'regex:' === substr( $rule_string, $i, 6 ) ) {
-				$in_regex = true;
+				$in_regex    = true;
+				$regex_start = $i + 6;
 			}
 
 			if ( '|' === $char && ! $in_regex ) {
@@ -168,8 +170,8 @@ abstract class BaseRestController {
 
 			$current_rule .= $char;
 
-			// Detect end of regex pattern: closing delimiter followed by optional flags.
-			if ( $in_regex && $i > 0 && '/' === $char && '/' !== $rule_string[ $i - 1 ] ) {
+			// Detect end of regex pattern: closing delimiter (must be past the opening one).
+			if ( $in_regex && $i > $regex_start && '/' === $char ) {
 				// Skip past any trailing regex flags (e.g., 'i', 'm', 's').
 				while ( $i + 1 < $len && ctype_alpha( $rule_string[ $i + 1 ] ) ) {
 					$i++;
