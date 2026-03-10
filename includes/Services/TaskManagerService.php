@@ -1079,6 +1079,14 @@ final class TaskManagerService {
 	 * @throws \Throwable
 	 */
 	public function rebalance_task_positions( int $status_id ): void {
-		$this->task_repository->rebalance_positions( $status_id );
+		try {
+			$this->task_repository->rebalance_positions( $status_id );
+		} catch ( \Throwable $e ) {
+			Logger::error( sprintf(
+				'Failed to rebalance task positions for status %d: %s',
+				$status_id,
+				$e->getMessage()
+			) );
+		}
 	}
 }

@@ -231,13 +231,18 @@ class TaskController extends BaseRestController {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_items( WP_REST_Request $request ) {
-		/** @var TaskManagerService $task_manager_service */
-		$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
-		$tasks                = $task_manager_service->get_all_tasks_with_fields();
+		try {
+			/** @var TaskManagerService $task_manager_service */
+			$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
+			$tasks                = $task_manager_service->get_all_tasks_with_fields();
 
-		// ToDo: Add pagination, filtering, etc.
+			// ToDo: Add pagination, filtering, etc.
 
-		return rest_ensure_response( $tasks );
+			return rest_ensure_response( $tasks );
+		} catch ( \Throwable $e ) {
+			Logger::error( 'Failed to fetch tasks: ' . $e->getMessage() );
+			return new WP_Error( 'fetch_failed', 'Failed to fetch tasks.', array( 'status' => 500 ) );
+		}
 	}
 
 	/**
@@ -268,7 +273,7 @@ class TaskController extends BaseRestController {
 
 		try {
 			$task = $task_manager_service->create_task( $data['title'], $data['description'] ?? '', $data['field_values'] ?? array() );
-		} catch ( \Exception|\Throwable $e ) {
+		} catch ( \Throwable $e ) {
 			Logger::error( 'Task creation failed: ' . $e->getMessage() );
 			return new WP_Error( 'task_creation_failed', __( 'Failed to create task.', 'wpo-aom' ), array( 'status' => 500 ) );
 		}
@@ -291,17 +296,22 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'invalid_id', 'Invalid task ID provided', array( 'status' => 400 ) );
 		}
 
-		/** @var TaskManagerService $task_manager_service */
-		$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
-		$task                 = $include_fields
-			? $task_manager_service->get_task_with_fields( $id )
-			: $task_manager_service->get_task( $id );
+		try {
+			/** @var TaskManagerService $task_manager_service */
+			$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
+			$task                 = $include_fields
+				? $task_manager_service->get_task_with_fields( $id )
+				: $task_manager_service->get_task( $id );
 
-		if ( ! $task ) {
-			return new WP_Error( 'not_found', 'Task not found', array( 'status' => 404 ) );
+			if ( ! $task ) {
+				return new WP_Error( 'not_found', 'Task not found', array( 'status' => 404 ) );
+			}
+
+			return rest_ensure_response( $task );
+		} catch ( \Throwable $e ) {
+			Logger::error( 'Failed to fetch task: ' . $e->getMessage() );
+			return new WP_Error( 'fetch_failed', 'Failed to fetch task.', array( 'status' => 500 ) );
 		}
-
-		return rest_ensure_response( $task );
 	}
 
 	/**
@@ -338,7 +348,7 @@ class TaskController extends BaseRestController {
 
 		try {
 			$task = $task_manager_service->update_task( $id, $data, $data['field_values'] ?? null );
-		} catch ( \Exception|\Throwable $e ) {
+		} catch ( \Throwable $e ) {
 			Logger::error( 'Task update failed: ' . $e->getMessage() );
 			return new WP_Error( 'task_update_failed', __( 'Failed to update task.', 'wpo-aom' ), array( 'status' => 500 ) );
 		}
@@ -427,11 +437,16 @@ class TaskController extends BaseRestController {
 	 * @return mixed
 	 */
 	public function get_task_fields( WP_REST_Request $request ) {
-		/** @var TaskManagerService $task_manager_service */
-		$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
-		$fields               = $task_manager_service->get_all_fields();
+		try {
+			/** @var TaskManagerService $task_manager_service */
+			$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
+			$fields               = $task_manager_service->get_all_fields();
 
-		return rest_ensure_response( $fields );
+			return rest_ensure_response( $fields );
+		} catch ( \Throwable $e ) {
+			Logger::error( 'Failed to fetch task fields: ' . $e->getMessage() );
+			return new WP_Error( 'fetch_failed', 'Failed to fetch task fields.', array( 'status' => 500 ) );
+		}
 	}
 
 	/**
@@ -448,15 +463,20 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'invalid_field_id', 'Invalid field ID provided', array( 'status' => 400 ) );
 		}
 
-		/** @var TaskManagerService $task_manager_service */
-		$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
-		$options              = $task_manager_service->get_field_options_by_field_id( $field_id );
+		try {
+			/** @var TaskManagerService $task_manager_service */
+			$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
+			$options              = $task_manager_service->get_field_options_by_field_id( $field_id );
 
-		if ( empty( $options ) ) {
-			return new WP_Error( 'not_found', 'Field not found or has no options', array( 'status' => 404 ) );
+			if ( empty( $options ) ) {
+				return new WP_Error( 'not_found', 'Field not found or has no options', array( 'status' => 404 ) );
+			}
+
+			return rest_ensure_response( $options );
+		} catch ( \Throwable $e ) {
+			Logger::error( 'Failed to fetch field options: ' . $e->getMessage() );
+			return new WP_Error( 'fetch_failed', 'Failed to fetch field options.', array( 'status' => 500 ) );
 		}
-
-		return rest_ensure_response( $options );
 	}
 
 	public function get_field_options_by_slug( WP_REST_Request $request ) {
@@ -466,15 +486,20 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'invalid_field_slug', 'Invalid field slug provided', array( 'status' => 400 ) );
 		}
 
-		/** @var TaskManagerService $task_manager_service */
-		$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
-		$options              = $task_manager_service->get_field_options_by_field_slug( $field_slug );
+		try {
+			/** @var TaskManagerService $task_manager_service */
+			$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
+			$options              = $task_manager_service->get_field_options_by_field_slug( $field_slug );
 
-		if ( empty( $options ) ) {
-			return new WP_Error( 'not_found', 'Field not found or has no options', array( 'status' => 404 ) );
+			if ( empty( $options ) ) {
+				return new WP_Error( 'not_found', 'Field not found or has no options', array( 'status' => 404 ) );
+			}
+
+			return rest_ensure_response( $options );
+		} catch ( \Throwable $e ) {
+			Logger::error( 'Failed to fetch field options: ' . $e->getMessage() );
+			return new WP_Error( 'fetch_failed', 'Failed to fetch field options.', array( 'status' => 500 ) );
 		}
-
-		return rest_ensure_response( $options );
 	}
 
 	/**
@@ -572,7 +597,7 @@ class TaskController extends BaseRestController {
 	 * @param WP_REST_Request $request
 	 *
 	 * @return WP_REST_Response|WP_Error
-	 * @throws \Exception|\Throwable
+	 * @throws \Throwable
 	 */
 	public function move_task( WP_REST_Request $request ) {
 		$task_id          = (int) $request->get_param( 'id' );

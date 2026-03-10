@@ -4,6 +4,8 @@ namespace WPO\AOM\Emails;
 
 use WC_Email;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use WPO\AOM\Core\Logger;
+use WPO\AOM\Services\TaskManagerService;
 use WPO\AOM\Traits\TaskEmailRecipients;
 use WPO\AOM\Enums\DefaultTaskFields;
 
@@ -150,12 +152,17 @@ class TaskUpdatedEmail extends WC_Email {
 			return;
 		}
 
-		// Fetch full task data.
-		$task_service     = WPO_AOM()->get_service( 'TaskManagerService' );
-		$task_with_fields = $task_service->get_task_with_fields( $task_id );
+		try {
+			/** @var TaskManagerService $task_service */
+			$task_service = WPO_AOM()->get_service( 'TaskManagerService' );
+			// Fetch full task data.
+			$task_with_fields = $task_service->get_task_with_fields( $task_id );
 
-		if ( ! empty( $task_with_fields ) ) {
-			$this->trigger( $task_id, $task_with_fields, $updated_fields );
+			if ( ! empty( $task_with_fields ) ) {
+				$this->trigger( $task_id, $task_with_fields, $updated_fields );
+			}
+		} catch ( \Throwable $e ) {
+			Logger::error( sprintf( 'Failed to send task updated email for task %d: %s', $task_id, $e->getMessage() ) );
 		}
 	}
 

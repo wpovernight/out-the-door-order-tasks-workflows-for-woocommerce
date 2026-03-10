@@ -182,6 +182,8 @@ class CustomOrderStatusController extends BaseRestController {
 
 		try {
 			$updated_status = $custom_order_status_service->update( $id, $data );
+		} catch ( \InvalidArgumentException $e ) {
+			return new WP_Error( 'not_found', $e->getMessage(), array( 'status' => 404 ) );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'update_failed', $e->getMessage(), array( 'status' => 500 ) );
 		}

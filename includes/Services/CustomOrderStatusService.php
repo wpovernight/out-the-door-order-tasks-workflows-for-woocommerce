@@ -214,7 +214,7 @@ class CustomOrderStatusService {
 	public function update( int $id, array $data ): CustomOrderStatus {
 		$custom_status = $this->repository->find( $id );
 		if ( ! $custom_status ) {
-			throw new Exception( __( 'Custom order status not found', 'wpo-aom' ) );
+			throw new \InvalidArgumentException( __( 'Custom order status not found', 'wpo-aom' ) );
 		}
 
 		$custom_status->fill( $data );

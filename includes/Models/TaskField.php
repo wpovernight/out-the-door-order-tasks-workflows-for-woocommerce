@@ -2,6 +2,7 @@
 
 namespace WPO\AOM\Models;
 
+use WPO\AOM\Core\Logger;
 use WPO\AOM\Enums\TaskFieldTypes;
 
 defined( 'ABSPATH' ) || exit;
@@ -17,7 +18,6 @@ class TaskField extends BaseModel {
 
 	protected array $guarded = array( 'id', 'type', 'slug' );
 
-
 	/**
 	 * Constructor.
 	 *
@@ -30,7 +30,8 @@ class TaskField extends BaseModel {
 
 		$type = $data['type'] ?? '';
 		if ( ! TaskFieldTypes::is_valid( $type ) ) {
-			throw new \InvalidArgumentException( "Invalid field type: $type" );
+			Logger::error( sprintf( 'Invalid field type "%s" for field "%s". Defaulting to text.', $type, $this->slug ) );
+			$type = TaskFieldTypes::TEXT;
 		}
 
 		$this->type         = $type;
