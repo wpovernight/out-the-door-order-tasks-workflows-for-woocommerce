@@ -1,17 +1,9 @@
-# Test Instruction for Task Manager
+# Test Helpers
 
-> ⚠️ Temporary file for testing PR. Will be removed before merge.
-> The build files is also not to be included in the final merge.
+> ⚠️ This is a temporary file for test and will be removed before the release.
 
-## Test Instructions
-- Install and activate the **Advanced Order Manager** plugin.
-- Copy the code snippet below into a PHP file and include it in your WordPress environment (e.g., via a custom plugin or theme's `functions.php`).
-- Create sample tasks by calling `create_sample_tasks( 10 );` function.
-- Navigate to the `WooCommerce > Task Management` section in the dashboard to see the board.
-- If the plugin is already installed but the database schema requires updating, you can run the `reinstall_database_schema()` function to update the schema and reset default values.
 
-> The build file is included temporary to ease the testing. However, in case you want to build the files yourself, please refer to the manual build instructions at the bottom of this document.
-## Task Creation for Testing
+## Automatic Task Creation
 
 Run the below code snippet to create sample tasks programmatically.
 
@@ -122,7 +114,6 @@ function remove_sample_tasks(): void {
 
 	// Also remove associated field values.
 	$task_field_value_repository = new \WPO\AOM\Repositories\TaskFieldValueRepository();
-	$task_field_value_repository->get();
 
 	foreach ( $task_field_value_repository->get() as $field_value ) {
 		$task_field_value_repository->delete( $field_value->id );
@@ -131,6 +122,13 @@ function remove_sample_tasks(): void {
 	echo "Sample tasks removed.\n";
 }
 
+```
+
+## Reinstall Database Schema
+
+Run the below code snippet to drop existing AOM tables and reinstall the database schema.
+
+```
 function reinstall_database_schema(): void {
 	// Remove tables if they exist.
 	global $wpdb;
@@ -140,6 +138,7 @@ function reinstall_database_schema(): void {
 		$wpdb->prefix . 'wpo_aom_task_field_options',
 		$wpdb->prefix . 'wpo_aom_task_fields',
 		$wpdb->prefix . 'wpo_aom_tasks',
+		$wpdb->prefix . 'wpo_aom_custom_statuses',
 	);
 
 	foreach ( $tables as $table ) {
@@ -161,7 +160,9 @@ function reinstall_database_schema(): void {
 ---
 
 ## Manual Build Instructions
-To build the Task Manager React app, run the following commands:
+
+To build the JavaScript assets for the AOM plugin, follow the steps below:
+
 ```bash
 cd includes/Admin/assets/js/src
 npm install
