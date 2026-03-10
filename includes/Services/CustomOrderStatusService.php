@@ -199,6 +199,13 @@ class CustomOrderStatusService {
 		$status->id            = $result;
 		$this->cached_statuses = null;
 
+		/**
+		 * Action triggered after a custom order status is created.
+		 *
+		 * @param CustomOrderStatus $status The newly created custom order status.
+		 */
+		do_action( 'wpo_aom_custom_order_status_created', $status );
+
 		return $status;
 	}
 
@@ -225,6 +232,14 @@ class CustomOrderStatusService {
 		}
 
 		$this->cached_statuses = null;
+
+		/**
+		 * Action triggered after a custom order status is updated.
+		 *
+		 * @param CustomOrderStatus $custom_status  The updated custom order status.
+		 * @param array             $data           The data used for the update.
+		 */
+		do_action( 'wpo_aom_custom_order_status_updated', $custom_status, $data );
 
 		return $custom_status;
 	}
@@ -254,6 +269,8 @@ class CustomOrderStatusService {
 
 		$result                = $this->repository->where( 'id', $id )->delete();
 		$this->cached_statuses = null;
+
+		do_action( 'wpo_aom_custom_order_status_deleted', $id, $status, $fallback_status );
 
 		return $result;
 	}

@@ -46,6 +46,14 @@ abstract class BaseRestController {
 	 * @return array Validation errors, if any
 	 */
 	protected function validate( array $data, array $rules ): array {
+		/**
+		 * Filter validation rules before they are applied.
+		 *
+		 * @param array $rules The validation rules.
+		 * @param array $data  The data being validated.
+		 */
+		$rules = apply_filters( 'wpo_aom_rest_validation_rules', $rules, $data );
+
 		$errors = array();
 
 		foreach ( $rules as $field => $rule_string ) {

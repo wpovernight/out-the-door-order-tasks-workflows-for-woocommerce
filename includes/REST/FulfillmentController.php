@@ -71,6 +71,14 @@ class FulfillmentController extends BaseRestController {
 			}
 		}
 
+		/**
+		 * Filter the fulfillment orders response.
+		 *
+		 * @param array  $data    The formatted order data.
+		 * @param string $status  The requested fulfillment status filter.
+		 */
+		$data = apply_filters( 'wpo_aom_rest_get_fulfillment_orders', $data, $status );
+
 		return rest_ensure_response( $data );
 	}
 

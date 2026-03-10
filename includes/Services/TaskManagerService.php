@@ -390,7 +390,18 @@ final class TaskManagerService {
 	 * @throws InvalidArgumentException
 	 */
 	public function delete_task( int $task_id ) {
-		return $this->task_repository->delete( $task_id );
+		$result = $this->task_repository->delete( $task_id );
+
+		if ( $result ) {
+			/**
+			 * Fires after a task has been deleted.
+			 *
+			 * @param int       $task_id The ID of the deleted task.
+			 */
+			do_action( 'wpo_aom_task_deleted', $task_id );
+		}
+
+		return $result;
 	}
 
 	/** ================================
@@ -407,7 +418,21 @@ final class TaskManagerService {
 	public function create_field( array $data ): int {
 		$field = new TaskField( $data );
 
-		return $this->task_field_repository->save( $field );
+		$result = $this->task_field_repository->save( $field );
+
+		if ( $result ) {
+			$field->id = $result;
+
+			/**
+			 * Fires after a task field has been created.
+			 *
+			 * @param int   $field_id The ID of the created field.
+			 * @param array $data     The field data.
+			 */
+			do_action( 'wpo_aom_field_created', $field->id, $data );
+		}
+
+		return $result;
 	}
 
 	/**
@@ -426,7 +451,19 @@ final class TaskManagerService {
 
 		$field->fill( $data );
 
-		return false !== $this->task_field_repository->save( $field );
+		$result = false !== $this->task_field_repository->save( $field );
+
+		if ( $result ) {
+			/**
+			 * Fires after a task field has been updated.
+			 *
+			 * @param int   $field_id The ID of the updated field.
+			 * @param array $data     The updated field data.
+			 */
+			do_action( 'wpo_aom_field_updated', $field_id, $data );
+		}
+
+		return $result;
 	}
 
 	/**
@@ -437,7 +474,18 @@ final class TaskManagerService {
 	 * @return bool
 	 */
 	public function delete_field( int $field_id ): bool {
-		return $this->task_field_repository->delete( $field_id );
+		$result = $this->task_field_repository->delete( $field_id );
+
+		if ( $result ) {
+			/**
+			 * Fires after a task field has been deleted.
+			 *
+			 * @param int $field_id The ID of the deleted field.
+			 */
+			do_action( 'wpo_aom_field_deleted', $field_id );
+		}
+
+		return $result;
 	}
 
 	/**
@@ -503,7 +551,20 @@ final class TaskManagerService {
 	public function add_field_option( int $field_id, array $option_data ): int {
 		$option_data['field_id'] = $field_id;
 
-		return $this->task_field_option_repository->insert( $option_data );
+		$option_id = $this->task_field_option_repository->insert( $option_data );
+
+		if ( $option_id ) {
+			/**
+			 * Fires after a field option has been created.
+			 *
+			 * @param int   $option_id   The ID of the created option.
+			 * @param int   $field_id    The ID of the field the option belongs to.
+			 * @param array $option_data The option data.
+			 */
+			do_action( 'wpo_aom_field_option_created', $option_id, $field_id, $option_data );
+		}
+
+		return $option_id;
 	}
 
 	/**
@@ -522,7 +583,19 @@ final class TaskManagerService {
 
 		$option->fill( $option_data );
 
-		return false !== $this->task_field_option_repository->save( $option );
+		$result = ( false !== $this->task_field_option_repository->save( $option ) );
+
+		if ( $result ) {
+			/**
+			 * Fires after a field option has been updated.
+			 *
+			 * @param int   $option_id   The ID of the updated option.
+			 * @param array $option_data The updated option data.
+			 */
+			do_action( 'wpo_aom_field_option_updated', $option_id, $option_data );
+		}
+
+		return $result;
 	}
 
 	/**
@@ -533,7 +606,18 @@ final class TaskManagerService {
 	 * @return bool
 	 */
 	public function delete_field_option( int $option_id ): bool {
-		return $this->task_field_option_repository->delete( $option_id );
+		$result = $this->task_field_option_repository->delete( $option_id );
+
+		if ( $result ) {
+			/**
+			 * Fires after a field option has been deleted.
+			 *
+			 * @param int $option_id The ID of the deleted option.
+			 */
+			do_action( 'wpo_aom_field_option_deleted', $option_id );
+		}
+
+		return $result;
 	}
 
 	/**
@@ -591,6 +675,14 @@ final class TaskManagerService {
 				)
 			);
 		}
+
+		/**
+		 * Filter the ordered option IDs before saving.
+		 *
+		 * @param array $ordered_option_ids The array of ordered option IDs.
+		 * @param int   $field_id           The ID of the field the options belong to.
+		 */
+		$ordered_option_ids = apply_filters( 'wpo_aom_field_ordered_option_ids', $ordered_option_ids, $field_id );
 
 		// Update positions in the database.
 		$this->task_field_option_repository->update_positions( $field_id, $ordered_option_ids );
@@ -851,7 +943,7 @@ final class TaskManagerService {
 	 * @param int $task_id
 	 *
 	 * @return bool
-	 * @throws Exception
+	 * @throws Exception|\Throwable
 	 */
 	public function mark_task_finished( int $task_id ): bool {
 		$task = $this->task_repository->find( $task_id );
@@ -868,7 +960,18 @@ final class TaskManagerService {
 			throw new RuntimeException( 'Finished status option not found. Please ensure a "completed" status option exists.' );
 		}
 
-		return (bool) $this->move_task( $task_id, $finished_status_option->id, null, 'last' );
+		$result = $this->move_task( $task_id, $finished_status_option->id, null, 'last' );
+
+		if ( $result ) {
+			/**
+			 * Fires after a task has been marked as finished.
+			 *
+			 * @param int $task_id The ID of the finished task.
+			 */
+			do_action( 'wpo_aom_task_marked_finished', $task_id );
+		}
+
+		return (bool) $result;
 	}
 
 	/**
@@ -897,6 +1000,13 @@ final class TaskManagerService {
 			) );
 		}
 
+		/**
+		 * Fires after a task has been archived.
+		 *
+		 * @param int $task_id The ID of the archived task.
+		 */
+		do_action( 'wpo_aom_task_archived', $task_id );
+
 		return true;
 	}
 
@@ -915,6 +1025,13 @@ final class TaskManagerService {
 		}
 
 		$this->task_field_value_repository->delete_by_task_and_field( $task_id, DefaultTaskFields::ARCHIVED_DATE );
+
+		/**
+		 * Fires after a task has been unarchived.
+		 *
+		 * @param int $task_id The ID of the unarchived task.
+		 */
+		do_action( 'wpo_aom_task_unarchived', $task_id );
 
 		return true;
 	}

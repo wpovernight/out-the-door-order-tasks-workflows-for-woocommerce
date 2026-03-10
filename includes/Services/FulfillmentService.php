@@ -145,7 +145,19 @@ final class FulfillmentService {
 			return true;
 		}
 
-		return (bool) wc_update_order_item_meta( $item_id, self::FULFILLMENT_DATA_META_KEY, $fulfillment_data_array );
+		$result = (bool) wc_update_order_item_meta( $item_id, self::FULFILLMENT_DATA_META_KEY, $fulfillment_data_array );
+
+		if ( $result ) {
+			/**
+			 * Fires after a fulfillment quantity has been saved for an order item.
+			 *
+			 * @param int $item_id  The order item ID.
+			 * @param int $quantity The fulfillment quantity that was saved.
+			 */
+			do_action( 'wpo_aom_fulfillment_quantity_saved', $item_id, $quantity );
+		}
+
+		return $result;
 	}
 
 	/**
@@ -156,7 +168,18 @@ final class FulfillmentService {
 	 * @return bool
 	 */
 	public function delete_order_item_fulfillment_data( int $item_id ): bool {
-		return wc_delete_order_item_meta( $item_id, self::FULFILLMENT_DATA_META_KEY );
+		$result = wc_delete_order_item_meta( $item_id, self::FULFILLMENT_DATA_META_KEY );
+
+		if ( $result ) {
+			/**
+			 * Fires after fulfillment data has been deleted for an order item.
+			 *
+			 * @param int $item_id The order item ID.
+			 */
+			do_action( 'wpo_aom_fulfillment_data_deleted', $item_id );
+		}
+
+		return $result;
 	}
 
 	/**
@@ -164,7 +187,7 @@ final class FulfillmentService {
 	 *
 	 * This is a denormalized cache that enables efficient queries.
 	 *
-	 * @param \WC_Abstract_Order|int $order_or_id Order object or order ID.
+	 * @param \WC_Abstract_Order|int $order Order object or order ID.
 	 *
 	 * @return string The computed fulfillment status, or empty string on failure.
 	 */
@@ -177,10 +200,22 @@ final class FulfillmentService {
 			return '';
 		}
 
-		$status = $this->get_order_fulfillment_status( $order );
+		$old_status = $order->get_meta( self::ORDER_FULFILLMENT_STATUS_META_KEY );
+		$status     = $this->get_order_fulfillment_status( $order );
 
 		$order->update_meta_data( self::ORDER_FULFILLMENT_STATUS_META_KEY, $status );
 		$order->save_meta_data();
+
+		if ( $status !== $old_status ) {
+			/**
+			 * Fires after the order-level fulfillment status has changed.
+			 *
+			 * @param \WC_Abstract_Order $order      The order whose status changed.
+			 * @param string             $status     The new fulfillment status.
+			 * @param string             $old_status The previous fulfillment status.
+			 */
+			do_action( 'wpo_aom_order_fulfillment_status_changed', $order, $status, $old_status );
+		}
 
 		return $status;
 	}

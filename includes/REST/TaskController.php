@@ -238,6 +238,14 @@ class TaskController extends BaseRestController {
 
 			// ToDo: Add pagination, filtering, etc.
 
+			/**
+			 * Allow modifying the tasks response before it's returned.
+			 *
+			 * @param array           $tasks    The array of task objects.
+			 * @param WP_REST_Request $request  The original REST request object.
+			 */
+			$tasks = apply_filters( 'wpo_aom_rest_prepare_tasks', $tasks, $request );
+
 			return rest_ensure_response( $tasks );
 		} catch ( \Throwable $e ) {
 			Logger::error( 'Failed to fetch tasks: ' . $e->getMessage() );
@@ -282,6 +290,14 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'task_creation_failed', __( 'Failed to create task.', 'wpo-aom' ), array( 'status' => 500 ) );
 		}
 
+		/**
+		 * Allow modifying the created task response.
+		 *
+		 * @param array           $task     The created task object.
+		 * @param WP_REST_Request $request  The original REST request object.
+		 */
+		$task = apply_filters( 'wpo_aom_rest_prepare_task', $task, $request );
+
 		return rest_ensure_response( $task );
 	}
 
@@ -310,6 +326,14 @@ class TaskController extends BaseRestController {
 			if ( ! $task ) {
 				return new WP_Error( 'not_found', 'Task not found', array( 'status' => 404 ) );
 			}
+
+			/**
+			 * Allow modifying the task response.
+			 *
+			 * @param array           $task     The task object.
+			 * @param WP_REST_Request $request  The original REST request object.
+			 */
+			$task = apply_filters( 'wpo_aom_rest_prepare_task', $task, $request );
 
 			return rest_ensure_response( $task );
 		} catch ( \Throwable $e ) {
@@ -356,6 +380,14 @@ class TaskController extends BaseRestController {
 			Logger::error( 'Task update failed: ' . $e->getMessage() );
 			return new WP_Error( 'task_update_failed', __( 'Failed to update task.', 'wpo-aom' ), array( 'status' => 500 ) );
 		}
+
+		/**
+		 * Allow modifying the updated task response.
+		 *
+		 * @param array           $task     The updated task object.
+		 * @param WP_REST_Request $request  The original REST request object.
+		 */
+		$task = apply_filters( 'wpo_aom_rest_prepare_task', $task, $request );
 
 		return rest_ensure_response( $task );
 	}

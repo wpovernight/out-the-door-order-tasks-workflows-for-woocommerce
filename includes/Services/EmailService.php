@@ -93,9 +93,9 @@ final class EmailService {
 	/**
 	 * Format field value based on field type.
 	 *
-	 * @param string                $field_slug   Field slug.
-	 * @param array|string|int|null $field_value  Field value.
-	 * @param array                 $field_object Field object.
+	 * @param string                $field_slug
+	 * @param array|string|int|null $field_value
+	 * @param array                 $field_object
 	 *
 	 * @return ?string Formatted value.
 	 */
@@ -136,6 +136,15 @@ final class EmailService {
 		}
 
 		$value = is_array( $field_value ) && ! empty( $field_value ) ? $field_value[0] : $field_value;
+
+		/**
+		 * Allow custom formatting for other field types via filter.
+		 *
+		 * @param string|null $value        The formatted value (default: unformatted).
+		 * @param string      $field_slug   The field slug.
+		 * @param array       $field_object The complete field object.
+		 */
+		$value = apply_filters( 'wpo_aom_email_task_updated_field_value', $value, $field_slug, $field_object );
 
 		return ! is_null( $value ) ? (string) $value : null;
 	}

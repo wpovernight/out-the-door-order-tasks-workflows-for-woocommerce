@@ -45,7 +45,16 @@ trait TaskEmailRecipients {
 		}
 
 		// Remove duplicates and filter valid emails.
-		return array_unique( array_filter( $recipients, 'is_email' ) );
+		$recipients = array_unique( array_filter( $recipients, 'is_email' ) );
+
+		/**
+		 * Filter the email recipients for a task notification.
+		 *
+		 * @param array $recipients        List of email addresses.
+		 * @param array $task_with_fields  Complete task data.
+		 * @param self  $email             The email instance.
+		 */
+		return apply_filters( 'wpo_aom_email_recipients', $recipients, $task_with_fields, $this );
 	}
 
 	/**
