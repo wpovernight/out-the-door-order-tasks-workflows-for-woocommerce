@@ -22,7 +22,7 @@ const Header: React.FC = () => {
 	return (
 		<SectionHeader
 			title={__('Tasks', 'wpo-aom')}
-			details={`${activeCount} ${__('Active Tasks', 'wpo-aom')}`}
+			details={`${activeCount} ${__('Active', 'wpo-aom')}`}
 			progressValue={
 				completionPercentage !== null ? completionPercentage : undefined
 			}

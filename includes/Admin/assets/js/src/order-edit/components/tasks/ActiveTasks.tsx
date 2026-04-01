@@ -19,9 +19,8 @@ const ActiveTasks: React.FC = () => {
 		loadingError,
 		refreshTasks,
 	} = useOrderTask();
-	const { orderId, archivePageUrl } = useOrderEditData();
+	const { archivePageUrl } = useOrderEditData();
 	const { openEditTaskModal } = useTaskEdit();
-	const { openCreateTaskModal } = useTaskCreation();
 	const { archiveTask, unarchiveTask } = useTasks();
 
 	// Track recently archived tasks to show overlay before removing
@@ -139,10 +138,6 @@ const ActiveTasks: React.FC = () => {
 		}
 	};
 
-	const handleAddTask = () => {
-		openCreateTaskModal({ title: __('Add Task', 'wpo-aom'), orderId });
-	};
-
 	// Show loading state
 	if (loadingStatus === 'loading') {
 		return <TaskCardSkeleton count={1} showDescription={true} />;
@@ -170,7 +165,6 @@ const ActiveTasks: React.FC = () => {
 				icon="📋"
 				message={__('No tasks found.', 'wpo-aom')}
 				actionText={__('Add Task', 'wpo-aom')}
-				onAction={handleAddTask}
 			/>
 		);
 	}
