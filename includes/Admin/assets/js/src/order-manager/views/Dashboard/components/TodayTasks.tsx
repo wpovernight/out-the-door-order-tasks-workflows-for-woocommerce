@@ -3,6 +3,7 @@ import { __ } from '@wordpress/i18n';
 import { useTasks } from '@shared/context/TaskContext';
 import { TaskCard } from '@shared/components/TaskCard';
 import { useTaskCreation, useTaskEdit } from '@shared/hooks/useTaskFormModal';
+import { useScrollable } from '@shared/hooks/useScrollable';
 import { getTaskDateField, isTaskArchived } from '@shared/utils/fieldUtils';
 import { TASK_FINISH_STATUS_SLUG, Task } from '@shared/types/task';
 import { EmptyState } from '@shared/components/LoadingSkeleton';
@@ -12,6 +13,7 @@ export const TodayTasks = () => {
 	const { openCreateTaskModal } = useTaskCreation();
 	const { openEditTaskModal } = useTaskEdit();
 	const [overdueExpanded, setOverdueExpanded] = useState(true);
+	const contentRef = useScrollable<HTMLDivElement>();
 
 	const todayStart = useMemo(() => {
 		const d = new Date();
@@ -130,7 +132,7 @@ export const TodayTasks = () => {
 					</span>
 				</button>
 			</div>
-			<div className="content">
+			<div className="content" ref={contentRef}>
 				{hasNoTasks ? (
 					<EmptyState
 						message={__('No tasks due today.', 'wpo-aom')}

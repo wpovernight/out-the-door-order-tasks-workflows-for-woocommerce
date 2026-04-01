@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { __ } from '@wordpress/i18n';
 import { EmptyState } from '@shared/components/LoadingSkeleton';
+import { useScrollable } from '@shared/hooks/useScrollable';
 import { FulfillmentOrder, FulfillmentItem } from '@shared/types/fulfillment';
 
 interface PartialFulfillmentsProps {
@@ -11,6 +12,7 @@ export const PartialFulfillments = ({ orders }: PartialFulfillmentsProps) => {
 	const [expandedOrders, setExpandedOrders] = useState<Set<number>>(
 		new Set()
 	);
+	const contentRef = useScrollable<HTMLDivElement>();
 
 	const toggleOrder = (orderId: number) => {
 		setExpandedOrders((prev) => {
@@ -55,7 +57,7 @@ export const PartialFulfillments = ({ orders }: PartialFulfillmentsProps) => {
 			<div className="header">
 				<h3>{__('Partially shipped fulfillments', 'wpo-aom')}</h3>
 			</div>
-			<div className="content">
+			<div className="content" ref={contentRef}>
 				{orders.length === 0 ? (
 					<EmptyState
 						icon="📦"
