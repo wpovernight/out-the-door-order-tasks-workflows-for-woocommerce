@@ -137,7 +137,6 @@ export const TodayTasks = () => {
 					<EmptyState
 						message={__('No tasks due today.', 'wpo-aom')}
 						actionText={__('Add Task', 'wpo-aom')}
-						onAction={handleAddTask}
 					/>
 				) : (
 					<>
@@ -185,16 +184,11 @@ export const TodayTasks = () => {
 					</>
 				)}
 			</div>
-			{!hasNoTasks && (
-				<div className="footer">
-					<a
-						href="#/task-manager/"
-						className="wpo-button view-all-link"
-					>
-						{__('View all tasks', 'wpo-aom')}
-					</a>
-				</div>
-			)}
+			<div className="footer">
+				<a href="#/task-manager/" className="wpo-button view-all-link">
+					{__('View all tasks', 'wpo-aom')}
+				</a>
+			</div>
 		</div>
 	);
 };
