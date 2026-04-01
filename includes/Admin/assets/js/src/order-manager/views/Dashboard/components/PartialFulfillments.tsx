@@ -52,13 +52,15 @@ export const PartialFulfillments = ({ orders }: PartialFulfillmentsProps) => {
 			.join(' \u2022 ');
 	};
 
+	const hasOrders = orders && orders.length > 0;
+
 	return (
 		<div className="dashboard-widget" id="partial-fulfillments">
 			<div className="header">
 				<h3>{__('Partially shipped fulfillments', 'wpo-aom')}</h3>
 			</div>
 			<div className="content" ref={contentRef}>
-				{orders.length === 0 ? (
+				{!hasOrders ? (
 					<EmptyState
 						icon="📦"
 						message={__('No partially shipped orders.', 'wpo-aom')}
@@ -184,6 +186,13 @@ export const PartialFulfillments = ({ orders }: PartialFulfillmentsProps) => {
 					</ul>
 				)}
 			</div>
+            {!hasOrders && (
+			<div className="footer">
+				<a href="edit.php?post_type=shop_order" className="wpo-button view-all-link">
+					{__('View all orders', 'wpo-aom')}
+				</a>
+			</div>
+			)}
 		</div>
 	);
 };
