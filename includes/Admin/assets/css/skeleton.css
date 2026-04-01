@@ -56,17 +56,39 @@
 .wpo-aom-empty-state {
     text-align: center;
     padding: 1em 1em;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    align-items: center;
+    justify-content: center;
 }
 
 .wpo-aom-empty-state-icon {
     font-size: 3em;
-    margin-bottom: 0.5em;
     opacity: 0.5;
+    line-height: 1;
+}
+
+.wpo-aom-empty-state-icon--note,
+.wpo-aom-empty-state-icon--box {
+    width: 9em;
+    height: 6em;
+    background-size: contain;
+    background-repeat: no-repeat;
+    font-size: initial;
+}
+
+.wpo-aom-empty-state-icon--note {
+    background-image: var(--wpo-aom-icon-note);
+}
+
+.wpo-aom-empty-state-icon--box {
+    background-image: var(--wpo-aom-icon-box);
 }
 
 .wpo-aom-empty-state-message {
-    margin: 0.5em 0 1em;
     font-size: 1em;
+    margin: 0;
 }
 
 .wpo-aom-empty-state-action {

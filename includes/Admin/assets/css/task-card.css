@@ -36,27 +36,19 @@
 
 .task-card-options .wpo-action-menu {
     width: 15em;
-    right: 1em;
+    right: 2em;
 }
 
 .task-card-options .wpo-action-menu button {
-    padding: 0.6em 0.9em;
+    padding: 0.9em;
     display: flex;
     align-items: center;
-    margin: 0 0.5em;
-}
-
-.task-card-options .wpo-action-menu > li:first-child > button {
-    margin-top: 0.5em;
-}
-
-.task-card-options .wpo-action-menu > li:last-child > button {
-    margin-bottom: 0.5em;
+    border-radius: 0;
 }
 
 .task-card-options .wpo-action-menu button::before {
     margin-right: 0.7em;
-    color: var(--wpo-aom-text-gray);
+    color: #888D91;
     font-size: 1.2em;
     vertical-align: middle;
 }
@@ -222,5 +214,14 @@
 .task-card .task-finish-checkbox > input {
     margin: 0;
     padding: 0;
-    border: 1px solid var(--wpo-aom-border-color);
+    background-color: #A4A7AE;
+    border: 0;
+    box-shadow: none;
+    mask-image: var(--wpo-aom-icon-finish);
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    -webkit-mask-image: var(--wpo-aom-icon-finish);
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    vertical-align: bottom;
 }

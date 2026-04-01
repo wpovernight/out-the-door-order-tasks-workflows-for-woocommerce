@@ -4,9 +4,9 @@ body.woocommerce_page_wpo_aom_order_manager #wpcontent {
 }
 
 #wpo-aom-order-manager h1 {
-    font-size: 1.5em;
-    margin: 1.3em;
+    font-size: 2.77em;
     user-select: none;
+    line-height: 1;
 }
 
 #wpo-aom-order-manager {
@@ -14,17 +14,14 @@ body.woocommerce_page_wpo_aom_order_manager #wpcontent {
 }
 
 #wpo-aom-order-manager > .inner > .header {
-    border-bottom: 1px solid #091E4224;
-}
-
-#wpo-aom-order-manager .tabs {
-    margin-left: 1em;
+    border-bottom: 2px solid #091E4224;
+    margin: 0 2.4em;
 }
 
 #wpo-aom-order-manager .tabs > ul {
-    font-size: 1.1em;
+    font-size: 1.23em;
     display: flex;
-    gap: 2em;
+    gap: 1em;
     font-weight: 600;
     list-style: none;
     padding: 0;
@@ -32,7 +29,7 @@ body.woocommerce_page_wpo_aom_order_manager #wpcontent {
 }
 
 #wpo-aom-order-manager .tabs > ul > li {
-    margin-bottom: 0;
+    margin-bottom: -1px;
 }
 
 #wpo-aom-order-manager .tabs > ul > li > button {

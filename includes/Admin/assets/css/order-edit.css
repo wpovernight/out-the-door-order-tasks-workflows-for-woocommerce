@@ -1,4 +1,5 @@
 .wpo-aom-metabox-section {
+    container-type: inline-size;
     border: 1px solid var(--wpo-aom-border-color);
     border-radius: var(--wpo-aom-radius-m);
     margin-top: 1em;
@@ -7,15 +8,9 @@
 .wpo-aom-metabox-section .header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 2em;
     border-bottom: 1px solid var(--wpo-aom-border-color);
     padding: 1em;
-}
-
-.wpo-aom-metabox-section .header .progress-actions {
-    display: flex;
-    align-items: center;
-    gap: 2em;
 }
 
 .wpo-aom-metabox-section .header .actions,
@@ -42,6 +37,7 @@
     display: flex;
     align-items: center;
     gap: 1em;
+    flex-grow: 1;
 }
 
 #order-tasks .header .title-details::before {
@@ -421,4 +417,31 @@ td.wpo-aom-fulfillment > div {
     font-family: 'dashicons';
     display: block;
     font-size: 1.6em;
+}
+
+
+
+
+@container (max-width: 300px) {
+    .wpo-aom-metabox-section .header {
+        flex-wrap: wrap;
+        gap: 0.5em;
+    }
+
+    .wpo-aom-metabox-section .header > .task-progress {
+        order: 3;
+        flex-basis: 100%;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5em;
+    }
+
+    .wpo-aom-metabox-section .header > .task-progress progress {
+        flex-grow: 1;
+    }
+
+    .fulfillments-list {
+        grid-template-columns: 1fr;
+    }
 }
