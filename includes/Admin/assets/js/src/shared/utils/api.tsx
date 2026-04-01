@@ -383,10 +383,13 @@ export async function unarchiveTask(taskId: number): Promise<boolean> {
 export async function fetchFulfillmentOrders(
 	status?: string
 ): Promise<FulfillmentOrder[]> {
-	const response = await fetch(
-		`${getApiRoot()}/${getApiNamespace()}/fulfillments/orders` +
-			(status ? `?status=${encodeURIComponent(status)}` : ''),
-		{
+	const url = new URL(
+		`${getApiRoot()}/${getApiNamespace()}/fulfillments/orders`
+	);
+	if (status) {
+		url.searchParams.set('status', status);
+	}
+	const response = await fetch(url.toString(), {
 			method: 'GET',
 			credentials: 'include',
 			headers: getHeaders(),
