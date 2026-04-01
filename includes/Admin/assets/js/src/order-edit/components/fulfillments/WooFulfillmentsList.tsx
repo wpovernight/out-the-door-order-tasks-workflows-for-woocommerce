@@ -40,7 +40,7 @@ const WooFulfillmentsList: React.FC<WooFulfillmentsListProps> = ({
 	if (loadingStatus === 'loaded' && fulfillments.length === 0) {
 		return (
 			<EmptyState
-				icon="📦"
+				icon="box"
 				message={__('No fulfillments yet.', 'wpo-aom')}
 				actionText={__('Add Fulfillment', 'wpo-aom')}
 				actionButtonProps={

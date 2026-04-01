@@ -62,7 +62,7 @@ export const PartialFulfillments = ({ orders }: PartialFulfillmentsProps) => {
 			<div className="content" ref={contentRef}>
 				{!hasOrders ? (
 					<EmptyState
-						icon="📦"
+						icon="box"
 						message={__('No partially shipped orders.', 'wpo-aom')}
 					/>
 				) : (

@@ -105,7 +105,7 @@ export const LoadingSkeleton: React.FC<LoadingSkeletonProps> = ({
 };
 
 interface EmptyStateProps {
-	icon?: string;
+	icon?: 'note' | 'box' | string;
 	message: string;
 	actionText?: string;
 	onAction?: () => void;
@@ -116,14 +116,14 @@ interface EmptyStateProps {
  * Empty state component for when there are no items.
  *
  * @param {Object}   props
- * @param {string}   [props.icon='📋']         - Icon to display
+ * @param {string}   [props.icon='note']       - Icon name ('note', 'box') or emoji string
  * @param {string}   props.message             - Message to display (required)
  * @param {string}   [props.actionText]        - Text for the action button
  * @param {Function} [props.onAction]          - Callback when action button is clicked
  * @param {Object}   [props.actionButtonProps] - Additional props for the action button (data attributes, etc.)
  */
 export const EmptyState: React.FC<EmptyStateProps> = ({
-	icon = '📋',
+	icon = 'note',
 	message,
 	actionText,
 	onAction,
@@ -136,9 +136,13 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 		? `wpo-aom-empty-state-action ${customClassName}`
 		: 'wpo-aom-empty-state-action';
 
+	const isSvgIcon = icon === 'note' || icon === 'box';
+
 	return (
 		<div className="wpo-aom-empty-state">
-			<div className="wpo-aom-empty-state-icon">{icon}</div>
+			<div className={`wpo-aom-empty-state-icon${isSvgIcon ? ` wpo-aom-empty-state-icon--${icon}` : ''}`}>
+				{!isSvgIcon && icon}
+			</div>
 			<p className="wpo-aom-empty-state-message">{message}</p>
 			{actionText && onAction && (
 				<button
@@ -172,7 +176,11 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
 	message,
 	onRetry,
 	retryText = __('Try Again', 'wpo-aom'),
-}: { message: string; onRetry?: Function; retryText?: string; }) => {
+}: {
+	message: string;
+	onRetry?: Function;
+	retryText?: string;
+}) => {
 	return (
 		<div className="wpo-aom-error-state">
 			<div className="wpo-aom-error-state-icon">⚠️</div>

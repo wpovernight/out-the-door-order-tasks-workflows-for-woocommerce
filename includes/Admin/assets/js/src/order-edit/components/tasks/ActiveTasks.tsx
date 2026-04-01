@@ -162,7 +162,7 @@ const ActiveTasks: React.FC = () => {
 	if (loadingStatus === 'loaded' && !hasVisibleTasks) {
 		return (
 			<EmptyState
-				icon="📋"
+				icon="note"
 				message={__('No tasks found.', 'wpo-aom')}
 				actionText={__('Add Task', 'wpo-aom')}
 			/>
