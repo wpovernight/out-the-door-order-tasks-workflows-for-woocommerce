@@ -5,12 +5,16 @@ import { useEffect, useRef } from 'react';
  * This allows CSS to conditionally apply padding only when the content overflows,
  * so the scrollbar doesn't overlap the content.
  */
-export function useScrollable<T extends HTMLElement>(): React.RefObject<T | null> {
+export function useScrollable<
+	T extends HTMLElement,
+>(): React.RefObject<T | null> {
 	const ref = useRef<T | null>(null);
 
 	useEffect(() => {
 		const el = ref.current;
-		if (!el) return;
+		if (!el) {
+			return;
+		}
 
 		const check = () => {
 			el.classList.toggle(

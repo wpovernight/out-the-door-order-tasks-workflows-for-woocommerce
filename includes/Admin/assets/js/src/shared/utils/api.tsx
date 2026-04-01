@@ -390,11 +390,10 @@ export async function fetchFulfillmentOrders(
 		url.searchParams.set('status', status);
 	}
 	const response = await fetch(url.toString(), {
-			method: 'GET',
-			credentials: 'include',
-			headers: getHeaders(),
-		}
-	);
+		method: 'GET',
+		credentials: 'include',
+		headers: getHeaders(),
+	});
 
 	return handleResponse<any[]>(response);
 }
