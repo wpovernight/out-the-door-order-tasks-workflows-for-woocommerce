@@ -290,7 +290,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 						<textarea
 							id="description"
 							name="description"
-							rows={4}
+							rows={6}
 							placeholder={__('Describe the task.', 'wpo-aom')}
 							defaultValue={task ? task.description : ''}
 						/>
