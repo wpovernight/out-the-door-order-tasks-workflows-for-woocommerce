@@ -19,23 +19,21 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
 				<h3>{title}</h3>
 				<span>{details}</span>
 			</div>
-			<div className="progress-actions">
-				{typeof progressValue === 'number' && (
-					<label htmlFor="progress">
-						<progress id="progress" value={progressValue} max="100">
-							{Math.round(progressValue)}%
-						</progress>
-						<span> {Math.round(progressValue)}%</span>
-					</label>
-				)}
-				{actionButtons && (
-					<ul className="actions">
-						{actionButtons.map((button, index) => (
-							<li key={index}>{button}</li>
-						))}
-					</ul>
-				)}
-			</div>
+			{typeof progressValue === 'number' && (
+				<label className="task-progress" htmlFor="progress">
+					<progress id="progress" value={progressValue} max="100">
+						{Math.round(progressValue)}%
+					</progress>
+					<span> {Math.round(progressValue)}%</span>
+				</label>
+			)}
+			{actionButtons && (
+				<ul className="actions">
+					{actionButtons.map((button, index) => (
+						<li key={index}>{button}</li>
+					))}
+				</ul>
+			)}
 		</div>
 	);
 };
