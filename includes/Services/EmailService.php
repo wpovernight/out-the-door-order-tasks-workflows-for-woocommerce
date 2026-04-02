@@ -13,7 +13,7 @@ final class EmailService {
 	 *
 	 * @return void
 	 */
-	public function register() {
+	public function register(): void {
 		// Register custom email classes and actions with WooCommerce.
 		add_filter( 'woocommerce_email_classes', array( $this, 'register_email_classes' ) );
 		add_filter( 'woocommerce_email_actions', array( $this, 'register_email_actions' ) );
@@ -164,7 +164,7 @@ final class EmailService {
 		}
 
 		if ( empty( $field_object['options'] ) ) {
-			return is_array( $field_value ) ? reset( $field_value ) : $field_value;
+			return (string) ( is_array( $field_value ) ? reset( $field_value ) : $field_value );
 		}
 
 		// Handle array of IDs (from updated_fields).
