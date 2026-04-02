@@ -91,9 +91,9 @@ final class Screen {
 
 		// Get order ID based on storage type
 		if ( isset( $_GET['post'] ) ) {
-			$order_id = absint( $_GET['post'] );
+			$order_id = absint( wp_unslash( $_GET['post'] ) );
 		} elseif ( isset( $_GET['id'] ) ) {
-			$order_id = absint( $_GET['id'] );
+			$order_id = absint( wp_unslash( $_GET['id'] ) );
 		}
 
 		// Verify it's a valid order
