@@ -74,48 +74,51 @@ class TaskUpdatedEmail extends WC_Email {
 
 		$this->setup_locale();
 
-		$this->task_data = $task_with_fields;
+		try {
+			$this->task_data = $task_with_fields;
 
-		// Check if we should send the email based on monitored fields.
-		$monitored_fields = $this->get_monitored_fields();
-		if ( ! empty( $monitored_fields ) ) {
-			// Check if any of the updated fields are in the monitored list.
-			$should_send = false;
-			foreach ( $updated_fields as $field_slug => $changes ) {
-				if ( in_array( $field_slug, $monitored_fields, true ) ) {
-					$should_send = true;
-					break;
+			// Check if we should send the email based on monitored fields.
+			$monitored_fields = $this->get_monitored_fields();
+			if ( ! empty( $monitored_fields ) ) {
+				// Check if any of the updated fields are in the monitored list.
+				$should_send = false;
+				foreach ( $updated_fields as $field_slug => $changes ) {
+					if ( in_array( $field_slug, $monitored_fields, true ) ) {
+						$should_send = true;
+						break;
+					}
+				}
+
+				// If no monitored fields were updated, don't send the email.
+				if ( ! $should_send ) {
+					return;
 				}
 			}
 
-			// If no monitored fields were updated, don't send the email.
-			if ( ! $should_send ) {
-				$this->restore_locale();
-				return;
+			// Replace placeholders in subject and heading.
+			$this->placeholders['{task_title}'] = $task_with_fields['title'];
+			$this->placeholders['{task_id}']    = (string) $task_id;
+
+			$recipients = $this->get_task_recipients( $task_with_fields );
+
+			if ( ! empty( $recipients ) ) {
+				$this->recipient = implode( ', ', $recipients );
+				$sent            = $this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
+
+				if ( $sent ) {
+					/**
+					 * Action hook after task updated email is sent.
+					 *
+					 * @param int   $task_id          The task ID.
+					 * @param array $task_with_fields Complete task data.
+					 * @param array $updated_fields   Array of updated field slugs with old and new values.
+					 */
+					do_action( 'wpo_aom_task_updated_email_sent', $task_id, $task_with_fields, $updated_fields );
+				}
 			}
+		} finally {
+			$this->restore_locale();
 		}
-
-		// Replace placeholders in subject and heading.
-		$this->placeholders['{task_title}'] = $task_with_fields['title'];
-		$this->placeholders['{task_id}']    = (string) $task_id;
-
-		$recipients = $this->get_task_recipients( $task_with_fields );
-
-		if ( ! empty( $recipients ) ) {
-			$this->recipient = implode( ', ', $recipients );
-			$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
-		}
-
-		$this->restore_locale();
-
-		/**
-		 * Action hook after task updated email is sent.
-		 *
-		 * @param int   $task_id          The task ID.
-		 * @param array $task_with_fields Complete task data.
-		 * @param array $updated_fields   Array of updated field slugs with old and new values.
-		 */
-		do_action( 'wpo_aom_task_updated_email_sent', $task_id, $task_with_fields, $updated_fields );
 	}
 
 	/**

@@ -69,30 +69,32 @@ class TaskCreatedEmail extends WC_Email {
 
 		$this->setup_locale();
 
-		$this->task_data = $task_with_fields;
+		try {
+			$this->task_data = $task_with_fields;
 
-		// Replace placeholders in subject and heading.
-		$this->placeholders['{task_title}'] = $task_with_fields['title'];
-		$this->placeholders['{task_id}']    = (string) $task_id;
+			// Replace placeholders in subject and heading.
+			$this->placeholders['{task_title}'] = $task_with_fields['title'];
+			$this->placeholders['{task_id}']    = (string) $task_id;
 
-		$recipients = $this->get_task_recipients( $task_with_fields );
+			$recipients = $this->get_task_recipients( $task_with_fields );
 
-		if ( ! empty( $recipients ) ) {
-			$this->recipient = implode( ', ', $recipients );
-			$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
-		}
+			if ( ! empty( $recipients ) ) {
+				$this->recipient = implode( ', ', $recipients );
+				$sent            = $this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 
-		$this->restore_locale();
-
-		if ( ! empty( $recipients ) ) {
-			/**
-			 * Action hook after task created email is sent.
-			 *
-			 * @param int   $task_id          The task ID.
-			 * @param array $task_with_fields Complete task data.
-			 * @param array $field_values     Field values set on creation.
-			 */
-			do_action( 'wpo_aom_task_created_email_sent', $task_id, $task_with_fields, $field_values );
+				if ( $sent ) {
+					/**
+					 * Action hook after task created email is sent.
+					 *
+					 * @param int   $task_id          The task ID.
+					 * @param array $task_with_fields Complete task data.
+					 * @param array $field_values     Field values set on creation.
+					 */
+					do_action( 'wpo_aom_task_created_email_sent', $task_id, $task_with_fields, $field_values );
+				}
+			}
+		} finally {
+			$this->restore_locale();
 		}
 	}
 
