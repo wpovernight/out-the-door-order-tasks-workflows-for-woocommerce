@@ -14,7 +14,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-/*
+/**
  * @hooked WC_Emails::email_header() Output the email header
  */
 do_action( 'woocommerce_email_header', $email_heading, $email );
@@ -23,7 +23,7 @@ do_action( 'woocommerce_email_header', $email_heading, $email );
 <p><?php esc_html_e( 'A new task has been created:', 'wpo-aom' ); ?></p>
 
 <?php
-/*
+/**
  * @hooked EmailService::email_task_details() Shows the task details.
  */
 do_action( 'wpo_aom_email_task_details', $task_data, $sent_to_admin, $plain_text, $email );
@@ -37,7 +37,7 @@ if ( $additional_content ) {
 	echo wp_kses_post( wpautop( wptexturize( $additional_content ) ) );
 }
 
-/*
+/**
  * @hooked WC_Emails::email_footer() Output the email footer
  */
 do_action( 'woocommerce_email_footer', $email );
