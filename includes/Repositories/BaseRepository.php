@@ -717,10 +717,8 @@ abstract class BaseRepository {
 	 * Add a raw ORDER BY clause to the query.
 	 *
 	 * @param string $expression
-	 * @param string $direction
 	 *
 	 * @return self
-	 * @throws InvalidArgumentException If invalid direction is provided.
 	 */
 	protected function order_by_raw( string $expression ): self {
 		$this->order_by = " ORDER BY {$expression}";
