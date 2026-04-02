@@ -33,6 +33,12 @@ final class Logger {
 			return;
 		}
 
+		// Validate level
+		$allowed_levels = array( 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency' );
+		if ( ! in_array( $level, $allowed_levels, true ) ) {
+			return;
+		}
+
 		/**
 		 * Filter whether logging is enabled.
 		 *
