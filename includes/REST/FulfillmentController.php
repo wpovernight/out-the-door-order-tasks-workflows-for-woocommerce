@@ -94,11 +94,7 @@ class FulfillmentController extends BaseRestController {
 		$items = array();
 
 		foreach ( $order->get_items() as $item ) {
-			$item_data = $this->format_order_item( $item, $fulfillment_service );
-
-			if ( null !== $item_data ) {
-				$items[] = $item_data;
-			}
+			$items[] = $this->format_order_item( $item, $fulfillment_service );
 		}
 
 		return array(
@@ -120,9 +116,9 @@ class FulfillmentController extends BaseRestController {
 	 * @param \WC_Order_Item_Product $item
 	 * @param FulfillmentService $fulfillment_service
 	 *
-	 * @return array|null
+	 * @return array
 	 */
-	private function format_order_item( \WC_Order_Item_Product $item, FulfillmentService $fulfillment_service ): ?array {
+	private function format_order_item( \WC_Order_Item_Product $item, FulfillmentService $fulfillment_service ): array {
 		$quantity           = (int) $item->get_quantity();
 		$fulfillment_data   = $fulfillment_service->get_order_item_fulfillment_data( $item );
 		$fulfilled_quantity = 0;
