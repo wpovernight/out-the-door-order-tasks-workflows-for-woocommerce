@@ -149,15 +149,15 @@ abstract class BaseRepository {
 	}
 
 	/**
-	 * Find a TaskField by its label.
+	 * Find a TaskField by its slug.
 	 *
 	 * @template TModel of BaseModel
-	 * @param string $label
+	 * @param string $slug
 	 *
 	 * @return TModel|null
 	 */
-	public function find_by_slug( string $label ): ?BaseModel {
-		return $this->find_by( 'slug', $label );
+	public function find_by_slug( string $slug ): ?BaseModel {
+		return $this->find_by( 'slug', $slug );
 	}
 
 	/**
