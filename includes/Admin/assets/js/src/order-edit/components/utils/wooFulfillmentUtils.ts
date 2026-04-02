@@ -37,14 +37,14 @@ export const formatDate = (dateString?: string) => {
 		return '';
 	}
 
-	try {
-		const date = new Date(dateString);
-		return date.toLocaleDateString(undefined, {
-			month: 'short',
-			day: 'numeric',
-			year: 'numeric',
-		});
-	} catch {
+	const date = new Date(dateString);
+	if (isNaN(date.getTime())) {
 		return dateString;
 	}
+
+	return date.toLocaleDateString(undefined, {
+		month: 'short',
+		day: 'numeric',
+		year: 'numeric',
+	});
 };
