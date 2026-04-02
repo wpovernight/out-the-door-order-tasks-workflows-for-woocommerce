@@ -3,6 +3,7 @@
 namespace WPO\AOM\Services;
 
 use Exception;
+use InvalidArgumentException;
 use RuntimeException;
 use WPO\AOM\Models\CustomOrderStatus;
 use WPO\AOM\Core\Logger;
@@ -122,7 +123,7 @@ class CustomOrderStatusService {
 	 *
 	 * @return void
 	 */
-	public function add_dynamic_style() {
+	public function add_dynamic_style(): void {
 		$statuses   = $this->all();
 		$custom_css = '';
 
@@ -171,7 +172,7 @@ class CustomOrderStatusService {
 	 *
 	 * @param array<string, mixed> $data
 	 *
-	 * @return CustomOrderStatus Inserted ID or false on failure
+	 * @return CustomOrderStatus
 	 * @throws Exception
 	 */
 	public function create( array $data ): CustomOrderStatus {
@@ -216,12 +217,12 @@ class CustomOrderStatusService {
 	 * @param array<string, mixed> $data
 	 *
 	 * @return CustomOrderStatus
-	 * @throws Exception
+	 * @throws RuntimeException|InvalidArgumentException
 	 */
 	public function update( int $id, array $data ): CustomOrderStatus {
 		$custom_status = $this->repository->find( $id );
 		if ( ! $custom_status ) {
-			throw new \InvalidArgumentException( __( 'Custom order status not found', 'wpo-aom' ) );
+			throw new InvalidArgumentException( __( 'Custom order status not found', 'wpo-aom' ) );
 		}
 
 		$custom_status->fill( $data );
@@ -272,7 +273,7 @@ class CustomOrderStatusService {
 
 		do_action( 'wpo_aom_custom_order_status_deleted', $id, $status, $fallback_status );
 
-		return $result;
+		return $result !== false;
 	}
 
 	/**
@@ -300,7 +301,7 @@ class CustomOrderStatusService {
 					$resolved_to_status,
 					'WPO AOM: ' . __( 'Status changed due to custom order status deletion.', 'wpo-aom' )
 				);
-			} catch ( \Exception $e ) {
+			} catch ( \Throwable $e ) {
 				Logger::warning( sprintf(
 					'Failed to reassign order %d from status "%s" to "%s": %s',
 					$order->get_id(),
