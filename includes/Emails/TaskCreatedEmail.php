@@ -10,7 +10,7 @@ defined( 'ABSPATH' ) || exit;
 
 class TaskCreatedEmail extends WC_Email {
 	use TaskEmailRecipients;
-	public array $task_data = array();
+	protected array $task_data = array();
 
 	/**
 	 * Constructor.
