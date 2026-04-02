@@ -515,6 +515,13 @@ class TaskController extends BaseRestController {
 		}
 	}
 
+	/**
+	 * Get options for a specific field by slug.
+	 *
+	 * @param WP_REST_Request $request
+	 *
+	 * @return WP_Error|WP_REST_Response
+	 */
 	public function get_field_options_by_slug( WP_REST_Request $request ) {
 		$field_slug = $request->get_param( 'field_slug' );
 
@@ -552,6 +559,11 @@ class TaskController extends BaseRestController {
 		// Validate field_id.
 		if ( $field_id <= 0 ) {
 			return new WP_Error( 'invalid_field_id', 'Invalid field ID provided', array( 'status' => 400 ) );
+		}
+
+		// Validate ordered_option_ids.
+		if ( ! is_array( $ordered_option_ids ) || empty( $ordered_option_ids ) ) {
+			return new WP_Error( 'invalid_option_ids', 'Invalid option IDs provided', array( 'status' => 400 ) );
 		}
 
 		/** @var TaskManagerService $task_manager_service */
