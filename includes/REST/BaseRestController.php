@@ -34,7 +34,7 @@ abstract class BaseRestController {
 		 *
 		 * @return bool Modified permission check result
 		 */
-		return apply_filters( 'wpo_aom_rest_api_permissions_check', wc_rest_check_manager_permissions( 'settings', 'edit' ), $request );
+		return (bool) apply_filters( 'wpo_aom_rest_api_permissions_check', wc_rest_check_manager_permissions( 'settings', 'edit' ), $request );
 	}
 
 	/**
@@ -112,7 +112,7 @@ abstract class BaseRestController {
 				}
 				break;
 			case 'regex':
-				if ( ! is_null( $value ) && ! empty( $rule_parameter ) && ! preg_match( $rule_parameter, $value ) ) {
+				if ( is_string( $value ) && ! empty( $rule_parameter ) && ! preg_match( $rule_parameter, $value ) ) {
 					return $this->format_error_message( $field, 'is invalid' );
 				}
 				break;
