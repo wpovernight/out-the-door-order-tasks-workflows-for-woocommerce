@@ -208,13 +208,17 @@ class FulfillmentController extends BaseRestController {
 		$state_code   = $order->get_shipping_state() ?: $order->get_billing_state();
 		$country_code = $order->get_shipping_country() ?: $order->get_billing_country();
 
-		$countries = \WC()->countries->get_countries();
-		$country   = $countries[ $country_code ] ?? $country_code;
+		$country = $country_code;
+		$state   = $state_code;
 
-		$state = $state_code;
-		if ( $country_code && $state_code ) {
-			$states = \WC()->countries->get_states( $country_code );
-			$state  = $states[ $state_code ] ?? $state_code;
+		if ( isset( \WC()->countries ) ) {
+			$countries = \WC()->countries->get_countries();
+			$country   = $countries[ $country_code ] ?? $country_code;
+
+			if ( $country_code && $state_code ) {
+				$states = \WC()->countries->get_states( $country_code );
+				$state  = $states[ $state_code ] ?? $state_code;
+			}
 		}
 
 		return array(
