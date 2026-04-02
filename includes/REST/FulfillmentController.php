@@ -42,11 +42,11 @@ class FulfillmentController extends BaseRestController {
 	/**
 	 * Handle GET requests to retrieve orders based on their fulfillment status.
 	 *
-	 * @param \WP_REST_Request $request
+	 * @param WP_REST_Request $request
 	 *
-	 * @return \WP_REST_Response|WP_Error
+	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_orders( \WP_REST_Request $request ) {
+	public function get_orders( WP_REST_Request $request ) {
 		$status = $request->get_param( 'status' ) ?? '';
 
 		if ( ! empty( $status ) && ! FulfillmentStatuses::is_valid( $status ) ) {
