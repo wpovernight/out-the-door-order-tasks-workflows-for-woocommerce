@@ -206,12 +206,12 @@ final class Screen {
 	 * Add fulfillment column values in order items table.
 	 *
 	 * @param \WC_Product|bool $product
-	 * @param \OrderRefund|\WC_Order_Item $item
+	 * @param \WC_Order_Item|object $item
 	 * @param int $item_id
 	 *
 	 * @return void
 	 */
-	public function order_items_values( $product, $item, int $item_id ) {
+	public function order_items_values( $product, $item, int $item_id ): void {
 		// Display only for product line items.
 		if ( ! $product instanceof \WC_Product || ! $item instanceof \WC_Order_Item ) {
 			return;
@@ -223,7 +223,7 @@ final class Screen {
 		$fulfillment = $fulfillment_data[0] ?? null;
 
 		$fulfillment_status = $fulfillment ?
-			$this->fulfillment_service->get_order_item_fulfillment_status( $item, $fulfillment_data[0] )
+			$this->fulfillment_service->get_order_item_fulfillment_status( $item, $fulfillment )
 			: FulfillmentStatuses::NOT_FULFILLED;
 
 		$fulfillment_quantity    = $fulfillment ? (int) $fulfillment->quantity : 0;
