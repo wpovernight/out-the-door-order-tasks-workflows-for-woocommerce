@@ -75,13 +75,17 @@ const TaskRow: React.FC<TaskRowProps> = ({ task }) => {
 			<td className="order-id">{renderAssociatedOrder()}</td>
 
 			<td className="customer-name">
-				<a
-					href={customerProfileLink}
-					target="_blank"
-					rel="noopener noreferrer"
-				>
-					{customerName}
-				</a>
+				{customerProfileLink ? (
+					<a
+						href={customerProfileLink}
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						{customerName}
+					</a>
+				) : (
+					customerName
+				)}
 			</td>
 
 			<td className="task-completed-date">

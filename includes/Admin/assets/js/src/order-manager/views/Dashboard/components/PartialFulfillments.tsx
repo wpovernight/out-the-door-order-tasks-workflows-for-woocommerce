@@ -186,12 +186,15 @@ export const PartialFulfillments = ({ orders }: PartialFulfillmentsProps) => {
 					</ul>
 				)}
 			</div>
-            {!hasOrders && (
-			<div className="footer">
-				<a href="edit.php?post_type=shop_order" className="wpo-button view-all-link">
-					{__('View all orders', 'wpo-aom')}
-				</a>
-			</div>
+			{!hasOrders && (
+				<div className="footer">
+					<a
+						href="edit.php?post_type=shop_order"
+						className="wpo-button view-all-link"
+					>
+						{__('View all orders', 'wpo-aom')}
+					</a>
+				</div>
 			)}
 		</div>
 	);

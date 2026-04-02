@@ -140,7 +140,9 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 
 	return (
 		<div className="wpo-aom-empty-state">
-			<div className={`wpo-aom-empty-state-icon${isSvgIcon ? ` wpo-aom-empty-state-icon--${icon}` : ''}`}>
+			<div
+				className={`wpo-aom-empty-state-icon${isSvgIcon ? ` wpo-aom-empty-state-icon--${icon}` : ''}`}
+			>
 				{!isSvgIcon && icon}
 			</div>
 			<p className="wpo-aom-empty-state-message">{message}</p>
