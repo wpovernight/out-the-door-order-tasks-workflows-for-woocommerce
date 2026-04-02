@@ -35,7 +35,7 @@ final class AdvancedOrderManager {
 	 *
 	 * @return void
 	 */
-	public function __clone() {
+	private function __clone() {
 		_doing_it_wrong( __FUNCTION__, esc_html__( 'Cloning is forbidden.', 'wpo-aom' ), '1.0.0' );
 	}
 
