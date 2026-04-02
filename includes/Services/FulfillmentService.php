@@ -20,7 +20,7 @@ final class FulfillmentService {
 	 */
 	public function get_order_item_fulfillment_data( $item ): ?array {
 		if ( is_numeric( $item ) ) {
-			if ( $item <= 0 ) {
+			if ( (int) $item <= 0 ) {
 				return null;
 			}
 
