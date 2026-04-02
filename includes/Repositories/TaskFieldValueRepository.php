@@ -54,7 +54,7 @@ class TaskFieldValueRepository extends BaseRepository {
 	 * @param array<int, mixed> $field_values Field ID => value (string or array of strings)
 	 *
 	 * @return int|false Number of rows inserted or false on failure.
-	 * @throws \Exception|\Throwable
+	 * @throws \Throwable
 	 */
 	public function update_task_multiple_field_values( int $task_id, array $field_values ) {
 		if ( empty( $field_values ) ) {

@@ -9,7 +9,7 @@ defined( 'ABSPATH' ) || exit;
 
 abstract class BaseModel {
 	protected array $non_db_properties = array();
-	protected array $guarded          = array( 'id' );
+	protected array $guarded           = array( 'id' );
 
 	/**
 	 * Fill the model with data from an associative array.
