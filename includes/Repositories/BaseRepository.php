@@ -1017,7 +1017,7 @@ abstract class BaseRepository {
 	 * Generate a cache key for a column and value.
 	 *
 	 * @param string $column
-	 * @param $value
+	 * @param mixed $value
 	 *
 	 * @return string
 	 */
