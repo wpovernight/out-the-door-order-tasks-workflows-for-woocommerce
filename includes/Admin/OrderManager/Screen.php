@@ -33,7 +33,7 @@ final class Screen {
 
 		wp_enqueue_script(
 			'wpo-aom-admin-order-manager',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/js/order-manager.js',
+			WPO_AOM()->plugin_url() . '/includes/Admin/assets/js/order-manager' . $suffix . '.js',
 			array( 'wp-element', 'wp-components', 'wp-i18n' ),
 			WPO_AOM_VERSION,
 			true
@@ -119,8 +119,8 @@ final class Screen {
 	public function add_screen(): void {
 		add_submenu_page(
 			'woocommerce',
-			__( 'Order Manager', 'wpo-aom' ),
-			__( 'Order Manager', 'wpo-aom' ),
+			esc_html__( 'Order Manager', 'wpo-aom' ),
+			esc_html__( 'Order Manager', 'wpo-aom' ),
 			'manage_woocommerce',
 			'wpo_aom_order_manager',
 			array( $this, 'render_page' )
