@@ -24,7 +24,7 @@ class TaskRepository extends BaseRepository {
 	 * Get the position of the next task based on the given task ID.
 	 *
 	 * @param int|null   $given_task_id       The ID of the reference task.
-	 * @param int|null   $target_status_id    The status ID to filter tasks.
+	 * @param int        $target_status_id    The status ID to filter tasks.
 	 * @param float|null $given_task_position The position of the reference task. (Optional if given_task_id is provided)
 	 * @param int|null   $moving_task_id      The ID of the task being moved (to exclude from results)
 	 *
@@ -130,7 +130,7 @@ class TaskRepository extends BaseRepository {
 	 * @throws \Throwable
 	 */
 	public function rebalance_positions( int $status_id ): bool {
-		return $this->transaction( function () use ( $status_id ) {
+		return (bool) $this->transaction( function () use ( $status_id ) {
 			$task_field_value_repository = RepositoryRegistry::get( TaskFieldValue::class );
 			$task_field_value_table_name = $task_field_value_repository->get_table_full_name();
 
