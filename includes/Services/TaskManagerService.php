@@ -45,7 +45,7 @@ final class TaskManagerService {
 	 *
 	 * @return void
 	 */
-	public function register() {
+	public function register(): void {
 		// Rebalance task positions hook.
 		add_action( 'wpo_aom_rebalance_task_positions', array( $this, 'rebalance_task_positions' ) );
 	}
@@ -207,7 +207,7 @@ final class TaskManagerService {
 		$status_id          = 1; // Default status ID
 		$field_values_array = array();
 
-		foreach ( $field_values as $field_value ) {
+		foreach ( $field_values ?? array() as $field_value ) {
 			$field_id                        = $field_value['field_id'];
 			$value                           = $field_value['value'];
 			$field_values_array[ $field_id ] = $value;
@@ -266,7 +266,8 @@ final class TaskManagerService {
 		}
 
 		// Track which fields were actually updated with old and new values.
-		$updated_fields = array();
+		$updated_fields     = array();
+		$field_values_array = array();
 
 		// Check for task data changes (title, description).
 		$original_task_data = $task->to_array();
@@ -292,7 +293,6 @@ final class TaskManagerService {
 			// Fetch all current field values at once to avoid N+1 queries.
 			$current_field_values = $this->get_field_values_for_task( $task_id );
 
-			$field_values_array = array();
 			foreach ( $field_values as $field_value ) {
 				if ( ! isset( $field_value['field_id'], $field_value['value'], $field_value['field_slug'] ) ) {
 					continue;
@@ -352,6 +352,8 @@ final class TaskManagerService {
 		}
 
 		// Update position if the status has been changed.
+		// Note: $field_values_array[STATUS] is guaranteed to exist here because $current_status_value
+		// is only set when the status field is present in $field_values (above if-statement).
 		if ( isset( $current_status_value ) && (string) $current_status_value->value !== (string) $new_status_value ) {
 			$last_position = $this->task_repository->get_last_task_position(
 				$task_id,
@@ -413,9 +415,9 @@ final class TaskManagerService {
 	 *
 	 * @param array $data
 	 *
-	 * @return int
+	 * @return int|false
 	 */
-	public function create_field( array $data ): int {
+	public function create_field( array $data ) {
 		$field = new TaskField( $data );
 
 		$result = $this->task_field_repository->save( $field );
@@ -491,9 +493,11 @@ final class TaskManagerService {
 	/**
 	 * Get all Task Fields.
 	 *
+	 * @param string $index_by
+	 *
 	 * @return array<int, TaskField>
 	 */
-	public function get_all_fields( $index_by = 'slug' ): array {
+	public function get_all_fields( string $index_by = 'slug' ): array {
 		$fields = $this->task_field_repository->get();
 		return array_column( $fields, null, $index_by );
 	}
@@ -546,9 +550,9 @@ final class TaskManagerService {
 	 * @param int $field_id
 	 * @param array $option_data
 	 *
-	 * @return int
+	 * @return int|false
 	 */
-	public function add_field_option( int $field_id, array $option_data ): int {
+	public function add_field_option( int $field_id, array $option_data ) {
 		$option_data['field_id'] = $field_id;
 
 		$option_id = $this->task_field_option_repository->insert( $option_data );
@@ -617,7 +621,7 @@ final class TaskManagerService {
 			do_action( 'wpo_aom_field_option_deleted', $option_id );
 		}
 
-		return $result;
+		return $result !== false;
 	}
 
 	/**
@@ -1058,12 +1062,12 @@ final class TaskManagerService {
 
 		switch ( $field->type ) {
 			case TaskFieldTypes::SELECT:
-				$raw = (float) $raw;
+				$raw = (int) $raw;
 
 				switch ( $field->slug ) {
 					case 'status':
 					case 'priority':
-						$field_option = $this->task_field_option_repository->find( (int) $raw );
+						$field_option = $this->task_field_option_repository->find( $raw );
 						if ( $field_option ) {
 							$resolved = $field_option->to_array();
 						}
