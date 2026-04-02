@@ -4,6 +4,9 @@ namespace WPO\AOM\Traits;
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * @mixin \WC_Email
+ */
 trait TaskEmailRecipients {
 	/**
 	 * Get recipients based on task data and settings.
