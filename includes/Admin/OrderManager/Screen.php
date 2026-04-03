@@ -31,9 +31,10 @@ final class Screen {
 			return;
 		}
 
+		// Do not need the suffix, since it's a React app and we are using webpack to handle the minification.
 		wp_enqueue_script(
 			'wpo-aom-admin-order-manager',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/js/order-manager' . $suffix . '.js',
+			WPO_AOM()->plugin_url() . '/includes/Admin/assets/js/order-manager.js',
 			array( 'wp-element', 'wp-components', 'wp-i18n' ),
 			WPO_AOM_VERSION,
 			true

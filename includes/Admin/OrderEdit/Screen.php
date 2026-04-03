@@ -104,7 +104,7 @@ final class Screen {
 			}
 		}
 
-		// Load metabox react app.
+		// Do not need the suffix, since it's a React app and we are using webpack to handle the minification.
 		wp_enqueue_script(
 			'wpo-aom-order-edit-metabox',
 			WPO_AOM()->plugin_url() . '/includes/Admin/assets/js/order-edit-metabox.js',
