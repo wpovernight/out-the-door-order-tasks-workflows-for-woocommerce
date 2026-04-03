@@ -525,14 +525,33 @@
 
 .sort-icon {
     margin-left: 0.5em;
-    color: var(--wpo-aom-gray-icon);
     display: inline-block;
-    transition: color var(--wpo-aom-transition-fast);
+    width: 0.75em;
+    height: 0.85em;
+    vertical-align: middle;
+    transition: background-color var(--wpo-aom-transition-fast);
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
 }
 
-.sort-icon-active {
-    color: var(--wpo-aom-purple-light);
-    font-weight: bold;
+.sort-icon.unsorted {
+    background-color: var(--wpo-aom-text-gray);
+    mask-image: var(--wpo-aom-icon-unsorted);
+    -webkit-mask-image: var(--wpo-aom-icon-unsorted);
+}
+
+.sort-icon.sorted {
+    background-color: var(--wpo-aom-purple-light);
+    mask-image: var(--wpo-aom-icon-sorted);
+    -webkit-mask-image: var(--wpo-aom-icon-sorted);
+}
+
+.sort-icon.sorted.asc {
+    transform: rotate(180deg);
 }
 
 .calendar-task-table-wrapper > table > tbody > tr {

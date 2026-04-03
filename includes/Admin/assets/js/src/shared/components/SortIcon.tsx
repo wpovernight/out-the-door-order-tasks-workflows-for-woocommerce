@@ -13,12 +13,12 @@ const SortIcon: React.FC<SortIconProps> = ({
 	sortDirection,
 }) => {
 	if (sortColumn !== column) {
-		return <span className="sort-icon">↕</span>;
+		return <span className="sort-icon unsorted" />;
 	}
 	return (
-		<span className="sort-icon sort-icon-active">
-			{sortDirection === 'asc' ? '↑' : '↓'}
-		</span>
+		<span
+			className={`sort-icon sorted ${sortDirection === 'asc' ? 'asc' : 'desc'}`}
+		/>
 	);
 };
 
