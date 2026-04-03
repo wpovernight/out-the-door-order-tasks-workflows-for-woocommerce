@@ -52,13 +52,14 @@
     --wpo-aom-backdrop: rgba(0, 0, 0, 0.4);
 
     /* Shadows */
-    --wpo-aom-card-shadow: 0px 1px 1px #1E1F2140, 0px 0px 1px #1E1F214F;
+    --wpo-aom-card-shadow: 0px 2px 4px -2px #1717170F, 0px 4px 8px -2px #1717171A;
     --wpo-aom-floating-shadow: 0px 0px 0px 1px #d1d9e080, 0px 6px 12px -3px #25292e0a, 0px 6px 18px 0px #25292e1f;
 
     /* Border Radius */
     --wpo-aom-radius-s: 0.3em;
     --wpo-aom-radius-m: 0.5em;
     --wpo-aom-radius-l: 1em;
+    --wpo-aom-radius-xl: 2em;
 
     /* Transitions */
     --wpo-aom-transition-fast: 0.2s;
@@ -127,6 +128,7 @@
 .wpo-button-primary {
     background-color: var(--wpo-aom-purple-primary);
     color: #fff;
+    border: none;
 }
 
 .wpo-button-primary:disabled {

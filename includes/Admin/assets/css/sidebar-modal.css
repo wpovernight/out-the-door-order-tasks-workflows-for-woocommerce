@@ -65,7 +65,14 @@
 .wpo-aom-task-form > .action-group > .wpo-button {
     flex: 1;
     border: 1px solid var(--wpo-aom-border-light);
-    height: 3.4em;
+    font-size: 1.23em;
+    font-weight: 600;
+    border-radius: var(--wpo-aom-radius-m);
+    padding: 0.65em 0;
+}
+
+.wpo-aom-task-form > .action-group > .wpo-button.wpo-button-primary {
+    border: none
 }
 
 .wpo-aom-sidebar-backdrop {

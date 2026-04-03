@@ -42,7 +42,7 @@
 .header-actions #header-search-input {
     border: 1px solid var(--wpo-aom-border-color);
     border-radius: var(--wpo-aom-radius-m);
-    font-size: 0.95em;
+    font-size: 1.08em;
     width: 20em;
     color: var(--wpo-aom-text-primary);
     outline: none;
@@ -51,7 +51,7 @@
     background-image: var(--wpo-aom-icon-search);
     background-position: 0.8em;
     background-repeat: no-repeat;
-    padding: 0.3em 1em 0.3em 3em;
+    padding: 0.37em 1em 0.37em 3em;
 }
 
 #header-search-input:focus {
@@ -59,8 +59,10 @@
 }
 
 .header-actions .add-task {
-    padding: 0.6em 1em;
+    padding: 0.63em 1em;
     border-radius: var(--wpo-aom-radius-m);
+    font-size: 1.08em;
+    font-weight: 600;
 }
 
 
@@ -152,7 +154,7 @@
 .kanban-board .kanban-column-container {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 0.92em;
     min-height: 100%;
 }
 
@@ -179,8 +181,18 @@
 .task-card {
     cursor: grab;
     box-shadow: var(--wpo-aom-card-shadow);
-    border-color: transparent;
-    border-radius: var(--wpo-aom-radius-l);
+    border-radius: var(--wpo-aom-radius-xl);
+    border: 1px solid #E9EAEB;
+    padding: 1.37em;
+}
+
+.kanban-board .task-card h5 {
+    font-size: 1.37em;
+    font-weight: 700;
+}
+
+.kanban-board .task-card .task-card-description > p {
+    font-size: 1.2em;
 }
 
 .task-card:hover {
@@ -638,11 +650,13 @@
     font-size: 1.54em;
     color: var(--wpo-aom-text-primary);
     margin: 0;
+    border-right: 1px solid #E9EAEB;
+    padding-right: 0.6em;
 }
 
-.calendar-task-day-label:after {
-    content: '|';
-    padding-left: 0.6em;
+.calendar-task-day-header > .wpo-count-badge {
+    font-size: 1.2em;
+    font-weight: 600;
 }
 
 .calendar-task-day-weekday {

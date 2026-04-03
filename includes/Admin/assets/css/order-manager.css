@@ -7,6 +7,7 @@ body.woocommerce_page_wpo_aom_order_manager #wpcontent {
     font-size: 2.77em;
     user-select: none;
     line-height: 1;
+    font-weight: 700;
 }
 
 #wpo-aom-order-manager {
@@ -38,6 +39,11 @@ body.woocommerce_page_wpo_aom_order_manager #wpcontent {
     cursor: pointer;
     padding: .7em;
     margin-bottom: 0;
+    color: var(--wpo-aom-text-gray);
+}
+
+#wpo-aom-order-manager .tabs > ul > li.active > button {
+    color: #252B37;
 }
 
 #wpo-aom-order-manager .tabs > ul > li.active,

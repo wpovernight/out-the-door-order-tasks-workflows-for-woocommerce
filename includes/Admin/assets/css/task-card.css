@@ -63,11 +63,12 @@
     mask-image: var(--wpo-aom-icon-edit);
     mask-size: contain;
     mask-repeat: no-repeat;
+    mask-position: center;
 
-    /* Webkit prefix for Safari */
     -webkit-mask-image: var(--wpo-aom-icon-edit);
     -webkit-mask-size: contain;
     -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
 }
 
 .task-finish-menu-item::before {
@@ -79,9 +80,12 @@
     mask-image: var(--wpo-aom-icon-finish);
     mask-size: contain;
     mask-repeat: no-repeat;
+    mask-position: center;
+
     -webkit-mask-image: var(--wpo-aom-icon-finish);
     -webkit-mask-size: contain;
     -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
 }
 
 .task-archive-menu-item::before {
@@ -93,9 +97,12 @@
     mask-image: var(--wpo-aom-icon-archive);
     mask-size: contain;
     mask-repeat: no-repeat;
+    mask-position: center;
+
     -webkit-mask-image: var(--wpo-aom-icon-archive);
     -webkit-mask-size: contain;
     -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
 }
 
 .task-delete-menu-item {
@@ -111,11 +118,13 @@
     mask-image: var(--wpo-aom-icon-delete);
     mask-size: contain;
     mask-repeat: no-repeat;
+    mask-position: center;
 
     /* Webkit prefix for Safari */
     -webkit-mask-image: var(--wpo-aom-icon-delete);
     -webkit-mask-size: contain;
     -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
 }
 
 .task-card-options .task-delete-menu-item::before {
@@ -171,9 +180,11 @@
     mask-image: var(--wpo-aom-icon-clock);
     mask-size: contain;
     mask-repeat: no-repeat;
+    mask-position: center;
     -webkit-mask-image: var(--wpo-aom-icon-clock);
     -webkit-mask-size: contain;
     -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
 }
 
 .task-card .task-card-order a {
@@ -194,9 +205,11 @@
     mask-image: var(--wpo-aom-icon-person);
     mask-size: contain;
     mask-repeat: no-repeat;
+    mask-position: center;
     -webkit-mask-image: var(--wpo-aom-icon-person);
     -webkit-mask-size: contain;
     -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
 }
 
 .task-card .task-card-info {
@@ -220,8 +233,10 @@
     mask-image: var(--wpo-aom-icon-finish);
     mask-size: contain;
     mask-repeat: no-repeat;
+    mask-position: center;
     -webkit-mask-image: var(--wpo-aom-icon-finish);
     -webkit-mask-size: contain;
     -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
     vertical-align: bottom;
 }

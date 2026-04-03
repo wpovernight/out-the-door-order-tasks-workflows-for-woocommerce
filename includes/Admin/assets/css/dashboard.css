@@ -34,8 +34,12 @@
     margin: 0;
     font-size: 1.85em;
     line-height: 1.4em;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--wpo-aom-text-primary);
+}
+
+.dashboard-widget > .header > h3 .wpo-count-badge {
+    font-size: 0.75em;
 }
 
 .dashboard-widget > .footer {
@@ -43,7 +47,6 @@
 }
 
 .dashboard-widget > .footer .view-all-link {
-    color: var(--wpo-aom-text-primary);
     font-weight: 600;
     text-decoration: none;
     font-size: 1.08em;
@@ -53,9 +56,13 @@
     justify-content: center;
 }
 
-.dashboard-widget > .footer .view-all-link:hover {
-    color: var(--wpo-aom-purple-primary);
+.dashboard-widget > .footer .view-all-link:not(:hover) {
+    color: var(--wpo-aom-text-primary);
 }
+
+    /*.dashboard-widget > .footer .view-all-link:hover {*/
+/*    color: var(--wpo-aom-purple-primary);*/
+/*}*/
 
 /* Today Tasks List */
 #today-tasks ul.today-tasks-list {
@@ -85,6 +92,14 @@
 
 #today-tasks .content > ul.today-tasks-list > li:first-child {
     padding-top: 0;
+}
+
+#today-tasks .task-card {
+    cursor: initial;
+}
+
+#today-tasks ul.today-tasks-list > li .task-card > div:not(.task-card-header) {
+    padding-left: 1.9em;
 }
 
 /* Section Toggles */
@@ -128,6 +143,10 @@
     transition: background-color var(--wpo-aom-transition-fast);
 }
 
+#today-tasks .today-tasks-section .today-tasks-section-toggle .wpo-count-badge {
+    line-height: 1.5;
+}
+
 #today-tasks .today-tasks-section .today-tasks-section-toggle::before {
     content: '';
     width: 1.1em;
@@ -168,10 +187,6 @@
     background-color: var(--wpo-aom-text-gray);
 }
 
-#today-tasks .task-card {
-    cursor: initial;
-}
-
 /* Partial Fulfillments Widget */
 #partial-fulfillments .fulfillment-order-list {
     list-style: none;
@@ -183,7 +198,7 @@
     border: 1px solid var(--wpo-aom-border-light);
     border-radius: var(--wpo-aom-radius-s);
     padding: 0.9em;
-    margin: 0 0 0.6em;
+    margin: 0 0 0.8em;
 }
 
 #partial-fulfillments .fulfillment-order > h4 {
