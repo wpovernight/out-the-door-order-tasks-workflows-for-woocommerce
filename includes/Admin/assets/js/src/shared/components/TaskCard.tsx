@@ -209,6 +209,23 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 
 		return (
 			<ul className="wpo-aom-task-actions task-card-actions">
+				{IncludedActions.includes('edit') && onEditClick && (
+					<li>
+						<button
+							className="wpo-button wpo-button-icon task-edit"
+							type="button"
+							onClick={(e) => {
+								e.stopPropagation();
+								onEditClick(task.id);
+							}}
+							title={__('Edit', 'wpo-aom')}
+						>
+							<span className="screenReader">
+								{__('Edit', 'wpo-aom')}
+							</span>
+						</button>
+					</li>
+				)}
 				{IncludedActions.includes('archive') && (
 					<li>
 						<button
@@ -249,23 +266,6 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 							</button>
 						</li>
 					)}
-				{IncludedActions.includes('edit') && onEditClick && (
-					<li>
-						<button
-							className="wpo-button wpo-button-icon task-edit"
-							type="button"
-							onClick={(e) => {
-								e.stopPropagation();
-								onEditClick(task.id);
-							}}
-							title={__('Edit', 'wpo-aom')}
-						>
-							<span className="screenReader">
-								{__('Edit', 'wpo-aom')}
-							</span>
-						</button>
-					</li>
-				)}
 				{IncludedActions.includes('delete') && onDeleteClick && (
 					<li>
 						<button
