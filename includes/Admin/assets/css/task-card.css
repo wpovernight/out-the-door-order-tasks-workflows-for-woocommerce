@@ -22,6 +22,12 @@
     gap: 0.5em;
 }
 
+.task-card-description-date {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
 .task-card-description > p {
     margin: 0;
     padding: 0;
