@@ -223,9 +223,9 @@ final class Install {
 				'is_protected' => true,
 				'options'      => array(
 					array(
-						'label'    => 'To Do',
-						'slug'     => 'to_do',
-						'color'    => '#6c757d',
+						'label'    => 'Not Started',
+						'slug'     => 'not_started',
+						'color'    => '#D5D7DA',
 						'position' => 1,
 					),
 					array(
@@ -317,25 +317,25 @@ final class Install {
 					array(
 						'label'    => 'Low',
 						'slug'     => 'low',
-						'color'    => '#34c38f',
+						'color'    => '#D1E9FF',
 						'position' => 1,
 					),
 					array(
 						'label'    => 'Medium',
 						'slug'     => 'medium',
-						'color'    => '#f1b44c',
+						'color'    => '#FFF2CC',
 						'position' => 2,
 					),
 					array(
 						'label'    => 'High',
 						'slug'     => 'high',
-						'color'    => '#f46a6a',
+						'color'    => '#FFF3E0',
 						'position' => 3,
 					),
 					array(
 						'label'    => 'Critical',
 						'slug'     => 'critical',
-						'color'    => '#f46a6a',
+						'color'    => '#FFEBEE',
 						'position' => 4,
 					)
 				),
