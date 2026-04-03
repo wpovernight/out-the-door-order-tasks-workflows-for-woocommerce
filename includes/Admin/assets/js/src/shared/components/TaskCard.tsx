@@ -12,7 +12,7 @@ import { __ } from '@wordpress/i18n';
 import { useTasks } from '@shared/context/TaskContext';
 
 type HeadingLevel = 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
-type TagsPosition = 'top' | 'bottom';
+type TagsPosition = 'none' | 'top' | 'bottom';
 type ActionDisplayMode = 'dropdown' | 'inline';
 
 interface TaskCardProps {
@@ -341,15 +341,26 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 						renderActionInline()}
 				</div>
 			</div>
-			{showDescription && renderDescription()}
-
-			<div className="task-card-footer">
-				<div className="task-card-info">
-					{tagsPosition === 'bottom' && renderTags()}
-					{showOrder && renderAssociatedOrder()}
+			{showDescription && !showOrder && tagsPosition === 'none' ? (
+				<div className="task-card-description-date">
+					{renderDescription()}
+					{renderDueDate()}
 				</div>
-				{renderDueDate()}
-			</div>
+			) : (
+				showDescription && renderDescription()
+			)}
+
+			{showOrder || tagsPosition !== 'none' || !showDescription ? (
+				<div className="task-card-footer">
+					<div className="task-card-info">
+						{tagsPosition === 'bottom' && renderTags()}
+						{showOrder && renderAssociatedOrder()}
+					</div>
+					{renderDueDate()}
+				</div>
+			) : (
+				''
+			)}
 		</div>
 	);
 };
