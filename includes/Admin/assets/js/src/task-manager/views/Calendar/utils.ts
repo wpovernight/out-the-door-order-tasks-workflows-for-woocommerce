@@ -99,6 +99,25 @@ export const formatDate = (date: Date): string => {
 	});
 };
 
+export const formatDateRange = (start: Date, end: Date): string => {
+	const sameYear = start.getFullYear() === end.getFullYear();
+
+	if (sameYear) {
+		const startStr = start.toLocaleDateString(undefined, {
+			month: 'short',
+			day: 'numeric',
+		});
+		const endStr = end.toLocaleDateString(undefined, {
+			month: 'short',
+			day: 'numeric',
+			year: 'numeric',
+		});
+		return `${startStr} - ${endStr}`;
+	}
+
+	return `${formatDate(start)} - ${formatDate(end)}`;
+};
+
 export interface DateRange {
 	start: Date | null;
 	end: Date | null;

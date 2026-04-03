@@ -3,7 +3,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { Task } from '@shared/types/task';
 import TaskDayGroup from './TaskDayGroup';
 import { getTaskDateField } from '@shared/utils/fieldUtils';
-import { formatDate, DateRange, DateRangePreset } from '../utils';
+import { formatDate, formatDateRange, isSameDate, DateRange, DateRangePreset } from '../utils';
 
 interface TaskListProps {
 	tasks: Task[];
@@ -62,21 +62,16 @@ const TaskList: React.FC<TaskListProps> = ({
 		}
 
 		if (dateRange.start) {
-			const startDate = formatDate(dateRange.start);
-			const endDate = dateRange.end
-				? formatDate(dateRange.end)
-				: startDate;
-
-			if (startDate === endDate) {
+			if (dateRange.end && !isSameDate(dateRange.start, dateRange.end)) {
 				return (
 					<>
-						{startDate} {taskCountBadge}
+						{formatDateRange(dateRange.start, dateRange.end)} {taskCountBadge}
 					</>
 				);
 			}
 			return (
 				<>
-					{startDate} - {endDate} {taskCountBadge}
+					{formatDate(dateRange.start)} {taskCountBadge}
 				</>
 			);
 		}

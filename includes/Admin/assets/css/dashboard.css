@@ -17,7 +17,7 @@
 .dashboard-widget .content {
     max-height: 38em;
     overflow-y: auto;
-    margin-top: 0.77em;
+    margin-top: 1.23em;
 }
 
 .dashboard-widget .content.is-scrollable {
@@ -60,7 +60,7 @@
     color: var(--wpo-aom-text-primary);
 }
 
-    /*.dashboard-widget > .footer .view-all-link:hover {*/
+/*.dashboard-widget > .footer .view-all-link:hover {*/
 /*    color: var(--wpo-aom-purple-primary);*/
 /*}*/
 
@@ -198,7 +198,7 @@
     border: 1px solid var(--wpo-aom-border-light);
     border-radius: var(--wpo-aom-radius-s);
     padding: 0.9em;
-    margin: 0 0 0.8em;
+    margin: 0 0 1.23em;
 }
 
 #partial-fulfillments .fulfillment-order > h4 {

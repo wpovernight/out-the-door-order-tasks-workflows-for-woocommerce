@@ -40,6 +40,10 @@
     flex-grow: 1;
 }
 
+.wpo-aom-metabox-section .header .task-progress > progress {
+    accent-color: var(--wpo-aom-purple-primary);
+}
+
 #order-tasks .header .title-details::before {
     content: '';
     display: inline-block;
