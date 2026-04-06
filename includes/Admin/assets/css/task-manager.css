@@ -130,8 +130,8 @@
     flex: 1;
     overflow-y: auto;
     scrollbar-color: var(--wpo-aom-gray-medium) transparent;
-    margin-right: 4px;
-    padding: 4px 6px 0 10px;
+    margin-right: 0.615em; /* Account for scrollbar width to prevent layout shift */
+    padding: 0 0.615em 0 1.23em;
 }
 
 .kanban-board .kanban-column-scrollable::-webkit-scrollbar {
@@ -159,7 +159,7 @@
 }
 
 .kanban-board .kanban-column-header {
-    padding: 1em;
+    padding: 1.23em;
     display: flex;
     align-items: center;
     justify-content: space-between;
