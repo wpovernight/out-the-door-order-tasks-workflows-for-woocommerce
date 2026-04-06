@@ -223,13 +223,13 @@ final class Install {
 				'is_protected' => true,
 				'options'      => array(
 					array(
-						'label'    => 'Not Started',
+						'label'    => 'Not started',
 						'slug'     => 'not_started',
 						'color'    => '#D5D7DA',
 						'position' => 1,
 					),
 					array(
-						'label'    => 'In Progress',
+						'label'    => 'In progress',
 						'slug'     => 'in_progress',
 						'color'    => '#17a2b8',
 						'position' => 2,
