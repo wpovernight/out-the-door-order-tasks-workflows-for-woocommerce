@@ -92,8 +92,9 @@ export const PartialFulfillments = ({ orders }: PartialFulfillmentsProps) => {
 											<span className="customer-info">
 												<a
 													href={order.order_url}
-                                                    target="_blank"
+													target="_blank"
 													className="customer-name"
+													rel="noreferrer"
 												>
 													{order.customer_name ||
 														__(
@@ -143,10 +144,11 @@ export const PartialFulfillments = ({ orders }: PartialFulfillmentsProps) => {
 													<div className="item-details">
 														<h5 className="item-name">
 															<a
-                                                                target="_blank"
+																target="_blank"
 																href={
 																	order.order_url
 																}
+																rel="noreferrer"
 															>
 																{item.name}
 															</a>

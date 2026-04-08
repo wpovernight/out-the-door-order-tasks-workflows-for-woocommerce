@@ -1,8 +1,7 @@
 import React from 'react';
 import { useSidebarModal } from '@shared/context/SidebarModalContext';
-import { TaskForm } from '@shared/components/TaskForm';
+import { TaskForm, TaskFormInitialValues } from '@shared/components/TaskForm';
 import { Task } from '@shared/types/task';
-import { TaskFormInitialValues } from '@shared/components/TaskForm';
 
 interface CreateTaskModalOptions {
 	title: string;

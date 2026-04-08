@@ -89,9 +89,7 @@ const TaskRow: React.FC<TaskRowProps> = ({ task }) => {
 			</td>
 
 			<td className="task-done-date">
-				<time
-					dateTime={doneDate ? doneDate.toISOString() : ''}
-				>
+				<time dateTime={doneDate ? doneDate.toISOString() : ''}>
 					{doneDate ? formatDate(doneDate) : '-'}
 				</time>
 			</td>

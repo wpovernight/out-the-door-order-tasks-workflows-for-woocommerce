@@ -240,7 +240,9 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 							id="title"
 							name="title"
 							type="text"
-							defaultValue={task ? task.title : (initialValues?.title ?? '')}
+							defaultValue={
+								task ? task.title : (initialValues?.title ?? '')
+							}
 							placeholder={__(
 								'Write a name for your task.',
 								'wpo-aom'
@@ -304,7 +306,11 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 							name="description"
 							rows={6}
 							placeholder={__('Describe the task.', 'wpo-aom')}
-							defaultValue={task ? task.description : (initialValues?.description ?? '')}
+							defaultValue={
+								task
+									? task.description
+									: (initialValues?.description ?? '')
+							}
 						/>
 					</div>
 				</div>

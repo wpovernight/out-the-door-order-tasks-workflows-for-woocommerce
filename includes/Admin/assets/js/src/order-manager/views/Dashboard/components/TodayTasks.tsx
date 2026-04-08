@@ -58,7 +58,7 @@ export const TodayTasks = () => {
 			}
 		});
 
-		return { todayActive: active, overdue: over, done: done };
+		return { todayActive: active, overdue: over, done };
 	}, [tasks, todayStart, todayEnd]);
 
 	const handleAddTask = () => {

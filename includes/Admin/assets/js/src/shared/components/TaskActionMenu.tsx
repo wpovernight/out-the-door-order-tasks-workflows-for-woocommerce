@@ -146,9 +146,7 @@ export const TaskActionMenu: React.FC<TaskActionMenuProps> = ({
 							type="button"
 							className={`wpo-button task-finish-menu-item ${isDone ? 'finished' : ''}`}
 							onClick={
-								isDone
-									? handleUnfinishClick
-									: handleFinishClick
+								isDone ? handleUnfinishClick : handleFinishClick
 							}
 						>
 							{isDone
