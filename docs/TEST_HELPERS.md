@@ -36,7 +36,7 @@ function create_sample_tasks( int $count = 15, bool $reset = true ): void {
 	$order_id = 1885; // Update as you want
 
 	$statuses = array(
-		$task_field_option_repository->find_by_slug( 'to_do' )->id,
+		$task_field_option_repository->find_by_slug( 'not_started' )->id,
 		$task_field_option_repository->find_by_slug( 'in_progress' )->id,
 		$task_field_option_repository->find_by_slug( 'done' )->id,
 	);
