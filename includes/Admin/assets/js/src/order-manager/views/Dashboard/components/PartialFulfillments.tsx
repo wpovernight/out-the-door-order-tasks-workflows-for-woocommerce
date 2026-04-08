@@ -92,6 +92,7 @@ export const PartialFulfillments = ({ orders }: PartialFulfillmentsProps) => {
 											<span className="customer-info">
 												<a
 													href={order.order_url}
+                                                    target="_blank"
 													className="customer-name"
 												>
 													{order.customer_name ||
@@ -142,6 +143,7 @@ export const PartialFulfillments = ({ orders }: PartialFulfillmentsProps) => {
 													<div className="item-details">
 														<h5 className="item-name">
 															<a
+                                                                target="_blank"
 																href={
 																	order.order_url
 																}
