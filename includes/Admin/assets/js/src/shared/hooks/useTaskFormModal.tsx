@@ -2,11 +2,11 @@ import React from 'react';
 import { useSidebarModal } from '@shared/context/SidebarModalContext';
 import { TaskForm } from '@shared/components/TaskForm';
 import { Task } from '@shared/types/task';
+import { TaskFormInitialValues } from '@shared/components/TaskForm';
 
 interface CreateTaskModalOptions {
 	title: string;
-	columnId?: number;
-	orderId?: number;
+	initialValues?: TaskFormInitialValues;
 	onTaskSaved?: (task: Task) => void;
 }
 
@@ -22,8 +22,7 @@ export const useTaskCreation = () => {
 	const openCreateTaskModal = (options: CreateTaskModalOptions) => {
 		openSidebar(
 			<TaskForm
-				columnId={options.columnId}
-				orderId={options.orderId}
+				initialValues={options.initialValues}
 				onDone={closeSidebar}
 				onTaskSaved={options.onTaskSaved}
 			/>,

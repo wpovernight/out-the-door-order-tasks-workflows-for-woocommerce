@@ -12,7 +12,10 @@ const Header: React.FC = () => {
 
 	const handleAddTask = (e: React.MouseEvent) => {
 		e.preventDefault();
-		openCreateTaskModal({ title: __('Add Task', 'wpo-aom'), orderId });
+		openCreateTaskModal({
+			title: __('Add Task', 'wpo-aom'),
+			initialValues: { orderIds: [orderId] },
+		});
 	};
 
 	const totalTasks = activeCount + finishedCount;

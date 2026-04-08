@@ -215,7 +215,7 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 
 	const openTaskCreationModal = () => {
 		openCreateTaskModal({
-			columnId: column.id,
+			initialValues: { statusIndex: column.id - 1 },
 			onTaskSaved: (newTask) => {
 				// Update local view state to include the new task
 				setViewTasks((prev) => {

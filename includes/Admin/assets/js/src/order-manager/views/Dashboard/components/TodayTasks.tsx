@@ -62,7 +62,12 @@ export const TodayTasks = () => {
 	}, [tasks, todayStart, todayEnd]);
 
 	const handleAddTask = () => {
-		openCreateTaskModal({ title: __('Add Task', 'wpo-aom') });
+		openCreateTaskModal({
+			title: __('Add Task', 'wpo-aom'),
+			initialValues: {
+				dueDate: new Date().toISOString().split('T')[0],
+			},
+		});
 	};
 
 	const handleEditClick = (taskId: number) => {

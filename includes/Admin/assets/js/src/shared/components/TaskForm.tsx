@@ -8,18 +8,25 @@ import { TaskFormSkeleton } from '@shared/components/TaskFormSkeleton';
 import { searchOrders } from '@shared/utils/api';
 import { isFieldOption, Task } from '@shared/types/task';
 
+export interface TaskFormInitialValues {
+	title?: string;
+	description?: string;
+	dueDate?: string;
+	statusIndex?: number;
+	priorityIndex?: number;
+	orderIds?: number[];
+}
+
 interface TaskFormProps {
 	task?: Task;
-	columnId?: number;
-	orderId?: number;
+	initialValues?: TaskFormInitialValues;
 	onDone?: () => void;
 	onTaskSaved?: (task: Task) => void;
 }
 
 export const TaskForm: React.FC<TaskFormProps> = ({
 	task,
-	columnId,
-	orderId,
+	initialValues,
 	onDone,
 	onTaskSaved,
 }) => {
@@ -136,24 +143,26 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 		? task.fields.find((field) => field.slug === 'status')?.values?.[0]
 				?.resolved
 		: null;
+	const defaultStatusIndex = initialValues?.statusIndex ?? 0;
 	const statusOption =
 		statusResolved && isFieldOption(statusResolved)
 			? statusResolved
-			: fieldOptions?.status?.[(columnId ?? 1) - 1];
+			: fieldOptions?.status?.[defaultStatusIndex];
 
 	const priorityResolved = task
 		? task.fields.find((field) => field.slug === 'priority')?.values?.[0]
 				?.resolved
 		: null;
+	const defaultPriorityIndex = initialValues?.priorityIndex ?? 0;
 	const priorityOption =
 		priorityResolved && isFieldOption(priorityResolved)
 			? priorityResolved
-			: fieldOptions?.priority?.[0];
+			: fieldOptions?.priority?.[defaultPriorityIndex];
 
 	const dueDate = task
 		? (task.fields.find((field) => field.slug === 'due_date')?.values?.[0]
 				?.raw as string)
-		: undefined;
+		: initialValues?.dueDate;
 
 	const associatedOrders = task?.fields.find(
 		(field) => field.slug === 'order'
@@ -172,9 +181,12 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 		})
 		.filter((item): item is { id: number; label: string } => item !== null);
 
-	// If creating a new task and orderId is provided, pre-select it
-	if (!task && orderId) {
-		associatedOrderIds = [{ id: orderId, label: `#${orderId}` }];
+	// If creating a new task and orderIds are provided, pre-select them
+	if (!task && initialValues?.orderIds?.length) {
+		associatedOrderIds = initialValues.orderIds.map((id) => ({
+			id,
+			label: `#${id}`,
+		}));
 	}
 
 	// The form field name should follow the pattern: field_{field_slug}
@@ -228,7 +240,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 							id="title"
 							name="title"
 							type="text"
-							defaultValue={task ? task.title : ''}
+							defaultValue={task ? task.title : (initialValues?.title ?? '')}
 							placeholder={__(
 								'Write a name for your task.',
 								'wpo-aom'
@@ -292,7 +304,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 							name="description"
 							rows={6}
 							placeholder={__('Describe the task.', 'wpo-aom')}
-							defaultValue={task ? task.description : ''}
+							defaultValue={task ? task.description : (initialValues?.description ?? '')}
 						/>
 					</div>
 				</div>
