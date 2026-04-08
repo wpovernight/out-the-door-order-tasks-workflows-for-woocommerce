@@ -37,7 +37,7 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    margin-top: 0.5em;
+    margin-top: 1em;
 }
 
 .task-card-options .wpo-action-menu {
@@ -221,7 +221,7 @@
 .task-card .task-card-info {
     display: flex;
     flex-direction: column;
-    gap: 0.5em;
+    gap: 1em;
 }
 
 .task-card .task-card-header-info {
