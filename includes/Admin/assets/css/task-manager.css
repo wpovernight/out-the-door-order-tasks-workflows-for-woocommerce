@@ -30,7 +30,6 @@
     display: flex;
     align-items: center;
     gap: 0.75em;
-    margin-right: 1em;
 }
 
 .header-actions .header-search {
@@ -83,9 +82,13 @@
     padding-right: 1em;
 }
 
+.kanban-board .kanban-column:last-child {
+    padding-right: 0;
+}
+
 .kanban-board .kanban-column .kanban-column-inner {
     background: var(--wpo-aom-bg-light);
-    border-radius: var(--wpo-aom-radius-l);
+    border-radius: var(--wpo-aom-radius-xl);
     padding-bottom: 1em;
     border: 1px solid var(--wpo-aom-border-light);
     display: flex;
@@ -191,6 +194,10 @@
     font-weight: 700;
 }
 
+.kanban-board .task-card task-card-description {
+    margin-top: -0.3em;
+}
+
 .kanban-board .task-card .task-card-description > p {
     font-size: 1.2em;
 }
@@ -275,6 +282,7 @@
 }
 
 .calendar-date-range-preset-selector > select {
+    font-size: 1.23em;
     width: 100%;
     border: 1px solid var(--wpo-aom-border-color);
     border-radius: var(--wpo-aom-radius-m);
@@ -372,6 +380,11 @@
     border-radius: var(--wpo-aom-radius-m);
     outline: none;
     transition: border-color var(--wpo-aom-transition-fast), box-shadow var(--wpo-aom-transition-fast);
+    cursor: text;
+}
+
+.date-range-inputs > input::-webkit-calendar-picker-indicator {
+    cursor: pointer;
 }
 
 .date-range-inputs > input:focus {

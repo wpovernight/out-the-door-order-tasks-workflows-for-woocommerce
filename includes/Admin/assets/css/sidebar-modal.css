@@ -310,7 +310,7 @@
 .wpo-aom-datepicker-dropdown {
     position: absolute;
     top: calc(100% + 6px);
-    left: 0;
+    right: 0;
     z-index: 10;
     background: var(--wpo-aom-card-bg);
     border-radius: var(--wpo-aom-radius-l);
