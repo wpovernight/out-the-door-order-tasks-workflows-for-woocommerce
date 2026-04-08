@@ -16,7 +16,7 @@ interface TaskRowProps {
 }
 
 const TaskRow: React.FC<TaskRowProps> = ({ task }) => {
-	const completedDate = getTaskDateField(task, 'completed_date');
+	const doneDate = getTaskDateField(task, 'done_date');
 	const archivedDate = getTaskDateField(task, 'archived_date');
 
 	const customerName = getFieldValue(
@@ -88,11 +88,11 @@ const TaskRow: React.FC<TaskRowProps> = ({ task }) => {
 				)}
 			</td>
 
-			<td className="task-completed-date">
+			<td className="task-done-date">
 				<time
-					dateTime={completedDate ? completedDate.toISOString() : ''}
+					dateTime={doneDate ? doneDate.toISOString() : ''}
 				>
-					{completedDate ? formatDate(completedDate) : '-'}
+					{doneDate ? formatDate(doneDate) : '-'}
 				</time>
 			</td>
 

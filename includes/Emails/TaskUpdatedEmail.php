@@ -255,8 +255,8 @@ class TaskUpdatedEmail extends WC_Email {
 						),
 						array(
 							'id'    => 3,
-							'label' => __( 'Completed', 'wpo-aom' ),
-							'slug'  => 'completed',
+							'label' => __( 'Done', 'wpo-aom' ),
+							'slug'  => 'done',
 							'color' => '#00a32a',
 						),
 					),

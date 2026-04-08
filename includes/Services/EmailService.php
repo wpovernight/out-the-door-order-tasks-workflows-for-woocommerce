@@ -109,7 +109,7 @@ final class EmailService {
 			'wpo_aom_email_task_updated_field_types',
 			array(
 				'select' => array( 'status', 'priority' ),
-				'date'   => array( 'due_date', 'completed_date', 'archived_date' ),
+				'date'   => array( 'due_date', 'done_date', 'archived_date' ),
 				'user'   => array( 'creator' ),
 				'number' => array( 'order' ),
 			)

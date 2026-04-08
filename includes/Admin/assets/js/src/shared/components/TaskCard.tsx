@@ -200,7 +200,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 		archiveTask(task.id);
 	};
 
-	const isCompleted = task.status === TASK_FINISH_STATUS_SLUG;
+	const isDone = task.status === TASK_FINISH_STATUS_SLUG;
 
 	const renderActionInline = () => {
 		if (IncludedActions.length === 0) {
@@ -245,23 +245,23 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 					!FinishAsCheckbox && (
 						<li>
 							<button
-								className={`wpo-button wpo-button-icon task-finish ${isCompleted ? 'finished' : ''}`}
+								className={`wpo-button wpo-button-icon task-finish ${isDone ? 'finished' : ''}`}
 								type="button"
 								onClick={
-									isCompleted
+									isDone
 										? handleUnfinishClick
 										: handleFinishClick
 								}
 								title={
-									isCompleted
+									isDone
 										? __('Mark as In Progress', 'wpo-aom')
-										: __('Mark as Completed', 'wpo-aom')
+										: __('Mark as Done', 'wpo-aom')
 								}
 							>
 								<span className="screenReader">
-									{isCompleted
+									{isDone
 										? __('Mark as In Progress', 'wpo-aom')
-										: __('Mark as Completed', 'wpo-aom')}
+										: __('Mark as Done', 'wpo-aom')}
 								</span>
 							</button>
 						</li>
@@ -302,11 +302,11 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 			<div className="task-card-header">
 				{FinishAsCheckbox && (
 					<label
-						className={`task-finish-checkbox ${isCompleted ? 'finished' : ''}`}
+						className={`task-finish-checkbox ${isDone ? 'finished' : ''}`}
 					>
 						<input
 							type="checkbox"
-							checked={isCompleted}
+							checked={isDone}
 							onChange={(e) => {
 								e.stopPropagation();
 								if (e.target.checked) {

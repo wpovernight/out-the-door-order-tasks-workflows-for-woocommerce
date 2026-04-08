@@ -77,15 +77,15 @@ const TaskDayGroup: React.FC<TaskDayGroupProps> = ({
 								/>
 							</th>
 							<th className="task-due-date">
-								{__('Due date', 'wpo-aom')}
+								{__('Due', 'wpo-aom')}
 							</th>
 							<th
-								className="task-completed-date th-sortable"
-								onClick={() => handleSort('completedDate')}
+								className="task-done-date th-sortable"
+								onClick={() => handleSort('doneDate')}
 							>
-								{__('Completed at', 'wpo-aom')}
+								{__('Done', 'wpo-aom')}
 								<SortIcon
-									column="completedDate"
+									column="doneDate"
 									sortColumn={sortColumn}
 									sortDirection={sortDirection}
 								/>

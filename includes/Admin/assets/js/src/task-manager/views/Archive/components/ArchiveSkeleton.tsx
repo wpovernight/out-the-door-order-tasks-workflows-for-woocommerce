@@ -19,7 +19,7 @@ export const ArchiveSkeleton: React.FC = () => {
 							<th className="task-customer">
 								<SkeletonLine width="5em" height="1em" />
 							</th>
-							<th className="task-completed-date">
+							<th className="task-done-date">
 								<SkeletonLine width="7em" height="1em" />
 							</th>
 							<th className="task-archived-date">
@@ -42,7 +42,7 @@ export const ArchiveSkeleton: React.FC = () => {
 								<td className="task-customer">
 									<SkeletonLine width="60%" height="1em" />
 								</td>
-								<td className="task-completed-date">
+								<td className="task-done-date">
 									<SkeletonLine width="55%" height="1em" />
 								</td>
 								<td className="task-archived-date">

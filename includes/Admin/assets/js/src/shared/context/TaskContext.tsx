@@ -297,7 +297,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 					};
 
 					if (targetStatusOption.slug === TASK_FINISH_STATUS_SLUG) {
-						fieldUpdates.completed_date = {
+						fieldUpdates.done_date = {
 							raw: new Date()
 								.toISOString()
 								.replace('T', ' ')
@@ -305,7 +305,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 							resolved: null,
 						};
 					} else if (task.status === TASK_FINISH_STATUS_SLUG) {
-						fieldUpdates.completed_date = {
+						fieldUpdates.done_date = {
 							raw: null,
 							resolved: null,
 						};
@@ -407,7 +407,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 							raw: Number.MAX_SAFE_INTEGER,
 							resolved: null,
 						},
-						completed_date: {
+						done_date: {
 							raw: new Date()
 								.toISOString()
 								.replace('T', ' ')
@@ -474,7 +474,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 							raw: Number.MAX_SAFE_INTEGER,
 							resolved: null,
 						},
-						completed_date: { raw: null, resolved: null },
+						done_date: { raw: null, resolved: null },
 					});
 				});
 			});

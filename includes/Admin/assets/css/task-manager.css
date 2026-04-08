@@ -810,7 +810,7 @@
     text-decoration: underline;
 }
 
-.archived-task-table-wrapper > table > tbody > tr > td.task-completed-date,
+.archived-task-table-wrapper > table > tbody > tr > td.task-done-date,
 .archived-task-table-wrapper > table > tbody > tr > td.task-archived-date {
     white-space: nowrap;
     color: var(--wpo-aom-text-gray);

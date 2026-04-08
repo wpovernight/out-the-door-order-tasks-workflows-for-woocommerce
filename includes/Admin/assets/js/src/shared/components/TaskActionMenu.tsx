@@ -49,7 +49,7 @@ export const TaskActionMenu: React.FC<TaskActionMenuProps> = ({
 	const archiveTask = onArchive || globalArchiveTask;
 	const deleteTask = onDelete || globalDeleteTask;
 
-	const isCompleted = task.status === TASK_FINISH_STATUS_SLUG;
+	const isDone = task.status === TASK_FINISH_STATUS_SLUG;
 
 	const closeMenu = (e?: React.MouseEvent) => {
 		if (!isControlled) {
@@ -144,16 +144,16 @@ export const TaskActionMenu: React.FC<TaskActionMenuProps> = ({
 					<li>
 						<button
 							type="button"
-							className={`wpo-button task-finish-menu-item ${isCompleted ? 'finished' : ''}`}
+							className={`wpo-button task-finish-menu-item ${isDone ? 'finished' : ''}`}
 							onClick={
-								isCompleted
+								isDone
 									? handleUnfinishClick
 									: handleFinishClick
 							}
 						>
-							{isCompleted
+							{isDone
 								? __('Mark as In Progress', 'wpo-aom')
-								: __('Mark as Completed', 'wpo-aom')}
+								: __('Mark as Done', 'wpo-aom')}
 						</button>
 					</li>
 					<li>

@@ -235,8 +235,8 @@ final class Install {
 						'position' => 2,
 					),
 					array(
-						'label'    => 'Completed',
-						'slug'     => 'completed',
+						'label'    => 'Done',
+						'slug'     => 'done',
 						'color'    => '#28a745',
 						'position' => 3,
 					),
@@ -282,12 +282,12 @@ final class Install {
 				'is_editable'  => false,
 				'is_protected' => true,
 			),
-			// Completed date - used to store the date when a task is marked as completed (status changed to "Completed")
+			// Done date - used to store the date when a task is marked as done (status changed to "Done")
 			array(
 				'id'           => 6,
-				'label'        => 'Completed Date',
+				'label'        => 'Done Date',
 				'type'         => 'date',
-				'slug'         => 'completed_date',
+				'slug'         => 'done_date',
 				'is_required'  => false,
 				'is_editable'  => false,
 				'is_protected' => true,

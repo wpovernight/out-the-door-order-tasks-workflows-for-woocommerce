@@ -80,14 +80,14 @@ export const ArchiveContent: React.FC = () => {
 										/>
 									</th>
 									<th
-										className="task-completed-date th-sortable"
+										className="task-done-date th-sortable"
 										onClick={() =>
-											handleSort('completedDate')
+											handleSort('doneDate')
 										}
 									>
-										{__('Completed Date', 'wpo-aom')}{' '}
+										{__('Done', 'wpo-aom')}{' '}
 										<SortIcon
-											column="completedDate"
+											column="doneDate"
 											sortColumn={sortColumn}
 											sortDirection={sortDirection}
 										/>

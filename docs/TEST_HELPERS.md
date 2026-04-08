@@ -38,7 +38,7 @@ function create_sample_tasks( int $count = 15, bool $reset = true ): void {
 	$statuses = array(
 		$task_field_option_repository->find_by_slug( 'to_do' )->id,
 		$task_field_option_repository->find_by_slug( 'in_progress' )->id,
-		$task_field_option_repository->find_by_slug( 'completed' )->id,
+		$task_field_option_repository->find_by_slug( 'done' )->id,
 	);
 	$priorities = array(
 		$task_field_option_repository->find_by_slug( 'low' )->id,
@@ -128,7 +128,7 @@ function remove_sample_tasks(): void {
 
 Run the below code snippet to drop existing AOM tables and reinstall the database schema.
 
-```
+```php
 function reinstall_database_schema(): void {
 	// Remove tables if they exist.
 	global $wpdb;

@@ -27,7 +27,7 @@ export const TodayTasks = () => {
 		return d;
 	}, []);
 
-	const { todayActive, overdue, completed } = useMemo(() => {
+	const { todayActive, overdue, done } = useMemo(() => {
 		const active: Task[] = [];
 		const over: Task[] = [];
 		const done: Task[] = [];
@@ -43,14 +43,14 @@ export const TodayTasks = () => {
 				return;
 			}
 
-			const isCompleted = task.status === TASK_FINISH_STATUS_SLUG;
+			const isDone = task.status === TASK_FINISH_STATUS_SLUG;
 
-			if (isCompleted && dueDate >= todayStart && dueDate <= todayEnd) {
+			if (isDone && dueDate >= todayStart && dueDate <= todayEnd) {
 				done.push(task);
-			} else if (!isCompleted && dueDate < todayStart) {
+			} else if (!isDone && dueDate < todayStart) {
 				over.push(task);
 			} else if (
-				!isCompleted &&
+				!isDone &&
 				dueDate >= todayStart &&
 				dueDate <= todayEnd
 			) {
@@ -58,7 +58,7 @@ export const TodayTasks = () => {
 			}
 		});
 
-		return { todayActive: active, overdue: over, completed: done };
+		return { todayActive: active, overdue: over, done: done };
 	}, [tasks, todayStart, todayEnd]);
 
 	const handleAddTask = () => {

@@ -17,7 +17,7 @@ final class DefaultTaskFields {
 	public const CREATOR        = 3;
 	public const ORDER          = 4;
 	public const DUE_DATE       = 5;
-	public const COMPLETED_DATE = 6;
+	public const DONE_DATE      = 6;
 	public const ARCHIVED_DATE  = 7;
 
 	// User-editable default fields
@@ -35,7 +35,7 @@ final class DefaultTaskFields {
 			self::CREATOR,
 			self::ORDER,
 			self::DUE_DATE,
-			self::COMPLETED_DATE,
+			self::DONE_DATE,
 			self::ARCHIVED_DATE,
 			self::PRIORITY,
 		);
@@ -53,7 +53,7 @@ final class DefaultTaskFields {
 			self::CREATOR,
 			self::ORDER,
 			self::DUE_DATE,
-			self::COMPLETED_DATE,
+			self::DONE_DATE,
 			self::ARCHIVED_DATE,
 		);
 	}

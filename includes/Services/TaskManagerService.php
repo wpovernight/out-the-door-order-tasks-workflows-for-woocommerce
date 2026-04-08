@@ -782,7 +782,7 @@ final class TaskManagerService {
 	 *                                      If null, the task will be placed at the start.
 	 * @param string   $fallback_placement  The default position to use if no previous task is specified.
 	 * @param array    $extra_field_values  Additional field values to update when moving the task.
-	 *                                      Only should be used for internal operations like marking as completed, not for general uses.
+	 *                                      Only should be used for internal operations like marking as done, not for general uses.
 	 *
 	 * @return float
 	 * @throws Exception|\Throwable
@@ -850,20 +850,20 @@ final class TaskManagerService {
 			$target_status_id
 		);
 
-		// Update "completed_date" automatically, if moving to "completed" status and not already set.
+		// Update "done_date" automatically, if moving to "Done" status and not already set.
 		if (
-			$target_status_option_field->slug === 'completed' &&
-			! isset( $extra_field_values[ DefaultTaskFields::COMPLETED_DATE ] )
+			$target_status_option_field->slug === 'done' &&
+			! isset( $extra_field_values[ DefaultTaskFields::DONE_DATE ] )
 		) {
-			$extra_field_values[ DefaultTaskFields::COMPLETED_DATE ] = gmdate( 'Y-m-d H:i:s' );
+			$extra_field_values[ DefaultTaskFields::DONE_DATE ] = gmdate( 'Y-m-d H:i:s' );
 		}
 
-		// Clear "completed_date" if moving out of "completed" status and not already set to null.
+		// Clear "done_date" if moving out of "done" status and not already set to null.
 		if (
-			$target_status_option_field->slug !== 'completed' &&
-			! isset( $extra_field_values[ DefaultTaskFields::COMPLETED_DATE ] )
+			$target_status_option_field->slug !== 'done' &&
+			! isset( $extra_field_values[ DefaultTaskFields::DONE_DATE ] )
 		) {
-			$extra_field_values[ DefaultTaskFields::COMPLETED_DATE ] = null;
+			$extra_field_values[ DefaultTaskFields::DONE_DATE ] = null;
 		}
 
 		$update_data = array(
@@ -957,11 +957,11 @@ final class TaskManagerService {
 
 		$finished_status_option = $this->task_field_option_repository
 			->where( 'field_id', DefaultTaskFields::STATUS )
-			->where( 'slug', 'completed' )
+			->where( 'slug', 'done' )
 			->first();
 
 		if ( ! $finished_status_option ) {
-			throw new RuntimeException( 'Finished status option not found. Please ensure a "completed" status option exists.' );
+			throw new RuntimeException( 'Finished status option not found. Please ensure a "done" status option exists.' );
 		}
 
 		$result = $this->move_task( $task_id, $finished_status_option->id, null, 'last' );

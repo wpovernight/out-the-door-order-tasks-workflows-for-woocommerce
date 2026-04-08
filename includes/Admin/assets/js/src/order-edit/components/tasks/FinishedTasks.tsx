@@ -55,7 +55,7 @@ const FinishedTasks: React.FC = () => {
 				style={!isExpanded ? { display: 'none' } : {}}
 			>
 				<h4>
-					{__('Completed Tasks', 'wpo-aom')} ({finishedCount})
+					{__('Done Tasks', 'wpo-aom')} ({finishedCount})
 				</h4>
 				<ul className="task-list">
 					{finishedTasks.map((task) => (
@@ -82,8 +82,8 @@ const FinishedTasks: React.FC = () => {
 				type="button"
 			>
 				{isExpanded
-					? __('Hide Completed Tasks', 'wpo-aom')
-					: __('View Completed Tasks', 'wpo-aom')}{' '}
+					? __('Hide Done Tasks', 'wpo-aom')
+					: __('View Done Tasks', 'wpo-aom')}{' '}
 				({finishedCount})
 			</button>
 		</div>

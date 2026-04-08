@@ -20,7 +20,7 @@ interface TaskRowProps {
 
 const TaskRow: React.FC<TaskRowProps> = ({ task, onTaskClick }) => {
 	const dueDate = getTaskDateField(task, 'due_date');
-	const completedDate = getTaskDateField(task, 'completed_date');
+	const doneDate = getTaskDateField(task, 'done_date');
 	const { deleteTask, setTasks } = useTasks();
 	const { openEditTaskModal } = useTaskEdit();
 
@@ -118,11 +118,11 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onTaskClick }) => {
 				</time>
 			</td>
 
-			<td className="task-completed-date">
+			<td className="task-done-date">
 				<time
-					dateTime={completedDate ? completedDate.toISOString() : ''}
+					dateTime={doneDate ? doneDate.toISOString() : ''}
 				>
-					{completedDate ? formatDate(completedDate) : '-'}
+					{doneDate ? formatDate(doneDate) : '-'}
 				</time>
 			</td>
 

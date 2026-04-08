@@ -12,7 +12,7 @@ export type SortColumn =
 	| 'priority'
 	| 'status'
 	| 'dueDate'
-	| 'completedDate'
+	| 'doneDate'
 	| 'archivedDate'
 	| 'orderID'
 	| 'customerName';
@@ -95,11 +95,11 @@ export const useTaskSort = (
 				}
 
 				case 'dueDate':
-				case 'completedDate':
+				case 'doneDate':
 				case 'archivedDate': {
 					const fieldMap: Record<string, string> = {
 						dueDate: 'due_date',
-						completedDate: 'completed_date',
+						doneDate: 'done_date',
 						archivedDate: 'archived_date',
 					};
 

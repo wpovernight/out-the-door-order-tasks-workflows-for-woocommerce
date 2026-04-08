@@ -66,14 +66,14 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 					}
 				}
 
-				// Add task to the completed column if found.
+				// Add task to the "done" column if found.
 				if (taskToMove && updated[TASK_FINISH_STATUS_SLUG]) {
-					const completedTask: Task = {
+					const doneTask: Task = {
 						...taskToMove,
 						status: TASK_FINISH_STATUS_SLUG,
 					};
 
-					updated[TASK_FINISH_STATUS_SLUG].push(completedTask);
+					updated[TASK_FINISH_STATUS_SLUG].push(doneTask);
 				}
 
 				return updated;
