@@ -1,12 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { __ } from '@wordpress/i18n';
 import { DateRange } from '../context/ViewTaskContext';
 import { CalendarDay } from '../data';
 import CalendarGrid from './CalendarGrid';
 
 interface DateRangeSelectorProps {
-	currentDate: Date;
-	dateRange: DateRange;
 	pendingDateRange: DateRange;
 	calendarDays: CalendarDay[];
 	onDateClick: (date: Date) => void;
@@ -18,9 +16,30 @@ interface DateRangeSelectorProps {
 	monthName: string;
 }
 
+const formatDateForInput = (date: Date | null): string => {
+	if (!date) {
+		return '';
+	}
+	const year = date.getFullYear();
+	const month = String(date.getMonth() + 1).padStart(2, '0');
+	const day = String(date.getDate()).padStart(2, '0');
+	return `${year}-${month}-${day}`;
+};
+
+const isValidDateString = (value: string): boolean => {
+	if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+		return false;
+	}
+	const [year, month, day] = value.split('-').map(Number);
+	const date = new Date(year, month - 1, day);
+	return (
+		date.getFullYear() === year &&
+		date.getMonth() === month - 1 &&
+		date.getDate() === day
+	);
+};
+
 const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
-	currentDate,
-	dateRange,
 	pendingDateRange,
 	calendarDays,
 	onDateClick,
@@ -31,37 +50,37 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 	onApply,
 	monthName,
 }) => {
-	// Format date for input field (YYYY-MM-DD)
-	const formatDateForInput = (date: Date | null): string => {
-		if (!date) {
-			return '';
-		}
-		const year = date.getFullYear();
-		const month = String(date.getMonth() + 1).padStart(2, '0');
-		const day = String(date.getDate()).padStart(2, '0');
-		return `${year}-${month}-${day}`;
-	};
+	const [startText, setStartText] = useState(formatDateForInput(pendingDateRange.start));
+	const [endText, setEndText] = useState(formatDateForInput(pendingDateRange.end));
 
-	const parseDateInput = (value: string): Date => {
-		const [year, month, day] = value.split('-').map(Number);
-		return new Date(year, month - 1, day);
-	};
+	// Sync local text when pendingDateRange changes externally (e.g. calendar click)
+	useEffect(() => {
+		setStartText(formatDateForInput(pendingDateRange.start));
+	}, [pendingDateRange.start]);
+
+	useEffect(() => {
+		setEndText(formatDateForInput(pendingDateRange.end));
+	}, [pendingDateRange.end]);
 
 	const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const value = e.target.value;
-		if (value) {
-			onDateInputChange(parseDateInput(value), 'start');
-		} else {
+		setStartText(value);
+		if (!value) {
 			onDateInputChange(null, 'start');
+		} else if (isValidDateString(value)) {
+			const [year, month, day] = value.split('-').map(Number);
+			onDateInputChange(new Date(year, month - 1, day), 'start');
 		}
 	};
 
 	const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const value = e.target.value;
-		if (value) {
-			onDateInputChange(parseDateInput(value), 'end');
-		} else {
+		setEndText(value);
+		if (!value) {
 			onDateInputChange(null, 'end');
+		} else if (isValidDateString(value)) {
+			const [year, month, day] = value.split('-').map(Number);
+			onDateInputChange(new Date(year, month - 1, day), 'end');
 		}
 	};
 
@@ -85,9 +104,10 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 				</label>
 				<input
 					id="date-input-start"
-					type="date"
+					type="text"
+                    pattern="\d{4}-\d{2}-\d{2}"
 					className="date-input date-input-start"
-					value={formatDateForInput(pendingDateRange.start)}
+					value={startText}
 					onChange={handleStartDateChange}
 				/>
 				<span className="date-separator">-</span>
@@ -96,9 +116,10 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 				</label>
 				<input
 					id="date-input-end"
-					type="date"
-					className="date-input date-input-end"
-					value={formatDateForInput(pendingDateRange.end)}
+                    type="text"
+                    pattern="\d{4}-\d{2}-\d{2}"
+                    className="date-input date-input-end"
+					value={endText}
 					onChange={handleEndDateChange}
 				/>
 			</div>
