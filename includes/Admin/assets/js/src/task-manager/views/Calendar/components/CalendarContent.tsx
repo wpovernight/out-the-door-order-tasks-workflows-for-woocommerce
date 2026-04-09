@@ -117,8 +117,6 @@ export const CalendarContent: React.FC = () => {
 				/>
 
 				<DateRangeSelector
-					currentDate={currentDate}
-					dateRange={dateRange}
 					pendingDateRange={pendingDateRange}
 					calendarDays={calendarDays}
 					onDateClick={handleDateClick}
