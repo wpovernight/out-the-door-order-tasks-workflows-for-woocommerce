@@ -96,6 +96,14 @@ final class Screen {
 			$order_id = absint( wp_unslash( $_GET['id'] ) );
 		}
 
+		// Fallback: get from global $post (e.g. new order being created)
+		if ( 0 === $order_id ) {
+			global $post;
+			if ( $post instanceof \WP_Post && $post->ID > 0 ) {
+				$order_id = absint( $post->ID );
+			}
+		}
+
 		// Verify it's a valid order
 		if ( $order_id > 0 ) {
 			$order = wc_get_order( $order_id );
