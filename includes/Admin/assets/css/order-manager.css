@@ -1,6 +1,7 @@
 body.woocommerce_page_wpo_aom_order_manager #wpcontent {
     background-color: #fff;
     padding-left: 0;
+    font-family: Inter;
 }
 
 #wpo-aom-order-manager h1 {
