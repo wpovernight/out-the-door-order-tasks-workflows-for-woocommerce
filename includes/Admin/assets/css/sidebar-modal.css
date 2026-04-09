@@ -107,30 +107,30 @@
     padding: 2em;
 }
 
-.field-group {
+.wpo-aom-task-form .field-group {
     display: flex;
     padding: 0 2em;
     gap: 0.5em;
 }
 
-.field-group input,
-.field-group select,
-.field-group textarea {
+.wpo-aom-task-form .field-group input,
+.wpo-aom-task-form .field-group select,
+.wpo-aom-task-form .field-group textarea {
     font-size: inherit;
     border-color: var(--wpo-aom-border-color);
     border-radius: var(--wpo-aom-radius-m);
     padding: 0.63em 0.8em;
 }
 
-.field-group input:focus,
-.field-group select:focus,
-.field-group textarea:focus {
+.wpo-aom-task-form .field-group input:focus,
+.wpo-aom-task-form .field-group select:focus,
+.wpo-aom-task-form .field-group textarea:focus {
     border-color: var(--wpo-aom-wp-blue);
     box-shadow: 0 0 0 1px var(--wpo-aom-wp-blue);
     outline: 2px solid transparent;
 }
 
-.field-group > * {
+.wpo-aom-task-form .field-group > * {
     width: 100%;
     display: flex;
     flex-direction: column;
