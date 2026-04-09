@@ -153,6 +153,8 @@
 .task-card .task-card-description > p {
     font-size: 1em;
     color: var(--wpo-aom-text-gray);
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 .task-card ul.task-card-tags {
@@ -228,6 +230,15 @@
     display: flex;
     gap: 0.3em;
     margin-left: auto;
+}
+
+.task-card .task-card-header-info .task-card-options {
+    display: flex;
+    align-items: center;
+}
+
+.task-card .task-card-header-info .task-card-options > button {
+    height: auto;
 }
 
 .task-card .task-finish-checkbox > input {

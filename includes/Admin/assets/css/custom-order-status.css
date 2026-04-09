@@ -201,6 +201,7 @@ div#color-field {
 
 #preview-field .status-preview {
     min-width: 8em;
+    margin: 0.35em 0;
 }
 
 .deleting-row {
