@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { __ } from '@wordpress/i18n';
 import { Task } from '@shared/types/task';
 import { TaskCard } from '@shared/components/TaskCard';
@@ -8,6 +8,11 @@ import { useTaskEdit, useTaskCreation } from '@shared/hooks/useTaskFormModal';
 import { EmptyState, ErrorState } from '@shared/components/LoadingSkeleton';
 import { TaskCardSkeleton } from '@shared/components/TaskCardSkeleton';
 import { useTasks } from '@shared/context/TaskContext';
+
+interface ArchivedEntry {
+	task: Task;
+	index: number;
+}
 
 const ARCHIVE_OVERLAY_DURATION = 5000;
 
@@ -24,9 +29,9 @@ const ActiveTasks: React.FC = () => {
 	const { archiveTask, unarchiveTask } = useTasks();
 
 	// Track recently archived tasks to show overlay before removing
-	const [recentlyArchived, setRecentlyArchived] = useState<Map<number, Task>>(
-		new Map()
-	);
+	const [recentlyArchived, setRecentlyArchived] = useState<
+		Map<number, ArchivedEntry>
+	>(new Map());
 	const [fadingOut, setFadingOut] = useState<Set<number>>(new Set());
 	const timersRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(
 		new Map()
@@ -53,13 +58,16 @@ const ActiveTasks: React.FC = () => {
 
 	const handleArchiveClick = useCallback(
 		async (taskId: number): Promise<boolean> => {
-			const task = activeTasks.find((t) => t.id === taskId);
-			if (!task) {
+			const index = activeTasks.findIndex((t) => t.id === taskId);
+			if (index === -1) {
 				return false;
 			}
+			const task = activeTasks[index];
 
-			// Snapshot the task for the overlay, then call the API immediately
-			setRecentlyArchived((prev) => new Map(prev).set(taskId, task));
+			// Snapshot the task and its position for the overlay
+			setRecentlyArchived((prev) =>
+				new Map(prev).set(taskId, { task, index })
+			);
 
 			const result = await archiveTask(taskId);
 
@@ -138,6 +146,30 @@ const ActiveTasks: React.FC = () => {
 		}
 	};
 
+	// Merge active tasks with recently archived snapshots at their original positions
+	const visibleTasks = useMemo(() => {
+		type VisibleItem =
+			| { type: 'active'; task: Task }
+			| { type: 'archived'; task: Task };
+
+		const result: VisibleItem[] = activeTasks.map((task) => ({
+			type: 'active' as const,
+			task,
+		}));
+
+		// Insert archived snapshots at their original positions
+		const sorted = Array.from(recentlyArchived.entries()).sort(
+			([, a], [, b]) => a.index - b.index
+		);
+
+		for (const [, { task, index }] of sorted) {
+			const insertAt = Math.min(index, result.length);
+			result.splice(insertAt, 0, { type: 'archived', task });
+		}
+
+		return result;
+	}, [activeTasks, recentlyArchived]);
+
 	// Show loading state
 	if (loadingStatus === 'loading') {
 		return <TaskCardSkeleton count={1} showDescription={true} />;
@@ -156,7 +188,7 @@ const ActiveTasks: React.FC = () => {
 		);
 	}
 
-	const hasVisibleTasks = activeTasks.length > 0 || recentlyArchived.size > 0;
+	const hasVisibleTasks = visibleTasks.length > 0;
 
 	// Show empty state only after data is loaded
 	if (loadingStatus === 'loaded' && !hasVisibleTasks) {
@@ -173,13 +205,56 @@ const ActiveTasks: React.FC = () => {
 		<div className="task-list-container active-tasks-container">
 			<h4 className="screenReader">{__('Active Tasks', 'wpo-aom')}</h4>
 			<ul className="task-list">
-				{activeTasks
-					.filter((task) => !recentlyArchived.has(task.id))
-					.map((task) => (
-						<li key={task.id}>
+				{visibleTasks.map((item) => {
+					if (item.type === 'archived') {
+						const taskId = item.task.id;
+						return (
+							<li
+								key={taskId}
+								className={`task-archived-item${fadingOut.has(taskId) ? ' task-archived-fadeout' : ''}`}
+							>
+								<TaskCard
+									task={item.task}
+									headingLevel="h5"
+									showDescription={true}
+									descriptionMaxLength={150}
+									showOrder={false}
+									IncludedActions={[]}
+								/>
+								<div className="task-archived-overlay">
+									<div className="task-archived-overlay-content">
+										<span className="task-archived-message">
+											{__(
+												'You archived this task',
+												'wpo-aom'
+											)}
+										</span>
+										<a
+											href={archivePageUrl}
+											className="task-archived-link"
+										>
+											{__('Go to archive', 'wpo-aom')}
+											{' \u2192'}
+										</a>
+									</div>
+									<button
+										type="button"
+										className="wpo-button task-archived-undo"
+										onClick={() =>
+											handleUndoArchive(taskId)
+										}
+									>
+										{__('Undo', 'wpo-aom')}
+									</button>
+								</div>
+							</li>
+						);
+					}
+
+					return (
+						<li key={item.task.id}>
 							<TaskCard
-								key={task.id}
-								task={task}
+								task={item.task}
 								onEditClick={handleEditClick}
 								onDeleteClick={handleDeleteClick}
 								onArchiveClick={handleArchiveClick}
@@ -189,48 +264,8 @@ const ActiveTasks: React.FC = () => {
 								showOrder={false}
 							/>
 						</li>
-					))}
-				{Array.from(recentlyArchived.entries()).map(
-					([taskId, task]) => (
-						<li
-							key={`archived-${taskId}`}
-							className={`task-archived-item${fadingOut.has(taskId) ? ' task-archived-fadeout' : ''}`}
-						>
-							<TaskCard
-								task={task}
-								headingLevel="h5"
-								showDescription={true}
-								descriptionMaxLength={150}
-								showOrder={false}
-								IncludedActions={[]}
-							/>
-							<div className="task-archived-overlay">
-								<div className="task-archived-overlay-content">
-									<span className="task-archived-message">
-										{__(
-											'You archived this task',
-											'wpo-aom'
-										)}
-									</span>
-									<a
-										href={archivePageUrl}
-										className="task-archived-link"
-									>
-										{__('Go to archive', 'wpo-aom')}
-										{' \u2192'}
-									</a>
-								</div>
-								<button
-									type="button"
-									className="wpo-button task-archived-undo"
-									onClick={() => handleUndoArchive(taskId)}
-								>
-									{__('Undo', 'wpo-aom')}
-								</button>
-							</div>
-						</li>
-					)
-				)}
+					);
+				})}
 			</ul>
 		</div>
 	);
