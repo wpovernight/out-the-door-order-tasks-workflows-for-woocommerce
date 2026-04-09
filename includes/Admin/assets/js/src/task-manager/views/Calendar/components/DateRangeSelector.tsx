@@ -20,23 +20,39 @@ const formatDateForInput = (date: Date | null): string => {
 	if (!date) {
 		return '';
 	}
-	const year = date.getFullYear();
-	const month = String(date.getMonth() + 1).padStart(2, '0');
 	const day = String(date.getDate()).padStart(2, '0');
-	return `${year}-${month}-${day}`;
+	const month = String(date.getMonth() + 1).padStart(2, '0');
+	const year = date.getFullYear();
+	return `${day}/${month}/${year}`;
+};
+
+const isSameDate = (a: Date | null, b: Date | null): boolean => {
+	if (!a || !b) {
+		return false;
+	}
+	return (
+		a.getFullYear() === b.getFullYear() &&
+		a.getMonth() === b.getMonth() &&
+		a.getDate() === b.getDate()
+	);
 };
 
 const isValidDateString = (value: string): boolean => {
-	if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+	if (!/^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
 		return false;
 	}
-	const [year, month, day] = value.split('-').map(Number);
+	const [day, month, year] = value.split('/').map(Number);
 	const date = new Date(year, month - 1, day);
 	return (
 		date.getFullYear() === year &&
 		date.getMonth() === month - 1 &&
 		date.getDate() === day
 	);
+};
+
+const parseDateInput = (value: string): Date => {
+	const [day, month, year] = value.split('/').map(Number);
+	return new Date(year, month - 1, day);
 };
 
 const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
@@ -50,8 +66,17 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 	onApply,
 	monthName,
 }) => {
-	const [startText, setStartText] = useState(formatDateForInput(pendingDateRange.start));
-	const [endText, setEndText] = useState(formatDateForInput(pendingDateRange.end));
+	const [startText, setStartText] = useState(
+		formatDateForInput(pendingDateRange.start)
+	);
+	const [endText, setEndText] = useState(
+		formatDateForInput(pendingDateRange.end)
+	);
+
+	const isRange =
+		pendingDateRange.start &&
+		pendingDateRange.end &&
+		!isSameDate(pendingDateRange.start, pendingDateRange.end);
 
 	// Sync local text when pendingDateRange changes externally (e.g. calendar click)
 	useEffect(() => {
@@ -68,8 +93,7 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 		if (!value) {
 			onDateInputChange(null, 'start');
 		} else if (isValidDateString(value)) {
-			const [year, month, day] = value.split('-').map(Number);
-			onDateInputChange(new Date(year, month - 1, day), 'start');
+			onDateInputChange(parseDateInput(value), 'start');
 		}
 	};
 
@@ -79,8 +103,7 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 		if (!value) {
 			onDateInputChange(null, 'end');
 		} else if (isValidDateString(value)) {
-			const [year, month, day] = value.split('-').map(Number);
-			onDateInputChange(new Date(year, month - 1, day), 'end');
+			onDateInputChange(parseDateInput(value), 'end');
 		}
 	};
 
@@ -99,29 +122,56 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 			</div>
 
 			<div className="date-range-inputs">
-				<label htmlFor="date-input-start" className="screenReader">
-					{__('From', 'wpo-aom')}
-				</label>
-				<input
-					id="date-input-start"
-					type="text"
-                    pattern="\d{4}-\d{2}-\d{2}"
-					className="date-input date-input-start"
-					value={startText}
-					onChange={handleStartDateChange}
-				/>
-				<span className="date-separator">-</span>
-				<label htmlFor="date-input-end" className="screenReader">
-					{__('To', 'wpo-aom')}
-				</label>
-				<input
-					id="date-input-end"
-                    type="text"
-                    pattern="\d{4}-\d{2}-\d{2}"
-                    className="date-input date-input-end"
-					value={endText}
-					onChange={handleEndDateChange}
-				/>
+				{isRange ? (
+					<>
+						<label
+							htmlFor="date-input-start"
+							className="screenReader"
+						>
+							{__('From', 'wpo-aom')}
+						</label>
+						<input
+							id="date-input-start"
+							type="text"
+							pattern="\d{2}/\d{2}/\d{4}"
+							className="date-input date-input-start"
+							value={startText}
+							onChange={handleStartDateChange}
+						/>
+						<span className="date-separator">-</span>
+						<label
+							htmlFor="date-input-end"
+							className="screenReader"
+						>
+							{__('To', 'wpo-aom')}
+						</label>
+						<input
+							id="date-input-end"
+							type="text"
+							pattern="\d{2}/\d{2}/\d{4}"
+							className="date-input date-input-end"
+							value={endText}
+							onChange={handleEndDateChange}
+						/>
+					</>
+				) : (
+					<>
+						<label
+							htmlFor="date-input-single"
+							className="screenReader"
+						>
+							{__('Select Date', 'wpo-aom')}
+						</label>
+						<input
+							id="date-input-single"
+							type="text"
+							pattern="\d{2}/\d{2}/\d{4}"
+							className="date-input date-input-single"
+							value={startText}
+							onChange={handleStartDateChange}
+						/>
+					</>
+				)}
 			</div>
 
 			<CalendarGrid days={calendarDays} onDayClick={onDateClick} />
