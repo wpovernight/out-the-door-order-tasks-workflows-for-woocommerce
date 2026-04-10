@@ -2,6 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { MetaBox } from './components/Metabox';
 import { SidebarModalProvider } from '@shared/context/SidebarModalContext';
+import { DialogProvider } from '@shared/context/DialogContext';
 import { TaskProvider } from '@shared/context/TaskContext';
 import { OrderTaskProvider } from './context/OrderTaskContext';
 import { OrderWooFulfillmentProvider } from './context/OrderWooFulfillmentContext';
@@ -16,9 +17,11 @@ if (container) {
 		<TaskProvider>
 			<OrderTaskProvider orderId={orderId}>
 				<OrderWooFulfillmentProvider orderId={orderId}>
-					<SidebarModalProvider>
-						<MetaBox />
-					</SidebarModalProvider>
+					<DialogProvider>
+						<SidebarModalProvider>
+							<MetaBox />
+						</SidebarModalProvider>
+					</DialogProvider>
 				</OrderWooFulfillmentProvider>
 			</OrderTaskProvider>
 		</TaskProvider>

@@ -4,6 +4,7 @@ import { HashRouter } from 'react-router-dom';
 import { TabProvider } from '@orderManager/context/TabContext';
 import Page from '@orderManager/components/Page';
 import { TaskProvider } from '@shared/context/TaskContext';
+import { DialogProvider } from '@shared/context/DialogContext';
 
 const container = document.getElementById('wpo-aom-order-manager');
 
@@ -22,7 +23,9 @@ if (container) {
 				 at this level for now.
 				  */}
 				<TaskProvider>
-					<Page />
+					<DialogProvider>
+						<Page />
+					</DialogProvider>
 				</TaskProvider>
 			</TabProvider>
 		</HashRouter>
