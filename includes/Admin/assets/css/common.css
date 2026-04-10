@@ -476,6 +476,7 @@
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
+    margin-bottom: 1em; /* total space of gap + margin-bottom should be ~20px */
 }
 
 .wpo-aom-dialog.tone-danger .dialog-content::before {
