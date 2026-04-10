@@ -14,6 +14,7 @@ import {
 	SkeletonLine,
 } from '@shared/components/LoadingSkeleton';
 import { StatusTable } from './components/StatusTable';
+import { useConfirm } from '@shared/context/DialogContext';
 
 export const CustomOrderStatusView = () => {
 	const [statuses, setStatuses] = useState<CustomOrderStatus[]>([]);
@@ -21,6 +22,7 @@ export const CustomOrderStatusView = () => {
 	const [isCreating, setIsCreating] = useState(false);
 	const [isSaving, setIsSaving] = useState(false);
 	const [deletingId, setDeletingId] = useState<number | null>(null);
+	const confirm = useConfirm();
 
 	const { loadingStatus, loadingError } = useAsyncLoader(async () => {
 		const data = await fetchCustomOrderStatuses();
@@ -57,16 +59,21 @@ export const CustomOrderStatusView = () => {
 	};
 
 	const handleDelete = async (id: number) => {
-		if (
-			!window.confirm(
-				__(
-					'Are you sure? Orders with this status will be moved to On Hold.',
-					'wpo-aom'
-				)
-			)
-		) {
+		const confirmationResult = await confirm({
+			title: __('Delete this status?', 'wpo-aom'),
+			message: __(
+				'Are you sure you want to delete this status? Orders with this status will be moved to On Hold.',
+				'wpo-aom'
+			),
+			confirmText: __('Delete', 'wpo-aom'),
+			cancelText: __('Cancel', 'wpo-aom'),
+			tone: 'danger',
+		});
+
+		if (!confirmationResult) {
 			return;
 		}
+
 		setDeletingId(id);
 		try {
 			await deleteCustomOrderStatus(id);

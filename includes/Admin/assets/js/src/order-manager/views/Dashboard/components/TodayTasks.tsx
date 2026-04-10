@@ -7,6 +7,7 @@ import { useScrollable } from '@shared/hooks/useScrollable';
 import { getTaskDateField, isTaskArchived } from '@shared/utils/fieldUtils';
 import { TASK_FINISH_STATUS_SLUG, Task } from '@shared/types/task';
 import { EmptyState } from '@shared/components/LoadingSkeleton';
+import { useConfirm } from '@shared/context/DialogContext';
 
 export const TodayTasks = () => {
 	const { tasks, deleteTask } = useTasks();
@@ -14,6 +15,7 @@ export const TodayTasks = () => {
 	const { openEditTaskModal } = useTaskEdit();
 	const [overdueExpanded, setOverdueExpanded] = useState(true);
 	const contentRef = useScrollable<HTMLDivElement>();
+	const confirm = useConfirm();
 
 	const todayStart = useMemo(() => {
 		const d = new Date();
@@ -83,8 +85,18 @@ export const TodayTasks = () => {
 	};
 
 	const handleDeleteClick = async (taskId: number) => {
-		// eslint-disable-next-line no-alert
-		if (!window.confirm(__('Are you sure?', 'wpo-aom'))) {
+		const confirmationResult = await confirm({
+			title: __('Delete this task?', 'wpo-aom'),
+			message: __(
+				'Are you sure you want to delete this task?',
+				'wpo-aom'
+			),
+			confirmText: __('Delete', 'wpo-aom'),
+			cancelText: __('Cancel', 'wpo-aom'),
+			tone: 'danger',
+		});
+
+		if (!confirmationResult) {
 			return;
 		}
 
