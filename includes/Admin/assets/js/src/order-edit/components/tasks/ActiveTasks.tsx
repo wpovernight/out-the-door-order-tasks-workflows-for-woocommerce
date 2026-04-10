@@ -8,6 +8,7 @@ import { useTaskEdit, useTaskCreation } from '@shared/hooks/useTaskFormModal';
 import { EmptyState, ErrorState } from '@shared/components/LoadingSkeleton';
 import { TaskCardSkeleton } from '@shared/components/TaskCardSkeleton';
 import { useTasks } from '@shared/context/TaskContext';
+import { useConfirm } from '@shared/context/DialogContext';
 
 interface ArchivedEntry {
 	task: Task;
@@ -27,6 +28,7 @@ const ActiveTasks: React.FC = () => {
 	const { archivePageUrl } = useOrderEditData();
 	const { openEditTaskModal } = useTaskEdit();
 	const { archiveTask, unarchiveTask } = useTasks();
+	const confirm = useConfirm();
 
 	// Track recently archived tasks to show overlay before removing
 	const [recentlyArchived, setRecentlyArchived] = useState<
@@ -133,9 +135,18 @@ const ActiveTasks: React.FC = () => {
 	};
 
 	const handleDeleteClick = async (taskId: number) => {
-		// ToDo: Update to use custom modal
-		// eslint-disable-next-line no-alert
-		if (!window.confirm(__('Are you sure?', 'wpo-aom'))) {
+		const confirmationResult = await confirm({
+			title: __('Delete this task?', 'wpo-aom'),
+			message: __(
+				'Are you sure you want to delete this task?',
+				'wpo-aom'
+			),
+			confirmText: __('Delete', 'wpo-aom'),
+			cancelText: __('Cancel', 'wpo-aom'),
+			tone: 'danger',
+		});
+
+		if (!confirmationResult) {
 			return;
 		}
 

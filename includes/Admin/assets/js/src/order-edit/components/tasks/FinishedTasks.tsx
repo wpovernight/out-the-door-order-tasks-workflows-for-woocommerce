@@ -3,12 +3,15 @@ import { __ } from '@wordpress/i18n';
 import { TaskCard } from '@shared/components/TaskCard';
 import { useOrderTask } from '@orderEdit/context/OrderTaskContext';
 import { useTaskEdit } from '@shared/hooks/useTaskFormModal';
+import { useConfirm, useNotice } from '@shared/context/DialogContext';
 
 const FinishedTasks: React.FC = () => {
 	const { finishedTasks, finishedCount, deleteTask, loadingStatus } =
 		useOrderTask();
 	const { openEditTaskModal } = useTaskEdit();
 	const [isExpanded, setIsExpanded] = useState(false);
+	const confirm = useConfirm();
+	const notice = useNotice();
 
 	const handleEditClick = (taskId: number) => {
 		const task = finishedTasks.find((t) => t.id === taskId);
@@ -23,18 +26,32 @@ const FinishedTasks: React.FC = () => {
 	};
 
 	const handleDeleteClick = async (taskId: number) => {
-		// ToDo: Update to use custom modal
-		// eslint-disable-next-line no-alert
-		if (!window.confirm(__('Are you sure?', 'wpo-aom'))) {
+		const confirmationResult = await confirm({
+			title: __('Delete this task?', 'wpo-aom'),
+			message: __(
+				'Are you sure you want to delete this task?',
+				'wpo-aom'
+			),
+			confirmText: __('Delete', 'wpo-aom'),
+			cancelText: __('Cancel', 'wpo-aom'),
+			tone: 'danger',
+		});
+
+		if (!confirmationResult) {
 			return;
 		}
 
 		try {
 			await deleteTask(taskId);
-		} catch (error) {
-			console.error('Failed to delete task:', error);
-			// eslint-disable-next-line no-alert
-			alert(__('Failed to delete task. Please try again.', 'wpo-aom'));
+		} catch {
+			await notice({
+				title: __('Delete failed', 'wpo-aom'),
+				message: __(
+					'Failed to delete task. Please try again.',
+					'wpo-aom'
+				),
+				tone: 'danger',
+			});
 		}
 	};
 
