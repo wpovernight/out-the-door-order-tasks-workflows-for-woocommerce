@@ -17,10 +17,8 @@ import { useTaskEdit } from '@shared/hooks/useTaskFormModal';
 import { __ } from '@wordpress/i18n';
 import { TaskCard } from '@shared/components/TaskCard';
 import { useTasks } from '@shared/context/TaskContext';
+import { useConfirm } from '@shared/context/DialogContext';
 
-// ------------------------------
-// Visual state
-// ------------------------------
 type CardState =
 	| { type: 'idle' } // Indicates no drag interaction occurring
 	| { type: 'dragging' } // Indicates the card itself is being dragged
@@ -28,10 +26,6 @@ type CardState =
 	| { type: 'dropped' }; // Indicates a card has just been dropped on this card
 
 const IDLE: CardState = { type: 'idle' };
-
-// ------------------------------
-// Component
-// ------------------------------
 
 interface CardProps {
 	task: Task;
@@ -46,6 +40,7 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 	const { selectedTask, selectTask, setViewTasks, finishTask, unfinishTask } =
 		useViewTasks();
 	const { openEditTaskModal } = useTaskEdit();
+	const confirm = useConfirm();
 
 	const taskRef = useRef(task);
 	useEffect(() => {
@@ -200,10 +195,19 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 		handleEditTask();
 	};
 
-	const handleDeleteClick = () => {
-		// ToDo: Update to use custom modal
-		// eslint-disable-next-line no-alert
-		if (!window.confirm(__('Are you sure?', 'wpo-aom'))) {
+	const handleDeleteClick = async () => {
+		const confirmationResult = await confirm({
+			title: __('Delete this task?', 'wpo-aom'),
+			message: __(
+				'Are you sure you want to delete this task?',
+				'wpo-aom'
+			),
+			confirmText: __('Delete', 'wpo-aom'),
+			cancelText: __('Cancel', 'wpo-aom'),
+			tone: 'danger',
+		});
+
+		if (!confirmationResult) {
 			return;
 		}
 

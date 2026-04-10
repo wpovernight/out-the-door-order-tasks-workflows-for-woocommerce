@@ -10,12 +10,15 @@ import { useTasks } from '@shared/context/TaskContext';
 import { truncateText } from '@shared/utils/textUtils';
 import { formatDate } from '@taskManager/views/Calendar/utils';
 import { __ } from '@wordpress/i18n';
+import { useConfirm } from '@shared/context/DialogContext';
 
 interface TaskRowProps {
 	task: Task;
 }
 
 const TaskRow: React.FC<TaskRowProps> = ({ task }) => {
+	const confirm = useConfirm();
+
 	const doneDate = getTaskDateField(task, 'done_date');
 	const archivedDate = getTaskDateField(task, 'archived_date');
 
@@ -34,12 +37,24 @@ const TaskRow: React.FC<TaskRowProps> = ({ task }) => {
 
 	const { deleteTask, setTasks, unarchiveTask } = useTasks();
 
-	const handleDelete = (taskId: number) => {
-		// eslint-disable-next-line no-alert
-		if (window.confirm(__('Are you sure?', 'wpo-aom'))) {
-			deleteTask(taskId);
-			setTasks((prevTasks) => prevTasks.filter((t) => t.id !== taskId));
+	const handleDelete = async (taskId: number) => {
+		const confirmationResult = await confirm({
+			title: __('Delete this task?', 'wpo-aom'),
+			message: __(
+				'Are you sure you want to delete this task?',
+				'wpo-aom'
+			),
+			confirmText: __('Delete', 'wpo-aom'),
+			cancelText: __('Cancel', 'wpo-aom'),
+			tone: 'danger',
+		});
+
+		if (!confirmationResult) {
+			return;
 		}
+
+		deleteTask(taskId);
+		setTasks((prevTasks) => prevTasks.filter((t) => t.id !== taskId));
 	};
 
 	const renderAssociatedOrder = () => {
