@@ -13,6 +13,7 @@ export interface DialogOptions {
 	action?: DialogAction;
 	confirmText?: string;
 	cancelText?: string;
+	invertActions?: boolean;
 }
 
 interface DialogState extends DialogOptions {
@@ -78,6 +79,7 @@ export const DialogProvider: React.FC<{ children: React.ReactNode }> = ({
 					action={state.action}
 					confirmText={state.confirmText}
 					cancelText={state.cancelText}
+					invertActions={state.invertActions}
 					onConfirm={() => resolveWith(true)}
 					onClose={() => resolveWith(false)}
 				/>

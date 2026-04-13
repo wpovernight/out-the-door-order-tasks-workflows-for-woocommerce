@@ -59,6 +59,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 			confirmText: __('Discard', 'wpo-aom'),
 			cancelText: __('Keep editing', 'wpo-aom'),
 			action: 'save',
+			invertActions: true,
 		});
 	}, [confirm]);
 

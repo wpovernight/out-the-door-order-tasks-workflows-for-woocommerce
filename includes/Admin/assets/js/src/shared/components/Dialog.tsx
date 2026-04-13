@@ -10,6 +10,7 @@ interface DialogProps {
 	action?: DialogAction;
 	confirmText?: string;
 	cancelText?: string;
+	invertActions?: boolean;
 	onConfirm?: () => void;
 	onClose: () => void;
 }
@@ -21,6 +22,7 @@ export const Dialog: React.FC<DialogProps> = ({
 	action = 'info',
 	confirmText = 'OK',
 	cancelText = 'Cancel',
+	invertActions = false,
 	onConfirm,
 	onClose,
 }) => {
@@ -80,9 +82,9 @@ export const Dialog: React.FC<DialogProps> = ({
 						<button
 							type="button"
 							className="wpo-button"
-							onClick={onClose}
+							onClick={invertActions ? handleConfirm : onClose}
 						>
-							{cancelText}
+							{invertActions ? confirmText : cancelText}
 						</button>
 					</li>
 				)}
@@ -90,9 +92,9 @@ export const Dialog: React.FC<DialogProps> = ({
 					<button
 						type="button"
 						className="wpo-button wpo-button-primary"
-						onClick={handleConfirm}
+						onClick={invertActions ? onClose : handleConfirm}
 					>
-						{confirmText}
+						{invertActions ? cancelText : confirmText}
 					</button>
 				</li>
 			</ul>
