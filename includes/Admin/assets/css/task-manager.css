@@ -489,10 +489,6 @@
     flex: 1;
 }
 
-.calendar-task-table-wrapper {
-    overflow: hidden;
-}
-
 .calendar-task-table-wrapper > table {
     width: 100%;
     border-collapse: collapse;
@@ -586,6 +582,12 @@
 
 .calendar-task-table-wrapper > table > tbody > tr > td.task-actions > div {
     text-align: center;
+    position: relative;
+}
+
+.calendar-task-table-wrapper > table > tbody > tr > td.task-actions > div > .wpo-action-menu {
+    top: 2em;
+    right: 1em;
 }
 
 .calendar-task-table-wrapper > table > tbody > tr > td.task-due-date {
@@ -660,7 +662,6 @@
     border: 1px solid var(--wpo-aom-border-light);
     border-radius: var(--wpo-aom-radius-l);
     margin-bottom: 1.5em;
-    overflow: hidden;
     margin-left: 2.3em;
 }
 
