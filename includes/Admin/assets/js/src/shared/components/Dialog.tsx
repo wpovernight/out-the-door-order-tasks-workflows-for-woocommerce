@@ -5,7 +5,7 @@ export type DialogAction = 'info' | 'delete' | 'archive' | 'restore' | 'save';
 
 interface DialogProps {
 	title: string;
-	message: string;
+	message: React.ReactNode;
 	variant?: DialogVariant;
 	action?: DialogAction;
 	confirmText?: string;

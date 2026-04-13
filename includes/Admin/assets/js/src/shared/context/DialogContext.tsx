@@ -9,7 +9,7 @@ import { Dialog, DialogAction, DialogVariant } from '@shared/components/Dialog';
 
 export interface DialogOptions {
 	title: string;
-	message: string;
+	message: React.ReactNode;
 	action?: DialogAction;
 	confirmText?: string;
 	cancelText?: string;
