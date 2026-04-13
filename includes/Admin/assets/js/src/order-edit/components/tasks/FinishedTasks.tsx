@@ -34,7 +34,7 @@ const FinishedTasks: React.FC = () => {
 			),
 			confirmText: __('Delete', 'wpo-aom'),
 			cancelText: __('Cancel', 'wpo-aom'),
-			tone: 'danger',
+			action: 'delete',
 		});
 
 		if (!confirmationResult) {
@@ -50,7 +50,7 @@ const FinishedTasks: React.FC = () => {
 					'Failed to delete task. Please try again.',
 					'wpo-aom'
 				),
-				tone: 'danger',
+				action: 'delete',
 			});
 		}
 	};

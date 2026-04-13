@@ -66,7 +66,7 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onTaskClick }) => {
 			),
 			confirmText: __('Delete', 'wpo-aom'),
 			cancelText: __('Cancel', 'wpo-aom'),
-			tone: 'danger',
+			action: 'delete',
 		});
 
 		if (!confirmationResult) {

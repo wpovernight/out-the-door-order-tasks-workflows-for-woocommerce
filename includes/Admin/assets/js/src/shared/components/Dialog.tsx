@@ -1,13 +1,13 @@
 import React, { useEffect, useRef } from 'react';
 
 export type DialogVariant = 'confirm' | 'notice';
-export type DialogTone = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
+export type DialogAction = 'info' | 'delete' | 'archive' | 'restore' | 'save';
 
 interface DialogProps {
 	title: string;
 	message: string;
 	variant?: DialogVariant;
-	tone?: DialogTone;
+	action?: DialogAction;
 	confirmText?: string;
 	cancelText?: string;
 	onConfirm?: () => void;
@@ -18,7 +18,7 @@ export const Dialog: React.FC<DialogProps> = ({
 	title,
 	message,
 	variant = 'confirm',
-	tone = 'neutral',
+	action = 'info',
 	confirmText = 'OK',
 	cancelText = 'Cancel',
 	onConfirm,
@@ -66,7 +66,7 @@ export const Dialog: React.FC<DialogProps> = ({
 	return (
 		<dialog
 			ref={dialogRef}
-			className={`wpo-aom-dialog dialog-${variant} tone-${tone}`}
+			className={`wpo-aom-dialog dialog-${variant} action-${action}`}
 			onClose={onClose}
 			onClick={handleBackdropClick}
 		>

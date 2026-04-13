@@ -67,7 +67,7 @@ export const CustomOrderStatusView = () => {
 			),
 			confirmText: __('Delete', 'wpo-aom'),
 			cancelText: __('Cancel', 'wpo-aom'),
-			tone: 'danger',
+			action: 'delete',
 		});
 
 		if (!confirmationResult) {

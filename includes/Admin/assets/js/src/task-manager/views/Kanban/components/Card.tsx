@@ -204,7 +204,7 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 			),
 			confirmText: __('Delete', 'wpo-aom'),
 			cancelText: __('Cancel', 'wpo-aom'),
-			tone: 'danger',
+			action: 'delete',
 		});
 
 		if (!confirmationResult) {

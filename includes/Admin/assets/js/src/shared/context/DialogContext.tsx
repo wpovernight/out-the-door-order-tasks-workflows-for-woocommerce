@@ -5,12 +5,12 @@ import React, {
 	useRef,
 	useState,
 } from 'react';
-import { Dialog, DialogTone, DialogVariant } from '@shared/components/Dialog';
+import { Dialog, DialogAction, DialogVariant } from '@shared/components/Dialog';
 
 export interface DialogOptions {
 	title: string;
 	message: string;
-	tone?: DialogTone;
+	action?: DialogAction;
 	confirmText?: string;
 	cancelText?: string;
 }
@@ -75,7 +75,7 @@ export const DialogProvider: React.FC<{ children: React.ReactNode }> = ({
 					title={state.title}
 					message={state.message}
 					variant={state.variant}
-					tone={state.tone}
+					action={state.action}
 					confirmText={state.confirmText}
 					cancelText={state.cancelText}
 					onConfirm={() => resolveWith(true)}
