@@ -39,7 +39,7 @@ const TaskRow: React.FC<TaskRowProps> = ({ task }) => {
 
 	const handleDelete = async (taskId: number) => {
 		const confirmationResult = await confirm({
-			title: __('Permanently delete archived task', 'wpo-aom'),
+			title: __('Permanently delete this task?', 'wpo-aom'),
 			message: __(
 				'Are you sure you want to delete this task? This action cannot be undone.',
 				'wpo-aom'
