@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { __ } from '@wordpress/i18n';
 import { useTasks } from '@shared/context/TaskContext';
 import { useAsyncLoader } from '@shared/hooks/useAsyncLoader';
@@ -7,6 +7,8 @@ import { AsyncMultiSelectField } from '@shared/components/AsyncMultiSelectField'
 import { TaskFormSkeleton } from '@shared/components/TaskFormSkeleton';
 import { searchOrders } from '@shared/utils/api';
 import { isFieldOption, Task } from '@shared/types/task';
+import { useSidebarModal } from '@shared/context/SidebarModalContext';
+import { useConfirm } from '@shared/context/DialogContext';
 
 export interface TaskFormInitialValues {
 	title?: string;
@@ -37,8 +39,37 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 		fieldOptions,
 		loadFieldOptions,
 	} = useTasks();
+	const { setBeforeClose } = useSidebarModal();
+	const confirm = useConfirm();
 
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const isDirtyRef = useRef(false);
+
+	const beforeCloseGuard = useCallback(async () => {
+		if (!isDirtyRef.current) {
+			return true;
+		}
+
+		return await confirm({
+			title: __('Unsaved changes', 'wpo-aom'),
+			message: __(
+				'Do you want to save or discard changes?',
+				'wpo-aom'
+			),
+			confirmText: __('Discard', 'wpo-aom'),
+			cancelText: __('Cancel', 'wpo-aom'),
+			action: 'save',
+		});
+	}, [confirm]);
+
+	useEffect(() => {
+		setBeforeClose(beforeCloseGuard);
+		return () => setBeforeClose(null);
+	}, [setBeforeClose, beforeCloseGuard]);
+
+	const handleFormChange = () => {
+		isDirtyRef.current = true;
+	};
 	const { loadingStatus, loadingError } = useAsyncLoader(async () => {
 		await Promise.all([
 			loadTaskFields(),
@@ -112,6 +143,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 			const payload = prepareFormData(formData);
 
 			const savedTask = await saveTask(payload, task?.id);
+			isDirtyRef.current = false;
 			onTaskSaved?.(savedTask);
 			onDone?.();
 		} catch (error) {
@@ -193,6 +225,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 	return (
 		<form
 			onSubmit={submit}
+			onChange={handleFormChange}
 			className={`wpo-aom-task-form ${isSubmitting ? 'submitting' : ''}`}
 		>
 			<fieldset disabled={isSubmitting}>
