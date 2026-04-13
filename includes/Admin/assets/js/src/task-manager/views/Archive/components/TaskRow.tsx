@@ -57,6 +57,25 @@ const TaskRow: React.FC<TaskRowProps> = ({ task }) => {
 		setTasks((prevTasks) => prevTasks.filter((t) => t.id !== taskId));
 	};
 
+	const handleRestore = async (taskId: number) => {
+		const confirmationResult = await confirm({
+			title: __('Restore this task?', 'wpo-aom'),
+			message: __(
+				'Once restored, you can locate this task in the board tab.',
+				'wpo-aom'
+			),
+			confirmText: __('Restore', 'wpo-aom'),
+			cancelText: __('Cancel', 'wpo-aom'),
+			action: 'restore',
+		});
+
+		if (!confirmationResult) {
+			return;
+		}
+
+		unarchiveTask(task.id);
+	};
+
 	const renderAssociatedOrder = () => {
 		const order = getFieldObjectValue(task, 'order');
 
@@ -123,7 +142,7 @@ const TaskRow: React.FC<TaskRowProps> = ({ task }) => {
 							className="wpo-button wpo-button-icon wpo-aom-restore-button"
 							onClick={(e) => {
 								e.stopPropagation();
-								unarchiveTask(task.id);
+								handleRestore(task.id);
 							}}
 							title={__('Restore Task', 'wpo-aom')}
 						>
