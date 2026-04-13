@@ -51,13 +51,13 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 		}
 
 		return await confirm({
-			title: __('Unsaved changes', 'wpo-aom'),
+			title: __('Save your changes?', 'wpo-aom'),
 			message: __(
-				'Do you want to save or discard changes?',
+				'You have unsaved work. Discarding will permanently erase your recent edits.',
 				'wpo-aom'
 			),
 			confirmText: __('Discard', 'wpo-aom'),
-			cancelText: __('Cancel', 'wpo-aom'),
+			cancelText: __('Keep editing', 'wpo-aom'),
 			action: 'save',
 		});
 	}, [confirm]);

@@ -29,7 +29,7 @@ const FinishedTasks: React.FC = () => {
 		const confirmationResult = await confirm({
 			title: __('Delete this task?', 'wpo-aom'),
 			message: __(
-				'Are you sure you want to delete this task?',
+				'Are you sure you want to delete this task? This action cannot be undone.',
 				'wpo-aom'
 			),
 			confirmText: __('Delete', 'wpo-aom'),
