@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { __ } from '@wordpress/i18n';
 import { Task, TASK_FINISH_STATUS_SLUG } from '@shared/types/task';
 import { useTasks } from '@shared/context/TaskContext';
+import {useConfirm} from "@shared/context/DialogContext";
+import { createInterpolateElement } from '@wordpress/element';
 
 interface TaskActionMenuProps {
 	task: Task;
@@ -36,6 +38,7 @@ export const TaskActionMenu: React.FC<TaskActionMenuProps> = ({
 		archiveTask: globalArchiveTask,
 		deleteTask: globalDeleteTask,
 	} = useTasks();
+	const confirm = useConfirm();
 
 	// Internal state for uncontrolled mode.
 	const [internalIsOpen, setInternalIsOpen] = useState(false);
@@ -81,10 +84,26 @@ export const TaskActionMenu: React.FC<TaskActionMenuProps> = ({
 		closeMenu(e);
 	};
 
-	const handleArchiveClick = (e: React.MouseEvent) => {
+	const handleArchiveClick = async (e: React.MouseEvent) => {
 		e.stopPropagation();
-		archiveTask(task.id);
 		closeMenu(e);
+
+        const confirmationResult = await confirm({
+            title: __('Archive this task?', 'wpo-aom'),
+            message: createInterpolateElement(
+                __('Once archived, you can locate this task in the <strong>Task → Archive</strong> tab.', 'wpo-aom'),
+                {strong: <strong/>}
+            ),
+            confirmText: __('Archive', 'wpo-aom'),
+            cancelText: __('Cancel', 'wpo-aom'),
+            action: 'archive',
+        });
+
+		if (!confirmationResult) {
+			return;
+		}
+
+		archiveTask(task.id);
 	};
 
 	const handleEditClick = (e: React.MouseEvent) => {

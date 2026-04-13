@@ -10,6 +10,8 @@ import { TaskActionMenu } from '@shared/components/TaskActionMenu';
 import { getFieldObjectValue } from '@shared/utils/fieldUtils';
 import { __ } from '@wordpress/i18n';
 import { useTasks } from '@shared/context/TaskContext';
+import { useConfirm } from '@shared/context/DialogContext';
+import {createInterpolateElement} from "@wordpress/element";
 
 type HeadingLevel = 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 type TagsPosition = 'none' | 'top' | 'bottom';
@@ -63,6 +65,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 		unfinishTask: globalUnfinishTask,
 		archiveTask: globalArchiveTask,
 	} = useTasks();
+	const confirm = useConfirm();
 	const finishTask = onFinishClick || globalFinishTask;
 	const unfinishTask = onUnfinishClick || globalUnfinishTask;
 	const archiveTask = onArchiveClick || globalArchiveTask;
@@ -195,8 +198,24 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 		unfinishTask(task.id);
 	};
 
-	const handleArchiveClick = (e: React.SyntheticEvent) => {
+	const handleArchiveClick = async (e: React.SyntheticEvent) => {
 		e.stopPropagation();
+
+		const confirmationResult = await confirm({
+			title: __('Archive this task?', 'wpo-aom'),
+            message: createInterpolateElement(
+                __('Once archived, you can locate this task in the <strong>Task → Archive</strong> tab.', 'wpo-aom'),
+                {strong: <strong/>}
+            ),
+			confirmText: __('Archive', 'wpo-aom'),
+			cancelText: __('Cancel', 'wpo-aom'),
+			action: 'archive',
+		});
+
+		if (!confirmationResult) {
+			return;
+		}
+
 		archiveTask(task.id);
 	};
 
