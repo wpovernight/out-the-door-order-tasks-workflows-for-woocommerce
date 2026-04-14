@@ -17,23 +17,25 @@ export const Toast: React.FC<ToastProps> = ({
 	isExiting = false,
 	onClose,
 }) => {
-    return (
-        <div className={`wpo-aom-toast toast-${type}${isExiting ? ' is-exiting' : ''}`}>
-            <div>
-                <div className="toast-content">
-                    <span className="toast-title">{title}</span>
-                    {message && <p>{message}</p>}
-                </div>
-                <button
-                    type="button"
-                    className="wpo-button wpo-button-icon close-toast"
-                    onClick={onClose}
-                >
-                <span className="screenReader">
-                    {__('Close', 'wpo-aom')}
-                </span>
-                </button>
-            </div>
-        </div>
-    );
+	return (
+		<div
+			className={`wpo-aom-toast toast-${type}${isExiting ? ' is-exiting' : ''}`}
+		>
+			<div>
+				<div className="toast-content">
+					<span className="toast-title">{title}</span>
+					{message && <p>{message}</p>}
+				</div>
+				<button
+					type="button"
+					className="wpo-button wpo-button-icon close-toast"
+					onClick={onClose}
+				>
+					<span className="screenReader">
+						{__('Close', 'wpo-aom')}
+					</span>
+				</button>
+			</div>
+		</div>
+	);
 };

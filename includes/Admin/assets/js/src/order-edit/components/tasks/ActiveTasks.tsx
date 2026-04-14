@@ -9,7 +9,7 @@ import { EmptyState, ErrorState } from '@shared/components/LoadingSkeleton';
 import { TaskCardSkeleton } from '@shared/components/TaskCardSkeleton';
 import { useTasks } from '@shared/context/TaskContext';
 import { useConfirm } from '@shared/context/DialogContext';
-import {createInterpolateElement} from "@wordpress/element";
+import { createInterpolateElement } from '@wordpress/element';
 
 interface ArchivedEntry {
 	task: Task;
@@ -61,20 +61,23 @@ const ActiveTasks: React.FC = () => {
 
 	const handleArchiveClick = useCallback(
 		async (taskId: number): Promise<boolean> => {
-            const confirmationResult = await confirm({
-                title: __('Archive this task?', 'wpo-aom'),
-                message: createInterpolateElement(
-                    __('Once archived, you can locate this task in the <strong>Task → Archive</strong> tab.', 'wpo-aom'),
-                    {strong: <strong/>}
-                ),
-                confirmText: __('Archive', 'wpo-aom'),
-                cancelText: __('Cancel', 'wpo-aom'),
-                action: 'archive',
-            });
+			const confirmationResult = await confirm({
+				title: __('Archive this task?', 'wpo-aom'),
+				message: createInterpolateElement(
+					__(
+						'Once archived, you can locate this task in the <strong>Task → Archive</strong> tab.',
+						'wpo-aom'
+					),
+					{ strong: <strong /> }
+				),
+				confirmText: __('Archive', 'wpo-aom'),
+				cancelText: __('Cancel', 'wpo-aom'),
+				action: 'archive',
+			});
 
-            if (!confirmationResult) {
-                return false;
-            }
+			if (!confirmationResult) {
+				return false;
+			}
 
 			const index = activeTasks.findIndex((t) => t.id === taskId);
 			if (index === -1) {

@@ -9,7 +9,7 @@ import { searchOrders } from '@shared/utils/api';
 import { isFieldOption, Task } from '@shared/types/task';
 import { useSidebarModal } from '@shared/context/SidebarModalContext';
 import { useConfirm } from '@shared/context/DialogContext';
-import {ToastType, useToast} from '@shared/context/ToastContext';
+import { ToastType, useToast } from '@shared/context/ToastContext';
 
 export interface TaskFormInitialValues {
 	title?: string;
@@ -153,7 +153,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 			addToast({
 				title: isUpdate
 					? __('The task has been successfully updated.', 'wpo-aom')
-					: __('A new task has been successfully created.', 'wpo-aom'),
+					: __(
+							'A new task has been successfully created.',
+							'wpo-aom'
+						),
 				type: ToastType.SUCCESS,
 			});
 			onDone?.();

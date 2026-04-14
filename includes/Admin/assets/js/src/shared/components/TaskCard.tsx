@@ -11,7 +11,7 @@ import { getFieldObjectValue } from '@shared/utils/fieldUtils';
 import { __ } from '@wordpress/i18n';
 import { useTasks } from '@shared/context/TaskContext';
 import { useConfirm } from '@shared/context/DialogContext';
-import {createInterpolateElement} from "@wordpress/element";
+import { createInterpolateElement } from '@wordpress/element';
 
 type HeadingLevel = 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 type TagsPosition = 'none' | 'top' | 'bottom';
@@ -203,10 +203,13 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 
 		const confirmationResult = await confirm({
 			title: __('Archive this task?', 'wpo-aom'),
-            message: createInterpolateElement(
-                __('Once archived, you can locate this task in the <strong>Task → Archive</strong> tab.', 'wpo-aom'),
-                {strong: <strong/>}
-            ),
+			message: createInterpolateElement(
+				__(
+					'Once archived, you can locate this task in the <strong>Task → Archive</strong> tab.',
+					'wpo-aom'
+				),
+				{ strong: <strong /> }
+			),
 			confirmText: __('Archive', 'wpo-aom'),
 			cancelText: __('Cancel', 'wpo-aom'),
 			action: 'archive',
