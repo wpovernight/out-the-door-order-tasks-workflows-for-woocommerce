@@ -77,6 +77,15 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 		if (preset !== 'custom') {
 			const range = getDateRangeFromPreset(preset);
 			setPendingDateRange(range);
+			if (range.start) {
+				setCurrentDate(
+					new Date(
+						range.start.getFullYear(),
+						range.start.getMonth(),
+						1
+					)
+				);
+			}
 		}
 	};
 
