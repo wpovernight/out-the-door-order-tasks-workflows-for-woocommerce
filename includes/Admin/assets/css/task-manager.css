@@ -7,7 +7,7 @@
 }
 
 #wpo-aom-order-manager .task-manager-tab .view.calendar-view {
-    padding: 0 1em;
+    padding: 0 2em;
 }
 
 #wpo-aom-order-manager .task-manager-tab .view.kanban-view {
@@ -590,6 +590,7 @@
     right: 1em;
 }
 
+.calendar-task-table-wrapper > table > tbody > tr > td.task-done-date,
 .calendar-task-table-wrapper > table > tbody > tr > td.task-due-date {
     white-space: nowrap;
 }
@@ -597,6 +598,7 @@
 .calendar-task-table-wrapper > table > tbody > tr > td:first-child,
 .calendar-task-table-wrapper > table > thead > tr > th:first-child {
     padding-left: 0.8em;
+    min-width: 15em;
 }
 
 .calendar-task-table-wrapper > table > tbody > tr > td.task-info > div {
@@ -840,4 +842,34 @@
 .archive-pagination > button {
     border: 1px solid var(--wpo-aom-border-color);
     padding: 0.4em 1em;
+}
+
+@media screen and (max-width: 1200px) {
+    .calendar-sidebar {
+        width: 23.5em;
+    }
+
+    .calendar-task-day-group {
+        margin-left: 1em;
+    }
+
+    .calendar-task-table-wrapper > table > thead th {
+        padding: 0.75em 0.6em;
+    }
+
+    .calendar-task-table-wrapper > table > tbody > tr > td {
+        padding: 0.6em;
+    }
+
+    .calendar-task-table-wrapper > table > tbody > tr > td.task-due-date,
+    .calendar-task-table-wrapper > table > tbody > tr > td.task-done-date {
+        white-space: normal;
+        min-width: 4em;
+    }
+}
+
+@media screen and (max-width: 990px ) {
+    .calendar-view-container {
+        overflow-x: auto;
+    }
 }
