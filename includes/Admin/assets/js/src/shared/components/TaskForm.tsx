@@ -159,13 +159,13 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 			onDone?.();
 		} catch (error) {
 			console.error('Failed to save task:', error);
-			// addToast({
-			// 	title: isUpdate
-			// 		? __('Failed to update task', 'wpo-aom')
-			// 		: __('Failed to create task', 'wpo-aom'),
-			// 	message: __('Please try again.', 'wpo-aom'),
-			// 	type: ToastType.ERROR,
-			// });
+			addToast({
+				title: isUpdate
+					? __('Failed to update task. Please try again.', 'wpo-aom')
+					: __('Failed to create task. Please try again.', 'wpo-aom'),
+				message: __('Please try again.', 'wpo-aom'),
+				type: ToastType.ERROR,
+			});
 		} finally {
 			setIsSubmitting(false);
 		}
