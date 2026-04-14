@@ -29,7 +29,10 @@ export interface ToastOptions {
 
 interface ToastNotification extends Required<ToastOptions> {
 	id: number;
+	isExiting: boolean;
 }
+
+const TOAST_FADE_OUT_MS = 400;
 
 interface ToastContextType {
 	addToast: (toast: ToastOptions) => void;
@@ -43,8 +46,15 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
 	const [toasts, setToasts] = useState<ToastNotification[]>([]);
 	const nextId = useRef(0);
 
-	const removeToast = useCallback((id: number) => {
-		setToasts((prev) => prev.filter((toast) => toast.id !== id));
+	const dismissToast = useCallback((id: number) => {
+		setToasts((prev) =>
+			prev.map((toast) =>
+				toast.id === id ? { ...toast, isExiting: true } : toast
+			)
+		);
+		setTimeout(() => {
+			setToasts((prev) => prev.filter((toast) => toast.id !== id));
+		}, TOAST_FADE_OUT_MS);
 	}, []);
 
 	const addToast = useCallback(
@@ -52,18 +62,19 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
 			const id = nextId.current++;
 			const toast: ToastNotification = {
 				id,
-                message: '',
+				message: '',
 				type: ToastType.INFO,
 				duration: ToastDuration.STANDARD,
+				isExiting: false,
 				...options,
 			};
 			setToasts((prev) => [...prev, toast]);
 
 			if (toast.duration !== ToastDuration.PERSISTENT) {
-				setTimeout(() => removeToast(id), toast.duration);
+				setTimeout(() => dismissToast(id), toast.duration);
 			}
 		},
-		[removeToast]
+		[dismissToast]
 	);
 
 	return (
@@ -76,7 +87,8 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
 						title={toast.title}
 						message={toast.message}
 						type={toast.type}
-						onClose={() => removeToast(toast.id)}
+						isExiting={toast.isExiting}
+						onClose={() => dismissToast(toast.id)}
 					/>
 				))}
 			</div>

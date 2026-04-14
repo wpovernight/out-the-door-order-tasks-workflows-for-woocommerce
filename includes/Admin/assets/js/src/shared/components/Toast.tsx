@@ -6,6 +6,7 @@ interface ToastProps {
 	title: string;
 	message: string;
 	type: ToastType;
+	isExiting?: boolean;
 	onClose: () => void;
 }
 
@@ -13,23 +14,26 @@ export const Toast: React.FC<ToastProps> = ({
 	title,
 	message,
 	type = ToastType.INFO,
+	isExiting = false,
 	onClose,
 }) => {
-	return (
-        <div className={`wpo-aom-toast toast-${type}`}>
+    return (
+        <div className={`wpo-aom-toast toast-${type}${isExiting ? ' is-exiting' : ''}`}>
             <div>
-                <strong>{title}</strong>
-                {message && <p>{message}</p>}
-            </div>
-            <button
-                type="button"
-                className="wpo-button wpo-button-icon close-toast"
-                onClick={onClose}
-            >
+                <div className="toast-content">
+                    <span className="toast-title">{title}</span>
+                    {message && <p>{message}</p>}
+                </div>
+                <button
+                    type="button"
+                    className="wpo-button wpo-button-icon close-toast"
+                    onClick={onClose}
+                >
                 <span className="screenReader">
                     {__('Close', 'wpo-aom')}
                 </span>
-            </button>
+                </button>
+            </div>
         </div>
     );
 };
