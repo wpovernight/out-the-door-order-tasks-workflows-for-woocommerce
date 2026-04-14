@@ -324,9 +324,16 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 			<div className="task-card-header">
 				{FinishAsCheckbox && (
 					<label
+						htmlFor={`task-finish-${task.id}`}
 						className={`task-finish-checkbox ${isDone ? 'finished' : ''}`}
 					>
+						<span className="screenReader">
+							{isDone
+								? __('Mark as In Progress', 'wpo-aom')
+								: __('Mark as Done', 'wpo-aom')}
+						</span>
 						<input
+							id={`task-finish-${task.id}`}
 							type="checkbox"
 							checked={isDone}
 							onChange={(e) => {

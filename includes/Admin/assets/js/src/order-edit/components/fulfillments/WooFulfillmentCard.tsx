@@ -26,7 +26,13 @@ export const WooFulfillmentCard: React.FC<WooFulfillmentCardProps> = ({
 	return (
 		<div className="fulfillment-card">
 			<div className="fulfillment-card-header">
-				<h4>{sprintf(__('Fulfillment #%d', 'wpo-aom'), index + 1)}</h4>
+				<h4>
+					{sprintf(
+						/* translators: %d is the fulfillment number. */
+						__('Fulfillment #%d', 'wpo-aom'),
+						index + 1
+					)}
+				</h4>
 				<span
 					className="wpo-aom-tag fulfillment-card-status"
 					style={getColorStyle(

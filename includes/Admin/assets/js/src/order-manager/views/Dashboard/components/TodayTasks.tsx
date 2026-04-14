@@ -32,7 +32,7 @@ export const TodayTasks = () => {
 	const { todayActive, overdue, done } = useMemo(() => {
 		const active: Task[] = [];
 		const over: Task[] = [];
-		const done: Task[] = [];
+		const finish: Task[] = [];
 
 		tasks.forEach((task) => {
 			const dueDate = getTaskDateField(task, 'due_date');
@@ -60,7 +60,7 @@ export const TodayTasks = () => {
 			}
 		});
 
-		return { todayActive: active, overdue: over, done };
+		return { todayActive: active, overdue: over, done: finish };
 	}, [tasks, todayStart, todayEnd]);
 
 	const handleAddTask = () => {

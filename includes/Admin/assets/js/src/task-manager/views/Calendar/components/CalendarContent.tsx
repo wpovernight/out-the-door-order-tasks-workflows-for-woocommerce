@@ -67,19 +67,16 @@ export const CalendarContent: React.FC = () => {
 		if (!pendingDateRange.start || pendingDateRange.end) {
 			// Start new selection
 			setPendingDateRange({ start: date, end: null });
+		} else if (date < pendingDateRange.start) {
+			setPendingDateRange({
+				start: date,
+				end: pendingDateRange.start,
+			});
 		} else {
-			// Complete range selection
-			if (date < pendingDateRange.start) {
-				setPendingDateRange({
-					start: date,
-					end: pendingDateRange.start,
-				});
-			} else {
-				setPendingDateRange({
-					start: pendingDateRange.start,
-					end: date,
-				});
-			}
+			setPendingDateRange({
+				start: pendingDateRange.start,
+				end: date,
+			});
 		}
 	};
 

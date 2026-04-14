@@ -51,6 +51,13 @@ export const StatusForm = ({
 
 	const foreground = getForegroundColor(background);
 
+	let submitLabel = __('Create', 'wpo-aom');
+	if (isSaving) {
+		submitLabel = __('Saving…', 'wpo-aom');
+	} else if (isEditing) {
+		submitLabel = __('Update', 'wpo-aom');
+	}
+
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 		if (!label.trim() || !statusKey.trim()) {
@@ -82,7 +89,6 @@ export const StatusForm = ({
 									'wpo-aom'
 								)}
 								required
-								autoFocus
 							/>
 						</div>
 						<div id="preview-field" className="form-field">
@@ -105,11 +111,21 @@ export const StatusForm = ({
 							</label>
 							<div
 								className="color-input-group"
+								role="button"
+								tabIndex={0}
 								onClick={() =>
 									document
 										.getElementById('cos-background')
 										?.click()
 								}
+								onKeyDown={(e) => {
+									if (e.key === 'Enter' || e.key === ' ') {
+										e.preventDefault();
+										document
+											.getElementById('cos-background')
+											?.click();
+									}
+								}}
 								style={{ cursor: 'pointer' }}
 							>
 								<input
@@ -159,11 +175,7 @@ export const StatusForm = ({
 									!statusKey.trim()
 								}
 							>
-								{isSaving
-									? __('Saving…', 'wpo-aom')
-									: isEditing
-										? __('Update', 'wpo-aom')
-										: __('Create', 'wpo-aom')}
+								{submitLabel}
 							</button>
 						</li>
 						<li>
