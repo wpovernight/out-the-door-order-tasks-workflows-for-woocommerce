@@ -9,6 +9,7 @@ import { searchOrders } from '@shared/utils/api';
 import { isFieldOption, Task } from '@shared/types/task';
 import { useSidebarModal } from '@shared/context/SidebarModalContext';
 import { useConfirm } from '@shared/context/DialogContext';
+import {ToastType, useToast} from '@shared/context/ToastContext';
 
 export interface TaskFormInitialValues {
 	title?: string;
@@ -41,6 +42,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 	} = useTasks();
 	const { setBeforeClose } = useSidebarModal();
 	const confirm = useConfirm();
+	const { addToast } = useToast();
 
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const isDirtyRef = useRef(false);
@@ -138,6 +140,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 		}
 		setIsSubmitting(true);
 
+		const isUpdate = Boolean(task?.id);
+
 		try {
 			const form = e.target as HTMLFormElement;
 			const formData = new FormData(form);
@@ -146,9 +150,22 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 			const savedTask = await saveTask(payload, task?.id);
 			isDirtyRef.current = false;
 			onTaskSaved?.(savedTask);
+			addToast({
+				title: isUpdate
+					? __('The task has been successfully updated.', 'wpo-aom')
+					: __('A new task has been successfully created.', 'wpo-aom'),
+				type: ToastType.SUCCESS,
+			});
 			onDone?.();
 		} catch (error) {
-			console.error('Failed to create task:', error);
+			console.error('Failed to save task:', error);
+			// addToast({
+			// 	title: isUpdate
+			// 		? __('Failed to update task', 'wpo-aom')
+			// 		: __('Failed to create task', 'wpo-aom'),
+			// 	message: __('Please try again.', 'wpo-aom'),
+			// 	type: ToastType.ERROR,
+			// });
 		} finally {
 			setIsSubmitting(false);
 		}
