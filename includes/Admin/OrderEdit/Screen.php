@@ -87,16 +87,33 @@ final class Screen {
 			return;
 		}
 
-		$order_id = 0;
+		// The screen ID is shared between the orders list and the edit/new screens (especially on HPOS).
+		// Restrict to the edit/new context only.
+		$action         = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : '';
+		$is_edit_screen = in_array( $action, array( 'edit', 'new' ), true ) || 'add' === $screen->action;
 
-		// Get order ID based on storage type
-		if ( isset( $_GET['post'] ) ) {
-			$order_id = absint( wp_unslash( $_GET['post'] ) );
-		} elseif ( isset( $_GET['id'] ) ) {
-			$order_id = absint( wp_unslash( $_GET['id'] ) );
+		if ( ! $is_edit_screen ) {
+			return;
 		}
 
-		// Fallback: get from global $post (e.g. new order being created)
+		$order_id = 0;
+
+		// Preferred: WooCommerce sets $GLOBALS['theorder'] on the order edit screen
+		// for both HPOS and legacy CPT storage.
+		if ( isset( $GLOBALS['theorder'] ) && $GLOBALS['theorder'] instanceof \WC_Order ) {
+			$order_id = absint( $GLOBALS['theorder']->get_id() );
+		}
+
+		// Fallback: resolve from query args (HPOS uses `id`, legacy uses `post`).
+		if ( 0 === $order_id ) {
+			if ( isset( $_GET['id'] ) ) {
+				$order_id = absint( wp_unslash( $_GET['id'] ) );
+			} elseif ( isset( $_GET['post'] ) ) {
+				$order_id = absint( wp_unslash( $_GET['post'] ) );
+			}
+		}
+
+		// Fallback: global $post (legacy auto-draft).
 		if ( 0 === $order_id ) {
 			global $post;
 			if ( $post instanceof \WP_Post && $post->ID > 0 ) {
@@ -104,7 +121,7 @@ final class Screen {
 			}
 		}
 
-		// Verify it's a valid order
+		// Verify it's a valid order.
 		if ( $order_id > 0 ) {
 			$order = wc_get_order( $order_id );
 			if ( ! $order ) {
