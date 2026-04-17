@@ -2,6 +2,7 @@ body.woocommerce_page_wpo_aom_order_manager #wpcontent {
     background-color: #fff;
     padding-left: 0;
     font-family: Inter;
+    min-height: calc(100vh - 32px);
 }
 
 #wpo-aom-order-manager h1 {

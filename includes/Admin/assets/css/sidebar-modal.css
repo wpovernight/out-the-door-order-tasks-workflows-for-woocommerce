@@ -278,32 +278,53 @@
     outline: 2px solid transparent;
 }
 
-.wpo-aom-datepicker-trigger svg {
+.wpo-aom-datepicker-container:has(.wpo-aom-datepicker-clear) .wpo-aom-datepicker-trigger {
+    padding-right: 2.5em;
+}
+
+.wpo-aom-datepicker-trigger::before {
+    content: '';
+    display: inline-block;
+    width: 1.15em;
+    height: 1.28em;
     flex-shrink: 0;
-    color: var(--wpo-aom-text-gray);
+    background-color: var(--wpo-aom-text-gray);
+    mask-image: var(--wpo-aom-icon-calendar);
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+
+    -webkit-mask-image: var(--wpo-aom-icon-calendar);
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
 }
 
-.wpo-aom-datepicker-value {
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.wpo-aom-datepicker-value.placeholder {
+.wpo-aom-datepicker-trigger.placeholder {
     color: var(--wpo-aom-text-gray-light);
 }
 
 .wpo-aom-datepicker-clear {
-    flex-shrink: 0;
-    font-size: 1.3em;
-    line-height: 1;
-    color: var(--wpo-aom-text-gray-light);
-    cursor: pointer;
-    padding: 0 0.15em;
+    position: absolute;
+    top: 50%;
+    right: 0.5em;
+    transform: translateY(-50%);
+    width: 1.7em;
+    height: 1.7em;
 }
 
-.wpo-aom-datepicker-clear:hover {
+.wpo-aom-datepicker-clear::before {
+    content: '\f335';
+    font-family: 'dashicons';
+    font-size: 1.7em;
+    color: var(--wpo-aom-text-gray-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.wpo-aom-datepicker-clear:hover::before {
     color: var(--wpo-aom-text-primary);
 }
 
@@ -311,130 +332,166 @@
     position: absolute;
     top: calc(100% + 6px);
     right: 0;
-    z-index: 10;
+    z-index: 100;
     background: var(--wpo-aom-card-bg);
     border-radius: var(--wpo-aom-radius-l);
     box-shadow: var(--wpo-aom-floating-shadow);
-    width: 21em;
-    padding: 1.2em;
+    width: 16.5em;
+    padding: 1em;
     user-select: none;
 }
 
 .wpo-aom-datepicker-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 0.5em;
     margin-bottom: 1em;
 }
 
-.wpo-aom-datepicker-header > button {
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    font-size: 1.4em;
-    line-height: 1;
-    color: var(--wpo-aom-text-primary);
-    padding: 0.2em 0.5em;
+.wpo-aom-datepicker-nav {
+    width: 2em;
+    height: 2em;
     border-radius: var(--wpo-aom-radius-s);
+    flex-shrink: 0;
 }
 
-.wpo-aom-datepicker-header > button:hover {
+.wpo-aom-datepicker-nav::before {
+    font-family: 'dashicons';
+    font-size: 1.4em;
+    color: var(--wpo-aom-text-gray);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.wpo-aom-datepicker-nav.prev::before {
+    content: '\f341';
+}
+
+.wpo-aom-datepicker-nav.next::before {
+    content: '\f345';
+}
+
+.wpo-aom-datepicker-nav:hover {
     background: var(--wpo-aom-hover-overlay);
 }
 
-.wpo-aom-datepicker-month-label {
+.wpo-aom-datepicker-title {
+    flex: 1;
+    background: transparent;
+    border: none;
+    cursor: pointer;
     font-weight: 600;
-    font-size: 1.05em;
+    font-size: 1.23em;
     color: var(--wpo-aom-text-primary);
-}
-
-.wpo-aom-datepicker-weekdays {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    padding: 0.55em 0.8em;
+    border-radius: var(--wpo-aom-radius-m);
     text-align: center;
-    margin-bottom: 0.4em;
 }
 
-.wpo-aom-datepicker-weekdays > span {
-    font-size: 0.85em;
+.wpo-aom-datepicker-title:hover {
+    background-color: var(--wpo-aom-bg-lighter);
+    transition: background-color 0.3s;
+}
+
+.wpo-aom-datepicker-title:disabled {
+    cursor: default;
+}
+
+.wpo-aom-datepicker-calendar {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 0.2em;
+    table-layout: fixed;
+    text-align: center;
+}
+
+.wpo-aom-datepicker-calendar th {
+    font-size: 1em;
     font-weight: 600;
     color: var(--wpo-aom-text-gray);
     padding: 0.4em 0;
 }
 
-.wpo-aom-datepicker-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    row-gap: 0.15em;
-}
-
-.wpo-aom-datepicker-day {
-    background: transparent;
-    border: none;
+.wpo-aom-datepicker-calendar td {
     cursor: pointer;
-    font-size: 0.9em;
-    padding: 0.55em 0;
-    border-radius: var(--wpo-aom-radius-s);
+    font-size: 1em;
     color: var(--wpo-aom-text-primary);
-    text-align: center;
-    line-height: 1.4;
+    padding: 0.5em 0;
 }
 
-.wpo-aom-datepicker-day:hover {
+.wpo-aom-datepicker-calendar.days td {
+    border-radius: 50%;
+}
+
+.wpo-aom-datepicker-calendar.months td,
+.wpo-aom-datepicker-calendar.years td {
+    padding: 1.5em 0;
+    border-radius: var(--wpo-aom-radius-l);
+}
+
+.wpo-aom-datepicker-calendar td:hover {
     background: var(--wpo-aom-hover-overlay);
 }
 
-.wpo-aom-datepicker-day.adjacent {
+.wpo-aom-datepicker-calendar td.adjacent {
     color: var(--wpo-aom-text-gray-light);
 }
 
-.wpo-aom-datepicker-day.today {
+.wpo-aom-datepicker-calendar td.today {
     font-weight: 700;
 }
 
-.wpo-aom-datepicker-day.selected {
+.wpo-aom-datepicker-calendar td.selected,
+.wpo-aom-datepicker-calendar td.selected:hover {
     background: var(--wpo-aom-purple-bg);
     color: var(--wpo-aom-purple-primary);
     font-weight: 600;
 }
 
-.wpo-aom-datepicker-footer {
+.wpo-aom-datepicker-actions {
     display: flex;
     gap: 0.6em;
-    margin-top: 1.2em;
+    margin-top: 0.6em;
     padding-top: 1em;
     border-top: 1px solid var(--wpo-aom-border-light);
 }
 
-.wpo-aom-datepicker-btn {
+.wpo-aom-datepicker-actions > li {
     flex: 1;
-    padding: 0.65em 0;
-    border-radius: var(--wpo-aom-radius-xl);
+    margin: 0;
+    padding: 0;
     font-size: 0.95em;
     font-weight: 600;
     cursor: pointer;
     text-align: center;
 }
 
-.wpo-aom-datepicker-btn.cancel {
+.wpo-aom-datepicker-actions button {
+    width: 100%;
+    height: 3em;
+    border-radius: var(--wpo-aom-radius-m);
+}
+
+.wpo-aom-datepicker-actions button.cancel {
     background: transparent;
     border: 1px solid var(--wpo-aom-border-color);
     color: var(--wpo-aom-text-primary);
 }
 
-.wpo-aom-datepicker-btn.cancel:hover {
+.wpo-aom-datepicker-actions button.cancel:hover {
     background: var(--wpo-aom-hover-overlay);
 }
 
-.wpo-aom-datepicker-btn.apply {
+.wpo-aom-datepicker-actions button.today {
     background: var(--wpo-aom-purple-bg);
     border: none;
     color: var(--wpo-aom-purple-primary);
 }
 
-.wpo-aom-datepicker-btn.apply:hover {
-    background: var(--wpo-aom-purple-primary);
-    color: #fff;
+.wpo-aom-datepicker-actions button.today:hover {
+    filter: brightness(0.95);
 }
 
 /* Task form Skeleton */
