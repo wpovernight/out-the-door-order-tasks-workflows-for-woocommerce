@@ -10,6 +10,7 @@ import { isFieldOption, Task } from '@shared/types/task';
 import { useSidebarModal } from '@shared/context/SidebarModalContext';
 import { useConfirm } from '@shared/context/DialogContext';
 import { ToastType, useToast } from '@shared/context/ToastContext';
+import { DatePicker } from '@shared/components/DatePicker';
 
 export interface TaskFormInitialValues {
 	title?: string;
@@ -279,11 +280,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 						<label htmlFor="due-date">
 							{__('Due Date', 'wpo-aom')}
 						</label>
-						<input
+						<DatePicker
 							id="due-date"
 							name="field_due_date"
-							type="date"
-							defaultValue={dueDate}
+							value={dueDate}
 						/>
 					</div>
 				</div>
