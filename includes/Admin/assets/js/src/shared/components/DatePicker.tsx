@@ -574,22 +574,26 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 						</table>
 					)}
 
-					<div className="wpo-aom-datepicker-footer">
-						<button
-							type="button"
-							className="wpo-button wpo-aom-datepicker-btn cancel"
-							onClick={closePicker}
-						>
-							{__('Cancel', 'wpo-aom')}
-						</button>
-						<button
-							type="button"
-							className="wpo-button wpo-button-primary wpo-aom-datepicker-btn today"
-							onClick={handleToday}
-						>
-							{__('Today', 'wpo-aom')}
-						</button>
-					</div>
+					<ul className="wpo-aom-datepicker-actions">
+						<li>
+                            <button
+                                type="button"
+                                className="wpo-button cancel"
+                                onClick={closePicker}
+                            >
+                                {__('Cancel', 'wpo-aom')}
+                            </button>
+                        </li>
+						<li>
+                            <button
+                                type="button"
+                                className="wpo-button wpo-button-primary today"
+                                onClick={handleToday}
+                            >
+                                {__('Today', 'wpo-aom')}
+                            </button>
+                        </li>
+					</ul>
 				</div>
 			)}
 		</div>
