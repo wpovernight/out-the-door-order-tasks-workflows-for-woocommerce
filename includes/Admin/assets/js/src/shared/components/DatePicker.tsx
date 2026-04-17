@@ -457,7 +457,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 															'adjacent',
 														isSelected &&
 															'selected',
-														isToday && 'today',
+														isToday && 'current',
 													]
 														.filter(Boolean)
 														.join(' ')}
@@ -494,6 +494,12 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 													selectedDate.month ===
 														calendarMonth.month;
 
+												const isCurrentMonth =
+													today.year ===
+														calendarMonth.year &&
+													today.month ===
+														calendarMonth.month;
+
 												return (
 													<td
 														key={columnIndex}
@@ -504,6 +510,8 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 																'adjacent',
 															isSelected &&
 																'selected',
+															isCurrentMonth &&
+																'current',
 														]
 															.filter(Boolean)
 															.join(' ')}
@@ -544,6 +552,10 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 													selectedDate.year ===
 														calendarYear.year;
 
+												const isCurrentYear =
+													today.year ===
+														calendarYear.year;
+
 												return (
 													<td
 														key={columnIndex}
@@ -554,6 +566,8 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 																'adjacent',
 															isSelected &&
 																'selected',
+															isCurrentYear &&
+																'current',
 														]
 															.filter(Boolean)
 															.join(' ')}
@@ -576,23 +590,23 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 
 					<ul className="wpo-aom-datepicker-actions">
 						<li>
-                            <button
-                                type="button"
-                                className="wpo-button cancel"
-                                onClick={closePicker}
-                            >
-                                {__('Cancel', 'wpo-aom')}
-                            </button>
-                        </li>
+							<button
+								type="button"
+								className="wpo-button cancel"
+								onClick={closePicker}
+							>
+								{__('Cancel', 'wpo-aom')}
+							</button>
+						</li>
 						<li>
-                            <button
-                                type="button"
-                                className="wpo-button wpo-button-primary today"
-                                onClick={handleToday}
-                            >
-                                {__('Today', 'wpo-aom')}
-                            </button>
-                        </li>
+							<button
+								type="button"
+								className="wpo-button wpo-button-primary today"
+								onClick={handleToday}
+							>
+								{__('Today', 'wpo-aom')}
+							</button>
+						</li>
 					</ul>
 				</div>
 			)}

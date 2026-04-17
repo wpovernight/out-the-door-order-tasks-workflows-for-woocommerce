@@ -439,7 +439,7 @@
     color: var(--wpo-aom-text-gray-light);
 }
 
-.wpo-aom-datepicker-calendar td.today {
+.wpo-aom-datepicker-calendar td.current {
     font-weight: 700;
 }
 
@@ -454,6 +454,7 @@
     display: flex;
     gap: 0.6em;
     margin-top: 0.6em;
+    margin-bottom: 0;
     padding-top: 1em;
     border-top: 1px solid var(--wpo-aom-border-light);
 }
