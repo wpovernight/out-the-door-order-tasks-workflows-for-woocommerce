@@ -48,7 +48,7 @@ export const TodayTasks = () => {
 			const isDone = task.status === TASK_FINISH_STATUS_SLUG;
 
 			if (isDone && dueDate >= todayStart && dueDate <= todayEnd) {
-				done.push(task);
+				finish.push(task);
 			} else if (!isDone && dueDate < todayStart) {
 				over.push(task);
 			} else if (
