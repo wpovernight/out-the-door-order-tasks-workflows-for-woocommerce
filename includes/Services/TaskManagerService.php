@@ -222,6 +222,12 @@ final class TaskManagerService {
 
 		$field_values_array[ DefaultTaskFields::POSITION ] = $last_position ? $last_position + 1.0 : 1.0;
 
+		// Auto-set "done_date" if creating with "done" status.
+		$status_option = $this->get_field_option( (int) $status_id );
+		if ( $status_option && $status_option->slug === 'done' && ! isset( $field_values_array[ DefaultTaskFields::DONE_DATE ] ) ) {
+			$field_values_array[ DefaultTaskFields::DONE_DATE ] = gmdate( 'Y-m-d H:i:s' );
+		}
+
 		// Set field values.
 		$this->task_field_value_repository->update_task_multiple_field_values( $task->id, $field_values_array );
 
@@ -351,7 +357,7 @@ final class TaskManagerService {
 			$this->task_field_value_repository->update_task_multiple_field_values( $task_id, $field_values_array );
 		}
 
-		// Update position if the status has been changed.
+		// Update position and done_date if the status has been changed.
 		// Note: $field_values_array[STATUS] is guaranteed to exist here because $current_status_value
 		// is only set when the status field is present in $field_values (above if-statement).
 		if ( isset( $current_status_value ) && (string) $current_status_value->value !== (string) $new_status_value ) {
@@ -361,6 +367,14 @@ final class TaskManagerService {
 			);
 
 			$field_values_array[ DefaultTaskFields::POSITION ] = $last_position ? $last_position + 1.0 : 1.0;
+
+			// Auto-set "done_date" when status changes to "done".
+			$new_status_option = $this->get_field_option( (int) $new_status_value );
+			if ( $new_status_option && $new_status_option->slug === 'done' && ! isset( $field_values_array[ DefaultTaskFields::DONE_DATE ] ) ) {
+				$field_values_array[ DefaultTaskFields::DONE_DATE ] = gmdate( 'Y-m-d H:i:s' );
+			} elseif ( $new_status_option && $new_status_option->slug !== 'done' && ! isset( $field_values_array[ DefaultTaskFields::DONE_DATE ] ) ) {
+				$field_values_array[ DefaultTaskFields::DONE_DATE ] = null;
+			}
 
 			$this->task_field_value_repository->update_task_multiple_field_values( $task_id, $field_values_array );
 		}
