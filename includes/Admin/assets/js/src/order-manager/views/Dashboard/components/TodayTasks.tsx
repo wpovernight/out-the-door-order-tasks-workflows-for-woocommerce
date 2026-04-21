@@ -108,7 +108,8 @@ export const TodayTasks = () => {
 		}
 	};
 
-	const hasNoTasks = todayActive.length === 0 && overdue.length === 0;
+	const hasNoTasks =
+		todayActive.length === 0 && overdue.length === 0 && done.length === 0;
 
 	const renderTaskList = (taskList: Task[], section: string) => (
 		<ul className="today-tasks-list">
