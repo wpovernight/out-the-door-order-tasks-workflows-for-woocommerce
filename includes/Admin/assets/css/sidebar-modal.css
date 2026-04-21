@@ -28,6 +28,7 @@
     overscroll-behavior-y: none;
     border-left: 1px solid var(--wpo-aom-border-light);
     background: var(--wpo-aom-card-bg);
+    font-family: Inter; /* To prevent WP overriding our styles in the Order Edit page */
 }
 
 .wpo-aom-sidebar-modal > .inner {
@@ -87,12 +88,12 @@
     z-index: 9990;
 }
 
+#poststuff .wpo-aom-sidebar-header > h2, /* To prevent WP overriding our styles in the Order Edit page */
 .wpo-aom-sidebar-header > h2 {
     padding: 0;
     margin: 0;
     font-size: 1.4em;
 }
-
 .wpo-aom-task-form > fieldset {
     display: flex;
     flex-direction: column;
@@ -300,7 +301,7 @@
     -webkit-mask-position: center;
 }
 
-.wpo-aom-datepicker-trigger.placeholder {
+.wpo-aom-datepicker-trigger.wpo-aom-placeholder {
     color: var(--wpo-aom-text-gray-light);
 }
 
