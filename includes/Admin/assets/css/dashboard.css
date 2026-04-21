@@ -180,6 +180,8 @@
 #today-tasks #done-tasks-section .task-card h4,
 #today-tasks #done-tasks-section .task-card h5 {
     text-decoration: line-through;
+    color: #888D91;
+    font-weight: normal;
 }
 
 
