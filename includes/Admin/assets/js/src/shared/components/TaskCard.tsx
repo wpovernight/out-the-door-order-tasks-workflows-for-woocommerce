@@ -37,6 +37,8 @@ interface TaskCardProps {
 	IncludedActions?: ('edit' | 'delete' | 'finish' | 'unfinish' | 'archive')[];
 	FinishAsCheckbox?: boolean;
 	excludeTags?: string[];
+	showDueDate?: boolean;
+	orderInline?: boolean;
 }
 
 export const TaskCard: React.FC<TaskCardProps> = ({
@@ -59,6 +61,8 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 	IncludedActions = ['edit', 'delete', 'finish', 'unfinish', 'archive'],
 	FinishAsCheckbox = false,
 	excludeTags = [],
+	showDueDate = true,
+	orderInline = false,
 }) => {
 	const {
 		finishTask: globalFinishTask,
@@ -150,7 +154,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 	};
 
 	const renderDueDate = () => {
-		if (!dueDate) {
+		if (!dueDate || !showDueDate) {
 			return null;
 		}
 
@@ -167,7 +171,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 		return <span className={classes}>{dueDate}</span>;
 	};
 
-	const renderAssociatedOrder = () => {
+	const renderAssociatedOrder = (inline = false) => {
 		const order = getFieldObjectValue(task, 'order');
 
 		if (!order) {
@@ -175,7 +179,9 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 		}
 
 		return (
-			<div className="task-card-order">
+			<div
+				className={`task-card-order${inline ? ' task-card-order-inline' : ''}`}
+			>
 				<a
 					href={order.url as string}
 					target="_blank"
@@ -348,6 +354,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 					</label>
 				)}
 				<HeadingTag>{task.title}</HeadingTag>
+				{orderInline && showOrder && renderAssociatedOrder(true)}
 				<div className="task-card-header-info">
 					{/* Tags for compact mode */}
 					{tagsPosition === 'top' && renderTags()}
@@ -379,11 +386,13 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 				showDescription && renderDescription()
 			)}
 
-			{showOrder || tagsPosition !== 'none' || !showDescription ? (
+			{(showOrder && !orderInline) ||
+			tagsPosition !== 'none' ||
+			(!showDescription && showDueDate && dueDate) ? (
 				<div className="task-card-footer">
 					<div className="task-card-info">
 						{tagsPosition === 'bottom' && renderTags()}
-						{showOrder && renderAssociatedOrder()}
+						{showOrder && !orderInline && renderAssociatedOrder()}
 					</div>
 					{renderDueDate()}
 				</div>

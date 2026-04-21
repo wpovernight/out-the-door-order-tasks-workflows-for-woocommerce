@@ -13,7 +13,8 @@ export const TodayTasks = () => {
 	const { tasks, deleteTask } = useTasks();
 	const { openCreateTaskModal } = useTaskCreation();
 	const { openEditTaskModal } = useTaskEdit();
-	const [overdueExpanded, setOverdueExpanded] = useState(true);
+	const [overdueExpanded, setOverdueExpanded] = useState(false);
+	const [doneExpanded, setDoneExpanded] = useState(false);
 	const contentRef = useScrollable<HTMLDivElement>();
 	const confirm = useConfirm();
 
@@ -109,20 +110,24 @@ export const TodayTasks = () => {
 
 	const hasNoTasks = todayActive.length === 0 && overdue.length === 0;
 
-	const renderTaskList = (taskList: Task[]) => (
+	const renderTaskList = (taskList: Task[], section: string) => (
 		<ul className="today-tasks-list">
 			{taskList.map((task) => (
 				<li key={task.id}>
 					<TaskCard
 						task={task}
 						headingLevel="h5"
-						showDescription={true}
-						descriptionMaxLength={120}
+						showDescription={section !== 'done'}
 						onEditClick={handleEditClick}
 						onDeleteClick={handleDeleteClick}
 						ActionDisplayMode="inline"
 						IncludedActions={['edit', 'archive', 'delete']}
 						FinishAsCheckbox={true}
+						{...(section === 'done' && {
+							tagsPosition: 'none',
+							showDueDate: false,
+							orderInline: true,
+						})}
 					/>
 				</li>
 			))}
@@ -163,7 +168,7 @@ export const TodayTasks = () => {
 								<h4 className="screenReader">
 									{__('Active tasks due today', 'wpo-aom')}
 								</h4>
-								{renderTaskList(todayActive)}
+								{renderTaskList(todayActive, 'active')}
 							</>
 						)}
 
@@ -191,10 +196,39 @@ export const TodayTasks = () => {
 									</button>
 								</h4>
 								<div
-									className={`today-tasks-overdue-list ${overdueExpanded ? 'expanded' : 'collapsed'}`}
+									className={`today-tasks-list today-tasks-overdue-list ${overdueExpanded ? 'expanded' : 'collapsed'}`}
 									id="overdue-tasks-list"
 								>
-									{renderTaskList(overdue)}
+									{renderTaskList(overdue, 'overdue')}
+								</div>
+							</div>
+						)}
+
+						{/* Done tasks */}
+						{done.length > 0 && (
+							<div
+								className={`today-tasks-section ${doneExpanded ? 'expanded' : 'collapsed'}`}
+								id="done-tasks-section"
+							>
+								<h4>
+									<button
+										type="button"
+										className={`today-tasks-section-toggle ${doneExpanded ? 'expanded' : 'collapsed'}`}
+										onClick={() =>
+											setDoneExpanded(!doneExpanded)
+										}
+									>
+										{__('Tasks marked as done', 'wpo-aom')}{' '}
+										<span className="wpo-count-badge">
+											{done.length}
+										</span>
+									</button>
+								</h4>
+								<div
+									className={`today-tasks-list ${doneExpanded ? 'expanded' : 'collapsed'}`}
+									id="done-tasks-list"
+								>
+									{renderTaskList(done, 'done')}
 								</div>
 							</div>
 						)}

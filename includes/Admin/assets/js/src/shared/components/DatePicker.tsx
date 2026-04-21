@@ -554,7 +554,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 
 												const isCurrentYear =
 													today.year ===
-														calendarYear.year;
+													calendarYear.year;
 
 												return (
 													<td
