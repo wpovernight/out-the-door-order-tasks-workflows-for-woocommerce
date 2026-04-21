@@ -197,12 +197,18 @@
 }
 
 .task-card .task-card-order a {
-    display: flex;
-    justify-content: center;
+    display: inline-flex;
+    justify-content: flex-start;
     align-items: anchor-center;
     gap: 0.3em;
     font-size: 0.9em;
     text-decoration: none;
+}
+
+.task-card .task-card-order-inline a {
+    margin-left: 0.5em;
+    border-left: 1px solid #E9EAEB;
+    padding-left: 1em;
 }
 
 .task-card .task-card-order a::before {
@@ -258,3 +264,13 @@
     -webkit-mask-position: center;
     vertical-align: bottom;
 }
+
+.task-card .task-finish-checkbox > input:checked {
+    background-color: var(--wpo-aom-purple-primary);
+}
+
+.task-card .task-finish-checkbox > input:checked::before {
+    content: ''; /* Override the default checkbox appearance applied by WP */
+}
+
+

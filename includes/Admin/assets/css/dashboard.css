@@ -109,6 +109,10 @@
     border-radius: var(--wpo-aom-radius-m);
 }
 
+#today-tasks .today-tasks-section:not(:last-child) {
+    margin-bottom: 1em;
+}
+
 #today-tasks .today-tasks-section > h4 {
     margin: 0;
     padding: 0;
@@ -118,11 +122,11 @@
     border-bottom: 1px solid var(--wpo-aom-border-light);
 }
 
-#today-tasks .today-tasks-section .today-tasks-overdue-list.expanded {
+#today-tasks .today-tasks-section .today-tasks-list.expanded {
     display: block;
 }
 
-#today-tasks .today-tasks-section .today-tasks-overdue-list.collapsed {
+#today-tasks .today-tasks-section .today-tasks-list.collapsed {
     display: none;
     margin: 0 -1em;
     padding: 1em;
@@ -149,18 +153,36 @@
 
 #today-tasks .today-tasks-section .today-tasks-section-toggle::before {
     content: '';
-    width: 1.1em;
-    height: 1.1em;
-    background-color: var(--wpo-aom-error);
+    width: 1em;
+    height: 1em;
     mask-size: contain;
     mask-repeat: no-repeat;
     mask-position: center;
     -webkit-mask-size: contain;
     -webkit-mask-repeat: no-repeat;
     -webkit-mask-position: center;
+
+}
+
+#today-tasks #overdue-tasks-section .today-tasks-section-toggle::before {
+    background-color: var(--wpo-aom-error);
     mask-image: var(--wpo-aom-icon-error);
     -webkit-mask-image: var(--wpo-aom-icon-error);
 }
+
+#today-tasks #done-tasks-section .today-tasks-section-toggle::before {
+    background-color: var(--wpo-aom-success);
+    mask-image: var(--wpo-aom-icon-finish);
+    -webkit-mask-image: var(--wpo-aom-icon-finish);
+}
+
+#today-tasks #done-tasks-section .task-card h3,
+#today-tasks #done-tasks-section .task-card h4,
+#today-tasks #done-tasks-section .task-card h5 {
+    text-decoration: line-through;
+}
+
+
 
 #today-tasks .today-tasks-section .today-tasks-section-toggle::after {
     content: '';
