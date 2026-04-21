@@ -262,7 +262,6 @@
     -webkit-mask-size: contain;
     -webkit-mask-repeat: no-repeat;
     -webkit-mask-position: center;
-    vertical-align: bottom;
 }
 
 .task-card .task-finish-checkbox > input:checked {
@@ -272,5 +271,3 @@
 .task-card .task-finish-checkbox > input:checked::before {
     content: ''; /* Override the default checkbox appearance applied by WP */
 }
-
-
