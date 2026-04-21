@@ -361,7 +361,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 				className={[
 					'wpo-aom-datepicker-trigger',
 					open && 'open',
-					!selectedDate && 'placeholder',
+					!selectedDate && 'wpo-aom-placeholder',
 				]
 					.filter(Boolean)
 					.join(' ')}
