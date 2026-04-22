@@ -33,7 +33,11 @@ class CustomOrderStatusService {
 	public function register(): void {
 		// Add custom order statuses to WooCommerce.
 		add_filter( 'wc_order_statuses', array( $this, 'add_to_order_statuses' ) );
+
+		// Register custom order statuses with WooCommerce so they are recognized as valid statuses.
 		add_filter( 'woocommerce_register_shop_order_post_statuses', array( $this, 'register_order_statuses' ) );
+
+		// Add custom order statuses to the bulk actions dropdown in the orders list table.
 		add_filter( 'bulk_actions-edit-shop_order', array( $this, 'add_to_bulk_action' ) );
 		add_filter( 'bulk_actions-woocommerce_page_wc-orders', array( $this, 'add_to_bulk_action' ) ); // HPOS support
 
@@ -104,18 +108,29 @@ class CustomOrderStatusService {
 	 * @return array
 	 */
 	public function add_to_bulk_action( array $bulk_actions ): array {
-		// We can introduce a new setting to toggle this feature if needed.
-		$statuses = $this->all();
+		$statuses         = $this->all();
+		$new_bulk_actions = array();
 
 		foreach ( $statuses as $status ) {
-			$bulk_actions[ 'mark_' . $status->status_key ] = sprintf(
+			$new_bulk_actions[ 'mark_' . $status->status_key ] = sprintf(
 				/* translators: %s: status label */
 				__( 'Change status to %s', 'wpo-aom' ),
 				esc_html( $status->label )
 			);
 		}
 
-		return $bulk_actions;
+		// Insert new bulk actions after the default "Mark as completed/pending/etc." actions.
+		$keys            = array_keys( $bulk_actions );
+		$insert_position = count( $keys );
+		foreach ( $keys as $index => $key ) {
+			if ( strpos( $key, 'mark_' ) === 0 ) {
+				$insert_position = $index + 1;
+			}
+		}
+
+		return array_slice( $bulk_actions, 0, $insert_position, true )
+			+ $new_bulk_actions
+			+ array_slice( $bulk_actions, $insert_position, null, true );
 	}
 
 	/**
