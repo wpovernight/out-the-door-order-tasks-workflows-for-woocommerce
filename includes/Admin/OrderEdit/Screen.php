@@ -504,15 +504,30 @@ final class Screen {
 		// Update the order-level fulfillment status cache.
 		$this->fulfillment_service->update_order_fulfillment_status_meta( $order_item->get_order_id() );
 
-		// Temporarily create a fulfillment object to get updated status.
+		// Temporarily create a fulfillment object to be able to call `get_order_item_fulfillment_status()`,
+		// and get the updated status for the response.
 		$fulfillment = new Fulfillment(
 			array(
-				'id' => $fulfillment_id,
+				'id'       => $fulfillment_id,
 				'quantity' => $quantity,
 			)
 		);
 
 		$fulfillment_status = $this->fulfillment_service->get_order_item_fulfillment_status( $order_item, $fulfillment );
+
+		// Register an order note to record the fulfillment quantity change.
+		$order = $order_item->get_order();
+		if ( $order ) {
+			$order->add_order_note(
+				sprintf(
+					/* translators: 1: product name, 2: fulfilled quantity, 3: total quantity */
+					esc_html__( 'Fulfillment updated for "%1$s": %2$d of %3$d fulfilled.', 'wpo-aom' ),
+					$order_item->get_name(),
+					$quantity,
+					$total_quantity
+				)
+			);
+		}
 
 		// Return the updated HTML.
 		wp_send_json_success(
