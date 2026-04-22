@@ -7,7 +7,10 @@ import {
 import { getColorStyle } from '@shared/utils/colorUtils';
 import { truncateText } from '@shared/utils/textUtils';
 import { TaskActionMenu } from '@shared/components/TaskActionMenu';
-import { getFieldObjectValue } from '@shared/utils/fieldUtils';
+import {
+	getFieldObjectValue,
+	getTaskDateField,
+} from '@shared/utils/fieldUtils';
 import { __ } from '@wordpress/i18n';
 import { useTasks } from '@shared/context/TaskContext';
 import { useConfirm } from '@shared/context/DialogContext';
@@ -78,21 +81,15 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 	const priorityField = task.fields?.find(
 		(field) => field.slug === 'priority'
 	);
-	const dueDateField = task.fields?.find(
-		(field) => field.slug === 'due_date'
-	);
-
 	const statusValue = statusField?.values
 		? statusField.values[0]?.resolved
 		: null;
 	const priorityValue = priorityField?.values
 		? priorityField.values[0]?.resolved
 		: null;
-	const dueDateValue = dueDateField?.values
-		? dueDateField.values[0]?.raw
-		: null;
-	const dueDate = dueDateValue
-		? new Date(dueDateValue.toString()).toLocaleDateString(undefined, {
+	const dueDateObject = getTaskDateField(task, 'due_date');
+	const dueDate = dueDateObject
+		? dueDateObject.toLocaleDateString(undefined, {
 				month: 'short',
 				day: 'numeric',
 				year: 'numeric',
@@ -161,7 +158,8 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 		let classes = 'task-card-due-date';
 
 		if (
-			new Date(dueDateValue as string).setHours(0, 0, 0, 0) <
+			dueDateObject &&
+			dueDateObject.setHours(0, 0, 0, 0) <
 				new Date().setHours(0, 0, 0, 0) &&
 			task.status !== TASK_FINISH_STATUS_SLUG
 		) {
