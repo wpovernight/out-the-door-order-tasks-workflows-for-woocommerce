@@ -202,11 +202,12 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 			<div className="screenReader" aria-live="polite">
 				{(() => {
 					if (loading) {
-						return __('Loading results...', 'wpo-aom');
+						return __('Loading results…', 'wpo-aom');
 					}
 					if (showResults) {
 						return results.length
 							? sprintf(
+									/* translators: %d is the number of results found. */
 									__('%d results found', 'wpo-aom'),
 									results.length
 								)
@@ -218,7 +219,7 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 
 			{showResults && loading && (
 				<div className="wpo-aom-async-multi-select-message">
-					<p>{__('Loading...', 'wpo-aom')}</p>
+					<p>{__('Loading…', 'wpo-aom')}</p>
 				</div>
 			)}
 			{showResults && !loading && !Boolean(results.length) && (
