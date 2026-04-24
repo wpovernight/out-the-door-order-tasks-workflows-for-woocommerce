@@ -2,6 +2,7 @@
 
 namespace WPO\AOM\Services;
 
+use WPO\AOM\Core\Logger;
 use WPO\AOM\Enums\FulfillmentStatuses;
 use WPO\AOM\Models\Fulfillment;
 
@@ -59,16 +60,28 @@ final class FulfillmentService {
 				continue;
 			}
 
-			foreach ( $item_fulfillment_data as $fulfillment ) {
-				$shipped_quantity += (int) $fulfillment->quantity;
-			}
+			// For now, only the first fulfillment entry per item is authoritative.
+			$shipped_quantity += (int) $item_fulfillment_data[0]->quantity;
+		}
+
+		if ( $shipped_quantity > $total_quantity ) {
+			Logger::warning(
+				sprintf(
+					'Fulfillment quantity (%d) exceeds order total quantity (%d) for order #%d.',
+					$shipped_quantity,
+					$total_quantity,
+					$order->get_id()
+				)
+			);
+
+			return FulfillmentStatuses::FULFILLED;
 		}
 
 		if ( 0 === $shipped_quantity ) {
 			return FulfillmentStatuses::NOT_FULFILLED;
 		}
 
-		if ( $shipped_quantity >= $total_quantity ) {
+		if ( $shipped_quantity === $total_quantity ) {
 			return FulfillmentStatuses::FULFILLED;
 		}
 
@@ -103,27 +116,27 @@ final class FulfillmentService {
 	/**
 	 * Save fulfillment quantity for an order item.
 	 *
-	 * @param int $item_id
-	 * @param int $quantity
+	 * @param int      $item_id
+	 * @param int      $quantity
 	 * @param int|null $fulfillment_id
 	 *
-	 * @return bool
+	 * @return int|null The id of the saved fulfillment entry, or null on failure.
 	 */
-	public function save_order_item_fulfillment_quantity( int $item_id, int $quantity, ?int $fulfillment_id ): bool {
-		$fulfillment_data = $this->get_order_item_fulfillment_data( $item_id ) ?? [];
+	public function save_order_item_fulfillment_quantity( int $item_id, int $quantity, ?int $fulfillment_id ): ?int {
+		$fulfillment_data = $this->get_order_item_fulfillment_data( $item_id ) ?? array();
 
-		$is_updated = false;
+		$saved_id = null;
 		foreach ( $fulfillment_data as $index => $fulfillment ) {
 			if ( $fulfillment->id === $fulfillment_id ) {
 				$fulfillment->quantity      = $quantity;
-				$is_updated                 = true;
 				$fulfillment_data[ $index ] = $fulfillment;
+				$saved_id                   = $fulfillment->id;
 				break;
 			}
 		}
 
 		// If not updated, create a new fulfillment entry.
-		if ( ! $is_updated ) {
+		if ( null === $saved_id ) {
 			// Find the next available ID.
 			$new_id = empty( $fulfillment_data )
 				? 1
@@ -136,13 +149,14 @@ final class FulfillmentService {
 				)
 			);
 			$fulfillment_data[] = $new_fulfillment;
+			$saved_id           = $new_id;
 		}
 
 		$fulfillment_data_array = array_map( fn( $f ) => $f->to_array(), $fulfillment_data );
 
 		$existing = wc_get_order_item_meta( $item_id, self::FULFILLMENT_DATA_META_KEY, true );
 		if ( $existing === $fulfillment_data_array ) {
-			return true;
+			return $saved_id;
 		}
 
 		$result = (bool) wc_update_order_item_meta( $item_id, self::FULFILLMENT_DATA_META_KEY, $fulfillment_data_array );
@@ -157,7 +171,7 @@ final class FulfillmentService {
 			do_action( 'wpo_aom_fulfillment_quantity_saved', $item_id, $quantity );
 		}
 
-		return $result;
+		return $result ? $saved_id : null;
 	}
 
 	/**

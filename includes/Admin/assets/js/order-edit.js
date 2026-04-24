@@ -103,6 +103,23 @@ document.addEventListener('DOMContentLoaded', function () {
 						}
 					}
 
+					// Sync the resolved fulfillment id back onto the form so the next save
+					// targets the same entry instead of creating a duplicate.
+					const savedFulfillmentId = data.data.fulfillment_id;
+					if (savedFulfillmentId) {
+						const newId = String(savedFulfillmentId);
+
+						saveButton.setAttribute('data-fulfillment-id', newId);
+
+						const cancelButton = fulfillmentCell.querySelector('.wpo-aom-cancel-fulfillment');
+						if (cancelButton) {
+							cancelButton.setAttribute('data-fulfillment-id', newId);
+						}
+
+						quantityInput.setAttribute('data-fulfillment-id', newId);
+						quantityInput.name = 'wpo-aom-fulfillment-quantity[' + itemId + '][' + newId + ']';
+					}
+
 					// Toggle back to view mode
 					toggleFulfillmentMode(fulfillmentCell, 'view');
 
