@@ -253,6 +253,11 @@ final class Screen {
 
 		$fulfillment_quantity    = $fulfillment ? (int) $fulfillment->quantity : 0;
 		$total_quantity          = (int) $item->get_quantity();
+		// Remove partial refunded items from total quantity.
+		$order = $item->get_order();
+		if ( $order instanceof \WC_Abstract_Order ) {
+			$total_quantity += (int) $order->get_qty_refunded_for_item( $item_id );
+		}
 
 		// View mode
 		$fulfillment_status_html = $this->get_fulfillment_status_html( $fulfillment_status, $fulfillment_quantity, $total_quantity );
@@ -487,13 +492,13 @@ final class Screen {
 		}
 
 		// Save the fulfillment quantity.
-		$result = $this->fulfillment_service->save_order_item_fulfillment_quantity(
+		$saved_fulfillment_id = $this->fulfillment_service->save_order_item_fulfillment_quantity(
 			$item_id,
 			$quantity,
 			$fulfillment_id
 		);
 
-		if ( ! $result ) {
+		if ( null === $saved_fulfillment_id ) {
 			wp_send_json_error(
 				array(
 					'message' => esc_html__( 'Failed to save fulfillment quantity.', 'wpo-aom' ),
@@ -508,12 +513,13 @@ final class Screen {
 		// and get the updated status for the response.
 		$fulfillment = new Fulfillment(
 			array(
-				'id'       => $fulfillment_id,
+				'id'       => $saved_fulfillment_id,
 				'quantity' => $quantity,
 			)
 		);
 
 		$fulfillment_status = $this->fulfillment_service->get_order_item_fulfillment_status( $order_item, $fulfillment );
+
 
 		// Register an order note to record the fulfillment quantity change.
 		$order = $order_item->get_order();
@@ -532,8 +538,9 @@ final class Screen {
 		// Return the updated HTML.
 		wp_send_json_success(
 			array(
-				'message' => esc_html__( 'Fulfillment quantity saved successfully.', 'wpo-aom' ),
-				'html'    => $this->get_fulfillment_status_html( $fulfillment_status, $quantity, $total_quantity ),
+				'message'        => esc_html__( 'Fulfillment quantity saved successfully.', 'wpo-aom' ),
+				'html'           => $this->get_fulfillment_status_html( $fulfillment_status, $quantity, $total_quantity ),
+				'fulfillment_id' => $saved_fulfillment_id,
 			)
 		);
 	}
