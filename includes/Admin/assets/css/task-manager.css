@@ -228,7 +228,7 @@
     background: var(--wpo-aom-primary-color);
     border-radius: var(--wpo-aom-radius-l);
     z-index: 10;
-    top: -4px;
+    top: -7.5px;
 }
 
 .task-card-wrapper.drop-indicator-bottom::after,
@@ -241,7 +241,7 @@
     background: var(--wpo-aom-primary-color);
     border-radius: var(--wpo-aom-radius-l);
     z-index: 10;
-    bottom: -4px;
+    bottom: -7.5px;
 }
 
 .kanban-column-container.show-drop-indicator:not(:has(.task-card-wrapper))::after {
