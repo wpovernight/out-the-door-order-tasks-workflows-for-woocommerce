@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { __ } from '@wordpress/i18n';
 import { Task, TASK_FINISH_STATUS_SLUG } from '@shared/types/task';
 import { useTasks } from '@shared/context/TaskContext';
@@ -43,6 +43,8 @@ export const TaskActionMenu: React.FC<TaskActionMenuProps> = ({
 	// Internal state for uncontrolled mode.
 	const [internalIsOpen, setInternalIsOpen] = useState(false);
 	const menuRef = useRef<HTMLDivElement>(null);
+	const menuListRef = useRef<HTMLUListElement>(null);
+	const [openUpward, setOpenUpward] = useState(false);
 
 	const isControlled = controlledIsOpen !== undefined;
 	const isOpen = isControlled ? controlledIsOpen : internalIsOpen;
@@ -121,6 +123,38 @@ export const TaskActionMenu: React.FC<TaskActionMenuProps> = ({
 		closeMenu(e);
 	};
 
+	// When the menu opens, check if it would overflow its nearest scroll container
+	// (or the viewport) and, if so, flip it to open above the trigger.
+	useLayoutEffect(() => {
+		if (!isOpen) {
+			setOpenUpward(false);
+			return;
+		}
+
+		const menu = menuListRef.current;
+		if (!menu) {
+			return;
+		}
+
+		let container: HTMLElement | null = menu.parentElement;
+		while (container && container !== document.body) {
+			const overflowY = window.getComputedStyle(container).overflowY;
+			if (/(auto|scroll|overlay)/.test(overflowY)) {
+				break;
+			}
+			container = container.parentElement;
+		}
+
+		const boundaryBottom =
+			container && container !== document.body
+				? container.getBoundingClientRect().bottom
+				: window.innerHeight;
+
+		if (menu.getBoundingClientRect().bottom > boundaryBottom) {
+			setOpenUpward(true);
+		}
+	}, [isOpen]);
+
 	// Close menu on outside click (uncontrolled mode only).
 	useEffect(() => {
 		if (isControlled || !isOpen) {
@@ -151,7 +185,10 @@ export const TaskActionMenu: React.FC<TaskActionMenuProps> = ({
 				<span className="screenReader">{__('Options', 'wpo-aom')}</span>
 			</button>
 			{isOpen && (
-				<ul className="wpo-action-menu">
+				<ul
+					ref={menuListRef}
+					className={`wpo-action-menu${openUpward ? ' open-upward' : ''}`}
+				>
 					{showEdit && onEdit && (
 						<li>
 							<button

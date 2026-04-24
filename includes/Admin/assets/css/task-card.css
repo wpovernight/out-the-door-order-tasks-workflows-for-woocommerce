@@ -46,6 +46,11 @@
     top: 3em;
 }
 
+.task-card-options .wpo-action-menu.open-upward {
+    top: auto;
+    bottom: 10em;
+}
+
 .task-card-options .wpo-action-menu button {
     padding: 0.9em;
     display: flex;
