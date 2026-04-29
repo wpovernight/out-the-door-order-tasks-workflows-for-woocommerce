@@ -15,7 +15,7 @@ use WPO\AOM\Services\EmailService;
 defined( 'ABSPATH' ) || exit;
 
 echo "========================================\n";
-echo strtoupper( esc_html__( 'Task Details', 'wpo-advanced-order-manager' ) ) . "\n";
+echo esc_html( strtoupper( __( 'Task Details', 'wpo-advanced-order-manager' ) ) ) . "\n";
 echo "========================================\n\n";
 
 echo esc_html__( 'Task ID:', 'wpo-advanced-order-manager' ) . ' #' . esc_html( $task_data['id'] ) . "\n";

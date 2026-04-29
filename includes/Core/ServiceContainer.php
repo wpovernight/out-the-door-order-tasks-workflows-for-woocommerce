@@ -143,7 +143,7 @@ final class ServiceContainer {
 			return $this->instances[ $id ];
 		}
 
-		throw new InvalidArgumentException( sprintf( 'Service ID "%s" is not defined.', $id ) );
+		throw new InvalidArgumentException( sprintf( 'Service ID "%s" is not defined.', esc_html( $id ) ) );
 	}
 
 	/**
@@ -172,7 +172,7 @@ final class ServiceContainer {
 
 			_doing_it_wrong(
 				__METHOD__,
-				sprintf( 'Builder callback for service ID "%s" is not callable.', $id ),
+				sprintf( 'Builder callback for service ID "%s" is not callable.', esc_html( $id ) ),
 				'1.0.0'
 			);
 		}

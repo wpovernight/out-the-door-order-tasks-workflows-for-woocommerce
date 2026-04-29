@@ -643,7 +643,7 @@ abstract class BaseRepository {
 
 		if ( $value === null ) {
 			if ( ! in_array( $operator, array( 'IS', 'IS NOT' ) ) ) {
-				throw new InvalidArgumentException( "Cannot use NULL with operator {$operator}" );
+				throw new InvalidArgumentException( esc_html( "Cannot use NULL with operator $operator" ) );
 			}
 
 			// Add IS NULL / IS NOT NULL as a raw clause (no placeholder or binding needed).
@@ -913,7 +913,7 @@ abstract class BaseRepository {
 			}
 
 			if ( '*' !== $column && ! in_array( strtolower( $column ), $this->get_column_names(), true ) ) {
-				throw new InvalidArgumentException( "Column {$column} does not exist in the table." );
+				throw new InvalidArgumentException( esc_html( "Column $column does not exist in the table." ) );
 			}
 		}
 	}

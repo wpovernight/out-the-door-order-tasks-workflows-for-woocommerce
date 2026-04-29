@@ -89,11 +89,12 @@ class CustomOrderStatusService {
 				'show_in_admin_all_list'    => true,
 				'show_in_admin_status_list' => true,
 				/* translators: %s: number of orders */
-				'label_count'               => _n_noop(
-					$label . ' <span class="count">(%s)</span>',
-					$label . ' <span class="count">(%s)</span>',
-					'wpo-advanced-order-manager'
-				)
+				'label_count' => array(
+					'singular' => $label . ' <span class="count">(%s)</span>',
+					'plural'   => $label . ' <span class="count">(%s)</span>',
+					'context'  => null,
+					'domain'   => null,
+				),
 			);
 		}
 
@@ -209,7 +210,7 @@ class CustomOrderStatusService {
 		$result = $this->repository->save( $status );
 
 		if ( ! $result ) {
-			throw new Exception( __( 'Failed to create custom order status', 'wpo-advanced-order-manager' ) );
+			throw new Exception( esc_html__( 'Failed to create custom order status', 'wpo-advanced-order-manager' ) );
 		}
 
 		$status->id            = $result;
@@ -237,14 +238,14 @@ class CustomOrderStatusService {
 	public function update( int $id, array $data ): CustomOrderStatus {
 		$custom_status = $this->repository->find( $id );
 		if ( ! $custom_status ) {
-			throw new InvalidArgumentException( __( 'Custom order status not found', 'wpo-advanced-order-manager' ) );
+			throw new InvalidArgumentException( esc_html__( 'Custom order status not found', 'wpo-advanced-order-manager' ) );
 		}
 
 		$custom_status->fill( $data );
 		$result = $this->repository->save( $custom_status );
 
 		if ( false === $result ) {
-			throw new RuntimeException( __( 'Failed to update custom order status', 'wpo-advanced-order-manager' ) );
+			throw new RuntimeException( esc_html__( 'Failed to update custom order status', 'wpo-advanced-order-manager' ) );
 		}
 
 		$this->cached_statuses = null;

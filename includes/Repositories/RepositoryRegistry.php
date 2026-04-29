@@ -38,7 +38,7 @@ final class RepositoryRegistry {
 		}
 
 		if ( ! $repository instanceof BaseRepository ) {
-			throw new \RuntimeException( "No repository registered for model: $model_class" );
+			throw new \RuntimeException( esc_html( "No repository registered for model: $model_class" ) );
 		}
 
 		return $repository;

@@ -651,13 +651,13 @@ final class TaskManagerService {
 		// Validate that the field exists.
 		$field = $this->task_field_repository->find( $field_id );
 		if ( ! $field ) {
-			throw new InvalidArgumentException( "Field with ID {$field_id} does not exist." );
+			throw new InvalidArgumentException( esc_html( "Field with ID $field_id does not exist." ) );
 		}
 
 		// Get all existing options for this field.
 		$existing_options = $this->task_field_option_repository->get_by_field_id_ordered( $field_id );
 		if ( empty( $existing_options ) ) {
-			throw new InvalidArgumentException( "Field {$field_id} has no options to reorder." );
+			throw new InvalidArgumentException( esc_html( "Field $field_id has no options to reorder." ) );
 		}
 
 		// Extract valid option IDs for this field.
@@ -671,7 +671,7 @@ final class TaskManagerService {
 		// Validate that all provided option IDs belong to this field.
 		foreach ( $ordered_option_ids as $option_id ) {
 			if ( ! in_array( $option_id, $valid_option_ids, true ) ) {
-				throw new InvalidArgumentException( "Option ID {$option_id} does not belong to field {$field_id}." );
+				throw new InvalidArgumentException( esc_html( "Option ID $option_id does not belong to field $field_id." ) );
 			}
 		}
 
