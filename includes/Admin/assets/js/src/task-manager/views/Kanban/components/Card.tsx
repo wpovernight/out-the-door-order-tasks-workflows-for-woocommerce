@@ -197,13 +197,13 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 
 	const handleDeleteClick = async () => {
 		const confirmationResult = await confirm({
-			title: __('Delete this task?', 'wpo-aom'),
+			title: __('Delete this task?', 'wpo-advanced-order-manager'),
 			message: __(
 				'Are you sure you want to delete this task? This action cannot be undone.',
-				'wpo-aom'
+				'wpo-advanced-order-manager'
 			),
-			confirmText: __('Delete', 'wpo-aom'),
-			cancelText: __('Cancel', 'wpo-aom'),
+			confirmText: __('Delete', 'wpo-advanced-order-manager'),
+			cancelText: __('Cancel', 'wpo-advanced-order-manager'),
 			action: 'delete',
 		});
 

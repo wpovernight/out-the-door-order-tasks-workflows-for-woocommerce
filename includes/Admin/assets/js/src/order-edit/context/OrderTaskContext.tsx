@@ -123,7 +123,7 @@ export const OrderTaskProvider: React.FC<{
 				setLoadingError(
 					err instanceof Error
 						? err
-						: new Error(__('Failed to load tasks', 'wpo-aom'))
+						: new Error(__('Failed to load tasks', 'wpo-advanced-order-manager'))
 				);
 				console.error('Error loading tasks:', err);
 			} finally {

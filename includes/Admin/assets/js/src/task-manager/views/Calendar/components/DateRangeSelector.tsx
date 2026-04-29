@@ -128,7 +128,7 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 							htmlFor="date-input-start"
 							className="screenReader"
 						>
-							{__('From', 'wpo-aom')}
+							{__('From', 'wpo-advanced-order-manager')}
 						</label>
 						<input
 							id="date-input-start"
@@ -143,7 +143,7 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 							htmlFor="date-input-end"
 							className="screenReader"
 						>
-							{__('To', 'wpo-aom')}
+							{__('To', 'wpo-advanced-order-manager')}
 						</label>
 						<input
 							id="date-input-end"
@@ -160,7 +160,7 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 							htmlFor="date-input-single"
 							className="screenReader"
 						>
-							{__('Select Date', 'wpo-aom')}
+							{__('Select Date', 'wpo-advanced-order-manager')}
 						</label>
 						<input
 							id="date-input-single"
@@ -181,13 +181,13 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 					className="wpo-button wpo-clear-button"
 					onClick={onCancel}
 				>
-					{__('Clear', 'wpo-aom')}
+					{__('Clear', 'wpo-advanced-order-manager')}
 				</button>
 				<button
 					className="wpo-button wpo-apply-button"
 					onClick={onApply}
 				>
-					{__('Apply', 'wpo-aom')}
+					{__('Apply', 'wpo-advanced-order-manager')}
 				</button>
 			</div>
 		</div>

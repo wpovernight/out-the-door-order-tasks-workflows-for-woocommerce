@@ -64,7 +64,7 @@ final class Screen {
 
 		add_meta_box(
 			'wpo-aom-order-meta-box',
-			esc_html__( 'Advanced Order Management', 'wpo-aom' ),
+			esc_html__( 'Advanced Order Management', 'wpo-advanced-order-manager' ),
 			array( $this, 'render_meta_box' ),
 			$screen_id,
 			'side',

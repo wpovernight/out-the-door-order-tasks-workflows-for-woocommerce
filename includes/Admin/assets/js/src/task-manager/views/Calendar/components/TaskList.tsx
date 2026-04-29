@@ -43,23 +43,23 @@ const TaskList: React.FC<TaskListProps> = ({
 
 		if (dateRangePreset !== 'custom') {
 			const presetLabels: Record<string, string> = {
-				today: __('Today', 'wpo-aom'),
-				tomorrow: __('Tomorrow', 'wpo-aom'),
-				yesterday: __('Yesterday', 'wpo-aom'),
-				'current-week': __('Current Week', 'wpo-aom'),
-				'next-week': __('Next Week', 'wpo-aom'),
-				'last-week': __('Last Week', 'wpo-aom'),
-				'current-month': __('Current Month', 'wpo-aom'),
-				'next-month': __('Next Month', 'wpo-aom'),
-				'last-month': __('Last Month', 'wpo-aom'),
+				today: __('Today', 'wpo-advanced-order-manager'),
+				tomorrow: __('Tomorrow', 'wpo-advanced-order-manager'),
+				yesterday: __('Yesterday', 'wpo-advanced-order-manager'),
+				'current-week': __('Current Week', 'wpo-advanced-order-manager'),
+				'next-week': __('Next Week', 'wpo-advanced-order-manager'),
+				'last-week': __('Last Week', 'wpo-advanced-order-manager'),
+				'current-month': __('Current Month', 'wpo-advanced-order-manager'),
+				'next-month': __('Next Month', 'wpo-advanced-order-manager'),
+				'last-month': __('Last Month', 'wpo-advanced-order-manager'),
 			};
 			const presetLabel =
-				presetLabels[dateRangePreset] || __('Today', 'wpo-aom');
+				presetLabels[dateRangePreset] || __('Today', 'wpo-advanced-order-manager');
 			return (
 				<>
 					{sprintf(
 						/* translators: %s: date range label (e.g. "Today", "Current Week") */
-						__("%s's tasks", 'wpo-aom'),
+						__("%s's tasks", 'wpo-advanced-order-manager'),
 						presetLabel
 					)}{' '}
 					{taskCountBadge}

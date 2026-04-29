@@ -8,9 +8,9 @@ interface CalendarGridProps {
 }
 
 const WEEKDAYS = [
-	{ abbr: __('Monday', 'wpo-aom'), short: __('Mo', 'wpo-aom') },
-	{ abbr: __('Tuesday', 'wpo-aom'), short: __('Tu', 'wpo-aom') },
-	{ abbr: __('Wednesday', 'wpo-aom'), short: __('We', 'wpo-aom') },
+	{ abbr: __('Monday', 'wpo-advanced-order-manager'), short: __('Mo', 'wpo-advanced-order-manager') },
+	{ abbr: __('Tuesday', 'wpo-advanced-order-manager'), short: __('Tu', 'wpo-advanced-order-manager') },
+	{ abbr: __('Wednesday', 'wpo-advanced-order-manager'), short: __('We', 'wpo-advanced-order-manager') },
 	{ abbr: __('Thursday', 'wpo-aom'), short: __('Th', 'wpo-aom') },
 	{ abbr: __('Friday', 'wpo-aom'), short: __('Fr', 'wpo-aom') },
 	{ abbr: __('Saturday', 'wpo-aom'), short: __('Sa', 'wpo-aom') },

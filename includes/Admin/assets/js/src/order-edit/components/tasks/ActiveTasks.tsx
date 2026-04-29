@@ -62,16 +62,16 @@ const ActiveTasks: React.FC = () => {
 	const handleArchiveClick = useCallback(
 		async (taskId: number): Promise<boolean> => {
 			const confirmationResult = await confirm({
-				title: __('Archive this task?', 'wpo-aom'),
+				title: __('Archive this task?', 'wpo-advanced-order-manager'),
 				message: createInterpolateElement(
 					__(
 						'Once archived, you can locate this task in the <strong>Task → Archive</strong> tab.',
-						'wpo-aom'
+						'wpo-advanced-order-manager'
 					),
 					{ strong: <strong /> }
 				),
-				confirmText: __('Archive', 'wpo-aom'),
-				cancelText: __('Cancel', 'wpo-aom'),
+				confirmText: __('Archive', 'wpo-advanced-order-manager'),
+				cancelText: __('Cancel', 'wpo-advanced-order-manager'),
 				action: 'archive',
 			});
 
@@ -149,13 +149,13 @@ const ActiveTasks: React.FC = () => {
 
 		openEditTaskModal({
 			task,
-			title: __('Edit task', 'wpo-aom'),
+			title: __('Edit task', 'wpo-advanced-order-manager'),
 		});
 	};
 
 	const handleDeleteClick = async (taskId: number) => {
 		const confirmationResult = await confirm({
-			title: __('Delete this task?', 'wpo-aom'),
+			title: __('Delete this task?', 'wpo-advanced-order-manager'),
 			message: __(
 				'Are you sure you want to delete this task? This action cannot be undone.',
 				'wpo-aom'

@@ -4,9 +4,9 @@ import { AVAILABLE_VIEWS, useView } from '../context/ViewContext';
 import { useTaskCreation } from '@shared/hooks/useTaskFormModal';
 
 const viewLabels: Record<string, string> = {
-	kanban: __('Board', 'wpo-aom'),
-	calendar: __('Calendar', 'wpo-aom'),
-	archive: __('Archive', 'wpo-aom'),
+	kanban: __('Board', 'wpo-advanced-order-manager'),
+	calendar: __('Calendar', 'wpo-advanced-order-manager'),
+	archive: __('Archive', 'wpo-advanced-order-manager'),
 };
 
 export default function Header() {
@@ -38,13 +38,13 @@ export default function Header() {
 				<div className="header-search">
 					<label htmlFor="header-search-input">
 						<span className="screenReader">
-							{__('Search', 'wpo-aom')}
+							{__('Search', 'wpo-advanced-order-manager')}
 						</span>
 					</label>
 					<input
 						type="search"
 						id="header-search-input"
-						placeholder={__('Search', 'wpo-aom')}
+						placeholder={__('Search', 'wpo-advanced-order-manager')}
 						value={searchQuery}
 						onChange={(e) => setSearchQuery(e.target.value)}
 					/>
@@ -54,11 +54,11 @@ export default function Header() {
 					className="wpo-button wpo-button-primary add-task"
 					onClick={() =>
 						openCreateTaskModal({
-							title: __('Add new task', 'wpo-aom'),
+							title: __('Add new task', 'wpo-advanced-order-manager'),
 						})
 					}
 				>
-					{__('Add new task', 'wpo-aom')}
+					{__('Add new task', 'wpo-advanced-order-manager')}
 				</button>
 			</div>
 		</div>

@@ -22,7 +22,7 @@ interface AsyncMultiSelectProps {
 }
 
 export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
-	placeholder = __('Search…', 'wpo-aom'),
+	placeholder = __('Search…', 'wpo-advanced-order-manager'),
 	selectedOptions = [],
 	id,
 	className,

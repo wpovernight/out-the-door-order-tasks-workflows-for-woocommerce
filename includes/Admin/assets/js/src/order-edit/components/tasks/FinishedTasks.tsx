@@ -21,19 +21,19 @@ const FinishedTasks: React.FC = () => {
 
 		openEditTaskModal({
 			task,
-			title: __('Edit task', 'wpo-aom'),
+			title: __('Edit task', 'wpo-advanced-order-manager'),
 		});
 	};
 
 	const handleDeleteClick = async (taskId: number) => {
 		const confirmationResult = await confirm({
-			title: __('Delete this task?', 'wpo-aom'),
+			title: __('Delete this task?', 'wpo-advanced-order-manager'),
 			message: __(
 				'Are you sure you want to delete this task? This action cannot be undone.',
-				'wpo-aom'
+				'wpo-advanced-order-manager'
 			),
-			confirmText: __('Delete', 'wpo-aom'),
-			cancelText: __('Cancel', 'wpo-aom'),
+			confirmText: __('Delete', 'wpo-advanced-order-manager'),
+			cancelText: __('Cancel', 'wpo-advanced-order-manager'),
 			action: 'delete',
 		});
 
@@ -45,10 +45,10 @@ const FinishedTasks: React.FC = () => {
 			await deleteTask(taskId);
 		} catch {
 			await notice({
-				title: __('Delete failed', 'wpo-aom'),
+				title: __('Delete failed', 'wpo-advanced-order-manager'),
 				message: __(
 					'Failed to delete task. Please try again.',
-					'wpo-aom'
+					'wpo-advanced-order-manager'
 				),
 				action: 'delete',
 			});
@@ -72,7 +72,7 @@ const FinishedTasks: React.FC = () => {
 				style={!isExpanded ? { display: 'none' } : {}}
 			>
 				<h4>
-					{__('Done Tasks', 'wpo-aom')} ({finishedCount})
+					{__('Done Tasks', 'wpo-advanced-order-manager')} ({finishedCount})
 				</h4>
 				<ul className="task-list">
 					{finishedTasks.map((task) => (
