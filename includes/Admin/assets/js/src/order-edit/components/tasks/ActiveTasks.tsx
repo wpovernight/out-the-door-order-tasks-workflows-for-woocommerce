@@ -158,10 +158,10 @@ const ActiveTasks: React.FC = () => {
 			title: __('Delete this task?', 'wpo-advanced-order-manager'),
 			message: __(
 				'Are you sure you want to delete this task? This action cannot be undone.',
-				'wpo-aom'
+				'wpo-advanced-order-manager'
 			),
-			confirmText: __('Delete', 'wpo-aom'),
-			cancelText: __('Cancel', 'wpo-aom'),
+			confirmText: __('Delete', 'wpo-advanced-order-manager'),
+			cancelText: __('Cancel', 'wpo-advanced-order-manager'),
 			action: 'delete',
 		});
 
@@ -211,7 +211,7 @@ const ActiveTasks: React.FC = () => {
 			<ErrorState
 				message={
 					loadingError?.message ||
-					__('Error loading data. Please try again.', 'wpo-aom')
+					__('Error loading data. Please try again.', 'wpo-advanced-order-manager')
 				}
 				onRetry={refreshTasks}
 			/>
@@ -225,15 +225,15 @@ const ActiveTasks: React.FC = () => {
 		return (
 			<EmptyState
 				icon="note"
-				message={__('No tasks found.', 'wpo-aom')}
-				actionText={__('Add Task', 'wpo-aom')}
+				message={__('No tasks found.', 'wpo-advanced-order-manager')}
+				actionText={__('Add Task', 'wpo-advanced-order-manager')}
 			/>
 		);
 	}
 
 	return (
 		<div className="task-list-container active-tasks-container">
-			<h4 className="screenReader">{__('Active Tasks', 'wpo-aom')}</h4>
+			<h4 className="screenReader">{__('Active Tasks', 'wpo-advanced-order-manager')}</h4>
 			<ul className="task-list">
 				{visibleTasks.map((item) => {
 					if (item.type === 'archived') {
@@ -256,14 +256,14 @@ const ActiveTasks: React.FC = () => {
 										<span className="task-archived-message">
 											{__(
 												'You archived this task',
-												'wpo-aom'
+												'wpo-advanced-order-manager'
 											)}
 										</span>
 										<a
 											href={archivePageUrl}
 											className="task-archived-link"
 										>
-											{__('Go to archive', 'wpo-aom')}
+											{__('Go to archive', 'wpo-advanced-order-manager')}
 											{' \u2192'}
 										</a>
 									</div>
@@ -274,7 +274,7 @@ const ActiveTasks: React.FC = () => {
 											handleUndoArchive(taskId)
 										}
 									>
-										{__('Undo', 'wpo-aom')}
+										{__('Undo', 'wpo-advanced-order-manager')}
 									</button>
 								</div>
 							</li>

@@ -52,7 +52,7 @@ class FulfillmentController extends BaseRestController {
 		if ( ! empty( $status ) && ! FulfillmentStatuses::is_valid( $status ) ) {
 			return new WP_Error(
 				'invalid_status',
-				__( 'Invalid fulfillment status provided.', 'wpo-aom' ),
+				__( 'Invalid fulfillment status provided.', 'wpo-advanced-order-manager' ),
 				array( 'status' => 400 )
 			);
 		}

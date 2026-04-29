@@ -91,16 +91,16 @@ export const TaskActionMenu: React.FC<TaskActionMenuProps> = ({
 		closeMenu(e);
 
 		const confirmationResult = await confirm({
-			title: __('Archive this task?', 'wpo-aom'),
+			title: __('Archive this task?', 'wpo-advanced-order-manager'),
 			message: createInterpolateElement(
 				__(
 					'Once archived, you can locate this task in the <strong>Task → Archive</strong> tab.',
-					'wpo-aom'
+					'wpo-advanced-order-manager'
 				),
 				{ strong: <strong /> }
 			),
-			confirmText: __('Archive', 'wpo-aom'),
-			cancelText: __('Cancel', 'wpo-aom'),
+			confirmText: __('Archive', 'wpo-advanced-order-manager'),
+			cancelText: __('Cancel', 'wpo-advanced-order-manager'),
 			action: 'archive',
 		});
 
@@ -182,7 +182,7 @@ export const TaskActionMenu: React.FC<TaskActionMenuProps> = ({
 				type="button"
 				onClick={handleToggle}
 			>
-				<span className="screenReader">{__('Options', 'wpo-aom')}</span>
+				<span className="screenReader">{__('Options', 'wpo-advanced-order-manager')}</span>
 			</button>
 			{isOpen && (
 				<ul
@@ -196,7 +196,7 @@ export const TaskActionMenu: React.FC<TaskActionMenuProps> = ({
 								className="wpo-button task-edit-menu-item"
 								onClick={handleEditClick}
 							>
-								{__('Edit', 'wpo-aom')}
+								{__('Edit', 'wpo-advanced-order-manager')}
 							</button>
 						</li>
 					)}
@@ -209,8 +209,8 @@ export const TaskActionMenu: React.FC<TaskActionMenuProps> = ({
 							}
 						>
 							{isDone
-								? __('Mark as In Progress', 'wpo-aom')
-								: __('Mark as Done', 'wpo-aom')}
+								? __('Mark as In Progress', 'wpo-advanced-order-manager')
+								: __('Mark as Done', 'wpo-advanced-order-manager')}
 						</button>
 					</li>
 					<li>
@@ -219,7 +219,7 @@ export const TaskActionMenu: React.FC<TaskActionMenuProps> = ({
 							className="wpo-button task-archive-menu-item"
 							onClick={handleArchiveClick}
 						>
-							{__('Archive', 'wpo-aom')}
+							{__('Archive', 'wpo-advanced-order-manager')}
 						</button>
 					</li>
 					{showDelete && (
@@ -229,7 +229,7 @@ export const TaskActionMenu: React.FC<TaskActionMenuProps> = ({
 								className="wpo-button task-delete-menu-item"
 								onClick={handleDeleteClick}
 							>
-								{__('Delete', 'wpo-aom')}
+								{__('Delete', 'wpo-advanced-order-manager')}
 							</button>
 						</li>
 					)}

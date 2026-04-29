@@ -20,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
 do_action( 'woocommerce_email_header', $email_heading, $email );
 ?>
 
-<p><?php esc_html_e( 'A new task has been created:', 'wpo-aom' ); ?></p>
+<p><?php esc_html_e( 'A new task has been created:', 'wpo-advanced-order-manager' ); ?></p>
 
 <?php
 /**

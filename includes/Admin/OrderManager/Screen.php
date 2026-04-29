@@ -40,7 +40,7 @@ final class Screen {
 			true
 		);
 
-		wp_set_script_translations( 'wpo-aom-admin-order-manager', 'wpo-aom', WPO_AOM()->plugin_path() . '/languages' );
+		wp_set_script_translations( 'wpo-aom-admin-order-manager', 'wpo-advanced-order-manager', WPO_AOM()->plugin_path() . '/languages' );
 
 		wp_localize_script(
 			'wpo-aom-admin-order-manager',
@@ -120,8 +120,8 @@ final class Screen {
 	public function add_screen(): void {
 		add_submenu_page(
 			'woocommerce',
-			esc_html__( 'Order Manager', 'wpo-aom' ),
-			esc_html__( 'Order Manager', 'wpo-aom' ),
+			esc_html__( 'Order Manager', 'wpo-advanced-order-manager' ),
+			esc_html__( 'Order Manager', 'wpo-advanced-order-manager' ),
 			'manage_woocommerce',
 			'wpo_aom_order_manager',
 			array( $this, 'render_page' )

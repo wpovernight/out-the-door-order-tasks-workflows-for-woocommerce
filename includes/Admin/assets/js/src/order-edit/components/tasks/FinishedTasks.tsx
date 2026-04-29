@@ -99,8 +99,8 @@ const FinishedTasks: React.FC = () => {
 				type="button"
 			>
 				{isExpanded
-					? __('Hide Done Tasks', 'wpo-aom')
-					: __('View Done Tasks', 'wpo-aom')}{' '}
+					? __('Hide Done Tasks', 'wpo-advanced-order-manager')
+					: __('View Done Tasks', 'wpo-advanced-order-manager')}{' '}
 				({finishedCount})
 			</button>
 		</div>

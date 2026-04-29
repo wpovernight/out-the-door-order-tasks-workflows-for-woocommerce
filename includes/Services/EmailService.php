@@ -172,7 +172,7 @@ final class EmailService {
 			// Get first value from array (select fields typically have single value).
 			$option_id = reset( $field_value );
 			if ( empty( $option_id ) ) {
-				return __( 'None', 'wpo-aom' );
+				return __( 'None', 'wpo-advanced-order-manager' );
 			}
 			$field_value = $option_id;
 		}
@@ -243,7 +243,7 @@ final class EmailService {
 		if ( is_array( $field_value ) && isset( $field_value['resolved'] ) ) {
 			return $field_value['resolved']['display_name']
 			       ?? $field_value['resolved']['username']
-			          ?? __( 'Unassigned', 'wpo-aom' );
+			          ?? __( 'Unassigned', 'wpo-advanced-order-manager' );
 		}
 
 		// Extract raw user ID from array format.
@@ -253,7 +253,7 @@ final class EmailService {
 
 		$user = get_userdata( absint( $field_value ) );
 
-		return $user ? $user->display_name : __( 'Unassigned', 'wpo-aom' );
+		return $user ? $user->display_name : __( 'Unassigned', 'wpo-advanced-order-manager' );
 	}
 
 	/**

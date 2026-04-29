@@ -206,16 +206,16 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 		e.stopPropagation();
 
 		const confirmationResult = await confirm({
-			title: __('Archive this task?', 'wpo-aom'),
+			title: __('Archive this task?', 'wpo-advanced-order-manager'),
 			message: createInterpolateElement(
 				__(
 					'Once archived, you can locate this task in the <strong>Task → Archive</strong> tab.',
-					'wpo-aom'
+					'wpo-advanced-order-manager'
 				),
 				{ strong: <strong /> }
 			),
-			confirmText: __('Archive', 'wpo-aom'),
-			cancelText: __('Cancel', 'wpo-aom'),
+			confirmText: __('Archive', 'wpo-advanced-order-manager'),
+			cancelText: __('Cancel', 'wpo-advanced-order-manager'),
 			action: 'archive',
 		});
 
@@ -244,10 +244,10 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 								e.stopPropagation();
 								onEditClick(task.id);
 							}}
-							title={__('Edit', 'wpo-aom')}
+							title={__('Edit', 'wpo-advanced-order-manager')}
 						>
 							<span className="screenReader">
-								{__('Edit', 'wpo-aom')}
+								{__('Edit', 'wpo-advanced-order-manager')}
 							</span>
 						</button>
 					</li>
@@ -258,10 +258,10 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 							className="wpo-button wpo-button-icon task-archive"
 							type="button"
 							onClick={handleArchiveClick}
-							title={__('Archive', 'wpo-aom')}
+							title={__('Archive', 'wpo-advanced-order-manager')}
 						>
 							<span className="screenReader">
-								{__('Archive', 'wpo-aom')}
+								{__('Archive', 'wpo-advanced-order-manager')}
 							</span>
 						</button>
 					</li>
@@ -280,14 +280,14 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 								}
 								title={
 									isDone
-										? __('Mark as In Progress', 'wpo-aom')
-										: __('Mark as Done', 'wpo-aom')
+										? __('Mark as In Progress', 'wpo-advanced-order-manager')
+										: __('Mark as Done', 'wpo-advanced-order-manager')
 								}
 							>
 								<span className="screenReader">
 									{isDone
-										? __('Mark as In Progress', 'wpo-aom')
-										: __('Mark as Done', 'wpo-aom')}
+										? __('Mark as In Progress', 'wpo-advanced-order-manager')
+										: __('Mark as Done', 'wpo-advanced-order-manager')}
 								</span>
 							</button>
 						</li>
@@ -301,10 +301,10 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 								e.stopPropagation();
 								onDeleteClick(task.id);
 							}}
-							title={__('Delete', 'wpo-aom')}
+							title={__('Delete', 'wpo-advanced-order-manager')}
 						>
 							<span className="screenReader">
-								{__('Delete', 'wpo-aom')}
+								{__('Delete', 'wpo-advanced-order-manager')}
 							</span>
 						</button>
 					</li>
@@ -333,8 +333,8 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 					>
 						<span className="screenReader">
 							{isDone
-								? __('Mark as In Progress', 'wpo-aom')
-								: __('Mark as Done', 'wpo-aom')}
+								? __('Mark as In Progress', 'wpo-advanced-order-manager')
+								: __('Mark as Done', 'wpo-advanced-order-manager')}
 						</span>
 						<input
 							id={`task-finish-${task.id}`}

@@ -212,7 +212,7 @@ class TaskController extends BaseRestController {
 							'required'          => true,
 							'type'              => 'array',
 							'items'             => array( 'type' => 'integer' ),
-							'description'       => __( 'Array of option IDs in desired order.', 'wpo-aom' ),
+							'description'       => __( 'Array of option IDs in desired order.', 'wpo-advanced-order-manager' ),
 							'validate_callback' => function ( $param ) {
 								return is_array( $param ) && ! empty( $param );
 							},
@@ -287,7 +287,7 @@ class TaskController extends BaseRestController {
 			);
 		} catch ( \Throwable $e ) {
 			Logger::error( 'Task creation failed: ' . $e->getMessage() );
-			return new WP_Error( 'task_creation_failed', __( 'Failed to create task.', 'wpo-aom' ), array( 'status' => 500 ) );
+			return new WP_Error( 'task_creation_failed', __( 'Failed to create task.', 'wpo-advanced-order-manager' ), array( 'status' => 500 ) );
 		}
 
 		/**
@@ -378,7 +378,7 @@ class TaskController extends BaseRestController {
 			$task = $task_manager_service->update_task( $id, $data, $data['field_values'] ?? null );
 		} catch ( \Throwable $e ) {
 			Logger::error( 'Task update failed: ' . $e->getMessage() );
-			return new WP_Error( 'task_update_failed', __( 'Failed to update task.', 'wpo-aom' ), array( 'status' => 500 ) );
+			return new WP_Error( 'task_update_failed', __( 'Failed to update task.', 'wpo-advanced-order-manager' ), array( 'status' => 500 ) );
 		}
 
 		/**
@@ -413,7 +413,7 @@ class TaskController extends BaseRestController {
 			$task_manager_service->delete_task( $id );
 		} catch ( \Exception $e ) {
 			Logger::error( 'Task deletion failed: ' . $e->getMessage() );
-			return new WP_Error( 'task_deletion_failed', __( 'Failed to delete task.', 'wpo-aom' ), array( 'status' => 500 ) );
+			return new WP_Error( 'task_deletion_failed', __( 'Failed to delete task.', 'wpo-advanced-order-manager' ), array( 'status' => 500 ) );
 		}
 
 		return rest_ensure_response( array( 'message' => 'Task deleted successfully' ) );
@@ -431,31 +431,31 @@ class TaskController extends BaseRestController {
 			'type'       => 'object',
 			'properties' => array(
 				'id'          => array(
-					'description' => __( 'Task ID.', 'wpo-aom' ),
+					'description' => __( 'Task ID.', 'wpo-advanced-order-manager' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'title'       => array(
-					'description' => __( 'Task title.', 'wpo-aom' ),
+					'description' => __( 'Task title.', 'wpo-advanced-order-manager' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit', 'create' ),
 					'required'    => true,
 				),
 				'description' => array(
-					'description' => __( 'Task description.', 'wpo-aom' ),
+					'description' => __( 'Task description.', 'wpo-advanced-order-manager' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit', 'create' ),
 				),
 				'created_at'  => array(
-					'description' => __( 'Task creation timestamp.', 'wpo-aom' ),
+					'description' => __( 'Task creation timestamp.', 'wpo-advanced-order-manager' ),
 					'type'        => 'string',
 					'format'      => 'date-time',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'updated_at'  => array(
-					'description' => __( 'Task last update timestamp.', 'wpo-aom' ),
+					'description' => __( 'Task last update timestamp.', 'wpo-advanced-order-manager' ),
 					'type'        => 'string',
 					'format'      => 'date-time',
 					'context'     => array( 'view' ),
@@ -575,7 +575,7 @@ class TaskController extends BaseRestController {
 			return rest_ensure_response(
 				array(
 					'success' => true,
-					'message' => __( 'Field option positions updated successfully', 'wpo-aom' ),
+					'message' => __( 'Field option positions updated successfully', 'wpo-advanced-order-manager' ),
 				)
 			);
 		} catch ( \InvalidArgumentException $e ) {
@@ -609,29 +609,29 @@ class TaskController extends BaseRestController {
 			'type'       => 'object',
 			'properties' => array(
 				'id'       => array(
-					'description' => __( 'Option ID.', 'wpo-aom' ),
+					'description' => __( 'Option ID.', 'wpo-advanced-order-manager' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'field_id' => array(
-					'description' => __( 'Field ID this option belongs to.', 'wpo-aom' ),
+					'description' => __( 'Field ID this option belongs to.', 'wpo-advanced-order-manager' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'label'    => array(
-					'description' => __( 'Option label.', 'wpo-aom' ),
+					'description' => __( 'Option label.', 'wpo-advanced-order-manager' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'color'    => array(
-					'description' => __( 'Option color.', 'wpo-aom' ),
+					'description' => __( 'Option color.', 'wpo-advanced-order-manager' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'position' => array(
-					'description' => __( 'Option position for ordering.', 'wpo-aom' ),
+					'description' => __( 'Option position for ordering.', 'wpo-advanced-order-manager' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
@@ -669,11 +669,11 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'invalid_params', $e->getMessage(), array( 'status' => 400 ) );
 		} catch ( \Exception $e ) {
 			Logger::error( 'Task move failed: ' . $e->getMessage() );
-			return new WP_Error( 'task_move_failed', __( 'Failed to move task.', 'wpo-aom' ), array( 'status' => 500 ) );
+			return new WP_Error( 'task_move_failed', __( 'Failed to move task.', 'wpo-advanced-order-manager' ), array( 'status' => 500 ) );
 		}
 
 		if ( ! $new_position ) {
-			return new WP_Error( 'task_move_failed', __( 'Failed to move task.', 'wpo-aom' ), array( 'status' => 500 ) );
+			return new WP_Error( 'task_move_failed', __( 'Failed to move task.', 'wpo-advanced-order-manager' ), array( 'status' => 500 ) );
 		}
 
 		return rest_ensure_response( array( 'new_position' => $new_position ) );
@@ -703,7 +703,7 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'task_finish_failed', $e->getMessage(), array( 'status' => 404 ) );
 		} catch ( \Exception $e ) {
 			Logger::error( 'Task finish failed: ' . $e->getMessage() );
-			return new WP_Error( 'task_finish_failed', __( 'Failed to finish task.', 'wpo-aom' ), array( 'status' => 500 ) );
+			return new WP_Error( 'task_finish_failed', __( 'Failed to finish task.', 'wpo-advanced-order-manager' ), array( 'status' => 500 ) );
 		}
 
 		return rest_ensure_response( array(
@@ -736,7 +736,7 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'task_archive_failed', $e->getMessage(), array( 'status' => 404 ) );
 		} catch ( \Exception $e ) {
 			Logger::error( 'Task archive failed: ' . $e->getMessage() );
-			return new WP_Error( 'task_archive_failed', __( 'Failed to archive task.', 'wpo-aom' ), array( 'status' => 500 ) );
+			return new WP_Error( 'task_archive_failed', __( 'Failed to archive task.', 'wpo-advanced-order-manager' ), array( 'status' => 500 ) );
 		}
 
 		return rest_ensure_response( array(
@@ -768,7 +768,7 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'task_unarchive_failed', $e->getMessage(), array( 'status' => 404 ) );
 		} catch ( \Exception $e ) {
 			Logger::error( 'Task unarchive failed: ' . $e->getMessage() );
-			return new WP_Error( 'task_unarchive_failed', __( 'Failed to unarchive task.', 'wpo-aom' ), array( 'status' => 500 ) );
+			return new WP_Error( 'task_unarchive_failed', __( 'Failed to unarchive task.', 'wpo-advanced-order-manager' ), array( 'status' => 500 ) );
 		}
 
 		return rest_ensure_response( array(

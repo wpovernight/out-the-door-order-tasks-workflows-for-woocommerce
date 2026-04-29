@@ -34,7 +34,7 @@ export const ArchiveContent: React.FC = () => {
 		<div className="archive-view-container">
 			{archivedTasks.length === 0 && (
 				<div className="no-tasks">
-					<p>{__('No archived tasks found.', 'wpo-aom')}</p>
+					<p>{__('No archived tasks found.', 'wpo-advanced-order-manager')}</p>
 				</div>
 			)}
 
@@ -48,7 +48,7 @@ export const ArchiveContent: React.FC = () => {
 										className="task-info th-sortable"
 										onClick={() => handleSort('title')}
 									>
-										{__('Task', 'wpo-aom')}{' '}
+										{__('Task', 'wpo-advanced-order-manager')}{' '}
 										<SortIcon
 											column="title"
 											sortColumn={sortColumn}
@@ -59,7 +59,7 @@ export const ArchiveContent: React.FC = () => {
 										className="task-order-id th-sortable"
 										onClick={() => handleSort('orderID')}
 									>
-										{__('Order ID', 'wpo-aom')}{' '}
+										{__('Order ID', 'wpo-advanced-order-manager')}{' '}
 										<SortIcon
 											column="orderID"
 											sortColumn={sortColumn}
@@ -72,7 +72,7 @@ export const ArchiveContent: React.FC = () => {
 											handleSort('customerName')
 										}
 									>
-										{__('Customer', 'wpo-aom')}{' '}
+										{__('Customer', 'wpo-advanced-order-manager')}{' '}
 										<SortIcon
 											column="customerName"
 											sortColumn={sortColumn}
@@ -83,7 +83,7 @@ export const ArchiveContent: React.FC = () => {
 										className="task-done-date th-sortable"
 										onClick={() => handleSort('doneDate')}
 									>
-										{__('Done', 'wpo-aom')}{' '}
+										{__('Done', 'wpo-advanced-order-manager')}{' '}
 										<SortIcon
 											column="doneDate"
 											sortColumn={sortColumn}
@@ -96,7 +96,7 @@ export const ArchiveContent: React.FC = () => {
 											handleSort('archivedDate')
 										}
 									>
-										{__('Archived Date', 'wpo-aom')}{' '}
+										{__('Archived Date', 'wpo-advanced-order-manager')}{' '}
 										<SortIcon
 											column="archivedDate"
 											sortColumn={sortColumn}
@@ -104,7 +104,7 @@ export const ArchiveContent: React.FC = () => {
 										/>
 									</th>
 									<th className="task-actions">
-										{__('Actions', 'wpo-aom')}
+										{__('Actions', 'wpo-advanced-order-manager')}
 									</th>
 								</tr>
 							</thead>
@@ -122,12 +122,12 @@ export const ArchiveContent: React.FC = () => {
 							onClick={() => setCurrentPage((p) => p - 1)}
 							disabled={currentPage === 1}
 						>
-							{__('Previous', 'wpo-aom')}
+							{__('Previous', 'wpo-advanced-order-manager')}
 						</button>
 						<span>
 							{sprintf(
 								/* translators: 1: current page, 2: total pages */
-								__('Page %1$d of %2$d', 'wpo-aom'),
+								__('Page %1$d of %2$d', 'wpo-advanced-order-manager'),
 								currentPage,
 								totalPages
 							)}
@@ -137,7 +137,7 @@ export const ArchiveContent: React.FC = () => {
 							onClick={() => setCurrentPage((page) => page + 1)}
 							disabled={currentPage === totalPages}
 						>
-							{__('Next', 'wpo-aom')}
+							{__('Next', 'wpo-advanced-order-manager')}
 						</button>
 					</div>
 				</>

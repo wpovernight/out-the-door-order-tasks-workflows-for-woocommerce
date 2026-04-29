@@ -86,7 +86,7 @@ const TaskList: React.FC<TaskListProps> = ({
 		// Fallback
 		return (
 			<>
-				{__('Tasks', 'wpo-aom')} - {taskCountBadge}
+				{__('Tasks', 'wpo-advanced-order-manager')} - {taskCountBadge}
 			</>
 		);
 	};
@@ -126,7 +126,7 @@ const TaskList: React.FC<TaskListProps> = ({
 				<div className="calendar-task-empty-state">
 					{__(
 						'No tasks found for the selected date range',
-						'wpo-aom'
+						'wpo-advanced-order-manager'
 					)}
 				</div>
 			) : (

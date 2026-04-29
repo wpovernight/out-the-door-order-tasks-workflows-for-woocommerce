@@ -92,7 +92,7 @@ class CustomOrderStatusService {
 				'label_count'               => _n_noop(
 					$label . ' <span class="count">(%s)</span>',
 					$label . ' <span class="count">(%s)</span>',
-					'wpo-aom'
+					'wpo-advanced-order-manager'
 				)
 			);
 		}
@@ -114,7 +114,7 @@ class CustomOrderStatusService {
 		foreach ( $statuses as $status ) {
 			$new_bulk_actions[ 'mark_' . $status->status_key ] = sprintf(
 				/* translators: %s: status label */
-				__( 'Change status to %s', 'wpo-aom' ),
+				__( 'Change status to %s', 'wpo-advanced-order-manager' ),
 				esc_html( $status->label )
 			);
 		}
@@ -209,7 +209,7 @@ class CustomOrderStatusService {
 		$result = $this->repository->save( $status );
 
 		if ( ! $result ) {
-			throw new Exception( __( 'Failed to create custom order status', 'wpo-aom' ) );
+			throw new Exception( __( 'Failed to create custom order status', 'wpo-advanced-order-manager' ) );
 		}
 
 		$status->id            = $result;
@@ -237,14 +237,14 @@ class CustomOrderStatusService {
 	public function update( int $id, array $data ): CustomOrderStatus {
 		$custom_status = $this->repository->find( $id );
 		if ( ! $custom_status ) {
-			throw new InvalidArgumentException( __( 'Custom order status not found', 'wpo-aom' ) );
+			throw new InvalidArgumentException( __( 'Custom order status not found', 'wpo-advanced-order-manager' ) );
 		}
 
 		$custom_status->fill( $data );
 		$result = $this->repository->save( $custom_status );
 
 		if ( false === $result ) {
-			throw new RuntimeException( __( 'Failed to update custom order status', 'wpo-aom' ) );
+			throw new RuntimeException( __( 'Failed to update custom order status', 'wpo-advanced-order-manager' ) );
 		}
 
 		$this->cached_statuses = null;
@@ -314,7 +314,7 @@ class CustomOrderStatusService {
 
 				$order->update_status(
 					$resolved_to_status,
-					'WPO AOM: ' . __( 'Status changed due to custom order status deletion.', 'wpo-aom' )
+					'WPO AOM: ' . __( 'Status changed due to custom order status deletion.', 'wpo-advanced-order-manager' )
 				);
 			} catch ( \Throwable $e ) {
 				Logger::warning( sprintf(

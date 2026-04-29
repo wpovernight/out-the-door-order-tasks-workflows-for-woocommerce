@@ -57,13 +57,13 @@ export const PartialFulfillments = ({ orders }: PartialFulfillmentsProps) => {
 	return (
 		<div className="dashboard-widget" id="partial-fulfillments">
 			<div className="header">
-				<h3>{__('Partially shipped fulfillments', 'wpo-aom')}</h3>
+				<h3>{__('Partially shipped fulfillments', 'wpo-advanced-order-manager')}</h3>
 			</div>
 			<div className="content" ref={contentRef}>
 				{!hasOrders ? (
 					<EmptyState
 						icon="box"
-						message={__('No partially shipped orders.', 'wpo-aom')}
+						message={__('No partially shipped orders.', 'wpo-advanced-order-manager')}
 					/>
 				) : (
 					<ul className="fulfillment-order-list">
@@ -99,10 +99,10 @@ export const PartialFulfillments = ({ orders }: PartialFulfillmentsProps) => {
 													{order.customer_name ||
 														__(
 															'Guest',
-															'wpo-aom'
+															'wpo-advanced-order-manager'
 														)}{' '}
 													&bull;{' '}
-													{__('Order', 'wpo-aom')} #
+													{__('Order', 'wpo-advanced-order-manager')} #
 													{order.order_id}{' '}
 													<span className="wpo-count-badge">
 														{unfulfilled.length}
@@ -175,7 +175,7 @@ export const PartialFulfillments = ({ orders }: PartialFulfillmentsProps) => {
 																{item.quantity}{' '}
 																{__(
 																	'fulfilled',
-																	'wpo-aom'
+																	'wpo-advanced-order-manager'
 																)}
 															</span>
 														</div>
@@ -196,7 +196,7 @@ export const PartialFulfillments = ({ orders }: PartialFulfillmentsProps) => {
 						href="edit.php?post_type=shop_order"
 						className="wpo-button view-all-link"
 					>
-						{__('View all orders', 'wpo-aom')}
+						{__('View all orders', 'wpo-advanced-order-manager')}
 					</a>
 				</div>
 			)}

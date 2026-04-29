@@ -230,7 +230,7 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 					return updated;
 				});
 			},
-			title: __('Add Task', 'wpo-aom'),
+			title: __('Add Task', 'wpo-advanced-order-manager'),
 		});
 	};
 
@@ -251,7 +251,7 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 						className="wpo-button wpo-button-icon wpo-aom-add-button"
 					>
 						<span className="screenReader">
-							{__('Create', 'wpo-aom')}
+							{__('Create', 'wpo-advanced-order-manager')}
 						</span>
 					</button>
 				</div>

@@ -261,7 +261,7 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 					return updated;
 				});
 			},
-			title: `${__('Edit Task', 'wpo-aom')}: ${task.title}`,
+			title: `${__('Edit Task', 'wpo-advanced-order-manager')}: ${task.title}`,
 		});
 	};
 

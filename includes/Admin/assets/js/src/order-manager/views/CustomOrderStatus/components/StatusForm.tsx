@@ -51,11 +51,11 @@ export const StatusForm = ({
 
 	const foreground = getForegroundColor(background);
 
-	let submitLabel = __('Create', 'wpo-aom');
+	let submitLabel = __('Create', 'wpo-advanced-order-manager');
 	if (isSaving) {
-		submitLabel = __('Saving…', 'wpo-aom');
+		submitLabel = __('Saving…', 'wpo-advanced-order-manager');
 	} else if (isEditing) {
-		submitLabel = __('Update', 'wpo-aom');
+		submitLabel = __('Update', 'wpo-advanced-order-manager');
 	}
 
 	const handleSubmit = (e: React.FormEvent) => {
@@ -77,7 +77,7 @@ export const StatusForm = ({
 					<fieldset>
 						<div id="label-field" className="form-field">
 							<label htmlFor="cos-label">
-								{__('Status Name', 'wpo-aom')}
+								{__('Status Name', 'wpo-advanced-order-manager')}
 							</label>
 							<input
 								id="cos-label"
@@ -86,14 +86,14 @@ export const StatusForm = ({
 								onChange={(e) => setLabel(e.target.value)}
 								placeholder={__(
 									'e.g., In production',
-									'wpo-aom'
+									'wpo-advanced-order-manager'
 								)}
 								required
 							/>
 						</div>
 						<div id="preview-field" className="form-field">
 							<span className="label">
-								{__('Preview', 'wpo-aom')}
+								{__('Preview', 'wpo-advanced-order-manager')}
 							</span>
 							<span
 								className="status-preview"
@@ -102,12 +102,12 @@ export const StatusForm = ({
 									color: foreground,
 								}}
 							>
-								{label || __('Status', 'wpo-aom')}
+								{label || __('Status', 'wpo-advanced-order-manager')}
 							</span>
 						</div>
 						<div id="color-field" className="form-field">
 							<label htmlFor="cos-background">
-								{__('Color', 'wpo-aom')}
+								{__('Color', 'wpo-advanced-order-manager')}
 							</label>
 							<div
 								className="color-input-group"
@@ -143,7 +143,7 @@ export const StatusForm = ({
 						</div>
 						<div id="slug-field" className="form-field">
 							<label htmlFor="cos-key">
-								{__('Slug', 'wpo-aom')}
+								{__('Slug', 'wpo-advanced-order-manager')}
 							</label>
 							<input
 								id="cos-key"
@@ -156,7 +156,7 @@ export const StatusForm = ({
 								pattern="^[a-z0-9_-]+$"
 								title={__(
 									'Only lowercase letters, numbers, hyphens, and underscores.',
-									'wpo-aom'
+									'wpo-advanced-order-manager'
 								)}
 								required
 								disabled={isEditing}
@@ -185,7 +185,7 @@ export const StatusForm = ({
 								onClick={onCancel}
 								disabled={isSaving}
 							>
-								{__('Cancel', 'wpo-aom')}
+								{__('Cancel', 'wpo-advanced-order-manager')}
 							</button>
 						</li>
 					</ul>

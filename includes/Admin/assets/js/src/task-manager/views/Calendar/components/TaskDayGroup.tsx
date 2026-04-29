@@ -21,7 +21,7 @@ const TaskDayGroup: React.FC<TaskDayGroupProps> = ({
 
 	const dayLabel = date
 		? date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-		: __('No due date', 'wpo-aom');
+		: __('No due date', 'wpo-advanced-order-manager');
 
 	const weekdayLabel = date
 		? date.toLocaleDateString(undefined, { weekday: 'long' })
@@ -47,7 +47,7 @@ const TaskDayGroup: React.FC<TaskDayGroupProps> = ({
 								className="task-info th-sortable"
 								onClick={() => handleSort('title')}
 							>
-								{__('Task', 'wpo-aom')}{' '}
+								{__('Task', 'wpo-advanced-order-manager')}{' '}
 								<SortIcon
 									column="title"
 									sortColumn={sortColumn}
@@ -58,7 +58,7 @@ const TaskDayGroup: React.FC<TaskDayGroupProps> = ({
 								className="task-priority th-sortable"
 								onClick={() => handleSort('priority')}
 							>
-								{__('Priority', 'wpo-aom')}{' '}
+								{__('Priority', 'wpo-advanced-order-manager')}{' '}
 								<SortIcon
 									column="priority"
 									sortColumn={sortColumn}
@@ -69,7 +69,7 @@ const TaskDayGroup: React.FC<TaskDayGroupProps> = ({
 								className="task-status th-sortable"
 								onClick={() => handleSort('status')}
 							>
-								{__('Status', 'wpo-aom')}{' '}
+								{__('Status', 'wpo-advanced-order-manager')}{' '}
 								<SortIcon
 									column="status"
 									sortColumn={sortColumn}
@@ -77,13 +77,13 @@ const TaskDayGroup: React.FC<TaskDayGroupProps> = ({
 								/>
 							</th>
 							<th className="task-due-date">
-								{__('Due', 'wpo-aom')}
+								{__('Due', 'wpo-advanced-order-manager')}
 							</th>
 							<th
 								className="task-done-date th-sortable"
 								onClick={() => handleSort('doneDate')}
 							>
-								{__('Done', 'wpo-aom')}
+								{__('Done', 'wpo-advanced-order-manager')}
 								<SortIcon
 									column="doneDate"
 									sortColumn={sortColumn}
@@ -91,7 +91,7 @@ const TaskDayGroup: React.FC<TaskDayGroupProps> = ({
 								/>
 							</th>
 							<th className="task-actions">
-								{__('Actions', 'wpo-aom')}
+								{__('Actions', 'wpo-advanced-order-manager')}
 							</th>
 						</tr>
 					</thead>

@@ -44,10 +44,10 @@ export const StatusTable = ({
 			<table className="cos-table">
 				<thead>
 					<tr>
-						<th id="label-header">{__('Label', 'wpo-aom')}</th>
-						<th id="color-header">{__('Color', 'wpo-aom')}</th>
-						<th id="slug-header">{__('Slug', 'wpo-aom')}</th>
-						<th id="actions-header">{__('Actions', 'wpo-aom')}</th>
+						<th id="label-header">{__('Label', 'wpo-advanced-order-manager')}</th>
+						<th id="color-header">{__('Color', 'wpo-advanced-order-manager')}</th>
+						<th id="slug-header">{__('Slug', 'wpo-advanced-order-manager')}</th>
+						<th id="actions-header">{__('Actions', 'wpo-advanced-order-manager')}</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -109,10 +109,10 @@ export const StatusTable = ({
 												onClick={() =>
 													onEdit(status.id)
 												}
-												title={__('Edit', 'wpo-aom')}
+												title={__('Edit', 'wpo-advanced-order-manager')}
 											>
 												<span className="screenReader">
-													{__('Edit', 'wpo-aom')}
+													{__('Edit', 'wpo-advanced-order-manager')}
 												</span>
 											</button>
 											<button
@@ -121,10 +121,10 @@ export const StatusTable = ({
 												onClick={() =>
 													onDelete(status.id)
 												}
-												title={__('Delete', 'wpo-aom')}
+												title={__('Delete', 'wpo-advanced-order-manager')}
 											>
 												<span className="screenReader">
-													{__('Delete', 'wpo-aom')}
+													{__('Delete', 'wpo-advanced-order-manager')}
 												</span>
 											</button>
 										</li>
@@ -149,7 +149,7 @@ export const StatusTable = ({
 					className="wpo-button wpo-button-primary"
 					onClick={onStartCreate}
 				>
-					{__('Add new status', 'wpo-aom')}
+					{__('Add new status', 'wpo-advanced-order-manager')}
 				</button>
 			)}
 		</>

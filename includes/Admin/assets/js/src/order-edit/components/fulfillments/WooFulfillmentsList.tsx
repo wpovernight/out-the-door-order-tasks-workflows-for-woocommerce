@@ -55,7 +55,7 @@ const WooFulfillmentsList: React.FC<WooFulfillmentsListProps> = ({
 
 	return (
 		<div className="fulfillments-list-container">
-			<h4 className="screenReader">{__('Fulfillments', 'wpo-aom')}</h4>
+			<h4 className="screenReader">{__('Fulfillments', 'wpo-advanced-order-manager')}</h4>
 			<ul className="fulfillments-list">
 				{fulfillments.map((fulfillment, index) => (
 					<li key={fulfillment.id}>

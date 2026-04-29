@@ -202,16 +202,16 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 			<div className="screenReader" aria-live="polite">
 				{(() => {
 					if (loading) {
-						return __('Loading results…', 'wpo-aom');
+						return __('Loading results…', 'wpo-advanced-order-manager');
 					}
 					if (showResults) {
 						return results.length
 							? sprintf(
 									/* translators: %d is the number of results found. */
-									__('%d results found', 'wpo-aom'),
+									__('%d results found', 'wpo-advanced-order-manager'),
 									results.length
 								)
-							: __('No results found', 'wpo-aom');
+							: __('No results found', 'wpo-advanced-order-manager');
 					}
 					return '';
 				})()}
@@ -219,12 +219,12 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 
 			{showResults && loading && (
 				<div className="wpo-aom-async-multi-select-message">
-					<p>{__('Loading…', 'wpo-aom')}</p>
+					<p>{__('Loading…', 'wpo-advanced-order-manager')}</p>
 				</div>
 			)}
 			{showResults && !loading && !Boolean(results.length) && (
 				<div className="wpo-aom-async-multi-select-message">
-					<p>{__('No results found', 'wpo-aom')}</p>
+					<p>{__('No results found', 'wpo-advanced-order-manager')}</p>
 				</div>
 			)}
 			{showResults && !loading && Boolean(results.length) && (
@@ -272,7 +272,7 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 								onClick={() => handleRemoveOption(option.id)}
 							>
 								<span className="screenReader">
-									{__('Close', 'wpo-aom')}
+									{__('Close', 'wpo-advanced-order-manager')}
 								</span>
 							</button>
 						</li>
