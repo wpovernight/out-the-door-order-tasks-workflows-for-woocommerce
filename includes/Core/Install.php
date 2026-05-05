@@ -357,6 +357,7 @@ final class Install {
 
 				// Use raw INSERT to ensure the exact ID is used.
 				$table_name = $wpdb->prefix . 'wpo_aom_task_fields';
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Install-time seeding; preserves the exact field ID.
 				$result     = $wpdb->insert( $table_name, $field_data );
 
 				if ( $result ) {
@@ -389,8 +390,10 @@ final class Install {
 		}
 
 		// Reset auto-increment to prevent gaps if needed.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Install-time check; cache would be stale immediately after seeding.
 		$max_id = $wpdb->get_var( "SELECT MAX(id) FROM {$wpdb->prefix}wpo_aom_task_fields" );
 		if ( $max_id ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Install-time AUTO_INCREMENT reset; schema change is intentional.
 			$wpdb->query( $wpdb->prepare( "ALTER TABLE {$wpdb->prefix}wpo_aom_task_fields AUTO_INCREMENT = %d", $max_id + 1 ) );
 		}
 	}

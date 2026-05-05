@@ -97,7 +97,6 @@ final class AdvancedOrderManager {
 		unload_textdomain( $text_domain );
 		load_textdomain( $text_domain, $custom_translation_path );
 		load_textdomain( $text_domain, $plugin_translation_path );
-		load_plugin_textdomain( $text_domain, false, dirname( plugin_basename( WPO_AOM_PLUGIN_FILE ) ) . '/languages' );
 	}
 
 	/**

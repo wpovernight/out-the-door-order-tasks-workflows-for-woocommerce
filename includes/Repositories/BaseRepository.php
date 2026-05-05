@@ -92,6 +92,7 @@ abstract class BaseRepository {
 	public function get( bool $raw = false, bool $reset = true ): array {
 		$query = $this->get_query( false );
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query is prepared inside append_bindings().
 		$result = $this->wpdb->get_results( $query, ARRAY_A ) ?? array();
 
 		if ( $reset ) {
@@ -237,9 +238,11 @@ abstract class BaseRepository {
 	 */
 	public function execute_raw( string $query, array $bindings = array(), bool $reset = true ) {
 		if ( ! empty( $bindings ) ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $query is prepared on this line; placeholders are caller-supplied.
 			$query = $this->wpdb->prepare( $query, ...array_values( $bindings ) );
 		}
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query is prepared above.
 		$result = $this->wpdb->query( $query );
 
 		if ( $reset ) {
@@ -301,6 +304,7 @@ abstract class BaseRepository {
 		// Prepare query with bindings
 		$query = $this->append_bindings( $query );
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query is prepared above.
 		$result = $this->wpdb->query( $query );
 
 		$this->reset_query();
@@ -376,6 +380,7 @@ abstract class BaseRepository {
 
 		$this->reset_query();
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query is prepared above.
 		$result = $this->wpdb->query( $query );
 
 		return false === $result ? false : (int) $result;
@@ -444,6 +449,7 @@ abstract class BaseRepository {
 		$query .= $this->compile_where();
 		$query = $this->append_bindings( $query );
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query is prepared above.
 		$result = $this->wpdb->query( $query );
 
 		$this->reset_query();
@@ -521,7 +527,7 @@ abstract class BaseRepository {
 			return self::$column_names[ $this->table_name ];
 		}
 
-		// WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Direct query is safe here as table name is validated internally and cannot be parameterized.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Direct query is safe here as table name is validated internally and cannot be parameterized.
 		$columns = (array) $this->wpdb->get_col( "DESCRIBE {$this->get_table_full_name()}" );
 		$columns = array_map( 'strtolower', $columns );
 
@@ -781,6 +787,7 @@ abstract class BaseRepository {
 	 */
 	private function append_bindings( string $query ): string {
 		if ( ! empty( $this->bindings ) ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $query is prepared on this line; placeholders are added in where() and join() methods.
 			$query = $this->wpdb->prepare( $query, ...array_values( $this->bindings ) );
 		}
 
