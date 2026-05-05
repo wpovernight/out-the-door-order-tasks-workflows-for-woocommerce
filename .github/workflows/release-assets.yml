@@ -41,8 +41,10 @@ jobs:
 
       - name: Create ZIP
         run: |
-          # reformat .distignore: remove all empty lines, leading slashes and prefix with the folder
-          sed "/^[[:space:]]*$/d;s#^/##;s#^#${{ env.plugin_slug }}/#" ${{ env.plugin_slug }}/.distignore > .zipignore
+          # reformat .distignore for `zip -x`: drop comments/blank lines, strip leading slashes,
+          # rewrite "dir/" -> "dir/*" so directory contents are actually excluded, then prefix
+          # every pattern with the plugin slug to match the archive paths.
+          sed -E "/^[[:space:]]*(#|$)/d;s#^/##;s#/\$#/*#;s#^#${{ env.plugin_slug }}/#" ${{ env.plugin_slug }}/.distignore > .zipignore
 
           # create zip file
           zip -rq ${{ env.zip_file_name }} ${{ env.plugin_slug }} -x@.zipignore
