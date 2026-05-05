@@ -18,6 +18,12 @@ composer.lock
 package.json
 package-lock.json
 yarn.lock
+**/composer.json
+**/composer.lock
+**/composer.phar
+**/package.json
+**/package-lock.json
+**/yarn.lock
 
 # WordPress-specific meta/config
 .wordpress-org/
@@ -30,11 +36,14 @@ phpcs.ruleset.xml
 phpstan.neon
 phpunit.xml
 phpunit.xml.dist
+phpunit-unit.xml
+.phpunit.result.cache
 multisite.xml
 multisite.xml.dist
 .editorconfig
 .env
 .vscode/
+.idea/
 bin/
 tests/
 
@@ -55,9 +64,12 @@ Thumbs.db
 strauss.md
 docs/
 
-# Languages
-/languages/cache/
-languages.json
+# JS/TS source
+includes/Admin/assets/js/src/
 
 # Source maps (debugging only)
 *.js.map
+
+# Languages
+/languages/cache/
+languages.json
