@@ -4,7 +4,7 @@ Tags: woocommerce, orders, order management, tasks, fulfillment
 Requires at least: 6.7
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.0-beta.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -30,5 +30,5 @@ Advanced Order Manager extends WooCommerce's order management with a flexible ta
 
 == Changelog ==
 
-= 1.0.0 =
+= 1.0.0-beta.1 =
 * Initial release.
