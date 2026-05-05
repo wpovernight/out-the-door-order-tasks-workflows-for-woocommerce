@@ -1,0 +1,837 @@
+# Copyright (C) 2026 WP Overnight
+# This file is distributed under the GPLv3.
+msgid ""
+msgstr ""
+"Project-Id-Version: Advanced Order Manager for WooCommerce 1.0.0-beta.1\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wpo-advanced-order-manager\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-05-05T09:44:00+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: wpo-advanced-order-manager\n"
+
+#. Plugin Name of the plugin
+#: advanced-order-manager.php
+#: includes/Core/DependencyChecker.php:133
+msgid "Advanced Order Manager for WooCommerce"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: advanced-order-manager.php
+msgid "https://wpovernight.com/downloads/advanced-order-manager/"
+msgstr ""
+
+#. Description of the plugin
+#: advanced-order-manager.php
+msgid "A powerful order management plugin for WooCommerce that enhances the order management experience with advanced features."
+msgstr ""
+
+#. Author of the plugin
+#: advanced-order-manager.php
+msgid "WP Overnight"
+msgstr ""
+
+#. Author URI of the plugin
+#: advanced-order-manager.php
+msgid "https://www.wpovernight.com"
+msgstr ""
+
+#: includes/Admin/OrderEdit/Screen.php:67
+msgid "Advanced Order Management"
+msgstr ""
+
+#: includes/Admin/OrderEdit/Screen.php:227
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Fulfillments"
+msgstr ""
+
+#: includes/Admin/OrderEdit/Screen.php:269
+msgid "Edit fulfillment quantity"
+msgstr ""
+
+#: includes/Admin/OrderEdit/Screen.php:291
+msgid "Fulfillment Quantity"
+msgstr ""
+
+#: includes/Admin/OrderEdit/Screen.php:320
+msgid "Save fulfillment quantity"
+msgstr ""
+
+#: includes/Admin/OrderEdit/Screen.php:321
+msgid "Cancel fulfillment edit"
+msgstr ""
+
+#: includes/Admin/OrderEdit/Screen.php:365
+msgid "fulfilled"
+msgstr ""
+
+#: includes/Admin/OrderEdit/Screen.php:444
+msgid "Security verification failed."
+msgstr ""
+
+#: includes/Admin/OrderEdit/Screen.php:453
+msgid "You do not have permission to perform this action."
+msgstr ""
+
+#: includes/Admin/OrderEdit/Screen.php:466
+msgid "Invalid item ID."
+msgstr ""
+
+#: includes/Admin/OrderEdit/Screen.php:476
+msgid "Order item not found."
+msgstr ""
+
+#. translators: %d: total quantity
+#: includes/Admin/OrderEdit/Screen.php:487
+#, php-format
+msgid "Fulfillment quantity cannot exceed %d."
+msgstr ""
+
+#: includes/Admin/OrderEdit/Screen.php:504
+msgid "Failed to save fulfillment quantity."
+msgstr ""
+
+#. translators: 1: product name, 2: fulfilled quantity, 3: total quantity
+#: includes/Admin/OrderEdit/Screen.php:530
+#, php-format
+msgid "Fulfillment updated for \"%1$s\": %2$d of %3$d fulfilled."
+msgstr ""
+
+#: includes/Admin/OrderEdit/Screen.php:541
+msgid "Fulfillment quantity saved successfully."
+msgstr ""
+
+#: includes/Admin/OrderManager/Screen.php:123
+#: includes/Admin/OrderManager/Screen.php:124
+msgid "Order Manager"
+msgstr ""
+
+#: includes/AdvancedOrderManager.php:39
+msgid "Cloning is forbidden."
+msgstr ""
+
+#. translators: %s: minimum PHP version
+#: includes/Core/DependencyChecker.php:68
+#, php-format
+msgid "PHP %s+ is required."
+msgstr ""
+
+#: includes/Core/DependencyChecker.php:74
+msgid "WooCommerce must be activated."
+msgstr ""
+
+#. translators: %s: minimum WooCommerce version
+#: includes/Core/DependencyChecker.php:78
+#, php-format
+msgid "WooCommerce %s+ is required."
+msgstr ""
+
+#: includes/Core/DependencyChecker.php:134
+msgid "can’t run because:"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:20
+msgid "Task Created"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:21
+msgid "Task created emails are sent when a new task is created."
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:46
+msgid "[{site_title}] New Task Created: {task_title}"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:55
+msgid "New Task Created"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:161
+#: includes/Emails/TaskUpdatedEmail.php:233
+msgid "Sample Task: Process Customer Order"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:162
+msgid "This is a preview of how task details will appear in the email notification. The task has been created and assigned to a team member for processing."
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:169
+#: includes/Emails/TaskUpdatedEmail.php:241
+#: includes/Emails/TaskUpdatedEmail.php:435
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Status"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:176
+#: includes/Emails/TaskUpdatedEmail.php:246
+msgid "Pending"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:187
+#: includes/Emails/TaskUpdatedEmail.php:279
+#: includes/Emails/TaskUpdatedEmail.php:436
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Priority"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:194
+#: includes/Emails/TaskUpdatedEmail.php:296
+#: includes/Emails/TaskUpdatedEmail.php:306
+msgid "High"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:205
+msgid "Created By"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:222
+#: includes/Emails/TaskUpdatedEmail.php:317
+#: includes/Emails/TaskUpdatedEmail.php:438
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Due Date"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:235
+msgid "Associated Order"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:258
+#: includes/Emails/TaskUpdatedEmail.php:338
+msgid "Available placeholders"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:264
+#: includes/Emails/TaskUpdatedEmail.php:344
+msgid "Enable/Disable"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:266
+#: includes/Emails/TaskUpdatedEmail.php:346
+msgid "Enable this email notification"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:270
+#: includes/Emails/TaskUpdatedEmail.php:350
+msgid "Recipient(s)"
+msgstr ""
+
+#. translators: %s: admin email
+#: includes/Emails/TaskCreatedEmail.php:274
+#: includes/Emails/TaskUpdatedEmail.php:354
+#, php-format
+msgid "Enter recipients (comma separated) for this email. Defaults to %s."
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:282
+#: includes/Emails/TaskUpdatedEmail.php:362
+msgid "Subject"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:290
+#: includes/Emails/TaskUpdatedEmail.php:370
+msgid "Email heading"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:298
+#: includes/Emails/TaskUpdatedEmail.php:378
+msgid "Additional content"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:299
+#: includes/Emails/TaskUpdatedEmail.php:379
+msgid "Text to appear below the main email content."
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:301
+#: includes/Emails/TaskUpdatedEmail.php:381
+msgid "N/A"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:307
+#: includes/Emails/TaskUpdatedEmail.php:396
+msgid "Notify Task Creator"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:309
+#: includes/Emails/TaskUpdatedEmail.php:398
+msgid "Send notification to the user who created the task"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:313
+#: includes/Emails/TaskUpdatedEmail.php:402
+msgid "Notify Shop Managers"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:315
+#: includes/Emails/TaskUpdatedEmail.php:404
+msgid "Send notification to all shop managers and administrators"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:319
+#: includes/Emails/TaskUpdatedEmail.php:408
+msgid "Email type"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:321
+#: includes/Emails/TaskUpdatedEmail.php:410
+msgid "Choose which format of email to send."
+msgstr ""
+
+#: includes/Emails/TaskUpdatedEmail.php:23
+#: includes/Emails/TaskUpdatedEmail.php:59
+msgid "Task Updated"
+msgstr ""
+
+#: includes/Emails/TaskUpdatedEmail.php:24
+msgid "Task updated emails are sent when a task is modified."
+msgstr ""
+
+#: includes/Emails/TaskUpdatedEmail.php:50
+msgid "[{site_title}] Task Updated: {task_title}"
+msgstr ""
+
+#: includes/Emails/TaskUpdatedEmail.php:234
+msgid "This is a preview of how task update details will appear in the email notification. The task has been updated with new status and priority."
+msgstr ""
+
+#: includes/Emails/TaskUpdatedEmail.php:252
+#: includes/Emails/TaskUpdatedEmail.php:268
+msgid "In Progress"
+msgstr ""
+
+#: includes/Emails/TaskUpdatedEmail.php:258
+msgid "Done"
+msgstr ""
+
+#: includes/Emails/TaskUpdatedEmail.php:284
+msgid "Low"
+msgstr ""
+
+#: includes/Emails/TaskUpdatedEmail.php:290
+msgid "Medium"
+msgstr ""
+
+#: includes/Emails/TaskUpdatedEmail.php:387
+msgid "Notify On"
+msgstr ""
+
+#: includes/Emails/TaskUpdatedEmail.php:390
+msgid "Select which fields changes should trigger this email notification."
+msgstr ""
+
+#: includes/Emails/TaskUpdatedEmail.php:433
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Title"
+msgstr ""
+
+#: includes/Emails/TaskUpdatedEmail.php:434
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Description"
+msgstr ""
+
+#: includes/Emails/TaskUpdatedEmail.php:437
+msgid "Order"
+msgstr ""
+
+#: includes/REST/CustomOrderStatusController.php:107
+#: includes/REST/CustomOrderStatusController.php:174
+msgid "Invalid data provided"
+msgstr ""
+
+#: includes/REST/CustomOrderStatusController.php:136
+#: includes/REST/CustomOrderStatusController.php:161
+#: includes/REST/CustomOrderStatusController.php:205
+msgid "Invalid ID provided"
+msgstr ""
+
+#: includes/REST/CustomOrderStatusController.php:144
+#: includes/Services/CustomOrderStatusService.php:241
+msgid "Custom order status not found"
+msgstr ""
+
+#: includes/REST/CustomOrderStatusController.php:219
+msgid "Custom order status deleted successfully"
+msgstr ""
+
+#: includes/REST/FulfillmentController.php:55
+msgid "Invalid fulfillment status provided."
+msgstr ""
+
+#: includes/REST/TaskController.php:215
+msgid "Array of option IDs in desired order."
+msgstr ""
+
+#: includes/REST/TaskController.php:290
+msgid "Failed to create task."
+msgstr ""
+
+#: includes/REST/TaskController.php:381
+msgid "Failed to update task."
+msgstr ""
+
+#: includes/REST/TaskController.php:416
+msgid "Failed to delete task."
+msgstr ""
+
+#: includes/REST/TaskController.php:434
+msgid "Task ID."
+msgstr ""
+
+#: includes/REST/TaskController.php:440
+msgid "Task title."
+msgstr ""
+
+#: includes/REST/TaskController.php:446
+msgid "Task description."
+msgstr ""
+
+#: includes/REST/TaskController.php:451
+msgid "Task creation timestamp."
+msgstr ""
+
+#: includes/REST/TaskController.php:458
+msgid "Task last update timestamp."
+msgstr ""
+
+#: includes/REST/TaskController.php:578
+msgid "Field option positions updated successfully"
+msgstr ""
+
+#: includes/REST/TaskController.php:612
+msgid "Option ID."
+msgstr ""
+
+#: includes/REST/TaskController.php:618
+msgid "Field ID this option belongs to."
+msgstr ""
+
+#: includes/REST/TaskController.php:624
+msgid "Option label."
+msgstr ""
+
+#: includes/REST/TaskController.php:629
+msgid "Option color."
+msgstr ""
+
+#: includes/REST/TaskController.php:634
+msgid "Option position for ordering."
+msgstr ""
+
+#: includes/REST/TaskController.php:672
+#: includes/REST/TaskController.php:676
+msgid "Failed to move task."
+msgstr ""
+
+#: includes/REST/TaskController.php:706
+msgid "Failed to finish task."
+msgstr ""
+
+#: includes/REST/TaskController.php:739
+msgid "Failed to archive task."
+msgstr ""
+
+#: includes/REST/TaskController.php:771
+msgid "Failed to unarchive task."
+msgstr ""
+
+#. translators: %s: status label
+#: includes/Services/CustomOrderStatusService.php:118
+#, php-format
+msgid "Change status to %s"
+msgstr ""
+
+#: includes/Services/CustomOrderStatusService.php:213
+msgid "Failed to create custom order status"
+msgstr ""
+
+#: includes/Services/CustomOrderStatusService.php:248
+msgid "Failed to update custom order status"
+msgstr ""
+
+#: includes/Services/CustomOrderStatusService.php:318
+msgid "Status changed due to custom order status deletion."
+msgstr ""
+
+#: includes/Services/EmailService.php:175
+msgid "None"
+msgstr ""
+
+#: includes/Services/EmailService.php:246
+#: includes/Services/EmailService.php:256
+msgid "Unassigned"
+msgstr ""
+
+#: templates/emails/email-task-details.php:24
+#: templates/emails/plain/email-task-details.php:18
+msgid "Task Details"
+msgstr ""
+
+#: templates/emails/email-task-details.php:31
+#: templates/emails/plain/email-task-details.php:21
+msgid "Task ID:"
+msgstr ""
+
+#: templates/emails/email-task-details.php:36
+#: templates/emails/plain/email-task-details.php:22
+msgid "Title:"
+msgstr ""
+
+#: templates/emails/email-task-details.php:42
+#: templates/emails/plain/email-task-details.php:25
+msgid "Description:"
+msgstr ""
+
+#: templates/emails/plain/task-created.php:21
+#: templates/emails/task-created.php:23
+msgid "A new task has been created:"
+msgstr ""
+
+#: templates/emails/plain/task-updated.php:21
+#: templates/emails/task-updated.php:23
+msgid "A task has been updated:"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Failed to load tasks"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Close"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Try Again"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Mo"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Monday"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Tu"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Tuesday"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "We"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Wednesday"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Th"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Thursday"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Fr"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Friday"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Sa"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Saturday"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Su"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Sunday"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Jan"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Feb"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Mar"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Apr"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "May"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Jun"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Jul"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Aug"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Sep"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Oct"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Nov"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Dec"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Date picker"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Clear date"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Previous"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Next"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Cancel"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Today"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Save your changes?"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "You have unsaved work. Discarding will permanently erase your recent edits."
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Discard"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Keep editing"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Error loading data. Please try again."
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "The task has been successfully updated."
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "A new task has been successfully created."
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Failed to update task. Please try again."
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Failed to create task. Please try again."
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Please try again."
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Select"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Write a name for your task."
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Describe the task."
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Update Task"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Create Task"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Tasks"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Active"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Add Task"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Options"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Edit"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Mark as In Progress"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Mark as Done"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Archive this task?"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Once archived, you can locate this task in the <strong>Task → Archive</strong> tab."
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Archive"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Delete"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Edit task"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Delete this task?"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Are you sure you want to delete this task? This action cannot be undone."
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Active Tasks"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "You archived this task"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Go to archive"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Undo"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "No tasks found."
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Delete failed"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Failed to delete task. Please try again."
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Done Tasks"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Hide Done Tasks"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "View Done Tasks"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Item"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Failed to load fulfillments"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Add Fulfillment"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+#, js-format
+msgid "Fulfillment #%d"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Tracking Number"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Manual Entry"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "No Info"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Unknown"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Track Package"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "Last Updated"
+msgstr ""
+
+#: includes/Admin/assets/js/order-edit-metabox.js:11
+msgid "No fulfillments yet."
+msgstr ""
