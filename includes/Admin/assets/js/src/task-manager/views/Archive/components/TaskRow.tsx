@@ -146,7 +146,7 @@ const TaskRow: React.FC<TaskRowProps> = ({ task }) => {
 							}}
 							title={__('Restore Task', 'wpo-advanced-order-manager')}
 						>
-							<span className="screenReader">
+							<span className="screen-reader-text">
 								{__('Restore Task', 'wpo-advanced-order-manager')}
 							</span>
 						</button>
@@ -161,7 +161,7 @@ const TaskRow: React.FC<TaskRowProps> = ({ task }) => {
 							}}
 							title={__('Delete Task', 'wpo-advanced-order-manager')}
 						>
-							<span className="screenReader">
+							<span className="screen-reader-text">
 								{__('Delete Task', 'wpo-advanced-order-manager')}
 							</span>
 						</button>

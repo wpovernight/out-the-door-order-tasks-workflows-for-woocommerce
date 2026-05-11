@@ -378,7 +378,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 					onClick={handleClear}
 					title={__('Clear date', 'wpo-advanced-order-manager')}
 				>
-					<span className="screenReader">
+					<span className="screen-reader-text">
 						{__('Clear date', 'wpo-advanced-order-manager')}
 					</span>
 				</button>
@@ -392,7 +392,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 							onClick={goPrevious}
 							title={__('Previous', 'wpo-advanced-order-manager')}
 						>
-							<span className="screenReader">
+							<span className="screen-reader-text">
 								{__('Previous', 'wpo-advanced-order-manager')}
 							</span>
 						</button>
@@ -410,7 +410,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 							onClick={goNext}
 							title={__('Next', 'wpo-advanced-order-manager')}
 						>
-							<span className="screenReader">
+							<span className="screen-reader-text">
 								{__('Next', 'wpo-advanced-order-manager')}
 							</span>
 						</button>
@@ -418,7 +418,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 
 					{viewMode === 'day' && (
 						<table className="wpo-aom-datepicker-calendar days">
-							<caption className="screenReader">
+							<caption className="screen-reader-text">
 								{headerLabel}
 							</caption>
 							<thead>
@@ -479,7 +479,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 
 					{viewMode === 'month' && (
 						<table className="wpo-aom-datepicker-calendar months">
-							<caption className="screenReader">
+							<caption className="screen-reader-text">
 								{headerLabel}
 							</caption>
 							<tbody>
@@ -539,7 +539,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 
 					{viewMode === 'year' && (
 						<table className="wpo-aom-datepicker-calendar years">
-							<caption className="screenReader">
+							<caption className="screen-reader-text">
 								{headerLabel}
 							</caption>
 							<tbody>

@@ -263,7 +263,7 @@ final class Screen {
 		$fulfillment_status_html = $this->get_fulfillment_status_html( $fulfillment_status, $fulfillment_quantity, $total_quantity );
 		$edit_button_html        = sprintf(
 			'<button type="button" class="wpo-button wpo-button-icon wpo-aom-edit-fulfillment" data-item-id="%1$d" title="%2$s">
-				<span class="screenReader">%2$s</span>
+				<span class="screen-reader-text">%2$s</span>
 			</button>',
 			esc_attr( $item_id ),
 			esc_html__( 'Edit fulfillment quantity', 'wpo-advanced-order-manager' )
@@ -282,7 +282,7 @@ final class Screen {
 					value="%3$d"
 					data-fulfillment-id="%4$s"
 				/>
-				<span class="screenReader">%5$s</span>
+				<span class="screen-reader-text">%5$s</span>
 			</label>',
 			esc_attr( $item_id ),
 			esc_attr( $total_quantity ),
@@ -300,7 +300,7 @@ final class Screen {
 							data-fulfillment-id="%2$s"
 							title="%3$s"
 						>
-							<span class="screenReader">%3$s</span>
+							<span class="screen-reader-text">%3$s</span>
 						</button>
 					</li>
 					<li>
@@ -311,7 +311,7 @@ final class Screen {
 							data-fulfillment-id="%2$s"
 							title="%4$s"
 						>
-							<span class="screenReader">%4$s</span>
+							<span class="screen-reader-text">%4$s</span>
 						</button>
 					</li>
 				</ul>',

@@ -150,7 +150,7 @@ export const TodayTasks = () => {
 					onClick={handleAddTask}
 					title={__('Add Task', 'wpo-advanced-order-manager')}
 				>
-					<span className="screenReader">
+					<span className="screen-reader-text">
 						{__('Add Task', 'wpo-advanced-order-manager')}
 					</span>
 				</button>
@@ -166,7 +166,7 @@ export const TodayTasks = () => {
 						{/* Today's active tasks */}
 						{todayActive.length > 0 && (
 							<>
-								<h4 className="screenReader">
+								<h4 className="screen-reader-text">
 									{__('Active tasks due today', 'wpo-advanced-order-manager')}
 								</h4>
 								{renderTaskList(todayActive, 'active')}

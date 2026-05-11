@@ -71,7 +71,7 @@ export const WooFulfillmentCard: React.FC<WooFulfillmentCardProps> = ({
 									className="fulfillment-card-link"
 									onClick={(e) => e.stopPropagation()}
 								>
-									<span className="screenReader">
+									<span className="screen-reader-text">
 										{__('Track Package', 'wpo-advanced-order-manager')}
 									</span>
 								</a>

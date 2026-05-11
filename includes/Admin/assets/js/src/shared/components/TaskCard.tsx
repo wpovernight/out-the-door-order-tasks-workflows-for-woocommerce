@@ -246,7 +246,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 							}}
 							title={__('Edit', 'wpo-advanced-order-manager')}
 						>
-							<span className="screenReader">
+							<span className="screen-reader-text">
 								{__('Edit', 'wpo-advanced-order-manager')}
 							</span>
 						</button>
@@ -260,7 +260,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 							onClick={handleArchiveClick}
 							title={__('Archive', 'wpo-advanced-order-manager')}
 						>
-							<span className="screenReader">
+							<span className="screen-reader-text">
 								{__('Archive', 'wpo-advanced-order-manager')}
 							</span>
 						</button>
@@ -284,7 +284,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 										: __('Mark as Done', 'wpo-advanced-order-manager')
 								}
 							>
-								<span className="screenReader">
+								<span className="screen-reader-text">
 									{isDone
 										? __('Mark as In Progress', 'wpo-advanced-order-manager')
 										: __('Mark as Done', 'wpo-advanced-order-manager')}
@@ -303,7 +303,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 							}}
 							title={__('Delete', 'wpo-advanced-order-manager')}
 						>
-							<span className="screenReader">
+							<span className="screen-reader-text">
 								{__('Delete', 'wpo-advanced-order-manager')}
 							</span>
 						</button>
@@ -331,7 +331,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 						htmlFor={`task-finish-${task.id}`}
 						className={`task-finish-checkbox ${isDone ? 'finished' : ''}`}
 					>
-						<span className="screenReader">
+						<span className="screen-reader-text">
 							{isDone
 								? __('Mark as In Progress', 'wpo-advanced-order-manager')
 								: __('Mark as Done', 'wpo-advanced-order-manager')}

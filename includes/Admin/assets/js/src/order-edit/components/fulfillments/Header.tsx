@@ -20,7 +20,7 @@ const Header: React.FC = () => {
 					className="wpo-button wpo-button-icon add-button fulfillments-trigger" // This "fulfillments-trigger" class is used to bind the click event
 					data-order-id={orderId}
 				>
-					<span className="screenReader">
+					<span className="screen-reader-text">
 						{__('Add Fulfillment', 'wpo-advanced-order-manager')}
 					</span>
 				</button>,

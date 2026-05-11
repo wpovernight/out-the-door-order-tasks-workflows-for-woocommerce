@@ -126,7 +126,7 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 					<>
 						<label
 							htmlFor="date-input-start"
-							className="screenReader"
+							className="screen-reader-text"
 						>
 							{__('From', 'wpo-advanced-order-manager')}
 						</label>
@@ -141,7 +141,7 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 						<span className="date-separator">-</span>
 						<label
 							htmlFor="date-input-end"
-							className="screenReader"
+							className="screen-reader-text"
 						>
 							{__('To', 'wpo-advanced-order-manager')}
 						</label>
@@ -158,7 +158,7 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 					<>
 						<label
 							htmlFor="date-input-single"
-							className="screenReader"
+							className="screen-reader-text"
 						>
 							{__('Select Date', 'wpo-advanced-order-manager')}
 						</label>

@@ -35,7 +35,7 @@ const Header: React.FC = () => {
 					className="wpo-button wpo-button-icon add-button"
 					onClick={handleAddTask}
 				>
-					<span className="screenReader">
+					<span className="screen-reader-text">
 						{__('Add Task', 'wpo-advanced-order-manager')}
 					</span>
 				</button>,

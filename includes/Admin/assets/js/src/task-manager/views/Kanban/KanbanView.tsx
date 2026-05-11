@@ -39,7 +39,7 @@ export const KanbanView: React.FC = () => {
 
 	return (
 		<>
-			<h3 className="screenReader">{__('Task Board', 'wpo-advanced-order-manager')}</h3>
+			<h3 className="screen-reader-text">{__('Task Board', 'wpo-advanced-order-manager')}</h3>
 			<ViewTaskProvider>
 				<Board />
 			</ViewTaskProvider>

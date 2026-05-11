@@ -31,7 +31,7 @@ export const Toast: React.FC<ToastProps> = ({
 					className="wpo-button wpo-button-icon close-toast"
 					onClick={onClose}
 				>
-					<span className="screenReader">
+					<span className="screen-reader-text">
 						{__('Close', 'wpo-advanced-order-manager')}
 					</span>
 				</button>

@@ -115,7 +115,7 @@ export const CustomOrderStatusView = () => {
 
 	return (
 		<>
-			<h2 className="screenReader">
+			<h2 className="screen-reader-text">
 				{__('Custom Order Statuses', 'wpo-advanced-order-manager')}
 			</h2>
 			<div className="custom-order-status-view">

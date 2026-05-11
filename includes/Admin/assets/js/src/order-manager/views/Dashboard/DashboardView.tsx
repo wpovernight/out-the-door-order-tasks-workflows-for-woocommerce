@@ -119,7 +119,7 @@ export const DashboardView = () => {
 
 	return (
 		<>
-			<h2 className="screenReader">{__('Dashboard', 'wpo-advanced-order-manager')}</h2>
+			<h2 className="screen-reader-text">{__('Dashboard', 'wpo-advanced-order-manager')}</h2>
 			<SidebarModalProvider>
 				<div className="dashboard-view">
 					<TodayTasks />

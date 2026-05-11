@@ -14,7 +14,7 @@ const DateRangePresetSelector: React.FC<DateRangePresetSelectorProps> = ({
 	return (
 		<div className="calendar-date-range-preset-selector">
 			<label htmlFor="date-range-preset-select">
-				<span className="screenReader">
+				<span className="screen-reader-text">
 					{__('Date Range Preset', 'wpo-advanced-order-manager')}
 				</span>
 			</label>

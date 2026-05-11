@@ -199,7 +199,7 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 				value={query}
 				onKeyDown={handleInputKeyDown}
 			/>
-			<div className="screenReader" aria-live="polite">
+			<div className="screen-reader-text" aria-live="polite">
 				{(() => {
 					if (loading) {
 						return __('Loading results…', 'wpo-advanced-order-manager');
@@ -271,7 +271,7 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 								className="wpo-button wpo-button-icon wpo-aom-sidebar-close"
 								onClick={() => handleRemoveOption(option.id)}
 							>
-								<span className="screenReader">
+								<span className="screen-reader-text">
 									{__('Close', 'wpo-advanced-order-manager')}
 								</span>
 							</button>

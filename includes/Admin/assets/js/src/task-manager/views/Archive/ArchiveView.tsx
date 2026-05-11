@@ -35,7 +35,7 @@ export const ArchiveView: React.FC = () => {
 
 	return (
 		<>
-			<h3 className="screenReader">{__('Task Archive', 'wpo-advanced-order-manager')}</h3>
+			<h3 className="screen-reader-text">{__('Task Archive', 'wpo-advanced-order-manager')}</h3>
 			<ViewTaskProvider>
 				<ArchiveContent />
 			</ViewTaskProvider>

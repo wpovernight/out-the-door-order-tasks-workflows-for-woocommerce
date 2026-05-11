@@ -111,7 +111,7 @@ export const StatusTable = ({
 												}
 												title={__('Edit', 'wpo-advanced-order-manager')}
 											>
-												<span className="screenReader">
+												<span className="screen-reader-text">
 													{__('Edit', 'wpo-advanced-order-manager')}
 												</span>
 											</button>
@@ -123,7 +123,7 @@ export const StatusTable = ({
 												}
 												title={__('Delete', 'wpo-advanced-order-manager')}
 											>
-												<span className="screenReader">
+												<span className="screen-reader-text">
 													{__('Delete', 'wpo-advanced-order-manager')}
 												</span>
 											</button>

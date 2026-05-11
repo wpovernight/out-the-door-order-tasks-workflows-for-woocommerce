@@ -233,7 +233,7 @@ const ActiveTasks: React.FC = () => {
 
 	return (
 		<div className="task-list-container active-tasks-container">
-			<h4 className="screenReader">{__('Active Tasks', 'wpo-advanced-order-manager')}</h4>
+			<h4 className="screen-reader-text">{__('Active Tasks', 'wpo-advanced-order-manager')}</h4>
 			<ul className="task-list">
 				{visibleTasks.map((item) => {
 					if (item.type === 'archived') {

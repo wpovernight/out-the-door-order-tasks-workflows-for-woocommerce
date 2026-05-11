@@ -37,7 +37,7 @@ export default function Header() {
 			<div className="header-actions">
 				<div className="header-search">
 					<label htmlFor="header-search-input">
-						<span className="screenReader">
+						<span className="screen-reader-text">
 							{__('Search', 'wpo-advanced-order-manager')}
 						</span>
 					</label>

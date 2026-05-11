@@ -250,7 +250,7 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 						onClick={openTaskCreationModal}
 						className="wpo-button wpo-button-icon wpo-aom-add-button"
 					>
-						<span className="screenReader">
+						<span className="screen-reader-text">
 							{__('Create', 'wpo-advanced-order-manager')}
 						</span>
 					</button>
