@@ -23,14 +23,24 @@ const DateRangePresetSelector: React.FC<DateRangePresetSelectorProps> = ({
 				value={value}
 				onChange={(e) => onChange(e.target.value as DateRangePreset)}
 			>
-				<option value="today">{__('Today', 'wpo-advanced-order-manager')}</option>
-				<option value="tomorrow">{__('Tomorrow', 'wpo-advanced-order-manager')}</option>
-				<option value="yesterday">{__('Yesterday', 'wpo-advanced-order-manager')}</option>
+				<option value="today">
+					{__('Today', 'wpo-advanced-order-manager')}
+				</option>
+				<option value="tomorrow">
+					{__('Tomorrow', 'wpo-advanced-order-manager')}
+				</option>
+				<option value="yesterday">
+					{__('Yesterday', 'wpo-advanced-order-manager')}
+				</option>
 				<option value="current-week">
 					{__('Current Week', 'wpo-advanced-order-manager')}
 				</option>
-				<option value="next-week">{__('Next Week', 'wpo-advanced-order-manager')}</option>
-				<option value="last-week">{__('Last Week', 'wpo-advanced-order-manager')}</option>
+				<option value="next-week">
+					{__('Next Week', 'wpo-advanced-order-manager')}
+				</option>
+				<option value="last-week">
+					{__('Last Week', 'wpo-advanced-order-manager')}
+				</option>
 				<option value="current-month">
 					{__('Current Month', 'wpo-advanced-order-manager')}
 				</option>
@@ -40,7 +50,9 @@ const DateRangePresetSelector: React.FC<DateRangePresetSelectorProps> = ({
 				<option value="last-month">
 					{__('Last Month', 'wpo-advanced-order-manager')}
 				</option>
-				<option value="custom">{__('Custom', 'wpo-advanced-order-manager')}</option>
+				<option value="custom">
+					{__('Custom', 'wpo-advanced-order-manager')}
+				</option>
 			</select>
 		</div>
 	);

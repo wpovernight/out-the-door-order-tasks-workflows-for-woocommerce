@@ -123,8 +123,14 @@ export const CustomOrderStatusView = () => {
 				{statuses.length === 0 && !isCreating ? (
 					<EmptyState
 						icon="🏷"
-						message={__('No custom order statuses yet.', 'wpo-advanced-order-manager')}
-						actionText={__('Add new status', 'wpo-advanced-order-manager')}
+						message={__(
+							'No custom order statuses yet.',
+							'wpo-advanced-order-manager'
+						)}
+						actionText={__(
+							'Add new status',
+							'wpo-advanced-order-manager'
+						)}
 						onAction={() => setIsCreating(true)}
 					/>
 				) : (

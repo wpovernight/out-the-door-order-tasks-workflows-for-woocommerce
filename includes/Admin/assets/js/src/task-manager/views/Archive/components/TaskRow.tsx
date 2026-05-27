@@ -39,7 +39,10 @@ const TaskRow: React.FC<TaskRowProps> = ({ task }) => {
 
 	const handleDelete = async (taskId: number) => {
 		const confirmationResult = await confirm({
-			title: __('Permanently delete this task?', 'wpo-advanced-order-manager'),
+			title: __(
+				'Permanently delete this task?',
+				'wpo-advanced-order-manager'
+			),
 			message: __(
 				'Are you sure you want to delete this task? This action cannot be undone.',
 				'wpo-advanced-order-manager'
@@ -144,10 +147,16 @@ const TaskRow: React.FC<TaskRowProps> = ({ task }) => {
 								e.stopPropagation();
 								handleRestore(task.id);
 							}}
-							title={__('Restore Task', 'wpo-advanced-order-manager')}
+							title={__(
+								'Restore Task',
+								'wpo-advanced-order-manager'
+							)}
 						>
 							<span className="screen-reader-text">
-								{__('Restore Task', 'wpo-advanced-order-manager')}
+								{__(
+									'Restore Task',
+									'wpo-advanced-order-manager'
+								)}
 							</span>
 						</button>
 					</li>
@@ -159,10 +168,16 @@ const TaskRow: React.FC<TaskRowProps> = ({ task }) => {
 								e.stopPropagation();
 								handleDelete(task.id);
 							}}
-							title={__('Delete Task', 'wpo-advanced-order-manager')}
+							title={__(
+								'Delete Task',
+								'wpo-advanced-order-manager'
+							)}
 						>
 							<span className="screen-reader-text">
-								{__('Delete Task', 'wpo-advanced-order-manager')}
+								{__(
+									'Delete Task',
+									'wpo-advanced-order-manager'
+								)}
 							</span>
 						</button>
 					</li>

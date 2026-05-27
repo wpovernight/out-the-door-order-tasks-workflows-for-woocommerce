@@ -182,7 +182,9 @@ export const TaskActionMenu: React.FC<TaskActionMenuProps> = ({
 				type="button"
 				onClick={handleToggle}
 			>
-				<span className="screen-reader-text">{__('Options', 'wpo-advanced-order-manager')}</span>
+				<span className="screen-reader-text">
+					{__('Options', 'wpo-advanced-order-manager')}
+				</span>
 			</button>
 			{isOpen && (
 				<ul
@@ -209,8 +211,14 @@ export const TaskActionMenu: React.FC<TaskActionMenuProps> = ({
 							}
 						>
 							{isDone
-								? __('Mark as In Progress', 'wpo-advanced-order-manager')
-								: __('Mark as Done', 'wpo-advanced-order-manager')}
+								? __(
+										'Mark as In Progress',
+										'wpo-advanced-order-manager'
+									)
+								: __(
+										'Mark as Done',
+										'wpo-advanced-order-manager'
+									)}
 						</button>
 					</li>
 					<li>

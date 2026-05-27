@@ -8,13 +8,34 @@ interface CalendarGridProps {
 }
 
 const WEEKDAYS = [
-	{ abbr: __('Monday', 'wpo-advanced-order-manager'), short: __('Mo', 'wpo-advanced-order-manager') },
-	{ abbr: __('Tuesday', 'wpo-advanced-order-manager'), short: __('Tu', 'wpo-advanced-order-manager') },
-	{ abbr: __('Wednesday', 'wpo-advanced-order-manager'), short: __('We', 'wpo-advanced-order-manager') },
-	{ abbr: __('Thursday', 'wpo-advanced-order-manager'), short: __('Th', 'wpo-advanced-order-manager') },
-	{ abbr: __('Friday', 'wpo-advanced-order-manager'), short: __('Fr', 'wpo-advanced-order-manager') },
-	{ abbr: __('Saturday', 'wpo-advanced-order-manager'), short: __('Sa', 'wpo-advanced-order-manager') },
-	{ abbr: __('Sunday', 'wpo-advanced-order-manager'), short: __('Su', 'wpo-advanced-order-manager') },
+	{
+		abbr: __('Monday', 'wpo-advanced-order-manager'),
+		short: __('Mo', 'wpo-advanced-order-manager'),
+	},
+	{
+		abbr: __('Tuesday', 'wpo-advanced-order-manager'),
+		short: __('Tu', 'wpo-advanced-order-manager'),
+	},
+	{
+		abbr: __('Wednesday', 'wpo-advanced-order-manager'),
+		short: __('We', 'wpo-advanced-order-manager'),
+	},
+	{
+		abbr: __('Thursday', 'wpo-advanced-order-manager'),
+		short: __('Th', 'wpo-advanced-order-manager'),
+	},
+	{
+		abbr: __('Friday', 'wpo-advanced-order-manager'),
+		short: __('Fr', 'wpo-advanced-order-manager'),
+	},
+	{
+		abbr: __('Saturday', 'wpo-advanced-order-manager'),
+		short: __('Sa', 'wpo-advanced-order-manager'),
+	},
+	{
+		abbr: __('Sunday', 'wpo-advanced-order-manager'),
+		short: __('Su', 'wpo-advanced-order-manager'),
+	},
 ];
 
 const CalendarGrid: React.FC<CalendarGridProps> = ({ days, onDayClick }) => {

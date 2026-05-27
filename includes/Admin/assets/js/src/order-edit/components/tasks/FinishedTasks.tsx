@@ -72,7 +72,8 @@ const FinishedTasks: React.FC = () => {
 				style={!isExpanded ? { display: 'none' } : {}}
 			>
 				<h4>
-					{__('Done Tasks', 'wpo-advanced-order-manager')} ({finishedCount})
+					{__('Done Tasks', 'wpo-advanced-order-manager')} (
+					{finishedCount})
 				</h4>
 				<ul className="task-list">
 					{finishedTasks.map((task) => (

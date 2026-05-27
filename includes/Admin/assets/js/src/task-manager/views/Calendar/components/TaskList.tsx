@@ -46,15 +46,22 @@ const TaskList: React.FC<TaskListProps> = ({
 				today: __('Today', 'wpo-advanced-order-manager'),
 				tomorrow: __('Tomorrow', 'wpo-advanced-order-manager'),
 				yesterday: __('Yesterday', 'wpo-advanced-order-manager'),
-				'current-week': __('Current Week', 'wpo-advanced-order-manager'),
+				'current-week': __(
+					'Current Week',
+					'wpo-advanced-order-manager'
+				),
 				'next-week': __('Next Week', 'wpo-advanced-order-manager'),
 				'last-week': __('Last Week', 'wpo-advanced-order-manager'),
-				'current-month': __('Current Month', 'wpo-advanced-order-manager'),
+				'current-month': __(
+					'Current Month',
+					'wpo-advanced-order-manager'
+				),
 				'next-month': __('Next Month', 'wpo-advanced-order-manager'),
 				'last-month': __('Last Month', 'wpo-advanced-order-manager'),
 			};
 			const presetLabel =
-				presetLabels[dateRangePreset] || __('Today', 'wpo-advanced-order-manager');
+				presetLabels[dateRangePreset] ||
+				__('Today', 'wpo-advanced-order-manager');
 			return (
 				<>
 					{sprintf(

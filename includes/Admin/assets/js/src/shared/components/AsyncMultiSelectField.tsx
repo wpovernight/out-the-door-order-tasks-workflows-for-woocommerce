@@ -202,16 +202,25 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 			<div className="screen-reader-text" aria-live="polite">
 				{(() => {
 					if (loading) {
-						return __('Loading results…', 'wpo-advanced-order-manager');
+						return __(
+							'Loading results…',
+							'wpo-advanced-order-manager'
+						);
 					}
 					if (showResults) {
 						return results.length
 							? sprintf(
 									/* translators: %d is the number of results found. */
-									__('%d results found', 'wpo-advanced-order-manager'),
+									__(
+										'%d results found',
+										'wpo-advanced-order-manager'
+									),
 									results.length
 								)
-							: __('No results found', 'wpo-advanced-order-manager');
+							: __(
+									'No results found',
+									'wpo-advanced-order-manager'
+								);
 					}
 					return '';
 				})()}
@@ -224,7 +233,9 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 			)}
 			{showResults && !loading && !Boolean(results.length) && (
 				<div className="wpo-aom-async-multi-select-message">
-					<p>{__('No results found', 'wpo-advanced-order-manager')}</p>
+					<p>
+						{__('No results found', 'wpo-advanced-order-manager')}
+					</p>
 				</div>
 			)}
 			{showResults && !loading && Boolean(results.length) && (

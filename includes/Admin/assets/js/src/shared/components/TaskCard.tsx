@@ -280,14 +280,26 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 								}
 								title={
 									isDone
-										? __('Mark as In Progress', 'wpo-advanced-order-manager')
-										: __('Mark as Done', 'wpo-advanced-order-manager')
+										? __(
+												'Mark as In Progress',
+												'wpo-advanced-order-manager'
+											)
+										: __(
+												'Mark as Done',
+												'wpo-advanced-order-manager'
+											)
 								}
 							>
 								<span className="screen-reader-text">
 									{isDone
-										? __('Mark as In Progress', 'wpo-advanced-order-manager')
-										: __('Mark as Done', 'wpo-advanced-order-manager')}
+										? __(
+												'Mark as In Progress',
+												'wpo-advanced-order-manager'
+											)
+										: __(
+												'Mark as Done',
+												'wpo-advanced-order-manager'
+											)}
 								</span>
 							</button>
 						</li>
@@ -333,8 +345,14 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 					>
 						<span className="screen-reader-text">
 							{isDone
-								? __('Mark as In Progress', 'wpo-advanced-order-manager')
-								: __('Mark as Done', 'wpo-advanced-order-manager')}
+								? __(
+										'Mark as In Progress',
+										'wpo-advanced-order-manager'
+									)
+								: __(
+										'Mark as Done',
+										'wpo-advanced-order-manager'
+									)}
 						</span>
 						<input
 							id={`task-finish-${task.id}`}

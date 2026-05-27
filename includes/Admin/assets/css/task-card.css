@@ -58,14 +58,6 @@
     border-radius: 0;
 }
 
-.task-card-options .wpo-action-menu button::before {
-    margin-right: 0.7em;
-    color: #888D91;
-    font-size: 1.2em;
-    vertical-align: middle;
-}
-
-
 .task-edit-menu-item::before {
     content: '';
     display: inline-block;

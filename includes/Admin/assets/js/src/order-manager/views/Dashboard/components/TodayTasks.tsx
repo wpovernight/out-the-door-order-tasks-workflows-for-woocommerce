@@ -158,8 +158,14 @@ export const TodayTasks = () => {
 			<div className="content" ref={contentRef}>
 				{hasNoTasks ? (
 					<EmptyState
-						message={__('No tasks due today.', 'wpo-advanced-order-manager')}
-						actionText={__('Add Task', 'wpo-advanced-order-manager')}
+						message={__(
+							'No tasks due today.',
+							'wpo-advanced-order-manager'
+						)}
+						actionText={__(
+							'Add Task',
+							'wpo-advanced-order-manager'
+						)}
 					/>
 				) : (
 					<>
@@ -167,7 +173,10 @@ export const TodayTasks = () => {
 						{todayActive.length > 0 && (
 							<>
 								<h4 className="screen-reader-text">
-									{__('Active tasks due today', 'wpo-advanced-order-manager')}
+									{__(
+										'Active tasks due today',
+										'wpo-advanced-order-manager'
+									)}
 								</h4>
 								{renderTaskList(todayActive, 'active')}
 							</>
@@ -219,7 +228,10 @@ export const TodayTasks = () => {
 											setDoneExpanded(!doneExpanded)
 										}
 									>
-										{__('Tasks marked as done', 'wpo-advanced-order-manager')}{' '}
+										{__(
+											'Tasks marked as done',
+											'wpo-advanced-order-manager'
+										)}{' '}
 										<span className="wpo-count-badge">
 											{done.length}
 										</span>

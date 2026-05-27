@@ -28,6 +28,8 @@
     align-items: center;
     padding: 1.85em 0 0.5em;
     border-bottom: 1px solid var(--wpo-aom-border-light);
+    display: flex;
+    justify-content: space-between;
 }
 
 .dashboard-widget > .header > h3 {

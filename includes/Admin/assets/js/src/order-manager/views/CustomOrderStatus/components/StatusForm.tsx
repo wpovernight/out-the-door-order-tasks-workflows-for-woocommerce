@@ -77,7 +77,10 @@ export const StatusForm = ({
 					<fieldset>
 						<div id="label-field" className="form-field">
 							<label htmlFor="cos-label">
-								{__('Status Name', 'wpo-advanced-order-manager')}
+								{__(
+									'Status Name',
+									'wpo-advanced-order-manager'
+								)}
 							</label>
 							<input
 								id="cos-label"
@@ -102,7 +105,8 @@ export const StatusForm = ({
 									color: foreground,
 								}}
 							>
-								{label || __('Status', 'wpo-advanced-order-manager')}
+								{label ||
+									__('Status', 'wpo-advanced-order-manager')}
 							</span>
 						</div>
 						<div id="color-field" className="form-field">

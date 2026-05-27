@@ -56,7 +56,10 @@ export const DashboardView = () => {
 				<div className="dashboard-widget" id="partial-fulfillments">
 					<div className="header">
 						<h3>
-							{__('Partially shipped fulfillments', 'wpo-advanced-order-manager')}
+							{__(
+								'Partially shipped fulfillments',
+								'wpo-advanced-order-manager'
+							)}
 						</h3>
 					</div>
 					<div className="content">
@@ -110,7 +113,10 @@ export const DashboardView = () => {
 				<ErrorState
 					message={
 						loadingError?.message ||
-						__('Error loading tasks. Please try again.', 'wpo-advanced-order-manager')
+						__(
+							'Error loading tasks. Please try again.',
+							'wpo-advanced-order-manager'
+						)
 					}
 				/>
 			</div>
@@ -119,7 +125,9 @@ export const DashboardView = () => {
 
 	return (
 		<>
-			<h2 className="screen-reader-text">{__('Dashboard', 'wpo-advanced-order-manager')}</h2>
+			<h2 className="screen-reader-text">
+				{__('Dashboard', 'wpo-advanced-order-manager')}
+			</h2>
 			<SidebarModalProvider>
 				<div className="dashboard-view">
 					<TodayTasks />

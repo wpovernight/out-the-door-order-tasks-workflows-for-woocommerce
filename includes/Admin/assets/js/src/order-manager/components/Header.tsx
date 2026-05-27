@@ -5,7 +5,10 @@ import { AVAILABLE_TABS, useTab } from '@orderManager/context/TabContext';
 const tabLabels: Record<string, string> = {
 	dashboard: __('Dashboard', 'wpo-advanced-order-manager'),
 	'task-manager': __('Task Manager', 'wpo-advanced-order-manager'),
-	'custom-order-status': __('Custom Order Status', 'wpo-advanced-order-manager'),
+	'custom-order-status': __(
+		'Custom Order Status',
+		'wpo-advanced-order-manager'
+	),
 };
 
 export default function Header() {

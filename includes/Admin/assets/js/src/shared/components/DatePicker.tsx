@@ -19,13 +19,34 @@ interface DateParts {
 }
 
 const DAYS_OF_WEEK = [
-	{ short: __('Mo', 'wpo-advanced-order-manager'), full: __('Monday', 'wpo-advanced-order-manager') },
-	{ short: __('Tu', 'wpo-advanced-order-manager'), full: __('Tuesday', 'wpo-advanced-order-manager') },
-	{ short: __('We', 'wpo-advanced-order-manager'), full: __('Wednesday', 'wpo-advanced-order-manager') },
-	{ short: __('Th', 'wpo-advanced-order-manager'), full: __('Thursday', 'wpo-advanced-order-manager') },
-	{ short: __('Fr', 'wpo-advanced-order-manager'), full: __('Friday', 'wpo-advanced-order-manager') },
-	{ short: __('Sa', 'wpo-advanced-order-manager'), full: __('Saturday', 'wpo-advanced-order-manager') },
-	{ short: __('Su', 'wpo-advanced-order-manager'), full: __('Sunday', 'wpo-advanced-order-manager') },
+	{
+		short: __('Mo', 'wpo-advanced-order-manager'),
+		full: __('Monday', 'wpo-advanced-order-manager'),
+	},
+	{
+		short: __('Tu', 'wpo-advanced-order-manager'),
+		full: __('Tuesday', 'wpo-advanced-order-manager'),
+	},
+	{
+		short: __('We', 'wpo-advanced-order-manager'),
+		full: __('Wednesday', 'wpo-advanced-order-manager'),
+	},
+	{
+		short: __('Th', 'wpo-advanced-order-manager'),
+		full: __('Thursday', 'wpo-advanced-order-manager'),
+	},
+	{
+		short: __('Fr', 'wpo-advanced-order-manager'),
+		full: __('Friday', 'wpo-advanced-order-manager'),
+	},
+	{
+		short: __('Sa', 'wpo-advanced-order-manager'),
+		full: __('Saturday', 'wpo-advanced-order-manager'),
+	},
+	{
+		short: __('Su', 'wpo-advanced-order-manager'),
+		full: __('Sunday', 'wpo-advanced-order-manager'),
+	},
 ];
 
 const MONTH_LABELS = [
@@ -369,7 +390,8 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 			>
 				{selectedDate
 					? formatDisplayDate(selectedDate)
-					: placeholder || __('Date picker', 'wpo-advanced-order-manager')}
+					: placeholder ||
+						__('Date picker', 'wpo-advanced-order-manager')}
 			</button>
 			{selectedDate && (
 				<button

@@ -57,13 +57,21 @@ export const PartialFulfillments = ({ orders }: PartialFulfillmentsProps) => {
 	return (
 		<div className="dashboard-widget" id="partial-fulfillments">
 			<div className="header">
-				<h3>{__('Partially shipped fulfillments', 'wpo-advanced-order-manager')}</h3>
+				<h3>
+					{__(
+						'Partially shipped fulfillments',
+						'wpo-advanced-order-manager'
+					)}
+				</h3>
 			</div>
 			<div className="content" ref={contentRef}>
 				{!hasOrders ? (
 					<EmptyState
 						icon="box"
-						message={__('No partially shipped orders.', 'wpo-advanced-order-manager')}
+						message={__(
+							'No partially shipped orders.',
+							'wpo-advanced-order-manager'
+						)}
 					/>
 				) : (
 					<ul className="fulfillment-order-list">
@@ -102,8 +110,11 @@ export const PartialFulfillments = ({ orders }: PartialFulfillmentsProps) => {
 															'wpo-advanced-order-manager'
 														)}{' '}
 													&bull;{' '}
-													{__('Order', 'wpo-advanced-order-manager')} #
-													{order.order_id}{' '}
+													{__(
+														'Order',
+														'wpo-advanced-order-manager'
+													)}{' '}
+													#{order.order_id}{' '}
 													<span className="wpo-count-badge">
 														{unfulfilled.length}
 													</span>

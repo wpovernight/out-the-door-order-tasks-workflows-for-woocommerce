@@ -29,7 +29,10 @@ const WooFulfillmentsList: React.FC<WooFulfillmentsListProps> = ({
 			<ErrorState
 				message={
 					loadingError?.message ||
-					__('Error loading data. Please try again.', 'wpo-advanced-order-manager')
+					__(
+						'Error loading data. Please try again.',
+						'wpo-advanced-order-manager'
+					)
 				}
 				onRetry={refreshFulfillments}
 			/>
@@ -41,7 +44,10 @@ const WooFulfillmentsList: React.FC<WooFulfillmentsListProps> = ({
 		return (
 			<EmptyState
 				icon="box"
-				message={__('No fulfillments yet.', 'wpo-advanced-order-manager')}
+				message={__(
+					'No fulfillments yet.',
+					'wpo-advanced-order-manager'
+				)}
 				actionText={__('Add Fulfillment', 'wpo-advanced-order-manager')}
 				actionButtonProps={
 					{
@@ -55,7 +61,9 @@ const WooFulfillmentsList: React.FC<WooFulfillmentsListProps> = ({
 
 	return (
 		<div className="fulfillments-list-container">
-			<h4 className="screen-reader-text">{__('Fulfillments', 'wpo-advanced-order-manager')}</h4>
+			<h4 className="screen-reader-text">
+				{__('Fulfillments', 'wpo-advanced-order-manager')}
+			</h4>
 			<ul className="fulfillments-list">
 				{fulfillments.map((fulfillment, index) => (
 					<li key={fulfillment.id}>

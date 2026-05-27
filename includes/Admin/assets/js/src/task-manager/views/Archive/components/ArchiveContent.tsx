@@ -34,7 +34,12 @@ export const ArchiveContent: React.FC = () => {
 		<div className="archive-view-container">
 			{archivedTasks.length === 0 && (
 				<div className="no-tasks">
-					<p>{__('No archived tasks found.', 'wpo-advanced-order-manager')}</p>
+					<p>
+						{__(
+							'No archived tasks found.',
+							'wpo-advanced-order-manager'
+						)}
+					</p>
 				</div>
 			)}
 
@@ -48,7 +53,10 @@ export const ArchiveContent: React.FC = () => {
 										className="task-info th-sortable"
 										onClick={() => handleSort('title')}
 									>
-										{__('Task', 'wpo-advanced-order-manager')}{' '}
+										{__(
+											'Task',
+											'wpo-advanced-order-manager'
+										)}{' '}
 										<SortIcon
 											column="title"
 											sortColumn={sortColumn}
@@ -59,7 +67,10 @@ export const ArchiveContent: React.FC = () => {
 										className="task-order-id th-sortable"
 										onClick={() => handleSort('orderID')}
 									>
-										{__('Order ID', 'wpo-advanced-order-manager')}{' '}
+										{__(
+											'Order ID',
+											'wpo-advanced-order-manager'
+										)}{' '}
 										<SortIcon
 											column="orderID"
 											sortColumn={sortColumn}
@@ -72,7 +83,10 @@ export const ArchiveContent: React.FC = () => {
 											handleSort('customerName')
 										}
 									>
-										{__('Customer', 'wpo-advanced-order-manager')}{' '}
+										{__(
+											'Customer',
+											'wpo-advanced-order-manager'
+										)}{' '}
 										<SortIcon
 											column="customerName"
 											sortColumn={sortColumn}
@@ -83,7 +97,10 @@ export const ArchiveContent: React.FC = () => {
 										className="task-done-date th-sortable"
 										onClick={() => handleSort('doneDate')}
 									>
-										{__('Done', 'wpo-advanced-order-manager')}{' '}
+										{__(
+											'Done',
+											'wpo-advanced-order-manager'
+										)}{' '}
 										<SortIcon
 											column="doneDate"
 											sortColumn={sortColumn}
@@ -96,7 +113,10 @@ export const ArchiveContent: React.FC = () => {
 											handleSort('archivedDate')
 										}
 									>
-										{__('Archived Date', 'wpo-advanced-order-manager')}{' '}
+										{__(
+											'Archived Date',
+											'wpo-advanced-order-manager'
+										)}{' '}
 										<SortIcon
 											column="archivedDate"
 											sortColumn={sortColumn}
@@ -104,7 +124,10 @@ export const ArchiveContent: React.FC = () => {
 										/>
 									</th>
 									<th className="task-actions">
-										{__('Actions', 'wpo-advanced-order-manager')}
+										{__(
+											'Actions',
+											'wpo-advanced-order-manager'
+										)}
 									</th>
 								</tr>
 							</thead>
@@ -127,7 +150,10 @@ export const ArchiveContent: React.FC = () => {
 						<span>
 							{sprintf(
 								/* translators: 1: current page, 2: total pages */
-								__('Page %1$d of %2$d', 'wpo-advanced-order-manager'),
+								__(
+									'Page %1$d of %2$d',
+									'wpo-advanced-order-manager'
+								),
 								currentPage,
 								totalPages
 							)}

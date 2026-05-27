@@ -211,7 +211,10 @@ const ActiveTasks: React.FC = () => {
 			<ErrorState
 				message={
 					loadingError?.message ||
-					__('Error loading data. Please try again.', 'wpo-advanced-order-manager')
+					__(
+						'Error loading data. Please try again.',
+						'wpo-advanced-order-manager'
+					)
 				}
 				onRetry={refreshTasks}
 			/>
@@ -233,7 +236,9 @@ const ActiveTasks: React.FC = () => {
 
 	return (
 		<div className="task-list-container active-tasks-container">
-			<h4 className="screen-reader-text">{__('Active Tasks', 'wpo-advanced-order-manager')}</h4>
+			<h4 className="screen-reader-text">
+				{__('Active Tasks', 'wpo-advanced-order-manager')}
+			</h4>
 			<ul className="task-list">
 				{visibleTasks.map((item) => {
 					if (item.type === 'archived') {
@@ -263,7 +268,10 @@ const ActiveTasks: React.FC = () => {
 											href={archivePageUrl}
 											className="task-archived-link"
 										>
-											{__('Go to archive', 'wpo-advanced-order-manager')}
+											{__(
+												'Go to archive',
+												'wpo-advanced-order-manager'
+											)}
 											{' \u2192'}
 										</a>
 									</div>
@@ -274,7 +282,10 @@ const ActiveTasks: React.FC = () => {
 											handleUndoArchive(taskId)
 										}
 									>
-										{__('Undo', 'wpo-advanced-order-manager')}
+										{__(
+											'Undo',
+											'wpo-advanced-order-manager'
+										)}
 									</button>
 								</div>
 							</li>

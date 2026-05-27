@@ -48,7 +48,10 @@ export const SidebarModal: React.FC<SidebarModalProps> = ({
 									onClick={onClose}
 								>
 									<span className="screen-reader-text">
-										{__('Close', 'wpo-advanced-order-manager')}
+										{__(
+											'Close',
+											'wpo-advanced-order-manager'
+										)}
 									</span>
 								</button>
 							</div>

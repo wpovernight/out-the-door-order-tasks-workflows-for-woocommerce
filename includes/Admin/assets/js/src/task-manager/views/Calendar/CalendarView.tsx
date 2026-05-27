@@ -32,14 +32,19 @@ export const CalendarView: React.FC = () => {
 	if (loadingStatus === 'error') {
 		return (
 			<div className="error-message">
-				{__('Error loading tasks. Please try again.', 'wpo-advanced-order-manager')}
+				{__(
+					'Error loading tasks. Please try again.',
+					'wpo-advanced-order-manager'
+				)}
 			</div>
 		);
 	}
 
 	return (
 		<>
-			<h3 className="screen-reader-text">{__('Task Calendar', 'wpo-advanced-order-manager')}</h3>
+			<h3 className="screen-reader-text">
+				{__('Task Calendar', 'wpo-advanced-order-manager')}
+			</h3>
 			<ViewTaskProvider>
 				<CalendarContent />
 			</ViewTaskProvider>

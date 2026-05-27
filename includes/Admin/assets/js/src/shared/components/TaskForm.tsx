@@ -153,7 +153,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 			onTaskSaved?.(savedTask);
 			addToast({
 				title: isUpdate
-					? __('The task has been successfully updated.', 'wpo-advanced-order-manager')
+					? __(
+							'The task has been successfully updated.',
+							'wpo-advanced-order-manager'
+						)
 					: __(
 							'A new task has been successfully created.',
 							'wpo-advanced-order-manager'
@@ -165,8 +168,14 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 			console.error('Failed to save task:', error);
 			addToast({
 				title: isUpdate
-					? __('Failed to update task. Please try again.', 'wpo-advanced-order-manager')
-					: __('Failed to create task. Please try again.', 'wpo-advanced-order-manager'),
+					? __(
+							'Failed to update task. Please try again.',
+							'wpo-advanced-order-manager'
+						)
+					: __(
+							'Failed to create task. Please try again.',
+							'wpo-advanced-order-manager'
+						),
 				message: __('Please try again.', 'wpo-advanced-order-manager'),
 				type: ToastType.ERROR,
 			});
@@ -188,7 +197,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 	if (loadingStatus === 'error') {
 		return (
 			<div className="error-message">
-				{__('Error loading data. Please try again.', 'wpo-advanced-order-manager')}
+				{__(
+					'Error loading data. Please try again.',
+					'wpo-advanced-order-manager'
+				)}
 			</div>
 		);
 	}
@@ -257,7 +269,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 							{__('Status', 'wpo-advanced-order-manager')}
 						</label>
 						<FieldOptionDropdown
-							placeholder={__('Select', 'wpo-advanced-order-manager')}
+							placeholder={__(
+								'Select',
+								'wpo-advanced-order-manager'
+							)}
 							options={fieldOptions.status}
 							id="status"
 							name="field_status"
@@ -269,7 +284,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 							{__('Priority', 'wpo-advanced-order-manager')}
 						</label>
 						<FieldOptionDropdown
-							placeholder={__('Select', 'wpo-advanced-order-manager')}
+							placeholder={__(
+								'Select',
+								'wpo-advanced-order-manager'
+							)}
 							options={fieldOptions?.priority || []}
 							id="priority"
 							name="field_priority"
@@ -289,7 +307,9 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				</div>
 				<div className="field-group">
 					<div>
-						<label htmlFor="title">{__('Title', 'wpo-advanced-order-manager')}</label>
+						<label htmlFor="title">
+							{__('Title', 'wpo-advanced-order-manager')}
+						</label>
 						<input
 							id="title"
 							name="title"
@@ -359,7 +379,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 							id="description"
 							name="description"
 							rows={6}
-							placeholder={__('Describe the task.', 'wpo-advanced-order-manager')}
+							placeholder={__(
+								'Describe the task.',
+								'wpo-advanced-order-manager'
+							)}
 							defaultValue={
 								task
 									? task.description

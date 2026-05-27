@@ -11,7 +11,7 @@
 }
 
 #wpo-aom-order-manager .task-manager-tab .view.kanban-view {
-    height: calc(100vh - 22em);
+    height: calc(100vh - 23em);
     padding: 2.4em;
 }
 
@@ -19,26 +19,76 @@
     align-items: end;
     border-bottom: 2px solid #091E4224;
     margin: 1.6em 2.4em 0;
-}
-
-#wpo-aom-order-manager .content .header {
     display: flex;
     justify-content: space-between;
+    position: relative;
 }
 
-.header-actions {
+#wpo-aom-order-manager .task-manager-tab ul.add-menu {
+    position: fixed;
+    right: 999vw;
+}
+
+#wpo-aom-order-manager .task-manager-tab ul.add-menu.open {
+    position: absolute;
+    width: 15em;
+    right: 0;
+    top: 3.5em;
+}
+
+#wpo-aom-order-manager .task-manager-tab ul.add-menu > li > button {
+    padding: 0.9em;
+    display: flex;
+    align-items: center;
+    border-radius: 0;
+}
+
+#wpo-aom-order-manager .task-manager-tab button.add-task-menu-item::before {
+    content: '';
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    background-color: currentColor;
+    mask-image: var(--wpo-aom-icon-list-bullet);
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-image: var(--wpo-aom-icon-list-bullet);
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+}
+
+#wpo-aom-order-manager .task-manager-tab button.add-column-menu-item::before {
+    content: '';
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    background-color: currentColor;
+    mask-image: var(--wpo-aom-icon-access-list);
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-image: var(--wpo-aom-icon-access-list);
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+}
+
+
+#wpo-aom-order-manager .task-manager-tab .header-actions {
     display: flex;
     align-items: center;
     gap: 0.75em;
 }
 
-.header-actions .header-search {
+#wpo-aom-order-manager .task-manager-tab .header-actions .header-search {
     position: relative;
     display: flex;
     align-items: center;
 }
 
-.header-actions #header-search-input {
+#wpo-aom-order-manager .task-manager-tab .header-actions #header-search-input {
     border: 1px solid var(--wpo-aom-border-color);
     border-radius: var(--wpo-aom-radius-m);
     font-size: 1.08em;
@@ -53,17 +103,24 @@
     padding: 0.37em 1em 0.37em 3em;
 }
 
-#header-search-input:focus {
+#wpo-aom-order-manager .task-manager-tab #header-search-input:focus {
     border-color: var(--wpo-aom-purple-primary);
 }
 
-.header-actions .add-task {
-    padding: 0.63em 1em;
+#wpo-aom-order-manager .task-manager-tab .header-actions .add-menu-button {
     border-radius: var(--wpo-aom-radius-m);
-    font-size: 1.08em;
-    font-weight: 600;
+    font-size: 1.5em;
+    height: 2.055em;
+    width: 2.055em;
+    padding: 0;
+    margin: 0;
 }
 
+#wpo-aom-order-manager .task-manager-tab .header-actions .add-menu-button::before {
+    font-family: dashicons;
+    content: '\f543';
+    display: block;
+}
 
 .kanban-board {
     display: flex;
@@ -159,6 +216,7 @@
     flex-direction: column;
     gap: 0.92em;
     min-height: 100%;
+    padding-top: 0.65em; /* Required for the space for drop indicator before the first card */
 }
 
 .kanban-board .kanban-column-header {
