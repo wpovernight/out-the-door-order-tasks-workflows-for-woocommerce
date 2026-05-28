@@ -191,6 +191,21 @@ class TaskController extends BaseRestController {
 			)
 		);
 
+		// PUT /{namespace}/tasks/fields/{field_id}/options/{option_id} -> updates a specific option for a specific field.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->resource_name . '/fields/(?P<field_id>[\d]+)/options/(?P<option_id>[\d]+)',
+			array(
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'update_field_option' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+					'args'                => rest_get_endpoint_args_for_schema( $this->get_field_option_schema(), WP_REST_Server::EDITABLE ),
+					'schema'              => array( $this, 'get_field_option_schema' ),
+				),
+			)
+		);
+
 		// GET /{namespace}/tasks/fields/{field_slug}/options -> returns options for a specific field by slug.
 		register_rest_route(
 			$this->namespace,
@@ -572,8 +587,8 @@ class TaskController extends BaseRestController {
 
 		$errors = $this->validate( $data, array(
 			'label'    => 'required|string',
-			'slug'     => 'string',
-			'color'    => 'string',
+			'slug'     => 'string|regex:/^[a-z0-9_-]+$/i',
+			'color'    => 'string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
 			'position' => 'integer',
 		) );
 
@@ -610,6 +625,65 @@ class TaskController extends BaseRestController {
 		} catch ( \Throwable $e ) {
 			Logger::error( 'Failed to create field option: ' . $e->getMessage() );
 			return new WP_Error( 'creation_failed', 'Failed to create field option.', array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Update an existing field option for a specific field.
+	 *
+	 * @param WP_REST_Request $request
+	 *
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function update_field_option( WP_REST_Request $request ) {
+		$field_id = (int) $request->get_param( 'field_id' );
+
+		if ( $field_id <= 0 ) {
+			return new WP_Error( 'invalid_field_id', 'Invalid field ID provided', array( 'status' => 400 ) );
+		}
+
+		$option_id = (int) $request->get_param( 'option_id' );
+
+		if ( $option_id <= 0 ) {
+			return new WP_Error( 'invalid_option_id', 'Invalid option ID provided', array( 'status' => 400 ) );
+		}
+
+		$data = $request->get_json_params();
+
+		$errors = $this->validate( $data, array(
+			'label'    => 'string',
+			'slug'     => 'string|regex:/^[a-z0-9_-]+$/i',
+			'color'    => 'string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
+			'position' => 'integer',
+		) );
+
+		if ( ! empty( $errors ) ) {
+			return new WP_Error( 'invalid_data', 'Invalid data provided', array(
+				'status' => 400,
+				'errors' => $errors
+			) );
+		}
+
+		try {
+			/** @var TaskManagerService $task_manager_service */
+			$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
+
+			$option = $task_manager_service->update_field_option( $field_id, $option_id, $data );
+
+			/**
+			 * Allow modifying the updated field option response.
+			 *
+			 * @param array $option The updated field option object.
+			 * @param WP_REST_Request $request The original REST request object.
+			 */
+			$option = apply_filters( 'wpo_aom_rest_prepare_field_option', $option, $request );
+
+			return rest_ensure_response( $option );
+		} catch ( \RuntimeException $e ) {
+			return new WP_Error( 'not_found', $e->getMessage(), array( 'status' => 404 ) );
+		} catch ( \Throwable $e ) {
+			Logger::error( 'Failed to update field option: ' . $e->getMessage() );
+			return new WP_Error( 'update_failed', 'Failed to update field option.', array( 'status' => 500 ) );
 		}
 	}
 

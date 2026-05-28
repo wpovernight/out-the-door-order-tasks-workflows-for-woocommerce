@@ -581,14 +581,23 @@ final class TaskManagerService {
 			->where( 'field_id', $field_id )
 			->where( 'slug', $option_data['slug'] )
 			->first();
+
 		if ( null !== $slug_exist ) {
 			// Slug collided: append -2, -3, ... until free.
 			$base_slug = $option_data['slug'];
 			$suffix    = 2;
+
 			do {
 				$candidate = $base_slug . '-' . $suffix;
 				++$suffix;
-			} while ( null !== $this->task_field_option_repository->where( 'field_id', $field_id )->where( 'slug', $candidate )->first() );
+			} while (
+				null !== $this
+					->task_field_option_repository
+					->where( 'field_id', $field_id )
+					->where( 'slug', $candidate )
+					->first()
+			);
+
 			$option_data['slug'] = $candidate;
 		}
 
@@ -649,32 +658,69 @@ final class TaskManagerService {
 	/**
 	 * Update an option by ID.
 	 *
-	 * @param int $option_id
+	 * @param int   $field_id
+	 * @param int   $option_id
 	 * @param array $option_data
 	 *
-	 * @return bool
+	 * @return array
+	 * @throws RuntimeException If the option does not exist or does not belong to the given field.
 	 */
-	public function update_field_option( int $option_id, array $option_data ): bool {
+	public function update_field_option( int $field_id, int $option_id, array $option_data ): array {
 		$option = $this->task_field_option_repository->find( $option_id );
 		if ( ! $option ) {
-			return false;
+			throw new RuntimeException( 'Field option not found.' );
+		}
+
+		if ( $option->field_id !== $field_id ) {
+			throw new RuntimeException( 'Field option does not belong to the given field.' );
+		}
+
+		// Enforce slug uniqueness within the field, skipping when the slug isn't changing.
+		if ( ! empty( $option_data['slug'] ) && $option_data['slug'] !== $option->slug ) {
+			$slug_exist = $this
+				->task_field_option_repository
+				->where( 'field_id', $option->field_id )
+				->where( 'slug', $option_data['slug'] )
+				->first();
+
+			if ( null !== $slug_exist ) {
+				// Slug collided: append -2, -3, ... until free. The `id != $option_id` guard
+				// protects against a candidate (e.g. "foo-2") matching the row's own current slug.
+				$base_slug = $option_data['slug'];
+				$suffix    = 2;
+
+				do {
+					$candidate = $base_slug . '-' . $suffix;
+					++$suffix;
+				} while (
+					null !== $this->task_field_option_repository
+						->where( 'field_id', $option->field_id )
+						->where( 'slug', $candidate )
+						->where( 'id', '!=', $option_id )
+						->first()
+				);
+
+				$option_data['slug'] = $candidate;
+			}
 		}
 
 		$option->fill( $option_data );
 
-		$result = ( false !== $this->task_field_option_repository->save( $option ) );
-
-		if ( $result ) {
-			/**
-			 * Fires after a field option has been updated.
-			 *
-			 * @param int   $option_id   The ID of the updated option.
-			 * @param array $option_data The updated option data.
-			 */
-			do_action( 'wpo_aom_field_option_updated', $option_id, $option_data );
+		if ( false === $this->task_field_option_repository->save( $option ) ) {
+			throw new RuntimeException( 'Failed to persist field option.' );
 		}
 
-		return $result;
+		$this->task_field_option_repository::clear_cache();
+
+		/**
+		 * Fires after a field option has been updated.
+		 *
+		 * @param int   $option_id   The ID of the updated option.
+		 * @param array $option_data The updated option data.
+		 */
+		do_action( 'wpo_aom_field_option_updated', $option_id, $option_data );
+
+		return $option->to_array();
 	}
 
 	/**
