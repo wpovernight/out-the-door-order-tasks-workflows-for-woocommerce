@@ -456,3 +456,38 @@ export async function deleteCustomOrderStatus(statusId: number): Promise<void> {
 
 	return handleResponse<void>(response);
 }
+
+export async function createFieldOption(
+	fieldId: number,
+	payload: Partial<FieldOption>
+): Promise<FieldOption> {
+	const response = await fetch(
+		`${getApiRoot()}/${getApiNamespace()}/tasks/fields/${fieldId}/options`,
+		{
+			method: 'POST',
+			credentials: 'include',
+			headers: getHeaders(),
+			body: JSON.stringify(payload),
+		}
+	);
+
+	return handleResponse<FieldOption>(response);
+}
+
+export async function updateFieldOption(
+	fieldId: number,
+	optionId: number,
+	payload: Partial<FieldOption>
+): Promise<FieldOption> {
+	const response = await fetch(
+		`${getApiRoot()}/${getApiNamespace()}/tasks/fields/${fieldId}/options/${optionId}`,
+		{
+			method: 'PUT',
+			credentials: 'include',
+			headers: getHeaders(),
+			body: JSON.stringify(payload),
+		}
+	);
+
+	return handleResponse<FieldOption>(response);
+}
