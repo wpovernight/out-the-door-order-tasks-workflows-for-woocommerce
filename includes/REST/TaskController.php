@@ -169,6 +169,7 @@ class TaskController extends BaseRestController {
 		 */
 
 		// GET /{namespace}/tasks/fields/{field_id}/options -> returns options for a specific field.
+		// POST /{namespace}/tasks/fields/{field_id}/options -> creates a new option for a specific field.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->resource_name . '/fields/(?P<field_id>[\d]+)/options',
@@ -178,6 +179,13 @@ class TaskController extends BaseRestController {
 					'callback'            => array( $this, 'get_field_options' ),
 					'permission_callback' => array( $this, 'check_permissions' ),
 					'args'                => rest_get_endpoint_args_for_schema( $this->get_field_option_schema(), WP_REST_Server::READABLE ),
+					'schema'              => array( $this, 'get_field_option_schema' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'create_field_option' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+					'args'                => rest_get_endpoint_args_for_schema( $this->get_field_option_schema(), WP_REST_Server::CREATABLE ),
 					'schema'              => array( $this, 'get_field_option_schema' ),
 				),
 			)
@@ -276,29 +284,29 @@ class TaskController extends BaseRestController {
 			) );
 		}
 
-		/** @var TaskManagerService $task_manager_service */
-		$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
-
 		try {
+			/** @var TaskManagerService $task_manager_service */
+			$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
+
 			$task = $task_manager_service->create_task(
 				$data['title'],
 				$data['description'] ?? '',
 				$data['field_values'] ?? array()
 			);
+
+			/**
+			 * Allow modifying the created task response.
+			 *
+			 * @param array           $task     The created task object.
+			 * @param WP_REST_Request $request  The original REST request object.
+			 */
+			$task = apply_filters( 'wpo_aom_rest_prepare_task', $task, $request );
+
+			return rest_ensure_response( $task );
 		} catch ( \Throwable $e ) {
 			Logger::error( 'Task creation failed: ' . $e->getMessage() );
 			return new WP_Error( 'task_creation_failed', __( 'Failed to create task.', 'wpo-advanced-order-manager' ), array( 'status' => 500 ) );
 		}
-
-		/**
-		 * Allow modifying the created task response.
-		 *
-		 * @param array           $task     The created task object.
-		 * @param WP_REST_Request $request  The original REST request object.
-		 */
-		$task = apply_filters( 'wpo_aom_rest_prepare_task', $task, $request );
-
-		return rest_ensure_response( $task );
 	}
 
 	/**
@@ -371,25 +379,25 @@ class TaskController extends BaseRestController {
 			) );
 		}
 
-		/** @var TaskManagerService $task_manager_service */
-		$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
-
 		try {
+			/** @var TaskManagerService $task_manager_service */
+			$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
+
 			$task = $task_manager_service->update_task( $id, $data, $data['field_values'] ?? null );
+
+			/**
+			 * Allow modifying the updated task response.
+			 *
+			 * @param array           $task     The updated task object.
+			 * @param WP_REST_Request $request  The original REST request object.
+			 */
+			$task = apply_filters( 'wpo_aom_rest_prepare_task', $task, $request );
+
+			return rest_ensure_response( $task );
 		} catch ( \Throwable $e ) {
 			Logger::error( 'Task update failed: ' . $e->getMessage() );
 			return new WP_Error( 'task_update_failed', __( 'Failed to update task.', 'wpo-advanced-order-manager' ), array( 'status' => 500 ) );
 		}
-
-		/**
-		 * Allow modifying the updated task response.
-		 *
-		 * @param array           $task     The updated task object.
-		 * @param WP_REST_Request $request  The original REST request object.
-		 */
-		$task = apply_filters( 'wpo_aom_rest_prepare_task', $task, $request );
-
-		return rest_ensure_response( $task );
 	}
 
 	/**
@@ -546,6 +554,66 @@ class TaskController extends BaseRestController {
 	}
 
 	/**
+	 * Create a new field option for a specific field.
+	 *
+	 * @param WP_REST_Request $request
+	 *
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function create_field_option( WP_REST_Request $request ) {
+		$field_id = (int) $request->get_param( 'field_id' );
+
+		// Validate field_id.
+		if ( $field_id <= 0 ) {
+			return new WP_Error( 'invalid_field_id', 'Invalid field ID provided', array( 'status' => 400 ) );
+		}
+
+		$data = $request->get_json_params();
+
+		$errors = $this->validate( $data, array(
+			'label'    => 'required|string',
+			'slug'     => 'string',
+			'color'    => 'string',
+			'position' => 'integer',
+		) );
+
+		if ( ! empty( $errors ) ) {
+			return new WP_Error( 'invalid_data', 'Invalid data provided', array(
+				'status' => 400,
+				'errors' => $errors
+			) );
+		}
+
+		try {
+			/** @var TaskManagerService $task_manager_service */
+			$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
+
+			$option = $task_manager_service->add_field_option(
+				$field_id,
+				array(
+					'label'    => $data['label'],
+					'slug'     => $data['slug'] ?? null,
+					'color'    => $data['color'] ?? null,
+					'position' => $data['position'] ?? null,
+				)
+			);
+
+			/**
+			 * Allow modifying the created field option response.
+			 *
+			 * @param array           $option   The created field option object.
+			 * @param WP_REST_Request $request  The original REST request object.
+			 */
+			$option = apply_filters( 'wpo_aom_rest_prepare_field_option', $option, $request );
+
+			return rest_ensure_response( $option );
+		} catch ( \Throwable $e ) {
+			Logger::error( 'Failed to create field option: ' . $e->getMessage() );
+			return new WP_Error( 'creation_failed', 'Failed to create field option.', array( 'status' => 500 ) );
+		}
+	}
+
+	/**
 	 * Reorder field options by updating their position values.
 	 *
 	 * @param WP_REST_Request $request
@@ -566,10 +634,10 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'invalid_option_ids', 'Invalid option IDs provided', array( 'status' => 400 ) );
 		}
 
-		/** @var TaskManagerService $task_manager_service */
-		$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
-
 		try {
+			/** @var TaskManagerService $task_manager_service */
+			$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
+
 			$task_manager_service->update_field_option_positions( $field_id, $ordered_option_ids );
 
 			return rest_ensure_response(
