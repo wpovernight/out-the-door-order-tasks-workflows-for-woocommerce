@@ -561,28 +561,89 @@ final class TaskManagerService {
 	/**
 	 * Add an option to a select-type field.
 	 *
-	 * @param int $field_id
+	 * @param int   $field_id
 	 * @param array $option_data
 	 *
-	 * @return int|false
+	 * @return array|false
+	 * @throws \Throwable Propagated from the transactional shift+insert if the DB layer fails.
 	 */
 	public function add_field_option( int $field_id, array $option_data ) {
 		$option_data['field_id'] = $field_id;
 
-		$option_id = $this->task_field_option_repository->insert( $option_data );
-
-		if ( $option_id ) {
-			/**
-			 * Fires after a field option has been created.
-			 *
-			 * @param int   $option_id   The ID of the created option.
-			 * @param int   $field_id    The ID of the field the option belongs to.
-			 * @param array $option_data The option data.
-			 */
-			do_action( 'wpo_aom_field_option_created', $option_id, $field_id, $option_data );
+		// Auto-generate slug from label if not provided.
+		if ( empty( $option_data['slug'] ) ) {
+			$option_data['slug'] = sanitize_title( $option_data['label'] );
 		}
 
-		return $option_id;
+		// Enforce slug uniqueness within the field.
+		$slug_exist = $this
+			->task_field_option_repository
+			->where( 'field_id', $field_id )
+			->where( 'slug', $option_data['slug'] )
+			->first();
+		if ( null !== $slug_exist ) {
+			// Slug collided: append -2, -3, ... until free.
+			$base_slug = $option_data['slug'];
+			$suffix    = 2;
+			do {
+				$candidate = $base_slug . '-' . $suffix;
+				++$suffix;
+			} while ( null !== $this->task_field_option_repository->where( 'field_id', $field_id )->where( 'slug', $candidate )->first() );
+			$option_data['slug'] = $candidate;
+		}
+
+		// Auto-assign a random color if not provided.
+		if ( empty( $option_data['color'] ) ) {
+			$option_data['color'] = sprintf(
+				'#%06X',
+				mt_rand( 0, 0xFFFFFF )
+			);
+		}
+
+		// Resolve the target position against the current max for this field. Positions are 1-based;
+		// any missing / out-of-range value falls through to "append at the end" so we never insert
+		// negative positions or leave gaps from oversized inputs.
+		$last_option        = $this
+			->task_field_option_repository
+			->where( 'field_id', $field_id )
+			->order_by( 'position', 'DESC' )
+			->first();
+		$max_position       = $last_option ? (int) $last_option->position : 0;
+		$requested_position = isset( $option_data['position'] ) ? (int) $option_data['position'] : 0;
+		$shift_needed       = $requested_position >= 1 && $requested_position <= $max_position;
+
+		$option_data['position'] = $shift_needed ? $requested_position : $max_position + 1;
+
+		// Shift + insert must be atomic; otherwise a failed insert leaves every subsequent option
+		// shifted up by one with no row filling the gap.
+		$option_id = $this->task_field_option_repository->transaction(
+			function ( $repository ) use ( $field_id, $shift_needed, $option_data ) {
+				if ( $shift_needed ) {
+					$repository->increment_positions_from( $field_id, $option_data['position'] );
+				}
+				return $repository->insert( $option_data );
+			}
+		);
+
+		if ( ! $option_id ) {
+			return false;
+		}
+
+		// Drop any cached reads.
+		$this->task_field_option_repository::clear_cache();
+
+		$option_data['id'] = (int) $option_id;
+
+		/**
+		 * Fires after a field option has been created.
+		 *
+		 * @param int   $option_id   The ID of the created option.
+		 * @param int   $field_id    The ID of the field the option belongs to.
+		 * @param array $option_data The option data.
+		 */
+		do_action( 'wpo_aom_field_option_created', $option_id, $field_id, $option_data );
+
+		return $option_data;
 	}
 
 	/**

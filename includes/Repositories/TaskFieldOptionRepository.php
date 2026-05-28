@@ -71,4 +71,21 @@ class TaskFieldOptionRepository extends BaseRepository {
 
 		$this->execute_raw( $query, $bindings );
 	}
+
+	/**
+	 * Increment positions of field options starting from a specific position for a given field ID.
+	 *
+	 * @param int $field_id
+	 * @param int $start_position
+	 *
+	 * @return void
+	 */
+	public function increment_positions_from( int $field_id, int $start_position ): void {
+		$query = "UPDATE {$this->get_table_full_name()}
+				  SET position = position + 1
+				  WHERE field_id = %d
+				  AND position >= %d";
+
+		$this->execute_raw( $query, array( absint( $field_id ), absint( $start_position ) ) );
+	}
 }
