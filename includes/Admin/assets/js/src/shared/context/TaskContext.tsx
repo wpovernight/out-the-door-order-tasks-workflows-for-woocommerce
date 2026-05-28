@@ -23,6 +23,7 @@ import {
 	finishTask as finishTaskAPI,
 	archiveTask as archiveTaskAPI,
 	unarchiveTask as unarchiveTaskAPI,
+	updateFieldOption as updateFieldOptionAPI,
 } from '@shared/utils/api';
 import { updateTaskFields } from '@shared/utils/fieldUtils';
 
@@ -42,6 +43,11 @@ interface TaskContextType {
 		React.SetStateAction<Record<string, FieldOption[]>>
 	>;
 	loadFieldOptions: (fieldSlug: string, force?: boolean) => Promise<void>;
+	updateFieldOption: (
+		fieldId: number,
+		optionId: number,
+		updates: Partial<FieldOption>
+	) => Promise<void>;
 	moveTask: (
 		taskId: number,
 		previousTaskId: number | null,
@@ -232,6 +238,66 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 			}
 		},
 		[] // No dependencies - stable reference
+	);
+
+	// WARNING: only safe for non-slug updates (e.g. label, color). Changing `slug`
+	// here would desync the kanban: `viewTasks` is keyed by status-option slug, and
+	// each task's `status` holds the server-resolved slug snapshot — neither is
+	// patched by this optimistic update, so affected tasks would vanish from the
+	// board until reload. Add a cascade (walk `tasks` + re-key `viewTasks`) before
+	// allowing slug edits through this path.
+	const updateFieldOption = useCallback(
+		async (
+			fieldId: number,
+			optionId: number,
+			updates: Partial<FieldOption>
+		): Promise<void> => {
+			let previousState: Record<string, FieldOption[]> | null = null;
+
+			const applyUpdates = (
+				prev: Record<string, FieldOption[]>,
+				patch: Partial<FieldOption>
+			): Record<string, FieldOption[]> => {
+				const fieldSlug = Object.keys(prev).find((slug) =>
+					prev[slug].some((opt) => opt.id === optionId)
+				);
+
+				if (!fieldSlug) {
+					return prev;
+				}
+				return {
+					...prev,
+					[fieldSlug]: prev[fieldSlug].map((opt) =>
+						opt.id === optionId ? { ...opt, ...patch } : opt
+					),
+				};
+			};
+
+			// Optimistically update the global field options state.
+			setFieldOptions((prev) => {
+				previousState = prev;
+				return applyUpdates(prev, updates);
+			});
+
+			try {
+				const updated = await updateFieldOptionAPI(
+					fieldId,
+					optionId,
+					updates
+				);
+				// Reconcile with the server response (e.g. slug may have been deduped).
+				setFieldOptions((prev) => applyUpdates(prev, updated));
+			} catch (error) {
+				console.error('Failed to update field option:', error);
+
+				if (previousState) {
+					setFieldOptions(previousState);
+				}
+
+				throw error;
+			}
+		},
+		[]
 	);
 
 	// ---------------------
@@ -597,6 +663,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				fieldOptions,
 				setFieldOptions,
 				loadFieldOptions,
+				updateFieldOption,
 				moveTask,
 				finishTask,
 				unfinishTask,
