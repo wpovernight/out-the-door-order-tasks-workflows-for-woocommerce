@@ -21,7 +21,9 @@ final class Install {
 	 *
 	 * @var array<string, string[]>
 	 */
-	private static array $migrations = array();
+	private static array $migrations = array(
+		'1.0.0-beta.2' => array( 'migrate_apply_option_slug_unique_index' ),
+	);
 
 	protected static ?self $_instance = null;
 
@@ -167,6 +169,7 @@ final class Install {
 			color VARCHAR(7) DEFAULT NULL,
 			position INT NOT NULL DEFAULT 0,
 			PRIMARY KEY  (id),
+			UNIQUE KEY field_slug_unique (field_id, slug),
 			FOREIGN KEY (field_id) REFERENCES {$wpdb->prefix}wpo_aom_task_fields(id) ON DELETE CASCADE
 		) {$charset_collate};
 		CREATE TABLE `{$wpdb->prefix}wpo_aom_task_field_values` (
@@ -396,6 +399,18 @@ final class Install {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Install-time AUTO_INCREMENT reset; schema change is intentional.
 			$wpdb->query( $wpdb->prepare( "ALTER TABLE {$wpdb->prefix}wpo_aom_task_fields AUTO_INCREMENT = %d", $max_id + 1 ) );
 		}
+	}
+
+	/**
+	 * Re-run create_tables() so dbDelta applies the new UNIQUE KEY on
+	 * wpo_aom_task_field_options(field_id, slug). Existing beta.1 installs only contain
+	 * the seeded options (no public create-option path existed), so seed data is already
+	 * unique and no dedupe is needed.
+	 *
+	 * @return void
+	 */
+	private static function migrate_apply_option_slug_unique_index(): void {
+		self::create_tables();
 	}
 
 	/**

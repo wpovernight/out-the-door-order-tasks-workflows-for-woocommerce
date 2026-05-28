@@ -8,7 +8,7 @@
  * Author URI:           https://www.wpovernight.com
  * License:              GPLv3
  * License URI:          https://www.gnu.org/licenses/gpl-3.0.html
- * Version:              1.0.0-beta.1
+ * Version:              1.0.0-beta.2
  * Requires at least:    6.7
  * Requires PHP:         7.4
  * WC requires at least: 8.2
