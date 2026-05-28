@@ -23,6 +23,7 @@ import { Card } from './Card';
 import { __ } from '@wordpress/i18n';
 import { useTaskCreation } from '@shared/hooks/useTaskFormModal';
 import { useViewTasks } from '@taskManager/views/Kanban/context/ViewTaskContext';
+import { useTasks } from '@shared/context/TaskContext';
 
 interface ColumnProps {
 	column: FieldOption;
@@ -43,7 +44,18 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 	const headerRef = useRef<HTMLDivElement | null>(null);
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const columnWrapperRef = useRef<HTMLDivElement | null>(null);
+	const titleInputRef = useRef<HTMLInputElement | null>(null);
 	const { openCreateTaskModal } = useTaskCreation();
+	const { updateFieldOption } = useTasks();
+	const [columnTitleEditState, setColumnTitleEditState] = useState<
+		'idle' | 'editing'
+	>('idle');
+	// Mirrored as a ref so `canDrag` reads the current value without forcing
+	// the DnD effect to re-register on every edit toggle.
+	const editStateRef = useRef(columnTitleEditState);
+	useEffect(() => {
+		editStateRef.current = columnTitleEditState;
+	}, [columnTitleEditState]);
 
 	const [state, setState] = useState<ColumnState>(IDLE);
 
@@ -83,6 +95,7 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 			draggable({
 				element: header,
 				getInitialData: () => columnData,
+				canDrag: () => editStateRef.current !== 'editing',
 				onDragStart: () => updateState({ type: 'dragging' }),
 				onDrop: resetState,
 			}),
@@ -234,6 +247,18 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 		});
 	};
 
+	const onColumnUpdate = () => {
+		const newTitle = titleInputRef.current?.value.trim();
+
+		if (!newTitle || newTitle === column.label) {
+			return;
+		}
+
+		void updateFieldOption(column.field_id, column.id, {
+			label: newTitle,
+		});
+	};
+
 	return (
 		<div
 			ref={columnWrapperRef}
@@ -245,7 +270,68 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 					className="kanban-column-header"
 					tabIndex={0}
 				>
-					<h4>{column.label}</h4>
+					<div className="kanban-column-header-title">
+						{columnTitleEditState === 'idle' && (
+							<>
+								<h4>{column.label}</h4>
+								<button
+									onClick={() =>
+										setColumnTitleEditState('editing')
+									}
+									className="wpo-button wpo-button-icon edit-title-button"
+								>
+									<span className="screen-reader-text">
+										{__(
+											'Edit column name',
+											'wpo-advanced-order-manager'
+										)}
+									</span>
+								</button>
+							</>
+						)}
+
+						{columnTitleEditState === 'editing' && (
+							<>
+								<input
+									ref={titleInputRef}
+									type="text"
+									defaultValue={column.label}
+									className="edit-title-input"
+									autoFocus
+								/>
+								<div className="edit-title-actions">
+									<button
+										onClick={() =>
+											setColumnTitleEditState('idle')
+										}
+										className="wpo-button wpo-button-icon cancel-edit-title-button"
+									>
+										<span className="screen-reader-text">
+											{__(
+												'Cancel',
+												'wpo-advanced-order-manager'
+											)}
+										</span>
+									</button>
+									<span className="wpo-aom-vertical-divider" />
+									<button
+										onClick={() => {
+											onColumnUpdate();
+											setColumnTitleEditState('idle');
+										}}
+										className="wpo-button wpo-button-icon save-title-button"
+									>
+										<span className="screen-reader-text">
+											{__(
+												'Save',
+												'wpo-advanced-order-manager'
+											)}
+										</span>
+									</button>
+								</div>
+							</>
+						)}
+					</div>
 					<button
 						onClick={openTaskCreationModal}
 						className="wpo-button wpo-button-icon wpo-aom-add-button"
