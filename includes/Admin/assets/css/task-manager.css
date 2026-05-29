@@ -215,8 +215,8 @@
     display: flex;
     flex-direction: column;
     gap: 0.92em;
-    min-height: 100%;
     padding-top: 0.65em; /* Required for the space for drop indicator before the first card */
+    min-height: 97%;
 }
 
 .kanban-board .kanban-column-header {
@@ -334,6 +334,74 @@
     display: block;
     font-size: 1.6em;
     color: #FF5C5C;
+}
+
+#wpo-aom-order-manager .task-manager-tab ul.column-action-menu {
+    position: fixed;
+    right: 999vw;
+}
+
+#wpo-aom-order-manager .task-manager-tab ul.column-action-menu.is-open {
+    position: absolute;
+    width: 15em;
+    right: 1.5em;
+    top: 3em;
+}
+
+#wpo-aom-order-manager .task-manager-tab ul.column-action-menu li > button::before {
+    content: '';
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    background-color: currentColor;
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+}
+
+#wpo-aom-order-manager .task-manager-tab ul.column-action-menu li > button {
+    padding: 0.9em;
+    display: flex;
+    align-items: center;
+    border-radius: 0;
+}
+
+#wpo-aom-order-manager .task-manager-tab ul.column-action-menu li > button.edit-column-title::before {
+    mask-image: var(--wpo-aom-icon-edit);
+    -webkit-mask-image: var(--wpo-aom-icon-edit);
+}
+
+#wpo-aom-order-manager .task-manager-tab ul.column-action-menu li > button.collapse-column::before {
+    mask-image: var(--wpo-aom-icon-collapse);
+    -webkit-mask-image: var(--wpo-aom-icon-collapse);
+}
+
+#wpo-aom-order-manager .task-manager-tab ul.column-action-menu li > button.hide-column::before {
+    mask-image: var(--wpo-aom-icon-hide);
+    -webkit-mask-image: var(--wpo-aom-icon-hide);
+}
+
+#wpo-aom-order-manager .task-manager-tab ul.column-action-menu li > button.add-column-right::before {
+    mask-image: var(--wpo-aom-icon-add-column-right);
+    -webkit-mask-image: var(--wpo-aom-icon-add-column-right);
+}
+
+#wpo-aom-order-manager .task-manager-tab ul.column-action-menu li > button.add-column-left::before {
+    mask-image: var(--wpo-aom-icon-add-column-left);
+    -webkit-mask-image: var(--wpo-aom-icon-add-column-left);
+}
+
+#wpo-aom-order-manager .task-manager-tab ul.column-action-menu li > button.delete-column {
+    color: var(--wpo-aom-danger);
+}
+
+#wpo-aom-order-manager .task-manager-tab ul.column-action-menu li > button.delete-column::before {
+    mask-image: var(--wpo-aom-icon-delete);
+    -webkit-mask-image: var(--wpo-aom-icon-delete);
+    color: var(--wpo-aom-danger);
 }
 
 .kanban-board .kanban-column h4 {
