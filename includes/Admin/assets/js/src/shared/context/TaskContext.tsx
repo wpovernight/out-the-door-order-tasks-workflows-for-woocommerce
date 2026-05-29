@@ -23,6 +23,7 @@ import {
 	finishTask as finishTaskAPI,
 	archiveTask as archiveTaskAPI,
 	unarchiveTask as unarchiveTaskAPI,
+	createFieldOption as createFieldOptionAPI,
 	updateFieldOption as updateFieldOptionAPI,
 } from '@shared/utils/api';
 import { updateTaskFields } from '@shared/utils/fieldUtils';
@@ -43,6 +44,10 @@ interface TaskContextType {
 		React.SetStateAction<Record<string, FieldOption[]>>
 	>;
 	loadFieldOptions: (fieldSlug: string, force?: boolean) => Promise<void>;
+	createFieldOption: (
+		fieldId: number,
+		payload: Partial<FieldOption>
+	) => Promise<FieldOption>;
 	updateFieldOption: (
 		fieldId: number,
 		optionId: number,
@@ -238,6 +243,57 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 			}
 		},
 		[] // No dependencies - stable reference
+	);
+
+	const createFieldOption = useCallback(
+		async (
+			fieldId: number,
+			payload: Partial<FieldOption>
+		): Promise<FieldOption> => {
+			try {
+				const newOption = await createFieldOptionAPI(fieldId, payload);
+
+				setFieldOptions((prev) => {
+					// Resolve the field slug from `taskFields` (primary), falling back
+					// to scanning existing options if `taskFields` isn't loaded yet.
+					const fieldSlug =
+						Object.values(taskFields).find((f) => f.id === fieldId)
+							?.slug ??
+						Object.keys(prev).find((slug) =>
+							prev[slug].some((opt) => opt.field_id === fieldId)
+						);
+
+					if (!fieldSlug) {
+						return prev;
+					}
+
+					// Mirror the server's atomic shift+insert: any existing option whose
+					// position is >= the new option's position gets bumped by 1, then sort
+					// by position so the column lands in the right slot on the board.
+					const existing = prev[fieldSlug] ?? [];
+					const shifted = existing.map((opt) =>
+						opt.id !== newOption.id &&
+						opt.position >= newOption.position
+							? { ...opt, position: opt.position + 1 }
+							: opt
+					);
+					const merged = [...shifted, newOption].sort(
+						(a, b) => a.position - b.position
+					);
+
+					return {
+						...prev,
+						[fieldSlug]: merged,
+					};
+				});
+
+				return newOption;
+			} catch (error) {
+				console.error('Failed to create field option:', error);
+				throw error;
+			}
+		},
+		[taskFields]
 	);
 
 	// WARNING: only safe for non-slug updates (e.g. label, color). Changing `slug`
@@ -663,6 +719,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				fieldOptions,
 				setFieldOptions,
 				loadFieldOptions,
+				createFieldOption,
 				updateFieldOption,
 				moveTask,
 				finishTask,
