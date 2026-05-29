@@ -21,13 +21,13 @@ import {
 } from '../data';
 import { Card } from './Card';
 import { __ } from '@wordpress/i18n';
-import { useTaskCreation } from '@shared/hooks/useTaskFormModal';
-import { useViewTasks } from '@taskManager/views/Kanban/context/ViewTaskContext';
 import { useTasks } from '@shared/context/TaskContext';
+import { useOnClickOutside } from '@shared/hooks/useOnClickOutside';
 
 interface ColumnProps {
 	column: FieldOption;
 	tasks: Task[];
+	requestAddColumn: (fieldId: number, position: number) => void;
 }
 
 type ColumnState =
@@ -39,13 +39,16 @@ type ColumnState =
 
 const IDLE: ColumnState = { type: 'idle' };
 
-export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
+export const Column: React.FC<ColumnProps> = ({
+	column,
+	tasks,
+	requestAddColumn,
+}) => {
 	const scrollableRef = useRef<HTMLDivElement | null>(null);
 	const headerRef = useRef<HTMLDivElement | null>(null);
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const columnWrapperRef = useRef<HTMLDivElement | null>(null);
 	const titleInputRef = useRef<HTMLInputElement | null>(null);
-	const { openCreateTaskModal } = useTaskCreation();
 	const { updateFieldOption } = useTasks();
 	const [columnTitleEditState, setColumnTitleEditState] = useState<
 		'idle' | 'editing'
@@ -56,12 +59,15 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 	useEffect(() => {
 		editStateRef.current = columnTitleEditState;
 	}, [columnTitleEditState]);
+	const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
+	const actionsContainerRef = useRef<HTMLDivElement | null>(null);
+	const [draggingState, setDraggingState] = useState<ColumnState>(IDLE);
 
-	const [state, setState] = useState<ColumnState>(IDLE);
+	useOnClickOutside(actionsContainerRef, () => setIsActionMenuOpen(false));
 
 	const updateState = useCallback(
 		(newState: ColumnState) => {
-			setState((prev) => {
+			setDraggingState((prev) => {
 				if (prev.type === newState.type) {
 					return prev;
 				}
@@ -224,27 +230,13 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 		});
 	}, []);
 
-	const { setViewTasks } = useViewTasks();
+	const handleTitleSave = () => {
+		onColumnUpdate();
+		setColumnTitleEditState('idle');
+	};
 
-	const openTaskCreationModal = () => {
-		openCreateTaskModal({
-			initialValues: { statusIndex: column.id - 1 },
-			onTaskSaved: (newTask) => {
-				// Update local view state to include the new task
-				setViewTasks((prev) => {
-					const updated = structuredClone(prev);
-					const status = newTask.status || column.slug;
-					if (updated[status]) {
-						updated[status].push({
-							...newTask,
-							status,
-						});
-					}
-					return updated;
-				});
-			},
-			title: __('Add Task', 'wpo-advanced-order-manager'),
-		});
+	const handleTitleCancel = () => {
+		setColumnTitleEditState('idle');
 	};
 
 	const onColumnUpdate = () => {
@@ -259,10 +251,19 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 		});
 	};
 
+	const handleAddColumn = (placement: 'left' | 'right') => {
+		const position =
+			placement === 'right' ? column.position + 1 : column.position;
+
+		requestAddColumn(column.field_id, position);
+
+		setIsActionMenuOpen(false);
+	};
+
 	return (
 		<div
 			ref={columnWrapperRef}
-			className={`kanban-column ${state.type === 'dragging' ? 'is-dragging' : ''} ${state.type === 'drag-over-empty' ? 'is-column-drag-over' : ''} ${state.type === 'column-drag-over' && state.edge === 'left' ? 'column-drop-indicator-left' : ''} ${state.type === 'column-drag-over' && state.edge === 'right' ? 'column-drop-indicator-right' : ''}`}
+			className={`kanban-column ${draggingState.type === 'dragging' ? 'is-dragging' : ''} ${draggingState.type === 'drag-over-empty' ? 'is-column-drag-over' : ''} ${draggingState.type === 'column-drag-over' && draggingState.edge === 'left' ? 'column-drop-indicator-left' : ''} ${draggingState.type === 'column-drag-over' && draggingState.edge === 'right' ? 'column-drop-indicator-right' : ''}`}
 		>
 			<div className="kanban-column-inner">
 				<div
@@ -298,12 +299,20 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 									defaultValue={column.label}
 									className="edit-title-input"
 									autoFocus
+									onFocus={(e) => e.currentTarget.select()}
+									onKeyDown={(e) => {
+										if (e.key === 'Enter') {
+											e.preventDefault();
+											handleTitleSave();
+										} else if (e.key === 'Escape') {
+											e.preventDefault();
+											handleTitleCancel();
+										}
+									}}
 								/>
 								<div className="edit-title-actions">
 									<button
-										onClick={() =>
-											setColumnTitleEditState('idle')
-										}
+										onClick={handleTitleCancel}
 										className="wpo-button wpo-button-icon cancel-edit-title-button"
 									>
 										<span className="screen-reader-text">
@@ -315,10 +324,7 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 									</button>
 									<span className="wpo-aom-vertical-divider" />
 									<button
-										onClick={() => {
-											onColumnUpdate();
-											setColumnTitleEditState('idle');
-										}}
+										onClick={handleTitleSave}
 										className="wpo-button wpo-button-icon save-title-button"
 									>
 										<span className="screen-reader-text">
@@ -332,20 +338,81 @@ export const Column: React.FC<ColumnProps> = ({ column, tasks }) => {
 							</>
 						)}
 					</div>
-					<button
-						onClick={openTaskCreationModal}
-						className="wpo-button wpo-button-icon wpo-aom-add-button"
+					<div
+						ref={actionsContainerRef}
+						className="kanban-column-header-actions"
 					>
-						<span className="screen-reader-text">
-							{__('Create', 'wpo-advanced-order-manager')}
-						</span>
-					</button>
+						<button
+							className="wpo-button wpo-button-icon wpo-options-button"
+							type="button"
+							onClick={(e) => {
+								e.stopPropagation();
+								setIsActionMenuOpen((prev) => !prev);
+							}}
+						>
+							<span className="screen-reader-text">
+								{__('Options', 'wpo-advanced-order-manager')}
+							</span>
+						</button>
+						<ul
+							className={`wpo-action-menu column-action-menu ${isActionMenuOpen ? 'is-open' : ''}`}
+						>
+							<li>
+								<button
+									type="button"
+									className="wpo-button edit-column-title"
+									onClick={() => {
+										setColumnTitleEditState('editing');
+										setIsActionMenuOpen(false);
+									}}
+								>
+									{__(
+										'Edit column title',
+										'wpo-advanced-order-manager'
+									)}
+								</button>
+							</li>
+							<li>
+								<button
+									type="button"
+									className="wpo-button add-column-right"
+									onClick={() => handleAddColumn('right')}
+								>
+									{__(
+										'Add column right',
+										'wpo-advanced-order-manager'
+									)}
+								</button>
+							</li>
+							<li>
+								<button
+									type="button"
+									className="wpo-button add-column-left"
+									onClick={() => handleAddColumn('left')}
+								>
+									{__(
+										'Add column left',
+										'wpo-advanced-order-manager'
+									)}
+								</button>
+							</li>
+							<li>
+								<button
+									type="button"
+									className="wpo-button delete-column"
+									onClick={() => {}}
+								>
+									{__('Delete', 'wpo-advanced-order-manager')}
+								</button>
+							</li>
+						</ul>
+					</div>
 				</div>
 				<div ref={scrollableRef} className="kanban-column-scrollable">
 					<div
 						ref={containerRef}
 						className={`kanban-column-container ${
-							state.type === 'drag-over-empty'
+							draggingState.type === 'drag-over-empty'
 								? 'show-drop-indicator'
 								: ''
 						}`}
