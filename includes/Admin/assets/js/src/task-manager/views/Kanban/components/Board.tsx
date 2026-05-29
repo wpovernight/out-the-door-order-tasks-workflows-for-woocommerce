@@ -5,7 +5,6 @@ import { monitorForElements } from '@atlaskit/pragmatic-drag-and-drop/element/ad
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
 import { autoScrollForElements } from '@atlaskit/pragmatic-drag-and-drop-auto-scroll/element';
 import { extractClosestEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
-
 import { useTasks } from '@shared/context/TaskContext';
 import {
 	isCardData,
@@ -14,6 +13,7 @@ import {
 	isColumnDropTargetData,
 } from '../data';
 import { Column } from './Column';
+import { DraftColumn } from './DraftColumn';
 import { useViewTasks } from '../context/ViewTaskContext';
 import { FieldOption, TASK_ARCHIVE_STATUS_SLUG } from '@shared/types/task';
 import { reorderFieldOptions } from '@shared/utils/api';
@@ -21,7 +21,26 @@ import { reorderFieldOptions } from '@shared/utils/api';
 export const Board: React.FC = () => {
 	const { fieldOptions, moveTask } = useTasks();
 	const { viewTasks, setViewTasks, clearSelectedTask } = useViewTasks();
-	const [columnOrder, setColumnOrder] = useState<FieldOption[]>([]);
+	const [orderedColumns, setOrderedColumns] = useState<FieldOption[]>([]);
+	const [draftColumn, setDraftColumn] = useState<{
+		fieldId: number;
+		position: number;
+	} | null>(null);
+
+	const requestAddColumn = (fieldId: number, position: number) => {
+		setDraftColumn({ fieldId, position });
+	};
+
+	const clearDraftColumn = () => setDraftColumn(null);
+
+	const draftIndex = draftColumn
+		? (() => {
+				const index = orderedColumns.findIndex(
+					(col) => col.position >= draftColumn.position
+				);
+				return index === -1 ? orderedColumns.length : index;
+		  })()
+		: -1;
 
 	const scrollableRef = useRef<HTMLDivElement | null>(null);
 
@@ -33,7 +52,7 @@ export const Board: React.FC = () => {
 				(status) => status.slug !== TASK_ARCHIVE_STATUS_SLUG
 			);
 			statusesRef.current = filteredStatuses;
-			setColumnOrder(filteredStatuses);
+			setOrderedColumns(filteredStatuses);
 		}
 	}, [fieldOptions.status]);
 
@@ -205,7 +224,7 @@ export const Board: React.FC = () => {
 						const edge = extractClosestEdge(dropTargetData);
 
 						// Reorder columns
-						setColumnOrder((prev) => {
+						setOrderedColumns((prev) => {
 							const updated = [...prev];
 							const fromIndex = updated.findIndex(
 								(col) => col.slug === fromColumnSlug
@@ -277,13 +296,29 @@ export const Board: React.FC = () => {
 				}
 			}}
 		>
-			{columnOrder.map((col) => (
-				<Column
-					key={col.id}
-					column={col}
-					tasks={viewTasks[col.slug] || []}
-				/>
+			{orderedColumns.map((col, idx) => (
+				<React.Fragment key={col.id}>
+					{draftColumn && idx === draftIndex && (
+						<DraftColumn
+							fieldId={draftColumn.fieldId}
+							position={draftColumn.position}
+							onClose={clearDraftColumn}
+						/>
+					)}
+					<Column
+						column={col}
+						tasks={viewTasks[col.slug] || []}
+						requestAddColumn={requestAddColumn}
+					/>
+				</React.Fragment>
 			))}
+			{draftColumn && draftIndex === orderedColumns.length && (
+				<DraftColumn
+					fieldId={draftColumn.fieldId}
+					position={draftColumn.position}
+					onClose={clearDraftColumn}
+				/>
+			)}
 		</div>
 	);
 };
