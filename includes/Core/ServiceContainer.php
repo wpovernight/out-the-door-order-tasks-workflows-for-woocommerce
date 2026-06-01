@@ -22,6 +22,7 @@ use WPO\AOM\Services\FulfillmentService;
 use WPO\AOM\Services\EmailService;
 use WPO\AOM\Services\TaskManagerService;
 use WPO\AOM\Admin as Admin;
+use WPO\AOM\Services\TaskManagerSettingsService;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -50,6 +51,7 @@ final class ServiceContainer {
 		'FulfillmentService'          => FulfillmentService::class,
 		'CustomOrderStatusService'    => CustomOrderStatusService::class,
 		'EmailService'                => EmailService::class,
+		'TaskManagerSettingsService'  => TaskManagerSettingsService::class,
 		// REST Controllers
 		'TaskController'              => TaskController::class,
 		'FulfillmentController'       => FulfillmentController::class,
