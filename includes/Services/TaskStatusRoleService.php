@@ -92,24 +92,6 @@ class TaskStatusRoleService {
 	}
 
 	/**
-	 * Get every option ID currently assigned to any role.
-	 *
-	 * @return array<int> Option IDs, with no null entries.
-	 */
-	public function get_all_assigned_option_ids(): array {
-		$option_ids = array();
-
-		foreach ( TaskStatusRoleSettingKeys::all() as $role ) {
-			$option_id = $this->settings_service->get( $role );
-			if ( null !== $option_id ) {
-				$option_ids[] = $option_id;
-			}
-		}
-
-		return $option_ids;
-	}
-
-	/**
 	 * Validate that an option ID exists and belongs to the status field.
 	 *
 	 * @param int $option_id
