@@ -15,7 +15,7 @@ import {
 import { Column } from './Column';
 import { DraftColumn } from './DraftColumn';
 import { useViewTasks } from '../context/ViewTaskContext';
-import { FieldOption, TASK_ARCHIVE_STATUS_SLUG } from '@shared/types/task';
+import { FieldOption } from '@shared/types/task';
 import { reorderFieldOptions } from '@shared/utils/api';
 
 export const Board: React.FC = () => {
@@ -45,16 +45,6 @@ export const Board: React.FC = () => {
 	const scrollableRef = useRef<HTMLDivElement | null>(null);
 
 	const statusesRef = useRef(fieldOptions.status || []);
-	useEffect(() => {
-		if (fieldOptions.status) {
-			// We don't display "archived" status on the board as it has a separate view.
-			const filteredStatuses = fieldOptions.status.filter(
-				(status) => status.slug !== TASK_ARCHIVE_STATUS_SLUG
-			);
-			statusesRef.current = filteredStatuses;
-			setOrderedColumns(filteredStatuses);
-		}
-	}, [fieldOptions.status]);
 
 	// Setup DND behavior
 	useEffect(() => {

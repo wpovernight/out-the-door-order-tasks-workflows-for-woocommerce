@@ -56,7 +56,5 @@ export type Task = {
 	previous_task_id?: number | null;
 };
 
-export const TASK_ARCHIVE_STATUS_SLUG = 'archived'; // Used only to exclude the archived column from the Kanban board.
-
 export const TASK_FINISH_STATUS_SLUG = 'done'; // ToDo: make dynamic based on field options
 export const TASK_UNFINISHED_STATUS_SLUG = 'in_progress'; // ToDo: make dynamic based on field options
