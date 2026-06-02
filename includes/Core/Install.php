@@ -5,6 +5,7 @@ namespace WPO\AOM\Core;
 use WPO\AOM\AdvancedOrderManager;
 use WPO\AOM\Repositories\TaskFieldOptionRepository;
 use WPO\AOM\Repositories\TaskFieldRepository;
+use WPO\AOM\Services\TaskStatusRoleService;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -66,6 +67,7 @@ final class Install {
 
 		self::create_tables();
 		self::insert_default_data();
+		self::seed_initial_state();
 
 		// Store the plugin version in the options table.
 		update_option( self::$option_version, AdvancedOrderManager::VERSION, true );
@@ -400,6 +402,17 @@ final class Install {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Install-time AUTO_INCREMENT reset; schema change is intentional.
 			$wpdb->query( $wpdb->prepare( "ALTER TABLE {$wpdb->prefix}wpo_aom_task_fields AUTO_INCREMENT = %d", $max_id + 1 ) );
 		}
+	}
+
+	/**
+	 * Trigger first-install seeding for services that need DB-derived initial state.
+	 *
+	 * @return void
+	 */
+	private static function seed_initial_state(): void {
+		/** @var TaskStatusRoleService $task_status_role_service */
+		$task_status_role_service = WPO_AOM()->get_service( TaskStatusRoleService::class );
+		$task_status_role_service->seed_default_role_assignments();
 	}
 
 	/**
