@@ -353,42 +353,43 @@ final class Install {
 
 			// Check if field with this specific ID already exists.
 			$existing_field = $task_field_repository->find( $field_id );
+			if ( $existing_field ) {
+				continue;
+			}
 
-			if ( ! $existing_field ) {
-				$field_options = $field_data['options'] ?? array();
-				unset( $field_data['options'] );
+			$field_options = $field_data['options'] ?? array();
+			unset( $field_data['options'] );
 
-				// Use raw INSERT to ensure the exact ID is used.
-				$table_name = $wpdb->prefix . 'wpo_aom_task_fields';
-				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Install-time seeding; preserves the exact field ID.
-				$result     = $wpdb->insert( $table_name, $field_data );
+			// Use raw INSERT to ensure the exact ID is used.
+			$table_name = $wpdb->prefix . 'wpo_aom_task_fields';
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Install-time seeding; preserves the exact field ID.
+			$result     = $wpdb->insert( $table_name, $field_data );
 
-				if ( $result ) {
-					$inserted_id = (int) $wpdb->insert_id;
+			if ( $result ) {
+				$inserted_id = (int) $wpdb->insert_id;
 
-					// Verify the ID matches what we expected.
-					if ( $inserted_id !== $field_id ) {
-						// Log error or throw exception - ID mismatch is critical.
-						Logger::critical(
-							sprintf(
-								'Failed to insert field with ID %d. Got ID %d instead.',
-								$field_id,
-								$inserted_id
-							)
-						);
-						continue;
-					}
-
-					// Insert options if it's a select field.
-					if ( ! empty( $field_options ) ) {
-						foreach ( $field_options as $option ) {
-							$task_field_option_repository
-								->insert( array_merge( $option, array( 'field_id' => $inserted_id ) ) );
-						}
-					}
-				} else {
-					Logger::critical( sprintf( 'Failed to insert default field "%s". DB error: %s', $field_data['slug'], $wpdb->last_error ) );
+				// Verify the ID matches what we expected.
+				if ( $inserted_id !== $field_id ) {
+					// Log error or throw exception - ID mismatch is critical.
+					Logger::critical(
+						sprintf(
+							'Failed to insert field with ID %d. Got ID %d instead.',
+							$field_id,
+							$inserted_id
+						)
+					);
+					continue;
 				}
+
+				// Insert options if it's a select field.
+				if ( ! empty( $field_options ) ) {
+					foreach ( $field_options as $option ) {
+						$task_field_option_repository
+							->insert( array_merge( $option, array( 'field_id' => $inserted_id ) ) );
+					}
+				}
+			} else {
+				Logger::critical( sprintf( 'Failed to insert default field "%s". DB error: %s', $field_data['slug'], $wpdb->last_error ) );
 			}
 		}
 
