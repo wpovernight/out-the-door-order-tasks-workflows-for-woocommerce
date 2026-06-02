@@ -53,12 +53,14 @@ final class ServiceContainer {
 	 */
 	private static array $service_map = array(
 		// Services
+		// Note: TaskManagerService depends on TaskStatusRoleService (via constructor),
+		// which depends on TaskManagerSettingsService. Listed in dependency order.
+		'TaskManagerSettingsService'  => TaskManagerSettingsService::class,
+		'TaskStatusRoleService'       => TaskStatusRoleService::class,
 		'TaskManagerService'          => TaskManagerService::class,
 		'FulfillmentService'          => FulfillmentService::class,
 		'CustomOrderStatusService'    => CustomOrderStatusService::class,
 		'EmailService'                => EmailService::class,
-		'TaskManagerSettingsService'  => TaskManagerSettingsService::class,
-		'TaskStatusRoleService'       => TaskStatusRoleService::class,
 		// REST Controllers
 		'TaskController'              => TaskController::class,
 		'FulfillmentController'       => FulfillmentController::class,
@@ -239,7 +241,8 @@ final class ServiceContainer {
 			new TaskRepository(),
 			new TaskFieldRepository(),
 			new TaskFieldOptionRepository(),
-			new TaskFieldValueRepository()
+			new TaskFieldValueRepository(),
+			$this->resolve_service( 'TaskStatusRoleService', TaskStatusRoleService::class )
 		);
 	}
 

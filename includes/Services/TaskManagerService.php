@@ -24,6 +24,7 @@ final class TaskManagerService {
 	protected TaskFieldRepository $task_field_repository;
 	protected TaskFieldOptionRepository $task_field_option_repository;
 	protected TaskFieldValueRepository $task_field_value_repository;
+	protected TaskStatusRoleService $task_status_role_service;
 
 	/**
 	 * Constructor.
@@ -32,12 +33,14 @@ final class TaskManagerService {
 		TaskRepository $task_repository,
 		TaskFieldRepository $task_field_repository,
 		TaskFieldOptionRepository $task_field_option_repository,
-		TaskFieldValueRepository $task_field_value_repository
+		TaskFieldValueRepository $task_field_value_repository,
+		TaskStatusRoleService $task_status_role_service
 	) {
 		$this->task_repository              = $task_repository;
 		$this->task_field_repository        = $task_field_repository;
 		$this->task_field_option_repository = $task_field_option_repository;
 		$this->task_field_value_repository  = $task_field_value_repository;
+		$this->task_status_role_service     = $task_status_role_service;
 	}
 
 	/**
@@ -222,9 +225,15 @@ final class TaskManagerService {
 
 		$field_values_array[ DefaultTaskFields::POSITION ] = $last_position ? $last_position + 1.0 : 1.0;
 
-		// Auto-set "done_date" if creating with "done" status.
+		$done_option_id = $this->task_status_role_service->get_done_field_option_id();
+
+		// Auto-set "done_date" if creating with the option assigned to the "done" role.
 		$status_option = $this->get_field_option( (int) $status_id );
-		if ( $status_option && $status_option->slug === 'done' && ! isset( $field_values_array[ DefaultTaskFields::DONE_DATE ] ) ) {
+		if (
+			$status_option &&
+			$status_option->id === $done_option_id &&
+			! isset( $field_values_array[ DefaultTaskFields::DONE_DATE ] )
+		) {
 			$field_values_array[ DefaultTaskFields::DONE_DATE ] = gmdate( 'Y-m-d H:i:s' );
 		}
 
@@ -368,11 +377,21 @@ final class TaskManagerService {
 
 			$field_values_array[ DefaultTaskFields::POSITION ] = $last_position ? $last_position + 1.0 : 1.0;
 
-			// Auto-set "done_date" when status changes to "done".
+			$done_option_id = $this->task_status_role_service->get_done_field_option_id();
+
+			// Auto-set "done_date" when moving into the option assigned to the "done" role.
 			$new_status_option = $this->get_field_option( (int) $new_status_value );
-			if ( $new_status_option && $new_status_option->slug === 'done' && ! isset( $field_values_array[ DefaultTaskFields::DONE_DATE ] ) ) {
+			if (
+				$new_status_option &&
+				$new_status_option->id === $done_option_id &&
+				! isset( $field_values_array[ DefaultTaskFields::DONE_DATE ] )
+			) {
 				$field_values_array[ DefaultTaskFields::DONE_DATE ] = gmdate( 'Y-m-d H:i:s' );
-			} elseif ( $new_status_option && $new_status_option->slug !== 'done' && ! isset( $field_values_array[ DefaultTaskFields::DONE_DATE ] ) ) {
+			} elseif (
+				$new_status_option &&
+				$new_status_option->id !== $done_option_id &&
+				! isset( $field_values_array[ DefaultTaskFields::DONE_DATE ] )
+			) {
 				$field_values_array[ DefaultTaskFields::DONE_DATE ] = null;
 			}
 
@@ -971,17 +990,21 @@ final class TaskManagerService {
 			$target_status_id
 		);
 
-		// Update "done_date" automatically, if moving to "Done" status and not already set.
+		$done_option_id = $this->task_status_role_service->get_done_field_option_id();
+
+		// Update "done_date" automatically, if moving into the option assigned to the "done" role.
 		if (
-			$target_status_option_field->slug === 'done' &&
+			$target_status_option_field->id === $done_option_id &&
 			! isset( $extra_field_values[ DefaultTaskFields::DONE_DATE ] )
 		) {
 			$extra_field_values[ DefaultTaskFields::DONE_DATE ] = gmdate( 'Y-m-d H:i:s' );
 		}
 
-		// Clear "done_date" if moving out of "done" status and not already set to null.
+		// Clear "done_date" if moving out of the option assigned to the "done" role.
+		// When no done role is configured, $done_option_id is null and this branch
+		// always runs — null'ing done_date is the safe default.
 		if (
-			$target_status_option_field->slug !== 'done' &&
+			$target_status_option_field->id !== $done_option_id &&
 			! isset( $extra_field_values[ DefaultTaskFields::DONE_DATE ] )
 		) {
 			$extra_field_values[ DefaultTaskFields::DONE_DATE ] = null;
@@ -1076,13 +1099,16 @@ final class TaskManagerService {
 			throw new RuntimeException( 'Task not found.' );
 		}
 
-		$finished_status_option = $this->task_field_option_repository
-			->where( 'field_id', DefaultTaskFields::STATUS )
-			->where( 'slug', 'done' )
-			->first();
+		$done_option_id = $this->task_status_role_service->get_done_field_option_id();
+
+		if ( null === $done_option_id ) {
+			throw new RuntimeException( 'No option is assigned to the "done" role. Configure the role assignment in plugin settings before finishing tasks.' );
+		}
+
+		$finished_status_option = $this->task_field_option_repository->find( $done_option_id );
 
 		if ( ! $finished_status_option ) {
-			throw new RuntimeException( 'Finished status option not found. Please ensure a "done" status option exists.' );
+			throw new RuntimeException( "The option assigned to the \"done\" role (ID $done_option_id) no longer exists." );
 		}
 
 		$result = $this->move_task( $task_id, $finished_status_option->id, null, 'last' );
