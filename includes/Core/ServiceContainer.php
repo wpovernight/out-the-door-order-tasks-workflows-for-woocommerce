@@ -23,6 +23,7 @@ use WPO\AOM\Services\EmailService;
 use WPO\AOM\Services\TaskManagerService;
 use WPO\AOM\Admin as Admin;
 use WPO\AOM\Services\TaskManagerSettingsService;
+use WPO\AOM\Services\TaskStatusRoleService;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -43,6 +44,11 @@ final class ServiceContainer {
 	 * Static service map.
 	 * Class names should match the build method suffix, e.g. 'TaskManagerService' => build_TaskManagerService()
 	 *
+	 * Order matters: services are resolved and their register() methods called in
+	 * the order listed here. A service that depends on another (e.g. via its build
+	 * method) should be listed AFTER the service it depends on, so the dependency
+	 * has finished its register()-time setup before the dependent uses it.
+	 *
 	 * @var array
 	 */
 	private static array $service_map = array(
@@ -52,6 +58,7 @@ final class ServiceContainer {
 		'CustomOrderStatusService'    => CustomOrderStatusService::class,
 		'EmailService'                => EmailService::class,
 		'TaskManagerSettingsService'  => TaskManagerSettingsService::class,
+		'TaskStatusRoleService'       => TaskStatusRoleService::class,
 		// REST Controllers
 		'TaskController'              => TaskController::class,
 		'FulfillmentController'       => FulfillmentController::class,
@@ -132,6 +139,7 @@ final class ServiceContainer {
 			/**
 			 * @uses build_TaskManagerService()
 			 * @uses build_OrderEdit_Screen()
+			 * @uses build_TaskStatusRoleService()
 			 */
 			$this->instances[ $id ] = $this->{$build_method}();
 
@@ -243,6 +251,18 @@ final class ServiceContainer {
 	private function build_OrderEdit_Screen(): Admin\OrderEdit\Screen {
 		return new Admin\OrderEdit\Screen(
 			$this->resolve_service( 'FulfillmentService', FulfillmentService::class )
+		);
+	}
+
+	/**
+	 * Build and return an instance of TaskStatusRoleService.
+	 *
+	 * @return TaskStatusRoleService
+	 */
+	private function build_TaskStatusRoleService(): TaskStatusRoleService {
+		return new TaskStatusRoleService(
+			$this->resolve_service( 'TaskManagerSettingsService', TaskManagerSettingsService::class ),
+			new TaskFieldOptionRepository(),
 		);
 	}
 }
