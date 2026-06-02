@@ -141,6 +141,7 @@ final class ServiceContainer {
 			/**
 			 * @uses build_TaskManagerService()
 			 * @uses build_OrderEdit_Screen()
+			 * @uses build_OrderManager_Screen()
 			 * @uses build_TaskStatusRoleService()
 			 */
 			$this->instances[ $id ] = $this->{$build_method}();
@@ -253,7 +254,19 @@ final class ServiceContainer {
 	 */
 	private function build_OrderEdit_Screen(): Admin\OrderEdit\Screen {
 		return new Admin\OrderEdit\Screen(
-			$this->resolve_service( 'FulfillmentService', FulfillmentService::class )
+			$this->resolve_service( 'FulfillmentService', FulfillmentService::class ),
+			$this->resolve_service( 'TaskStatusRoleService', TaskStatusRoleService::class )
+		);
+	}
+
+	/**
+	 * Build and return an instance of OrderManager Screen.
+	 *
+	 * @return Admin\OrderManager\Screen
+	 */
+	private function build_OrderManager_Screen(): Admin\OrderManager\Screen {
+		return new Admin\OrderManager\Screen(
+			$this->resolve_service( 'TaskStatusRoleService', TaskStatusRoleService::class )
 		);
 	}
 

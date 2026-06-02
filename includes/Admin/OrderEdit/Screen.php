@@ -7,17 +7,24 @@ defined( 'ABSPATH' ) || exit;
 use WPO\AOM\Enums\FulfillmentStatuses;
 use WPO\AOM\Models\Fulfillment;
 use WPO\AOM\Services\FulfillmentService;
+use WPO\AOM\Services\TaskStatusRoleService;
 
 final class Screen {
 	private FulfillmentService $fulfillment_service;
+	private TaskStatusRoleService $task_status_role_service;
 
 	/**
 	 * Constructor
 	 *
-	 * @param FulfillmentService $fulfillment_service
+	 * @param FulfillmentService    $fulfillment_service
+	 * @param TaskStatusRoleService $task_status_role_service
 	 */
-	public function __construct( FulfillmentService $fulfillment_service ) {
-		$this->fulfillment_service = $fulfillment_service;
+	public function __construct(
+		FulfillmentService $fulfillment_service,
+		TaskStatusRoleService $task_status_role_service
+	) {
+		$this->fulfillment_service      = $fulfillment_service;
+		$this->task_status_role_service = $task_status_role_service;
 	}
 
 	/**
@@ -150,6 +157,10 @@ final class Screen {
 				'nonce'                    => wp_create_nonce( 'wp_rest' ),
 				'isWooFulfillmentsEnabled' => wc_string_to_bool( get_option( 'woocommerce_feature_fulfillments_enabled', 'no' ) ),
 				'archivePageUrl'           => esc_url( admin_url( 'admin.php?page=wpo_aom_order_manager#/task-manager/archive' ) ),
+				'statusRoles'              => array(
+					'done'   => $this->task_status_role_service->get_done_field_option_id(),
+					'undone' => $this->task_status_role_service->get_undone_field_option_id(),
+				),
 			)
 		);
 

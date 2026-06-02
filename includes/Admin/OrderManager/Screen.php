@@ -2,9 +2,22 @@
 
 namespace WPO\AOM\Admin\OrderManager;
 
+use WPO\AOM\Services\TaskStatusRoleService;
+
 defined( 'ABSPATH' ) || exit;
 
 final class Screen {
+	private TaskStatusRoleService $task_status_role_service;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param TaskStatusRoleService $task_status_role_service
+	 */
+	public function __construct( TaskStatusRoleService $task_status_role_service ) {
+		$this->task_status_role_service = $task_status_role_service;
+	}
+
 	/**
 	 * Register screen and actions.
 	 *
@@ -49,6 +62,10 @@ final class Screen {
 				'apiRoot'      => esc_url_raw( rest_url( '/wc/v3' ) ),
 				'apiNamespace' => 'wpo/aom',
 				'nonce'        => wp_create_nonce( 'wp_rest' ),
+				'statusRoles'  => array(
+					'done'   => $this->task_status_role_service->get_done_field_option_id(),
+					'undone' => $this->task_status_role_service->get_undone_field_option_id(),
+				),
 			)
 		);
 
