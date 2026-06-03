@@ -46,6 +46,17 @@ export const Board: React.FC = () => {
 
 	const statusesRef = useRef(fieldOptions.status || []);
 
+	// Keep orderedColumns and statusesRef in sync with the latest field options.
+	// Without this the board renders no columns on first load (fieldOptions arrive
+	// asynchronously after mount) and statusesRef stays stale, breaking DnD drop
+	// resolution.
+	useEffect(() => {
+		if (fieldOptions.status) {
+			statusesRef.current = fieldOptions.status;
+			setOrderedColumns(fieldOptions.status);
+		}
+	}, [fieldOptions.status]);
+
 	// Setup DND behavior
 	useEffect(() => {
 		const scrollable = scrollableRef.current;
@@ -80,11 +91,15 @@ export const Board: React.FC = () => {
 							return;
 						}
 
-						// Variables to store API parameters
 						let previousTaskId: number | null = null;
-						let targetStatusId: number = 0;
+						const targetStatusId =
+							statusesRef.current.find(
+								(s) => s.slug === toColumn
+							)?.id;
+						if (!targetStatusId) {
+							return;
+						}
 
-						// Compute the new state and extract API parameters in one go
 						setViewTasks((prev) => {
 							const updated = structuredClone(prev);
 							const fromList = updated[fromColumn] || [];
@@ -108,7 +123,7 @@ export const Board: React.FC = () => {
 									: targetIndex;
 							toList.splice(insertAt, 0, {
 								...task,
-								status: toColumn,
+								status: targetStatusId,
 							});
 
 							updated[fromColumn] = fromList;
@@ -117,10 +132,6 @@ export const Board: React.FC = () => {
 							// Compute API parameters based on UPDATED state
 							previousTaskId =
 								insertAt > 0 ? toList[insertAt - 1].id : null;
-							targetStatusId =
-								statusesRef.current.find(
-									(s) => s.slug === toColumn
-								)?.id || 0;
 
 							return updated;
 						});
@@ -140,9 +151,14 @@ export const Board: React.FC = () => {
 							return;
 						}
 
-						// Variables to store API parameters
 						let previousTaskId: number | null = null;
-						let targetStatusId: number = 0;
+						const targetStatusId =
+							statusesRef.current.find(
+								(s) => s.slug === toColumn
+							)?.id;
+						if (!targetStatusId) {
+							return;
+						}
 
 						setViewTasks((prev) => {
 							const updated = structuredClone(prev);
@@ -158,7 +174,7 @@ export const Board: React.FC = () => {
 							}
 
 							// Append to end of target column
-							toList.push({ ...task, status: toColumn });
+							toList.push({ ...task, status: targetStatusId });
 
 							updated[fromColumn] = fromList;
 							updated[toColumn] = toList;
@@ -170,10 +186,6 @@ export const Board: React.FC = () => {
 								toList.length > 1
 									? toList[toList.length - 2].id
 									: null;
-							targetStatusId =
-								statusesRef.current.find(
-									(s) => s.slug === toColumn
-								)?.id || 0;
 
 							return updated;
 						});
