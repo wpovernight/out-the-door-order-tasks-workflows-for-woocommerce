@@ -436,6 +436,46 @@
     font-family: 'Inter';
 }
 
+/* Zoom-in entrance animation when the dialog opens. */
+.wpo-aom-dialog[open] {
+    animation: wpo-aom-dialog-zoom-in 150ms ease-out;
+}
+
+.wpo-aom-dialog::backdrop {
+    /* Explicit transparent base prevents the browser's default backdrop flashing
+       before the animation starts; `forwards` keeps the faded-in state after. */
+    background-color: rgba(0, 0, 0, 0);
+    animation: wpo-aom-dialog-backdrop-fade-in 150ms ease-out forwards;
+}
+
+@keyframes wpo-aom-dialog-zoom-in {
+    from {
+        opacity: 0;
+        transform: scale(0.30);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes wpo-aom-dialog-backdrop-fade-in {
+    from {
+        background-color: rgba(0, 0, 0, 0);
+    }
+    to {
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+}
+
+/* Respect user's motion preference — skip animations when reduced motion is set. */
+@media (prefers-reduced-motion: reduce) {
+    .wpo-aom-dialog[open],
+    .wpo-aom-dialog::backdrop {
+        animation: none;
+    }
+}
+
 .wpo-aom-dialog .dialog-content {
     display: flex;
     flex-direction: column;
