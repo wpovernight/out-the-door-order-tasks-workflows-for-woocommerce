@@ -51,10 +51,12 @@ export type Task = {
 	fields: TaskField[];
 
 	// Derived UI properties for Kanban
-	status: string;
+	status: number;
 	position: number;
 	previous_task_id?: number | null;
 };
 
-export const TASK_FINISH_STATUS_SLUG = 'done'; // ToDo: make dynamic based on field options
-export const TASK_UNFINISHED_STATUS_SLUG = 'in_progress'; // ToDo: make dynamic based on field options
+export type StatusRoles = {
+	done: number | null;
+	undone: number | null;
+};
