@@ -132,10 +132,7 @@ export const updateTaskFields = (
 	// Extract top-level properties from the updates
 	const topLevelUpdates: Partial<Task> = {};
 	if (updates.status) {
-		topLevelUpdates.status =
-			typeof updates.status.resolved === 'object'
-				? updates.status.resolved.slug
-				: updates.status.resolved;
+		topLevelUpdates.status = updates.status.raw;
 	}
 	if (updates.position) {
 		topLevelUpdates.position = updates.position.raw;

@@ -1,8 +1,7 @@
 import React from 'react';
 import {
 	isFieldOption,
-	Task,
-	TASK_FINISH_STATUS_SLUG,
+	Task
 } from '@shared/types/task';
 import { getColorStyle } from '@shared/utils/colorUtils';
 import { truncateText } from '@shared/utils/textUtils';
@@ -15,6 +14,7 @@ import { __ } from '@wordpress/i18n';
 import { useTasks } from '@shared/context/TaskContext';
 import { useConfirm } from '@shared/context/DialogContext';
 import { createInterpolateElement } from '@wordpress/element';
+import {useStatusRoles} from "@shared/hooks/useStatusRoles";
 
 type HeadingLevel = 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 type TagsPosition = 'none' | 'top' | 'bottom';
@@ -73,6 +73,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 		archiveTask: globalArchiveTask,
 	} = useTasks();
 	const confirm = useConfirm();
+    const statusRoles = useStatusRoles();
 	const finishTask = onFinishClick || globalFinishTask;
 	const unfinishTask = onUnfinishClick || globalUnfinishTask;
 	const archiveTask = onArchiveClick || globalArchiveTask;
@@ -161,7 +162,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 			dueDateObject &&
 			dueDateObject.setHours(0, 0, 0, 0) <
 				new Date().setHours(0, 0, 0, 0) &&
-			task.status !== TASK_FINISH_STATUS_SLUG
+			task.status !== statusRoles.done
 		) {
 			classes += ' overdue';
 		}
@@ -226,7 +227,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 		archiveTask(task.id);
 	};
 
-	const isDone = task.status === TASK_FINISH_STATUS_SLUG;
+	const isDone = task.status === statusRoles.done;
 
 	const renderActionInline = () => {
 		if (IncludedActions.length === 0) {

@@ -8,9 +8,7 @@ import React, {
 import {
 	Task,
 	FieldOption,
-	TaskField,
-	TASK_FINISH_STATUS_SLUG,
-	TASK_UNFINISHED_STATUS_SLUG,
+	TaskField
 } from '@shared/types/task';
 import {
 	fetchTasks,
@@ -27,6 +25,7 @@ import {
 	updateFieldOption as updateFieldOptionAPI,
 } from '@shared/utils/api';
 import { updateTaskFields } from '@shared/utils/fieldUtils';
+import {useStatusRoles} from "@shared/hooks/useStatusRoles";
 
 interface TaskContextType {
 	tasks: Task[];
@@ -69,6 +68,7 @@ const TaskContext = createContext<TaskContextType | undefined>(undefined);
 export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 	children,
 }) => {
+    const statusRoles = useStatusRoles();
 	// ---------------------
 	// TASKS
 	// ---------------------
@@ -418,7 +418,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 						},
 					};
 
-					if (targetStatusOption.slug === TASK_FINISH_STATUS_SLUG) {
+					if (targetStatusOption.id === statusRoles.done) {
 						fieldUpdates.done_date = {
 							raw: new Date()
 								.toISOString()
@@ -426,7 +426,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 								.slice(0, 19),
 							resolved: null,
 						};
-					} else if (task.status === TASK_FINISH_STATUS_SLUG) {
+					} else if (task.status === statusRoles.done) {
 						fieldUpdates.done_date = {
 							raw: null,
 							resolved: null,
@@ -494,7 +494,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				throw error;
 			}
 		},
-		[fieldOptions]
+		[fieldOptions, statusRoles.done]
 	);
 
 	const finishTask = useCallback(
@@ -503,7 +503,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 
 			// Get the finish status option ID
 			const finishedOption = fieldOptions.status?.find(
-				(opt) => opt.slug === TASK_FINISH_STATUS_SLUG
+				(opt) => opt.id === statusRoles.done
 			);
 
 			if (!finishedOption) {
@@ -561,7 +561,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				throw error;
 			}
 		},
-		[fieldOptions]
+		[fieldOptions, statusRoles.done]
 	);
 
 	const unfinishTask = useCallback(
@@ -570,7 +570,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 
 			// Get the default "unfinished" status option.
 			const unfinishedOption = fieldOptions.status?.find(
-				(fo) => fo.slug === TASK_UNFINISHED_STATUS_SLUG
+				(opt) => opt.id === statusRoles.undone
 			);
 
 			if (!unfinishedOption) {
@@ -616,7 +616,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				throw error;
 			}
 		},
-		[fieldOptions]
+		[fieldOptions, statusRoles.undone]
 	);
 
 	const archiveTask = useCallback(

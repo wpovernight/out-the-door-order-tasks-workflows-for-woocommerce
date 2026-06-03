@@ -1,13 +1,10 @@
 import React, { useContext, useEffect, useState, useCallback } from 'react';
-import {
-	Task,
-	TASK_FINISH_STATUS_SLUG,
-	TASK_UNFINISHED_STATUS_SLUG,
-} from '@shared/types/task';
+import { Task } from '@shared/types/task';
 import { useTasks } from '@shared/context/TaskContext';
 import { groupAndSortTasks } from '../../../utils/task-sort';
 import { isTaskArchived } from '@shared/utils/fieldUtils';
 import { useView } from '@taskManager/context/ViewContext';
+import {useStatusRoles} from "@shared/hooks/useStatusRoles";
 
 interface ViewTaskContextType {
 	viewTasks: Record<string, Task[]>;
@@ -35,6 +32,7 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 	const { searchQuery } = useView();
 	const [viewTasks, setViewTasks] = useState<Record<string, Task[]>>({});
 	const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+    const statusRoles = useStatusRoles();
 
 	const selectTask = useCallback((task: Task) => {
 		setSelectedTask(task);
@@ -47,6 +45,18 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 	// Wrapper function that updates both global state and local viewTasks.
 	const finishTask = useCallback(
 		async (taskId: number): Promise<boolean> => {
+			const doneOptionId = statusRoles.done;
+			if (doneOptionId === null) {
+				return false;
+			}
+
+			const doneOption = fieldOptions.status?.find(
+				(opt) => opt.id === doneOptionId
+			);
+			if (!doneOption) {
+				return false;
+			}
+
 			let previousState: Record<string, Task[]> | null = null;
 			let taskToMove: Task | null = null;
 
@@ -66,14 +76,14 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 					}
 				}
 
-				// Add task to the "done" column if found.
-				if (taskToMove && updated[TASK_FINISH_STATUS_SLUG]) {
+				// Add task to the "done" column if it exists in the view.
+				if (taskToMove && updated[doneOption.slug]) {
 					const doneTask: Task = {
 						...taskToMove,
-						status: TASK_FINISH_STATUS_SLUG,
+						status: doneOptionId,
 					};
 
-					updated[TASK_FINISH_STATUS_SLUG].push(doneTask);
+					updated[doneOption.slug].push(doneTask);
 				}
 
 				return updated;
@@ -82,11 +92,9 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 			try {
 				const success = await globalFinishTask(taskId);
 
-				if (!success) {
+				if (!success && previousState) {
 					// Rollback if API call failed.
-					if (previousState) {
-						setViewTasks(previousState);
-					}
+					setViewTasks(previousState);
 				}
 
 				return success;
@@ -101,12 +109,24 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				throw error;
 			}
 		},
-		[globalFinishTask]
+		[globalFinishTask, statusRoles.done, fieldOptions.status]
 	);
 
 	// Wrapper function for unfinishing tasks
 	const unfinishTask = useCallback(
 		async (taskId: number): Promise<boolean> => {
+			const undoneOptionId = statusRoles.undone;
+			if (undoneOptionId === null) {
+				return false;
+			}
+
+			const undoneOption = fieldOptions.status?.find(
+				(opt) => opt.id === undoneOptionId
+			);
+			if (!undoneOption) {
+				return false;
+			}
+
 			let previousState: Record<string, Task[]> | null = null;
 			let taskToMove: Task | null = null;
 
@@ -115,27 +135,25 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				previousState = structuredClone(prev);
 				const updated = structuredClone(prev);
 
-				// Find and remove the task from FINISHED column.
-				if (updated[TASK_FINISH_STATUS_SLUG]) {
-					const taskIndex = updated[
-						TASK_FINISH_STATUS_SLUG
-					].findIndex((t) => t.id === taskId);
+				// Find and remove the task from whichever column it's in.
+				for (const status in updated) {
+					const taskIndex = updated[status].findIndex(
+						(t) => t.id === taskId
+					);
 					if (taskIndex !== -1) {
-						[taskToMove] = updated[TASK_FINISH_STATUS_SLUG].splice(
-							taskIndex,
-							1
-						);
+						[taskToMove] = updated[status].splice(taskIndex, 1);
+						break;
 					}
 				}
 
-				// Add task to the UNFINISHED column if found
-				if (taskToMove && updated[TASK_UNFINISHED_STATUS_SLUG]) {
+				// Add task to the "undone" column if it exists in the view.
+				if (taskToMove && updated[undoneOption.slug]) {
 					const unfinishedTask: Task = {
 						...taskToMove,
-						status: TASK_UNFINISHED_STATUS_SLUG,
+						status: undoneOptionId,
 					};
 
-					updated[TASK_UNFINISHED_STATUS_SLUG].push(unfinishedTask);
+					updated[undoneOption.slug].push(unfinishedTask);
 				}
 
 				return updated;
@@ -144,18 +162,16 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 			try {
 				const success = await globalUnfinishTask(taskId);
 
-				if (!success) {
-					// Rollback if API call failed
-					if (previousState) {
-						setViewTasks(previousState);
-					}
+				if (!success && previousState) {
+					// Rollback if API call failed.
+					setViewTasks(previousState);
 				}
 
 				return success;
 			} catch (error) {
 				console.error('Failed to unfinish task:', error);
 
-				// Rollback on error
+				// Rollback on error.
 				if (previousState) {
 					setViewTasks(previousState);
 				}
@@ -163,7 +179,7 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				throw error;
 			}
 		},
-		[globalUnfinishTask]
+		[globalUnfinishTask, statusRoles.undone, fieldOptions.status]
 	);
 
 	useEffect(() => {

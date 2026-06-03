@@ -7,13 +7,10 @@ import React, {
 } from 'react';
 import { useTasks } from '@shared/context/TaskContext';
 import { getFieldRawValues, isTaskArchived } from '@shared/utils/fieldUtils';
-import {
-	Task,
-	TASK_FINISH_STATUS_SLUG,
-	TASK_UNFINISHED_STATUS_SLUG,
-} from '@shared/types/task';
+import {Task} from '@shared/types/task';
 import { AsyncLoaderStatus } from '@shared/hooks/useAsyncLoader';
 import { __ } from '@wordpress/i18n';
+import {useStatusRoles} from "@shared/hooks/useStatusRoles";
 
 // Type for creating/updating tasks via API
 export type TaskPayload = Partial<Task> & {
@@ -64,6 +61,7 @@ export const OrderTaskProvider: React.FC<{
 	const [loadingError, setLoadingError] = useState<Error | null>(null);
 	const [hasLoaded, setHasLoaded] = useState<boolean>(false);
 	const isLoadingRef = useRef<boolean>(false);
+    const statusRoles = useStatusRoles();
 
 	const orderTasks = useMemo(() => {
 		return tasks.filter((task) => {
@@ -85,17 +83,12 @@ export const OrderTaskProvider: React.FC<{
 	}, [tasks, orderId]);
 
 	const activeTasks = useMemo(() => {
-		return orderTasks.filter(
-			(task) => task.status !== TASK_FINISH_STATUS_SLUG
-		);
-	}, [orderTasks]);
+		return orderTasks.filter((task) => task.status !== statusRoles.done);
+	}, [orderTasks, statusRoles.done]);
 
 	const finishedTasks = useMemo(() => {
-		return orderTasks.filter(
-			(task: { status: string }) =>
-				task.status === TASK_FINISH_STATUS_SLUG
-		);
-	}, [orderTasks]);
+		return orderTasks.filter((task) => task.status === statusRoles.done);
+	}, [orderTasks, statusRoles.done]);
 
 	// Load all task-related data
 	const loadTaskData = useCallback(
@@ -176,9 +169,15 @@ export const OrderTaskProvider: React.FC<{
 		}
 
 		const newStatus =
-			task.status === TASK_FINISH_STATUS_SLUG
-				? TASK_UNFINISHED_STATUS_SLUG
-				: TASK_FINISH_STATUS_SLUG;
+			task.status === statusRoles.done
+				? statusRoles.undone
+				: statusRoles.done;
+
+        if ( newStatus === null) {
+            // Required status role isn't configured — toggle is a no-op.
+            return;
+        }
+
 		await saveTask({ status: newStatus }, taskId);
 	};
 

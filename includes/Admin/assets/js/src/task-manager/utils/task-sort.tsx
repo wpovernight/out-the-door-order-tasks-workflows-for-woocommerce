@@ -10,15 +10,18 @@ export function groupAndSortTasks(
 
 	const grouped: Record<string, typeof tasks> = {};
 
+	// Index statuses by ID once so the per-task lookup below is O(1) instead of O(n).
+	const slugByOptionId = new Map<number, string>();
 	statuses.forEach((col) => {
 		grouped[col.slug] = [];
+		slugByOptionId.set(col.id, col.slug);
 	});
 
-	// Distribute tasks into their respective columns
+	// task.status holds the status option's ID. Translate to slug to land in the right bucket.
 	tasks.forEach((task) => {
-		const columnName = task.status;
-		if (grouped[columnName]) {
-			grouped[columnName].push(task);
+		const columnSlug = slugByOptionId.get(task.status);
+		if (columnSlug && grouped[columnSlug]) {
+			grouped[columnSlug].push(task);
 		}
 	});
 

@@ -5,9 +5,10 @@ import { TaskCard } from '@shared/components/TaskCard';
 import { useTaskCreation, useTaskEdit } from '@shared/hooks/useTaskFormModal';
 import { useScrollable } from '@shared/hooks/useScrollable';
 import { getTaskDateField, isTaskArchived } from '@shared/utils/fieldUtils';
-import { TASK_FINISH_STATUS_SLUG, Task } from '@shared/types/task';
+import { Task } from '@shared/types/task';
 import { EmptyState } from '@shared/components/LoadingSkeleton';
 import { useConfirm } from '@shared/context/DialogContext';
+import {useStatusRoles} from "@shared/hooks/useStatusRoles";
 
 export const TodayTasks = () => {
 	const { tasks, deleteTask } = useTasks();
@@ -17,6 +18,7 @@ export const TodayTasks = () => {
 	const [doneExpanded, setDoneExpanded] = useState(false);
 	const contentRef = useScrollable<HTMLDivElement>();
 	const confirm = useConfirm();
+    const statusRoles = useStatusRoles();
 
 	const todayStart = useMemo(() => {
 		const d = new Date();
@@ -46,7 +48,7 @@ export const TodayTasks = () => {
 				return;
 			}
 
-			const isDone = task.status === TASK_FINISH_STATUS_SLUG;
+			const isDone = task.status === statusRoles.done;
 
 			if (isDone && dueDate >= todayStart && dueDate <= todayEnd) {
 				finish.push(task);

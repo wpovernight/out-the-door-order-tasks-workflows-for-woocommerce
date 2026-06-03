@@ -1,8 +1,9 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { __ } from '@wordpress/i18n';
-import { Task, TASK_FINISH_STATUS_SLUG } from '@shared/types/task';
+import { Task } from '@shared/types/task';
 import { useTasks } from '@shared/context/TaskContext';
 import { useConfirm } from '@shared/context/DialogContext';
+import { useStatusRoles } from '@shared/hooks/useStatusRoles';
 import { createInterpolateElement } from '@wordpress/element';
 
 interface TaskActionMenuProps {
@@ -54,7 +55,8 @@ export const TaskActionMenu: React.FC<TaskActionMenuProps> = ({
 	const archiveTask = onArchive || globalArchiveTask;
 	const deleteTask = onDelete || globalDeleteTask;
 
-	const isDone = task.status === TASK_FINISH_STATUS_SLUG;
+	const statusRoles = useStatusRoles();
+	const isDone = task.status === statusRoles.done;
 
 	const closeMenu = (e?: React.MouseEvent) => {
 		if (!isControlled) {
