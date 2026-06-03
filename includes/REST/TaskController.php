@@ -192,6 +192,7 @@ class TaskController extends BaseRestController {
 		);
 
 		// PUT /{namespace}/tasks/fields/{field_id}/options/{option_id} -> updates a specific option for a specific field.
+		// DELETE /{namespace}/tasks/fields/{field_id}/options/{option_id} -> deletes a specific option for a specific field.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->resource_name . '/fields/(?P<field_id>[\d]+)/options/(?P<option_id>[\d]+)',
@@ -201,6 +202,13 @@ class TaskController extends BaseRestController {
 					'callback'            => array( $this, 'update_field_option' ),
 					'permission_callback' => array( $this, 'check_permissions' ),
 					'args'                => rest_get_endpoint_args_for_schema( $this->get_field_option_schema(), WP_REST_Server::EDITABLE ),
+					'schema'              => array( $this, 'get_field_option_schema' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'delete_field_option' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+					'args'                => rest_get_endpoint_args_for_schema( $this->get_field_option_schema(), WP_REST_Server::DELETABLE ),
 					'schema'              => array( $this, 'get_field_option_schema' ),
 				),
 			)
@@ -684,6 +692,42 @@ class TaskController extends BaseRestController {
 		} catch ( \Throwable $e ) {
 			Logger::error( 'Failed to update field option: ' . $e->getMessage() );
 			return new WP_Error( 'update_failed', 'Failed to update field option.', array( 'status' => 500 ) );
+		}
+	}
+
+	/**
+	 * Delete a field option from a specific field.
+	 *
+	 * @param WP_REST_Request $request
+	 *
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function delete_field_option( WP_REST_Request $request ) {
+		$field_id = (int) $request->get_param( 'field_id' );
+
+		if ( $field_id <= 0 ) {
+			return new WP_Error( 'invalid_field_id', 'Invalid field ID provided', array( 'status' => 400 ) );
+		}
+
+		$option_id = (int) $request->get_param( 'option_id' );
+
+		if ( $option_id <= 0 ) {
+			return new WP_Error( 'invalid_option_id', 'Invalid option ID provided', array( 'status' => 400 ) );
+		}
+
+		try {
+			/** @var TaskManagerService $task_manager_service */
+			$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
+			$task_manager_service->delete_field_option( $field_id, $option_id );
+
+			return rest_ensure_response( array( 'success' => true ) );
+		} catch ( \InvalidArgumentException $e ) {
+			return new WP_Error( 'not_found', $e->getMessage(), array( 'status' => 404 ) );
+		} catch ( \RuntimeException $e ) {
+			return new WP_Error( 'delete_failed', $e->getMessage(), array( 'status' => 409 ) );
+		} catch ( \Throwable $e ) {
+			Logger::error( 'Failed to delete field option: ' . $e->getMessage() );
+			return new WP_Error( 'deletion_failed', 'Failed to delete field option.', array( 'status' => 500 ) );
 		}
 	}
 

@@ -745,11 +745,45 @@ final class TaskManagerService {
 	/**
 	 * Delete an option by ID.
 	 *
+	 * @param int $field_id
 	 * @param int $option_id
 	 *
 	 * @return bool
+	 * @throws InvalidArgumentException If the option doesn't exist or doesn't belong to the given field.
+	 * @throws RuntimeException If the option is assigned to a status role, or if any
+	 *                          task currently references the option as a field value.
 	 */
-	public function delete_field_option( int $option_id ): bool {
+	public function delete_field_option( int $field_id, int $option_id ): bool {
+		$option = $this->task_field_option_repository->find( $option_id );
+		if ( ! $option ) {
+			throw new InvalidArgumentException( 'Field option not found.' );
+		}
+
+		if ( $option->field_id !== $field_id ) {
+			throw new InvalidArgumentException( 'Field option does not belong to the given field.' );
+		}
+
+		if ( $this->task_status_role_service->is_field_option_assigned_to_any_role( $option_id ) ) {
+			throw new RuntimeException( 'This option is assigned to a status role and cannot be deleted.' );
+		}
+
+		// Block deletion when any task currently references this option as a field value.
+		// The frontend handles the resolution path (move tasks to another option, or delete
+		// the tasks first, then retry the option delete) so the API stays focused.
+		$tasks_using_option = $this->task_field_value_repository
+			->where( 'field_id', $option->field_id )
+			->where( 'value', (string) $option_id )
+			->get();
+
+		if ( ! empty( $tasks_using_option ) ) {
+			throw new RuntimeException(
+				sprintf(
+					'%d task(s) are using this option. Move them to a different option before deleting.',
+					count( $tasks_using_option )
+				)
+			);
+		}
+
 		$result = $this->task_field_option_repository->delete( $option_id );
 
 		if ( $result ) {
