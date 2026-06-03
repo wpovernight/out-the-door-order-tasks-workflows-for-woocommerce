@@ -18,12 +18,15 @@ final class Install {
 	 * Notice: The version sequence should be in ascending order.
 	 *
 	 * Example:
-	 * '1.1.0' => array( 'migrate_110_add_custom_statuses_feature' )
+	 * '1.1.0' => array( 'migrate_add_custom_statuses_feature' )
 	 *
 	 * @var array<string, string[]>
 	 */
 	private static array $migrations = array(
-		'1.0.0-beta.2' => array( 'migrate_apply_option_slug_unique_index' ),
+		'1.0.0-beta.2' => array(
+			'migrate_apply_option_slug_unique_index', /** @uses migrate_apply_option_slug_unique_index() */
+			'migrate_seed_status_role_assignments', /** @uses migrate_seed_status_role_assignments() */
+		),
 	);
 
 	protected static ?self $_instance = null;
@@ -417,14 +420,26 @@ final class Install {
 
 	/**
 	 * Re-run create_tables() so dbDelta applies the new UNIQUE KEY on
-	 * wpo_aom_task_field_options(field_id, slug). Existing beta.1 installs only contain
-	 * the seeded options (no public create-option path existed), so seed data is already
-	 * unique and no dedupe is needed.
+	 * wpo_aom_task_field_options(field_id, slug). Existing beta.1 installs only
+	 * contain the seeded options (no public create-option path existed), so
+	 * seed data is already unique and no dedupe is needed.
 	 *
 	 * @return void
 	 */
 	private static function migrate_apply_option_slug_unique_index(): void {
 		self::create_tables();
+	}
+
+	/**
+	 * Seed the default "done" / "undone" status role assignments for installs
+	 * that predate the role feature.
+	 *
+	 * @return void
+	 */
+	private static function migrate_seed_status_role_assignments(): void {
+		/** @var TaskStatusRoleService $task_status_role_service */
+		$task_status_role_service = WPO_AOM()->get_service( TaskStatusRoleService::class );
+		$task_status_role_service->seed_default_role_assignments();
 	}
 
 	/**
