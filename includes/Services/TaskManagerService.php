@@ -264,12 +264,14 @@ final class TaskManagerService {
 	 * @param array|null $field_values
 	 *
 	 * @return array|null
+	 * @throws InvalidArgumentException If the task does not exist.
+	 * @throws RuntimeException If the persistence call fails.
 	 * @throws Exception|\Throwable
 	 */
 	public function update_task( int $task_id, array $task_data, ?array $field_values = array() ): ?array {
 		$task = $this->task_repository->find( $task_id );
 		if ( ! $task ) {
-			throw new RuntimeException( 'Task not found.' );
+			throw new InvalidArgumentException( 'Task not found.' );
 		}
 
 		// Sanitize input before filling the model.
@@ -682,16 +684,17 @@ final class TaskManagerService {
 	 * @param array $option_data
 	 *
 	 * @return array
-	 * @throws RuntimeException If the option does not exist or does not belong to the given field.
+	 * @throws InvalidArgumentException If the option doesn't exist or doesn't belong to the given field.
+	 * @throws RuntimeException If the persistence call fails.
 	 */
 	public function update_field_option( int $field_id, int $option_id, array $option_data ): array {
 		$option = $this->task_field_option_repository->find( $option_id );
 		if ( ! $option ) {
-			throw new RuntimeException( 'Field option not found.' );
+			throw new InvalidArgumentException( 'Field option not found.' );
 		}
 
 		if ( $option->field_id !== $field_id ) {
-			throw new RuntimeException( 'Field option does not belong to the given field.' );
+			throw new InvalidArgumentException( 'Field option does not belong to the given field.' );
 		}
 
 		// Enforce slug uniqueness within the field, skipping when the slug isn't changing.
@@ -1125,12 +1128,15 @@ final class TaskManagerService {
 	 * @param int $task_id
 	 *
 	 * @return bool
+	 * @throws InvalidArgumentException If the task does not exist.
+	 * @throws RuntimeException If no option is assigned to the "done" role or
+	 *                          the configured option no longer exists.
 	 * @throws Exception|\Throwable
 	 */
 	public function mark_task_finished( int $task_id ): bool {
 		$task = $this->task_repository->find( $task_id );
 		if ( ! $task ) {
-			throw new RuntimeException( 'Task not found.' );
+			throw new InvalidArgumentException( 'Task not found.' );
 		}
 
 		$done_option_id = $this->task_status_role_service->get_done_field_option_id();
@@ -1165,12 +1171,13 @@ final class TaskManagerService {
 	 * @param int $task_id
 	 *
 	 * @return bool
+	 * @throws InvalidArgumentException If the task does not exist.
 	 * @throws Exception
 	 */
 	public function archive_task( int $task_id ): bool {
 		$task = $this->task_repository->find( $task_id );
 		if ( ! $task ) {
-			throw new RuntimeException( 'Task not found.' );
+			throw new InvalidArgumentException( 'Task not found.' );
 		}
 
 		$existing = $this->task_field_value_repository->find_by_task_and_field(
@@ -1201,12 +1208,13 @@ final class TaskManagerService {
 	 * @param int $task_id
 	 *
 	 * @return bool
+	 * @throws InvalidArgumentException If the task does not exist.
 	 * @throws Exception
 	 */
 	public function unarchive_task( int $task_id ): bool {
 		$task = $this->task_repository->find( $task_id );
 		if ( ! $task ) {
-			throw new RuntimeException( 'Task not found.' );
+			throw new InvalidArgumentException( 'Task not found.' );
 		}
 
 		$this->task_field_value_repository->delete_by_task_and_field( $task_id, DefaultTaskFields::ARCHIVED_DATE );
