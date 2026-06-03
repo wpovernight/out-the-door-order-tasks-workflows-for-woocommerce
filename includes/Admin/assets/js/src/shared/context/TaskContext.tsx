@@ -23,6 +23,7 @@ import {
 	unarchiveTask as unarchiveTaskAPI,
 	createFieldOption as createFieldOptionAPI,
 	updateFieldOption as updateFieldOptionAPI,
+    deleteFieldOption as deleteFieldOptionAPI,
 } from '@shared/utils/api';
 import { updateTaskFields } from '@shared/utils/fieldUtils';
 import {useStatusRoles} from "@shared/hooks/useStatusRoles";
@@ -51,6 +52,10 @@ interface TaskContextType {
 		fieldId: number,
 		optionId: number,
 		updates: Partial<FieldOption>
+	) => Promise<void>;
+	deleteFieldOption: (
+		fieldId: number,
+		optionId: number
 	) => Promise<void>;
 	moveTask: (
 		taskId: number,
@@ -355,6 +360,52 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 		},
 		[]
 	);
+
+    const deleteFieldOption = useCallback(
+        async (
+            fieldId: number,
+            optionId: number
+        ): Promise<void> => {
+            let previousState: Record<string, FieldOption[]> | null = null;
+
+            const applyDeletion = (
+                prev: Record<string, FieldOption[]>
+            ) => {
+                const fieldSlug = Object.keys(prev).find((slug) =>
+                    prev[slug].some((opt) => opt.id === optionId)
+                );
+
+                if (!fieldSlug) {
+                    return prev;
+                }
+
+                return {
+                    ...prev,
+                    [fieldSlug]: prev[fieldSlug].filter((opt) => opt.id !== optionId),
+                };
+            }
+
+            // Optimistically update the global field options state.
+            setFieldOptions((prev) => {
+                previousState = prev;
+                return applyDeletion(prev);
+            });
+
+            try {
+                await deleteFieldOptionAPI(fieldId, optionId);
+
+            } catch (error) {
+                console.error('Failed to delete field option:', error);
+
+                if (previousState) {
+                    setFieldOptions(previousState);
+                }
+
+                throw error;
+            }
+        },
+        []
+    );
 
 	// ---------------------
 	// MOVE TASK
@@ -721,6 +772,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				loadFieldOptions,
 				createFieldOption,
 				updateFieldOption,
+                deleteFieldOption,
 				moveTask,
 				finishTask,
 				unfinishTask,

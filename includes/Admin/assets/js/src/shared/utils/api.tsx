@@ -491,3 +491,19 @@ export async function updateFieldOption(
 
 	return handleResponse<FieldOption>(response);
 }
+
+export async function deleteFieldOption(
+    fieldId: number,
+    optionId: number
+): Promise<void> {
+    const response = await fetch(
+        `${getApiRoot()}/${getApiNamespace()}/tasks/fields/${fieldId}/options/${optionId}`,
+        {
+            method: 'DELETE',
+            credentials: 'include',
+            headers: getHeaders(),
+        }
+    );
+
+    return handleResponse<void>(response);
+}
