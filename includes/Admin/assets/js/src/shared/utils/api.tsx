@@ -83,8 +83,8 @@ export async function fetchTasks(): Promise<Task[]> {
 
 		return {
 			...task,
-			status: statusField?.values?.[0]?.resolved?.slug ?? undefined,
-			position: positionField?.values?.[0]?.raw ?? undefined,
+			status: statusField?.values?.[0]?.raw,
+			position: positionField?.values?.[0]?.raw,
 		};
 	});
 }
@@ -117,8 +117,8 @@ export async function createTask(payload: Partial<Task>): Promise<Task> {
 
 	return {
 		...task,
-		status: statusField?.values?.[0]?.resolved?.slug ?? undefined,
-		position: positionField?.values?.[0]?.raw ?? undefined,
+		status: statusField?.values?.[0]?.raw,
+		position: positionField?.values?.[0]?.raw,
 	};
 }
 
@@ -148,8 +148,8 @@ export async function updateTask(
 
 	return {
 		...task,
-		status: statusField?.values?.[0]?.resolved?.slug ?? undefined,
-		position: positionField?.values?.[0]?.raw ?? undefined,
+		status: statusField?.values?.[0]?.raw,
+		position: positionField?.values?.[0]?.raw,
 	};
 }
 
