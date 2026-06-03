@@ -36,7 +36,7 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 	const innerRef = useRef<HTMLDivElement | null>(null);
 	const [state, setState] = useState<CardState>(IDLE);
 
-	const { deleteTask } = useTasks();
+	const { deleteTask, fieldOptions } = useTasks();
 	const { selectedTask, selectTask, setViewTasks, finishTask, unfinishTask } =
 		useViewTasks();
 	const { openEditTaskModal } = useTaskEdit();
@@ -46,6 +46,14 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 	useEffect(() => {
 		taskRef.current = task;
 	}, [task]);
+
+	// task.status holds a status option's ID, but DnD/grouping work with slugs.
+	const columnSlugRef = useRef<string>('');
+	useEffect(() => {
+		columnSlugRef.current =
+			fieldOptions.status?.find((opt) => opt.id === task.status)?.slug ??
+			'';
+	}, [task.status, fieldOptions.status]);
 
 	const updateState = useCallback(
 		(newState: CardState) => {
@@ -77,7 +85,7 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 				getInitialData: ({ element }) =>
 					getCardData({
 						task: taskRef.current,
-						fromColumn: taskRef.current.status,
+						fromColumn: columnSlugRef.current,
 						rect: element.getBoundingClientRect(),
 					}),
 				onDragStart() {
@@ -101,7 +109,7 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 				getData: ({ element, input }) => {
 					const data = getCardDropTargetData({
 						task: taskRef.current,
-						column: taskRef.current.status,
+						column: columnSlugRef.current,
 					});
 					return attachClosestEdge(data, {
 						element,
@@ -234,12 +242,25 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 					const oldStatus = task.status;
 					const newStatus = updatedTask.status;
 
+					// viewTasks is keyed by status slug; resolve the slugs from option IDs.
+					const oldColumnSlug = fieldOptions.status?.find(
+						(opt) => opt.id === oldStatus
+					)?.slug;
+					const newColumnSlug = fieldOptions.status?.find(
+						(opt) => opt.id === newStatus
+					)?.slug;
+
 					// If status didn't change, update in place to preserve position
-					if (oldStatus === newStatus && updated[oldStatus]) {
-						updated[oldStatus] = updated[oldStatus].map((t) =>
-							t.id === updatedTask.id
-								? { ...updatedTask, status: newStatus }
-								: t
+					if (
+						oldStatus === newStatus &&
+						oldColumnSlug &&
+						updated[oldColumnSlug]
+					) {
+						updated[oldColumnSlug] = updated[oldColumnSlug].map(
+							(t) =>
+								t.id === updatedTask.id
+									? { ...updatedTask, status: newStatus }
+									: t
 						);
 					} else {
 						// Status changed - remove from old column and add to new column
@@ -250,8 +271,8 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 						}
 
 						// Add task to the end of the new column
-						if (updated[newStatus]) {
-							updated[newStatus].push({
+						if (newColumnSlug && updated[newColumnSlug]) {
+							updated[newColumnSlug].push({
 								...updatedTask,
 								status: newStatus,
 							});
