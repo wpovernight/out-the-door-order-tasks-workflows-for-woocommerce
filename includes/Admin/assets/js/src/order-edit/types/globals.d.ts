@@ -2,6 +2,8 @@
  * Global type declarations for the WPO AOM Order Edit metabox.
  */
 
+import type { StatusRoles } from '@shared/types/task';
+
 export interface WpoAomOrderEditMetaBoxData {
 	apiRoot: string;
 	apiNamespace: string;
@@ -9,6 +11,7 @@ export interface WpoAomOrderEditMetaBoxData {
 	orderId: number;
 	isWooFulfillmentsEnabled: boolean;
 	archivePageUrl: string;
+	statusRoles: StatusRoles;
 }
 
 declare global {
