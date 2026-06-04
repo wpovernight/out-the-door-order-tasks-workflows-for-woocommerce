@@ -1,4 +1,4 @@
-import { Task, FieldOption, TaskField } from '../types/task';
+import {Task, FieldOption, TaskField, StatusRoles} from '../types/task';
 import { WooFulfillment } from '../types/wooFulfillment';
 import { FulfillmentOrder } from '@shared/types/fulfillment';
 import { CustomOrderStatus } from '@shared/types/customOrderStatus';
@@ -506,4 +506,20 @@ export async function deleteFieldOption(
     );
 
     return handleResponse<void>(response);
+}
+
+export async function updateStatusRoleAssignment(
+    payload: Record<string, number>
+): Promise<StatusRoles> {
+    const response = await fetch(
+        `${getApiRoot()}/${getApiNamespace()}/tasks/status-roles`,
+        {
+            method: 'PUT',
+            credentials: 'include',
+            headers: getHeaders(),
+            body: JSON.stringify(payload),
+        }
+    );
+
+    return handleResponse<StatusRoles>(response);
 }
