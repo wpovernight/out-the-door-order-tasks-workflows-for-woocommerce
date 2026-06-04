@@ -22,7 +22,10 @@ import {
 import { Card } from './Card';
 import { __ } from '@wordpress/i18n';
 import { useTasks } from '@shared/context/TaskContext';
+import { useConfirm } from '@shared/context/DialogContext';
 import { useOnClickOutside } from '@shared/hooks/useOnClickOutside';
+import { useStatusRoles } from '@shared/hooks/useStatusRoles';
+import { DeleteColumnDialog } from './DeleteColumnDialog';
 
 interface ColumnProps {
 	column: FieldOption;
@@ -49,7 +52,13 @@ export const Column: React.FC<ColumnProps> = ({
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const columnWrapperRef = useRef<HTMLDivElement | null>(null);
 	const titleInputRef = useRef<HTMLInputElement | null>(null);
-	const { updateFieldOption } = useTasks();
+	const { updateFieldOption, deleteFieldOption } = useTasks();
+	const confirm = useConfirm();
+	const statusRoles = useStatusRoles();
+	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+	const isRoleAssigned =
+		statusRoles.done === column.id || statusRoles.undone === column.id;
 	const [columnTitleEditState, setColumnTitleEditState] = useState<
 		'idle' | 'editing'
 	>('idle');
@@ -260,6 +269,44 @@ export const Column: React.FC<ColumnProps> = ({
 		setIsActionMenuOpen(false);
 	};
 
+	const handleDeleteColumn = async () => {
+		setIsActionMenuOpen(false);
+
+		// Role-assigned column → always go through the multi-phase dialog so the
+		// user can reassign the role to another column first. This applies even
+		// for empty columns: the role binding has to be moved before the column
+		// can be deleted.
+		//
+		// Column has tasks → also go through the dialog (handles role internally
+		// if applicable, plus the Move/Delete choice).
+		if (isRoleAssigned || tasks.length > 0) {
+			setShowDeleteDialog(true);
+			return;
+		}
+
+		// Empty + not role-assigned → simple confirmation, nothing to lose.
+		const confirmed = await confirm({
+			title: __('Delete this column?', 'wpo-advanced-order-manager'),
+			message: __(
+				'This action cannot be undone.',
+				'wpo-advanced-order-manager'
+			),
+			confirmText: __('Delete', 'wpo-advanced-order-manager'),
+			cancelText: __('Cancel', 'wpo-advanced-order-manager'),
+			action: 'delete',
+		});
+
+		if (!confirmed) {
+			return;
+		}
+
+		try {
+			await deleteFieldOption(column.field_id, column.id);
+		} catch (error) {
+			console.error('Failed to delete column:', error);
+		}
+	};
+
 	return (
 		<div
 			ref={columnWrapperRef}
@@ -400,7 +447,7 @@ export const Column: React.FC<ColumnProps> = ({
 								<button
 									type="button"
 									className="wpo-button delete-column"
-									onClick={() => {}}
+									onClick={handleDeleteColumn}
 								>
 									{__('Delete', 'wpo-advanced-order-manager')}
 								</button>
@@ -423,6 +470,13 @@ export const Column: React.FC<ColumnProps> = ({
 					</div>
 				</div>
 			</div>
+
+			{showDeleteDialog && (
+				<DeleteColumnDialog
+					column={column}
+					onClose={() => setShowDeleteDialog(false)}
+				/>
+			)}
 		</div>
 	);
 };
