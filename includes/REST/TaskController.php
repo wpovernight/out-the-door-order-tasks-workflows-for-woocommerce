@@ -1012,12 +1012,17 @@ class TaskController extends BaseRestController {
 		$task_status_role_service = WPO_AOM()->get_service( TaskStatusRoleService::class );
 
 		try {
+			// Cast non-null values to int; preserve null so callers can clear a role.
 			if ( array_key_exists( 'done', $data ) ) {
-				$task_status_role_service->set_done_field_option_id( (int) $data['done'] );
+				$task_status_role_service->set_done_field_option_id(
+					null === $data['done'] ? null : (int) $data['done']
+				);
 			}
 
 			if ( array_key_exists( 'undone', $data ) ) {
-				$task_status_role_service->set_undone_field_option_id( (int) $data['undone'] );
+				$task_status_role_service->set_undone_field_option_id(
+					null === $data['undone'] ? null : (int) $data['undone']
+				);
 			}
 
 			return rest_ensure_response( array(
