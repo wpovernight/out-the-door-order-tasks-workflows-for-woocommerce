@@ -8,6 +8,7 @@ use WP_REST_Server;
 use WP_Error;
 use WPO\AOM\Core\Logger;
 use WPO\AOM\Services\TaskManagerService;
+use WPO\AOM\Services\TaskStatusRoleService;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -44,6 +45,21 @@ class TaskController extends BaseRestController {
 					'args'                => rest_get_endpoint_args_for_schema( $this->get_task_schema(), WP_REST_Server::CREATABLE ),
 				),
 				'schema' => array( $this, 'get_task_schema' ),
+			)
+		);
+
+		/**
+		 * PUT /{namespace}/tasks/status-roles -> updates task status role assignments.
+		 */
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->resource_name . '/status-roles',
+			array(
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'update_status_roles' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+				),
 			)
 		);
 
@@ -965,5 +981,54 @@ class TaskController extends BaseRestController {
 			'success' => true,
 			'message' => 'Task unarchived',
 		) );
+	}
+
+	/**
+	 * Update the status roles (done/undone) field option IDs.
+	 *
+	 * Only fields present in the request body are updated; missing fields are
+	 * left untouched. Returns the current state of both roles after the update.
+	 *
+	 * @param WP_REST_Request $request
+	 *
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function update_status_roles( WP_REST_Request $request ) {
+		$data = $request->get_json_params();
+
+		$errors = $this->validate( $data, array(
+			'done'   => 'integer',
+			'undone' => 'integer',
+		) );
+
+		if ( ! empty( $errors ) ) {
+			return new WP_Error( 'invalid_data', 'Invalid data provided', array(
+				'status' => 400,
+				'errors' => $errors,
+			) );
+		}
+
+		/** @var TaskStatusRoleService $task_status_role_service */
+		$task_status_role_service = WPO_AOM()->get_service( TaskStatusRoleService::class );
+
+		try {
+			if ( array_key_exists( 'done', $data ) ) {
+				$task_status_role_service->set_done_field_option_id( (int) $data['done'] );
+			}
+
+			if ( array_key_exists( 'undone', $data ) ) {
+				$task_status_role_service->set_undone_field_option_id( (int) $data['undone'] );
+			}
+
+			return rest_ensure_response( array(
+				'done'   => $task_status_role_service->get_done_field_option_id(),
+				'undone' => $task_status_role_service->get_undone_field_option_id(),
+			) );
+		} catch ( \InvalidArgumentException $e ) {
+			return new WP_Error( 'invalid_option', $e->getMessage(), array( 'status' => 400 ) );
+		} catch ( \Throwable $e ) {
+			Logger::error( 'Failed to update status roles: ' . $e->getMessage() );
+			return new WP_Error( 'update_failed', 'Failed to update status roles.', array( 'status' => 500 ) );
+		}
 	}
 }

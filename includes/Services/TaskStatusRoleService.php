@@ -2,7 +2,7 @@
 
 namespace WPO\AOM\Services;
 
-use RuntimeException;
+use InvalidArgumentException;
 use WPO\AOM\Enums\DefaultTaskFields;
 use WPO\AOM\Enums\TaskStatusRoleSettingKeys;
 use WPO\AOM\Repositories\TaskFieldOptionRepository;
@@ -36,7 +36,7 @@ class TaskStatusRoleService {
 	 * @param int|null $id
 	 *
 	 * @return void
-	 * @throws RuntimeException If the option does not exist or does not belong to the status field.
+	 * @throws InvalidArgumentException If the option does not exist or does not belong to the status field.
 	 */
 	public function set_done_field_option_id( ?int $id ): void {
 		if ( null !== $id ) {
@@ -61,7 +61,7 @@ class TaskStatusRoleService {
 	 * @param int|null $id
 	 *
 	 * @return void
-	 * @throws RuntimeException If the option does not exist or does not belong to the status field.
+	 * @throws InvalidArgumentException If the option does not exist or does not belong to the status field.
 	 */
 	public function set_undone_field_option_id( ?int $id ): void {
 		if ( null !== $id ) {
@@ -97,17 +97,17 @@ class TaskStatusRoleService {
 	 * @param int $option_id
 	 *
 	 * @return void
-	 * @throws RuntimeException
+	 * @throws InvalidArgumentException
 	 */
 	private function validate_status_option( int $option_id ): void {
 		$option = $this->task_field_option_repository->find( $option_id );
 
 		if ( null === $option ) {
-			throw new RuntimeException( "No TaskFieldOption found with ID $option_id." );
+			throw new InvalidArgumentException( "No task field option found with ID $option_id." );
 		}
 
 		if ( $option->field_id !== DefaultTaskFields::STATUS ) {
-			throw new RuntimeException( "Option $option_id does not belong to the status field." );
+			throw new InvalidArgumentException( "Option $option_id does not belong to the status field." );
 		}
 	}
 
