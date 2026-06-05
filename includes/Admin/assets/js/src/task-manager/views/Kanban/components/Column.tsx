@@ -272,13 +272,7 @@ export const Column: React.FC<ColumnProps> = ({
 	const handleDeleteColumn = async () => {
 		setIsActionMenuOpen(false);
 
-		// Role-assigned column → always go through the multi-phase dialog so the
-		// user can reassign the role to another column first. This applies even
-		// for empty columns: the role binding has to be moved before the column
-		// can be deleted.
-		//
-		// Column has tasks → also go through the dialog (handles role internally
-		// if applicable, plus the Move/Delete choice).
+		// Empty column + role-assigned skips straight to the role-reassign step inside.
 		if (isRoleAssigned || tasks.length > 0) {
 			setShowDeleteDialog(true);
 			return;
@@ -474,6 +468,7 @@ export const Column: React.FC<ColumnProps> = ({
 			{showDeleteDialog && (
 				<DeleteColumnDialog
 					column={column}
+					tasks={tasks}
 					onClose={() => setShowDeleteDialog(false)}
 				/>
 			)}

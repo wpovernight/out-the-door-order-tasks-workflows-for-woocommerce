@@ -3,7 +3,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { FieldOption, Task } from '@shared/types/task';
 import { useColumnDeletion } from '@taskManager/hooks/useColumnDeletion';
 import { useConfirm } from '@shared/context/DialogContext';
-import { useStatusRoles } from '@shared/hooks/useStatusRoles';
+import { useStatusRoles } from '@shared/context/StatusRoleContext';
 import { useTasks } from '@shared/context/TaskContext';
 
 // ============================================================================
@@ -230,21 +230,34 @@ type LastAttempt = 'delete-everything' | 'move-and-delete' | null;
 
 interface DeleteColumnDialogProps {
 	column: FieldOption;
+	tasks: Task[];
 	onClose: () => void;
 }
 
 export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 	column,
+	tasks,
 	onClose,
 }) => {
 	const dialogRef = useRef<HTMLDialogElement>(null);
 	const { fieldOptions } = useTasks();
-	const statusRoles = useStatusRoles();
+	const { statusRoles, updateStatusRoles } = useStatusRoles();
 	const { deleteColumnAndTasks, deleteColumnAndMoveTasks } =
 		useColumnDeletion();
 	const confirm = useConfirm();
 
-	const [phase, setPhase] = useState<Phase>('choose-action');
+	// Empty column + role-assigned columns skip the choose-action phase.
+	const [skipChooseAction] = useState(() => {
+		const isEmpty = tasks.length === 0;
+		const isRoleAssigned =
+			statusRoles.done === column.id ||
+			statusRoles.undone === column.id;
+		return isEmpty && isRoleAssigned;
+	});
+
+	const [phase, setPhase] = useState<Phase>(
+		skipChooseAction ? 'role-reassign' : 'choose-action'
+	);
 	const [moveTargetOptionId, setMoveTargetOptionId] = useState<number | null>(
 		null
 	);
@@ -253,6 +266,11 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 	);
 	const [errorMessage, setErrorMessage] = useState<string>('');
 	const [lastAttempt, setLastAttempt] = useState<LastAttempt>(null);
+	// When the user routes through role-reassign, we need to remember what they
+	// originally chose so we can run the right operation after the role updates.
+	const [pendingIntent, setPendingIntent] = useState<
+		'delete-everything' | 'move-and-delete' | null
+	>(skipChooseAction ? 'delete-everything' : null);
 
 	// ----- Derived ---------------------------------------------------------
 
@@ -371,6 +389,7 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 
 	const handleDeleteEverythingAction = async () => {
 		if (needsRoleSelection) {
+			setPendingIntent('delete-everything');
 			setPhase('role-reassign');
 			return;
 		}
@@ -401,6 +420,7 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 		// If the column is role-assigned, route through role-reassign before
 		// executing the move + delete.
 		if (needsRoleSelection) {
+			setPendingIntent('move-and-delete');
 			setPhase('role-reassign');
 			return;
 		}
@@ -408,18 +428,54 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 		void runMoveAndDelete();
 	};
 
-	const handleRoleReassignConfirmation = () => {
-		if (roleTargetOptionId === null) {
+	const handleRoleReassignConfirmation = async () => {
+		if (roleTargetOptionId === null || pendingIntent === null) {
 			return;
 		}
 
-		// TODO(role-reassign): persist the new role assignment via a backend
-		// update (no frontend API/context method exists for this yet). Once it
-		// does, call it here and then dispatch to the appropriate execution
-		// path based on whether the original intent was delete or move.
-		console.warn(
-			'Role reassignment is not yet wired to a backend update; column delete will likely 409.'
-		);
+		setPhase('processing');
+
+		try {
+			// Reassign the role to the chosen column first — otherwise the column
+			// delete that follows will be rejected by the backend's role-block guard.
+			await updateStatusRoles({ [attachedRole]: roleTargetOptionId });
+
+			// Now run the operation the user originally chose.
+			if (pendingIntent === 'delete-everything') {
+				await deleteColumnAndTasks(column.field_id, column.id);
+			} else {
+				if (moveTargetOptionId === null) {
+					throw new Error(
+						__(
+							'No destination column was selected.',
+							'wpo-advanced-order-manager'
+						)
+					);
+				}
+				await deleteColumnAndMoveTasks(
+					column.field_id,
+					column.id,
+					moveTargetOptionId
+				);
+			}
+
+			onClose();
+		} catch (error) {
+			console.error(
+				'Failed to reassign role and delete column:',
+				error
+			);
+			setErrorMessage(
+				extractErrorMessage(
+					error,
+					__(
+						'Failed to reassign the role and delete the column.',
+						'wpo-advanced-order-manager'
+					)
+				)
+			);
+			setPhase('error');
+		}
 	};
 
 	// ----- Render ----------------------------------------------------------
@@ -511,12 +567,17 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 							'Save & delete',
 							'wpo-advanced-order-manager'
 						)}
-						secondaryActionLabel={__(
-							'Back',
-							'wpo-advanced-order-manager'
-						)}
+						secondaryActionLabel={
+							skipChooseAction
+								? __('Cancel', 'wpo-advanced-order-manager')
+								: __('Back', 'wpo-advanced-order-manager')
+						}
 						onPrimaryAction={handleRoleReassignConfirmation}
-						onSecondaryAction={() => setPhase('choose-action')}
+						onSecondaryAction={
+							skipChooseAction
+								? onClose
+								: () => setPhase('choose-action')
+						}
 					/>
 				);
 			}
