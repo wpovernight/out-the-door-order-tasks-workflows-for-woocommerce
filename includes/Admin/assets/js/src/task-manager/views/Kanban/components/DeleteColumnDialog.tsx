@@ -226,7 +226,8 @@ type Phase =
 	| 'processing'
 	| 'error';
 
-type LastAttempt = 'delete-everything' | 'move-and-delete' | null;
+type ColumnDeleteOperation = 'delete-everything' | 'move-and-delete';
+type LastAttempt = ColumnDeleteOperation | null;
 
 interface DeleteColumnDialogProps {
 	column: FieldOption;
@@ -246,14 +247,23 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 		useColumnDeletion();
 	const confirm = useConfirm();
 
-	// Empty column + role-assigned columns skip the choose-action phase.
-	const [skipChooseAction] = useState(() => {
-		const isEmpty = tasks.length === 0;
-		const isRoleAssigned =
+	// Role attachment is captured at mount. If the reassign step succeeds but
+	// the follow-up delete fails, recomputing from live statusRoles on retry
+	// would point at the wrong role and corrupt it.
+	const [attachedRole] = useState<'done' | 'undone'>(() =>
+		statusRoles.done === column.id ? 'done' : 'undone'
+	);
+	const [needsRoleSelection] = useState(
+		() =>
 			statusRoles.done === column.id ||
-			statusRoles.undone === column.id;
-		return isEmpty && isRoleAssigned;
-	});
+			statusRoles.undone === column.id
+	);
+
+	// Empty + role-assigned columns skip choose-action and go straight to
+	// role-reassign. Captured at mount so an in-flight reassign can't flip it.
+	const [skipChooseAction] = useState(
+		() => tasks.length === 0 && needsRoleSelection
+	);
 
 	const [phase, setPhase] = useState<Phase>(
 		skipChooseAction ? 'role-reassign' : 'choose-action'
@@ -268,16 +278,12 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 	const [lastAttempt, setLastAttempt] = useState<LastAttempt>(null);
 	// When the user routes through role-reassign, we need to remember what they
 	// originally chose so we can run the right operation after the role updates.
-	const [pendingIntent, setPendingIntent] = useState<
-		'delete-everything' | 'move-and-delete' | null
-	>(skipChooseAction ? 'delete-everything' : null);
+	const [pendingIntent, setPendingIntent] =
+		useState<ColumnDeleteOperation | null>(
+			skipChooseAction ? 'delete-everything' : null
+		);
 
 	// ----- Derived ---------------------------------------------------------
-
-	const needsRoleSelection =
-		statusRoles.done === column.id || statusRoles.undone === column.id;
-	const attachedRole: 'done' | 'undone' =
-		statusRoles.done === column.id ? 'done' : 'undone';
 
 	const allStatusOptions = fieldOptions.status ?? [];
 	const availableColumnsToMove = allStatusOptions.filter(
@@ -378,6 +384,14 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 	};
 
 	const retryLastAttempt = () => {
+		// If we got here via the role-reassign flow, retry the whole sequence.
+		// updateStatusRoles is idempotent on a re-run with the same target, so
+		// it's safe whether the original failure was at the reassign step or
+		// the follow-up delete.
+		if (pendingIntent !== null) {
+			void handleRoleReassignConfirmation();
+			return;
+		}
 		if (lastAttempt === 'delete-everything') {
 			void runDeleteEverything();
 		} else if (lastAttempt === 'move-and-delete') {
