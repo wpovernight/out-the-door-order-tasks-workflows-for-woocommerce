@@ -508,18 +508,18 @@ export async function deleteFieldOption(
     return handleResponse<void>(response);
 }
 
-export async function updateStatusRoleAssignment(
-    payload: Record<string, number>
+export async function updateStatusRoles(
+	updates: Partial<StatusRoles>
 ): Promise<StatusRoles> {
-    const response = await fetch(
-        `${getApiRoot()}/${getApiNamespace()}/tasks/status-roles`,
-        {
-            method: 'PUT',
-            credentials: 'include',
-            headers: getHeaders(),
-            body: JSON.stringify(payload),
-        }
-    );
+	const response = await fetch(
+		`${getApiRoot()}/${getApiNamespace()}/tasks/status-roles`,
+		{
+			method: 'PUT',
+			credentials: 'include',
+			headers: getHeaders(),
+			body: JSON.stringify(updates),
+		}
+	);
 
-    return handleResponse<StatusRoles>(response);
+	return handleResponse<StatusRoles>(response);
 }
