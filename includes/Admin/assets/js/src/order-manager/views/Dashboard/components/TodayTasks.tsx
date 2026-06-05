@@ -8,7 +8,7 @@ import { getTaskDateField, isTaskArchived } from '@shared/utils/fieldUtils';
 import { Task } from '@shared/types/task';
 import { EmptyState } from '@shared/components/LoadingSkeleton';
 import { useConfirm } from '@shared/context/DialogContext';
-import {useStatusRoles} from "@shared/hooks/useStatusRoles";
+import { useStatusRoles } from '@shared/context/StatusRoleContext';
 
 export const TodayTasks = () => {
 	const { tasks, deleteTask } = useTasks();
@@ -18,7 +18,7 @@ export const TodayTasks = () => {
 	const [doneExpanded, setDoneExpanded] = useState(false);
 	const contentRef = useScrollable<HTMLDivElement>();
 	const confirm = useConfirm();
-    const statusRoles = useStatusRoles();
+	const { statusRoles } = useStatusRoles();
 
 	const todayStart = useMemo(() => {
 		const d = new Date();

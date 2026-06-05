@@ -26,7 +26,7 @@ import {
     deleteFieldOption as deleteFieldOptionAPI,
 } from '@shared/utils/api';
 import { updateTaskFields } from '@shared/utils/fieldUtils';
-import {useStatusRoles} from "@shared/hooks/useStatusRoles";
+import { useStatusRoles } from '@shared/context/StatusRoleContext';
 
 interface TaskContextType {
 	tasks: Task[];
@@ -73,7 +73,7 @@ const TaskContext = createContext<TaskContextType | undefined>(undefined);
 export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 	children,
 }) => {
-    const statusRoles = useStatusRoles();
+	const { statusRoles } = useStatusRoles();
 	// ---------------------
 	// TASKS
 	// ---------------------

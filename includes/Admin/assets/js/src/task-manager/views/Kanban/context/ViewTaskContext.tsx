@@ -4,7 +4,7 @@ import { useTasks } from '@shared/context/TaskContext';
 import { groupAndSortTasks } from '../../../utils/task-sort';
 import { isTaskArchived } from '@shared/utils/fieldUtils';
 import { useView } from '@taskManager/context/ViewContext';
-import {useStatusRoles} from "@shared/hooks/useStatusRoles";
+import { useStatusRoles } from '@shared/context/StatusRoleContext';
 
 interface ViewTaskContextType {
 	viewTasks: Record<string, Task[]>;
@@ -32,7 +32,7 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 	const { searchQuery } = useView();
 	const [viewTasks, setViewTasks] = useState<Record<string, Task[]>>({});
 	const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-    const statusRoles = useStatusRoles();
+	const { statusRoles } = useStatusRoles();
 
 	const selectTask = useCallback((task: Task) => {
 		setSelectedTask(task);

@@ -24,7 +24,7 @@ import { __ } from '@wordpress/i18n';
 import { useTasks } from '@shared/context/TaskContext';
 import { useConfirm } from '@shared/context/DialogContext';
 import { useOnClickOutside } from '@shared/hooks/useOnClickOutside';
-import { useStatusRoles } from '@shared/hooks/useStatusRoles';
+import { useStatusRoles } from '@shared/context/StatusRoleContext';
 import { DeleteColumnDialog } from './DeleteColumnDialog';
 
 interface ColumnProps {
@@ -54,7 +54,7 @@ export const Column: React.FC<ColumnProps> = ({
 	const titleInputRef = useRef<HTMLInputElement | null>(null);
 	const { updateFieldOption, deleteFieldOption } = useTasks();
 	const confirm = useConfirm();
-	const statusRoles = useStatusRoles();
+	const { statusRoles } = useStatusRoles();
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
 	const isRoleAssigned =

@@ -10,7 +10,7 @@ import { getFieldRawValues, isTaskArchived } from '@shared/utils/fieldUtils';
 import {Task} from '@shared/types/task';
 import { AsyncLoaderStatus } from '@shared/hooks/useAsyncLoader';
 import { __ } from '@wordpress/i18n';
-import {useStatusRoles} from "@shared/hooks/useStatusRoles";
+import {useStatusRoles} from "@shared/context/StatusRoleContext";
 
 // Type for creating/updating tasks via API
 export type TaskPayload = Partial<Task> & {
@@ -61,7 +61,7 @@ export const OrderTaskProvider: React.FC<{
 	const [loadingError, setLoadingError] = useState<Error | null>(null);
 	const [hasLoaded, setHasLoaded] = useState<boolean>(false);
 	const isLoadingRef = useRef<boolean>(false);
-    const statusRoles = useStatusRoles();
+	const { statusRoles } = useStatusRoles();
 
 	const orderTasks = useMemo(() => {
 		return tasks.filter((task) => {

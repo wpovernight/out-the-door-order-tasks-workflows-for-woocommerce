@@ -14,7 +14,7 @@ import { __ } from '@wordpress/i18n';
 import { useTasks } from '@shared/context/TaskContext';
 import { useConfirm } from '@shared/context/DialogContext';
 import { createInterpolateElement } from '@wordpress/element';
-import {useStatusRoles} from "@shared/hooks/useStatusRoles";
+import { useStatusRoles } from '@shared/context/StatusRoleContext';
 
 type HeadingLevel = 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 type TagsPosition = 'none' | 'top' | 'bottom';
@@ -73,7 +73,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 		archiveTask: globalArchiveTask,
 	} = useTasks();
 	const confirm = useConfirm();
-    const statusRoles = useStatusRoles();
+	const { statusRoles } = useStatusRoles();
 	const finishTask = onFinishClick || globalFinishTask;
 	const unfinishTask = onUnfinishClick || globalUnfinishTask;
 	const archiveTask = onArchiveClick || globalArchiveTask;

@@ -3,7 +3,7 @@ import { __ } from '@wordpress/i18n';
 import { Task } from '@shared/types/task';
 import { useTasks } from '@shared/context/TaskContext';
 import { useConfirm } from '@shared/context/DialogContext';
-import { useStatusRoles } from '@shared/hooks/useStatusRoles';
+import { useStatusRoles } from '@shared/context/StatusRoleContext';
 import { createInterpolateElement } from '@wordpress/element';
 
 interface TaskActionMenuProps {
@@ -55,7 +55,7 @@ export const TaskActionMenu: React.FC<TaskActionMenuProps> = ({
 	const archiveTask = onArchive || globalArchiveTask;
 	const deleteTask = onDelete || globalDeleteTask;
 
-	const statusRoles = useStatusRoles();
+	const { statusRoles } = useStatusRoles();
 	const isDone = task.status === statusRoles.done;
 
 	const closeMenu = (e?: React.MouseEvent) => {
