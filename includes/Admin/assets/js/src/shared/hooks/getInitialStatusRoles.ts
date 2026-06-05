@@ -15,7 +15,7 @@ type WindowWithBootstrap = Window & {
 /**
  * Read status-role assignments from whichever screen bootstrap is present.
  */
-export function useStatusRoles(): StatusRoles {
+export function getInitialStatusRoles(): StatusRoles {
 	const win = window as WindowWithBootstrap;
 	const data = win.WPO_AOM_OrderManager ?? win.WPO_AOM_OrderEdit_MetaBox;
 
