@@ -4,6 +4,7 @@ import { HashRouter } from 'react-router-dom';
 import { TabProvider } from '@orderManager/context/TabContext';
 import Page from '@orderManager/components/Page';
 import { TaskProvider } from '@shared/context/TaskContext';
+import { StatusRoleProvider } from '@shared/context/StatusRoleContext';
 import { DialogProvider } from '@shared/context/DialogContext';
 import { ToastProvider } from '@shared/context/ToastContext';
 
@@ -23,13 +24,15 @@ if (container) {
 				 We also need to use task data in the dashboard view, so we need to keep the TaskProvider
 				 at this level for now.
 				  */}
-				<TaskProvider>
-					<ToastProvider>
-						<DialogProvider>
-							<Page />
-						</DialogProvider>
-					</ToastProvider>
-				</TaskProvider>
+				<StatusRoleProvider>
+					<TaskProvider>
+						<ToastProvider>
+							<DialogProvider>
+								<Page />
+							</DialogProvider>
+						</ToastProvider>
+					</TaskProvider>
+				</StatusRoleProvider>
 			</TabProvider>
 		</HashRouter>
 	);

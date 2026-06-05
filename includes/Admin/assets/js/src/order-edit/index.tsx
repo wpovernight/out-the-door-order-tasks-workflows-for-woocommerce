@@ -5,6 +5,7 @@ import { SidebarModalProvider } from '@shared/context/SidebarModalContext';
 import { DialogProvider } from '@shared/context/DialogContext';
 import { ToastProvider } from '@shared/context/ToastContext';
 import { TaskProvider } from '@shared/context/TaskContext';
+import { StatusRoleProvider } from '@shared/context/StatusRoleContext';
 import { OrderTaskProvider } from './context/OrderTaskContext';
 import { OrderWooFulfillmentProvider } from './context/OrderWooFulfillmentContext';
 
@@ -15,18 +16,20 @@ if (container) {
 
 	const root = createRoot(container);
 	root.render(
-		<TaskProvider>
-			<OrderTaskProvider orderId={orderId}>
-				<OrderWooFulfillmentProvider orderId={orderId}>
-					<ToastProvider>
-						<DialogProvider>
-							<SidebarModalProvider>
-								<MetaBox />
-							</SidebarModalProvider>
-						</DialogProvider>
-					</ToastProvider>
-				</OrderWooFulfillmentProvider>
-			</OrderTaskProvider>
-		</TaskProvider>
+		<StatusRoleProvider>
+			<TaskProvider>
+				<OrderTaskProvider orderId={orderId}>
+					<OrderWooFulfillmentProvider orderId={orderId}>
+						<ToastProvider>
+							<DialogProvider>
+								<SidebarModalProvider>
+									<MetaBox />
+								</SidebarModalProvider>
+							</DialogProvider>
+						</ToastProvider>
+					</OrderWooFulfillmentProvider>
+				</OrderTaskProvider>
+			</TaskProvider>
+		</StatusRoleProvider>
 	);
 }
