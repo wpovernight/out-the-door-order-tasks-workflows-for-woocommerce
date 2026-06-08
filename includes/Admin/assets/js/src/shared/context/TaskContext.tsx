@@ -23,7 +23,8 @@ import {
 	unarchiveTask as unarchiveTaskAPI,
 	createFieldOption as createFieldOptionAPI,
 	updateFieldOption as updateFieldOptionAPI,
-    deleteFieldOption as deleteFieldOptionAPI,
+	deleteFieldOption as deleteFieldOptionAPI,
+	reorderFieldOptions as reorderFieldOptionsAPI,
 } from '@shared/utils/api';
 import { updateTaskFields } from '@shared/utils/fieldUtils';
 import { useStatusRoles } from '@shared/context/StatusRoleContext';
@@ -56,6 +57,10 @@ interface TaskContextType {
 	deleteFieldOption: (
 		fieldId: number,
 		optionId: number
+	) => Promise<void>;
+	reorderFieldOptions: (
+		fieldId: number,
+		orderedOptionIds: number[]
 	) => Promise<void>;
 	moveTask: (
 		taskId: number,
@@ -406,6 +411,61 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
         },
         []
     );
+
+	// Reorders a field's options optimistically and persists the new order to
+	// the API. Positions are written as 1..N to match the backend (see
+	// TaskFieldOptionRepository::update_positions, which stores idx + 1).
+	const reorderFieldOptions = useCallback(
+		async (
+			fieldId: number,
+			orderedOptionIds: number[]
+		): Promise<void> => {
+			let previousState: Record<string, FieldOption[]> | null = null;
+
+			setFieldOptions((prev) => {
+				previousState = prev;
+
+				const fieldSlug =
+					Object.values(taskFields).find((f) => f.id === fieldId)
+						?.slug ??
+					Object.keys(prev).find((slug) =>
+						prev[slug].some((opt) => opt.field_id === fieldId)
+					);
+
+				if (!fieldSlug) {
+					return prev;
+				}
+
+				const existing = prev[fieldSlug] ?? [];
+				const byId = new Map(existing.map((opt) => [opt.id, opt]));
+
+				const reordered = orderedOptionIds
+					.map((id, idx) => {
+						const opt = byId.get(id);
+						return opt ? { ...opt, position: idx + 1 } : null;
+					})
+					.filter((opt): opt is FieldOption => opt !== null);
+
+				return {
+					...prev,
+					[fieldSlug]: reordered,
+				};
+			});
+
+			try {
+				await reorderFieldOptionsAPI(fieldId, orderedOptionIds);
+			} catch (error) {
+				console.error('Failed to reorder field options:', error);
+
+				if (previousState) {
+					setFieldOptions(previousState);
+				}
+
+				throw error;
+			}
+		},
+		[taskFields]
+	);
 
 	// ---------------------
 	// MOVE TASK
@@ -773,6 +833,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				createFieldOption,
 				updateFieldOption,
                 deleteFieldOption,
+				reorderFieldOptions,
 				moveTask,
 				finishTask,
 				unfinishTask,

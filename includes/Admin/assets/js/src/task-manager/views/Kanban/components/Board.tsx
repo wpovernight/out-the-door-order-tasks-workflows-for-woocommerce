@@ -15,17 +15,15 @@ import {
 import { Column } from './Column';
 import { DraftColumn } from './DraftColumn';
 import { useViewTasks } from '../context/ViewTaskContext';
-import { FieldOption } from '@shared/types/task';
-import { reorderFieldOptions } from '@shared/utils/api';
 
 export const Board: React.FC = () => {
-	const { fieldOptions, moveTask } = useTasks();
+	const { fieldOptions, moveTask, reorderFieldOptions } = useTasks();
 	const { viewTasks, setViewTasks, clearSelectedTask } = useViewTasks();
-	const [orderedColumns, setOrderedColumns] = useState<FieldOption[]>([]);
 	const [draftColumn, setDraftColumn] = useState<{
 		fieldId: number;
 		position: number;
 	} | null>(null);
+	const orderedColumns = fieldOptions.status ?? [];
 
 	const requestAddColumn = (fieldId: number, position: number) => {
 		setDraftColumn({ fieldId, position });
@@ -44,16 +42,14 @@ export const Board: React.FC = () => {
 
 	const scrollableRef = useRef<HTMLDivElement | null>(null);
 
+	// Mirror fieldOptions.status into a ref so the DnD effect can read the
+	// latest columns inside its onDrop callback without depending on
+	// fieldOptions in the deps array (which would tear down and re-register
+	// the DnD setup on every field-options update).
 	const statusesRef = useRef(fieldOptions.status || []);
-
-	// Keep orderedColumns and statusesRef in sync with the latest field options.
-	// Without this the board renders no columns on first load (fieldOptions arrive
-	// asynchronously after mount) and statusesRef stays stale, breaking DnD drop
-	// resolution.
 	useEffect(() => {
 		if (fieldOptions.status) {
 			statusesRef.current = fieldOptions.status;
-			setOrderedColumns(fieldOptions.status);
 		}
 	}, [fieldOptions.status]);
 
@@ -225,49 +221,36 @@ export const Board: React.FC = () => {
 						// Extract the edge to determine insert position
 						const edge = extractClosestEdge(dropTargetData);
 
-						// Reorder columns
-						setOrderedColumns((prev) => {
-							const updated = [...prev];
-							const fromIndex = updated.findIndex(
-								(col) => col.slug === fromColumnSlug
-							);
-							const toIndex = updated.findIndex(
-								(col) => col.slug === toColumnSlug
-							);
+						// Compute the new column order from the latest snapshot
+						// and dispatch through TaskContext. The context method
+						// applies the optimistic update to global field
+						// options and handles rollback on API failure.
+						const currentColumns = statusesRef.current;
+						const fromIndex = currentColumns.findIndex(
+							(col) => col.slug === fromColumnSlug
+						);
+						const toIndex = currentColumns.findIndex(
+							(col) => col.slug === toColumnSlug
+						);
 
-							if (fromIndex === -1 || toIndex === -1) {
-								return prev;
-							}
+						if (fromIndex === -1 || toIndex === -1) {
+							return;
+						}
 
-							// Remove from source position
-							const [movedColumn] = updated.splice(fromIndex, 1);
+						const updated = [...currentColumns];
+						const [movedColumn] = updated.splice(fromIndex, 1);
+						const newToIndex = updated.findIndex(
+							(col) => col.slug === toColumnSlug
+						);
+						const insertIndex =
+							edge === 'right' ? newToIndex + 1 : newToIndex;
+						updated.splice(insertIndex, 0, movedColumn);
 
-							// Recalculate target index after removal
-							const newToIndex = updated.findIndex(
-								(col) => col.slug === toColumnSlug
-							);
-
-							// Insert based on edge
-							const insertIndex =
-								edge === 'right' ? newToIndex + 1 : newToIndex;
-							updated.splice(insertIndex, 0, movedColumn);
-
-							// Persist the new column order to the API
-							const orderedIds = updated.map((col) => col.id);
-							const fieldId = updated[0]?.field_id;
-							if (fieldId) {
-								reorderFieldOptions(fieldId, orderedIds).catch(
-									(error) => {
-										console.error(
-											'Failed to persist column order:',
-											error
-										);
-									}
-								);
-							}
-
-							return updated;
-						});
+						const orderedIds = updated.map((col) => col.id);
+						const fieldId = updated[0]?.field_id;
+						if (fieldId) {
+							void reorderFieldOptions(fieldId, orderedIds);
+						}
 					}
 				},
 			}),
@@ -278,7 +261,7 @@ export const Board: React.FC = () => {
 					isCardData(source.data) || isColumnData(source.data),
 			})
 		);
-	}, [setViewTasks, moveTask, statusesRef]);
+	}, [setViewTasks, moveTask, reorderFieldOptions, statusesRef]);
 
 	// Clear highlight when clicking anywhere on the board background
 	const handleClick = () => {
