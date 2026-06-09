@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
-import { FieldOption, Task } from '@shared/types/task';
+import { FieldOption, StatusRoles, Task } from '@shared/types/task';
 import { useColumnDeletion } from '@taskManager/hooks/useColumnDeletion';
 import { useConfirm } from '@shared/context/DialogContext';
 import { useStatusRoles } from '@shared/context/StatusRoleContext';
@@ -244,17 +244,16 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 		useColumnDeletion();
 	const confirm = useConfirm();
 
-	// Role attachment is captured at mount. If the reassign step succeeds but
-	// the follow-up delete fails, recomputing from live statusRoles on retry
-	// would point at the wrong role and corrupt it.
-	const [attachedRole] = useState<'done' | 'undone'>(() =>
-		statusRoles.done === column.id ? 'done' : 'undone'
-	);
-	const [needsRoleSelection] = useState(
-		() =>
-			statusRoles.done === column.id ||
-			statusRoles.undone === column.id
-	);
+	const [attachedRole] = useState<keyof StatusRoles | null>(() => {
+		const match = (
+			Object.entries(statusRoles) as [
+				keyof StatusRoles,
+				number | null,
+			][]
+		).find(([, optionId]) => optionId === column.id);
+		return match ? match[0] : null;
+	});
+	const needsRoleSelection = attachedRole !== null;
 
 	// Empty + role-assigned columns skip choose-action and go straight to
 	// role-reassign. Captured at mount so an in-flight reassign can't flip it.
@@ -547,10 +546,13 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 				);
 
 			case 'role-reassign': {
-				const roleLabel =
-					attachedRole === 'done'
-						? __('done', 'wpo-advanced-order-manager')
-						: __('undone', 'wpo-advanced-order-manager');
+				// One translatable label per role. Adding a role to StatusRoles
+				// means adding one line here — the only role-aware spot left.
+				const roleLabels: Record<keyof StatusRoles, string> = {
+					done: __('done', 'wpo-advanced-order-manager'),
+					undone: __('undone', 'wpo-advanced-order-manager'),
+				};
+				const roleLabel = attachedRole ? roleLabels[attachedRole] : attachedRole;
 
 				return (
 					<ColumnPickerPhase
