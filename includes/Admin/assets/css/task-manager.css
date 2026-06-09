@@ -1075,6 +1075,35 @@
     padding: 0.4em 1em;
 }
 
+.wpo-aom-dialog.column-deletion-dialog .dialog-actions > li > button.wpo-button.action-move {
+    background-color: #FEF3F2;
+    border: #FEF3F2;
+}
+
+.wpo-aom-dialog.column-deletion-dialog .wpo-aom-select {
+    width: 100%;
+    font-size: inherit;
+    border-color: var(--wpo-aom-border-color);
+    border-radius: var(--wpo-aom-radius-m);
+    padding: 0.27em 0.8em;
+}
+
+.wpo-aom-dialog.column-deletion-dialog .wpo-aom-select:focus {
+    border-color: var(--wpo-aom-wp-blue);
+    box-shadow: 0 0 0 1px var(--wpo-aom-wp-blue);
+    outline: 2px solid transparent;
+}
+
+.wpo-aom-dialog .dialog-content #delete-progress {
+    display: flex;
+    width: 100%;
+    gap: 1em;
+    justify-content: center;
+    align-items: center;
+    accent-color: var(--wpo-aom-purple-primary);
+}
+
+
 @media screen and (max-width: 1200px) {
     .calendar-sidebar {
         width: 23.5em;
