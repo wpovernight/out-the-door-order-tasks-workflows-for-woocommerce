@@ -35,7 +35,7 @@ export const DialogProvider: React.FC<{ children: React.ReactNode }> = ({
 
 	const open = useCallback(
 		(variant: DialogVariant, options: DialogOptions): Promise<boolean> => {
-			// If a dialog is already open, dismiss it as cancelled so we
+			// If a dialog is already open, dismiss it as canceled so we
 			// don't lose the previous resolver.
 			if (resolverRef.current) {
 				resolverRef.current(false);
