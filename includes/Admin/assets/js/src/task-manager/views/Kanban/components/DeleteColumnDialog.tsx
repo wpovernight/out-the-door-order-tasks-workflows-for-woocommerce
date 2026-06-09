@@ -166,12 +166,69 @@ const ChooseActionPhase: React.FC<ChooseActionPhaseProps> = ({
 	</>
 );
 
-const ProcessingPhase: React.FC = () => (
-	<div className="dialog-content dialog-processing">
-		<div className="wpo-aom-spinner" aria-hidden="true" />
-		<p>{__('Processing…', 'wpo-advanced-order-manager')}</p>
-	</div>
-);
+interface ProcessingPhaseProps {
+	completed: number | null;
+	total: number;
+	canceling: boolean;
+	onCancel: () => void;
+}
+
+const ProcessingPhase: React.FC<ProcessingPhaseProps> = ({
+	completed,
+	total,
+	canceling,
+	onCancel,
+}) => {
+	let percent: number;
+	if (completed === null) {
+		percent = 0;
+	} else if (total === 0) {
+		percent = 100;
+	} else {
+		percent = Math.round((completed / total) * 100);
+	}
+
+	return (
+        <>
+        <div className="dialog-content dialog-processing">
+            <h2>
+                {__(
+                    'We are currently moving your items',
+                    'wpo-advanced-order-manager'
+                )}
+            </h2>
+            <p>
+                {__(
+                    'This might take a while, depending on the number of items that need to be moved.',
+                    'wpo-advanced-order-manager'
+                )}
+            </p>
+            <label id="delete-progress">
+                <progress id="delete-progress" max="100" value={percent}>{percent}%</progress>
+
+                <span className="screen-reader-text">
+                    {__( 'Progress', 'wpo-advanced-order-manager' )}
+                </span>
+                {percent}%
+            </label>
+        </div>
+        <ul className="dialog-actions dialog-actions-horizontal">
+            <li>
+                <button
+                    type="button"
+                    className="wpo-button"
+                    onClick={onCancel}
+                    disabled={canceling}
+                >
+                    {canceling
+                        ? __('Canceling…', 'wpo-advanced-order-manager')
+                        : __('Cancel', 'wpo-advanced-order-manager')}
+                </button>
+            </li>
+        </ul>
+    </>
+    );
+};
 
 interface ErrorPhaseProps {
 	message: string;
@@ -596,7 +653,14 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 			}
 
 			case 'processing':
-				return <ProcessingPhase />;
+				return (
+					<ProcessingPhase
+						completed={progress.completed}
+						total={progress.total}
+						canceling={processCanceling}
+						onCancel={handleCancelProcessing}
+					/>
+				);
 
 			case 'error':
 				return (
