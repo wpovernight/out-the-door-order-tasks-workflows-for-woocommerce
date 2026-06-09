@@ -21,10 +21,6 @@ const extractErrorMessage = (error: unknown, fallback: string): string => {
 // Shared sub-components
 // ============================================================================
 
-const AlertIcon: React.FC = () => (
-	<div className="dialog-alert-icon" aria-hidden="true" />
-);
-
 interface ColumnPickerPhaseProps {
 	title: string;
 	description: string;
@@ -61,7 +57,8 @@ const ColumnPickerPhase: React.FC<ColumnPickerPhaseProps> = ({
 			<label className="dialog-field">
 				{fieldLabel}
 				<select
-					className="wpo-select"
+					className="wpo-aom-select"
+                    id="column-picker"
 					value={selectedOptionId ?? ''}
 					onChange={(e) =>
 						onSelectionChange(
@@ -613,11 +610,10 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 	return (
 		<dialog
 			ref={dialogRef}
-			className="wpo-aom-dialog column-deletion-dialog"
+			className={`wpo-aom-dialog column-deletion-dialog ${phase === 'processing' ? 'processing-action' : 'action-delete'}`}
 			onClose={onClose}
 			onClick={handleBackdropClick}
 		>
-			<AlertIcon />
 			{renderPhase()}
 		</dialog>
 	);
