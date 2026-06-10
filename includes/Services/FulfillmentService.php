@@ -252,10 +252,11 @@ final class FulfillmentService {
 		/**
 		 * Filter the number of days to look back when querying orders by fulfillment status.
 		 *
-		 * @param int $days Number of days. Default 60. Set to 0 for no date limit.
+		 * @param int $days Number of days. Default 0 (no date limit).
 		 */
-		$days = (int) apply_filters( 'wpo_aom_fulfillment_status_query_days', 60 );
+		$days = (int) apply_filters( 'wpo_aom_fulfillment_status_query_days', 0 );
 
+		// ToDo: Needs updates. Maybe ORDERBY and filters for it?
 		$defaults = array(
 			'meta_key' => self::ORDER_FULFILLMENT_STATUS_META_KEY, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			'limit'    => -1,
