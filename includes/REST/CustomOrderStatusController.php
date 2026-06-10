@@ -209,7 +209,7 @@ class CustomOrderStatusController extends BaseRestController {
 		$custom_order_status_service = WPO_AOM()->get_service( CustomOrderStatusService::class );
 
 		try {
-			$custom_order_status_service->delete( $id );
+			$custom_order_status_service->request_deletion( $id );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'deletion_failed', $e->getMessage(), array( 'status' => 500 ) );
 		}

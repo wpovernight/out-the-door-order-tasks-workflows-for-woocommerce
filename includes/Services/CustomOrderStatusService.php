@@ -44,8 +44,8 @@ class CustomOrderStatusService {
 		// Add dynamic styles for custom order statuses in the orders page.
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_dynamic_style' ), 99 );
 
-		// Reassign orders when a custom status is deleted.
-		add_action( 'wpo_aom_reassign_orders', array( $this, 'reassign_orders' ), 10, 2 );
+		// Drain & finalize a custom status deletion, one batch per scheduled run.
+		add_action( 'wpo_aom_reassign_orders', array( $this, 'process_deletion_batch' ), 10, 3 );
 	}
 
 	/** ================================
@@ -63,6 +63,11 @@ class CustomOrderStatusService {
 		$statuses = $this->all();
 
 		foreach ( $statuses as $status ) {
+			// Statuses pending deletion are intentionally NOT skipped: this filter
+			// is also WooCommerce's label map (wc_get_order_status_name()), so
+			// dropping one would make orders still sitting in it — while the drain
+			// is in progress — render a raw "wc-foo" key instead of their label.
+
 			$order_statuses[ $status->get_prefixed_status_key() ] = esc_html( $status->label );
 		}
 
@@ -113,6 +118,11 @@ class CustomOrderStatusService {
 		$new_bulk_actions = array();
 
 		foreach ( $statuses as $status ) {
+			// Skip "deleting" statuses, as they are not actionable.
+			if ( $status->is_deleting ) {
+				continue;
+			}
+
 			$new_bulk_actions[ 'mark_' . $status->status_key ] = sprintf(
 				/* translators: %s: status label */
 				__( 'Change status to %s', 'wpo-advanced-order-manager' ),
@@ -262,45 +272,62 @@ class CustomOrderStatusService {
 	}
 
 	/**
-	 * Delete a custom order status by ID.
-	 * Updates all orders with the deleted status to a fallback status before deletion.
+	 * Request deletion of a custom order status.
 	 *
-	 * @param int    $id
+	 * The status is not removed synchronously. Its orders must first be drained
+	 * to a fallback status, so this only schedules the async batch job and
+	 * returns. The row is deleted once the final batch completes (see
+	 * process_deletion_batch()); until then the status stays registered so
+	 * wc_get_orders() can keep matching its orders.
+	 *
+	 * @param int    $id              The custom status ID to delete.
 	 * @param string $fallback_status The status to assign to affected orders (default: 'on-hold').
 	 *
-	 * @return bool
+	 * @return bool True if deletion was scheduled, false if the status was not found.
 	 */
-	public function delete( int $id, string $fallback_status = 'on-hold' ): bool {
+	public function request_deletion( int $id, string $fallback_status = 'on-hold' ): bool {
 		$status = $this->find( $id );
 		if ( ! $status ) {
 			return false;
 		}
 
-		// Update all orders with this custom status to the fallback status.
+		if ( $status->is_deleting ) {
+			return true; // Deletion already in progress.
+		}
+
+		// Mark the status as pending deletion.
+		$status->is_deleting = true;
+		$this->repository->save( $status );
+
+		$this->cached_statuses = null;
+
+		// Schedule the drain. Do NOT delete the row yet — it must stay
+		// registered so wc_get_orders() can still match its orders
 		as_schedule_single_action(
 			time(),
 			'wpo_aom_reassign_orders',
-			array( $status->status_key, $fallback_status ),
+			array( $status->status_key, $fallback_status, $id ),
 			'wpo-aom'
 		);
 
-		$result                = $this->repository->where( 'id', $id )->delete();
-		$this->cached_statuses = null;
-
-		do_action( 'wpo_aom_custom_order_status_deleted', $id, $status, $fallback_status );
-
-		return $result !== false;
+		return true;
 	}
 
 	/**
-	 * Reassign orders from one status to another.
+	 * Process one batch of an in-progress status deletion.
+	 *
+	 * Reassigns up to a (filterable) batch of orders from the deleted status to
+	 * the fallback, then either reschedules itself for the next batch or — once
+	 * no orders remain — deletes the custom status row and fires the deleted
+	 * action. Runs via the 'wpo_aom_reassign_orders' scheduled action.
 	 *
 	 * @param string $from_status The status key to reassign from (without 'wc-' prefix).
 	 * @param string $to_status   The status key to reassign to (without 'wc-' prefix).
+	 * @param int    $status_id   The ID of the custom status being deleted.
 	 *
 	 * @return void
 	 */
-	public function reassign_orders( string $from_status, string $to_status ): void {
+	public function process_deletion_batch( string $from_status, string $to_status, int $status_id ): void {
 		$limit  = apply_filters( 'wpo_aom_reassign_orders_batch_size', 50 );
 		$orders = wc_get_orders(
 			array(
@@ -313,10 +340,12 @@ class CustomOrderStatusService {
 			try {
 				$resolved_to_status = apply_filters( 'wpo_aom_reassign_orders_to_status', $to_status, $order );
 
-				$order->update_status(
-					$resolved_to_status,
-					'WPO AOM: ' . __( 'Status changed due to custom order status deletion.', 'wpo-advanced-order-manager' )
-				);
+				if ( is_callable( array( $order, 'update_status' ) ) ) {
+					$order->update_status(
+						$resolved_to_status,
+						'WPO AOM: ' . __( 'Status changed due to custom order status deletion.', 'wpo-advanced-order-manager' )
+					);
+				}
 			} catch ( \Throwable $e ) {
 				Logger::warning( sprintf(
 					'Failed to reassign order %d from status "%s" to "%s": %s',
@@ -333,9 +362,17 @@ class CustomOrderStatusService {
 			as_schedule_single_action(
 				time(),
 				'wpo_aom_reassign_orders',
-				array( $from_status, $to_status ),
+				array( $from_status, $to_status, $status_id ),
 				'wpo-aom'
 			);
+
+			return;
 		}
+
+		// Final batch done — now it's safe to remove the status.
+		$this->repository->where( 'id', $status_id )->delete();
+		$this->cached_statuses = null;
+
+		do_action( 'wpo_aom_custom_order_status_deleted', $status_id, $from_status, $to_status );
 	}
 }
