@@ -1,13 +1,5 @@
 import React, { useState } from 'react';
 import { __ } from '@wordpress/i18n';
-import { useAsyncLoader } from '@shared/hooks/useAsyncLoader';
-import {
-	fetchCustomOrderStatuses,
-	createCustomOrderStatus,
-	updateCustomOrderStatus,
-	deleteCustomOrderStatus,
-} from '@shared/utils/api';
-import { CustomOrderStatus } from '@shared/types/customOrderStatus';
 import {
 	ErrorState,
 	EmptyState,
@@ -15,47 +7,35 @@ import {
 } from '@shared/components/LoadingSkeleton';
 import { StatusTable } from './components/StatusTable';
 import { useConfirm } from '@shared/context/DialogContext';
+import {
+	useCustomOrderStatuses,
+	CustomOrderStatusInput,
+} from './hooks/useCustomOrderStatuses';
 
 export const CustomOrderStatusView = () => {
-	const [statuses, setStatuses] = useState<CustomOrderStatus[]>([]);
 	const [editingId, setEditingId] = useState<number | null>(null);
 	const [isCreating, setIsCreating] = useState(false);
-	const [isSaving, setIsSaving] = useState(false);
-	const [deletingId, setDeletingId] = useState<number | null>(null);
 	const confirm = useConfirm();
 
-	const { loadingStatus, loadingError } = useAsyncLoader(async () => {
-		const data = await fetchCustomOrderStatuses();
-		setStatuses(data);
-	});
+	const {
+		statuses,
+		loadingStatus,
+		loadingError,
+		isSaving,
+		deletingId,
+		createStatus,
+		updateStatus,
+		deleteStatus,
+	} = useCustomOrderStatuses();
 
-	const handleCreate = async (data: {
-		label: string;
-		status_key: string;
-		background: string;
-	}) => {
-		setIsSaving(true);
-		try {
-			const created = await createCustomOrderStatus(data);
-			setStatuses((prev) => [...prev, created]);
-			setIsCreating(false);
-		} finally {
-			setIsSaving(false);
-		}
+	const handleCreate = async (data: CustomOrderStatusInput) => {
+		await createStatus(data);
+		setIsCreating(false);
 	};
 
-	const handleUpdate = async (
-		id: number,
-		data: { label: string; status_key: string; background: string }
-	) => {
-		setIsSaving(true);
-		try {
-			const updated = await updateCustomOrderStatus(id, data);
-			setStatuses((prev) => prev.map((s) => (s.id === id ? updated : s)));
-			setEditingId(null);
-		} finally {
-			setIsSaving(false);
-		}
+	const handleUpdate = async (id: number, data: CustomOrderStatusInput) => {
+		await updateStatus(id, data);
+		setEditingId(null);
 	};
 
 	const handleDelete = async (id: number) => {
@@ -74,13 +54,7 @@ export const CustomOrderStatusView = () => {
 			return;
 		}
 
-		setDeletingId(id);
-		try {
-			await deleteCustomOrderStatus(id);
-			setStatuses((prev) => prev.filter((s) => s.id !== id));
-		} finally {
-			setDeletingId(null);
-		}
+		await deleteStatus(id);
 	};
 
 	if (loadingStatus === 'loading') {
