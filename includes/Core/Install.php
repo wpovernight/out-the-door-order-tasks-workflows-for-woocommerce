@@ -192,6 +192,7 @@ final class Install {
 			status_key VARCHAR(64) NOT NULL,
 			label VARCHAR(255) NOT NULL,
 			background VARCHAR(32) DEFAULT NULL,
+			is_deleting TINYINT(1) NOT NULL DEFAULT 0,
 			PRIMARY KEY (id),
 			UNIQUE KEY (status_key)
 		) {$charset_collate};
@@ -419,10 +420,14 @@ final class Install {
 	}
 
 	/**
-	 * Re-run create_tables() so dbDelta applies the new UNIQUE KEY on
-	 * wpo_aom_task_field_options(field_id, slug). Existing beta.1 installs only
-	 * contain the seeded options (no public create-option path existed), so
-	 * seed data is already unique and no dedupe is needed.
+	 * Re-run create_tables() so dbDelta applies pending schema changes for the
+	 * beta.2 upgrade. Two changes ride along on this single dbDelta pass:
+	 *  - the new UNIQUE KEY on wpo_aom_task_field_options(field_id, slug), and
+	 *  - the new is_deleting column on wpo_aom_custom_statuses.
+	 *
+	 * Existing beta.1 installs only contain the seeded options (no public
+	 * create-option path existed), so seed data is already unique and no dedupe
+	 * is needed.
 	 *
 	 * @return void
 	 */
