@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import {useEffect, useState} from 'react';
+import { __ } from '@wordpress/i18n';
 import {
 	fetchCustomOrderStatuses,
 	createCustomOrderStatus,
@@ -10,6 +11,7 @@ import {
 	useAsyncLoader,
 	AsyncLoaderStatus,
 } from '@shared/hooks/useAsyncLoader';
+import { useToast, ToastType } from '@shared/context/ToastContext';
 
 /** Fields editable through the create/edit form. */
 export type CustomOrderStatusInput = Pick<
@@ -37,12 +39,27 @@ export interface UseCustomOrderStatusesResult {
 export function useCustomOrderStatuses(): UseCustomOrderStatusesResult {
 	const [statuses, setStatuses] = useState<CustomOrderStatus[]>([]);
 	const [isSaving, setIsSaving] = useState(false);
-	const [deletingId, setDeletingId] = useState<number | null>(null);
+	const { addToast } = useToast();
 
 	const { loadingStatus, loadingError } = useAsyncLoader(async () => {
 		const data = await fetchCustomOrderStatuses();
 		setStatuses(data);
 	});
+
+	const reportError = (error: unknown, title: string): void => {
+		console.error(title, error);
+		addToast({
+			title,
+			message:
+				error instanceof Error
+					? error.message
+					: __(
+							'Something went wrong. Please try again.',
+							'wpo-advanced-order-manager'
+						),
+			type: ToastType.ERROR,
+		});
+	};
 
 	const createStatus = async (
 		data: CustomOrderStatusInput
@@ -51,6 +68,12 @@ export function useCustomOrderStatuses(): UseCustomOrderStatusesResult {
 		try {
 			const created = await createCustomOrderStatus(data);
 			setStatuses((prev) => [...prev, created]);
+		} catch (error) {
+			reportError(
+				error,
+				__('Could not create status', 'wpo-advanced-order-manager')
+			);
+			throw error;
 		} finally {
 			setIsSaving(false);
 		}
@@ -66,6 +89,12 @@ export function useCustomOrderStatuses(): UseCustomOrderStatusesResult {
 			setStatuses((prev) =>
 				prev.map((status) => (status.id === id ? updated : status))
 			);
+		} catch (error) {
+			reportError(
+				error,
+				__('Could not update status', 'wpo-advanced-order-manager')
+			);
+			throw error;
 		} finally {
 			setIsSaving(false);
 		}
@@ -77,7 +106,8 @@ export function useCustomOrderStatuses(): UseCustomOrderStatusesResult {
 			// Deletion is async server-side: the request only schedules the
 			// order drain, so flip the row to its "deleting" state rather than
 			// removing it. It disappears once the drain finishes (handled by the
-			// poll, added separately).
+			// poll, added separately). The flip only runs on success, so a
+			// failure leaves the row untouched.
 			await deleteCustomOrderStatus(id);
 			setStatuses((prev) =>
 				prev.map((status) =>
@@ -86,8 +116,12 @@ export function useCustomOrderStatuses(): UseCustomOrderStatusesResult {
 						: status
 				)
 			);
-		} finally {
-			setDeletingId(null);
+		} catch (error) {
+			reportError(
+				error,
+				__('Could not delete status', 'wpo-advanced-order-manager')
+			);
+			throw error;
 		}
 	};
 
@@ -96,7 +130,6 @@ export function useCustomOrderStatuses(): UseCustomOrderStatusesResult {
 		loadingStatus,
 		loadingError,
 		isSaving,
-		deletingId,
 		createStatus,
 		updateStatus,
 		deleteStatus,
