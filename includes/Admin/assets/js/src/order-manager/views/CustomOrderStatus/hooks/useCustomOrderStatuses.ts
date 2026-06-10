@@ -24,7 +24,6 @@ export interface UseCustomOrderStatusesResult {
 	loadingStatus: AsyncLoaderStatus;
 	loadingError: Error | null;
 	isSaving: boolean;
-	deletingId: number | null;
 	createStatus: (data: CustomOrderStatusInput) => Promise<void>;
 	updateStatus: (id: number, data: CustomOrderStatusInput) => Promise<void>;
 	deleteStatus: (id: number) => Promise<void>;
@@ -101,7 +100,6 @@ export function useCustomOrderStatuses(): UseCustomOrderStatusesResult {
 	};
 
 	const deleteStatus = async (id: number): Promise<void> => {
-		setDeletingId(id);
 		try {
 			// Deletion is async server-side: the request only schedules the
 			// order drain, so flip the row to its "deleting" state rather than
@@ -124,6 +122,24 @@ export function useCustomOrderStatuses(): UseCustomOrderStatusesResult {
 			throw error;
 		}
 	};
+
+    const hasDeleting = statuses.some((s) => s.is_deleting);
+
+    useEffect(() => {
+        if (!hasDeleting) return;
+
+        const id = setInterval(async () => {
+            try {
+                const fresh = await fetchCustomOrderStatuses();
+                setStatuses(fresh);
+            } catch (error) {
+                console.error('Failed to refresh statuses during deletion:', error);
+            }
+        }, 5000);
+
+        return () => clearInterval(id);
+
+    }, [hasDeleting]);
 
 	return {
 		statuses,
