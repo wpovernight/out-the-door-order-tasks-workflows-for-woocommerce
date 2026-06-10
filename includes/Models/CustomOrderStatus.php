@@ -7,12 +7,12 @@ use WPO\AOM\Contracts\ArraySerializableModel;
 defined( 'ABSPATH' ) || exit;
 
 class CustomOrderStatus extends BaseModel implements ArraySerializableModel {
-
 	public int $id;
 	public string $status_key;
 	public string $label;
 	public string $background;
 	public string $foreground;
+	public bool $is_deleting;
 
 	protected array $non_db_properties = array( 'foreground' );
 
@@ -22,13 +22,14 @@ class CustomOrderStatus extends BaseModel implements ArraySerializableModel {
 	 * @param array $data
 	 */
 	public function __construct( array $data = array() ) {
-		$this->id         = isset( $data['id'] ) && $data['id'] > 0 ? (int) $data['id'] : 0;
-		$this->label      = $data['label'] ?? '';
-		$this->status_key = ! empty( $data['status_key'] )
+		$this->id          = isset( $data['id'] ) && $data['id'] > 0 ? (int) $data['id'] : 0;
+		$this->label       = $data['label'] ?? '';
+		$this->status_key  = ! empty( $data['status_key'] )
 			? sanitize_title( $data['status_key'] )
 			: sanitize_title( $this->label );
-		$this->background = $data['background'] ?? '#ccc';
-		$this->foreground = $data['foreground'] ?? $this->get_foreground_color( $this->background );
+		$this->background  = $data['background'] ?? '#ccc';
+		$this->foreground  = $data['foreground'] ?? $this->get_foreground_color( $this->background );
+		$this->is_deleting = ! empty( $data['is_deleting'] );
 	}
 
 	/**
@@ -38,11 +39,12 @@ class CustomOrderStatus extends BaseModel implements ArraySerializableModel {
 	 */
 	public function to_array(): array {
 		return array(
-			'id'         => $this->id,
-			'status_key' => $this->status_key,
-			'label'      => $this->label,
-			'background' => $this->background,
-			'foreground' => $this->foreground,
+			'id'          => $this->id,
+			'status_key'  => $this->status_key,
+			'label'       => $this->label,
+			'background'  => $this->background,
+			'foreground'  => $this->foreground,
+			'is_deleting' => $this->is_deleting,
 		);
 	}
 
@@ -53,9 +55,10 @@ class CustomOrderStatus extends BaseModel implements ArraySerializableModel {
 	 */
 	public function to_db_array(): array {
 		return array(
-			'status_key' => $this->status_key,
-			'label'      => $this->label,
-			'background' => $this->background,
+			'status_key'  => $this->status_key,
+			'label'       => $this->label,
+			'background'  => $this->background,
+			'is_deleting' => (int) $this->is_deleting,
 		);
 	}
 
@@ -161,5 +164,4 @@ class CustomOrderStatus extends BaseModel implements ArraySerializableModel {
 		// Coefficients based on human perception
 		return 0.2126 * $channels[0] + 0.7152 * $channels[1] + 0.0722 * $channels[2];
 	}
-
 }
