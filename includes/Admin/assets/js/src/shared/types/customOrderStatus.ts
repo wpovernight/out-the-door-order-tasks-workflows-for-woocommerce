@@ -4,4 +4,5 @@ export interface CustomOrderStatus {
 	label: string;
 	background: `#${string}` | `rgb(${number},${number},${number})` | string;
 	foreground: `#${string}` | `rgb(${number},${number},${number})` | string;
+    is_deleting: boolean;
 }
