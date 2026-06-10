@@ -22,20 +22,27 @@ export const CustomOrderStatusView = () => {
 		loadingStatus,
 		loadingError,
 		isSaving,
-		deletingId,
 		createStatus,
 		updateStatus,
 		deleteStatus,
 	} = useCustomOrderStatuses();
 
 	const handleCreate = async (data: CustomOrderStatusInput) => {
-		await createStatus(data);
-		setIsCreating(false);
+		try {
+			await createStatus(data);
+			setIsCreating(false);
+		} catch {
+			// Already reported via toast in the hook.
+		}
 	};
 
 	const handleUpdate = async (id: number, data: CustomOrderStatusInput) => {
-		await updateStatus(id, data);
-		setEditingId(null);
+		try {
+			await updateStatus(id, data);
+			setEditingId(null);
+		} catch {
+			// Already reported via toast in the hook.
+		}
 	};
 
 	const handleDelete = async (id: number) => {
@@ -54,7 +61,11 @@ export const CustomOrderStatusView = () => {
 			return;
 		}
 
-		await deleteStatus(id);
+		try {
+			await deleteStatus(id);
+		} catch {
+			// Already reported via toast in the hook.
+		}
 	};
 
 	if (loadingStatus === 'loading') {
@@ -111,7 +122,6 @@ export const CustomOrderStatusView = () => {
 					<StatusTable
 						statuses={statuses}
 						editingId={editingId}
-						deletingId={deletingId}
 						isCreating={isCreating}
 						isSaving={isSaving}
 						onEdit={(id) => {

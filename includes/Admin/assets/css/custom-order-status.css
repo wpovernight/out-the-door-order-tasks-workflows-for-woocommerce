@@ -205,7 +205,13 @@ div#color-field {
 }
 
 .deleting-row {
-    opacity: 0.4;
-    transition: opacity 0.2s;
     cursor: wait;
+}
+
+.deleting-row > td.actions-column {
+    opacity: 0.5;
+}
+
+.cos-table .deleting-notice {
+    color: red;
 }

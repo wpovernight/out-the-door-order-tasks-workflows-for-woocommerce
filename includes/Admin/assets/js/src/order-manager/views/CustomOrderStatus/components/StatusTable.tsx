@@ -6,7 +6,6 @@ import { StatusForm } from './StatusForm';
 interface StatusTableProps {
 	statuses: CustomOrderStatus[];
 	editingId: number | null;
-	deletingId: number | null;
 	isCreating: boolean;
 	isSaving: boolean;
 	onEdit: (id: number) => void;
@@ -28,7 +27,6 @@ interface StatusTableProps {
 export const StatusTable = ({
 	statuses,
 	editingId,
-	deletingId,
 	isCreating,
 	isSaving,
 	onEdit,
@@ -39,6 +37,8 @@ export const StatusTable = ({
 	onDelete,
 	onStartCreate,
 }: StatusTableProps) => {
+	const isDeleting = (status: CustomOrderStatus) => status.is_deleting;
+
 	return (
 		<>
 			<table className="cos-table">
@@ -72,7 +72,7 @@ export const StatusTable = ({
 							<tr
 								key={status.id}
 								className={
-									deletingId === status.id
+									isDeleting(status)
 										? 'deleting-row'
 										: undefined
 								}
@@ -80,6 +80,16 @@ export const StatusTable = ({
 								<td className="label-column">
 									<div>
 										{status.label}
+										{isDeleting(status) && (
+											<span
+												className="deleting-notice"
+											>
+												{__(
+													'Reassigning orders before removal…',
+													'wpo-advanced-order-manager'
+												)}
+											</span>
+										)}
 										<span
 											className="status-preview"
 											style={{
@@ -121,6 +131,7 @@ export const StatusTable = ({
 													'Edit',
 													'wpo-advanced-order-manager'
 												)}
+												disabled={isDeleting(status)}
 											>
 												<span className="screen-reader-text">
 													{__(
@@ -139,6 +150,7 @@ export const StatusTable = ({
 													'Delete',
 													'wpo-advanced-order-manager'
 												)}
+												disabled={isDeleting(status)}
 											>
 												<span className="screen-reader-text">
 													{__(
