@@ -4,10 +4,16 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'includes/Admin/assets/js/src/**'
+      - 'src/**'
+      - 'package.json'
+      - 'webpack.config.js'
+      - 'tsconfig.json'
   pull_request:
     paths:
-      - 'includes/Admin/assets/js/src/**'
+      - 'src/**'
+      - 'package.json'
+      - 'webpack.config.js'
+      - 'tsconfig.json'
 
 jobs:
   lint-and-build:
@@ -24,15 +30,12 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        working-directory: includes/Admin/assets/js/src
         run: npm install
 
       - name: Run ESLint with auto-fix
-        working-directory: includes/Admin/assets/js/src
         run: npm run lint:fix || true
 
       - name: Build production files
-        working-directory: includes/Admin/assets/js/src
         run: npm run build
 
       - name: Remove package-lock.json files if generated
@@ -44,4 +47,4 @@ jobs:
         if: github.event_name == 'push'
         with:
           commit_message: "Lint and build JS/TS assets"
-          file_pattern: 'includes/Admin/assets/js/*.js includes/Admin/assets/js/src/**'
+          file_pattern: 'includes/Admin/assets/js/*.js src/**'
