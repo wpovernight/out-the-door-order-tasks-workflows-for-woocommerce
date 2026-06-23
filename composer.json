@@ -5,5 +5,8 @@
 		"psr-4": {
 			"WPO\\AOM\\": "includes/"
 		}
+	},
+	"require-dev": {
+		"php-stubs/wordpress-stubs": "^7.0"
 	}
 }

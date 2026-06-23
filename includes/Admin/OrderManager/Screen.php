@@ -53,7 +53,11 @@ final class Screen {
 			true
 		);
 
-		wp_set_script_translations( 'wpo-aom-admin-order-manager', 'wpo-advanced-order-manager', WPO_AOM()->plugin_path() . '/languages' );
+		wp_set_script_translations(
+			'wpo-aom-admin-order-manager',
+			'wpo-advanced-order-manager',
+			WPO_AOM()->plugin_path() . '/languages'
+		);
 
 		wp_localize_script(
 			'wpo-aom-admin-order-manager',

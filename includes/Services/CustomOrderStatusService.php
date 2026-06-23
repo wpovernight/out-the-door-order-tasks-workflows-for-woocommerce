@@ -373,6 +373,13 @@ class CustomOrderStatusService {
 		$this->repository->where( 'id', $status_id )->delete();
 		$this->cached_statuses = null;
 
+		/**
+		 * Action triggered after a custom order status is deleted.
+		 *
+		 * @param int    $status_id   The ID of the deleted custom order status.
+		 * @param string $from_status The status key that was deleted (without 'wc-' prefix).
+		 * @param string $to_status   The fallback status key that orders were reassigned to (without 'wc-' prefix).
+		 */
 		do_action( 'wpo_aom_custom_order_status_deleted', $status_id, $from_status, $to_status );
 	}
 }
