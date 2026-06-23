@@ -39,6 +39,8 @@ module.exports = (env, argv) => {
 			react: 'React',
 			'react-dom': 'ReactDOM',
 			'@wordpress/i18n': ['wp', 'i18n'],
+			'@wordpress/hooks': ['wp', 'hooks'],
+			'@wordpress/element': ['wp', 'element'],
 		},
 		devtool: isProduction ? false : 'source-map',
 		optimization: {

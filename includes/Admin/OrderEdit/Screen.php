@@ -140,7 +140,7 @@ final class Screen {
 		wp_enqueue_script(
 			'wpo-aom-order-edit-metabox',
 			WPO_AOM()->plugin_url() . '/includes/Admin/assets/js/order-edit-metabox.js',
-			array( 'wp-element', 'wp-components', 'wp-i18n' ),
+			array( 'wp-hooks', 'wp-element', 'wp-components', 'wp-i18n' ),
 			WPO_AOM_VERSION,
 			true
 		);
