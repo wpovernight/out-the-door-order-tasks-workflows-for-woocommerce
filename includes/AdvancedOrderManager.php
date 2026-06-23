@@ -68,7 +68,7 @@ final class AdvancedOrderManager {
 	 * @return void
 	 */
 	private function define_constants(): void {
-		$this->define( 'WPO_AOM_VERSION', self::VERSION );
+		defined( 'WPO_AOM_VERSION' ) || define( 'WPO_AOM_VERSION', self::VERSION );
 	}
 
 	/**
@@ -108,20 +108,6 @@ final class AdvancedOrderManager {
 		if ( class_exists( FeaturesUtil::class ) ) {
 			// HPOS (compatible)
 			FeaturesUtil::declare_compatibility( 'custom_order_tables', WPO_AOM_PLUGIN_FILE, true );
-		}
-	}
-
-	/**
-	 * Define constant if not already set.
-	 *
-	 * @param string $name Constant name.
-	 * @param bool|string $value Constant value.
-	 *
-	 * @return void
-	 */
-	private function define( string $name, $value ): void {
-		if ( ! defined( $name ) ) {
-			define( $name, $value );
 		}
 	}
 
