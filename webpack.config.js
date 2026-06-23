@@ -8,21 +8,21 @@ module.exports = (env, argv) => {
 	return {
 		mode,
 		entry: {
-			'order-manager': path.resolve(__dirname, 'order-manager/index.tsx'),
-			'order-edit-metabox': path.resolve(__dirname, 'order-edit/index.tsx'),
+			'order-manager': path.resolve(__dirname, 'src/order-manager/index.tsx'),
+			'order-edit-metabox': path.resolve(__dirname, 'src/order-edit/index.tsx'),
 		},
 		output: {
 			filename: '[name].js',
-			path: path.resolve(__dirname, '..'), // output directly in /js (parent of src)
+			path: path.resolve(__dirname, 'includes/Admin/assets/js'),
 			clean: false, // don’t delete other files
 		},
 		resolve: {
 			extensions: ['.ts', '.tsx', '.js'],
 			alias: {
-				'@shared': path.resolve(__dirname, 'shared/'),
-				'@orderManager': path.resolve(__dirname, 'order-manager/'),
-				'@taskManager': path.resolve(__dirname, 'task-manager/'),
-				'@orderEdit': path.resolve(__dirname, 'order-edit/'),
+				'@shared': path.resolve(__dirname, 'src/shared/'),
+				'@orderManager': path.resolve(__dirname, 'src/order-manager/'),
+				'@taskManager': path.resolve(__dirname, 'src/task-manager/'),
+				'@orderEdit': path.resolve(__dirname, 'src/order-edit/'),
 			},
 		},
 		module: {

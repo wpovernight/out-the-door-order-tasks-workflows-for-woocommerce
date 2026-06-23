@@ -1,6 +1,6 @@
 {
 	"compilerOptions": {
-		"baseUrl": "./",
+		"baseUrl": "./src",
 		"paths": {
 			"@shared/*": ["shared/*"],
 			"@orderManager/*": ["order-manager/*"],
@@ -19,5 +19,6 @@
 		"outDir": "./dist",
 		"types": ["react", "node"],
 	},
+	"include": ["src/**/*"],
 	"exclude": ["node_modules", "build", "dist"]
 }

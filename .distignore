@@ -64,8 +64,12 @@ Thumbs.db
 strauss.md
 docs/
 
-# JS/TS source
-includes/Admin/assets/js/src/
+# JS/TS source & build tooling
+src/
+webpack.config.js
+tsconfig.json
+.eslintrc.js
+.eslintignore
 
 # Source maps (debugging only)
 *.js.map
