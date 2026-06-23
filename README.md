@@ -15,7 +15,6 @@ A WordPress plugin that extends WooCommerce's order management with advanced fea
 composer install
 
 # Frontend (React + TypeScript)
-cd includes/Admin/assets/js/src
 npm install
 npm run dev      # watch mode
 npm run build    # production build
