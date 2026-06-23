@@ -139,7 +139,7 @@ final class Screen {
 		// Do not need the suffix, since it's a React app and we are using webpack to handle the minification.
 		wp_enqueue_script(
 			'wpo-aom-order-edit-metabox',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/js/order-edit-metabox.js',
+			WPO_AOM()->plugin_url() . '/assets/js/order-edit-metabox.js',
 			array( 'wp-hooks', 'wp-element', 'wp-components', 'wp-i18n' ),
 			WPO_AOM_VERSION,
 			true
@@ -166,7 +166,7 @@ final class Screen {
 
 		wp_enqueue_script(
 			'wpo-aom-order-edit',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/js/order-edit.js',
+			WPO_AOM()->plugin_url() . '/assets/js/order-edit.js',
 			array(),
 			WPO_AOM_VERSION,
 			true
@@ -182,35 +182,35 @@ final class Screen {
 
 		wp_enqueue_style(
 			'wpo-aom-admin-common',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/common.css',
+			WPO_AOM()->plugin_url() . '/assets/css/common.css',
 			array(),
 			WPO_AOM_VERSION
 		);
 
 		wp_enqueue_style(
 			'wpo-aom-admin-skeleton',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/skeleton.css',
+			WPO_AOM()->plugin_url() . '/assets/css/skeleton.css',
 			array(),
 			WPO_AOM_VERSION
 		);
 
 		wp_enqueue_style(
 			'wpo-aom-admin-task-card',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/task-card.css',
+			WPO_AOM()->plugin_url() . '/assets/css/task-card.css',
 			array(),
 			WPO_AOM_VERSION
 		);
 
 		wp_enqueue_style(
 			'wpo-aom-admin-sidebar-modal',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/sidebar-modal.css',
+			WPO_AOM()->plugin_url() . '/assets/css/sidebar-modal.css',
 			array(),
 			WPO_AOM_VERSION
 		);
 
 		wp_enqueue_style(
 			'wpo-aom-admin-order-edit',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/order-edit.css',
+			WPO_AOM()->plugin_url() . '/assets/css/order-edit.css',
 			array(),
 			WPO_AOM_VERSION
 		);

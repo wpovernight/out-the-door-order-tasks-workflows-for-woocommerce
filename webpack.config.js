@@ -13,7 +13,7 @@ module.exports = (env, argv) => {
 		},
 		output: {
 			filename: '[name].js',
-			path: path.resolve(__dirname, 'includes/Admin/assets/js'),
+			path: path.resolve(__dirname, 'assets/js'),
 			clean: false, // don’t delete other files
 		},
 		resolve: {

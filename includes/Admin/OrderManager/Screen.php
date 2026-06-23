@@ -47,7 +47,7 @@ final class Screen {
 		// Do not need the suffix, since it's a React app and we are using webpack to handle the minification.
 		wp_enqueue_script(
 			'wpo-aom-admin-order-manager',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/js/order-manager.js',
+			WPO_AOM()->plugin_url() . '/assets/js/order-manager.js',
 			array( 'wp-hooks', 'wp-element', 'wp-components', 'wp-i18n' ),
 			WPO_AOM_VERSION,
 			true
@@ -74,56 +74,56 @@ final class Screen {
 		 */
 		wp_enqueue_style(
 			'wpo-aom-admin-common',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/common' . $suffix . '.css',
+			WPO_AOM()->plugin_url() . '/assets/css/common' . $suffix . '.css',
 			array(),
 			WPO_AOM_VERSION
 		);
 
 		wp_enqueue_style(
 			'wpo-aom-admin-order-manager',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/order-manager' . $suffix . '.css',
+			WPO_AOM()->plugin_url() . '/assets/css/order-manager' . $suffix . '.css',
 			array(),
 			WPO_AOM_VERSION
 		);
 
 		wp_enqueue_style(
 			'wpo-aom-admin-task-card',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/task-card' . $suffix . '.css',
+			WPO_AOM()->plugin_url() . '/assets/css/task-card' . $suffix . '.css',
 			array(),
 			WPO_AOM_VERSION
 		);
 
 		wp_enqueue_style(
 			'wpo-aom-admin-sidebar-modal',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/sidebar-modal' . $suffix . '.css',
+			WPO_AOM()->plugin_url() . '/assets/css/sidebar-modal' . $suffix . '.css',
 			array(),
 			WPO_AOM_VERSION
 		);
 
 		wp_enqueue_style(
 			'wpo-aom-admin-dashboard',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/dashboard' . $suffix . '.css',
+			WPO_AOM()->plugin_url() . '/assets/css/dashboard' . $suffix . '.css',
 			array(),
 			WPO_AOM_VERSION
 		);
 
 		wp_enqueue_style(
 			'wpo-aom-admin-task-manager',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/task-manager' . $suffix . '.css',
+			WPO_AOM()->plugin_url() . '/assets/css/task-manager' . $suffix . '.css',
 			array(),
 			WPO_AOM_VERSION
 		);
 
 		wp_enqueue_style(
 			'wpo-aom-admin-custom-order-status',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/custom-order-status' . $suffix . '.css',
+			WPO_AOM()->plugin_url() . '/assets/css/custom-order-status' . $suffix . '.css',
 			array(),
 			WPO_AOM_VERSION
 		);
 
 		wp_enqueue_style(
 			'wpo-aom-admin-skeleton',
-			WPO_AOM()->plugin_url() . '/includes/Admin/assets/css/skeleton' . $suffix . '.css',
+			WPO_AOM()->plugin_url() . '/assets/css/skeleton' . $suffix . '.css',
 			array(),
 			WPO_AOM_VERSION
 		);

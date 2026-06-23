@@ -144,4 +144,4 @@ npm run build      # Production build
 npm run dev        # Development build
 ```
 
-Build output is compiled to `includes/Admin/assets/js/`.
+Build output is compiled to `assets/js/`.

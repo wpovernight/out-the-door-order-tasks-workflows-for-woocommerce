@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'includes/Admin/assets/**/*.js'
-      - 'includes/Admin/assets/**/*.css'
+      - 'assets/**/*.js'
+      - 'assets/**/*.css'
 
 jobs:
   build:
@@ -22,7 +22,7 @@ jobs:
 
       - name: Minify JS files
         run: |
-          find includes/Admin/assets -type f -name "*.js" \
+          find assets -type f -name "*.js" \
             ! -name "*.min.js" \
             ! -name "task-manager.js" \
             ! -name "order-edit-metabox.js" \
@@ -30,7 +30,7 @@ jobs:
 
       - name: Minify CSS files
         run: |
-          find includes/Admin/assets -type f -name "*.css" \
+          find assets -type f -name "*.css" \
             ! -name "*.min.css" \
             ! -path "*/build/*" \
             -exec bash -c 'cleancss -o "${0%.css}.min.css" "$0"' {} \;

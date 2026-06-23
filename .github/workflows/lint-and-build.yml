@@ -47,4 +47,4 @@ jobs:
         if: github.event_name == 'push'
         with:
           commit_message: "Lint and build JS/TS assets"
-          file_pattern: 'includes/Admin/assets/js/*.js src/**'
+          file_pattern: 'assets/js/*.js src/**'
