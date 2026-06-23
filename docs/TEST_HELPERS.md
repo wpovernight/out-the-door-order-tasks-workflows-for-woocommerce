@@ -164,7 +164,7 @@ function reinstall_database_schema(): void {
 To build the JavaScript assets for the AOM plugin, follow the steps below:
 
 ```bash
-cd includes/Admin/assets/js/src
+# Run from the plugin root (where package.json lives)
 npm install
 npm run build
 ```

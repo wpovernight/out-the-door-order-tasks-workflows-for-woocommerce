@@ -117,7 +117,7 @@ All endpoints are prefixed with `wc/v3/wpo/aom/`.
 Handles the presentation layer for administrators.
 The frontend is built with React + TypeScript. Each feature has its own admin screen class.
 
-📁 `includes/Admin/` and `includes/Admin/assets/js/src/`
+📁 `includes/Admin/` (PHP screens) and the root-level `src/` (React/TypeScript apps)
 
 ---
 
@@ -138,7 +138,7 @@ The frontend is built with React + TypeScript. Each feature has its own admin sc
 
 All React applications share a single build configuration:
 ```bash
-cd includes/Admin/assets/js/src
+# Run from the plugin root (where package.json lives)
 npm install
 npm run build      # Production build
 npm run dev        # Development build
