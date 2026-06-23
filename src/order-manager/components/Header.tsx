@@ -1,8 +1,9 @@
 import React from 'react';
 import { __ } from '@wordpress/i18n';
-import { AVAILABLE_TABS, useTab } from '@orderManager/context/TabContext';
+import { applyFilters } from '@wordpress/hooks';
+import { useTab } from '@orderManager/context/TabContext';
 
-const tabLabels: Record<string, string> = {
+const coreTabLabels: Record<string, string> = {
 	dashboard: __('Dashboard', 'wpo-advanced-order-manager'),
 	'task-manager': __('Task Manager', 'wpo-advanced-order-manager'),
 	'custom-order-status': __(
@@ -12,14 +13,19 @@ const tabLabels: Record<string, string> = {
 };
 
 export default function Header() {
-	const { tab, setTab } = useTab();
+	const { tab, setTab, tabs } = useTab();
+
+	const tabLabels = applyFilters(
+		'wpo_aom.tab_labels',
+		coreTabLabels
+	) as Record<string, string>;
 
 	return (
 		<div className="header">
 			<h1>Advanced Order Manager</h1>
 			<nav className="tabs" id="main-tabs">
 				<ul>
-					{AVAILABLE_TABS.map((availableTab) => (
+					{tabs.map((availableTab) => (
 						<li
 							key={availableTab}
 							className={tab === availableTab ? 'active' : ''}
@@ -29,7 +35,7 @@ export default function Header() {
 								onClick={() => setTab(availableTab)}
 								className="tab-button"
 							>
-								{tabLabels[availableTab]}
+								{tabLabels[availableTab] ?? availableTab}
 							</button>
 						</li>
 					))}

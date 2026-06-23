@@ -1,5 +1,5 @@
 import React from 'react';
-import { __ } from '@wordpress/i18n';
+import { applyFilters } from '@wordpress/hooks';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Header from '@orderManager/components/Header';
 import { TaskView } from '@orderManager/views/TaskView';
@@ -7,8 +7,21 @@ import { useTab } from '@orderManager/context/TabContext';
 import { DashboardView } from '@orderManager/views/Dashboard/DashboardView';
 import { CustomOrderStatusView } from '@orderManager/views/CustomOrderStatus/CustomOrderStatusView';
 
+export interface AomRoute {
+	path: string;
+	element: React.ReactNode;
+}
+
+const coreRoutes: AomRoute[] = [
+	{ path: '/dashboard', element: <DashboardView /> },
+	{ path: '/task-manager/*', element: <TaskView /> },
+	{ path: '/custom-order-status', element: <CustomOrderStatusView /> },
+];
+
 export default function Page() {
 	const { tab } = useTab();
+
+	const routes = applyFilters('wpo_aom.routes', coreRoutes) as AomRoute[];
 
 	return (
 		<div className="inner">
@@ -19,12 +32,13 @@ export default function Page() {
 						index
 						element={<Navigate to="/dashboard" replace />}
 					/>
-					<Route path="/dashboard" element={<DashboardView />} />
-					<Route path="/task-manager/*" element={<TaskView />} />
-					<Route
-						path="/custom-order-status"
-						element={<CustomOrderStatusView />}
-					/>
+					{routes.map((route) => (
+						<Route
+							key={route.path}
+							path={route.path}
+							element={route.element}
+						/>
+					))}
 				</Routes>
 			</div>
 		</div>

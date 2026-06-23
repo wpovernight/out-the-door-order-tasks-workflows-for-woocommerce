@@ -1,17 +1,25 @@
 import React, { createContext, useContext, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { applyFilters } from '@wordpress/hooks';
 
-export const AVAILABLE_TABS = [
-	'dashboard',
-	'task-manager',
-	'custom-order-status',
-];
+export const CORE_TABS = ['dashboard', 'task-manager', 'custom-order-status'];
 
-type Tab = (typeof AVAILABLE_TABS)[number];
+type Tab = string;
+
+/**
+ * The list of tabs to render, after add-on plugins (e.g. Pro) have had a
+ * chance to extend it.
+ *
+ * @param {string[]} tabs The slugs of the core tabs.
+ * @return {string[]} The (possibly extended) list of tab slugs.
+ */
+export const getAvailableTabs = (): Tab[] =>
+	applyFilters('wpo_aom.tabs', CORE_TABS) as Tab[];
 
 interface TabContextType {
 	tab: Tab;
 	setTab: (tab: Tab) => void;
+	tabs: Tab[];
 }
 
 const TabContext = createContext<TabContextType | undefined>(undefined);
@@ -22,14 +30,15 @@ export const TabProvider: React.FC<{ children: React.ReactNode }> = ({
 	const navigate = useNavigate();
 	const location = useLocation();
 
+	// Resolved once per render so late-registered filters still take effect.
+	const tabs = useMemo<Tab[]>(() => getAvailableTabs(), []);
+
 	// Extract tab from the first path segment (e.g., "/task-manager/kanban" -> "task-manager").
 	const tab = useMemo<Tab>(() => {
 		const firstSegment =
 			location.pathname.split('/').filter(Boolean)[0] || '';
-		return AVAILABLE_TABS.includes(firstSegment)
-			? (firstSegment as Tab)
-			: 'dashboard';
-	}, [location.pathname]);
+		return tabs.includes(firstSegment) ? firstSegment : 'dashboard';
+	}, [location.pathname, tabs]);
 
 	// Navigate to new tab instead of setting state.
 	const setTab = (newTab: Tab) => {
@@ -37,7 +46,7 @@ export const TabProvider: React.FC<{ children: React.ReactNode }> = ({
 	};
 
 	return (
-		<TabContext.Provider value={{ tab, setTab }}>
+		<TabContext.Provider value={{ tab, setTab, tabs }}>
 			{children}
 		</TabContext.Provider>
 	);
