@@ -5,7 +5,7 @@ namespace WPO\AOM\Core;
 defined( 'ABSPATH' ) || exit;
 
 final class DependencyChecker {
-	private const PHP_MIN_VERSION = '7.4';
+	private const PHP_MIN_VERSION = '8.1';
 	private const WC_MIN_VERSION  = '8.2';
 
 	private array $activated_plugins;

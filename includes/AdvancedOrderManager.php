@@ -11,7 +11,6 @@ use WPO\AOM\Core\ServiceContainer;
 defined( 'ABSPATH' ) || exit;
 
 final class AdvancedOrderManager {
-
 	public const VERSION = '1.0.0-beta.2';
 	public ServiceContainer $service_container;
 

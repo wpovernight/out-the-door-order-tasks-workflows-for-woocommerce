@@ -32,7 +32,6 @@ defined( 'ABSPATH' ) || exit;
  * and repository bindings within the Advanced Order Manager plugin.
  */
 final class ServiceContainer {
-
 	/**
 	 * Internal service instance cache.
 	 *
