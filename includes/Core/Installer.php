@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 final class Installer {
 	private const OPTION_VERSION      = 'wpo_aom_version';
 	private const OPTION_UPGRADE_LOCK = 'wpo_aom_upgrade_lock';
+	private const TABLE_PREFIX        = 'wpo_aom_';
 
 	/**
 	 * Map of version => array of migration method names (instance methods).
@@ -64,6 +65,21 @@ final class Installer {
 
 		// Store the plugin version in the options table.
 		update_option( self::OPTION_VERSION, AdvancedOrderManager::VERSION, true );
+	}
+
+	/**
+	 * Drop every plugin table and rebuild it from scratch (schema + default data).
+	 *
+	 * @return void
+	 */
+	public function reset(): void {
+		self::drop_tables();
+
+		// Clear install state so install() rebuilds instead of early-returning.
+		delete_option( self::OPTION_VERSION );
+		delete_option( self::OPTION_UPGRADE_LOCK );
+
+		$this->install();
 	}
 
 	/**
@@ -137,6 +153,36 @@ final class Installer {
 		if ( $were_showing_errors ) {
 			$wpdb->show_errors();
 		}
+	}
+
+	/**
+	 * Drop all plugin tables, discovered by name prefix so new tables are
+	 * included automatically. FK checks are disabled so drop order is irrelevant.
+	 *
+	 * @return void
+	 */
+	public static function drop_tables(): void {
+		global $wpdb;
+
+		$like = $wpdb->esc_like( $wpdb->prefix . self::TABLE_PREFIX ) . '%';
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Install-time table discovery.
+		$tables = $wpdb->get_col( $wpdb->prepare( 'SHOW TABLES LIKE %s', $like ) );
+
+		if ( empty( $tables ) ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Install-time schema teardown.
+		$wpdb->query( 'SET FOREIGN_KEY_CHECKS = 0' );
+
+		foreach ( $tables as $table ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Install-time DROP TABLE; $table is a trusted name from SHOW TABLES.
+			$wpdb->query( "DROP TABLE IF EXISTS `{$table}`" );
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Install-time schema teardown.
+		$wpdb->query( 'SET FOREIGN_KEY_CHECKS = 1' );
 	}
 
 	/**

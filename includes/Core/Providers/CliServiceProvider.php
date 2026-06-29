@@ -5,6 +5,7 @@ namespace WPO\AOM\Core\Providers;
 use WP_CLI;
 use WPO\AOM\CLI\CommandInterface;
 use WPO\AOM\CLI\GenerateTaskCommand;
+use WPO\AOM\CLI\InstallCommand;
 use WPO\AOM\CLI\RemoveTaskCommand;
 use WPO\AOM\Core\Container\Container;
 use WPO\AOM\Core\Container\ServiceProvider;
@@ -18,6 +19,7 @@ final class CliServiceProvider implements ServiceProvider {
 	 * @var array<int, class-string<CommandInterface>>
 	 */
 	private const COMMANDS = array(
+		InstallCommand::class,
 		GenerateTaskCommand::class,
 		RemoveTaskCommand::class,
 	);
