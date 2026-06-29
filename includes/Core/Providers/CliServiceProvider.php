@@ -3,11 +3,11 @@
 namespace WPO\AOM\Core\Providers;
 
 use WP_CLI;
-use WPO\AOM\CLI\ClearFulfillmentsCommand;
 use WPO\AOM\CLI\CommandInterface;
-use WPO\AOM\CLI\GenerateTaskCommand;
+use WPO\AOM\CLI\FulfillmentsClearCommand;
 use WPO\AOM\CLI\InstallCommand;
-use WPO\AOM\CLI\RemoveTaskCommand;
+use WPO\AOM\CLI\TasksGenerateCommand;
+use WPO\AOM\CLI\TasksRemoveCommand;
 use WPO\AOM\Core\Container\Container;
 use WPO\AOM\Core\Container\ServiceProvider;
 
@@ -21,9 +21,9 @@ final class CliServiceProvider implements ServiceProvider {
 	 */
 	private const COMMANDS = array(
 		InstallCommand::class,
-		GenerateTaskCommand::class,
-		RemoveTaskCommand::class,
-		ClearFulfillmentsCommand::class,
+		TasksGenerateCommand::class,
+		TasksRemoveCommand::class,
+		FulfillmentsClearCommand::class,
 	);
 
 	/**

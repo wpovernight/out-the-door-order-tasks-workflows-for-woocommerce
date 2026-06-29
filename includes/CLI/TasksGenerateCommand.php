@@ -10,7 +10,7 @@ use WPO\AOM\Repositories\TaskRepository;
 
 defined( 'ABSPATH' ) || exit;
 
-final class GenerateTaskCommand extends AbstractCommand {
+final class TasksGenerateCommand extends AbstractCommand {
 	private TaskRepository $task_repository;
 	private TaskFieldRepository $task_field_repository;
 	private TaskFieldOptionRepository $task_field_option_repository;
