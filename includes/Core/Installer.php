@@ -9,52 +9,42 @@ use WPO\AOM\Services\TaskStatusRoleService;
 
 defined( 'ABSPATH' ) || exit;
 
-final class Install {
-	private static string $option_version      = 'wpo_aom_version';
-	private static string $option_upgrade_lock = 'wpo_aom_upgrade_lock';
+final class Installer {
+	private const OPTION_VERSION      = 'wpo_aom_version';
+	private const OPTION_UPGRADE_LOCK = 'wpo_aom_upgrade_lock';
 
 	/**
-	 * Map of version => array of migration method names (static within this class).
+	 * Map of version => array of migration method names (instance methods).
 	 * Notice: The version sequence should be in ascending order.
-	 *
-	 * Example:
-	 * '1.1.0' => array( 'migrate_add_custom_statuses_feature' )
 	 *
 	 * @var array<string, string[]>
 	 */
-	private static array $migrations = array(
+	private const MIGRATIONS = array(
 		'1.0.0-beta.2' => array(
 			'migrate_apply_option_slug_unique_index', /** @uses migrate_apply_option_slug_unique_index() */
 			'migrate_seed_status_role_assignments', /** @uses migrate_seed_status_role_assignments() */
 		),
 	);
 
-	protected static ?self $_instance = null;
+	private TaskFieldRepository $task_field_repository;
+	private TaskFieldOptionRepository $task_field_option_repository;
+	private TaskStatusRoleService $task_status_role_service;
 
 	/**
-	 * Get the instance of the class.
+	 * Constructor.
 	 *
-	 * @return self
+	 * @param TaskFieldRepository       $task_field_repository        Default-field seeding.
+	 * @param TaskFieldOptionRepository $task_field_option_repository Field-option seeding.
+	 * @param TaskStatusRoleService     $task_status_role_service     Install-time role seeding.
 	 */
-	public static function instance(): self {
-		if ( is_null( self::$_instance ) ) {
-			self::$_instance = new self();
-		}
-
-		return self::$_instance;
-	}
-
-	/**
-	 * Register the installation and upgrade hooks.
-	 *
-	 * @return void
-	 */
-	public function register(): void {
-		// Create tables & set version immediately on activation.
-		register_activation_hook( WPO_AOM_PLUGIN_FILE, array( self::class, 'install' ) );
-
-		// Run upgrade when an admin page is loaded.
-		add_action( 'admin_init', array( self::class, 'upgrade' ) );
+	public function __construct(
+		TaskFieldRepository $task_field_repository,
+		TaskFieldOptionRepository $task_field_option_repository,
+		TaskStatusRoleService $task_status_role_service
+	) {
+		$this->task_field_repository        = $task_field_repository;
+		$this->task_field_option_repository = $task_field_option_repository;
+		$this->task_status_role_service     = $task_status_role_service;
 	}
 
 	/**
@@ -62,18 +52,30 @@ final class Install {
 	 *
 	 * @return void
 	 */
-	public static function install(): void {
-		if ( get_option( self::$option_version ) ) {
+	public function install(): void {
+		if ( get_option( self::OPTION_VERSION ) ) {
 			// Already installed.
 			return;
 		}
 
 		self::create_tables();
-		self::insert_default_data();
-		self::seed_initial_state();
+		$this->insert_default_data();
+		$this->seed_initial_state();
 
 		// Store the plugin version in the options table.
-		update_option( self::$option_version, AdvancedOrderManager::VERSION, true );
+		update_option( self::OPTION_VERSION, AdvancedOrderManager::VERSION, true );
+	}
+
+	/**
+	 * Check whether an upgrade is pending.
+	 *
+	 * @return bool
+	 */
+	public static function is_upgrade_due(): bool {
+		$current_version = (string) get_option( self::OPTION_VERSION );
+
+		return '' === $current_version ||
+		       version_compare( $current_version, AdvancedOrderManager::VERSION, '<' );
 	}
 
 	/**
@@ -81,12 +83,12 @@ final class Install {
 	 *
 	 * @return void
 	 */
-	public static function upgrade(): void {
-		$current_version = (string) get_option( self::$option_version );
+	public function upgrade(): void {
+		$current_version = (string) get_option( self::OPTION_VERSION );
 
 		// If the version is not set, it means this is a fresh installation.
 		if ( empty( $current_version ) ) {
-			self::install();
+			$this->install();
 
 			return;
 		}
@@ -94,27 +96,27 @@ final class Install {
 		// If the current version is the same or higher, or if we can't acquire the lock, do nothing.
 		if (
 			version_compare( $current_version, AdvancedOrderManager::VERSION, '>=' ) ||
-			! self::acquire_upgrade_lock()
+			! $this->acquire_upgrade_lock()
 		) {
 			return;
 		}
 
 		try {
 			// Loop through migrations and run them if the version matches.
-			foreach ( self::$migrations as $version => $migration_callbacks ) {
+			foreach ( self::MIGRATIONS as $version => $migration_callbacks ) {
 				if ( version_compare( $current_version, $version, '<' ) ) {
 					foreach ( $migration_callbacks as $migration_method ) {
-						if ( is_callable( array( self::class, $migration_method ) ) ) {
-							call_user_func( array( self::class, $migration_method ) );
+						if ( is_callable( array( $this, $migration_method ) ) ) {
+							$this->{$migration_method}();
 						}
 					}
 				}
 			}
 
 			// Store the plugin version in the options table.
-			update_option( self::$option_version, AdvancedOrderManager::VERSION, true );
+			update_option( self::OPTION_VERSION, AdvancedOrderManager::VERSION, true );
 		} finally {
-			self::release_upgrade_lock();
+			$this->release_upgrade_lock();
 		}
 	}
 
@@ -204,18 +206,21 @@ final class Install {
 	 *
 	 * @return void
 	 */
-	private static function insert_default_data(): void {
+	private function insert_default_data(): void {
 		global $wpdb;
 
 		/**
-		 * Note: When adding new default fields, ensure that the ID is unique and does not conflict with existing fields.
-		 *       Also, update the DefaultTaskFields enum class accordingly to maintain a single source of truth for default field IDs.
+		 * Note: When adding new default fields, ensure that the ID is unique and does
+		 * not conflict with existing fields. Also, update the DefaultTaskFields enum
+		 * class accordingly to maintain a single source of truth for default field IDs.
 		 *
 		 * Default fields to be inserted on plugin activation.
-		 * The IDs are hardcoded to ensure consistency across installations and to allow referencing in code.
-		 * Protected fields (is_protected = true) cannot be deleted by users and are essential for the plugin's core functionality.
-		 * Editable fields (is_editable = true) can be modified by users, but protected fields cannot be deleted to ensure the integrity.
-		 * The 'options' key is only applicable for 'select' type fields and defines the available options for that field.
+		 * The IDs are hardcoded to ensure consistency across installations and to allow
+		 * referencing in code. Protected fields (is_protected = true) cannot be deleted
+		 * by users and are essential for the plugin's core functionality. Editable fields
+		 * (is_editable = true) can be modified by users, but protected fields cannot be
+		 * deleted to ensure the integrity. The 'options' key is only applicable for 'select'
+		 * type fields and defines the available options for that field.
 		 */
 		$default_fields = array(
 			/*
@@ -351,8 +356,8 @@ final class Install {
 			),
 		);
 
-		$task_field_repository        = new TaskFieldRepository();
-		$task_field_option_repository = new TaskFieldOptionRepository();
+		$task_field_repository        = $this->task_field_repository;
+		$task_field_option_repository = $this->task_field_option_repository;
 
 		foreach ( $default_fields as $field_data ) {
 			$field_id = $field_data['id'];
@@ -413,10 +418,8 @@ final class Install {
 	 *
 	 * @return void
 	 */
-	private static function seed_initial_state(): void {
-		/** @var TaskStatusRoleService $task_status_role_service */
-		$task_status_role_service = WPO_AOM()->get_service( TaskStatusRoleService::class );
-		$task_status_role_service->seed_default_role_assignments();
+	private function seed_initial_state(): void {
+		$this->task_status_role_service->seed_default_role_assignments();
 	}
 
 	/**
@@ -431,7 +434,7 @@ final class Install {
 	 *
 	 * @return void
 	 */
-	private static function migrate_apply_option_slug_unique_index(): void {
+	private function migrate_apply_option_slug_unique_index(): void {
 		self::create_tables();
 	}
 
@@ -441,10 +444,8 @@ final class Install {
 	 *
 	 * @return void
 	 */
-	private static function migrate_seed_status_role_assignments(): void {
-		/** @var TaskStatusRoleService $task_status_role_service */
-		$task_status_role_service = WPO_AOM()->get_service( TaskStatusRoleService::class );
-		$task_status_role_service->seed_default_role_assignments();
+	private function migrate_seed_status_role_assignments(): void {
+		$this->task_status_role_service->seed_default_role_assignments();
 	}
 
 	/**
@@ -454,16 +455,16 @@ final class Install {
 	 *
 	 * @return bool
 	 */
-	private static function acquire_upgrade_lock(): bool {
+	private function acquire_upgrade_lock(): bool {
 		// Try to acquire a short-lived lock (prevents concurrent requests running migrations twice).
-		$locked_until = (int) get_option( self::$option_upgrade_lock, 0 );
+		$locked_until = (int) get_option( self::OPTION_UPGRADE_LOCK, 0 );
 
 		if ( $locked_until > time() ) {
 			return false; // Another process is migrating.
 		}
 
 		// Lock the upgrade process for 2 minutes to prevent concurrent migrations.
-		update_option( self::$option_upgrade_lock, time() + 120, false );
+		update_option( self::OPTION_UPGRADE_LOCK, time() + 120, false );
 
 		return true;
 	}
@@ -473,7 +474,7 @@ final class Install {
 	 *
 	 * @return void
 	 */
-	private static function release_upgrade_lock(): void {
-		delete_option( self::$option_upgrade_lock );
+	private function release_upgrade_lock(): void {
+		delete_option( self::OPTION_UPGRADE_LOCK );
 	}
 }

@@ -2,17 +2,19 @@
 
 namespace WPO\AOM;
 
-use InvalidArgumentException;
-use WPO\AOM\Core\Install;
 use WPO\AOM\Core\DependencyChecker;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
-use WPO\AOM\Core\ServiceContainer;
+use WPO\AOM\Core\Kernel;
+use WPO\AOM\Core\Container\Container;
+use WPO\AOM\Core\Container\ServiceProvider;
+use WPO\AOM\Core\Providers\CoreServiceProvider;
 
 defined( 'ABSPATH' ) || exit;
 
 final class AdvancedOrderManager {
 	public const VERSION = '1.0.0-beta.2';
-	public ServiceContainer $service_container;
+
+	private ?Kernel $kernel = null;
 
 	protected static ?self $_instance = null;
 
@@ -50,15 +52,42 @@ final class AdvancedOrderManager {
 			return;
 		}
 
-		// Load the Install class.
-		Install::instance()->register();
-
 		$this->define_constants();
 		$this->init_hooks();
 
-		// Register services and repositories.
-		$this->service_container = new ServiceContainer();
-		$this->service_container->register();
+		// Build and boot the service kernel once all plugins have loaded.
+		add_action( 'plugins_loaded', array( $this, 'boot_kernel' ), 11 );
+	}
+
+	/**
+	 * Build the container/kernel, collect providers, and boot.
+	 *
+	 * @return void
+	 */
+	public function boot_kernel(): void {
+		$this->kernel = new Kernel( new Container() );
+		$this->kernel->add_provider( new CoreServiceProvider() );
+
+		/**
+		 * Filter the list of service providers to register with the kernel.
+		 *
+		 * @param ServiceProvider[] $providers
+		 */
+		$providers = (array) apply_filters( 'wpo_aom_service_providers', array() );
+
+		foreach ( $providers as $provider ) {
+			if ( $provider instanceof ServiceProvider ) {
+				$this->kernel->add_provider( $provider );
+			} else {
+				_doing_it_wrong(
+					__METHOD__,
+					esc_html__( 'Each "wpo_aom_service_providers" entry must implement ServiceProvider.', 'wpo-advanced-order-manager' ),
+					'1.0.0'
+				);
+			}
+		}
+
+		$this->kernel->boot();
 	}
 
 	/**
@@ -126,18 +155,5 @@ final class AdvancedOrderManager {
 	 */
 	public function plugin_path(): string {
 		return untrailingslashit( plugin_dir_path( WPO_AOM_PLUGIN_FILE ) );
-	}
-
-	/**
-	 * Get a service instance from the service container.
-	 *
-	 * @param string $id Service ID.
-	 *
-	 * @return object
-	 *
-	 * @throws InvalidArgumentException If the service ID is not defined.
-	 */
-	public function get_service( string $id ): object {
-		return $this->service_container->resolve_service( $id );
 	}
 }
