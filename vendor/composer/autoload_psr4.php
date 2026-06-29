@@ -7,4 +7,5 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'WPO\\AOM\\' => array($baseDir . '/includes'),
+    'Psr\\Container\\' => array($vendorDir . '/psr/container/src'),
 );

@@ -11,12 +11,20 @@ class ComposerStaticInit3d1c492cd29e57382975be71f37ed19f
         array (
             'WPO\\AOM\\' => 8,
         ),
+        'P' =>
+        array (
+            'Psr\\Container\\' => 14,
+        ),
     );
 
     public static $prefixDirsPsr4 = array (
         'WPO\\AOM\\' =>
         array (
             0 => __DIR__ . '/../..' . '/includes',
+        ),
+        'Psr\\Container\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/psr/container/src',
         ),
     );
 
