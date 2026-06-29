@@ -30,7 +30,7 @@ final class RemoveTaskCommand extends AbstractCommand {
 	 * {@inheritDoc}
 	 */
 	protected function get_command_name(): string {
-		return 'remove-tasks';
+		return 'tasks remove';
 	}
 
 	/**

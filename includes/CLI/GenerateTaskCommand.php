@@ -32,7 +32,7 @@ final class GenerateTaskCommand extends AbstractCommand {
 	 * {@inheritDoc}
 	 */
 	protected function get_command_name(): string {
-		return 'generate-tasks';
+		return 'tasks generate';
 	}
 
 	/**
