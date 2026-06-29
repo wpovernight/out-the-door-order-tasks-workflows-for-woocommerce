@@ -69,7 +69,9 @@ final class AdvancedOrderManager {
 		$this->kernel = new Kernel( new Container() );
 		$this->kernel->add_provider( new CoreServiceProvider() );
 
-		// Register the WP CLI Provider.
+		// Register the WP-CLI provider.
+		// The class_exists() check should NOT be removed, as the CLI classes
+		// are excluded from the distributed build.
 		if ( defined( 'WP_CLI' ) && WP_CLI && class_exists( CliServiceProvider::class ) ) {
 			$this->kernel->add_provider( new CliServiceProvider() );
 		}
