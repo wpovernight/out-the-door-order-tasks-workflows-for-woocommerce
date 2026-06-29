@@ -10,7 +10,7 @@ The Advanced Order Manager plugin is built on a modular, service-oriented archit
 
 At the foundation lies the data layer, which is composed of model classes representing entities such as tasks, fields, and options, and a set of repository classes that encapsulate data persistence logic. The repositories abstract direct database operations, allowing the rest of the system to interact with data through a clean, object-oriented API rather than raw SQL or WordPress queries.
 
-Above the data layer, the service layer acts as the core of the business logic. Managed through the central ServiceContainer, it serves as the plugin's dependency injection and lifecycle manager, responsible for registering, instantiating, and caching all major services and repositories. This layer coordinates complex operations that involve multiple data sources or entities, ensuring a consistent and reusable workflow throughout the plugin.
+Above the data layer, the service layer acts as the core of the business logic. Dependencies are wired through a PSR-11 Container that autowires and caches services from their constructor type-hints, while a Kernel orchestrates startup in two phases — `register()` (bind definitions) then `boot()` (wire WordPress) — across a set of ServiceProviders. This layer coordinates complex operations that involve multiple data sources or entities, ensuring a consistent and reusable workflow throughout the plugin.
 
 The API layer—implemented using the WordPress REST API framework—serves as the communication bridge between the plugin's backend and its user interfaces or external integrations. These REST controllers expose structured endpoints that allow the plugin's internal services to be accessed programmatically, either from within the WordPress admin or by third-party systems. Unlike a traditional MVC controller, this layer acts more as an integration interface, decoupling the core logic from any specific presentation technology.
 
@@ -47,7 +47,7 @@ Together, these elements form a layered, loosely coupled system where:
                   │──────────────────────────────────────│
                   │ - Business logic orchestration       │
                   │ - Coordinates repositories & models  │
-                  │ - Managed by ServiceContainer (DI)   │
+                  │ - Wired by Container + Kernel (DI)   │
                   └──────────────────────────────────────┘
                                       │
                                       ▼
@@ -80,8 +80,10 @@ Together, these elements form a layered, loosely coupled system where:
 ### 1. Core Components
 Provide the foundation for plugin bootstrapping, lifecycle management, and dependency resolution.
 They initialize the plugin environment, ensure prerequisites are met, and register key services and repositories.
-- **ServiceContainer.php**: Manages the registration and resolution of plugin services and repositories, acting as a lightweight dependency injection container that centralizes object instantiation.
-- **Install.php**: Manages database table creation, version-based migrations, and initial data setup.
+- **Container/**: A PSR-11 dependency-injection container (`Container.php`) plus the `ServiceProvider` / `DeferrableProvider` contracts and typed exceptions. It autowires services from their constructor type-hints and caches them as singletons.
+- **Kernel.php**: The composition root that collects `ServiceProvider`s and boots them in two phases — `register()` (bind definitions only) then `boot()` (wire WordPress hooks/REST routes).
+- **Providers/CoreServiceProvider.php**: The free plugin's provider — registers model→repository bindings and, on boot, wires its hooks, REST routes, and admin screens by request context.
+- **Installer.php**: An injectable service that manages database table creation, version-based migrations, and initial data setup, resolved from a container at a composition root.
 - **DependencyChecker.php**: Verifies required dependencies (e.g., WooCommerce) and PHP/WordPress version compatibility.
 - **Logger.php**: A static logging utility that wraps WooCommerce's `WC_Logger`, providing convenience methods for all log levels.
 
@@ -124,7 +126,7 @@ The frontend is built with React + TypeScript. Each feature has its own admin sc
 ## 🛠️ Development Setup
 
 ### Prerequisites
-- PHP 7.4+
+- PHP 8.1+
 - WordPress 6.7+
 - WooCommerce 8.2+
 - Node.js & npm
