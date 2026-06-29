@@ -8,6 +8,7 @@ use WPO\AOM\Core\Kernel;
 use WPO\AOM\Core\Container\Container;
 use WPO\AOM\Core\Container\ServiceProvider;
 use WPO\AOM\Core\Providers\CoreServiceProvider;
+use WPO\AOM\Core\Providers\CliServiceProvider;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -67,6 +68,11 @@ final class AdvancedOrderManager {
 	public function boot_kernel(): void {
 		$this->kernel = new Kernel( new Container() );
 		$this->kernel->add_provider( new CoreServiceProvider() );
+
+		// Register the WP CLI Provider.
+		if ( defined( 'WP_CLI' ) && WP_CLI && class_exists( CliServiceProvider::class ) ) {
+			$this->kernel->add_provider( new CliServiceProvider() );
+		}
 
 		/**
 		 * Filter the list of service providers to register with the kernel.
