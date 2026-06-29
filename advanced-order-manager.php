@@ -38,3 +38,19 @@ function WPO_AOM(): \WPO\AOM\AdvancedOrderManager {
 }
 
 WPO_AOM();
+
+/**
+ * Activation composition root.
+ *
+ * The activation request never reaches the `plugins_loaded` boot, so wire a dedicated root here.
+ */
+register_activation_hook(
+	WPO_AOM_PLUGIN_FILE,
+	static function (): void {
+		$kernel = new \WPO\AOM\Core\Kernel( new \WPO\AOM\Core\Container\Container() );
+		$kernel->add_provider( new \WPO\AOM\Core\Providers\CoreServiceProvider() );
+		$kernel->register();
+
+		$kernel->container()->get( \WPO\AOM\Core\Installer::class )->install();
+	}
+);
