@@ -235,6 +235,29 @@ final class FulfillmentService {
 	}
 
 	/**
+	 * Remove all fulfillment data: per-item data meta and the order-level status meta.
+	 *
+	 * @return int Number of orders cleared.
+	 */
+	public function clear_all(): int {
+		$orders = $this->get_orders_by_fulfillment_status();
+		$count  = 0;
+
+		foreach ( $orders as $order ) {
+			foreach ( $order->get_items() as $item ) {
+				$this->delete_order_item_fulfillment_data( $item->get_id() );
+			}
+
+			$order->delete_meta_data( self::ORDER_FULFILLMENT_STATUS_META_KEY );
+			$order->save();
+
+			$count++;
+		}
+
+		return $count;
+	}
+
+	/**
 	 * Query orders by their cached fulfillment status.
 	 *
 	 * Pass an empty string to retrieve all orders that have any fulfillment data.
