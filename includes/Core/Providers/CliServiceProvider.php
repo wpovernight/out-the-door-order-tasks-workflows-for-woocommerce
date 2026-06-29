@@ -3,6 +3,7 @@
 namespace WPO\AOM\Core\Providers;
 
 use WP_CLI;
+use WPO\AOM\CLI\ClearFulfillmentsCommand;
 use WPO\AOM\CLI\CommandInterface;
 use WPO\AOM\CLI\GenerateTaskCommand;
 use WPO\AOM\CLI\InstallCommand;
@@ -22,6 +23,7 @@ final class CliServiceProvider implements ServiceProvider {
 		InstallCommand::class,
 		GenerateTaskCommand::class,
 		RemoveTaskCommand::class,
+		ClearFulfillmentsCommand::class,
 	);
 
 	/**
