@@ -14,11 +14,16 @@ defined( 'ABSPATH' ) || exit;
 class TaskUpdatedEmail extends WC_Email {
 	use TaskEmailRecipients;
 	protected array $task_data = array();
+	protected TaskManagerService $task_manager_service;
 
 	/**
 	 * Constructor.
+	 *
+	 * @param TaskManagerService $task_manager_service
 	 */
-	public function __construct() {
+	public function __construct( TaskManagerService $task_manager_service ) {
+		$this->task_manager_service = $task_manager_service;
+
 		$this->id             = 'wpo_aom_task_updated';
 		$this->title          = __( 'Task Updated', 'wpo-advanced-order-manager' );
 		$this->description    = __( 'Task updated emails are sent when a task is modified.', 'wpo-advanced-order-manager' );
@@ -156,8 +161,7 @@ class TaskUpdatedEmail extends WC_Email {
 		}
 
 		try {
-			/** @var TaskManagerService $task_service */
-			$task_service = WPO_AOM()->get_service( 'TaskManagerService' );
+			$task_service = $this->task_manager_service;
 			// Fetch full task data.
 			$task_with_fields = $task_service->get_task_with_fields( $task_id );
 

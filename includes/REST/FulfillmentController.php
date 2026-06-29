@@ -14,6 +14,17 @@ defined( 'ABSPATH' ) || exit;
 class FulfillmentController extends BaseRestController {
 	protected string $resource_name = 'fulfillments';
 
+	private FulfillmentService $fulfillment_service;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param FulfillmentService $fulfillment_service
+	 */
+	public function __construct( FulfillmentService $fulfillment_service ) {
+		$this->fulfillment_service = $fulfillment_service;
+	}
+
 	public function register_routes(): void {
 		/**
 		 * Endpoint to retrieve orders based on their fulfillment status.
@@ -57,8 +68,7 @@ class FulfillmentController extends BaseRestController {
 			);
 		}
 
-		/** @var FulfillmentService $fulfillment_service */
-		$fulfillment_service = WPO_AOM()->get_service( FulfillmentService::class );
+		$fulfillment_service = $this->fulfillment_service;
 
 		$orders = $fulfillment_service->get_orders_by_fulfillment_status( $status );
 		$data   = array();

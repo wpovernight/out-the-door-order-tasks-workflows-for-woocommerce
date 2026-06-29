@@ -28,9 +28,11 @@ class CustomOrderStatusService {
 	}
 
 	/**
-	 * Register the service.
+	 * Register hooks and filters.
+	 *
+	 * @return void
 	 */
-	public function register(): void {
+	public function register_hooks(): void {
 		// Add custom order statuses to WooCommerce.
 		add_filter( 'wc_order_statuses', array( $this, 'add_to_order_statuses' ) );
 

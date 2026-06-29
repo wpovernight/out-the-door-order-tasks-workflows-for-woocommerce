@@ -15,6 +15,23 @@ defined( 'ABSPATH' ) || exit;
 class TaskController extends BaseRestController {
 	protected string $resource_name = 'tasks';
 
+	private TaskManagerService $task_manager_service;
+	private TaskStatusRoleService $task_status_role_service;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param TaskManagerService    $task_manager_service
+	 * @param TaskStatusRoleService $task_status_role_service
+	 */
+	public function __construct(
+		TaskManagerService $task_manager_service,
+		TaskStatusRoleService $task_status_role_service
+	) {
+		$this->task_manager_service     = $task_manager_service;
+		$this->task_status_role_service = $task_status_role_service;
+	}
+
 	/**
 	 * Register the REST API routes for tasks.
 	 *
@@ -279,8 +296,7 @@ class TaskController extends BaseRestController {
 	 */
 	public function get_items( WP_REST_Request $request ) {
 		try {
-			/** @var TaskManagerService $task_manager_service */
-			$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
+			$task_manager_service = $this->task_manager_service;
 			$tasks                = $task_manager_service->get_all_tasks_with_fields();
 
 			// ToDo: Add pagination, filtering, etc.
@@ -324,8 +340,7 @@ class TaskController extends BaseRestController {
 		}
 
 		try {
-			/** @var TaskManagerService $task_manager_service */
-			$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
+			$task_manager_service = $this->task_manager_service;
 
 			$task = $task_manager_service->create_task(
 				$data['title'],
@@ -364,8 +379,7 @@ class TaskController extends BaseRestController {
 		}
 
 		try {
-			/** @var TaskManagerService $task_manager_service */
-			$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
+			$task_manager_service = $this->task_manager_service;
 			$task                 = $include_fields
 				? $task_manager_service->get_task_with_fields( $id )
 				: $task_manager_service->get_task( $id );
@@ -419,8 +433,7 @@ class TaskController extends BaseRestController {
 		}
 
 		try {
-			/** @var TaskManagerService $task_manager_service */
-			$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
+			$task_manager_service = $this->task_manager_service;
 
 			$task = $task_manager_service->update_task( $id, $data, $data['field_values'] ?? null );
 
@@ -455,8 +468,7 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'invalid_id', 'Invalid task ID provided', array( 'status' => 400 ) );
 		}
 
-		/** @var TaskManagerService $task_manager_service */
-		$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
+		$task_manager_service = $this->task_manager_service;
 
 		try {
 			$task_manager_service->delete_task( $id );
@@ -523,8 +535,7 @@ class TaskController extends BaseRestController {
 	 */
 	public function get_task_fields( WP_REST_Request $request ) {
 		try {
-			/** @var TaskManagerService $task_manager_service */
-			$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
+			$task_manager_service = $this->task_manager_service;
 			$fields               = $task_manager_service->get_all_fields();
 
 			return rest_ensure_response( $fields );
@@ -549,8 +560,7 @@ class TaskController extends BaseRestController {
 		}
 
 		try {
-			/** @var TaskManagerService $task_manager_service */
-			$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
+			$task_manager_service = $this->task_manager_service;
 			$options              = $task_manager_service->get_field_options_by_field_id( $field_id );
 
 			if ( empty( $options ) ) {
@@ -579,8 +589,7 @@ class TaskController extends BaseRestController {
 		}
 
 		try {
-			/** @var TaskManagerService $task_manager_service */
-			$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
+			$task_manager_service = $this->task_manager_service;
 			$options              = $task_manager_service->get_field_options_by_field_slug( $field_slug );
 
 			if ( empty( $options ) ) {
@@ -626,8 +635,7 @@ class TaskController extends BaseRestController {
 		}
 
 		try {
-			/** @var TaskManagerService $task_manager_service */
-			$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
+			$task_manager_service = $this->task_manager_service;
 
 			$option = $task_manager_service->add_field_option(
 				$field_id,
@@ -691,8 +699,7 @@ class TaskController extends BaseRestController {
 		}
 
 		try {
-			/** @var TaskManagerService $task_manager_service */
-			$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
+			$task_manager_service = $this->task_manager_service;
 
 			$option = $task_manager_service->update_field_option( $field_id, $option_id, $data );
 
@@ -734,8 +741,7 @@ class TaskController extends BaseRestController {
 		}
 
 		try {
-			/** @var TaskManagerService $task_manager_service */
-			$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
+			$task_manager_service = $this->task_manager_service;
 			$task_manager_service->delete_field_option( $field_id, $option_id );
 
 			return rest_ensure_response( array( 'success' => true ) );
@@ -771,8 +777,7 @@ class TaskController extends BaseRestController {
 		}
 
 		try {
-			/** @var TaskManagerService $task_manager_service */
-			$task_manager_service = WPO_AOM()->get_service( TaskManagerService::class );
+			$task_manager_service = $this->task_manager_service;
 
 			$task_manager_service->update_field_option_positions( $field_id, $ordered_option_ids );
 
@@ -864,8 +869,7 @@ class TaskController extends BaseRestController {
 			);
 		}
 
-		/** @var TaskManagerService $task_service */
-		$task_service = WPO_AOM()->get_service( TaskManagerService::class );
+		$task_service = $this->task_manager_service;
 
 		try {
 			$new_position = $task_service->move_task( $task_id, $target_status_id, $previous_task_id );
@@ -898,8 +902,7 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'invalid_id', 'Invalid task ID provided', array( 'status' => 400 ) );
 		}
 
-		/** @var TaskManagerService $task_service */
-		$task_service = WPO_AOM()->get_service( TaskManagerService::class );
+		$task_service = $this->task_manager_service;
 
 		try {
 			$task_service->mark_task_finished( $task_id );
@@ -933,8 +936,7 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'invalid_id', 'Invalid task ID provided', array( 'status' => 400 ) );
 		}
 
-		/** @var TaskManagerService $task_service */
-		$task_service = WPO_AOM()->get_service( TaskManagerService::class );
+		$task_service = $this->task_manager_service;
 
 		try {
 			$task_service->archive_task( $task_id );
@@ -965,8 +967,7 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'invalid_id', 'Invalid task ID provided', array( 'status' => 400 ) );
 		}
 
-		/** @var TaskManagerService $task_service */
-		$task_service = WPO_AOM()->get_service( TaskManagerService::class );
+		$task_service = $this->task_manager_service;
 
 		try {
 			$task_service->unarchive_task( $task_id );
@@ -1008,8 +1009,7 @@ class TaskController extends BaseRestController {
 			) );
 		}
 
-		/** @var TaskStatusRoleService $task_status_role_service */
-		$task_status_role_service = WPO_AOM()->get_service( TaskStatusRoleService::class );
+		$task_status_role_service = $this->task_status_role_service;
 
 		try {
 			// Cast non-null values to int; preserve null so callers can clear a role.

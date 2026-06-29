@@ -5,7 +5,6 @@ namespace WPO\AOM\Repositories;
 use InvalidArgumentException;
 use WPO\AOM\Enums\DefaultTaskFields;
 use WPO\AOM\Models\Task;
-use WPO\AOM\Models\TaskFieldValue;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -13,10 +12,16 @@ class TaskRepository extends BaseRepository {
 	private static string $table_name = 'tasks';
 	private static string $model_class = Task::class;
 
+	private TaskFieldValueRepository $task_field_value_repository;
+
 	/**
 	 * Constructor.
+	 *
+	 * @param TaskFieldValueRepository $task_field_value_repository
 	 */
-	public function __construct() {
+	public function __construct( TaskFieldValueRepository $task_field_value_repository ) {
+		$this->task_field_value_repository = $task_field_value_repository;
+
 		parent::__construct( self::$table_name, self::$model_class );
 	}
 
@@ -41,7 +46,7 @@ class TaskRepository extends BaseRepository {
 			throw new InvalidArgumentException( 'Either given_task_id or given_task_position must be provided.' );
 		}
 
-		$task_field_value_repository = RepositoryRegistry::get( TaskFieldValue::class );
+		$task_field_value_repository = $this->task_field_value_repository;
 		$task_field_value_table_name = $task_field_value_repository->get_table_full_name();
 
 		if ( $given_task_id && empty( $given_task_position ) ) {
@@ -104,7 +109,7 @@ class TaskRepository extends BaseRepository {
 		?int $given_task_id,
 		int $target_status_id
 	): ?float {
-		$task_field_value_repository = RepositoryRegistry::get( TaskFieldValue::class );
+		$task_field_value_repository = $this->task_field_value_repository;
 		$task_field_value_table_name = $task_field_value_repository->get_table_full_name();
 
 		$last_task_value_field = $task_field_value_repository
@@ -131,7 +136,7 @@ class TaskRepository extends BaseRepository {
 	 */
 	public function rebalance_positions( int $status_id ): bool {
 		return (bool) $this->transaction( function () use ( $status_id ) {
-			$task_field_value_repository = RepositoryRegistry::get( TaskFieldValue::class );
+			$task_field_value_repository = $this->task_field_value_repository;
 			$task_field_value_table_name = $task_field_value_repository->get_table_full_name();
 
 			$status_field_id   = DefaultTaskFields::STATUS;

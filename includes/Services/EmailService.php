@@ -8,12 +8,23 @@ use WPO\AOM\Emails\TaskUpdatedEmail;
 defined( 'ABSPATH' ) || exit;
 
 final class EmailService {
+	private TaskManagerService $task_manager_service;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param TaskManagerService $task_manager_service
+	 */
+	public function __construct( TaskManagerService $task_manager_service ) {
+		$this->task_manager_service = $task_manager_service;
+	}
+
 	/**
 	 * Register hooks and filters.
 	 *
 	 * @return void
 	 */
-	public function register(): void {
+	public function register_hooks(): void {
 		// Register custom email classes and actions with WooCommerce.
 		add_filter( 'woocommerce_email_classes', array( $this, 'register_email_classes' ) );
 		add_filter( 'woocommerce_email_actions', array( $this, 'register_email_actions' ) );
@@ -31,7 +42,7 @@ final class EmailService {
 	 */
 	public function register_email_classes( array $email_classes ): array {
 		$email_classes['WPO_AOM_Task_Created_Email'] = new TaskCreatedEmail();
-		$email_classes['WPO_AOM_Task_Updated_Email'] = new TaskUpdatedEmail();
+		$email_classes['WPO_AOM_Task_Updated_Email'] = new TaskUpdatedEmail( $this->task_manager_service );
 
 		return $email_classes;
 	}
@@ -71,6 +82,7 @@ final class EmailService {
 					'sent_to_admin' => $sent_to_admin,
 					'plain_text'    => $plain_text,
 					'email'         => $email,
+					'email_service' => $this,
 				),
 				'',
 				WPO_AOM()->plugin_path() . '/templates/'
@@ -83,6 +95,7 @@ final class EmailService {
 					'sent_to_admin' => $sent_to_admin,
 					'plain_text'    => $plain_text,
 					'email'         => $email,
+					'email_service' => $this,
 				),
 				'',
 				WPO_AOM()->plugin_path() . '/templates/'

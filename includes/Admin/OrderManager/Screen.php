@@ -23,7 +23,7 @@ final class Screen {
 	 *
 	 * @return void
 	 */
-	public function register(): void {
+	public function register_hooks(): void {
 		// Enqueue admin scripts and styles.
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 

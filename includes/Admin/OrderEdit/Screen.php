@@ -32,7 +32,7 @@ final class Screen {
 	 *
 	 * @return void
 	 */
-	public function register(): void {
+	public function register_hooks(): void {
 		// Add meta box to order edit screen.
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ), 10, 2 );
 

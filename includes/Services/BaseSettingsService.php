@@ -20,15 +20,6 @@ abstract class BaseSettingsService {
 	protected array $defaults = array();
 
 	/**
-	 * Values written to the database on first install when the option doesn't
-	 * exist yet. Unlike $defaults, these are written once and then left alone —
-	 * if the user later clears or deletes a key, it won't be re-seeded.
-	 *
-	 * @var array<string, mixed>
-	 */
-	protected array $initial_values = array();
-
-	/**
 	 * In-memory cache of settings.
 	 *
 	 * @var array<string, mixed>|null
@@ -41,20 +32,14 @@ abstract class BaseSettingsService {
 	private bool $has_unsaved_changes = false;
 
 	/**
-	 * Register hooks and filters.
+	 * Constructor.
 	 *
-	 * @return void
+	 * @throws \LogicException When the subclass has not defined OPTION_NAME.
 	 */
-	public function register(): void {
+	public function __construct() {
 		if ( empty( static::OPTION_NAME ) ) {
 			throw new \LogicException( static::class . ' must define OPTION_NAME.' );
 		}
-
-		$this->seed_initial_values();
-
-		// Prime the cache on registration; the lazy load() below also covers
-		// any caller that resolves the service before register() runs.
-		$this->load();
 	}
 
 	/**
@@ -66,7 +51,7 @@ abstract class BaseSettingsService {
 	 * @return mixed
 	 */
 	public function get( string $key, $default = null ) {
-		$settings = $this->load();
+		$settings = $this->fetchAll();
 
 		if ( array_key_exists( $key, $settings ) ) {
 			return $settings[ $key ];
@@ -85,7 +70,7 @@ abstract class BaseSettingsService {
 	 * @return self
 	 */
 	public function set( string $key, $value ): self {
-		$this->load();
+		$this->fetchAll();
 
 		if ( ! array_key_exists( $key, $this->settings ) || $this->settings[ $key ] !== $value ) {
 			$this->settings[ $key ]    = $value;
@@ -103,7 +88,7 @@ abstract class BaseSettingsService {
 	 * @return self
 	 */
 	public function delete( string $key ): self {
-		$this->load();
+		$this->fetchAll();
 
 		if ( array_key_exists( $key, $this->settings ) ) {
 			unset( $this->settings[ $key ] );
@@ -111,15 +96,6 @@ abstract class BaseSettingsService {
 		}
 
 		return $this;
-	}
-
-	/**
-	 * Get all settings.
-	 *
-	 * @return array<string, mixed>
-	 */
-	public function all(): array {
-		return $this->load();
 	}
 
 	/**
@@ -159,34 +135,13 @@ abstract class BaseSettingsService {
 	 *
 	 * @return array<string, mixed>
 	 */
-	private function load(): array {
+	private function fetchAll(): array {
 		if ( null === $this->settings ) {
 			$stored         = get_option( static::OPTION_NAME, array() );
 			$this->settings = is_array( $stored ) ? $stored : array();
 		}
 
 		return $this->settings;
-	}
-
-	/**
-	 * Write initial values to the database on first install.
-	 *
-	 * Uses add_option() which only inserts when the option doesn't already
-	 * exist — so subsequent registrations are a no-op even if the user has
-	 * since cleared values.
-	 *
-	 * @return void
-	 */
-	private function seed_initial_values(): void {
-		if ( empty( $this->initial_values ) ) {
-			return;
-		}
-
-		// add_option returns true only when the row didn't exist; when it does,
-		// prime the cache so the load() right after doesn't re-fetch from DB.
-		if ( add_option( static::OPTION_NAME, $this->initial_values ) ) {
-			$this->settings = $this->initial_values;
-		}
 	}
 }
 

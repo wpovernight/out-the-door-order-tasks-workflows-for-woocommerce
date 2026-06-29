@@ -48,7 +48,7 @@ final class TaskManagerService {
 	 *
 	 * @return void
 	 */
-	public function register(): void {
+	public function register_hooks(): void {
 		// Rebalance task positions hook.
 		add_action( 'wpo_aom_rebalance_task_positions', array( $this, 'rebalance_task_positions' ) );
 	}

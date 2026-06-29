@@ -45,8 +45,7 @@ defined( 'ABSPATH' ) || exit;
 		</tr>
 		<?php endif; ?>
 		<?php
-		/** @var EmailService $email_service */
-		$email_service = WPO_AOM()->get_service( EmailService::class );
+		/** @var EmailService $email_service Passed in from EmailService::email_task_details(). */
 
 		// Display task fields
 		if ( ! empty( $task_data['fields'] ) ) :

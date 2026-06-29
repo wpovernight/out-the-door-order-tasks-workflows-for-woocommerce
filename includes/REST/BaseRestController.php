@@ -12,13 +12,6 @@ abstract class BaseRestController {
 	abstract public function register_routes(): void;
 
 	/**
-	 * Registers the REST API routes when the REST API is initialized.
-	 */
-	public function register(): void {
-		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
-	}
-
-	/**
 	 * Checks if the current user has permission to access the endpoint.
 	 *
 	 * @param WP_REST_Request $request The REST request
