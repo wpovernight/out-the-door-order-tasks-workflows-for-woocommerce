@@ -42,9 +42,9 @@ final class Logger {
 		/**
 		 * Filter whether logging is enabled.
 		 *
-		 * @param bool   $enabled
-		 * @param string $level
-		 * @param string $message
+		 * @param bool   $enabled Whether logging is enabled. Default true.
+		 * @param string $level   The log level of the message.
+		 * @param string $message The message being logged.
 		 */
 		if ( ! apply_filters( 'wpo_aom_logging_enabled', true, $level, $message ) ) {
 			return;

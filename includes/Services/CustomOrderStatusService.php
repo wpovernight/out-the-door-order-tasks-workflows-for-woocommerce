@@ -330,6 +330,11 @@ class CustomOrderStatusService {
 	 * @return void
 	 */
 	public function process_deletion_batch( string $from_status, string $to_status, int $status_id ): void {
+		/**
+		 * Filter the number of orders reassigned per batch when draining a deleted status.
+		 *
+		 * @param int $limit Maximum orders processed per batch. Default 50.
+		 */
 		$limit  = apply_filters( 'wpo_aom_reassign_orders_batch_size', 50 );
 		$orders = wc_get_orders(
 			array(
@@ -340,6 +345,12 @@ class CustomOrderStatusService {
 
 		foreach ( $orders as $order ) {
 			try {
+				/**
+				 * Filter the fallback status assigned to an order during reassignment.
+				 *
+				 * @param string $to_status The fallback status key (without 'wc-' prefix).
+				 * @param mixed  $order     The order being reassigned.
+				 */
 				$resolved_to_status = apply_filters( 'wpo_aom_reassign_orders_to_status', $to_status, $order );
 
 				if ( is_callable( array( $order, 'update_status' ) ) ) {

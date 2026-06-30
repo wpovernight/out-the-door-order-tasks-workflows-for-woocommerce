@@ -114,9 +114,9 @@ final class EmailService {
 	 */
 	public function format_by_field_type( string $field_slug, $field_value, array $field_object ): ?string {
 		/**
-		 * Define field types for formatting.
+		 * Filter the map of field types to the field slugs handled by each formatter.
 		 *
-		 * @var array $field_types Array defining field types.
+		 * @param array $field_types Map of field type => list of field slugs.
 		 */
 		$field_types = apply_filters(
 			'wpo_aom_email_task_updated_field_types',

@@ -431,6 +431,11 @@ class TaskUpdatedEmail extends WC_Email {
 	 * @return array
 	 */
 	private function get_notify_on_field_options(): array {
+		/**
+		 * Filter the fields that can be selected to trigger a task updated notification.
+		 *
+		 * @param array $options Map of field slug => human-readable label.
+		 */
 		return apply_filters(
 			'wpo_aom_task_updated_email_notify_on_field_options',
 			array(
@@ -452,6 +457,11 @@ class TaskUpdatedEmail extends WC_Email {
 	private function get_monitored_fields(): array {
 		$monitored = $this->get_option( 'notify_on_fields', array() );
 
+		/**
+		 * Filter the fields monitored for changes when deciding whether to send a notification.
+		 *
+		 * @param array $monitored List of monitored field slugs.
+		 */
 		return apply_filters( 'wpo_aom_task_updated_email_monitored_fields', (array) $monitored );
 	}
 
