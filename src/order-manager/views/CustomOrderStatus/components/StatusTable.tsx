@@ -80,14 +80,6 @@ export const StatusTable = ({
 								<td className="label-column">
 									<div>
 										{status.label}
-										{isDeleting(status) && (
-											<span className="deleting-notice">
-												{__(
-													'Reassigning orders before removal…',
-													'wpo-advanced-order-manager'
-												)}
-											</span>
-										)}
 										<span
 											className="status-preview"
 											style={{
@@ -111,54 +103,79 @@ export const StatusTable = ({
 										{status.background.toUpperCase()}
 									</span>
 								</td>
-								<td className="slug-column">
-									<span className="slug-field">
-										{status.status_key}
-									</span>
-								</td>
-								<td className="actions-column">
-									<ul className="wpo-aom-row-actions">
-										<li>
-											<button
-												type="button"
-												className="wpo-button wpo-button-icon wpo-aom-edit-button"
-												onClick={() =>
-													onEdit(status.id)
-												}
-												title={__(
-													'Edit',
+								<td
+									className={
+										isDeleting(status)
+											? 'slug-column deleting'
+											: 'slug-column'
+									}
+								>
+									{isDeleting(status) && (
+										<>
+											<span className="wpo-aom-loader"></span>
+											<span className="deleting-notice">
+												{__(
+													'Reassigning order statuses before deletion.',
 													'wpo-advanced-order-manager'
 												)}
-												disabled={isDeleting(status)}
-											>
-												<span className="screen-reader-text">
-													{__(
+											</span>
+										</>
+									)}
+									{!isDeleting(status) && (
+										<span className="slug-field">
+											{status.status_key}
+										</span>
+									)}
+								</td>
+								<td className="actions-column">
+									{!isDeleting(status) && (
+										<ul className="wpo-aom-row-actions">
+											<li>
+												<button
+													type="button"
+													className="wpo-button wpo-button-icon wpo-aom-edit-button"
+													onClick={() =>
+														onEdit(status.id)
+													}
+													title={__(
 														'Edit',
 														'wpo-advanced-order-manager'
 													)}
-												</span>
-											</button>
-											<button
-												type="button"
-												className="wpo-button wpo-button-icon wpo-aom-delete-button"
-												onClick={() =>
-													onDelete(status.id)
-												}
-												title={__(
-													'Delete',
-													'wpo-advanced-order-manager'
-												)}
-												disabled={isDeleting(status)}
-											>
-												<span className="screen-reader-text">
-													{__(
+													disabled={isDeleting(
+														status
+													)}
+												>
+													<span className="screen-reader-text">
+														{__(
+															'Edit',
+															'wpo-advanced-order-manager'
+														)}
+													</span>
+												</button>
+												<button
+													type="button"
+													className="wpo-button wpo-button-icon wpo-aom-delete-button"
+													onClick={() =>
+														onDelete(status.id)
+													}
+													title={__(
 														'Delete',
 														'wpo-advanced-order-manager'
 													)}
-												</span>
-											</button>
-										</li>
-									</ul>
+													disabled={isDeleting(
+														status
+													)}
+												>
+													<span className="screen-reader-text">
+														{__(
+															'Delete',
+															'wpo-advanced-order-manager'
+														)}
+													</span>
+												</button>
+											</li>
+										</ul>
+									)}
 								</td>
 							</tr>
 						)

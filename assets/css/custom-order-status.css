@@ -62,8 +62,15 @@ button#add-new-status:disabled {
     font-size: 1.1em;
 }
 
+.cos-table .label-column {
+    width: 44%;
+}
+
 .cos-table .color-column {
-    width: 8em;
+    width: 12%;
+}
+.cos-table .slug-column {
+    width: 35%;
 }
 
 .cos-table .actions-column {
@@ -204,14 +211,25 @@ div#color-field {
     margin: 0.35em 0;
 }
 
-.deleting-row {
-    cursor: wait;
+.cos-table .deleting-row {
+    background: #F5F5F5;
 }
 
-.deleting-row > td.actions-column {
+.cos-table .deleting-row > td:not(.deleting) {
+    opacity: 0.5;
+}
+
+.cos-table .deleting-row > td.actions-column {
     opacity: 0.5;
 }
 
 .cos-table .deleting-notice {
-    color: red;
+    color: #6750A4;
+    font-weight: 600;
+    font-style: italic;
+}
+
+.cos-table .slug-column .wpo-aom-loader {
+    margin-right: 0.8em;
+    vertical-align: middle;
 }

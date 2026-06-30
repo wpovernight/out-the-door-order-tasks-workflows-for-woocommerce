@@ -692,3 +692,27 @@
     align-self: center;
     height: 1.5em;
 }
+
+.wpo-aom-loader {
+    display: inline-block;
+    position: relative;
+    border: 3px solid #E8DEF8;
+    border-top: 3px solid #6750A4;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    -webkit-animation: spin 2s linear infinite;
+    animation: spin 2s linear infinite;
+    box-sizing: border-box;
+}
+
+/* Safari */
+@-webkit-keyframes spin {
+    0% { -webkit-transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
