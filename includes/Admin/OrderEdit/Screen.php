@@ -74,8 +74,8 @@ final class Screen {
 			esc_html__( 'Advanced Order Management', 'wpo-advanced-order-manager' ),
 			array( $this, 'render_meta_box' ),
 			$screen_id,
-			'side',
-			'default'
+			'normal',
+			'high'
 		);
 	}
 
