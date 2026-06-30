@@ -11,12 +11,18 @@ const viewLabels: Record<string, string> = {
 };
 
 export default function Header() {
-	const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
 	const addMenuRef = useRef<HTMLDivElement>(null);
 	const { view, setView, searchQuery, setSearchQuery } = useView();
 	const { openCreateTaskModal } = useTaskCreation();
 
-	useOnClickOutside(addMenuRef, () => setIsAddMenuOpen(false));
+    const handleAddTask = () => {
+        openCreateTaskModal({
+            title: __('Add Task', 'wpo-advanced-order-manager'),
+            initialValues: {
+                dueDate: new Date().toISOString().split('T')[0],
+            },
+        });
+    };
 
 	return (
 		<div className="header">
@@ -58,45 +64,12 @@ export default function Header() {
 					<button
 						type="button"
 						className="wpo-button wpo-button-primary add-menu-button"
-						onClick={() => setIsAddMenuOpen((prev) => !prev)}
+						onClick={handleAddTask}
 					>
 						<span className="screen-reader-text">
 							{__('Add new task', 'wpo-advanced-order-manager')}
 						</span>
 					</button>
-					<ul
-						className={`wpo-action-menu add-menu ${
-							isAddMenuOpen ? 'open' : ''
-						}`}
-					>
-						<li>
-							<button
-								type="button"
-								role="menuitem"
-								className="wpo-button add-task-menu-item"
-								onClick={() => {
-									openCreateTaskModal({
-										title: __(
-											'Add new task',
-											'wpo-advanced-order-manager'
-										),
-									});
-									setIsAddMenuOpen(false);
-								}}
-							>
-								{__('New task', 'wpo-advanced-order-manager')}
-							</button>
-						</li>
-						<li>
-							<button
-								type="button"
-								className="wpo-button add-column-menu-item"
-								onClick={() => {}}
-							>
-								{__('New column', 'wpo-advanced-order-manager')}
-							</button>
-						</li>
-					</ul>
 				</div>
 			</div>
 		</div>
