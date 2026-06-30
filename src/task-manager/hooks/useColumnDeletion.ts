@@ -17,7 +17,7 @@ import { useTasks } from '@shared/context/TaskContext';
  * @param completed Number of tasks processed so far.
  * @param total     Total number of tasks to process (0 for an empty column).
  */
-export type ColumnDeletionProgress = ( completed: number, total: number ) => void;
+export type ColumnDeletionProgress = (completed: number, total: number) => void;
 
 /**
  * Polled between tasks to allow the caller to abort a long-running drain.

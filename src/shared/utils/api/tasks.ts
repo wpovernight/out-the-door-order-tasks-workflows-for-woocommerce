@@ -1,5 +1,10 @@
-import {Task} from "@shared/types/task";
-import {getApiRoot, getApiNamespace, getHeaders, handleResponse} from "./client";
+import { Task } from '@shared/types/task';
+import {
+	getApiRoot,
+	getApiNamespace,
+	getHeaders,
+	handleResponse,
+} from './client';
 
 /**
  * Fetches tasks from the API and maps custom fields to task properties.
@@ -8,28 +13,28 @@ import {getApiRoot, getApiNamespace, getHeaders, handleResponse} from "./client"
  * @throws Will throw an error if the API request fails.
  */
 export async function fetchTasks(): Promise<Task[]> {
-    const response = await fetch(`${getApiRoot()}/${getApiNamespace()}/tasks`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: getHeaders(),
-    });
+	const response = await fetch(`${getApiRoot()}/${getApiNamespace()}/tasks`, {
+		method: 'GET',
+		credentials: 'include',
+		headers: getHeaders(),
+	});
 
-    const data = await handleResponse<any[]>(response);
+	const data = await handleResponse<any[]>(response);
 
-    return data.map((task: any) => {
-        const statusField = task.fields.find(
-            (field: any) => field.slug === 'status'
-        );
-        const positionField = task.fields.find(
-            (field: any) => field.slug === 'position'
-        );
+	return data.map((task: any) => {
+		const statusField = task.fields.find(
+			(field: any) => field.slug === 'status'
+		);
+		const positionField = task.fields.find(
+			(field: any) => field.slug === 'position'
+		);
 
-        return {
-            ...task,
-            status: statusField?.values?.[0]?.raw,
-            position: positionField?.values?.[0]?.raw,
-        };
-    });
+		return {
+			...task,
+			status: statusField?.values?.[0]?.raw,
+			position: positionField?.values?.[0]?.raw,
+		};
+	});
 }
 
 /**
@@ -41,72 +46,72 @@ export async function fetchTasks(): Promise<Task[]> {
  * @throws Will throw an error if the API request fails.
  */
 export async function createTask(payload: Partial<Task>): Promise<Task> {
-    const response = await fetch(`${getApiRoot()}/${getApiNamespace()}/tasks`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: getHeaders(),
-        body: JSON.stringify(payload),
-    });
+	const response = await fetch(`${getApiRoot()}/${getApiNamespace()}/tasks`, {
+		method: 'POST',
+		credentials: 'include',
+		headers: getHeaders(),
+		body: JSON.stringify(payload),
+	});
 
-    const task = await handleResponse<any>(response);
+	const task = await handleResponse<any>(response);
 
-    // Apply the same mapping as fetchTasks
-    const statusField = task.fields?.find(
-        (field: any) => field.slug === 'status'
-    );
-    const positionField = task.fields?.find(
-        (field: any) => field.slug === 'position'
-    );
+	// Apply the same mapping as fetchTasks
+	const statusField = task.fields?.find(
+		(field: any) => field.slug === 'status'
+	);
+	const positionField = task.fields?.find(
+		(field: any) => field.slug === 'position'
+	);
 
-    return {
-        ...task,
-        status: statusField?.values?.[0]?.raw,
-        position: positionField?.values?.[0]?.raw,
-    };
+	return {
+		...task,
+		status: statusField?.values?.[0]?.raw,
+		position: positionField?.values?.[0]?.raw,
+	};
 }
 
 export async function updateTask(
-    taskId: number,
-    payload: Partial<Task>
+	taskId: number,
+	payload: Partial<Task>
 ): Promise<Task> {
-    const response = await fetch(
-        `${getApiRoot()}/${getApiNamespace()}/tasks/${taskId}`,
-        {
-            method: 'PUT',
-            credentials: 'include',
-            headers: getHeaders(),
-            body: JSON.stringify(payload),
-        }
-    );
+	const response = await fetch(
+		`${getApiRoot()}/${getApiNamespace()}/tasks/${taskId}`,
+		{
+			method: 'PUT',
+			credentials: 'include',
+			headers: getHeaders(),
+			body: JSON.stringify(payload),
+		}
+	);
 
-    const task = await handleResponse<any>(response);
+	const task = await handleResponse<any>(response);
 
-    // Apply the same mapping as fetchTasks
-    const statusField = task.fields?.find(
-        (field: any) => field.slug === 'status'
-    );
-    const positionField = task.fields?.find(
-        (field: any) => field.slug === 'position'
-    );
+	// Apply the same mapping as fetchTasks
+	const statusField = task.fields?.find(
+		(field: any) => field.slug === 'status'
+	);
+	const positionField = task.fields?.find(
+		(field: any) => field.slug === 'position'
+	);
 
-    return {
-        ...task,
-        status: statusField?.values?.[0]?.raw,
-        position: positionField?.values?.[0]?.raw,
-    };
+	return {
+		...task,
+		status: statusField?.values?.[0]?.raw,
+		position: positionField?.values?.[0]?.raw,
+	};
 }
 
 export async function deleteTask(taskId: number): Promise<void> {
-    const response = await fetch(
-        `${getApiRoot()}/${getApiNamespace()}/tasks/${taskId}`,
-        {
-            method: 'DELETE',
-            credentials: 'include',
-            headers: getHeaders(),
-        }
-    );
+	const response = await fetch(
+		`${getApiRoot()}/${getApiNamespace()}/tasks/${taskId}`,
+		{
+			method: 'DELETE',
+			credentials: 'include',
+			headers: getHeaders(),
+		}
+	);
 
-    return handleResponse<void>(response);
+	return handleResponse<void>(response);
 }
 
 /**
@@ -120,24 +125,24 @@ export async function deleteTask(taskId: number): Promise<void> {
  * @throws Will throw an error if the API request fails.
  */
 export async function moveTask(
-    taskId: number,
-    previousTaskId: number | null,
-    targetStatusId: number
+	taskId: number,
+	previousTaskId: number | null,
+	targetStatusId: number
 ): Promise<{ new_position: number }> {
-    const response = await fetch(
-        `${getApiRoot()}/${getApiNamespace()}/tasks/${taskId}/move`,
-        {
-            method: 'POST',
-            credentials: 'include',
-            headers: getHeaders(),
-            body: JSON.stringify({
-                previous_task_id: previousTaskId,
-                target_status_id: targetStatusId,
-            }),
-        }
-    );
+	const response = await fetch(
+		`${getApiRoot()}/${getApiNamespace()}/tasks/${taskId}/move`,
+		{
+			method: 'POST',
+			credentials: 'include',
+			headers: getHeaders(),
+			body: JSON.stringify({
+				previous_task_id: previousTaskId,
+				target_status_id: targetStatusId,
+			}),
+		}
+	);
 
-    return handleResponse<{ new_position: number }>(response);
+	return handleResponse<{ new_position: number }>(response);
 }
 
 /**
@@ -148,19 +153,18 @@ export async function moveTask(
  * @throws Will throw an error if the API request fails.
  */
 export async function finishTask(taskId: number): Promise<boolean> {
-    const response = await fetch(
-        `${getApiRoot()}/${getApiNamespace()}/tasks/${taskId}/finish`,
-        {
-            method: 'POST',
-            credentials: 'include',
-            headers: getHeaders(),
-        }
-    );
+	const response = await fetch(
+		`${getApiRoot()}/${getApiNamespace()}/tasks/${taskId}/finish`,
+		{
+			method: 'POST',
+			credentials: 'include',
+			headers: getHeaders(),
+		}
+	);
 
-    const data = await handleResponse<{ success: boolean }>(response);
-    return data.success;
+	const data = await handleResponse<{ success: boolean }>(response);
+	return data.success;
 }
-
 
 /**
  * Archive a task.
@@ -170,29 +174,29 @@ export async function finishTask(taskId: number): Promise<boolean> {
  * @throws Will throw an error if the API request fails.
  */
 export async function archiveTask(taskId: number): Promise<boolean> {
-    const response = await fetch(
-        `${getApiRoot()}/${getApiNamespace()}/tasks/${taskId}/archive`,
-        {
-            method: 'POST',
-            credentials: 'include',
-            headers: getHeaders(),
-        }
-    );
+	const response = await fetch(
+		`${getApiRoot()}/${getApiNamespace()}/tasks/${taskId}/archive`,
+		{
+			method: 'POST',
+			credentials: 'include',
+			headers: getHeaders(),
+		}
+	);
 
-    const data = await handleResponse<{ success: boolean }>(response);
-    return data.success;
+	const data = await handleResponse<{ success: boolean }>(response);
+	return data.success;
 }
 
 export async function unarchiveTask(taskId: number): Promise<boolean> {
-    const response = await fetch(
-        `${getApiRoot()}/${getApiNamespace()}/tasks/${taskId}/unarchive`,
-        {
-            method: 'POST',
-            credentials: 'include',
-            headers: getHeaders(),
-        }
-    );
+	const response = await fetch(
+		`${getApiRoot()}/${getApiNamespace()}/tasks/${taskId}/unarchive`,
+		{
+			method: 'POST',
+			credentials: 'include',
+			headers: getHeaders(),
+		}
+	);
 
-    const data = await handleResponse<{ success: boolean }>(response);
-    return data.success;
+	const data = await handleResponse<{ success: boolean }>(response);
+	return data.success;
 }

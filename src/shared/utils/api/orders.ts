@@ -1,4 +1,4 @@
-import {getApiRoot, getHeaders, handleResponse} from "./client";
+import { getApiRoot, getHeaders, handleResponse } from './client';
 
 /**
  * Searches orders based on a search term.
@@ -9,15 +9,15 @@ import {getApiRoot, getHeaders, handleResponse} from "./client";
  * @throws Will throw an error if the API request fails.
  */
 export const searchOrders = (
-    term: string,
-    signal?: AbortSignal
+	term: string,
+	signal?: AbortSignal
 ): Promise<any[]> => {
-    return fetch(`${getApiRoot()}/orders?search=${encodeURIComponent(term)}`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: getHeaders(),
-        signal,
-    }).then(handleResponse<any[]>);
+	return fetch(`${getApiRoot()}/orders?search=${encodeURIComponent(term)}`, {
+		method: 'GET',
+		credentials: 'include',
+		headers: getHeaders(),
+		signal,
+	}).then(handleResponse<any[]>);
 };
 
 /**
@@ -28,11 +28,11 @@ export const searchOrders = (
  * @throws Will throw an error if the API request fails.
  */
 export async function fetchOrder(orderId: number): Promise<any> {
-    const response = await fetch(`${getApiRoot()}/orders/${orderId}`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: getHeaders(),
-    });
+	const response = await fetch(`${getApiRoot()}/orders/${orderId}`, {
+		method: 'GET',
+		credentials: 'include',
+		headers: getHeaders(),
+	});
 
-    return handleResponse(response);
+	return handleResponse(response);
 }

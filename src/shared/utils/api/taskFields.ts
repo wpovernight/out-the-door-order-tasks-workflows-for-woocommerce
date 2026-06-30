@@ -1,5 +1,10 @@
-import {TaskField} from "@shared/types/task";
-import {getApiRoot, getApiNamespace, getHeaders, handleResponse} from "./client";
+import { TaskField } from '@shared/types/task';
+import {
+	getApiRoot,
+	getApiNamespace,
+	getHeaders,
+	handleResponse,
+} from './client';
 
 /**
  * Fetches task fields from the API.
@@ -8,14 +13,14 @@ import {getApiRoot, getApiNamespace, getHeaders, handleResponse} from "./client"
  * @throws Will throw an error if the API request fails.
  */
 export async function fetchTaskFields(): Promise<Record<string, TaskField>> {
-    const response = await fetch(
-        `${getApiRoot()}/${getApiNamespace()}/tasks/fields`,
-        {
-            method: 'GET',
-            credentials: 'include',
-            headers: getHeaders(),
-        }
-    );
+	const response = await fetch(
+		`${getApiRoot()}/${getApiNamespace()}/tasks/fields`,
+		{
+			method: 'GET',
+			credentials: 'include',
+			headers: getHeaders(),
+		}
+	);
 
-    return handleResponse<Record<string, TaskField>>(response);
+	return handleResponse<Record<string, TaskField>>(response);
 }

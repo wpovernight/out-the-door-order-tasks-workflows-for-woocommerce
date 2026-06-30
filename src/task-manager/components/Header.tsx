@@ -15,14 +15,14 @@ export default function Header() {
 	const { view, setView, searchQuery, setSearchQuery } = useView();
 	const { openCreateTaskModal } = useTaskCreation();
 
-    const handleAddTask = () => {
-        openCreateTaskModal({
-            title: __('Add Task', 'wpo-advanced-order-manager'),
-            initialValues: {
-                dueDate: new Date().toISOString().split('T')[0],
-            },
-        });
-    };
+	const handleAddTask = () => {
+		openCreateTaskModal({
+			title: __('Add Task', 'wpo-advanced-order-manager'),
+			initialValues: {
+				dueDate: new Date().toISOString().split('T')[0],
+			},
+		});
+	};
 
 	return (
 		<div className="header">

@@ -37,7 +37,7 @@ export const Board: React.FC = () => {
 					(col) => col.position >= draftColumn.position
 				);
 				return index === -1 ? orderedColumns.length : index;
-		  })()
+			})()
 		: -1;
 
 	const scrollableRef = useRef<HTMLDivElement | null>(null);
@@ -88,10 +88,9 @@ export const Board: React.FC = () => {
 						}
 
 						let previousTaskId: number | null = null;
-						const targetStatusId =
-							statusesRef.current.find(
-								(s) => s.slug === toColumn
-							)?.id;
+						const targetStatusId = statusesRef.current.find(
+							(s) => s.slug === toColumn
+						)?.id;
 						if (!targetStatusId) {
 							return;
 						}
@@ -148,10 +147,9 @@ export const Board: React.FC = () => {
 						}
 
 						let previousTaskId: number | null = null;
-						const targetStatusId =
-							statusesRef.current.find(
-								(s) => s.slug === toColumn
-							)?.id;
+						const targetStatusId = statusesRef.current.find(
+							(s) => s.slug === toColumn
+						)?.id;
 						if (!targetStatusId) {
 							return;
 						}

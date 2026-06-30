@@ -63,10 +63,7 @@ export const DraftColumn: React.FC<DraftColumnProps> = ({
 								className="wpo-button wpo-button-icon cancel-edit-title-button"
 							>
 								<span className="screen-reader-text">
-									{__(
-										'Cancel',
-										'wpo-advanced-order-manager'
-									)}
+									{__('Cancel', 'wpo-advanced-order-manager')}
 								</span>
 							</button>
 							<span className="wpo-aom-vertical-divider" />

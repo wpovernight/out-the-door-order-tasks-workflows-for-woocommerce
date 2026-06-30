@@ -1,5 +1,10 @@
-import {FieldOption} from "@shared/types/task";
-import {getApiRoot, getApiNamespace, getHeaders, handleResponse} from "./client";
+import { FieldOption } from '@shared/types/task';
+import {
+	getApiRoot,
+	getApiNamespace,
+	getHeaders,
+	handleResponse,
+} from './client';
 
 /**
  * Fetches options for a specific field.
@@ -9,20 +14,19 @@ import {getApiRoot, getApiNamespace, getHeaders, handleResponse} from "./client"
  * @throws Will throw an error if the API request fails.
  */
 export async function fetchFieldOptions(
-    fieldSlug: string
+	fieldSlug: string
 ): Promise<FieldOption[]> {
-    const response = await fetch(
-        `${getApiRoot()}/${getApiNamespace()}/tasks/fields/${fieldSlug}/options`,
-        {
-            method: 'GET',
-            credentials: 'include',
-            headers: getHeaders(),
-        }
-    );
+	const response = await fetch(
+		`${getApiRoot()}/${getApiNamespace()}/tasks/fields/${fieldSlug}/options`,
+		{
+			method: 'GET',
+			credentials: 'include',
+			headers: getHeaders(),
+		}
+	);
 
-    return handleResponse<FieldOption[]>(response);
+	return handleResponse<FieldOption[]>(response);
 }
-
 
 /**
  * Reorders field options by updating their position values.
@@ -33,72 +37,71 @@ export async function fetchFieldOptions(
  * @throws Will throw an error if the API request fails.
  */
 export async function reorderFieldOptions(
-    fieldId: number,
-    orderedOptionIds: number[]
+	fieldId: number,
+	orderedOptionIds: number[]
 ): Promise<{ success: boolean; message: string }> {
-    const response = await fetch(
-        `${getApiRoot()}/${getApiNamespace()}/tasks/fields/${fieldId}/options/reorder`,
-        {
-            method: 'POST',
-            credentials: 'include',
-            headers: getHeaders(),
-            body: JSON.stringify({
-                ordered_option_ids: orderedOptionIds,
-            }),
-        }
-    );
+	const response = await fetch(
+		`${getApiRoot()}/${getApiNamespace()}/tasks/fields/${fieldId}/options/reorder`,
+		{
+			method: 'POST',
+			credentials: 'include',
+			headers: getHeaders(),
+			body: JSON.stringify({
+				ordered_option_ids: orderedOptionIds,
+			}),
+		}
+	);
 
-    return handleResponse<{ success: boolean; message: string }>(response);
+	return handleResponse<{ success: boolean; message: string }>(response);
 }
 
-
 export async function createFieldOption(
-    fieldId: number,
-    payload: Partial<FieldOption>
+	fieldId: number,
+	payload: Partial<FieldOption>
 ): Promise<FieldOption> {
-    const response = await fetch(
-        `${getApiRoot()}/${getApiNamespace()}/tasks/fields/${fieldId}/options`,
-        {
-            method: 'POST',
-            credentials: 'include',
-            headers: getHeaders(),
-            body: JSON.stringify(payload),
-        }
-    );
+	const response = await fetch(
+		`${getApiRoot()}/${getApiNamespace()}/tasks/fields/${fieldId}/options`,
+		{
+			method: 'POST',
+			credentials: 'include',
+			headers: getHeaders(),
+			body: JSON.stringify(payload),
+		}
+	);
 
-    return handleResponse<FieldOption>(response);
+	return handleResponse<FieldOption>(response);
 }
 
 export async function updateFieldOption(
-    fieldId: number,
-    optionId: number,
-    payload: Partial<FieldOption>
+	fieldId: number,
+	optionId: number,
+	payload: Partial<FieldOption>
 ): Promise<FieldOption> {
-    const response = await fetch(
-        `${getApiRoot()}/${getApiNamespace()}/tasks/fields/${fieldId}/options/${optionId}`,
-        {
-            method: 'PUT',
-            credentials: 'include',
-            headers: getHeaders(),
-            body: JSON.stringify(payload),
-        }
-    );
+	const response = await fetch(
+		`${getApiRoot()}/${getApiNamespace()}/tasks/fields/${fieldId}/options/${optionId}`,
+		{
+			method: 'PUT',
+			credentials: 'include',
+			headers: getHeaders(),
+			body: JSON.stringify(payload),
+		}
+	);
 
-    return handleResponse<FieldOption>(response);
+	return handleResponse<FieldOption>(response);
 }
 
 export async function deleteFieldOption(
-    fieldId: number,
-    optionId: number
+	fieldId: number,
+	optionId: number
 ): Promise<void> {
-    const response = await fetch(
-        `${getApiRoot()}/${getApiNamespace()}/tasks/fields/${fieldId}/options/${optionId}`,
-        {
-            method: 'DELETE',
-            credentials: 'include',
-            headers: getHeaders(),
-        }
-    );
+	const response = await fetch(
+		`${getApiRoot()}/${getApiNamespace()}/tasks/fields/${fieldId}/options/${optionId}`,
+		{
+			method: 'DELETE',
+			credentials: 'include',
+			headers: getHeaders(),
+		}
+	);
 
-    return handleResponse<void>(response);
+	return handleResponse<void>(response);
 }

@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 import { __ } from '@wordpress/i18n';
 import {
 	fetchCustomOrderStatuses,
@@ -109,9 +109,7 @@ export function useCustomOrderStatuses(): UseCustomOrderStatusesResult {
 			await deleteCustomOrderStatus(id);
 			setStatuses((prev) =>
 				prev.map((status) =>
-					status.id === id
-						? { ...status, is_deleting: true }
-						: status
+					status.id === id ? { ...status, is_deleting: true } : status
 				)
 			);
 		} catch (error) {
@@ -123,23 +121,27 @@ export function useCustomOrderStatuses(): UseCustomOrderStatusesResult {
 		}
 	};
 
-    const hasDeleting = statuses.some((s) => s.is_deleting);
+	const hasDeleting = statuses.some((s) => s.is_deleting);
 
-    useEffect(() => {
-        if (!hasDeleting) return;
+	useEffect(() => {
+		if (!hasDeleting) {
+			return;
+		}
 
-        const id = setInterval(async () => {
-            try {
-                const fresh = await fetchCustomOrderStatuses();
-                setStatuses(fresh);
-            } catch (error) {
-                console.error('Failed to refresh statuses during deletion:', error);
-            }
-        }, 5000);
+		const id = setInterval(async () => {
+			try {
+				const fresh = await fetchCustomOrderStatuses();
+				setStatuses(fresh);
+			} catch (error) {
+				console.error(
+					'Failed to refresh statuses during deletion:',
+					error
+				);
+			}
+		}, 5000);
 
-        return () => clearInterval(id);
-
-    }, [hasDeleting]);
+		return () => clearInterval(id);
+	}, [hasDeleting]);
 
 	return {
 		statuses,

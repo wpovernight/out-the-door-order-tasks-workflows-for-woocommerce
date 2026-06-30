@@ -1,9 +1,4 @@
-import React, {
-	createContext,
-	useCallback,
-	useContext,
-	useState,
-} from 'react';
+import React, { createContext, useCallback, useContext, useState } from 'react';
 import { StatusRoles } from '@shared/types/task';
 import { getInitialStatusRoles } from '@shared/hooks/getInitialStatusRoles';
 import { updateStatusRoles as updateStatusRolesAPI } from '@shared/utils/api';

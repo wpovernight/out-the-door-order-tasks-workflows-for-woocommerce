@@ -81,9 +81,7 @@ export const StatusTable = ({
 									<div>
 										{status.label}
 										{isDeleting(status) && (
-											<span
-												className="deleting-notice"
-											>
+											<span className="deleting-notice">
 												{__(
 													'Reassigning orders before removal…',
 													'wpo-advanced-order-manager'

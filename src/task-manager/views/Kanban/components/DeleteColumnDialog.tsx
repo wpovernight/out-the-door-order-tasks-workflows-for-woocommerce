@@ -37,6 +37,17 @@ interface ColumnPickerPhaseProps {
 /**
  * Shared shape for "pick a column from a dropdown, then continue or back out"
  * — used by both the move-picker and the role-reassign phases.
+ * @param root0
+ * @param root0.title
+ * @param root0.description
+ * @param root0.fieldLabel
+ * @param root0.availableColumns
+ * @param root0.selectedOptionId
+ * @param root0.onSelectionChange
+ * @param root0.primaryActionLabel
+ * @param root0.secondaryActionLabel
+ * @param root0.onPrimaryAction
+ * @param root0.onSecondaryAction
  */
 const ColumnPickerPhase: React.FC<ColumnPickerPhaseProps> = ({
 	title,
@@ -58,7 +69,7 @@ const ColumnPickerPhase: React.FC<ColumnPickerPhaseProps> = ({
 				{fieldLabel}
 				<select
 					className="wpo-aom-select"
-                    id="column-picker"
+					id="column-picker"
 					value={selectedOptionId ?? ''}
 					onChange={(e) =>
 						onSelectionChange(
@@ -154,11 +165,7 @@ const ChooseOperationPhase: React.FC<ChooseOperationPhaseProps> = ({
 				</button>
 			</li>
 			<li>
-				<button
-					type="button"
-					className="wpo-button"
-					onClick={onCancel}
-				>
+				<button type="button" className="wpo-button" onClick={onCancel}>
 					{__('Cancel', 'wpo-advanced-order-manager')}
 				</button>
 			</li>
@@ -189,45 +196,46 @@ const ProcessingPhase: React.FC<ProcessingPhaseProps> = ({
 	}
 
 	return (
-        <>
-        <div className="dialog-content dialog-processing">
-            <h2>
-                {__(
-                    'We are currently moving your items',
-                    'wpo-advanced-order-manager'
-                )}
-            </h2>
-            <p>
-                {__(
-                    'This might take a while, depending on the number of items that need to be moved.',
-                    'wpo-advanced-order-manager'
-                )}
-            </p>
-            <label id="delete-progress">
-                <progress id="delete-progress" max="100" value={percent}>{percent}%</progress>
-
-                <span className="screen-reader-text">
-                    {__( 'Progress', 'wpo-advanced-order-manager' )}
-                </span>
-                {percent}%
-            </label>
-        </div>
-        <ul className="dialog-actions dialog-actions-horizontal">
-            <li>
-                <button
-                    type="button"
-                    className="wpo-button"
-                    onClick={onCancel}
-                    disabled={canceling}
-                >
-                    {canceling
-                        ? __('Canceling…', 'wpo-advanced-order-manager')
-                        : __('Cancel', 'wpo-advanced-order-manager')}
-                </button>
-            </li>
-        </ul>
-    </>
-    );
+		<>
+			<div className="dialog-content dialog-processing">
+				<h2>
+					{__(
+						'We are currently moving your items',
+						'wpo-advanced-order-manager'
+					)}
+				</h2>
+				<p>
+					{__(
+						'This might take a while, depending on the number of items that need to be moved.',
+						'wpo-advanced-order-manager'
+					)}
+				</p>
+				<label id="delete-progress">
+					<progress id="delete-progress" max="100" value={percent}>
+						{percent}%
+					</progress>
+					<span className="screen-reader-text">
+						{__('Progress', 'wpo-advanced-order-manager')}
+					</span>
+					{percent}%
+				</label>
+			</div>
+			<ul className="dialog-actions dialog-actions-horizontal">
+				<li>
+					<button
+						type="button"
+						className="wpo-button"
+						onClick={onCancel}
+						disabled={canceling}
+					>
+						{canceling
+							? __('Canceling…', 'wpo-advanced-order-manager')
+							: __('Cancel', 'wpo-advanced-order-manager')}
+					</button>
+				</li>
+			</ul>
+		</>
+	);
 };
 
 interface ErrorPhaseProps {
@@ -248,11 +256,7 @@ const ErrorPhase: React.FC<ErrorPhaseProps> = ({
 		</div>
 		<ul className="dialog-actions dialog-actions-horizontal">
 			<li>
-				<button
-					type="button"
-					className="wpo-button"
-					onClick={onClose}
-				>
+				<button type="button" className="wpo-button" onClick={onClose}>
 					{__('Close', 'wpo-advanced-order-manager')}
 				</button>
 			</li>
@@ -303,10 +307,7 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 
 	const [attachedRole] = useState<keyof StatusRoles | null>(() => {
 		const match = (
-			Object.entries(statusRoles) as [
-				keyof StatusRoles,
-				number | null,
-			][]
+			Object.entries(statusRoles) as [keyof StatusRoles, number | null][]
 		).find(([, optionId]) => optionId === column.id);
 		return match ? match[0] : null;
 	});
@@ -318,42 +319,42 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 		() => tasks.length === 0 && needsRoleSelection
 	);
 
-    // Drives which screen the dialog renders. The user steps through phases
-    // and each setPhase swaps the body via renderPhase().
+	// Drives which screen the dialog renders. The user steps through phases
+	// and each setPhase swaps the body via renderPhase().
 	const [phase, setPhase] = useState<Phase>(
 		directRoleAssignment ? 'role-reassign' : 'choose-operation'
 	);
 
-    // Tracks which column the user has selected to move tasks into, if any.
-    // Only relevant if they choose move-and-delete.
+	// Tracks which column the user has selected to move tasks into, if any.
+	// Only relevant if they choose move-and-delete.
 	const [moveTargetOptionId, setMoveTargetOptionId] = useState<number | null>(
 		null
 	);
-    // Tracks which column the user has selected to reassign the role to, if any.
-    // Only relevant if they need to reassign a role.
+	// Tracks which column the user has selected to reassign the role to, if any.
+	// Only relevant if they need to reassign a role.
 	const [roleTargetOptionId, setRoleTargetOptionId] = useState<number | null>(
 		null
 	);
 
-    // Tracks the current operation in case of an error, so we know what to retry.
-	const [lastOperationAttempt, setLastOperationAttempt] = useState<LastAttemptOperation>(null);
+	// Tracks the current operation in case of an error, so we know what to retry.
+	const [lastOperationAttempt, setLastOperationAttempt] =
+		useState<LastAttemptOperation>(null);
 
-    // When the user routes through role-reassign, we need to remember what they
-    // originally chose so we can run the right operation after the role updates.
-    const [pendingOperation, setPendingOperation] =
-        useState<ColumnDeleteOperation | null>(
-            directRoleAssignment ? 'delete-everything' : null
-        );
+	// When the user routes through role-reassign, we need to remember what they
+	// originally chose so we can run the right operation after the role updates.
+	const [pendingOperation, setPendingOperation] =
+		useState<ColumnDeleteOperation | null>(
+			directRoleAssignment ? 'delete-everything' : null
+		);
 
-    // Track progress deletion process.
+	// Track progress deletion process.
 	const [progress, setProgress] = useState<{
 		completed: number | null;
 		total: number;
 	}>({ completed: null, total: 0 });
 	const cancelProcessRef = useRef(false);
 	const [processCanceling, setProcessCanceling] = useState(false);
-    const [errorMessage, setErrorMessage] = useState<string>('');
-
+	const [errorMessage, setErrorMessage] = useState<string>('');
 
 	// ----- Derived ---------------------------------------------------------
 
@@ -415,9 +416,9 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 		setPhase('processing');
 	};
 
-    // Signals the in-flight drain loop to stop before its next task. The running
-    // operation then unwinds to its 'canceled' return and closes the dialog.
-    const handleCancelProcessing = () => {
+	// Signals the in-flight drain loop to stop before its next task. The running
+	// operation then unwinds to its 'canceled' return and closes the dialog.
+	const handleCancelProcessing = () => {
 		cancelProcessRef.current = true;
 		setProcessCanceling(true);
 	};
@@ -579,10 +580,7 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 
 			onClose();
 		} catch (error) {
-			console.error(
-				'Failed to reassign role and delete column:',
-				error
-			);
+			console.error('Failed to reassign role and delete column:', error);
 			setErrorMessage(
 				extractErrorMessage(
 					error,
@@ -596,21 +594,21 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 		}
 	};
 
-    const retryLastAttempt = () => {
-        // If we got here via the role-reassign flow, retry the whole sequence.
-        // updateStatusRoles is idempotent on a re-run with the same target, so
-        // it's safe whether the original failure was at the reassign step or
-        // the follow-up delete.
-        if (pendingOperation !== null) {
-            void handleRoleReassignConfirmation();
-            return;
-        }
-        if (lastOperationAttempt === 'delete-everything') {
-            void runDeleteEverything();
-        } else if (lastOperationAttempt === 'move-and-delete') {
-            void runMoveAndDelete();
-        }
-    };
+	const retryLastAttempt = () => {
+		// If we got here via the role-reassign flow, retry the whole sequence.
+		// updateStatusRoles is idempotent on a re-run with the same target, so
+		// it's safe whether the original failure was at the reassign step or
+		// the follow-up delete.
+		if (pendingOperation !== null) {
+			void handleRoleReassignConfirmation();
+			return;
+		}
+		if (lastOperationAttempt === 'delete-everything') {
+			void runDeleteEverything();
+		} else if (lastOperationAttempt === 'move-and-delete') {
+			void runMoveAndDelete();
+		}
+	};
 
 	// ----- Render ----------------------------------------------------------
 
@@ -676,7 +674,9 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 					done: __('done', 'wpo-advanced-order-manager'),
 					undone: __('undone', 'wpo-advanced-order-manager'),
 				};
-				const roleLabel = attachedRole ? roleLabels[attachedRole] : attachedRole;
+				const roleLabel = attachedRole
+					? roleLabels[attachedRole]
+					: attachedRole;
 
 				return (
 					<ColumnPickerPhase
@@ -693,10 +693,7 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 							column.label,
 							roleLabel
 						)}
-						fieldLabel={__(
-							'Column',
-							'wpo-advanced-order-manager'
-						)}
+						fieldLabel={__('Column', 'wpo-advanced-order-manager')}
 						availableColumns={availableColumnsForRoleReassign}
 						selectedOptionId={roleTargetOptionId}
 						onSelectionChange={setRoleTargetOptionId}

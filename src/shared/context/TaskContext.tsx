@@ -5,11 +5,7 @@ import React, {
 	useCallback,
 	useRef,
 } from 'react';
-import {
-	Task,
-	FieldOption,
-	TaskField
-} from '@shared/types/task';
+import { Task, FieldOption, TaskField } from '@shared/types/task';
 import {
 	fetchTasks,
 	fetchTaskFields,
@@ -54,10 +50,7 @@ interface TaskContextType {
 		optionId: number,
 		updates: Partial<FieldOption>
 	) => Promise<void>;
-	deleteFieldOption: (
-		fieldId: number,
-		optionId: number
-	) => Promise<void>;
+	deleteFieldOption: (fieldId: number, optionId: number) => Promise<void>;
 	reorderFieldOptions: (
 		fieldId: number,
 		orderedOptionIds: number[]
@@ -366,60 +359,53 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 		[]
 	);
 
-    const deleteFieldOption = useCallback(
-        async (
-            fieldId: number,
-            optionId: number
-        ): Promise<void> => {
-            let previousState: Record<string, FieldOption[]> | null = null;
+	const deleteFieldOption = useCallback(
+		async (fieldId: number, optionId: number): Promise<void> => {
+			let previousState: Record<string, FieldOption[]> | null = null;
 
-            const applyDeletion = (
-                prev: Record<string, FieldOption[]>
-            ) => {
-                const fieldSlug = Object.keys(prev).find((slug) =>
-                    prev[slug].some((opt) => opt.id === optionId)
-                );
+			const applyDeletion = (prev: Record<string, FieldOption[]>) => {
+				const fieldSlug = Object.keys(prev).find((slug) =>
+					prev[slug].some((opt) => opt.id === optionId)
+				);
 
-                if (!fieldSlug) {
-                    return prev;
-                }
+				if (!fieldSlug) {
+					return prev;
+				}
 
-                return {
-                    ...prev,
-                    [fieldSlug]: prev[fieldSlug].filter((opt) => opt.id !== optionId),
-                };
-            }
+				return {
+					...prev,
+					[fieldSlug]: prev[fieldSlug].filter(
+						(opt) => opt.id !== optionId
+					),
+				};
+			};
 
-            // Optimistically update the global field options state.
-            setFieldOptions((prev) => {
-                previousState = prev;
-                return applyDeletion(prev);
-            });
+			// Optimistically update the global field options state.
+			setFieldOptions((prev) => {
+				previousState = prev;
+				return applyDeletion(prev);
+			});
 
-            try {
-                await deleteFieldOptionAPI(fieldId, optionId);
+			try {
+				await deleteFieldOptionAPI(fieldId, optionId);
+			} catch (error) {
+				console.error('Failed to delete field option:', error);
 
-            } catch (error) {
-                console.error('Failed to delete field option:', error);
+				if (previousState) {
+					setFieldOptions(previousState);
+				}
 
-                if (previousState) {
-                    setFieldOptions(previousState);
-                }
-
-                throw error;
-            }
-        },
-        []
-    );
+				throw error;
+			}
+		},
+		[]
+	);
 
 	// Reorders a field's options optimistically and persists the new order to
 	// the API. Positions are written as 1..N to match the backend (see
 	// TaskFieldOptionRepository::update_positions, which stores idx + 1).
 	const reorderFieldOptions = useCallback(
-		async (
-			fieldId: number,
-			orderedOptionIds: number[]
-		): Promise<void> => {
+		async (fieldId: number, orderedOptionIds: number[]): Promise<void> => {
 			let previousState: Record<string, FieldOption[]> | null = null;
 
 			setFieldOptions((prev) => {
@@ -832,7 +818,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				loadFieldOptions,
 				createFieldOption,
 				updateFieldOption,
-                deleteFieldOption,
+				deleteFieldOption,
 				reorderFieldOptions,
 				moveTask,
 				finishTask,
