@@ -20,11 +20,11 @@ use WPO\AOM\Repositories\TaskRepository;
 defined( 'ABSPATH' ) || exit;
 
 final class TaskManagerService {
-	protected TaskRepository $task_repository;
-	protected TaskFieldRepository $task_field_repository;
-	protected TaskFieldOptionRepository $task_field_option_repository;
-	protected TaskFieldValueRepository $task_field_value_repository;
-	protected TaskStatusRoleService $task_status_role_service;
+	protected readonly TaskRepository $task_repository;
+	protected readonly TaskFieldRepository $task_field_repository;
+	protected readonly TaskFieldOptionRepository $task_field_option_repository;
+	protected readonly TaskFieldValueRepository $task_field_value_repository;
+	protected readonly TaskStatusRoleService $task_status_role_service;
 
 	/**
 	 * Constructor.
@@ -426,7 +426,7 @@ final class TaskManagerService {
 	 * @throws RuntimeException
 	 * @throws InvalidArgumentException
 	 */
-	public function delete_task( int $task_id ) {
+	public function delete_task( int $task_id ): int|false {
 		$result = $this->task_repository->delete( $task_id );
 
 		if ( $result ) {
@@ -452,7 +452,7 @@ final class TaskManagerService {
 	 *
 	 * @return int|false
 	 */
-	public function create_field( array $data ) {
+	public function create_field( array $data ): int|false {
 		$field = new TaskField( $data );
 
 		$result = $this->task_field_repository->save( $field );
@@ -588,7 +588,7 @@ final class TaskManagerService {
 	 * @return array|false
 	 * @throws \Throwable Propagated from the transactional shift+insert if the DB layer fails.
 	 */
-	public function add_field_option( int $field_id, array $option_data ) {
+	public function add_field_option( int $field_id, array $option_data ): array|false {
 		$option_data['field_id'] = $field_id;
 
 		// Auto-generate slug from label if not provided.
@@ -1241,7 +1241,7 @@ final class TaskManagerService {
 	 *
 	 * @return mixed Parsed field value.
 	 */
-	public function get_field_value( TaskFieldValue $field_value, TaskField $field ) {
+	public function get_field_value( TaskFieldValue $field_value, TaskField $field ): mixed {
 		if ( is_null( $field_value->value ) ) {
 			return null;
 		}

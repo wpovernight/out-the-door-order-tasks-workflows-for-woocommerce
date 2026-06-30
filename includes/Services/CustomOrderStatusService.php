@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 
 class CustomOrderStatusService {
 
-	protected CustomOrderStatusRepository $repository;
+	protected readonly CustomOrderStatusRepository $repository;
 
 	/**
 	 * @var CustomOrderStatus[]|null
@@ -136,7 +136,7 @@ class CustomOrderStatusService {
 		$keys            = array_keys( $bulk_actions );
 		$insert_position = count( $keys );
 		foreach ( $keys as $index => $key ) {
-			if ( strpos( $key, 'mark_' ) === 0 ) {
+			if ( str_starts_with( $key, 'mark_' ) ) {
 				$insert_position = $index + 1;
 			}
 		}

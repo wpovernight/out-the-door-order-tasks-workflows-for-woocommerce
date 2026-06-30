@@ -10,8 +10,8 @@ use WPO\AOM\Repositories\TaskFieldOptionRepository;
 defined( 'ABSPATH' ) || exit;
 
 class TaskStatusRoleService {
-	protected TaskManagerSettingsService $settings_service;
-	protected TaskFieldOptionRepository $task_field_option_repository;
+	protected readonly TaskManagerSettingsService $settings_service;
+	protected readonly TaskFieldOptionRepository $task_field_option_repository;
 
 	public function __construct(
 		TaskManagerSettingsService $settings_service,

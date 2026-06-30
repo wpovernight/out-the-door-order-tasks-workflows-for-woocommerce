@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 class CustomOrderStatusController extends BaseRestController {
 	protected string $resource_name = 'custom-order-statuses';
 
-	private CustomOrderStatusService $custom_order_status_service;
+	private readonly CustomOrderStatusService $custom_order_status_service;
 
 	/**
 	 * Constructor.
@@ -89,7 +89,7 @@ class CustomOrderStatusController extends BaseRestController {
 	 *
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_items( WP_REST_Request $request ) {
+	public function get_items( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$custom_order_status_service = $this->custom_order_status_service;
 		$custom_order_statuses       = $custom_order_status_service->all();
 
@@ -103,7 +103,7 @@ class CustomOrderStatusController extends BaseRestController {
 	 *
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function create_item( WP_REST_Request $request ) {
+	public function create_item( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$data = $request->get_json_params();
 
 		$errors = $this->validate( $data, array(
@@ -138,7 +138,7 @@ class CustomOrderStatusController extends BaseRestController {
 	 *
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_item( WP_REST_Request $request ) {
+	public function get_item( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$id = (int) $request->get_param( 'id' );
 
 		if ( $id <= 0 ) {
@@ -162,7 +162,7 @@ class CustomOrderStatusController extends BaseRestController {
 	 *
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function update_item( WP_REST_Request $request ) {
+	public function update_item( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$id = (int) $request->get_param( 'id' );
 
 		if ( $id <= 0 ) {
@@ -205,7 +205,7 @@ class CustomOrderStatusController extends BaseRestController {
 	 *
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function delete_item( WP_REST_Request $request ) {
+	public function delete_item( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$id = (int) $request->get_param( 'id' );
 
 		if ( $id <= 0 ) {

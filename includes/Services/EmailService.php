@@ -8,7 +8,7 @@ use WPO\AOM\Emails\TaskUpdatedEmail;
 defined( 'ABSPATH' ) || exit;
 
 final class EmailService {
-	private TaskManagerService $task_manager_service;
+	private readonly TaskManagerService $task_manager_service;
 
 	/**
 	 * Constructor.

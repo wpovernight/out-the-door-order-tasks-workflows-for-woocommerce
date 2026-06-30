@@ -56,7 +56,7 @@ final class Kernel {
 	 *
 	 * @var Container
 	 */
-	private Container $container;
+	private readonly Container $container;
 
 	/**
 	 * Constructor.

@@ -10,8 +10,8 @@ use WPO\AOM\Services\FulfillmentService;
 use WPO\AOM\Services\TaskStatusRoleService;
 
 final class Screen {
-	private FulfillmentService $fulfillment_service;
-	private TaskStatusRoleService $task_status_role_service;
+	private readonly FulfillmentService $fulfillment_service;
+	private readonly TaskStatusRoleService $task_status_role_service;
 
 	/**
 	 * Constructor
@@ -356,18 +356,11 @@ final class Screen {
 	 * @return string
 	 */
 	public function get_fulfillment_status_html( string $fulfillment_status, int $shipped_quantity, int $total_quantity ): string {
-		switch ( $fulfillment_status ) {
-			case FulfillmentStatuses::FULFILLED:
-				$class = 'fully-fulfilled';
-				break;
-			case FulfillmentStatuses::PARTIALLY_FULFILLED:
-				$class = 'partially-fulfilled';
-				break;
-			default:
-			case FulfillmentStatuses::NOT_FULFILLED:
-				$class = 'not-fulfilled';
-				break;
-		}
+		$class = match ( $fulfillment_status ) {
+			FulfillmentStatuses::FULFILLED           => 'fully-fulfilled',
+			FulfillmentStatuses::PARTIALLY_FULFILLED => 'partially-fulfilled',
+			default                                  => 'not-fulfilled',
+		};
 
 		$label = sprintf(
 			'%1$d / %2$d %3$s',

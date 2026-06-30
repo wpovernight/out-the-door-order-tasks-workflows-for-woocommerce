@@ -8,7 +8,7 @@ use WP_CLI;
 defined( 'ABSPATH' ) || exit;
 
 final class InstallCommand extends AbstractCommand {
-	private Installer $installer;
+	private readonly Installer $installer;
 
 	/**
 	 * Constructor.

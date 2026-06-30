@@ -27,9 +27,9 @@ final class Installer {
 		),
 	);
 
-	private TaskFieldRepository $task_field_repository;
-	private TaskFieldOptionRepository $task_field_option_repository;
-	private TaskStatusRoleService $task_status_role_service;
+	private readonly TaskFieldRepository $task_field_repository;
+	private readonly TaskFieldOptionRepository $task_field_option_repository;
+	private readonly TaskStatusRoleService $task_status_role_service;
 
 	/**
 	 * Constructor.

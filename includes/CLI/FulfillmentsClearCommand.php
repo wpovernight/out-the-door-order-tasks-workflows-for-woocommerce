@@ -8,7 +8,7 @@ use WPO\AOM\Services\FulfillmentService;
 defined( 'ABSPATH' ) || exit;
 
 final class FulfillmentsClearCommand extends AbstractCommand {
-	private FulfillmentService $fulfillment_service;
+	private readonly FulfillmentService $fulfillment_service;
 
 	/**
 	 * Constructor.

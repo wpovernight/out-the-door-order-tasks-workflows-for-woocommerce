@@ -50,7 +50,7 @@ abstract class BaseSettingsService {
 	 *
 	 * @return mixed
 	 */
-	public function get( string $key, $default = null ) {
+	public function get( string $key, mixed $default = null ): mixed {
 		$settings = $this->fetchAll();
 
 		if ( array_key_exists( $key, $settings ) ) {
@@ -69,7 +69,7 @@ abstract class BaseSettingsService {
 	 *
 	 * @return self
 	 */
-	public function set( string $key, $value ): self {
+	public function set( string $key, mixed $value ): self {
 		$this->fetchAll();
 
 		if ( ! array_key_exists( $key, $this->settings ) || $this->settings[ $key ] !== $value ) {

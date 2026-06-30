@@ -68,7 +68,7 @@ trait TaskEmailRecipients {
 	 *
 	 * @return mixed|null
 	 */
-	private function get_field_value_from_task( array $task_with_fields, string $field_slug ) {
+	private function get_field_value_from_task( array $task_with_fields, string $field_slug ): mixed {
 		if ( empty( $task_with_fields['fields'] ) ) {
 			return null;
 		}

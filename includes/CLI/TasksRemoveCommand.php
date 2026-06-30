@@ -9,8 +9,8 @@ use WP_CLI;
 defined( 'ABSPATH' ) || exit;
 
 final class TasksRemoveCommand extends AbstractCommand {
-	private TaskRepository $task_repository;
-	private TaskFieldValueRepository $task_field_value_repository;
+	private readonly TaskRepository $task_repository;
+	private readonly TaskFieldValueRepository $task_field_value_repository;
 
 	/**
 	 * Constructor.

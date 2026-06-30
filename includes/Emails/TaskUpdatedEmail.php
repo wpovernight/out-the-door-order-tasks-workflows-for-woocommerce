@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 class TaskUpdatedEmail extends WC_Email {
 	use TaskEmailRecipients;
 	protected array $task_data = array();
-	protected TaskManagerService $task_manager_service;
+	protected readonly TaskManagerService $task_manager_service;
 
 	/**
 	 * Constructor.

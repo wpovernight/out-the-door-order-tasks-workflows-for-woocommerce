@@ -7,7 +7,7 @@ use WPO\AOM\Services\TaskStatusRoleService;
 defined( 'ABSPATH' ) || exit;
 
 final class Screen {
-	private TaskStatusRoleService $task_status_role_service;
+	private readonly TaskStatusRoleService $task_status_role_service;
 
 	/**
 	 * Constructor.

@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 class FulfillmentController extends BaseRestController {
 	protected string $resource_name = 'fulfillments';
 
-	private FulfillmentService $fulfillment_service;
+	private readonly FulfillmentService $fulfillment_service;
 
 	/**
 	 * Constructor.
@@ -57,7 +57,7 @@ class FulfillmentController extends BaseRestController {
 	 *
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_orders( WP_REST_Request $request ) {
+	public function get_orders( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$status = $request->get_param( 'status' ) ?? '';
 
 		if ( ! empty( $status ) && ! FulfillmentStatuses::is_valid( $status ) ) {

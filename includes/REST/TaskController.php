@@ -15,8 +15,8 @@ defined( 'ABSPATH' ) || exit;
 class TaskController extends BaseRestController {
 	protected string $resource_name = 'tasks';
 
-	private TaskManagerService $task_manager_service;
-	private TaskStatusRoleService $task_status_role_service;
+	private readonly TaskManagerService $task_manager_service;
+	private readonly TaskStatusRoleService $task_status_role_service;
 
 	/**
 	 * Constructor.
@@ -294,7 +294,7 @@ class TaskController extends BaseRestController {
 	 *
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_items( WP_REST_Request $request ) {
+	public function get_items( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		try {
 			$task_manager_service = $this->task_manager_service;
 			$tasks                = $task_manager_service->get_all_tasks_with_fields();
@@ -323,7 +323,7 @@ class TaskController extends BaseRestController {
 	 *
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function create_item( WP_REST_Request $request ) {
+	public function create_item( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$data = $request->get_json_params();
 
 		$errors = $this->validate( $data, array(
@@ -370,7 +370,7 @@ class TaskController extends BaseRestController {
 	 *
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_item( WP_REST_Request $request ) {
+	public function get_item( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$id             = (int) $request->get_param( 'id' );
 		$include_fields = $request->get_param( 'include_fields' ) ?? true;
 
@@ -410,7 +410,7 @@ class TaskController extends BaseRestController {
 	 *
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function update_item( WP_REST_Request $request ) {
+	public function update_item( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$id = (int) $request->get_param( 'id' );
 
 		if ( $id <= 0 ) {
@@ -461,7 +461,7 @@ class TaskController extends BaseRestController {
 	 *
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function delete_item( WP_REST_Request $request ) {
+	public function delete_item( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$id = (int) $request->get_param( 'id' );
 
 		if ( $id <= 0 ) {
@@ -531,9 +531,9 @@ class TaskController extends BaseRestController {
 	 *
 	 * @param WP_REST_Request $request
 	 *
-	 * @return mixed
+	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_task_fields( WP_REST_Request $request ) {
+	public function get_task_fields( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		try {
 			$task_manager_service = $this->task_manager_service;
 			$fields               = $task_manager_service->get_all_fields();
@@ -552,7 +552,7 @@ class TaskController extends BaseRestController {
 	 *
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function get_field_options( WP_REST_Request $request ) {
+	public function get_field_options( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$field_id = (int) $request->get_param( 'field_id' );
 
 		if ( $field_id <= 0 ) {
@@ -581,7 +581,7 @@ class TaskController extends BaseRestController {
 	 *
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function get_field_options_by_slug( WP_REST_Request $request ) {
+	public function get_field_options_by_slug( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$field_slug = $request->get_param( 'field_slug' );
 
 		if ( empty( $field_slug ) || ! is_string( $field_slug ) ) {
@@ -610,7 +610,7 @@ class TaskController extends BaseRestController {
 	 *
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function create_field_option( WP_REST_Request $request ) {
+	public function create_field_option( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$field_id = (int) $request->get_param( 'field_id' );
 
 		// Validate field_id.
@@ -669,7 +669,7 @@ class TaskController extends BaseRestController {
 	 *
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function update_field_option( WP_REST_Request $request ) {
+	public function update_field_option( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$field_id = (int) $request->get_param( 'field_id' );
 
 		if ( $field_id <= 0 ) {
@@ -727,7 +727,7 @@ class TaskController extends BaseRestController {
 	 *
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function delete_field_option( WP_REST_Request $request ) {
+	public function delete_field_option( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$field_id = (int) $request->get_param( 'field_id' );
 
 		if ( $field_id <= 0 ) {
@@ -762,7 +762,7 @@ class TaskController extends BaseRestController {
 	 *
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function reorder_field_options( WP_REST_Request $request ) {
+	public function reorder_field_options( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$field_id           = (int) $request->get_param( 'field_id' );
 		$ordered_option_ids = $request->get_param( 'ordered_option_ids' );
 
@@ -856,7 +856,7 @@ class TaskController extends BaseRestController {
 	 * @return WP_REST_Response|WP_Error
 	 * @throws \Throwable
 	 */
-	public function move_task( WP_REST_Request $request ) {
+	public function move_task( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$task_id          = (int) $request->get_param( 'id' );
 		$previous_task_id = $request->get_param( 'previous_task_id' ) ? (int) $request->get_param( 'previous_task_id' ) : null;
 		$target_status_id = (int) $request->get_param( 'target_status_id' );
@@ -895,7 +895,7 @@ class TaskController extends BaseRestController {
 	 * @return WP_REST_Response|WP_Error
 	 * @throws \Exception
 	 */
-	public function finish_task( WP_REST_Request $request ) {
+	public function finish_task( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$task_id = (int) $request->get_param( 'id' );
 
 		if ( $task_id <= 0 ) {
@@ -929,7 +929,7 @@ class TaskController extends BaseRestController {
 	 * @return WP_REST_Response|WP_Error
 	 * @throws \Exception
 	 */
-	public function archive_task( WP_REST_Request $request ) {
+	public function archive_task( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$task_id = (int) $request->get_param( 'id' );
 
 		if ( $task_id <= 0 ) {
@@ -960,7 +960,7 @@ class TaskController extends BaseRestController {
 	 * @return WP_REST_Response|WP_Error
 	 * @throws \Exception
 	 */
-	public function unarchive_task( WP_REST_Request $request ) {
+	public function unarchive_task( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$task_id = (int) $request->get_param( 'id' );
 
 		if ( $task_id <= 0 ) {
@@ -994,7 +994,7 @@ class TaskController extends BaseRestController {
 	 *
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function update_status_roles( WP_REST_Request $request ) {
+	public function update_status_roles( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$data = $request->get_json_params();
 
 		$errors = $this->validate( $data, array(

@@ -8,7 +8,7 @@ final class DependencyChecker {
 	private const PHP_MIN_VERSION = '8.1';
 	private const WC_MIN_VERSION  = '8.2';
 
-	private array $activated_plugins;
+	private readonly array $activated_plugins;
 
 	protected static ?self $_instance = null;
 

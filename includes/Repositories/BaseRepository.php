@@ -259,7 +259,7 @@ abstract class BaseRepository {
 	 *
 	 * @return int|false Insert id or false on failure.
 	 */
-	public function insert( array $data ) {
+	public function insert( array $data ): int|false {
 		if ( empty( $data ) ) {
 			throw new InvalidArgumentException( 'Data must be a non-empty array.' );
 		}
@@ -290,7 +290,7 @@ abstract class BaseRepository {
 	 * @return int|false Number of affected rows or false on failure.
 	 * @throws InvalidArgumentException If columns, rows, or bindings are empty.
 	 */
-	protected function insert_raw( string $columns, array $rows, array $bindings ) {
+	protected function insert_raw( string $columns, array $rows, array $bindings ): int|false {
 		if ( '' === trim( $columns ) || empty( $rows ) || empty( $bindings ) ) {
 			throw new InvalidArgumentException( 'Columns, rows, and bindings must not be empty.' );
 		}
@@ -321,7 +321,7 @@ abstract class BaseRepository {
 	 * @throws RuntimeException If no WHERE clause is specified.
 	 * @throws InvalidArgumentException If data is empty or columns are invalid.
 	 */
-	public function update( array $data ) {
+	public function update( array $data ): int|false {
 		// Validate the data array.
 		if ( empty( $data ) ) {
 			throw new InvalidArgumentException( 'Data must be a non-empty array.' );
@@ -360,7 +360,7 @@ abstract class BaseRepository {
 	 * @throws InvalidArgumentException If SET clause is empty.
 	 * @throws RuntimeException If no WHERE clause is specified.
 	 */
-	protected function update_raw( string $set_clause, array $bindings ) {
+	protected function update_raw( string $set_clause, array $bindings ): int|false {
 		// Ensure that the SET clause is not empty.
 		if ( '' === trim( $set_clause ) ) {
 			throw new InvalidArgumentException( 'SET clause must not be empty.' );
@@ -396,7 +396,7 @@ abstract class BaseRepository {
 	 * @throws InvalidArgumentException
 	 * @throws RuntimeException
 	 */
-	public function save( BaseModel $model ) {
+	public function save( BaseModel $model ): int|false {
 		return $model->id
 			? $this->where( 'id', $model->id )->update( $model->to_db_array() )
 			: $this->insert( $model->to_db_array() );
@@ -409,7 +409,7 @@ abstract class BaseRepository {
 	 * @throws RuntimeException If no WHERE clause is specified.
 	 * @throws InvalidArgumentException If invalid arguments are sent to where().
 	 */
-	public function delete( ?int $id = null ) {
+	public function delete( ?int $id = null ): int|false {
 		if ( ! empty( $id ) ) {
 			$this->where( 'id', absint( $id ) );
 		}
@@ -440,7 +440,7 @@ abstract class BaseRepository {
 	 * @return int|false Number of rows deleted or false on failure.
 	 * @throws RuntimeException If no WHERE clause is specified.
 	 */
-	public function delete_raw() {
+	public function delete_raw(): int|false {
 		if ( empty( $this->wheres ) ) {
 			throw new RuntimeException( 'No WHERE clause specified for delete.' );
 		}
@@ -469,7 +469,7 @@ abstract class BaseRepository {
 	 * @return mixed Result of the callback, or false on failure.
 	 * @throws \Throwable
 	 */
-	public function transaction( callable $callback ) {
+	public function transaction( callable $callback ): mixed {
 		$this->wpdb->query( 'START TRANSACTION' );
 
 		try {
@@ -499,7 +499,7 @@ abstract class BaseRepository {
 		$prefix = static::class . ':';
 
 		foreach ( array_keys( self::$cache ) as $key ) {
-			if ( strpos( $key, $prefix ) === 0 ) {
+			if ( str_starts_with( $key, $prefix ) ) {
 				unset( self::$cache[ $key ] );
 			}
 		}
@@ -914,7 +914,7 @@ abstract class BaseRepository {
 			}
 
 			// Handle table.column format.
-			if ( false !== strpos( $column, '.' ) ) {
+			if ( str_contains( $column, '.' ) ) {
 				$parts  = explode( '.', $column );
 				$column = end( $parts );
 			}
