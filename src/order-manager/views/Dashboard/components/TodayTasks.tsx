@@ -64,7 +64,7 @@ export const TodayTasks = () => {
 		});
 
 		return { todayActive: active, overdue: over, done: finish };
-	}, [tasks, todayStart, todayEnd]);
+	}, [tasks, todayStart, todayEnd, statusRoles.done]);
 
 	const handleAddTask = () => {
 		openCreateTaskModal({

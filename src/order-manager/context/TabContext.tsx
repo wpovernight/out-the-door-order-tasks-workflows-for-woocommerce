@@ -10,7 +10,6 @@ type Tab = string;
  * The list of tabs to render, after add-on plugins (e.g. Pro) have had a
  * chance to extend it.
  *
- * @param {string[]} tabs The slugs of the core tabs.
  * @return {string[]} The (possibly extended) list of tab slugs.
  */
 export const getAvailableTabs = (): Tab[] =>

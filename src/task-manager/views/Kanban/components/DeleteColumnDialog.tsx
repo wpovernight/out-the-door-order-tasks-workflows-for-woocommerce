@@ -65,7 +65,7 @@ const ColumnPickerPhase: React.FC<ColumnPickerPhaseProps> = ({
 		<div className="dialog-content">
 			<h2>{title}</h2>
 			<p>{description}</p>
-			<label className="dialog-field">
+			<label className="dialog-field" htmlFor="column-picker">
 				{fieldLabel}
 				<select
 					className="wpo-aom-select"
@@ -210,7 +210,7 @@ const ProcessingPhase: React.FC<ProcessingPhaseProps> = ({
 						'wpo-advanced-order-manager'
 					)}
 				</p>
-				<label id="delete-progress">
+				<label id="delete-progress" htmlFor="delete-progress">
 					<progress id="delete-progress" max="100" value={percent}>
 						{percent}%
 					</progress>
@@ -738,6 +738,7 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 	};
 
 	return (
+		// eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
 		<dialog
 			ref={dialogRef}
 			className={`wpo-aom-dialog column-deletion-dialog ${phase === 'processing' ? 'processing-action' : 'action-delete'}`}

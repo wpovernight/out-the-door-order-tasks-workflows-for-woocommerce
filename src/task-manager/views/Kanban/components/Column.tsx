@@ -339,6 +339,7 @@ export const Column: React.FC<ColumnProps> = ({
 									type="text"
 									defaultValue={column.label}
 									className="edit-title-input"
+									// eslint-disable-next-line jsx-a11y/no-autofocus
 									autoFocus
 									onFocus={(e) => e.currentTarget.select()}
 									onKeyDown={(e) => {

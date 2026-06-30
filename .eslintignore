@@ -1,6 +1,8 @@
 build/
 dist/
 node_modules/
+assets/js/
+updater/
 webpack.config.js
 tsconfig.json
 .eslintrc.js
