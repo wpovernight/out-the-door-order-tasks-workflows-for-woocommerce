@@ -3,6 +3,7 @@
 namespace WPO\AOM\REST;
 
 use WP_REST_Request;
+use WP_REST_Response;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -10,6 +11,24 @@ abstract class BaseRestController {
 	protected string $namespace = 'wc/v3/wpo/aom';
 
 	abstract public function register_routes(): void;
+
+	/**
+	 * Build the standard success envelope: { data } (+ meta when provided).
+	 *
+	 * @param mixed                    $data The payload.
+	 * @param array<string,mixed>|null $meta Optional metadata to attach alongside the data.
+	 *
+	 * @return WP_REST_Response
+	 */
+	protected function respond( mixed $data, ?array $meta = null ): WP_REST_Response {
+		$payload = array( 'data' => $data );
+
+		if ( null !== $meta ) {
+			$payload['meta'] = $meta;
+		}
+
+		return rest_ensure_response( $payload );
+	}
 
 	/**
 	 * Checks if the current user has permission to access the endpoint.

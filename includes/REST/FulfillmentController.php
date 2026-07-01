@@ -89,7 +89,7 @@ class FulfillmentController extends BaseRestController {
 		 */
 		$data = apply_filters( 'wpo_aom_rest_get_fulfillment_orders', $data, $status );
 
-		return rest_ensure_response( $data );
+		return $this->respond( $data );
 	}
 
 	/**

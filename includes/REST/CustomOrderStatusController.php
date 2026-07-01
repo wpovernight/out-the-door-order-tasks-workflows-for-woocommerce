@@ -93,7 +93,7 @@ class CustomOrderStatusController extends BaseRestController {
 		$custom_order_status_service = $this->custom_order_status_service;
 		$custom_order_statuses       = $custom_order_status_service->all();
 
-		return rest_ensure_response( $custom_order_statuses );
+		return $this->respond( $custom_order_statuses );
 	}
 
 	/**
@@ -128,7 +128,7 @@ class CustomOrderStatusController extends BaseRestController {
 			return new WP_Error( 'creation_failed', $e->getMessage(), array( 'status' => 500 ) );
 		}
 
-		return rest_ensure_response( $new_status );
+		return $this->respond( $new_status );
 	}
 
 	/**
@@ -152,7 +152,7 @@ class CustomOrderStatusController extends BaseRestController {
 			return new WP_Error( 'not_found', __( 'Custom order status not found', 'wpo-advanced-order-manager' ), array( 'status' => 404 ) );
 		}
 
-		return rest_ensure_response( $status );
+		return $this->respond( $status );
 	}
 
 	/**
@@ -195,7 +195,7 @@ class CustomOrderStatusController extends BaseRestController {
 			return new WP_Error( 'update_failed', $e->getMessage(), array( 'status' => 500 ) );
 		}
 
-		return rest_ensure_response( $updated_status );
+		return $this->respond( $updated_status );
 	}
 
 	/**
@@ -220,7 +220,7 @@ class CustomOrderStatusController extends BaseRestController {
 			return new WP_Error( 'deletion_failed', $e->getMessage(), array( 'status' => 500 ) );
 		}
 
-		return rest_ensure_response( array(
+		return $this->respond( array(
 			'success' => true,
 			'message' => __( 'Custom order status deleted successfully', 'wpo-advanced-order-manager' )
 		) );

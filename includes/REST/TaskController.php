@@ -309,7 +309,7 @@ class TaskController extends BaseRestController {
 			 */
 			$tasks = apply_filters( 'wpo_aom_rest_prepare_tasks', $tasks, $request );
 
-			return rest_ensure_response( $tasks );
+			return $this->respond( $tasks );
 		} catch ( \Throwable $e ) {
 			Logger::error( 'Failed to fetch tasks: ' . $e->getMessage() );
 			return new WP_Error( 'fetch_failed', 'Failed to fetch tasks.', array( 'status' => 500 ) );
@@ -356,7 +356,7 @@ class TaskController extends BaseRestController {
 			 */
 			$task = apply_filters( 'wpo_aom_rest_prepare_task', $task, $request );
 
-			return rest_ensure_response( $task );
+			return $this->respond( $task );
 		} catch ( \Throwable $e ) {
 			Logger::error( 'Task creation failed: ' . $e->getMessage() );
 			return new WP_Error( 'task_creation_failed', __( 'Failed to create task.', 'wpo-advanced-order-manager' ), array( 'status' => 500 ) );
@@ -396,7 +396,7 @@ class TaskController extends BaseRestController {
 			 */
 			$task = apply_filters( 'wpo_aom_rest_prepare_task', $task, $request );
 
-			return rest_ensure_response( $task );
+			return $this->respond( $task );
 		} catch ( \Throwable $e ) {
 			Logger::error( 'Failed to fetch task: ' . $e->getMessage() );
 			return new WP_Error( 'fetch_failed', 'Failed to fetch task.', array( 'status' => 500 ) );
@@ -445,7 +445,7 @@ class TaskController extends BaseRestController {
 			 */
 			$task = apply_filters( 'wpo_aom_rest_prepare_task', $task, $request );
 
-			return rest_ensure_response( $task );
+			return $this->respond( $task );
 		} catch ( \InvalidArgumentException $e ) {
 			return new WP_Error( 'not_found', $e->getMessage(), array( 'status' => 404 ) );
 		} catch ( \Throwable $e ) {
@@ -477,7 +477,7 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'task_deletion_failed', __( 'Failed to delete task.', 'wpo-advanced-order-manager' ), array( 'status' => 500 ) );
 		}
 
-		return rest_ensure_response( array( 'message' => 'Task deleted successfully' ) );
+		return $this->respond( array( 'message' => 'Task deleted successfully' ) );
 	}
 
 	/**
@@ -538,7 +538,7 @@ class TaskController extends BaseRestController {
 			$task_manager_service = $this->task_manager_service;
 			$fields               = $task_manager_service->get_all_fields();
 
-			return rest_ensure_response( $fields );
+			return $this->respond( $fields );
 		} catch ( \Throwable $e ) {
 			Logger::error( 'Failed to fetch task fields: ' . $e->getMessage() );
 			return new WP_Error( 'fetch_failed', 'Failed to fetch task fields.', array( 'status' => 500 ) );
@@ -567,7 +567,7 @@ class TaskController extends BaseRestController {
 				return new WP_Error( 'not_found', 'Field not found or has no options', array( 'status' => 404 ) );
 			}
 
-			return rest_ensure_response( $options );
+			return $this->respond( $options );
 		} catch ( \Throwable $e ) {
 			Logger::error( 'Failed to fetch field options: ' . $e->getMessage() );
 			return new WP_Error( 'fetch_failed', 'Failed to fetch field options.', array( 'status' => 500 ) );
@@ -596,7 +596,7 @@ class TaskController extends BaseRestController {
 				return new WP_Error( 'not_found', 'Field not found or has no options', array( 'status' => 404 ) );
 			}
 
-			return rest_ensure_response( $options );
+			return $this->respond( $options );
 		} catch ( \Throwable $e ) {
 			Logger::error( 'Failed to fetch field options: ' . $e->getMessage() );
 			return new WP_Error( 'fetch_failed', 'Failed to fetch field options.', array( 'status' => 500 ) );
@@ -655,7 +655,7 @@ class TaskController extends BaseRestController {
 			 */
 			$option = apply_filters( 'wpo_aom_rest_prepare_field_option', $option, $request );
 
-			return rest_ensure_response( $option );
+			return $this->respond( $option );
 		} catch ( \Throwable $e ) {
 			Logger::error( 'Failed to create field option: ' . $e->getMessage() );
 			return new WP_Error( 'creation_failed', 'Failed to create field option.', array( 'status' => 500 ) );
@@ -711,7 +711,7 @@ class TaskController extends BaseRestController {
 			 */
 			$option = apply_filters( 'wpo_aom_rest_prepare_field_option', $option, $request );
 
-			return rest_ensure_response( $option );
+			return $this->respond( $option );
 		} catch ( \InvalidArgumentException $e ) {
 			return new WP_Error( 'not_found', $e->getMessage(), array( 'status' => 404 ) );
 		} catch ( \Throwable $e ) {
@@ -744,7 +744,7 @@ class TaskController extends BaseRestController {
 			$task_manager_service = $this->task_manager_service;
 			$task_manager_service->delete_field_option( $field_id, $option_id );
 
-			return rest_ensure_response( array( 'success' => true ) );
+			return $this->respond( array( 'success' => true ) );
 		} catch ( \InvalidArgumentException $e ) {
 			return new WP_Error( 'not_found', $e->getMessage(), array( 'status' => 404 ) );
 		} catch ( \RuntimeException $e ) {
@@ -781,7 +781,7 @@ class TaskController extends BaseRestController {
 
 			$task_manager_service->update_field_option_positions( $field_id, $ordered_option_ids );
 
-			return rest_ensure_response(
+			return $this->respond(
 				array(
 					'success' => true,
 					'message' => __( 'Field option positions updated successfully', 'wpo-advanced-order-manager' ),
@@ -884,7 +884,7 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'task_move_failed', __( 'Failed to move task.', 'wpo-advanced-order-manager' ), array( 'status' => 500 ) );
 		}
 
-		return rest_ensure_response( array( 'new_position' => $new_position ) );
+		return $this->respond( array( 'new_position' => $new_position ) );
 	}
 
 	/**
@@ -907,7 +907,7 @@ class TaskController extends BaseRestController {
 		try {
 			$task_service->mark_task_finished( $task_id );
 
-			return rest_ensure_response( array(
+			return $this->respond( array(
 				'success' => true,
 				'message' => 'Task marked as finished',
 			) );
@@ -947,7 +947,7 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'task_archive_failed', __( 'Failed to archive task.', 'wpo-advanced-order-manager' ), array( 'status' => 500 ) );
 		}
 
-		return rest_ensure_response( array(
+		return $this->respond( array(
 			'success' => true,
 			'message' => 'Task archived',
 		) );
@@ -978,7 +978,7 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'task_unarchive_failed', __( 'Failed to unarchive task.', 'wpo-advanced-order-manager' ), array( 'status' => 500 ) );
 		}
 
-		return rest_ensure_response( array(
+		return $this->respond( array(
 			'success' => true,
 			'message' => 'Task unarchived',
 		) );
@@ -1025,7 +1025,7 @@ class TaskController extends BaseRestController {
 				);
 			}
 
-			return rest_ensure_response( array(
+			return $this->respond( array(
 				'done'   => $task_status_role_service->get_done_field_option_id(),
 				'undone' => $task_status_role_service->get_undone_field_option_id(),
 			) );
