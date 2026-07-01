@@ -3,7 +3,7 @@ import {
 	getApiRoot,
 	getApiNamespace,
 	getHeaders,
-	handleResponse,
+	handleEnvelope,
 } from './client';
 
 /**
@@ -22,5 +22,5 @@ export async function fetchTaskFields(): Promise<Record<string, TaskField>> {
 		}
 	);
 
-	return handleResponse<Record<string, TaskField>>(response);
+	return handleEnvelope<Record<string, TaskField>>(response);
 }

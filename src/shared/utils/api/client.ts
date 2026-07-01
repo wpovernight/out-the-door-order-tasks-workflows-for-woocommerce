@@ -52,3 +52,21 @@ export async function handleResponse<T>(response: Response): Promise<T> {
 
 	return response.json() as Promise<T>;
 }
+
+/**
+ * The uniform response wrapper for our wc/v3/wpo/aom/* endpoints.
+ *
+ */
+export interface Envelope<TData, TMeta = undefined> {
+	data: TData;
+	meta?: TMeta;
+}
+
+/**
+ * Unwraps the { data } envelope used by our endpoints. WC core
+ * endpoints are not enveloped, keep using handleResponse for those.
+ */
+export async function handleEnvelope<T>(response: Response): Promise<T> {
+	const body = await handleResponse<Envelope<T> | undefined>(response);
+	return body?.data as T;
+}

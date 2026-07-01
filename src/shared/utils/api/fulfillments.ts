@@ -4,6 +4,7 @@ import {
 	getApiRoot,
 	getApiNamespace,
 	getHeaders,
+	handleEnvelope,
 	handleResponse,
 } from './client';
 
@@ -22,7 +23,7 @@ export async function fetchFulfillmentOrders(
 		headers: getHeaders(),
 	});
 
-	return handleResponse<any[]>(response);
+	return handleEnvelope<FulfillmentOrder[]>(response);
 }
 
 /**

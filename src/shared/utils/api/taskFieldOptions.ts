@@ -3,7 +3,7 @@ import {
 	getApiRoot,
 	getApiNamespace,
 	getHeaders,
-	handleResponse,
+	handleEnvelope,
 } from './client';
 
 /**
@@ -25,7 +25,7 @@ export async function fetchFieldOptions(
 		}
 	);
 
-	return handleResponse<FieldOption[]>(response);
+	return handleEnvelope<FieldOption[]>(response);
 }
 
 /**
@@ -52,7 +52,7 @@ export async function reorderFieldOptions(
 		}
 	);
 
-	return handleResponse<{ success: boolean; message: string }>(response);
+	return handleEnvelope<{ success: boolean; message: string }>(response);
 }
 
 export async function createFieldOption(
@@ -69,7 +69,7 @@ export async function createFieldOption(
 		}
 	);
 
-	return handleResponse<FieldOption>(response);
+	return handleEnvelope<FieldOption>(response);
 }
 
 export async function updateFieldOption(
@@ -87,7 +87,7 @@ export async function updateFieldOption(
 		}
 	);
 
-	return handleResponse<FieldOption>(response);
+	return handleEnvelope<FieldOption>(response);
 }
 
 export async function deleteFieldOption(
@@ -103,5 +103,5 @@ export async function deleteFieldOption(
 		}
 	);
 
-	return handleResponse<void>(response);
+	return handleEnvelope<void>(response);
 }

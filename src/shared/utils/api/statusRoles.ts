@@ -3,7 +3,7 @@ import {
 	getApiRoot,
 	getApiNamespace,
 	getHeaders,
-	handleResponse,
+	handleEnvelope,
 } from './client';
 
 export async function updateStatusRoles(
@@ -19,5 +19,5 @@ export async function updateStatusRoles(
 		}
 	);
 
-	return handleResponse<StatusRoles>(response);
+	return handleEnvelope<StatusRoles>(response);
 }

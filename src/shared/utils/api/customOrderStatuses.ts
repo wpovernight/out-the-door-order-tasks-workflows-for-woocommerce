@@ -3,7 +3,7 @@ import {
 	getApiRoot,
 	getApiNamespace,
 	getHeaders,
-	handleResponse,
+	handleEnvelope,
 } from './client';
 
 export async function fetchCustomOrderStatuses(): Promise<CustomOrderStatus[]> {
@@ -16,7 +16,7 @@ export async function fetchCustomOrderStatuses(): Promise<CustomOrderStatus[]> {
 		}
 	);
 
-	return handleResponse<CustomOrderStatus[]>(response);
+	return handleEnvelope<CustomOrderStatus[]>(response);
 }
 
 export async function createCustomOrderStatus(
@@ -32,7 +32,7 @@ export async function createCustomOrderStatus(
 		}
 	);
 
-	return handleResponse<CustomOrderStatus>(response);
+	return handleEnvelope<CustomOrderStatus>(response);
 }
 
 export async function updateCustomOrderStatus(
@@ -49,7 +49,7 @@ export async function updateCustomOrderStatus(
 		}
 	);
 
-	return handleResponse<CustomOrderStatus>(response);
+	return handleEnvelope<CustomOrderStatus>(response);
 }
 
 export async function deleteCustomOrderStatus(statusId: number): Promise<void> {
@@ -62,5 +62,5 @@ export async function deleteCustomOrderStatus(statusId: number): Promise<void> {
 		}
 	);
 
-	return handleResponse<void>(response);
+	return handleEnvelope<void>(response);
 }

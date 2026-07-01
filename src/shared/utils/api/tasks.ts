@@ -3,7 +3,7 @@ import {
 	getApiRoot,
 	getApiNamespace,
 	getHeaders,
-	handleResponse,
+	handleEnvelope,
 } from './client';
 
 /**
@@ -19,7 +19,7 @@ export async function fetchTasks(): Promise<Task[]> {
 		headers: getHeaders(),
 	});
 
-	const data = await handleResponse<any[]>(response);
+	const data = await handleEnvelope<any[]>(response);
 
 	return data.map((task: any) => {
 		const statusField = task.fields.find(
@@ -53,7 +53,7 @@ export async function createTask(payload: Partial<Task>): Promise<Task> {
 		body: JSON.stringify(payload),
 	});
 
-	const task = await handleResponse<any>(response);
+	const task = await handleEnvelope<any>(response);
 
 	// Apply the same mapping as fetchTasks
 	const statusField = task.fields?.find(
@@ -84,7 +84,7 @@ export async function updateTask(
 		}
 	);
 
-	const task = await handleResponse<any>(response);
+	const task = await handleEnvelope<any>(response);
 
 	// Apply the same mapping as fetchTasks
 	const statusField = task.fields?.find(
@@ -111,7 +111,7 @@ export async function deleteTask(taskId: number): Promise<void> {
 		}
 	);
 
-	return handleResponse<void>(response);
+	return handleEnvelope<void>(response);
 }
 
 /**
@@ -142,7 +142,7 @@ export async function moveTask(
 		}
 	);
 
-	return handleResponse<{ new_position: number }>(response);
+	return handleEnvelope<{ new_position: number }>(response);
 }
 
 /**
@@ -162,7 +162,7 @@ export async function finishTask(taskId: number): Promise<boolean> {
 		}
 	);
 
-	const data = await handleResponse<{ success: boolean }>(response);
+	const data = await handleEnvelope<{ success: boolean }>(response);
 	return data.success;
 }
 
@@ -183,7 +183,7 @@ export async function archiveTask(taskId: number): Promise<boolean> {
 		}
 	);
 
-	const data = await handleResponse<{ success: boolean }>(response);
+	const data = await handleEnvelope<{ success: boolean }>(response);
 	return data.success;
 }
 
@@ -197,6 +197,6 @@ export async function unarchiveTask(taskId: number): Promise<boolean> {
 		}
 	);
 
-	const data = await handleResponse<{ success: boolean }>(response);
+	const data = await handleEnvelope<{ success: boolean }>(response);
 	return data.success;
 }
