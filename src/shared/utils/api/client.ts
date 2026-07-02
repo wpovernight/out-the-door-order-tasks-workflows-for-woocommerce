@@ -65,6 +65,7 @@ export interface Envelope<TData, TMeta = undefined> {
 /**
  * Unwraps the { data } envelope used by our endpoints. WC core
  * endpoints are not enveloped, keep using handleResponse for those.
+ * @param response
  */
 export async function handleEnvelope<T>(response: Response): Promise<T> {
 	const body = await handleResponse<Envelope<T> | undefined>(response);
