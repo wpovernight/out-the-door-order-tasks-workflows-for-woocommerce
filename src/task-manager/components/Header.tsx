@@ -65,6 +65,7 @@ export default function Header() {
 						type="button"
 						className="wpo-button wpo-button-primary add-menu-button"
 						onClick={handleAddTask}
+						title={__('Add new task', 'wpo-advanced-order-manager')}
 					>
 						<span className="screen-reader-text">
 							{__('Add new task', 'wpo-advanced-order-manager')}
