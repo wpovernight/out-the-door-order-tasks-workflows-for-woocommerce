@@ -4,7 +4,7 @@ A WordPress plugin that extends WooCommerce's order management with advanced fea
 
 ## Requirements
 
-- PHP 7.4+
+- PHP 8.1+
 - WordPress 6.7+
 - WooCommerce 8.2+
 
