@@ -26,6 +26,7 @@ import { useConfirm } from '@shared/context/DialogContext';
 import { useOnClickOutside } from '@shared/hooks/useOnClickOutside';
 import { useStatusRoles } from '@shared/context/StatusRoleContext';
 import { DeleteColumnDialog } from './DeleteColumnDialog';
+import { useTaskCreation } from '@shared/hooks/useTaskFormModal';
 
 interface ColumnProps {
 	column: FieldOption;
@@ -56,6 +57,7 @@ export const Column: React.FC<ColumnProps> = ({
 	const confirm = useConfirm();
 	const { statusRoles } = useStatusRoles();
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+	const { openCreateTaskModal } = useTaskCreation();
 
 	const isRoleAssigned =
 		statusRoles.done === column.id || statusRoles.undone === column.id;
@@ -239,6 +241,15 @@ export const Column: React.FC<ColumnProps> = ({
 		});
 	}, []);
 
+	const handleAddTask = () => {
+		openCreateTaskModal({
+			title: __('Add Task', 'wpo-advanced-order-manager'),
+			initialValues: {
+				statusIndex: column.position - 1,
+			},
+		});
+	};
+
 	const handleTitleSave = () => {
 		onColumnUpdate();
 		setColumnTitleEditState('idle');
@@ -384,6 +395,14 @@ export const Column: React.FC<ColumnProps> = ({
 						ref={actionsContainerRef}
 						className="kanban-column-header-actions"
 					>
+						<button
+							onClick={handleAddTask}
+							className="wpo-button wpo-button-icon wpo-aom-add-button"
+						>
+							<span className="screen-reader-text">
+								{__('Create', 'wpo-advanced-order-manager')}
+							</span>
+						</button>
 						<button
 							className="wpo-button wpo-button-icon wpo-options-button"
 							type="button"
