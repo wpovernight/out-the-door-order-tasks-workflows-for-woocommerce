@@ -277,6 +277,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 							id="status"
 							name="field_status"
 							selected={statusOption}
+							onChange={handleFormChange}
 						/>
 					</div>
 					<div>
@@ -292,6 +293,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 							id="priority"
 							name="field_priority"
 							selected={priorityOption}
+							onChange={handleFormChange}
 						/>
 					</div>
 					<div>
@@ -302,6 +304,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 							id="due-date"
 							name="field_due_date"
 							value={dueDate}
+							onChange={handleFormChange}
 						/>
 					</div>
 				</div>
