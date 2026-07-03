@@ -6,6 +6,7 @@
 }
 
 .wpo-aom-sidebar-close::before {
+    font-family: dashicons;
     content: '\f335';
     font-size: 1.4em;
     color: var(--wpo-aom-text-gray);

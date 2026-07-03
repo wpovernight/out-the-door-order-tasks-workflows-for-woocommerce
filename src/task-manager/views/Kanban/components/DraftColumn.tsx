@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { __ } from '@wordpress/i18n';
 
 import { useTasks } from '@shared/context/TaskContext';
+import { ToastType, useToast } from '@shared/context/ToastContext';
 
 interface DraftColumnProps {
 	fieldId: number;
@@ -14,13 +15,39 @@ export const DraftColumn: React.FC<DraftColumnProps> = ({
 	position,
 	onClose,
 }) => {
-	const { createFieldOption } = useTasks();
+	const { createFieldOption, fieldOptions } = useTasks();
+	const { addToast } = useToast();
 	const inputRef = useRef<HTMLInputElement | null>(null);
 
 	const handleSave = () => {
 		const label = inputRef.current?.value.trim();
 		if (!label) {
 			onClose();
+			return;
+		}
+
+		// Reject a name that already belongs to another column.
+		const isDuplicate = Object.values(fieldOptions)
+			.flat()
+			.some(
+				(option) =>
+					option.field_id === fieldId &&
+					option.label.trim().toLowerCase() === label.toLowerCase()
+			);
+
+		if (isDuplicate) {
+			addToast({
+				title: __(
+					'A column with this name already exists.',
+					'wpo-advanced-order-manager'
+				),
+				message: __(
+					'Please choose a different name.',
+					'wpo-advanced-order-manager'
+				),
+				type: ToastType.ERROR,
+			});
+			inputRef.current?.select();
 			return;
 		}
 
