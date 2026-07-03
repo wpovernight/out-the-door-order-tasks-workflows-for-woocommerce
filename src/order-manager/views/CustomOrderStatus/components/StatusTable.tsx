@@ -152,6 +152,7 @@ export const StatusTable = ({
 														)}
 													</span>
 												</button>
+                                            </li><li>
 												<button
 													type="button"
 													className="wpo-button wpo-button-icon wpo-aom-delete-button"
