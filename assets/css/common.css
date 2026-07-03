@@ -34,6 +34,7 @@
     /* Primary Colors */
     --wpo-aom-primary-color: #0079bf;
     --wpo-aom-purple-primary: #6E1EDC;
+    --wpo-aom-purple-primary-dark: #2B0C55;
     --wpo-aom-purple-dark: #411282;
     --wpo-aom-purple-light: #7c3aed;
     --wpo-aom-purple-lighter: #5818AF;
@@ -164,6 +165,10 @@
     background-color: var(--wpo-aom-purple-primary);
     color: #fff;
     border: none;
+}
+
+.wpo-button-primary:hover {
+    background-color: var(--wpo-aom-purple-primary-dark);
 }
 
 .wpo-button-primary:disabled {
