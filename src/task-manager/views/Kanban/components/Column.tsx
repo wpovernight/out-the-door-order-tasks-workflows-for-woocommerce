@@ -485,6 +485,13 @@ export const Column: React.FC<ColumnProps> = ({
 						{tasks.map((task) => (
 							<Card key={task.id} task={task} />
 						))}
+						<button
+							type="button"
+							className="wpo-button kanban-column-add-task"
+							onClick={handleAddTask}
+						>
+							{__('Add new task', 'wpo-advanced-order-manager')}
+						</button>
 					</div>
 				</div>
 			</div>

@@ -254,7 +254,25 @@
     flex-direction: column;
     gap: 0.92em;
     padding-top: 0.65em; /* Required for the space for drop indicator before the first card */
-    min-height: 97%;
+    min-height: 98%;
+}
+
+.kanban-board .kanban-column-add-task {
+    padding: 0.5em;
+    margin-top: auto; /* Push to the bottom when the column isn't filled with cards */
+    margin-bottom: 1em;
+    cursor: pointer;
+    border-radius: var(--wpo-aom-radius-m);
+    background: var(--wpo-aom-card-bg);
+    border: 1px solid #E9EAEB;
+    box-shadow: var(--wpo-aom-card-shadow);
+    color: var(--wpo-aom-text-gray);
+    font-weight: 600;
+    font-size: 1.1em;
+}
+
+.kanban-board .kanban-column-add-task:hover {
+    color: var(--wpo-aom-primary-color);
 }
 
 .kanban-board .kanban-column-header {
@@ -505,7 +523,7 @@
 }
 
 .task-card-wrapper.drop-indicator-bottom::after,
-.kanban-column-container.show-drop-indicator .task-card-wrapper:last-child::after {
+.kanban-column-container.show-drop-indicator .task-card-wrapper:last-of-type::after {
     content: "";
     position: absolute;
     left: 0;
