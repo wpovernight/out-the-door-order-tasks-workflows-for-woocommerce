@@ -11,7 +11,6 @@ const viewLabels: Record<string, string> = {
 };
 
 export default function Header() {
-	const addMenuRef = useRef<HTMLDivElement>(null);
 	const { view, setView, searchQuery, setSearchQuery } = useView();
 	const { openCreateTaskModal } = useTaskCreation();
 
@@ -60,18 +59,16 @@ export default function Header() {
 						onChange={(e) => setSearchQuery(e.target.value)}
 					/>
 				</div>
-				<div ref={addMenuRef} className="add-menu-container">
-					<button
-						type="button"
-						className="wpo-button wpo-button-primary add-menu-button"
-						onClick={handleAddTask}
-						title={__('Add new task', 'wpo-advanced-order-manager')}
-					>
-						<span className="screen-reader-text">
-							{__('Add new task', 'wpo-advanced-order-manager')}
-						</span>
-					</button>
-				</div>
+				<button
+					type="button"
+					className="wpo-button wpo-button-primary add-new-task"
+					onClick={handleAddTask}
+					title={__('Add new task', 'wpo-advanced-order-manager')}
+				>
+					<span className="screen-reader-text">
+						{__('Add new task', 'wpo-advanced-order-manager')}
+					</span>
+				</button>
 			</div>
 		</div>
 	);

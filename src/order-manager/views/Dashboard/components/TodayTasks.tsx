@@ -148,7 +148,7 @@ export const TodayTasks = () => {
 				</h3>
 				<button
 					type="button"
-					className="wpo-button wpo-button-icon wpo-aom-add-button"
+					className="wpo-button wpo-button-icon add-new-task"
 					onClick={handleAddTask}
 					title={__('Add Task', 'wpo-advanced-order-manager')}
 				>

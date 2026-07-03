@@ -180,7 +180,7 @@ export const TaskActionMenu: React.FC<TaskActionMenuProps> = ({
 	return (
 		<div className="task-card-options" ref={menuRef}>
 			<button
-				className="wpo-button wpo-button-icon wpo-options-button"
+				className="wpo-button wpo-button-icon options-button"
 				type="button"
 				onClick={handleToggle}
 			>

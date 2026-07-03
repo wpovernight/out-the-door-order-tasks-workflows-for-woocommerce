@@ -15,6 +15,33 @@
     padding: 2.4em;
 }
 
+#wpo-aom-order-manager .task-manager-tab .options-button {
+    border-radius: var(--wpo-aom-radius-m);
+    font-size: 1em;
+    padding: 0;
+    margin: 0;
+    position: relative;
+}
+
+#wpo-aom-order-manager .task-manager-tab .options-button::before {
+    content: '';
+    position: absolute;
+    transform: translate(-50%, -50%);
+    top: 50%;
+    left: 50%;
+    width: 1.2em;
+    height: 1.2em;
+    background-color: currentColor;
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-image: var(--wpo-aom-icon-dots-three);
+    -webkit-mask-image: var(--wpo-aom-icon-dots-three);
+}
+
 #wpo-aom-order-manager .task-manager-tab .header {
     align-items: end;
     border-bottom: 2px solid #091E4224;
@@ -107,7 +134,7 @@
     border-color: var(--wpo-aom-purple-primary);
 }
 
-#wpo-aom-order-manager .task-manager-tab .header-actions .add-menu-button {
+#wpo-aom-order-manager .task-manager-tab .header-actions .add-new-task {
     border-radius: var(--wpo-aom-radius-m);
     font-size: 1.5em;
     height: 2.055em;
@@ -116,10 +143,21 @@
     margin: 0;
 }
 
-#wpo-aom-order-manager .task-manager-tab .header-actions .add-menu-button::before {
-    font-family: dashicons;
-    content: '\f543';
-    display: block;
+#wpo-aom-order-manager .task-manager-tab .header-actions .add-new-task::before {
+    content: '';
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 0.95em;
+    height: 0.95em;
+    background-color: currentColor;
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-image: var(--wpo-aom-icon-add);
+    -webkit-mask-image: var(--wpo-aom-icon-add);
 }
 
 .kanban-board {
@@ -334,6 +372,10 @@
     display: block;
     font-size: 1.6em;
     color: #FF5C5C;
+}
+
+.kanban-board .kanban-column-header .kanban-column-header-actions {
+    gap: 0.3em;
 }
 
 #wpo-aom-order-manager .task-manager-tab ul.column-action-menu {

@@ -71,7 +71,7 @@ export const Column: React.FC<ColumnProps> = ({
 		editStateRef.current = columnTitleEditState;
 	}, [columnTitleEditState]);
 	const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
-	const actionsContainerRef = useRef<HTMLDivElement | null>(null);
+	const actionsContainerRef = useRef<HTMLUListElement | null>(null);
 	const [draggingState, setDraggingState] = useState<ColumnState>(IDLE);
 
 	useOnClickOutside(actionsContainerRef, () => setIsActionMenuOpen(false));
@@ -391,33 +391,36 @@ export const Column: React.FC<ColumnProps> = ({
 							</>
 						)}
 					</div>
-					<div
+					<ul
 						ref={actionsContainerRef}
-						className="kanban-column-header-actions"
+						className="kanban-column-header-actions wpo-aom-row-actions"
 					>
-						<button
-							onClick={handleAddTask}
-							className="wpo-button wpo-button-icon wpo-aom-add-button"
-						>
-							<span className="screen-reader-text">
-								{__('Create', 'wpo-advanced-order-manager')}
-							</span>
-						</button>
-						<button
-							className="wpo-button wpo-button-icon wpo-options-button"
-							type="button"
-							onClick={(e) => {
-								e.stopPropagation();
-								setIsActionMenuOpen((prev) => !prev);
-							}}
-						>
-							<span className="screen-reader-text">
-								{__('Options', 'wpo-advanced-order-manager')}
-							</span>
-						</button>
-						<ul
-							className={`wpo-action-menu column-action-menu ${isActionMenuOpen ? 'is-open' : ''}`}
-						>
+						<li>
+							<button
+								onClick={handleAddTask}
+								className="wpo-button wpo-button-icon wpo-aom-add-button"
+							>
+								<span className="screen-reader-text">
+									{__('Create', 'wpo-advanced-order-manager')}
+								</span>
+							</button>
+						</li>
+						<li>
+							<button
+								className="wpo-button wpo-button-icon options-button"
+								type="button"
+								onClick={(e) => {
+									e.stopPropagation();
+									setIsActionMenuOpen((prev) => !prev);
+								}}
+							>
+								<span className="screen-reader-text">
+									{__('Options', 'wpo-advanced-order-manager')}
+								</span>
+							</button>
+							<ul
+								className={`wpo-action-menu column-action-menu ${isActionMenuOpen ? 'is-open' : ''}`}
+							>
 							<li>
 								<button
 									type="button"
@@ -467,9 +470,10 @@ export const Column: React.FC<ColumnProps> = ({
 								</button>
 							</li>
 						</ul>
-					</div>
-				</div>
-				<div ref={scrollableRef} className="kanban-column-scrollable">
+					</li>
+				</ul>
+			</div>
+			<div ref={scrollableRef} className="kanban-column-scrollable">
 					<div
 						ref={containerRef}
 						className={`kanban-column-container ${
