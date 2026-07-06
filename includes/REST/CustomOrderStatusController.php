@@ -107,8 +107,8 @@ class CustomOrderStatusController extends BaseRestController {
 		$data = $request->get_json_params();
 
 		$errors = $this->validate( $data, array(
-			'label'      => 'required|string',
-			'status_key' => 'string|regex:/^[a-z0-9_-]+$/i',
+			'label'      => 'required|string|max:255',
+			'status_key' => 'string|max:64|regex:/^[a-z0-9_-]+$/i',
 			'background' => 'string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
 			'foreground' => 'string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
 		) );
@@ -172,8 +172,8 @@ class CustomOrderStatusController extends BaseRestController {
 		$data = $request->get_json_params();
 
 		$errors = $this->validate( $data, array(
-			'label'      => 'string',
-			'status_key' => 'string|regex:/^[a-z0-9_-]+$/i',
+			'label'      => 'string|max:255',
+			'status_key' => 'string|max:64|regex:/^[a-z0-9_-]+$/i',
 			'background' => 'string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
 			'foreground' => 'string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
 		) );

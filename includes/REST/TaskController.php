@@ -327,7 +327,7 @@ class TaskController extends BaseRestController {
 		$data = $request->get_json_params();
 
 		$errors = $this->validate( $data, array(
-			'title'        => 'required|string',
+			'title'        => 'required|string|max:255',
 			'description'  => 'string',
 			'field_values' => 'array',
 		) );
@@ -420,7 +420,7 @@ class TaskController extends BaseRestController {
 		$data = $request->get_json_params();
 
 		$errors = $this->validate( $data, array(
-			'title'       => 'string',
+			'title'       => 'string|max:255',
 			'description' => 'string',
 			'field_values' => 'array',
 		) );
@@ -621,8 +621,8 @@ class TaskController extends BaseRestController {
 		$data = $request->get_json_params();
 
 		$errors = $this->validate( $data, array(
-			'label'    => 'required|string',
-			'slug'     => 'string|regex:/^[a-z0-9_-]+$/i',
+			'label'    => 'required|string|max:255',
+			'slug'     => 'string|max:255|regex:/^[a-z0-9_-]+$/i',
 			'color'    => 'string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
 			'position' => 'integer',
 		) );
@@ -685,8 +685,8 @@ class TaskController extends BaseRestController {
 		$data = $request->get_json_params();
 
 		$errors = $this->validate( $data, array(
-			'label'    => 'string',
-			'slug'     => 'string|regex:/^[a-z0-9_-]+$/i',
+			'label'    => 'string|max:255',
+			'slug'     => 'string|max:255|regex:/^[a-z0-9_-]+$/i',
 			'color'    => 'string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
 			'position' => 'integer',
 		) );

@@ -97,7 +97,7 @@ abstract class BaseRestController {
 	 *
 	 * @return string|null Error message or null if validation passes
 	 */
-	private function validate_rule( string $field, $value, string $rule_name, ?string $rule_parameter ): ?string {
+	private function validate_rule( string $field, mixed $value, string $rule_name, ?string $rule_parameter ): ?string {
 		switch ( $rule_name ) {
 			case 'required':
 				if ( empty( $value ) ) {
@@ -131,6 +131,18 @@ abstract class BaseRestController {
 			case 'array':
 				if ( ! is_null( $value ) && ! is_array( $value ) ) {
 					return $this->format_error_message( $field, 'must be an array' );
+				}
+				break;
+			case 'max':
+				if (
+					is_string( $value ) &&
+					is_numeric( $rule_parameter ) &&
+					mb_strlen( $value ) > (int) $rule_parameter
+				) {
+					return $this->format_error_message(
+						$field,
+						sprintf( 'may not be longer than %d characters', (int) $rule_parameter )
+					);
 				}
 				break;
 		}
