@@ -200,10 +200,13 @@ final class TaskManagerService {
 		);
 		$task      = new Task( $task_data );
 
-		$result   = $this->task_repository->save( $task );
+		$result = $this->task_repository->save( $task );
 
 		if ( ! $result ) {
-			throw new Exception( 'Failed to create task.' );
+			$db_error = $this->task_repository->get_last_db_error();
+			throw new Exception(
+				'Failed to create task.' . ( $db_error ? ' Database error: ' . $db_error : '' )
+			);
 		}
 
 		$task->id           = $result;
@@ -302,7 +305,10 @@ final class TaskManagerService {
 		$result = $this->task_repository->save( $task );
 
 		if ( false === $result ) {
-			throw new RuntimeException( 'Failed to update task.' );
+			$db_error = $this->task_repository->get_last_db_error();
+			throw new RuntimeException(
+				'Failed to update task.' . ( $db_error ? ' Database error: ' . $db_error : '' )
+			);
 		}
 
 		// Update field values if provided.
@@ -467,6 +473,11 @@ final class TaskManagerService {
 			 * @param array $data     The field data.
 			 */
 			do_action( 'wpo_aom_field_created', $field->id, $data );
+		} else {
+			$db_error = $this->task_field_repository->get_last_db_error();
+			Logger::error(
+				'Failed to create task field.' . ( $db_error ? ' Database error: ' . $db_error : '' )
+			);
 		}
 
 		return $result;
@@ -498,6 +509,15 @@ final class TaskManagerService {
 			 * @param array $data     The updated field data.
 			 */
 			do_action( 'wpo_aom_field_updated', $field_id, $data );
+		} else {
+			$db_error = $this->task_field_repository->get_last_db_error();
+			Logger::error(
+				sprintf(
+					'Failed to update task field %d.%s',
+					$field_id,
+					$db_error ? ' Database error: ' . $db_error : ''
+				)
+			);
 		}
 
 		return $result;
@@ -585,10 +605,10 @@ final class TaskManagerService {
 	 * @param int   $field_id
 	 * @param array $option_data
 	 *
-	 * @return array|false
+	 * @return array
 	 * @throws \Throwable Propagated from the transactional shift+insert if the DB layer fails.
 	 */
-	public function add_field_option( int $field_id, array $option_data ): array|false {
+	public function add_field_option( int $field_id, array $option_data ): array {
 		$option_data['field_id'] = $field_id;
 
 		// Auto-generate slug from label if not provided.
@@ -656,7 +676,10 @@ final class TaskManagerService {
 		);
 
 		if ( ! $option_id ) {
-			return false;
+			$db_error = $this->task_field_option_repository->get_last_db_error();
+			throw new RuntimeException(
+				'Failed to create field option.' . ( $db_error ? ' Database error: ' . $db_error : '' )
+			);
 		}
 
 		// Drop any cached reads.
@@ -729,7 +752,10 @@ final class TaskManagerService {
 		$option->fill( $option_data );
 
 		if ( false === $this->task_field_option_repository->save( $option ) ) {
-			throw new RuntimeException( 'Failed to persist field option.' );
+			$db_error = $this->task_field_option_repository->get_last_db_error();
+			throw new RuntimeException(
+				'Failed to persist field option.' . ( $db_error ? ' Database error: ' . $db_error : '' )
+			);
 		}
 
 		$this->task_field_option_repository::clear_cache();
@@ -912,16 +938,30 @@ final class TaskManagerService {
 		if ( $field_value ) {
 			$field_value->value = maybe_serialize( $value );
 
-			return false !== $this->task_field_value_repository->save( $field_value );
+			$saved = false !== $this->task_field_value_repository->save( $field_value );
+		} else {
+			$new_value = array(
+				'task_id'  => $task_id,
+				'field_id' => $field_id,
+				'value'    => maybe_serialize( $value ),
+			);
+
+			$saved = false !== $this->task_field_value_repository->insert( $new_value );
 		}
 
-		$new_value = array(
-			'task_id'  => $task_id,
-			'field_id' => $field_id,
-			'value'    => maybe_serialize( $value ),
-		);
+		if ( ! $saved ) {
+			$db_error = $this->task_field_value_repository->get_last_db_error();
+			Logger::error(
+				sprintf(
+					'Failed to persist field value for task %d, field %d.%s',
+					$task_id,
+					$field_id,
+					$db_error ? ' Database error: ' . $db_error : ''
+				)
+			);
+		}
 
-		return false !== $this->task_field_value_repository->insert( $new_value );
+		return $saved;
 	}
 
 	/**
@@ -938,7 +978,7 @@ final class TaskManagerService {
 		foreach ( $field_data as $field_id => $value ) {
 			$result = $this->set_field_value( $task_id, (int) $field_id, $value );
 			if ( ! $result ) {
-				Logger::warning( sprintf( 'Failed to set field value for task %d, field %d.', $task_id, $field_id ) );
+				// set_field_value() already logs the DB-level reason.
 				$success = false;
 			}
 		}

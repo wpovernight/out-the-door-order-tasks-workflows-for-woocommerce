@@ -222,7 +222,11 @@ class CustomOrderStatusService {
 		$result = $this->repository->save( $status );
 
 		if ( ! $result ) {
-			throw new Exception( esc_html__( 'Failed to create custom order status', 'wpo-advanced-order-manager' ) );
+			$db_error = $this->repository->get_last_db_error();
+			throw new Exception(
+				esc_html__( 'Failed to create custom order status', 'wpo-advanced-order-manager' )
+				. ( $db_error ? ' Database error: ' . $db_error : '' )
+			);
 		}
 
 		$status->id            = $result;
@@ -257,7 +261,11 @@ class CustomOrderStatusService {
 		$result = $this->repository->save( $custom_status );
 
 		if ( false === $result ) {
-			throw new RuntimeException( esc_html__( 'Failed to update custom order status', 'wpo-advanced-order-manager' ) );
+			$db_error = $this->repository->get_last_db_error();
+			throw new RuntimeException(
+				esc_html__( 'Failed to update custom order status', 'wpo-advanced-order-manager' )
+				. ( $db_error ? ' Database error: ' . $db_error : '' )
+			);
 		}
 
 		$this->cached_statuses = null;

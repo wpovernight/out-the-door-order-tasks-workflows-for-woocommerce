@@ -169,14 +169,20 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 			addToast({
 				title: isUpdate
 					? __(
-							'Failed to update task. Please try again.',
+							'Failed to update task.',
 							'wpo-advanced-order-manager'
 						)
 					: __(
-							'Failed to create task. Please try again.',
+							'Failed to create task.',
 							'wpo-advanced-order-manager'
 						),
-				message: __('Please try again.', 'wpo-advanced-order-manager'),
+				message:
+					error instanceof Error && error.message
+						? error.message
+						: __(
+								'Please try again.',
+								'wpo-advanced-order-manager'
+							),
 				type: ToastType.ERROR,
 			});
 		} finally {

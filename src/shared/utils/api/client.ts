@@ -31,6 +31,39 @@ export function getHeaders(): Record<string, string> {
 	};
 }
 
+async function extractErrorMessage(response: Response): Promise<string> {
+	const fallback = `Request failed (${response.status}).`;
+
+	const raw = await response.text();
+	if (!raw) {
+		return fallback;
+	}
+
+	try {
+		const body = JSON.parse(raw);
+
+		const fieldErrors = body?.data?.errors;
+		if (fieldErrors && typeof fieldErrors === 'object') {
+			const first = Object.values(fieldErrors)[0];
+			if (Array.isArray(first) && first.length > 0) {
+				return String(first[0]);
+			}
+			if (typeof first === 'string') {
+				return first;
+			}
+		}
+
+		if (typeof body?.message === 'string' && body.message) {
+			return body.message;
+		}
+	} catch {
+		// Non-JSON body — fall through to the raw text.
+		return raw;
+	}
+
+	return fallback;
+}
+
 /**
  * Handles the API response, checking for errors and parsing JSON.
  *
@@ -42,8 +75,7 @@ export function getHeaders(): Record<string, string> {
  */
 export async function handleResponse<T>(response: Response): Promise<T> {
 	if (!response.ok) {
-		const errorText = await response.text();
-		throw new Error(`API request failed: ${response.status}: ${errorText}`);
+		throw new Error(await extractErrorMessage(response));
 	}
 
 	if (response.status === 204) {

@@ -51,11 +51,29 @@ export const DraftColumn: React.FC<DraftColumnProps> = ({
 			return;
 		}
 
-		void createFieldOption(fieldId, {
+		createFieldOption(fieldId, {
 			label,
 			field_id: fieldId,
 			position,
-		}).finally(onClose);
+		})
+			.then(() => onClose())
+			.catch((error) => {
+				addToast({
+					title: __(
+						'Failed to create column.',
+						'wpo-advanced-order-manager'
+					),
+					message:
+						error instanceof Error && error.message
+							? error.message
+							: __(
+									'Please try again.',
+									'wpo-advanced-order-manager'
+								),
+					type: ToastType.ERROR,
+				});
+				inputRef.current?.select();
+			});
 	};
 
 	return (

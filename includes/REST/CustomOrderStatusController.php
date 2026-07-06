@@ -6,6 +6,7 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 use WP_Error;
+use WPO\AOM\Core\Logger;
 use WPO\AOM\Services\CustomOrderStatusService;
 
 defined( 'ABSPATH' ) || exit;
@@ -125,6 +126,7 @@ class CustomOrderStatusController extends BaseRestController {
 		try {
 			$new_status = $custom_order_status_service->create( $data );
 		} catch ( \Exception $e ) {
+			Logger::error( 'Custom order status creation failed: ' . $e->getMessage() );
 			return new WP_Error( 'creation_failed', $e->getMessage(), array( 'status' => 500 ) );
 		}
 
@@ -192,6 +194,7 @@ class CustomOrderStatusController extends BaseRestController {
 		} catch ( \InvalidArgumentException $e ) {
 			return new WP_Error( 'not_found', $e->getMessage(), array( 'status' => 404 ) );
 		} catch ( \Exception $e ) {
+			Logger::error( 'Custom order status update failed: ' . $e->getMessage() );
 			return new WP_Error( 'update_failed', $e->getMessage(), array( 'status' => 500 ) );
 		}
 
@@ -217,6 +220,7 @@ class CustomOrderStatusController extends BaseRestController {
 		try {
 			$custom_order_status_service->request_deletion( $id );
 		} catch ( \Exception $e ) {
+			Logger::error( 'Custom order status deletion failed: ' . $e->getMessage() );
 			return new WP_Error( 'deletion_failed', $e->getMessage(), array( 'status' => 500 ) );
 		}
 

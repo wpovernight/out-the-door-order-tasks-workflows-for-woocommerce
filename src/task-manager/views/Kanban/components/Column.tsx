@@ -23,6 +23,7 @@ import { Card } from './Card';
 import { __ } from '@wordpress/i18n';
 import { useTasks } from '@shared/context/TaskContext';
 import { useConfirm } from '@shared/context/DialogContext';
+import { ToastType, useToast } from '@shared/context/ToastContext';
 import { useOnClickOutside } from '@shared/hooks/useOnClickOutside';
 import { useStatusRoles } from '@shared/context/StatusRoleContext';
 import { DeleteColumnDialog } from './DeleteColumnDialog';
@@ -54,6 +55,7 @@ export const Column: React.FC<ColumnProps> = ({
 	const columnWrapperRef = useRef<HTMLDivElement | null>(null);
 	const titleInputRef = useRef<HTMLInputElement | null>(null);
 	const { updateFieldOption, deleteFieldOption } = useTasks();
+	const { addToast } = useToast();
 	const confirm = useConfirm();
 	const { statusRoles } = useStatusRoles();
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -266,8 +268,21 @@ export const Column: React.FC<ColumnProps> = ({
 			return;
 		}
 
-		void updateFieldOption(column.field_id, column.id, {
+		updateFieldOption(column.field_id, column.id, {
 			label: newTitle,
+		}).catch((error) => {
+			// The optimistic update already reverted the title, inform the user why.
+			addToast({
+				title: __(
+					'Failed to rename column.',
+					'wpo-advanced-order-manager'
+				),
+				message:
+					error instanceof Error && error.message
+						? error.message
+						: __('Please try again.', 'wpo-advanced-order-manager'),
+				type: ToastType.ERROR,
+			});
 		});
 	};
 
