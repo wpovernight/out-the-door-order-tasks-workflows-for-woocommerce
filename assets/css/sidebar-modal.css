@@ -109,6 +109,16 @@
     padding: 2em;
 }
 
+.wpo-aom-sidebar-header h2 {
+    overflow-wrap: break-word;
+    word-break: break-word;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    overflow: hidden;
+}
+
 .wpo-aom-task-form .field-group {
     display: flex;
     padding: 0 2em;

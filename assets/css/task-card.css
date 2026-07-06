@@ -128,6 +128,14 @@
     font-weight: 600;
     color: var(--wpo-aom-text-primary);
     margin: 0;
+    min-width: 0;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
 }
 
 .task-card .task-card-description > p {
