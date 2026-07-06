@@ -403,6 +403,15 @@ abstract class BaseRepository {
 	}
 
 	/**
+	 * The last MySQL error string from the underlying $wpdb, if any.
+	 *
+	 * @return string Empty string when there was no error.
+	 */
+	public function get_last_db_error(): string {
+		return (string) $this->wpdb->last_error;
+	}
+
+	/**
 	 * Delete records from the table based on the WHERE clause.
 	 *
 	 * @return int|false Number of rows deleted or false on failure.
