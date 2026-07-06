@@ -291,6 +291,13 @@
     z-index: 1;
 }
 
+/* TaskActionMenu renders in a portal on <body> and positions itself via inline `fixed` coords */
+.wpo-action-menu.wpo-action-menu-floating {
+    width: 15em;
+    margin: 0;
+    z-index: 100000;
+}
+
 .wpo-action-menu > li {
     display: flex;
     margin: 0;
@@ -305,6 +312,10 @@
     width: 100%;
     text-align: left;
     background: none;
+    padding: 0.9em;
+    display: flex;
+    align-items: center;
+    border-radius: 0;
 }
 
 .wpo-action-menu > li > button:hover,

@@ -40,24 +40,6 @@
     margin-top: 1em;
 }
 
-.task-card-options .wpo-action-menu {
-    width: 15em;
-    right: 2em;
-    top: 3em;
-}
-
-.task-card-options .wpo-action-menu.open-upward {
-    top: auto;
-    bottom: 10em;
-}
-
-.task-card-options .wpo-action-menu button {
-    padding: 0.9em;
-    display: flex;
-    align-items: center;
-    border-radius: 0;
-}
-
 .task-edit-menu-item::before {
     content: '';
     display: inline-block;

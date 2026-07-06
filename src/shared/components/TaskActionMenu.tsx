@@ -1,4 +1,11 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, {
+	useCallback,
+	useEffect,
+	useLayoutEffect,
+	useRef,
+	useState,
+} from 'react';
+import { createPortal } from 'react-dom';
 import { __ } from '@wordpress/i18n';
 import { Task } from '@shared/types/task';
 import { useTasks } from '@shared/context/TaskContext';
@@ -44,8 +51,11 @@ export const TaskActionMenu: React.FC<TaskActionMenuProps> = ({
 	// Internal state for uncontrolled mode.
 	const [internalIsOpen, setInternalIsOpen] = useState(false);
 	const menuRef = useRef<HTMLDivElement>(null);
+	const buttonRef = useRef<HTMLButtonElement>(null);
 	const menuListRef = useRef<HTMLUListElement>(null);
-	const [openUpward, setOpenUpward] = useState(false);
+	// The menu is rendered in a portal on <body>, so it can't be clipped
+    // by any ancestor's overflow/containment.
+	const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
 
 	const isControlled = controlledIsOpen !== undefined;
 	const isOpen = isControlled ? controlledIsOpen : internalIsOpen;
@@ -125,37 +135,112 @@ export const TaskActionMenu: React.FC<TaskActionMenuProps> = ({
 		closeMenu(e);
 	};
 
-	// When the menu opens, check if it would overflow its nearest scroll container
-	// (or the viewport) and, if so, flip it to open above the trigger.
-	useLayoutEffect(() => {
-		if (!isOpen) {
-			setOpenUpward(false);
-			return;
-		}
-
+	// Position the portaled menu relative to the trigger button.
+	const updatePosition = useCallback(() => {
+		const button = buttonRef.current;
 		const menu = menuListRef.current;
-		if (!menu) {
+		if (!button || !menu) {
 			return;
 		}
 
-		let container: HTMLElement | null = menu.parentElement;
-		while (container && container !== document.body) {
-			const overflowY = window.getComputedStyle(container).overflowY;
-			if (/(auto|scroll|overlay)/.test(overflowY)) {
-				break;
+		const buttonRect = button.getBoundingClientRect();
+		const menuRect = menu.getBoundingClientRect();
+		const GAP = 4;
+		const MARGIN = 8; // keep the menu off the viewport edges
+
+		const spaceBelow = window.innerHeight - buttonRect.bottom;
+		const spaceAbove = buttonRect.top;
+		const openUpward =
+			spaceBelow < menuRect.height + GAP && spaceAbove > spaceBelow;
+
+		let top = openUpward
+			? buttonRect.top - menuRect.height - GAP
+			: buttonRect.bottom + GAP;
+		top = Math.min(
+			Math.max(top, MARGIN),
+			window.innerHeight - menuRect.height - MARGIN
+		);
+
+		// Right-align the menu to the trigger, then clamp horizontally.
+		let left = buttonRect.right - menuRect.width;
+		left = Math.min(
+			Math.max(left, MARGIN),
+			window.innerWidth - menuRect.width - MARGIN
+		);
+
+		setMenuStyle({ position: 'fixed', top, left });
+	}, []);
+
+	useLayoutEffect(() => {
+		if (isOpen) {
+			updatePosition();
+		}
+	}, [isOpen, updatePosition]);
+
+	// While open, keep the menu anchored to the button on scroll/resize, but
+	// close it once the button scrolls out of its scroll container.
+	useEffect(() => {
+		if (!isOpen) {
+			return;
+		}
+
+		const isTriggerVisible = () => {
+			const button = buttonRef.current;
+			if (!button) {
+				return false;
 			}
-			container = container.parentElement;
-		}
+			const rect = button.getBoundingClientRect();
 
-		const boundaryBottom =
-			container && container !== document.body
-				? container.getBoundingClientRect().bottom
-				: window.innerHeight;
+			// Clip against the nearest scrolling/clipping ancestor, else the
+			// viewport. The button is "visible" only if it intersects that box.
+			const bounds = {
+				top: 0,
+				left: 0,
+				right: window.innerWidth,
+				bottom: window.innerHeight,
+			};
+			let ancestor = button.parentElement;
+			while (ancestor && ancestor !== document.body) {
+				const overflowY = window.getComputedStyle(ancestor).overflowY;
+				if (/(auto|scroll|overlay|hidden|clip)/.test(overflowY)) {
+					const r = ancestor.getBoundingClientRect();
+					bounds.top = Math.max(bounds.top, r.top);
+					bounds.left = Math.max(bounds.left, r.left);
+					bounds.right = Math.min(bounds.right, r.right);
+					bounds.bottom = Math.min(bounds.bottom, r.bottom);
+					break;
+				}
+				ancestor = ancestor.parentElement;
+			}
 
-		if (menu.getBoundingClientRect().bottom > boundaryBottom) {
-			setOpenUpward(true);
-		}
-	}, [isOpen]);
+			return (
+				rect.bottom > bounds.top &&
+				rect.top < bounds.bottom &&
+				rect.right > bounds.left &&
+				rect.left < bounds.right
+			);
+		};
+
+		const handleReposition = () => {
+			if (!isTriggerVisible()) {
+				// Parent owns open state in controlled mode; only self-close
+				// when uncontrolled.
+				if (!isControlled) {
+					setInternalIsOpen(false);
+				}
+				return;
+			}
+			updatePosition();
+		};
+
+		// Capture phase so scrolls inside nested containers are caught too.
+		window.addEventListener('scroll', handleReposition, true);
+		window.addEventListener('resize', handleReposition);
+		return () => {
+			window.removeEventListener('scroll', handleReposition, true);
+			window.removeEventListener('resize', handleReposition);
+		};
+	}, [isOpen, isControlled, updatePosition]);
 
 	// Close menu on outside click (uncontrolled mode only).
 	useEffect(() => {
@@ -164,9 +249,12 @@ export const TaskActionMenu: React.FC<TaskActionMenuProps> = ({
 		}
 
 		const handleClickOutside = (e: MouseEvent) => {
+			const target = e.target as Node;
+			// The menu lives in a portal, so check it separately from the
+			// trigger, otherwise a menu-item click would close before it fires.
 			if (
-				menuRef.current &&
-				!menuRef.current.contains(e.target as Node)
+				!menuRef.current?.contains(target) &&
+				!menuListRef.current?.contains(target)
 			) {
 				setInternalIsOpen(false);
 			}
@@ -180,6 +268,7 @@ export const TaskActionMenu: React.FC<TaskActionMenuProps> = ({
 	return (
 		<div className="task-card-options" ref={menuRef}>
 			<button
+				ref={buttonRef}
 				className="wpo-button wpo-button-icon options-button"
 				type="button"
 				onClick={handleToggle}
@@ -188,63 +277,68 @@ export const TaskActionMenu: React.FC<TaskActionMenuProps> = ({
 					{__('Options', 'wpo-advanced-order-manager')}
 				</span>
 			</button>
-			{isOpen && (
-				<ul
-					ref={menuListRef}
-					className={`wpo-action-menu${openUpward ? ' open-upward' : ''}`}
-				>
-					{showEdit && onEdit && (
+			{isOpen &&
+				createPortal(
+					<ul
+						ref={menuListRef}
+						className="wpo-action-menu wpo-action-menu-floating"
+						style={menuStyle}
+					>
+						{showEdit && onEdit && (
+							<li>
+								<button
+									type="button"
+									className="wpo-button task-edit-menu-item"
+									onClick={handleEditClick}
+								>
+									{__('Edit', 'wpo-advanced-order-manager')}
+								</button>
+							</li>
+						)}
 						<li>
 							<button
 								type="button"
-								className="wpo-button task-edit-menu-item"
-								onClick={handleEditClick}
+								className={`wpo-button task-finish-menu-item ${isDone ? 'finished' : ''}`}
+								onClick={
+									isDone
+										? handleUnfinishClick
+										: handleFinishClick
+								}
 							>
-								{__('Edit', 'wpo-advanced-order-manager')}
+								{isDone
+									? __(
+											'Mark as In Progress',
+											'wpo-advanced-order-manager'
+										)
+									: __(
+											'Mark as Done',
+											'wpo-advanced-order-manager'
+										)}
 							</button>
 						</li>
-					)}
-					<li>
-						<button
-							type="button"
-							className={`wpo-button task-finish-menu-item ${isDone ? 'finished' : ''}`}
-							onClick={
-								isDone ? handleUnfinishClick : handleFinishClick
-							}
-						>
-							{isDone
-								? __(
-										'Mark as In Progress',
-										'wpo-advanced-order-manager'
-									)
-								: __(
-										'Mark as Done',
-										'wpo-advanced-order-manager'
-									)}
-						</button>
-					</li>
-					<li>
-						<button
-							type="button"
-							className="wpo-button task-archive-menu-item"
-							onClick={handleArchiveClick}
-						>
-							{__('Archive', 'wpo-advanced-order-manager')}
-						</button>
-					</li>
-					{showDelete && (
 						<li>
 							<button
 								type="button"
-								className="wpo-button task-delete-menu-item"
-								onClick={handleDeleteClick}
+								className="wpo-button task-archive-menu-item"
+								onClick={handleArchiveClick}
 							>
-								{__('Delete', 'wpo-advanced-order-manager')}
+								{__('Archive', 'wpo-advanced-order-manager')}
 							</button>
 						</li>
-					)}
-				</ul>
-			)}
+						{showDelete && (
+							<li>
+								<button
+									type="button"
+									className="wpo-button task-delete-menu-item"
+									onClick={handleDeleteClick}
+								>
+									{__('Delete', 'wpo-advanced-order-manager')}
+								</button>
+							</li>
+						)}
+					</ul>,
+					document.body
+				)}
 		</div>
 	);
 };
