@@ -9,7 +9,6 @@ import { EmptyState, ErrorState } from '@shared/components/LoadingSkeleton';
 import { TaskCardSkeleton } from '@shared/components/TaskCardSkeleton';
 import { useTasks } from '@shared/context/TaskContext';
 import { useConfirm } from '@shared/context/DialogContext';
-import { createInterpolateElement } from '@wordpress/element';
 
 interface ArchivedEntry {
 	task: Task;
@@ -61,24 +60,7 @@ const ActiveTasks: React.FC = () => {
 
 	const handleArchiveClick = useCallback(
 		async (taskId: number): Promise<boolean> => {
-			const confirmationResult = await confirm({
-				title: __('Archive this task?', 'wpo-advanced-order-manager'),
-				message: createInterpolateElement(
-					__(
-						'Once archived, you can locate this task in the <strong>Task → Archive</strong> tab.',
-						'wpo-advanced-order-manager'
-					),
-					{ strong: <strong /> }
-				),
-				confirmText: __('Archive', 'wpo-advanced-order-manager'),
-				cancelText: __('Cancel', 'wpo-advanced-order-manager'),
-				action: 'archive',
-			});
-
-			if (!confirmationResult) {
-				return false;
-			}
-
+			// Confirmation is handled by TaskCard before this callback runs.
 			const index = activeTasks.findIndex((t) => t.id === taskId);
 			if (index === -1) {
 				return false;
@@ -111,7 +93,7 @@ const ActiveTasks: React.FC = () => {
 
 			return true;
 		},
-		[activeTasks, archiveTask, confirm, startFadeOut]
+		[activeTasks, archiveTask, startFadeOut]
 	);
 
 	const handleUndoArchive = useCallback(
