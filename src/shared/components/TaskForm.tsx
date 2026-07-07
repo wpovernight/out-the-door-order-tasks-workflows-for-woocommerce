@@ -246,7 +246,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				return null;
 			}
 			const num = Number(raw);
-			if (Number.isNaN(num)) {
+			if (Number.isNaN(num) || num === 0) {
+				// `0` is the sentinel for "no order assigned".
 				return null;
 			}
 			return { id: num, label: `#${raw}` };
@@ -334,51 +335,42 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 						/>
 					</div>
 				</div>
-				{/*For now, we will hide the associated orders field as it has been decided to automatically link order*/}
-				{/*to the task when created from order edit page.*/}
-				{/*<div className="field-group">*/}
-				{/*	<div>*/}
-				{/*		<label htmlFor="associated-orders">*/}
-				{/*			{__('Associated Orders', 'wpo-advanced-order-manager')}*/}
-				{/*		</label>*/}
-				{/*		<AsyncMultiSelectField*/}
-				{/*			placeholder={__(*/}
-				{/*				'Search orders by number, customer, address…',*/}
-				{/*				'wpo-advanced-order-manager'*/}
-				{/*			)}*/}
-				{/*			selectedOptions={associatedOrderIds}*/}
-				{/*			id="associated-orders"*/}
-				{/*			name="field_order"*/}
-				{/*			// ToDo: Lazy load for next pages*/}
-				{/*			onSearch={async (*/}
-				{/*				query: string,*/}
-				{/*				signal?: AbortSignal*/}
-				{/*			) => {*/}
-				{/*				const results = await searchOrders(*/}
-				{/*					query,*/}
-				{/*					signal*/}
-				{/*				);*/}
-				{/*				return results.map((order) => ({*/}
-				{/*					id: order.id,*/}
-				{/*					label: `#${order.id}`,*/}
-				{/*					searchLabel: `#${order.id} - ${order.billing?.first_name} ${order.billing?.last_name}`,*/}
-				{/*				}));*/}
-				{/*			}}*/}
-				{/*		/>*/}
-				{/*	</div>*/}
-				{/*</div>*/}
-
-				{/* Add associated order IDs as a hidden field to be processed on submit */}
-				{associatedOrderIds &&
-					associatedOrderIds.length > 0 &&
-					associatedOrderIds.map((order) => (
-						<input
-							key={order.id}
-							type="hidden"
-							name="field_order[]"
-							value={order.id}
+				<div className="field-group">
+					<div>
+						<label htmlFor="associated-orders">
+							{__(
+								'Associated Orders',
+								'wpo-advanced-order-manager'
+							)}
+						</label>
+						<AsyncMultiSelectField
+							placeholder={__(
+								'Search orders by number, customer, address…',
+								'wpo-advanced-order-manager'
+							)}
+							selectedOptions={associatedOrderIds}
+							id="associated-orders"
+							name="field_order"
+							onSelect={handleFormChange}
+							onRemove={handleFormChange}
+							// ToDo: Lazy load for next pages
+							onSearch={async (
+								query: string,
+								signal?: AbortSignal
+							) => {
+								const results = await searchOrders(
+									query,
+									signal
+								);
+								return results.map((order) => ({
+									id: order.id,
+									label: `#${order.id}`,
+									searchLabel: `#${order.id} - ${order.billing?.first_name} ${order.billing?.last_name}`,
+								}));
+							}}
 						/>
-					))}
+					</div>
+				</div>
 				<div className="field-group">
 					<div>
 						<label htmlFor="description">
