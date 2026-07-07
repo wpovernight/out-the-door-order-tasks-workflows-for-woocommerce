@@ -260,7 +260,7 @@
 .kanban-board .kanban-column-add-task {
     padding: 0.5em;
     margin-top: auto; /* Push to the bottom when the column isn't filled with cards */
-    margin-bottom: 1em;
+    margin-bottom: 0.33em; /* The sum of this and .kanban-column-inner margin should be equals to the margin of the header */
     cursor: pointer;
     border-radius: var(--wpo-aom-radius-m);
     background: var(--wpo-aom-card-bg);
@@ -535,7 +535,7 @@
     bottom: -7.5px;
 }
 
-.kanban-column-container.show-drop-indicator:not(:has(.task-card-wrapper))::after {
+.kanban-column-container.show-drop-indicator:not(:has(.task-card-wrapper))::before {
     content: "";
     height: 3px;
     background: var(--wpo-aom-primary-color);

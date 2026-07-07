@@ -100,7 +100,7 @@
     display: inline-block;
     width: 1.1em;
     height: 1.1em;
-    background-color: currentColor;
+    background-color: var(--wpo-aom-danger);;
     mask-image: var(--wpo-aom-icon-delete);
     mask-size: contain;
     mask-repeat: no-repeat;

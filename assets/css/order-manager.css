@@ -33,6 +33,8 @@ body.woocommerce_page_wpo_aom_order_manager #wpcontent {
 
 #wpo-aom-order-manager .tabs > ul > li {
     margin-bottom: -1px;
+    transition: 0.3s all;
+    border-bottom: 2px solid transparent;
 }
 
 #wpo-aom-order-manager .tabs > ul > li > button {
