@@ -59,7 +59,7 @@ final class InstallCommand extends AbstractCommand {
 			);
 
 			$this->installer->reset();
-			WP_CLI::success( 'Plugin tables dropped, recreated, and reseeded.' );
+			WP_CLI::success( 'Plugin tables and options dropped, recreated, and reseeded.' );
 
 			return;
 		}
