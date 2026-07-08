@@ -11,17 +11,26 @@ defined( 'ABSPATH' ) || exit;
 
 final class Installer {
 	private const OPTION_VERSION      = 'wpo_aom_version';
+	private const OPTION_DB_VERSION   = 'wpo_aom_db_version';
 	private const OPTION_UPGRADE_LOCK = 'wpo_aom_upgrade_lock';
 	private const TABLE_PREFIX        = 'wpo_aom_';
 
 	/**
-	 * Map of version => array of migration method names (instance methods).
-	 * Notice: The version sequence should be in ascending order.
+	 * Current database schema version.
 	 *
-	 * @var array<string, string[]>
+	 * Deliberately decoupled from the plugin's version. Bump this by one whenever you add a migration.
+	 */
+	private const DB_VERSION = 1;
+
+	/**
+	 * Map of db schema version => array of migration method names (instance methods).
+	 * A migration keyed to version N runs on any site whose stored db version is
+	 * below N. Keys must be listed in ascending order.
+	 *
+	 * @var array<int, string[]>
 	 */
 	private const MIGRATIONS = array(
-		'1.0.0-beta.2' => array(
+		1 => array(
 			'migrate_apply_option_slug_unique_index', /** @uses migrate_apply_option_slug_unique_index() */
 			'migrate_seed_status_role_assignments', /** @uses migrate_seed_status_role_assignments() */
 		),
@@ -63,8 +72,9 @@ final class Installer {
 		$this->insert_default_data();
 		$this->seed_initial_state();
 
-		// Store the plugin version in the options table.
+		// Record the installed plugin version and the current schema version.
 		update_option( self::OPTION_VERSION, AdvancedOrderManager::VERSION, true );
+		update_option( self::OPTION_DB_VERSION, self::DB_VERSION, true );
 	}
 
 	/**
@@ -88,10 +98,11 @@ final class Installer {
 	 * @return bool
 	 */
 	public static function is_upgrade_due(): bool {
-		$current_version = (string) get_option( self::OPTION_VERSION );
+		if ( '' === (string) get_option( self::OPTION_VERSION ) ) {
+			return true;
+		}
 
-		return '' === $current_version ||
-		       version_compare( $current_version, AdvancedOrderManager::VERSION, '<' );
+		return (int) get_option( self::OPTION_DB_VERSION, 0 ) < self::DB_VERSION;
 	}
 
 	/**
@@ -100,27 +111,24 @@ final class Installer {
 	 * @return void
 	 */
 	public function upgrade(): void {
-		$current_version = (string) get_option( self::OPTION_VERSION );
-
-		// If the version is not set, it means this is a fresh installation.
-		if ( empty( $current_version ) ) {
+		// First install when there is no stored plugin version.
+		if ( '' === (string) get_option( self::OPTION_VERSION ) ) {
 			$this->install();
 
 			return;
 		}
 
-		// If the current version is the same or higher, or if we can't acquire the lock, do nothing.
-		if (
-			version_compare( $current_version, AdvancedOrderManager::VERSION, '>=' ) ||
-			! $this->acquire_upgrade_lock()
-		) {
+		$current_db_version = (int) get_option( self::OPTION_DB_VERSION, 0 );
+
+		// Nothing to do if the schema is current, or another request holds the lock.
+		if ( $current_db_version >= self::DB_VERSION || ! $this->acquire_upgrade_lock() ) {
 			return;
 		}
 
 		try {
-			// Loop through migrations and run them if the version matches.
+			// Run every migration whose target schema version is newer than the site's.
 			foreach ( self::MIGRATIONS as $version => $migration_callbacks ) {
-				if ( version_compare( $current_version, $version, '<' ) ) {
+				if ( $current_db_version < $version ) {
 					foreach ( $migration_callbacks as $migration_method ) {
 						if ( is_callable( array( $this, $migration_method ) ) ) {
 							$this->{$migration_method}();
@@ -129,7 +137,8 @@ final class Installer {
 				}
 			}
 
-			// Store the plugin version in the options table.
+			// Record the new schema version and refresh the stored plugin version.
+			update_option( self::OPTION_DB_VERSION, self::DB_VERSION, true );
 			update_option( self::OPTION_VERSION, AdvancedOrderManager::VERSION, true );
 		} finally {
 			$this->release_upgrade_lock();
