@@ -24,6 +24,7 @@ export interface UseCustomOrderStatusesResult {
 	loadingStatus: AsyncLoaderStatus;
 	loadingError: Error | null;
 	isSaving: boolean;
+	pendingDeletionIds: Set<number>;
 	createStatus: (data: CustomOrderStatusInput) => Promise<void>;
 	updateStatus: (id: number, data: CustomOrderStatusInput) => Promise<void>;
 	deleteStatus: (id: number) => Promise<void>;
@@ -38,6 +39,9 @@ export interface UseCustomOrderStatusesResult {
 export function useCustomOrderStatuses(): UseCustomOrderStatusesResult {
 	const [statuses, setStatuses] = useState<CustomOrderStatus[]>([]);
 	const [isSaving, setIsSaving] = useState(false);
+	const [pendingDeletionIds, setPendingDeletionIds] = useState<Set<number>>(
+		new Set()
+	);
 	const { addToast } = useToast();
 
 	const { loadingStatus, loadingError } = useAsyncLoader(async () => {
@@ -100,24 +104,32 @@ export function useCustomOrderStatuses(): UseCustomOrderStatusesResult {
 	};
 
 	const deleteStatus = async (id: number): Promise<void> => {
+		setPendingDeletionIds((prev) => new Set(prev).add(id));
+
 		try {
-			// Deletion is async server-side: the request only schedules the
-			// order drain, so flip the row to its "deleting" state rather than
-			// removing it. It disappears once the drain finishes (handled by the
-			// poll, added separately). The flip only runs on success, so a
-			// failure leaves the row untouched.
 			await deleteCustomOrderStatus(id);
-			setStatuses((prev) =>
-				prev.map((status) =>
-					status.id === id ? { ...status, is_deleting: true } : status
-				)
-			);
+
+			// Deletion resolves two ways server-side: immediately, when the
+			// status has no orders to reassign, or asynchronously, when it
+			// schedules an order drain and flags the row is_deleting. Re-fetch so
+			// the UI reflects whichever happened — the row either disappears or
+			// returns in its "deleting" state, and the poll below drives it to
+			// completion. This only runs on success, so a failure leaves the row
+			// untouched.
+			const fresh = await fetchCustomOrderStatuses();
+			setStatuses(fresh);
 		} catch (error) {
 			reportError(
 				error,
 				__('Could not delete status', 'wpo-advanced-order-manager')
 			);
 			throw error;
+		} finally {
+			setPendingDeletionIds((prev) => {
+				const next = new Set(prev);
+				next.delete(id);
+				return next;
+			});
 		}
 	};
 
@@ -148,6 +160,7 @@ export function useCustomOrderStatuses(): UseCustomOrderStatusesResult {
 		loadingStatus,
 		loadingError,
 		isSaving,
+		pendingDeletionIds,
 		createStatus,
 		updateStatus,
 		deleteStatus,

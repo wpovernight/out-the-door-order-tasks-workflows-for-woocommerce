@@ -305,14 +305,28 @@ class CustomOrderStatusService {
 			return true; // Deletion already in progress.
 		}
 
-		// Mark the status as pending deletion.
+		$existing_orders = wc_get_orders(
+			array(
+				'status' => $status->status_key,
+				'limit'  => 1,
+				'return' => 'ids',
+			)
+		);
+
+		// Nothing to drain — delete the status immediately.
+		if ( 0 === count( $existing_orders ) ) {
+			$this->remove( $id, $status->status_key, $fallback_status );
+
+			return true;
+		}
+
+		// Orders exist: mark as pending deletion and schedule the async drain.
+		// Do NOT delete the row yet — it must stay registered so wc_get_orders()
+		// can still match its orders.
 		$status->is_deleting = true;
 		$this->repository->save( $status );
-
 		$this->cached_statuses = null;
 
-		// Schedule the drain. Do NOT delete the row yet — it must stay
-		// registered so wc_get_orders() can still match its orders
 		as_schedule_single_action(
 			time(),
 			'wpo_aom_reassign_orders',
@@ -390,7 +404,44 @@ class CustomOrderStatusService {
 			return;
 		}
 
+		// Double-check if any orders remain with the deleted status,
+		// in case some were added since the last batch, to prevent race condition.
+		$remaining_orders = wc_get_orders(
+			array(
+				'status' => $from_status,
+				'limit'  => 1,
+				'return' => 'ids',
+			)
+		);
+
+		if ( 0 !== count( $remaining_orders ) ) {
+			as_schedule_single_action(
+				time(),
+				'wpo_aom_reassign_orders',
+				array( $from_status, $to_status, $status_id ),
+				'wpo-aom'
+			);
+
+			return;
+		}
+
 		// Final batch done — now it's safe to remove the status.
+		$this->remove( $status_id, $from_status, $to_status );
+	}
+
+	/**
+	 * Delete the custom status row and fire the deleted action.
+	 *
+	 * Internal final step of the deletion flow: callers must ensure the status
+	 * has already been drained of its orders (or never had any) before calling.
+	 *
+	 * @param int    $status_id   The ID of the custom status being deleted.
+	 * @param string $from_status The status key that was deleted (without 'wc-' prefix).
+	 * @param string $to_status   The fallback status key orders were reassigned to (without 'wc-' prefix).
+	 *
+	 * @return void
+	 */
+	private function remove( int $status_id, string $from_status, string $to_status ): void {
 		$this->repository->where( 'id', $status_id )->delete();
 		$this->cached_statuses = null;
 

@@ -22,6 +22,7 @@ export const CustomOrderStatusView = () => {
 		loadingStatus,
 		loadingError,
 		isSaving,
+		pendingDeletionIds,
 		createStatus,
 		updateStatus,
 		deleteStatus,
@@ -124,6 +125,7 @@ export const CustomOrderStatusView = () => {
 						editingId={editingId}
 						isCreating={isCreating}
 						isSaving={isSaving}
+						pendingDeletionIds={pendingDeletionIds}
 						onEdit={(id) => {
 							setEditingId(id);
 							setIsCreating(false);

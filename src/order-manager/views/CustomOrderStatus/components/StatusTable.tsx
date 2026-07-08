@@ -8,6 +8,7 @@ interface StatusTableProps {
 	editingId: number | null;
 	isCreating: boolean;
 	isSaving: boolean;
+	pendingDeletionIds: Set<number>;
 	onEdit: (id: number) => void;
 	onCancelEdit: () => void;
 	onSaveEdit: (
@@ -29,6 +30,7 @@ export const StatusTable = ({
 	editingId,
 	isCreating,
 	isSaving,
+	pendingDeletionIds,
 	onEdit,
 	onCancelEdit,
 	onSaveEdit,
@@ -38,6 +40,8 @@ export const StatusTable = ({
 	onStartCreate,
 }: StatusTableProps) => {
 	const isDeleting = (status: CustomOrderStatus) => status.is_deleting;
+	const isBusy = (status: CustomOrderStatus) =>
+		status.is_deleting || pendingDeletionIds.has(status.id);
 
 	return (
 		<>
@@ -72,7 +76,7 @@ export const StatusTable = ({
 							<tr
 								key={status.id}
 								className={
-									isDeleting(status)
+									isBusy(status)
 										? 'deleting-row'
 										: undefined
 								}
@@ -105,30 +109,35 @@ export const StatusTable = ({
 								</td>
 								<td
 									className={
-										isDeleting(status)
+										isBusy(status)
 											? 'slug-column deleting'
 											: 'slug-column'
 									}
 								>
-									{isDeleting(status) && (
+									{isBusy(status) && (
 										<>
 											<span className="wpo-aom-loader"></span>
 											<span className="deleting-notice">
-												{__(
-													'Reassigning order statuses before deletion.',
-													'wpo-advanced-order-manager'
-												)}
+												{isDeleting(status)
+													? __(
+															'Reassigning order statuses before deletion.',
+															'wpo-advanced-order-manager'
+														)
+													: __(
+															'Deleting…',
+															'wpo-advanced-order-manager'
+														)}
 											</span>
 										</>
 									)}
-									{!isDeleting(status) && (
+									{!isBusy(status) && (
 										<span className="slug-field">
 											{status.status_key}
 										</span>
 									)}
 								</td>
 								<td className="actions-column">
-									{!isDeleting(status) && (
+									{!isBusy(status) && (
 										<ul className="wpo-aom-row-actions">
 											<li>
 												<button
@@ -141,7 +150,7 @@ export const StatusTable = ({
 														'Edit',
 														'wpo-advanced-order-manager'
 													)}
-													disabled={isDeleting(
+													disabled={isBusy(
 														status
 													)}
 												>
@@ -163,7 +172,7 @@ export const StatusTable = ({
 														'Delete',
 														'wpo-advanced-order-manager'
 													)}
-													disabled={isDeleting(
+													disabled={isBusy(
 														status
 													)}
 												>
