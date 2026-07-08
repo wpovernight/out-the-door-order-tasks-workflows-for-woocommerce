@@ -16,6 +16,17 @@ final class Installer {
 	private const TABLE_PREFIX        = 'wpo_aom_';
 
 	/**
+	 * The install-state options this plugin writes to the wp_options table.
+	 *
+	 * @var string[]
+	 */
+	public const OPTION_NAMES = array(
+		self::OPTION_VERSION,
+		self::OPTION_DB_VERSION,
+		self::OPTION_UPGRADE_LOCK,
+	);
+
+	/**
 	 * Current database schema version.
 	 *
 	 * Deliberately decoupled from the plugin's version. Bump this by one whenever you add a migration.
@@ -86,8 +97,9 @@ final class Installer {
 		self::drop_tables();
 
 		// Clear install state so install() rebuilds instead of early-returning.
-		delete_option( self::OPTION_VERSION );
-		delete_option( self::OPTION_UPGRADE_LOCK );
+		foreach ( self::OPTION_NAMES as $option_name ) {
+			delete_option( $option_name );
+		}
 
 		$this->install();
 	}
@@ -250,7 +262,7 @@ final class Installer {
 			label VARCHAR(255) NOT NULL,
 			background VARCHAR(32) DEFAULT NULL,
 			is_deleting TINYINT(1) NOT NULL DEFAULT 0,
-			PRIMARY KEY (id),
+			PRIMARY KEY  (id),
 			UNIQUE KEY (status_key)
 		) {$charset_collate};
 		";
