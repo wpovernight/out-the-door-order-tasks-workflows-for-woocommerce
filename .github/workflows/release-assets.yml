@@ -31,6 +31,16 @@ jobs:
           submodules: true
           fetch-depth: 1
 
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer
+
+      - name: Install production-only Composer dependencies
+        working-directory: ${{ env.plugin_slug }}
+        run: composer install --no-dev --optimize-autoloader --no-progress --prefer-dist
+
       - name: Check stable version in readme.txt
         run: |
           STABLE_TAG=$(grep -oP '(?<=Stable tag: ).*' ${{ env.plugin_slug }}/readme.txt | tr -d '[:space:]')
