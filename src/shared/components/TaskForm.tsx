@@ -46,9 +46,16 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 	const { addToast } = useToast();
 
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	// Tracks unsaved edits so the close guard knows whether to prompt before closing.
 	const isDirtyRef = useRef(false);
+    // Tracks whether a submission is in progress so the close guard can prevent closing during that time.
+	const isSubmittingRef = useRef(false);
 
 	const beforeCloseGuard = useCallback(async () => {
+		if (isSubmittingRef.current) {
+			return false;
+		}
+
 		if (!isDirtyRef.current) {
 			return true;
 		}
@@ -140,6 +147,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 			return; // Prevent multiple submissions
 		}
 		setIsSubmitting(true);
+		isSubmittingRef.current = true;
 
 		const isUpdate = Boolean(task?.id);
 
@@ -150,6 +158,9 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 
 			const savedTask = await saveTask(payload, task?.id);
 			isDirtyRef.current = false;
+			// Clear before onDone() so the programmatic close below passes the
+			// guard instead of being blocked by the in-flight check.
+			isSubmittingRef.current = false;
 			onTaskSaved?.(savedTask);
 			addToast({
 				title: isUpdate
@@ -187,6 +198,9 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 			});
 		} finally {
 			setIsSubmitting(false);
+			// Safety net for the failure path (the success path already cleared
+			// it before closing), so later close attempts prompt normally.
+			isSubmittingRef.current = false;
 		}
 	};
 

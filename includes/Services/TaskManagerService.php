@@ -1323,6 +1323,7 @@ final class TaskManagerService {
 						}
 						break;
 
+					// Handle special case for 'order' field type (for the Associated Order field).
 					case 'order':
 						$order = wc_get_order( (int) $raw );
 						if ( $order ) {
