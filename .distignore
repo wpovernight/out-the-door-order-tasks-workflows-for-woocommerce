@@ -61,8 +61,8 @@ Thumbs.db
 *.zip
 
 # Docs
-strauss.md
 docs/
+README.md
 
 # JS/TS source & build tooling
 src/
