@@ -8,9 +8,17 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx --ignore-path .eslintignore",
     "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --ignore-path .eslintignore --fix"
   },
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "author": "WP Overnight",
+  "license": "GPL-3.0-or-later",
+  "description": "Advanced Order Manager for WooCommerce — extends WooCommerce order management.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wpovernight/wpo-advanced-order-manager.git"
+  },
+  "homepage": "https://github.com/wpovernight/wpo-advanced-order-manager#readme",
+  "bugs": {
+    "url": "https://github.com/wpovernight/wpo-advanced-order-manager/issues"
+  },
   "dependencies": {
     "@atlaskit/pragmatic-drag-and-drop": "^1.7.7",
     "@atlaskit/pragmatic-drag-and-drop-auto-scroll": "^2.1.2",
