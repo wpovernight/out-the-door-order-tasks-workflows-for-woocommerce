@@ -2,7 +2,7 @@
 Contributors: wpovernight
 Tags: woocommerce, orders, order management, tasks, fulfillment
 Requires at least: 6.7
-Tested up to: 6.8
+Tested up to: 7.0
 Requires PHP: 8.1
 Stable tag: 1.0.0-beta.2
 License: GPLv3
@@ -27,6 +27,17 @@ Advanced Order Manager extends WooCommerce's order management with a flexible ta
 1. Upload the plugin files to `/wp-content/plugins/wpo-advanced-order-manager`, or install through the WordPress Plugins screen directly.
 2. Activate the plugin through the *Plugins* screen in WordPress.
 3. Make sure WooCommerce 8.2 or later is installed and active.
+
+== Where is the source code? ==
+
+All PHP ships as human-readable source. The admin interface is written in React/TypeScript and compiled with webpack. The complete, unminified source and the build tooling are available in the public repository at https://github.com/wpovernight/wpo-advanced-order-manager.
+
+To build the compiled assets from source:
+
+`npm install`
+`npm run build`
+
+This regenerates the files in `assets/js/`. See the repository's readme for full development instructions.
 
 == Changelog ==
 
