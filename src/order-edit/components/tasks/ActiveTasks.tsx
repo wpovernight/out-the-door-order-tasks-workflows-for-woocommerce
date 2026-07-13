@@ -264,10 +264,7 @@ const ActiveTasks: React.FC = () => {
 											handleUndoArchive(taskId)
 										}
 									>
-										{__(
-											'Undo',
-											'advanced-order-manager'
-										)}
+										{__('Undo', 'advanced-order-manager')}
 									</button>
 								</div>
 							</li>

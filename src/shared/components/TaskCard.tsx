@@ -347,10 +347,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 										'Mark as In Progress',
 										'advanced-order-manager'
 									)
-								: __(
-										'Mark as Done',
-										'advanced-order-manager'
-									)}
+								: __('Mark as Done', 'advanced-order-manager')}
 						</span>
 						<input
 							id={`task-finish-${task.id}`}

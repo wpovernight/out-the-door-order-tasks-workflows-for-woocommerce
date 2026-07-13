@@ -147,16 +147,10 @@ const TaskRow: React.FC<TaskRowProps> = ({ task }) => {
 								e.stopPropagation();
 								handleRestore(task.id);
 							}}
-							title={__(
-								'Restore Task',
-								'advanced-order-manager'
-							)}
+							title={__('Restore Task', 'advanced-order-manager')}
 						>
 							<span className="screen-reader-text">
-								{__(
-									'Restore Task',
-									'advanced-order-manager'
-								)}
+								{__('Restore Task', 'advanced-order-manager')}
 							</span>
 						</button>
 					</li>
@@ -168,16 +162,10 @@ const TaskRow: React.FC<TaskRowProps> = ({ task }) => {
 								e.stopPropagation();
 								handleDelete(task.id);
 							}}
-							title={__(
-								'Delete Task',
-								'advanced-order-manager'
-							)}
+							title={__('Delete Task', 'advanced-order-manager')}
 						>
 							<span className="screen-reader-text">
-								{__(
-									'Delete Task',
-									'advanced-order-manager'
-								)}
+								{__('Delete Task', 'advanced-order-manager')}
 							</span>
 						</button>
 					</li>

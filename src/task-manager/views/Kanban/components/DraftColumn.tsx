@@ -66,10 +66,7 @@ export const DraftColumn: React.FC<DraftColumnProps> = ({
 					message:
 						error instanceof Error && error.message
 							? error.message
-							: __(
-									'Please try again.',
-									'advanced-order-manager'
-								),
+							: __('Please try again.', 'advanced-order-manager'),
 					type: ToastType.ERROR,
 				});
 				inputRef.current?.select();

@@ -77,10 +77,7 @@ export const StatusForm = ({
 					<fieldset>
 						<div id="label-field" className="form-field">
 							<label htmlFor="cos-label">
-								{__(
-									'Status Name',
-									'advanced-order-manager'
-								)}
+								{__('Status Name', 'advanced-order-manager')}
 							</label>
 							<input
 								id="cos-label"

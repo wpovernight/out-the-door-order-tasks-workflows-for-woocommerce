@@ -54,7 +54,7 @@ export const TaskActionMenu: React.FC<TaskActionMenuProps> = ({
 	const buttonRef = useRef<HTMLButtonElement>(null);
 	const menuListRef = useRef<HTMLUListElement>(null);
 	// The menu is rendered in a portal on <body>, so it can't be clipped
-    // by any ancestor's overflow/containment.
+	// by any ancestor's overflow/containment.
 	const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
 
 	const isControlled = controlledIsOpen !== undefined;

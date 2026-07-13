@@ -76,9 +76,7 @@ export const StatusTable = ({
 							<tr
 								key={status.id}
 								className={
-									isBusy(status)
-										? 'deleting-row'
-										: undefined
+									isBusy(status) ? 'deleting-row' : undefined
 								}
 							>
 								<td className="label-column">
@@ -150,9 +148,7 @@ export const StatusTable = ({
 														'Edit',
 														'advanced-order-manager'
 													)}
-													disabled={isBusy(
-														status
-													)}
+													disabled={isBusy(status)}
 												>
 													<span className="screen-reader-text">
 														{__(
@@ -161,7 +157,8 @@ export const StatusTable = ({
 														)}
 													</span>
 												</button>
-                                            </li><li>
+											</li>
+											<li>
 												<button
 													type="button"
 													className="wpo-button wpo-button-icon wpo-aom-delete-button"
@@ -172,9 +169,7 @@ export const StatusTable = ({
 														'Delete',
 														'advanced-order-manager'
 													)}
-													disabled={isBusy(
-														status
-													)}
+													disabled={isBusy(status)}
 												>
 													<span className="screen-reader-text">
 														{__(

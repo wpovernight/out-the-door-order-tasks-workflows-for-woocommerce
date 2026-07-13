@@ -44,10 +44,7 @@ const WooFulfillmentsList: React.FC<WooFulfillmentsListProps> = ({
 		return (
 			<EmptyState
 				icon="box"
-				message={__(
-					'No fulfillments yet.',
-					'advanced-order-manager'
-				)}
+				message={__('No fulfillments yet.', 'advanced-order-manager')}
 				actionText={__('Add Fulfillment', 'advanced-order-manager')}
 				actionButtonProps={
 					{

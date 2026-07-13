@@ -48,7 +48,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	// Tracks unsaved edits so the close guard knows whether to prompt before closing.
 	const isDirtyRef = useRef(false);
-    // Tracks whether a submission is in progress so the close guard can prevent closing during that time.
+	// Tracks whether a submission is in progress so the close guard can prevent closing during that time.
 	const isSubmittingRef = useRef(false);
 
 	const beforeCloseGuard = useCallback(async () => {
@@ -179,21 +179,12 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 			console.error('Failed to save task:', error);
 			addToast({
 				title: isUpdate
-					? __(
-							'Failed to update task.',
-							'advanced-order-manager'
-						)
-					: __(
-							'Failed to create task.',
-							'advanced-order-manager'
-						),
+					? __('Failed to update task.', 'advanced-order-manager')
+					: __('Failed to create task.', 'advanced-order-manager'),
 				message:
 					error instanceof Error && error.message
 						? error.message
-						: __(
-								'Please try again.',
-								'advanced-order-manager'
-							),
+						: __('Please try again.', 'advanced-order-manager'),
 				type: ToastType.ERROR,
 			});
 		} finally {
@@ -290,10 +281,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 							{__('Status', 'advanced-order-manager')}
 						</label>
 						<FieldOptionDropdown
-							placeholder={__(
-								'Select',
-								'advanced-order-manager'
-							)}
+							placeholder={__('Select', 'advanced-order-manager')}
 							options={fieldOptions.status}
 							id="status"
 							name="field_status"
@@ -306,10 +294,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 							{__('Priority', 'advanced-order-manager')}
 						</label>
 						<FieldOptionDropdown
-							placeholder={__(
-								'Select',
-								'advanced-order-manager'
-							)}
+							placeholder={__('Select', 'advanced-order-manager')}
 							options={fieldOptions?.priority || []}
 							id="priority"
 							name="field_priority"
@@ -352,10 +337,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				<div className="field-group">
 					<div>
 						<label htmlFor="associated-orders">
-							{__(
-								'Associated Orders',
-								'advanced-order-manager'
-							)}
+							{__('Associated Orders', 'advanced-order-manager')}
 						</label>
 						<AsyncMultiSelectField
 							placeholder={__(

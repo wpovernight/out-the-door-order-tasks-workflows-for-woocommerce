@@ -53,10 +53,7 @@ export const ArchiveContent: React.FC = () => {
 										className="task-info th-sortable"
 										onClick={() => handleSort('title')}
 									>
-										{__(
-											'Task',
-											'advanced-order-manager'
-										)}{' '}
+										{__('Task', 'advanced-order-manager')}{' '}
 										<SortIcon
 											column="title"
 											sortColumn={sortColumn}
@@ -97,10 +94,7 @@ export const ArchiveContent: React.FC = () => {
 										className="task-done-date th-sortable"
 										onClick={() => handleSort('doneDate')}
 									>
-										{__(
-											'Done',
-											'advanced-order-manager'
-										)}{' '}
+										{__('Done', 'advanced-order-manager')}{' '}
 										<SortIcon
 											column="doneDate"
 											sortColumn={sortColumn}

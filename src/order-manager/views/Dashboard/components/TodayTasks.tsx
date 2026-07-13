@@ -164,10 +164,7 @@ export const TodayTasks = () => {
 							'No tasks due today.',
 							'advanced-order-manager'
 						)}
-						actionText={__(
-							'Add Task',
-							'advanced-order-manager'
-						)}
+						actionText={__('Add Task', 'advanced-order-manager')}
 					/>
 				) : (
 					<>

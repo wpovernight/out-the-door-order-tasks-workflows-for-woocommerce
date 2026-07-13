@@ -439,10 +439,7 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 			setErrorMessage(
 				extractErrorMessage(
 					error,
-					__(
-						'Failed to delete the column.',
-						'advanced-order-manager'
-					)
+					__('Failed to delete the column.', 'advanced-order-manager')
 				)
 			);
 			setPhase('error');
@@ -643,20 +640,14 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 							),
 							column.label
 						)}
-						fieldLabel={__(
-							'Destination',
-							'advanced-order-manager'
-						)}
+						fieldLabel={__('Destination', 'advanced-order-manager')}
 						availableColumns={availableColumnsToMove}
 						selectedOptionId={moveTargetOptionId}
 						onSelectionChange={setMoveTargetOptionId}
 						primaryActionLabel={
 							needsRoleSelection
 								? __('Continue', 'advanced-order-manager')
-								: __(
-										'Move & delete',
-										'advanced-order-manager'
-									)
+								: __('Move & delete', 'advanced-order-manager')
 						}
 						secondaryActionLabel={__(
 							'Cancel',
@@ -680,10 +671,7 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 
 				return (
 					<ColumnPickerPhase
-						title={__(
-							'Reassign role?',
-							'advanced-order-manager'
-						)}
+						title={__('Reassign role?', 'advanced-order-manager')}
 						description={sprintf(
 							/* translators: 1: column label being deleted, 2: role name ("done" or "undone") */
 							__(

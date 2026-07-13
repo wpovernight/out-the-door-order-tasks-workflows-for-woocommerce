@@ -6,10 +6,7 @@ import { useTab } from '@orderManager/context/TabContext';
 const coreTabLabels: Record<string, string> = {
 	dashboard: __('Dashboard', 'advanced-order-manager'),
 	'task-manager': __('Task Manager', 'advanced-order-manager'),
-	'custom-order-status': __(
-		'Custom Order Status',
-		'advanced-order-manager'
-	),
+	'custom-order-status': __('Custom Order Status', 'advanced-order-manager'),
 };
 
 export default function Header() {

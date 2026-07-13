@@ -273,10 +273,7 @@ export const Column: React.FC<ColumnProps> = ({
 		}).catch((error) => {
 			// The optimistic update already reverted the title, inform the user why.
 			addToast({
-				title: __(
-					'Failed to rename column.',
-					'advanced-order-manager'
-				),
+				title: __('Failed to rename column.', 'advanced-order-manager'),
 				message:
 					error instanceof Error && error.message
 						? error.message
@@ -436,59 +433,59 @@ export const Column: React.FC<ColumnProps> = ({
 							<ul
 								className={`wpo-action-menu column-action-menu ${isActionMenuOpen ? 'is-open' : ''}`}
 							>
-							<li>
-								<button
-									type="button"
-									className="wpo-button edit-column-title"
-									onClick={() => {
-										setColumnTitleEditState('editing');
-										setIsActionMenuOpen(false);
-									}}
-								>
-									{__(
-										'Edit column title',
-										'advanced-order-manager'
-									)}
-								</button>
-							</li>
-							<li>
-								<button
-									type="button"
-									className="wpo-button add-column-right"
-									onClick={() => handleAddColumn('right')}
-								>
-									{__(
-										'Add column right',
-										'advanced-order-manager'
-									)}
-								</button>
-							</li>
-							<li>
-								<button
-									type="button"
-									className="wpo-button add-column-left"
-									onClick={() => handleAddColumn('left')}
-								>
-									{__(
-										'Add column left',
-										'advanced-order-manager'
-									)}
-								</button>
-							</li>
-							<li>
-								<button
-									type="button"
-									className="wpo-button delete-column"
-									onClick={handleDeleteColumn}
-								>
-									{__('Delete', 'advanced-order-manager')}
-								</button>
-							</li>
-						</ul>
-					</li>
-				</ul>
-			</div>
-			<div ref={scrollableRef} className="kanban-column-scrollable">
+								<li>
+									<button
+										type="button"
+										className="wpo-button edit-column-title"
+										onClick={() => {
+											setColumnTitleEditState('editing');
+											setIsActionMenuOpen(false);
+										}}
+									>
+										{__(
+											'Edit column title',
+											'advanced-order-manager'
+										)}
+									</button>
+								</li>
+								<li>
+									<button
+										type="button"
+										className="wpo-button add-column-right"
+										onClick={() => handleAddColumn('right')}
+									>
+										{__(
+											'Add column right',
+											'advanced-order-manager'
+										)}
+									</button>
+								</li>
+								<li>
+									<button
+										type="button"
+										className="wpo-button add-column-left"
+										onClick={() => handleAddColumn('left')}
+									>
+										{__(
+											'Add column left',
+											'advanced-order-manager'
+										)}
+									</button>
+								</li>
+								<li>
+									<button
+										type="button"
+										className="wpo-button delete-column"
+										onClick={handleDeleteColumn}
+									>
+										{__('Delete', 'advanced-order-manager')}
+									</button>
+								</li>
+							</ul>
+						</li>
+					</ul>
+				</div>
+				<div ref={scrollableRef} className="kanban-column-scrollable">
 					<div
 						ref={containerRef}
 						className={`kanban-column-container ${

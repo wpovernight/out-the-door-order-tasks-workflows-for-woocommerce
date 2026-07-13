@@ -46,16 +46,10 @@ const TaskList: React.FC<TaskListProps> = ({
 				today: __('Today', 'advanced-order-manager'),
 				tomorrow: __('Tomorrow', 'advanced-order-manager'),
 				yesterday: __('Yesterday', 'advanced-order-manager'),
-				'current-week': __(
-					'Current Week',
-					'advanced-order-manager'
-				),
+				'current-week': __('Current Week', 'advanced-order-manager'),
 				'next-week': __('Next Week', 'advanced-order-manager'),
 				'last-week': __('Last Week', 'advanced-order-manager'),
-				'current-month': __(
-					'Current Month',
-					'advanced-order-manager'
-				),
+				'current-month': __('Current Month', 'advanced-order-manager'),
 				'next-month': __('Next Month', 'advanced-order-manager'),
 				'last-month': __('Last Month', 'advanced-order-manager'),
 			};
