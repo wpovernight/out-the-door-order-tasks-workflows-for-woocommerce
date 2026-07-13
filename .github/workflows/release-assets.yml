@@ -13,7 +13,8 @@ jobs:
           TAG_NAME: ${{ github.event.release.tag_name }}
         run: |
           # process existing variables
-          PLUGIN_SLUG="${PWD##*/}"
+          # The distributed plugin slug must not contain the restricted terms, like "wp"
+          PLUGIN_SLUG="advanced-order-manager"
           VERSION="${TAG_NAME#v}"
           ZIP_FILE_NAME=$PLUGIN_SLUG.$VERSION.zip
 
