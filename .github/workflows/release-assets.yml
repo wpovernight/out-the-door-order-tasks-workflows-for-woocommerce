@@ -32,6 +32,26 @@ jobs:
           submodules: true
           fetch-depth: 1
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Build JS assets
+        working-directory: ${{ env.plugin_slug }}
+        run: |
+          npm ci
+          npm run build
+
+      - name: Minify CSS
+        working-directory: ${{ env.plugin_slug }}
+        run: |
+          npm install -g clean-css-cli
+          # Minify each CSS source into its .min.css counterpart, in place under assets/css/.
+          find assets/css -type f -name '*.css' \
+            ! -name '*.min.css' \
+            -exec bash -c 'cleancss -o "${0%.css}.min.css" "$0"' {} \;
+
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
