@@ -115,7 +115,7 @@ class CustomOrderStatusController extends BaseRestController {
 		) );
 
 		if ( ! empty( $errors ) ) {
-			return new WP_Error( 'invalid_data', __( 'Invalid data provided', 'wpo-advanced-order-manager' ), array(
+			return new WP_Error( 'invalid_data', __( 'Invalid data provided', 'advanced-order-manager' ), array(
 				'status' => 400,
 				'errors' => $errors
 			) );
@@ -144,14 +144,14 @@ class CustomOrderStatusController extends BaseRestController {
 		$id = (int) $request->get_param( 'id' );
 
 		if ( $id <= 0 ) {
-			return new WP_Error( 'invalid_id', __( 'Invalid ID provided', 'wpo-advanced-order-manager' ), array( 'status' => 400 ) );
+			return new WP_Error( 'invalid_id', __( 'Invalid ID provided', 'advanced-order-manager' ), array( 'status' => 400 ) );
 		}
 
 		$custom_order_status_service = $this->custom_order_status_service;
 		$status                      = $custom_order_status_service->find( $id );
 
 		if ( ! $status ) {
-			return new WP_Error( 'not_found', __( 'Custom order status not found', 'wpo-advanced-order-manager' ), array( 'status' => 404 ) );
+			return new WP_Error( 'not_found', __( 'Custom order status not found', 'advanced-order-manager' ), array( 'status' => 404 ) );
 		}
 
 		return $this->respond( $status );
@@ -168,7 +168,7 @@ class CustomOrderStatusController extends BaseRestController {
 		$id = (int) $request->get_param( 'id' );
 
 		if ( $id <= 0 ) {
-			return new WP_Error( 'invalid_id', __( 'Invalid ID provided', 'wpo-advanced-order-manager' ), array( 'status' => 400 ) );
+			return new WP_Error( 'invalid_id', __( 'Invalid ID provided', 'advanced-order-manager' ), array( 'status' => 400 ) );
 		}
 
 		$data = $request->get_json_params();
@@ -181,7 +181,7 @@ class CustomOrderStatusController extends BaseRestController {
 		) );
 
 		if ( ! empty( $errors ) ) {
-			return new WP_Error( 'invalid_data', __( 'Invalid data provided', 'wpo-advanced-order-manager' ), array(
+			return new WP_Error( 'invalid_data', __( 'Invalid data provided', 'advanced-order-manager' ), array(
 				'status' => 400,
 				'errors' => $errors
 			) );
@@ -212,7 +212,7 @@ class CustomOrderStatusController extends BaseRestController {
 		$id = (int) $request->get_param( 'id' );
 
 		if ( $id <= 0 ) {
-			return new WP_Error( 'invalid_id', __( 'Invalid ID provided', 'wpo-advanced-order-manager' ), array( 'status' => 400 ) );
+			return new WP_Error( 'invalid_id', __( 'Invalid ID provided', 'advanced-order-manager' ), array( 'status' => 400 ) );
 		}
 
 		$custom_order_status_service = $this->custom_order_status_service;
@@ -226,7 +226,7 @@ class CustomOrderStatusController extends BaseRestController {
 
 		return $this->respond( array(
 			'success' => true,
-			'message' => __( 'Custom order status deleted successfully', 'wpo-advanced-order-manager' )
+			'message' => __( 'Custom order status deleted successfully', 'advanced-order-manager' )
 		) );
 	}
 }

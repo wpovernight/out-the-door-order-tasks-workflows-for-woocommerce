@@ -71,7 +71,7 @@ final class Screen {
 
 		add_meta_box(
 			'wpo-aom-order-meta-box',
-			esc_html__( 'Advanced Order Management', 'wpo-advanced-order-manager' ),
+			esc_html__( 'Advanced Order Management', 'advanced-order-manager' ),
 			array( $this, 'render_meta_box' ),
 			$screen_id,
 			'normal',
@@ -147,7 +147,7 @@ final class Screen {
 			true
 		);
 
-		wp_set_script_translations( 'wpo-aom-order-edit-metabox', 'wpo-advanced-order-manager', WPO_AOM()->plugin_path() . '/languages' );
+		wp_set_script_translations( 'wpo-aom-order-edit-metabox', 'advanced-order-manager', WPO_AOM()->plugin_path() . '/languages' );
 
 		wp_localize_script(
 			'wpo-aom-order-edit-metabox',
@@ -237,7 +237,7 @@ final class Screen {
 	 * @return void
 	 */
 	public function order_items_headers(): void {
-		echo '<th>' . esc_html__( 'Fulfillments', 'wpo-advanced-order-manager' ) . '</th>';
+		echo '<th>' . esc_html__( 'Fulfillments', 'advanced-order-manager' ) . '</th>';
 	}
 
 	/**
@@ -279,7 +279,7 @@ final class Screen {
 				<span class="screen-reader-text">%2$s</span>
 			</button>',
 			esc_attr( $item_id ),
-			esc_html__( 'Edit fulfillment quantity', 'wpo-advanced-order-manager' )
+			esc_html__( 'Edit fulfillment quantity', 'advanced-order-manager' )
 		);
 		$view_html               = sprintf( '<div class="view">%s%s</div>', $fulfillment_status_html, $edit_button_html );
 
@@ -301,7 +301,7 @@ final class Screen {
 			esc_attr( $total_quantity ),
 			esc_attr( $fulfillment_quantity ),
 			esc_attr( $fulfillment ? $fulfillment->id : '' ),
-			esc_html__( 'Fulfillment Quantity', 'wpo-advanced-order-manager' )
+			esc_html__( 'Fulfillment Quantity', 'advanced-order-manager' )
 		);
 		$edit_button_html = sprintf(
 			'<ul class="wpo-aom-fulfillment-actions" style="display: none;">
@@ -330,8 +330,8 @@ final class Screen {
 				</ul>',
 			esc_attr( $item_id ),
 			esc_attr( $fulfillment ? $fulfillment->id : '' ),
-			esc_html__( 'Save fulfillment quantity', 'wpo-advanced-order-manager' ),
-			esc_html__( 'Cancel fulfillment edit', 'wpo-advanced-order-manager' )
+			esc_html__( 'Save fulfillment quantity', 'advanced-order-manager' ),
+			esc_html__( 'Cancel fulfillment edit', 'advanced-order-manager' )
 		);
 		$edit_html        = sprintf(
 			'<div class="edit" style="display:none;">%s%s</div>',
@@ -368,7 +368,7 @@ final class Screen {
 			'%1$d / %2$d %3$s',
 			$shipped_quantity,
 			$total_quantity,
-			esc_html__( 'fulfilled', 'wpo-advanced-order-manager' )
+			esc_html__( 'fulfilled', 'advanced-order-manager' )
 		);
 
 
@@ -447,7 +447,7 @@ final class Screen {
 		) {
 			wp_send_json_error(
 				array(
-					'message' => esc_html__( 'Security verification failed.', 'wpo-advanced-order-manager' ),
+					'message' => esc_html__( 'Security verification failed.', 'advanced-order-manager' ),
 				)
 			);
 		}
@@ -456,7 +456,7 @@ final class Screen {
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
 			wp_send_json_error(
 				array(
-					'message' => esc_html__( 'You do not have permission to perform this action.', 'wpo-advanced-order-manager' ),
+					'message' => esc_html__( 'You do not have permission to perform this action.', 'advanced-order-manager' ),
 				)
 			);
 		}
@@ -469,7 +469,7 @@ final class Screen {
 		if ( $item_id <= 0 ) {
 			wp_send_json_error(
 				array(
-					'message' => esc_html__( 'Invalid item ID.', 'wpo-advanced-order-manager' ),
+					'message' => esc_html__( 'Invalid item ID.', 'advanced-order-manager' ),
 				)
 			);
 		}
@@ -479,7 +479,7 @@ final class Screen {
 		if ( ! $order_item ) {
 			wp_send_json_error(
 				array(
-					'message' => esc_html__( 'Order item not found.', 'wpo-advanced-order-manager' ),
+					'message' => esc_html__( 'Order item not found.', 'advanced-order-manager' ),
 				)
 			);
 		}
@@ -490,7 +490,7 @@ final class Screen {
 				array(
 					'message' => sprintf(
 						/* translators: %d: total quantity */
-						esc_html__( 'Fulfillment quantity cannot exceed %d.', 'wpo-advanced-order-manager' ),
+						esc_html__( 'Fulfillment quantity cannot exceed %d.', 'advanced-order-manager' ),
 						$total_quantity
 					),
 				)
@@ -507,7 +507,7 @@ final class Screen {
 		if ( null === $saved_fulfillment_id ) {
 			wp_send_json_error(
 				array(
-					'message' => esc_html__( 'Failed to save fulfillment quantity.', 'wpo-advanced-order-manager' ),
+					'message' => esc_html__( 'Failed to save fulfillment quantity.', 'advanced-order-manager' ),
 				)
 			);
 		}
@@ -533,7 +533,7 @@ final class Screen {
 			$order->add_order_note(
 				sprintf(
 					/* translators: 1: product name, 2: fulfilled quantity, 3: total quantity */
-					esc_html__( 'Fulfillment updated for "%1$s": %2$d of %3$d fulfilled.', 'wpo-advanced-order-manager' ),
+					esc_html__( 'Fulfillment updated for "%1$s": %2$d of %3$d fulfilled.', 'advanced-order-manager' ),
 					$order_item->get_name(),
 					$quantity,
 					$total_quantity
@@ -544,7 +544,7 @@ final class Screen {
 		// Return the updated HTML.
 		wp_send_json_success(
 			array(
-				'message'        => esc_html__( 'Fulfillment quantity saved successfully.', 'wpo-advanced-order-manager' ),
+				'message'        => esc_html__( 'Fulfillment quantity saved successfully.', 'advanced-order-manager' ),
 				'html'           => $this->get_fulfillment_status_html( $fulfillment_status, $quantity, $total_quantity ),
 				'fulfillment_id' => $saved_fulfillment_id,
 			)

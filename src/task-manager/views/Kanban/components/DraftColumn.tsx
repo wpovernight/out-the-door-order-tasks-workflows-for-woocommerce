@@ -39,11 +39,11 @@ export const DraftColumn: React.FC<DraftColumnProps> = ({
 			addToast({
 				title: __(
 					'A column with this name already exists.',
-					'wpo-advanced-order-manager'
+					'advanced-order-manager'
 				),
 				message: __(
 					'Please choose a different name.',
-					'wpo-advanced-order-manager'
+					'advanced-order-manager'
 				),
 				type: ToastType.ERROR,
 			});
@@ -61,14 +61,14 @@ export const DraftColumn: React.FC<DraftColumnProps> = ({
 				addToast({
 					title: __(
 						'Failed to create column.',
-						'wpo-advanced-order-manager'
+						'advanced-order-manager'
 					),
 					message:
 						error instanceof Error && error.message
 							? error.message
 							: __(
 									'Please try again.',
-									'wpo-advanced-order-manager'
+									'advanced-order-manager'
 								),
 					type: ToastType.ERROR,
 				});
@@ -86,7 +86,7 @@ export const DraftColumn: React.FC<DraftColumnProps> = ({
 							type="text"
 							defaultValue={__(
 								'New Column',
-								'wpo-advanced-order-manager'
+								'advanced-order-manager'
 							)}
 							className="edit-title-input"
 							// eslint-disable-next-line jsx-a11y/no-autofocus
@@ -109,7 +109,7 @@ export const DraftColumn: React.FC<DraftColumnProps> = ({
 								className="wpo-button wpo-button-icon cancel-edit-title-button"
 							>
 								<span className="screen-reader-text">
-									{__('Cancel', 'wpo-advanced-order-manager')}
+									{__('Cancel', 'advanced-order-manager')}
 								</span>
 							</button>
 							<span className="wpo-aom-vertical-divider" />
@@ -119,7 +119,7 @@ export const DraftColumn: React.FC<DraftColumnProps> = ({
 								className="wpo-button wpo-button-icon save-title-button"
 							>
 								<span className="screen-reader-text">
-									{__('Save', 'wpo-advanced-order-manager')}
+									{__('Save', 'advanced-order-manager')}
 								</span>
 							</button>
 						</div>

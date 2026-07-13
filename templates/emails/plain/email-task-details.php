@@ -15,14 +15,14 @@ use WPO\AOM\Services\EmailService;
 defined( 'ABSPATH' ) || exit;
 
 echo "========================================\n";
-echo esc_html( strtoupper( __( 'Task Details', 'wpo-advanced-order-manager' ) ) ) . "\n";
+echo esc_html( strtoupper( __( 'Task Details', 'advanced-order-manager' ) ) ) . "\n";
 echo "========================================\n\n";
 
-echo esc_html__( 'Task ID:', 'wpo-advanced-order-manager' ) . ' #' . esc_html( $task_data['id'] ) . "\n";
-echo esc_html__( 'Title:', 'wpo-advanced-order-manager' ) . ' ' . esc_html( $task_data['title'] ) . "\n";
+echo esc_html__( 'Task ID:', 'advanced-order-manager' ) . ' #' . esc_html( $task_data['id'] ) . "\n";
+echo esc_html__( 'Title:', 'advanced-order-manager' ) . ' ' . esc_html( $task_data['title'] ) . "\n";
 
 if ( ! empty( $task_data['description'] ) ) {
-	echo esc_html__( 'Description:', 'wpo-advanced-order-manager' ) . "\n" . esc_html( $task_data['description'] ) . "\n";
+	echo esc_html__( 'Description:', 'advanced-order-manager' ) . "\n" . esc_html( $task_data['description'] ) . "\n";
 }
 
 /** @var EmailService $email_service Passed in from EmailService::email_task_details(). */

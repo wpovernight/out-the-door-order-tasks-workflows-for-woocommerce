@@ -53,19 +53,19 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onTaskClick }) => {
 					)
 				);
 			},
-			title: `${__('Edit', 'wpo-advanced-order-manager')}: ${task.title}`,
+			title: `${__('Edit', 'advanced-order-manager')}: ${task.title}`,
 		});
 	};
 
 	const handleDelete = async (taskId: number) => {
 		const confirmationResult = await confirm({
-			title: __('Delete this task?', 'wpo-advanced-order-manager'),
+			title: __('Delete this task?', 'advanced-order-manager'),
 			message: __(
 				'Are you sure you want to delete this task? This action cannot be undone.',
-				'wpo-advanced-order-manager'
+				'advanced-order-manager'
 			),
-			confirmText: __('Delete', 'wpo-advanced-order-manager'),
-			cancelText: __('Cancel', 'wpo-advanced-order-manager'),
+			confirmText: __('Delete', 'advanced-order-manager'),
+			cancelText: __('Cancel', 'advanced-order-manager'),
 			action: 'delete',
 		});
 

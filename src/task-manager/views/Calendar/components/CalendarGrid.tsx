@@ -9,32 +9,32 @@ interface CalendarGridProps {
 
 const WEEKDAYS = [
 	{
-		abbr: __('Monday', 'wpo-advanced-order-manager'),
-		short: __('Mo', 'wpo-advanced-order-manager'),
+		abbr: __('Monday', 'advanced-order-manager'),
+		short: __('Mo', 'advanced-order-manager'),
 	},
 	{
-		abbr: __('Tuesday', 'wpo-advanced-order-manager'),
-		short: __('Tu', 'wpo-advanced-order-manager'),
+		abbr: __('Tuesday', 'advanced-order-manager'),
+		short: __('Tu', 'advanced-order-manager'),
 	},
 	{
-		abbr: __('Wednesday', 'wpo-advanced-order-manager'),
-		short: __('We', 'wpo-advanced-order-manager'),
+		abbr: __('Wednesday', 'advanced-order-manager'),
+		short: __('We', 'advanced-order-manager'),
 	},
 	{
-		abbr: __('Thursday', 'wpo-advanced-order-manager'),
-		short: __('Th', 'wpo-advanced-order-manager'),
+		abbr: __('Thursday', 'advanced-order-manager'),
+		short: __('Th', 'advanced-order-manager'),
 	},
 	{
-		abbr: __('Friday', 'wpo-advanced-order-manager'),
-		short: __('Fr', 'wpo-advanced-order-manager'),
+		abbr: __('Friday', 'advanced-order-manager'),
+		short: __('Fr', 'advanced-order-manager'),
 	},
 	{
-		abbr: __('Saturday', 'wpo-advanced-order-manager'),
-		short: __('Sa', 'wpo-advanced-order-manager'),
+		abbr: __('Saturday', 'advanced-order-manager'),
+		short: __('Sa', 'advanced-order-manager'),
 	},
 	{
-		abbr: __('Sunday', 'wpo-advanced-order-manager'),
-		short: __('Su', 'wpo-advanced-order-manager'),
+		abbr: __('Sunday', 'advanced-order-manager'),
+		short: __('Su', 'advanced-order-manager'),
 	},
 ];
 

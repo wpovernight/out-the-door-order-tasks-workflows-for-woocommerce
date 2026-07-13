@@ -22,7 +22,7 @@ interface AsyncMultiSelectProps {
 }
 
 export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
-	placeholder = __('Search…', 'wpo-advanced-order-manager'),
+	placeholder = __('Search…', 'advanced-order-manager'),
 	selectedOptions = [],
 	id,
 	className,
@@ -204,7 +204,7 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 					if (loading) {
 						return __(
 							'Loading results…',
-							'wpo-advanced-order-manager'
+							'advanced-order-manager'
 						);
 					}
 					if (showResults) {
@@ -213,13 +213,13 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 									/* translators: %d is the number of results found. */
 									__(
 										'%d results found',
-										'wpo-advanced-order-manager'
+										'advanced-order-manager'
 									),
 									results.length
 								)
 							: __(
 									'No results found',
-									'wpo-advanced-order-manager'
+									'advanced-order-manager'
 								);
 					}
 					return '';
@@ -228,13 +228,13 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 
 			{showResults && loading && (
 				<div className="wpo-aom-async-multi-select-message">
-					<p>{__('Loading…', 'wpo-advanced-order-manager')}</p>
+					<p>{__('Loading…', 'advanced-order-manager')}</p>
 				</div>
 			)}
 			{showResults && !loading && !Boolean(results.length) && (
 				<div className="wpo-aom-async-multi-select-message">
 					<p>
-						{__('No results found', 'wpo-advanced-order-manager')}
+						{__('No results found', 'advanced-order-manager')}
 					</p>
 				</div>
 			)}
@@ -283,7 +283,7 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 								onClick={() => handleRemoveOption(option.id)}
 							>
 								<span className="screen-reader-text">
-									{__('Close', 'wpo-advanced-order-manager')}
+									{__('Close', 'advanced-order-manager')}
 								</span>
 							</button>
 						</li>

@@ -9,14 +9,14 @@ export const getShippingMethodLabel = (
 			return (
 				fulfillmentMeta.provider_name?.toUpperCase() ||
 				fulfillmentMeta.shipment_provider?.toUpperCase() ||
-				__('Tracking Number', 'wpo-advanced-order-manager')
+				__('Tracking Number', 'advanced-order-manager')
 			);
 		case 'manual-entry':
-			return __('Manual Entry', 'wpo-advanced-order-manager');
+			return __('Manual Entry', 'advanced-order-manager');
 		case 'no-info':
-			return __('No Info', 'wpo-advanced-order-manager');
+			return __('No Info', 'advanced-order-manager');
 		default:
-			return __('Unknown', 'wpo-advanced-order-manager');
+			return __('Unknown', 'advanced-order-manager');
 	}
 };
 

@@ -119,7 +119,7 @@ export const OrderTaskProvider: React.FC<{
 						: new Error(
 								__(
 									'Failed to load tasks',
-									'wpo-advanced-order-manager'
+									'advanced-order-manager'
 								)
 							)
 				);

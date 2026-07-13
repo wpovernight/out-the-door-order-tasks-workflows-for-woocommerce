@@ -29,7 +29,7 @@ export const WooFulfillmentCard: React.FC<WooFulfillmentCardProps> = ({
 				<h4>
 					{sprintf(
 						/* translators: %d is the fulfillment number. */
-						__('Fulfillment #%d', 'wpo-advanced-order-manager'),
+						__('Fulfillment #%d', 'advanced-order-manager'),
 						index + 1
 					)}
 				</h4>
@@ -74,7 +74,7 @@ export const WooFulfillmentCard: React.FC<WooFulfillmentCardProps> = ({
 									<span className="screen-reader-text">
 										{__(
 											'Track Package',
-											'wpo-advanced-order-manager'
+											'advanced-order-manager'
 										)}
 									</span>
 								</a>
@@ -82,7 +82,7 @@ export const WooFulfillmentCard: React.FC<WooFulfillmentCardProps> = ({
 						</div>
 					)}
 				</dd>
-				<dt>{__('Last Updated', 'wpo-advanced-order-manager')}</dt>
+				<dt>{__('Last Updated', 'advanced-order-manager')}</dt>
 				<dd>
 					{fulfillment.status === 'fulfilled' &&
 						meta.date_fulfilled &&

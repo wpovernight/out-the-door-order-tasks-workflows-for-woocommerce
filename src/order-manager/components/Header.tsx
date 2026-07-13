@@ -4,11 +4,11 @@ import { applyFilters } from '@wordpress/hooks';
 import { useTab } from '@orderManager/context/TabContext';
 
 const coreTabLabels: Record<string, string> = {
-	dashboard: __('Dashboard', 'wpo-advanced-order-manager'),
-	'task-manager': __('Task Manager', 'wpo-advanced-order-manager'),
+	dashboard: __('Dashboard', 'advanced-order-manager'),
+	'task-manager': __('Task Manager', 'advanced-order-manager'),
 	'custom-order-status': __(
 		'Custom Order Status',
-		'wpo-advanced-order-manager'
+		'advanced-order-manager'
 	),
 };
 

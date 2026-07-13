@@ -21,25 +21,25 @@ defined( 'ABSPATH' ) || exit;
 	<thead>
 		<tr>
 			<th class="td" scope="col" style="background-color: #f8f8f8; padding: 12px;">
-				<?php esc_html_e( 'Task Details', 'wpo-advanced-order-manager' ); ?>
+				<?php esc_html_e( 'Task Details', 'advanced-order-manager' ); ?>
 			</th>
 		</tr>
 	</thead>
 	<tbody>
 		<tr>
 			<td class="td" style="padding: 12px;">
-				<strong><?php esc_html_e( 'Task ID:', 'wpo-advanced-order-manager' ); ?></strong> #<?php echo esc_html( $task_data['id'] ); ?>
+				<strong><?php esc_html_e( 'Task ID:', 'advanced-order-manager' ); ?></strong> #<?php echo esc_html( $task_data['id'] ); ?>
 			</td>
 		</tr>
 		<tr>
 			<td class="td" style="padding: 12px;">
-				<strong><?php esc_html_e( 'Title:', 'wpo-advanced-order-manager' ); ?></strong> <?php echo esc_html( $task_data['title'] ); ?>
+				<strong><?php esc_html_e( 'Title:', 'advanced-order-manager' ); ?></strong> <?php echo esc_html( $task_data['title'] ); ?>
 			</td>
 		</tr>
 		<?php if ( ! empty( $task_data['description'] ) ) : ?>
 		<tr>
 			<td class="td" style="padding: 12px;">
-				<strong><?php esc_html_e( 'Description:', 'wpo-advanced-order-manager' ); ?></strong><br>
+				<strong><?php esc_html_e( 'Description:', 'advanced-order-manager' ); ?></strong><br>
 				<?php echo wp_kses_post( nl2br( $task_data['description'] ) ); ?>
 			</td>
 		</tr>

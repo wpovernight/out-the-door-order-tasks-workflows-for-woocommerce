@@ -58,7 +58,7 @@ export function useCustomOrderStatuses(): UseCustomOrderStatusesResult {
 					? error.message
 					: __(
 							'Something went wrong. Please try again.',
-							'wpo-advanced-order-manager'
+							'advanced-order-manager'
 						),
 			type: ToastType.ERROR,
 		});
@@ -74,7 +74,7 @@ export function useCustomOrderStatuses(): UseCustomOrderStatusesResult {
 		} catch (error) {
 			reportError(
 				error,
-				__('Could not create status', 'wpo-advanced-order-manager')
+				__('Could not create status', 'advanced-order-manager')
 			);
 			throw error;
 		} finally {
@@ -95,7 +95,7 @@ export function useCustomOrderStatuses(): UseCustomOrderStatusesResult {
 		} catch (error) {
 			reportError(
 				error,
-				__('Could not update status', 'wpo-advanced-order-manager')
+				__('Could not update status', 'advanced-order-manager')
 			);
 			throw error;
 		} finally {
@@ -121,7 +121,7 @@ export function useCustomOrderStatuses(): UseCustomOrderStatusesResult {
 		} catch (error) {
 			reportError(
 				error,
-				__('Could not delete status', 'wpo-advanced-order-manager')
+				__('Could not delete status', 'advanced-order-manager')
 			);
 			throw error;
 		} finally {

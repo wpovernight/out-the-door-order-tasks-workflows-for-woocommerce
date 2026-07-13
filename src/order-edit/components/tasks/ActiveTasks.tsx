@@ -131,19 +131,19 @@ const ActiveTasks: React.FC = () => {
 
 		openEditTaskModal({
 			task,
-			title: __('Edit task', 'wpo-advanced-order-manager'),
+			title: __('Edit task', 'advanced-order-manager'),
 		});
 	};
 
 	const handleDeleteClick = async (taskId: number) => {
 		const confirmationResult = await confirm({
-			title: __('Delete this task?', 'wpo-advanced-order-manager'),
+			title: __('Delete this task?', 'advanced-order-manager'),
 			message: __(
 				'Are you sure you want to delete this task? This action cannot be undone.',
-				'wpo-advanced-order-manager'
+				'advanced-order-manager'
 			),
-			confirmText: __('Delete', 'wpo-advanced-order-manager'),
-			cancelText: __('Cancel', 'wpo-advanced-order-manager'),
+			confirmText: __('Delete', 'advanced-order-manager'),
+			cancelText: __('Cancel', 'advanced-order-manager'),
 			action: 'delete',
 		});
 
@@ -195,7 +195,7 @@ const ActiveTasks: React.FC = () => {
 					loadingError?.message ||
 					__(
 						'Error loading data. Please try again.',
-						'wpo-advanced-order-manager'
+						'advanced-order-manager'
 					)
 				}
 				onRetry={refreshTasks}
@@ -210,8 +210,8 @@ const ActiveTasks: React.FC = () => {
 		return (
 			<EmptyState
 				icon="note"
-				message={__('No tasks found.', 'wpo-advanced-order-manager')}
-				actionText={__('Add Task', 'wpo-advanced-order-manager')}
+				message={__('No tasks found.', 'advanced-order-manager')}
+				actionText={__('Add Task', 'advanced-order-manager')}
 			/>
 		);
 	}
@@ -219,7 +219,7 @@ const ActiveTasks: React.FC = () => {
 	return (
 		<div className="task-list-container active-tasks-container">
 			<h4 className="screen-reader-text">
-				{__('Active Tasks', 'wpo-advanced-order-manager')}
+				{__('Active Tasks', 'advanced-order-manager')}
 			</h4>
 			<ul className="task-list">
 				{visibleTasks.map((item) => {
@@ -243,7 +243,7 @@ const ActiveTasks: React.FC = () => {
 										<span className="task-archived-message">
 											{__(
 												'You archived this task',
-												'wpo-advanced-order-manager'
+												'advanced-order-manager'
 											)}
 										</span>
 										<a
@@ -252,7 +252,7 @@ const ActiveTasks: React.FC = () => {
 										>
 											{__(
 												'Go to archive',
-												'wpo-advanced-order-manager'
+												'advanced-order-manager'
 											)}
 											{' \u2192'}
 										</a>
@@ -266,7 +266,7 @@ const ActiveTasks: React.FC = () => {
 									>
 										{__(
 											'Undo',
-											'wpo-advanced-order-manager'
+											'advanced-order-manager'
 										)}
 									</button>
 								</div>

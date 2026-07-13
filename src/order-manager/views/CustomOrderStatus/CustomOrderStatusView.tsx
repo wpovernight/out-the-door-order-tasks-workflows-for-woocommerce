@@ -48,13 +48,13 @@ export const CustomOrderStatusView = () => {
 
 	const handleDelete = async (id: number) => {
 		const confirmationResult = await confirm({
-			title: __('Delete this status?', 'wpo-advanced-order-manager'),
+			title: __('Delete this status?', 'advanced-order-manager'),
 			message: __(
 				'Are you sure you want to delete this status? Orders with this status will be moved to On Hold.',
-				'wpo-advanced-order-manager'
+				'advanced-order-manager'
 			),
-			confirmText: __('Delete', 'wpo-advanced-order-manager'),
-			cancelText: __('Cancel', 'wpo-advanced-order-manager'),
+			confirmText: __('Delete', 'advanced-order-manager'),
+			cancelText: __('Cancel', 'advanced-order-manager'),
 			action: 'delete',
 		});
 
@@ -72,7 +72,7 @@ export const CustomOrderStatusView = () => {
 	if (loadingStatus === 'loading') {
 		return (
 			<div className="custom-order-status-view">
-				<h3>{__('Active Statuses', 'wpo-advanced-order-manager')}</h3>
+				<h3>{__('Active Statuses', 'advanced-order-manager')}</h3>
 				<div className="cos-skeleton">
 					<SkeletonLine width="100%" height="2.5em" />
 					<SkeletonLine width="100%" height="2.5em" />
@@ -91,7 +91,7 @@ export const CustomOrderStatusView = () => {
 						loadingError?.message ||
 						__(
 							'Error loading custom order statuses. Please try again.',
-							'wpo-advanced-order-manager'
+							'advanced-order-manager'
 						)
 					}
 				/>
@@ -102,20 +102,20 @@ export const CustomOrderStatusView = () => {
 	return (
 		<>
 			<h2 className="screen-reader-text">
-				{__('Custom Order Statuses', 'wpo-advanced-order-manager')}
+				{__('Custom Order Statuses', 'advanced-order-manager')}
 			</h2>
 			<div className="custom-order-status-view">
-				<h3>{__('Active Statuses', 'wpo-advanced-order-manager')}</h3>
+				<h3>{__('Active Statuses', 'advanced-order-manager')}</h3>
 				{statuses.length === 0 && !isCreating ? (
 					<EmptyState
 						icon="🏷"
 						message={__(
 							'No custom order statuses yet.',
-							'wpo-advanced-order-manager'
+							'advanced-order-manager'
 						)}
 						actionText={__(
 							'Add new status',
-							'wpo-advanced-order-manager'
+							'advanced-order-manager'
 						)}
 						onAction={() => setIsCreating(true)}
 					/>

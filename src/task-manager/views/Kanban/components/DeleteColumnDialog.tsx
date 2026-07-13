@@ -78,7 +78,7 @@ const ColumnPickerPhase: React.FC<ColumnPickerPhaseProps> = ({
 					}
 				>
 					<option value="">
-						{__('Select', 'wpo-advanced-order-manager')}
+						{__('Select', 'advanced-order-manager')}
 					</option>
 					{availableColumns.map((column) => (
 						<option key={column.id} value={column.id}>
@@ -134,14 +134,14 @@ const ChooseOperationPhase: React.FC<ChooseOperationPhaseProps> = ({
 			<h2>
 				{sprintf(
 					/* translators: %s: column label */
-					__('Delete "%s" column?', 'wpo-advanced-order-manager'),
+					__('Delete "%s" column?', 'advanced-order-manager'),
 					columnLabel
 				)}
 			</h2>
 			<p>
 				{__(
 					'What would you like to do with the items currently inside it?',
-					'wpo-advanced-order-manager'
+					'advanced-order-manager'
 				)}
 			</p>
 		</div>
@@ -152,7 +152,7 @@ const ChooseOperationPhase: React.FC<ChooseOperationPhaseProps> = ({
 					className="wpo-button wpo-button-primary action-delete"
 					onClick={onDeleteEverything}
 				>
-					{__('Delete everything', 'wpo-advanced-order-manager')}
+					{__('Delete everything', 'advanced-order-manager')}
 				</button>
 			</li>
 			<li>
@@ -161,12 +161,12 @@ const ChooseOperationPhase: React.FC<ChooseOperationPhaseProps> = ({
 					className="wpo-button action-move"
 					onClick={onMoveItems}
 				>
-					{__('Move items', 'wpo-advanced-order-manager')}
+					{__('Move items', 'advanced-order-manager')}
 				</button>
 			</li>
 			<li>
 				<button type="button" className="wpo-button" onClick={onCancel}>
-					{__('Cancel', 'wpo-advanced-order-manager')}
+					{__('Cancel', 'advanced-order-manager')}
 				</button>
 			</li>
 		</ul>
@@ -201,13 +201,13 @@ const ProcessingPhase: React.FC<ProcessingPhaseProps> = ({
 				<h2>
 					{__(
 						'We are currently moving your items',
-						'wpo-advanced-order-manager'
+						'advanced-order-manager'
 					)}
 				</h2>
 				<p>
 					{__(
 						'This might take a while, depending on the number of items that need to be moved.',
-						'wpo-advanced-order-manager'
+						'advanced-order-manager'
 					)}
 				</p>
 				<label id="delete-progress" htmlFor="delete-progress">
@@ -215,7 +215,7 @@ const ProcessingPhase: React.FC<ProcessingPhaseProps> = ({
 						{percent}%
 					</progress>
 					<span className="screen-reader-text">
-						{__('Progress', 'wpo-advanced-order-manager')}
+						{__('Progress', 'advanced-order-manager')}
 					</span>
 					{percent}%
 				</label>
@@ -229,8 +229,8 @@ const ProcessingPhase: React.FC<ProcessingPhaseProps> = ({
 						disabled={canceling}
 					>
 						{canceling
-							? __('Canceling…', 'wpo-advanced-order-manager')
-							: __('Cancel', 'wpo-advanced-order-manager')}
+							? __('Canceling…', 'advanced-order-manager')
+							: __('Cancel', 'advanced-order-manager')}
 					</button>
 				</li>
 			</ul>
@@ -251,13 +251,13 @@ const ErrorPhase: React.FC<ErrorPhaseProps> = ({
 }) => (
 	<>
 		<div className="dialog-content">
-			<h2>{__('Something went wrong', 'wpo-advanced-order-manager')}</h2>
+			<h2>{__('Something went wrong', 'advanced-order-manager')}</h2>
 			<p>{message}</p>
 		</div>
 		<ul className="dialog-actions dialog-actions-horizontal">
 			<li>
 				<button type="button" className="wpo-button" onClick={onClose}>
-					{__('Close', 'wpo-advanced-order-manager')}
+					{__('Close', 'advanced-order-manager')}
 				</button>
 			</li>
 			<li>
@@ -266,7 +266,7 @@ const ErrorPhase: React.FC<ErrorPhaseProps> = ({
 					className="wpo-button wpo-button-primary"
 					onClick={onRetry}
 				>
-					{__('Retry', 'wpo-advanced-order-manager')}
+					{__('Retry', 'advanced-order-manager')}
 				</button>
 			</li>
 		</ul>
@@ -441,7 +441,7 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 					error,
 					__(
 						'Failed to delete the column.',
-						'wpo-advanced-order-manager'
+						'advanced-order-manager'
 					)
 				)
 			);
@@ -472,7 +472,7 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 					error,
 					__(
 						'Failed to move items and delete the column.',
-						'wpo-advanced-order-manager'
+						'advanced-order-manager'
 					)
 				)
 			);
@@ -490,13 +490,13 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 		}
 
 		const confirmed = await confirm({
-			title: __('Delete everything?', 'wpo-advanced-order-manager'),
+			title: __('Delete everything?', 'advanced-order-manager'),
 			message: __(
 				'Are you sure you want to delete this column and all the items inside it? This action cannot be undone.',
-				'wpo-advanced-order-manager'
+				'advanced-order-manager'
 			),
-			confirmText: __('Delete', 'wpo-advanced-order-manager'),
-			cancelText: __('Cancel', 'wpo-advanced-order-manager'),
+			confirmText: __('Delete', 'advanced-order-manager'),
+			cancelText: __('Cancel', 'advanced-order-manager'),
 			action: 'delete',
 		});
 
@@ -565,7 +565,7 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 					throw new Error(
 						__(
 							'No destination column was selected.',
-							'wpo-advanced-order-manager'
+							'advanced-order-manager'
 						)
 					);
 				}
@@ -586,7 +586,7 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 					error,
 					__(
 						'Failed to reassign the role and delete the column.',
-						'wpo-advanced-order-manager'
+						'advanced-order-manager'
 					)
 				)
 			);
@@ -631,7 +631,7 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 							/* translators: %s: column label */
 							__(
 								'Move items from "%s"?',
-								'wpo-advanced-order-manager'
+								'advanced-order-manager'
 							),
 							column.label
 						)}
@@ -639,28 +639,28 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 							/* translators: %s: column label */
 							__(
 								'Where would you like to move the items currently in this column? Once the items are reassigned, the "%s" column will be permanently deleted.',
-								'wpo-advanced-order-manager'
+								'advanced-order-manager'
 							),
 							column.label
 						)}
 						fieldLabel={__(
 							'Destination',
-							'wpo-advanced-order-manager'
+							'advanced-order-manager'
 						)}
 						availableColumns={availableColumnsToMove}
 						selectedOptionId={moveTargetOptionId}
 						onSelectionChange={setMoveTargetOptionId}
 						primaryActionLabel={
 							needsRoleSelection
-								? __('Continue', 'wpo-advanced-order-manager')
+								? __('Continue', 'advanced-order-manager')
 								: __(
 										'Move & delete',
-										'wpo-advanced-order-manager'
+										'advanced-order-manager'
 									)
 						}
 						secondaryActionLabel={__(
 							'Cancel',
-							'wpo-advanced-order-manager'
+							'advanced-order-manager'
 						)}
 						onPrimaryAction={handleMovePickerConfirmation}
 						onSecondaryAction={onClose}
@@ -671,8 +671,8 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 				// One translatable label per role. Adding a role to StatusRoles
 				// means adding one line here — the only role-aware spot left.
 				const roleLabels: Record<keyof StatusRoles, string> = {
-					done: __('done', 'wpo-advanced-order-manager'),
-					undone: __('undone', 'wpo-advanced-order-manager'),
+					done: __('done', 'advanced-order-manager'),
+					undone: __('undone', 'advanced-order-manager'),
 				};
 				const roleLabel = attachedRole
 					? roleLabels[attachedRole]
@@ -682,29 +682,29 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 					<ColumnPickerPhase
 						title={__(
 							'Reassign role?',
-							'wpo-advanced-order-manager'
+							'advanced-order-manager'
 						)}
 						description={sprintf(
 							/* translators: 1: column label being deleted, 2: role name ("done" or "undone") */
 							__(
 								'You are deleting your "%1$s" column. Which column should we use to mark tasks as "%2$s" from now on?',
-								'wpo-advanced-order-manager'
+								'advanced-order-manager'
 							),
 							column.label,
 							roleLabel
 						)}
-						fieldLabel={__('Column', 'wpo-advanced-order-manager')}
+						fieldLabel={__('Column', 'advanced-order-manager')}
 						availableColumns={availableColumnsForRoleReassign}
 						selectedOptionId={roleTargetOptionId}
 						onSelectionChange={setRoleTargetOptionId}
 						primaryActionLabel={__(
 							'Save & delete',
-							'wpo-advanced-order-manager'
+							'advanced-order-manager'
 						)}
 						secondaryActionLabel={
 							directRoleAssignment
-								? __('Cancel', 'wpo-advanced-order-manager')
-								: __('Back', 'wpo-advanced-order-manager')
+								? __('Cancel', 'advanced-order-manager')
+								: __('Back', 'advanced-order-manager')
 						}
 						onPrimaryAction={handleRoleReassignConfirmation}
 						onSecondaryAction={

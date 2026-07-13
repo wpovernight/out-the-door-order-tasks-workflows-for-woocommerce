@@ -127,7 +127,7 @@ class CustomOrderStatusService {
 
 			$new_bulk_actions[ 'mark_' . $status->status_key ] = sprintf(
 				/* translators: %s: status label */
-				__( 'Change status to %s', 'wpo-advanced-order-manager' ),
+				__( 'Change status to %s', 'advanced-order-manager' ),
 				esc_html( $status->label )
 			);
 		}
@@ -224,7 +224,7 @@ class CustomOrderStatusService {
 		if ( ! $result ) {
 			$db_error = $this->repository->get_last_db_error();
 			throw new Exception(
-				esc_html__( 'Failed to create custom order status', 'wpo-advanced-order-manager' )
+				esc_html__( 'Failed to create custom order status', 'advanced-order-manager' )
 				. ( $db_error ? ' Database error: ' . esc_html( $db_error ) : '' )
 			);
 		}
@@ -254,7 +254,7 @@ class CustomOrderStatusService {
 	public function update( int $id, array $data ): CustomOrderStatus {
 		$custom_status = $this->repository->find( $id );
 		if ( ! $custom_status ) {
-			throw new InvalidArgumentException( esc_html__( 'Custom order status not found', 'wpo-advanced-order-manager' ) );
+			throw new InvalidArgumentException( esc_html__( 'Custom order status not found', 'advanced-order-manager' ) );
 		}
 
 		$custom_status->fill( $data );
@@ -263,7 +263,7 @@ class CustomOrderStatusService {
 		if ( false === $result ) {
 			$db_error = $this->repository->get_last_db_error();
 			throw new RuntimeException(
-				esc_html__( 'Failed to update custom order status', 'wpo-advanced-order-manager' )
+				esc_html__( 'Failed to update custom order status', 'advanced-order-manager' )
 				. ( $db_error ? ' Database error: ' . esc_html( $db_error ) : '' )
 			);
 		}
@@ -378,7 +378,7 @@ class CustomOrderStatusService {
 				if ( is_callable( array( $order, 'update_status' ) ) ) {
 					$order->update_status(
 						$resolved_to_status,
-						'WPO AOM: ' . __( 'Status changed due to custom order status deletion.', 'wpo-advanced-order-manager' )
+						'WPO AOM: ' . __( 'Status changed due to custom order status deletion.', 'advanced-order-manager' )
 					);
 				}
 			} catch ( \Throwable $e ) {

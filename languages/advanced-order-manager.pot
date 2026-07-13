@@ -1,0 +1,494 @@
+# Copyright (C) 2026 WP Overnight
+# This file is distributed under the GPLv3.
+msgid ""
+msgstr ""
+"Project-Id-Version: Advanced Order Manager for WooCommerce 1.0.0-beta.2\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wpo-advanced-order-manager\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-07-13T08:24:55+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: advanced-order-manager\n"
+
+#. Plugin Name of the plugin
+#: advanced-order-manager.php
+#: includes/Core/DependencyChecker.php:133
+msgid "Advanced Order Manager for WooCommerce"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: advanced-order-manager.php
+msgid "https://wpovernight.com/downloads/advanced-order-manager/"
+msgstr ""
+
+#. Description of the plugin
+#: advanced-order-manager.php
+msgid "A powerful order management plugin for WooCommerce that enhances the order management experience with advanced features."
+msgstr ""
+
+#. Author of the plugin
+#: advanced-order-manager.php
+msgid "WP Overnight"
+msgstr ""
+
+#. Author URI of the plugin
+#: advanced-order-manager.php
+msgid "https://www.wpovernight.com"
+msgstr ""
+
+#: includes/Admin/OrderEdit/Screen.php:74
+msgid "Advanced Order Management"
+msgstr ""
+
+#: includes/Admin/OrderEdit/Screen.php:240
+msgid "Fulfillments"
+msgstr ""
+
+#: includes/Admin/OrderEdit/Screen.php:282
+msgid "Edit fulfillment quantity"
+msgstr ""
+
+#: includes/Admin/OrderEdit/Screen.php:304
+msgid "Fulfillment Quantity"
+msgstr ""
+
+#: includes/Admin/OrderEdit/Screen.php:333
+msgid "Save fulfillment quantity"
+msgstr ""
+
+#: includes/Admin/OrderEdit/Screen.php:334
+msgid "Cancel fulfillment edit"
+msgstr ""
+
+#: includes/Admin/OrderEdit/Screen.php:371
+msgid "fulfilled"
+msgstr ""
+
+#: includes/Admin/OrderEdit/Screen.php:450
+msgid "Security verification failed."
+msgstr ""
+
+#: includes/Admin/OrderEdit/Screen.php:459
+msgid "You do not have permission to perform this action."
+msgstr ""
+
+#: includes/Admin/OrderEdit/Screen.php:472
+msgid "Invalid item ID."
+msgstr ""
+
+#: includes/Admin/OrderEdit/Screen.php:482
+msgid "Order item not found."
+msgstr ""
+
+#. translators: %d: total quantity
+#: includes/Admin/OrderEdit/Screen.php:493
+#, php-format
+msgid "Fulfillment quantity cannot exceed %d."
+msgstr ""
+
+#: includes/Admin/OrderEdit/Screen.php:510
+msgid "Failed to save fulfillment quantity."
+msgstr ""
+
+#. translators: 1: product name, 2: fulfilled quantity, 3: total quantity
+#: includes/Admin/OrderEdit/Screen.php:536
+#, php-format
+msgid "Fulfillment updated for \"%1$s\": %2$d of %3$d fulfilled."
+msgstr ""
+
+#: includes/Admin/OrderEdit/Screen.php:547
+msgid "Fulfillment quantity saved successfully."
+msgstr ""
+
+#: includes/Admin/OrderManager/Screen.php:144
+#: includes/Admin/OrderManager/Screen.php:145
+msgid "Order Manager"
+msgstr ""
+
+#: includes/AdvancedOrderManager.php:41
+msgid "Cloning is forbidden."
+msgstr ""
+
+#: includes/AdvancedOrderManager.php:92
+msgid "Each \"wpo_aom_service_providers\" entry must implement ServiceProvider."
+msgstr ""
+
+#. translators: %s: minimum PHP version
+#: includes/Core/DependencyChecker.php:68
+#, php-format
+msgid "PHP %s+ is required."
+msgstr ""
+
+#: includes/Core/DependencyChecker.php:74
+msgid "WooCommerce must be activated."
+msgstr ""
+
+#. translators: %s: minimum WooCommerce version
+#: includes/Core/DependencyChecker.php:78
+#, php-format
+msgid "WooCommerce %s+ is required."
+msgstr ""
+
+#: includes/Core/DependencyChecker.php:134
+msgid "can’t run because:"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:20
+msgid "Task Created"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:21
+msgid "Task created emails are sent when a new task is created."
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:46
+msgid "[{site_title}] New Task Created: {task_title}"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:55
+msgid "New Task Created"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:161
+#: includes/Emails/TaskUpdatedEmail.php:237
+msgid "Sample Task: Process Customer Order"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:162
+msgid "This is a preview of how task details will appear in the email notification. The task has been created and assigned to a team member for processing."
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:169
+#: includes/Emails/TaskUpdatedEmail.php:245
+#: includes/Emails/TaskUpdatedEmail.php:444
+msgid "Status"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:176
+#: includes/Emails/TaskUpdatedEmail.php:250
+msgid "Pending"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:187
+#: includes/Emails/TaskUpdatedEmail.php:283
+#: includes/Emails/TaskUpdatedEmail.php:445
+msgid "Priority"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:194
+#: includes/Emails/TaskUpdatedEmail.php:300
+#: includes/Emails/TaskUpdatedEmail.php:310
+msgid "High"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:205
+msgid "Created By"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:222
+#: includes/Emails/TaskUpdatedEmail.php:321
+#: includes/Emails/TaskUpdatedEmail.php:447
+msgid "Due Date"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:235
+msgid "Associated Order"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:258
+#: includes/Emails/TaskUpdatedEmail.php:342
+msgid "Available placeholders"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:264
+#: includes/Emails/TaskUpdatedEmail.php:348
+msgid "Enable/Disable"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:266
+#: includes/Emails/TaskUpdatedEmail.php:350
+msgid "Enable this email notification"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:270
+#: includes/Emails/TaskUpdatedEmail.php:354
+msgid "Recipient(s)"
+msgstr ""
+
+#. translators: %s: admin email
+#: includes/Emails/TaskCreatedEmail.php:274
+#: includes/Emails/TaskUpdatedEmail.php:358
+#, php-format
+msgid "Enter recipients (comma separated) for this email. Defaults to %s."
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:282
+#: includes/Emails/TaskUpdatedEmail.php:366
+msgid "Subject"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:290
+#: includes/Emails/TaskUpdatedEmail.php:374
+msgid "Email heading"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:298
+#: includes/Emails/TaskUpdatedEmail.php:382
+msgid "Additional content"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:299
+#: includes/Emails/TaskUpdatedEmail.php:383
+msgid "Text to appear below the main email content."
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:301
+#: includes/Emails/TaskUpdatedEmail.php:385
+msgid "N/A"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:307
+#: includes/Emails/TaskUpdatedEmail.php:400
+msgid "Notify Task Creator"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:309
+#: includes/Emails/TaskUpdatedEmail.php:402
+msgid "Send notification to the user who created the task"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:313
+#: includes/Emails/TaskUpdatedEmail.php:406
+msgid "Notify Shop Managers"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:315
+#: includes/Emails/TaskUpdatedEmail.php:408
+msgid "Send notification to all shop managers and administrators"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:319
+#: includes/Emails/TaskUpdatedEmail.php:412
+msgid "Email type"
+msgstr ""
+
+#: includes/Emails/TaskCreatedEmail.php:321
+#: includes/Emails/TaskUpdatedEmail.php:414
+msgid "Choose which format of email to send."
+msgstr ""
+
+#: includes/Emails/TaskUpdatedEmail.php:28
+#: includes/Emails/TaskUpdatedEmail.php:64
+msgid "Task Updated"
+msgstr ""
+
+#: includes/Emails/TaskUpdatedEmail.php:29
+msgid "Task updated emails are sent when a task is modified."
+msgstr ""
+
+#: includes/Emails/TaskUpdatedEmail.php:55
+msgid "[{site_title}] Task Updated: {task_title}"
+msgstr ""
+
+#: includes/Emails/TaskUpdatedEmail.php:238
+msgid "This is a preview of how task update details will appear in the email notification. The task has been updated with new status and priority."
+msgstr ""
+
+#: includes/Emails/TaskUpdatedEmail.php:256
+#: includes/Emails/TaskUpdatedEmail.php:272
+msgid "In Progress"
+msgstr ""
+
+#: includes/Emails/TaskUpdatedEmail.php:262
+msgid "Done"
+msgstr ""
+
+#: includes/Emails/TaskUpdatedEmail.php:288
+msgid "Low"
+msgstr ""
+
+#: includes/Emails/TaskUpdatedEmail.php:294
+msgid "Medium"
+msgstr ""
+
+#: includes/Emails/TaskUpdatedEmail.php:391
+msgid "Notify On"
+msgstr ""
+
+#: includes/Emails/TaskUpdatedEmail.php:394
+msgid "Select which fields changes should trigger this email notification."
+msgstr ""
+
+#: includes/Emails/TaskUpdatedEmail.php:442
+msgid "Title"
+msgstr ""
+
+#: includes/Emails/TaskUpdatedEmail.php:443
+msgid "Description"
+msgstr ""
+
+#: includes/Emails/TaskUpdatedEmail.php:446
+msgid "Order"
+msgstr ""
+
+#: includes/REST/CustomOrderStatusController.php:118
+#: includes/REST/CustomOrderStatusController.php:184
+msgid "Invalid data provided"
+msgstr ""
+
+#: includes/REST/CustomOrderStatusController.php:147
+#: includes/REST/CustomOrderStatusController.php:171
+#: includes/REST/CustomOrderStatusController.php:215
+msgid "Invalid ID provided"
+msgstr ""
+
+#: includes/REST/CustomOrderStatusController.php:154
+#: includes/Services/CustomOrderStatusService.php:257
+msgid "Custom order status not found"
+msgstr ""
+
+#: includes/REST/CustomOrderStatusController.php:229
+msgid "Custom order status deleted successfully"
+msgstr ""
+
+#: includes/REST/FulfillmentController.php:66
+msgid "Invalid fulfillment status provided."
+msgstr ""
+
+#: includes/REST/TaskController.php:279
+msgid "Array of option IDs in desired order."
+msgstr ""
+
+#: includes/REST/TaskController.php:362
+msgid "Failed to create task."
+msgstr ""
+
+#: includes/REST/TaskController.php:453
+msgid "Failed to update task."
+msgstr ""
+
+#: includes/REST/TaskController.php:477
+msgid "Failed to delete task."
+msgstr ""
+
+#: includes/REST/TaskController.php:495
+msgid "Task ID."
+msgstr ""
+
+#: includes/REST/TaskController.php:501
+msgid "Task title."
+msgstr ""
+
+#: includes/REST/TaskController.php:507
+msgid "Task description."
+msgstr ""
+
+#: includes/REST/TaskController.php:512
+msgid "Task creation timestamp."
+msgstr ""
+
+#: includes/REST/TaskController.php:519
+msgid "Task last update timestamp."
+msgstr ""
+
+#: includes/REST/TaskController.php:787
+msgid "Field option positions updated successfully"
+msgstr ""
+
+#: includes/REST/TaskController.php:821
+msgid "Option ID."
+msgstr ""
+
+#: includes/REST/TaskController.php:827
+msgid "Field ID this option belongs to."
+msgstr ""
+
+#: includes/REST/TaskController.php:833
+msgid "Option label."
+msgstr ""
+
+#: includes/REST/TaskController.php:838
+msgid "Option color."
+msgstr ""
+
+#: includes/REST/TaskController.php:843
+msgid "Option position for ordering."
+msgstr ""
+
+#: includes/REST/TaskController.php:880
+#: includes/REST/TaskController.php:884
+msgid "Failed to move task."
+msgstr ""
+
+#: includes/REST/TaskController.php:920
+msgid "Failed to finish task."
+msgstr ""
+
+#: includes/REST/TaskController.php:947
+msgid "Failed to archive task."
+msgstr ""
+
+#: includes/REST/TaskController.php:978
+msgid "Failed to unarchive task."
+msgstr ""
+
+#. translators: %s: status label
+#: includes/Services/CustomOrderStatusService.php:130
+#, php-format
+msgid "Change status to %s"
+msgstr ""
+
+#: includes/Services/CustomOrderStatusService.php:227
+msgid "Failed to create custom order status"
+msgstr ""
+
+#: includes/Services/CustomOrderStatusService.php:266
+msgid "Failed to update custom order status"
+msgstr ""
+
+#: includes/Services/CustomOrderStatusService.php:381
+msgid "Status changed due to custom order status deletion."
+msgstr ""
+
+#: includes/Services/EmailService.php:188
+msgid "None"
+msgstr ""
+
+#: includes/Services/EmailService.php:259
+#: includes/Services/EmailService.php:269
+msgid "Unassigned"
+msgstr ""
+
+#: templates/emails/email-task-details.php:24
+#: templates/emails/plain/email-task-details.php:18
+msgid "Task Details"
+msgstr ""
+
+#: templates/emails/email-task-details.php:31
+#: templates/emails/plain/email-task-details.php:21
+msgid "Task ID:"
+msgstr ""
+
+#: templates/emails/email-task-details.php:36
+#: templates/emails/plain/email-task-details.php:22
+msgid "Title:"
+msgstr ""
+
+#: templates/emails/email-task-details.php:42
+#: templates/emails/plain/email-task-details.php:25
+msgid "Description:"
+msgstr ""
+
+#: templates/emails/plain/task-created.php:21
+#: templates/emails/task-created.php:24
+msgid "A new task has been created:"
+msgstr ""
+
+#: templates/emails/plain/task-updated.php:21
+#: templates/emails/task-updated.php:24
+msgid "A task has been updated:"
+msgstr ""

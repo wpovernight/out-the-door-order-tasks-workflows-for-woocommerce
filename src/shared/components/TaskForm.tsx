@@ -61,13 +61,13 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 		}
 
 		return await confirm({
-			title: __('Save your changes?', 'wpo-advanced-order-manager'),
+			title: __('Save your changes?', 'advanced-order-manager'),
 			message: __(
 				'You have unsaved work. Discarding will permanently erase your recent edits.',
-				'wpo-advanced-order-manager'
+				'advanced-order-manager'
 			),
-			confirmText: __('Discard', 'wpo-advanced-order-manager'),
-			cancelText: __('Keep editing', 'wpo-advanced-order-manager'),
+			confirmText: __('Discard', 'advanced-order-manager'),
+			cancelText: __('Keep editing', 'advanced-order-manager'),
 			action: 'save',
 			invertActions: true,
 		});
@@ -166,11 +166,11 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				title: isUpdate
 					? __(
 							'The task has been successfully updated.',
-							'wpo-advanced-order-manager'
+							'advanced-order-manager'
 						)
 					: __(
 							'A new task has been successfully created.',
-							'wpo-advanced-order-manager'
+							'advanced-order-manager'
 						),
 				type: ToastType.SUCCESS,
 			});
@@ -181,18 +181,18 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				title: isUpdate
 					? __(
 							'Failed to update task.',
-							'wpo-advanced-order-manager'
+							'advanced-order-manager'
 						)
 					: __(
 							'Failed to create task.',
-							'wpo-advanced-order-manager'
+							'advanced-order-manager'
 						),
 				message:
 					error instanceof Error && error.message
 						? error.message
 						: __(
 								'Please try again.',
-								'wpo-advanced-order-manager'
+								'advanced-order-manager'
 							),
 				type: ToastType.ERROR,
 			});
@@ -219,7 +219,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 			<div className="error-message">
 				{__(
 					'Error loading data. Please try again.',
-					'wpo-advanced-order-manager'
+					'advanced-order-manager'
 				)}
 			</div>
 		);
@@ -287,12 +287,12 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				<div className="field-group">
 					<div>
 						<label htmlFor="status">
-							{__('Status', 'wpo-advanced-order-manager')}
+							{__('Status', 'advanced-order-manager')}
 						</label>
 						<FieldOptionDropdown
 							placeholder={__(
 								'Select',
-								'wpo-advanced-order-manager'
+								'advanced-order-manager'
 							)}
 							options={fieldOptions.status}
 							id="status"
@@ -303,12 +303,12 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 					</div>
 					<div>
 						<label htmlFor="priority">
-							{__('Priority', 'wpo-advanced-order-manager')}
+							{__('Priority', 'advanced-order-manager')}
 						</label>
 						<FieldOptionDropdown
 							placeholder={__(
 								'Select',
-								'wpo-advanced-order-manager'
+								'advanced-order-manager'
 							)}
 							options={fieldOptions?.priority || []}
 							id="priority"
@@ -319,7 +319,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 					</div>
 					<div>
 						<label htmlFor="due-date">
-							{__('Due Date', 'wpo-advanced-order-manager')}
+							{__('Due Date', 'advanced-order-manager')}
 						</label>
 						<DatePicker
 							id="due-date"
@@ -332,7 +332,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				<div className="field-group">
 					<div>
 						<label htmlFor="title">
-							{__('Title', 'wpo-advanced-order-manager')}
+							{__('Title', 'advanced-order-manager')}
 						</label>
 						<input
 							id="title"
@@ -343,7 +343,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 							}
 							placeholder={__(
 								'Write a name for your task.',
-								'wpo-advanced-order-manager'
+								'advanced-order-manager'
 							)}
 							required
 						/>
@@ -354,13 +354,13 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 						<label htmlFor="associated-orders">
 							{__(
 								'Associated Orders',
-								'wpo-advanced-order-manager'
+								'advanced-order-manager'
 							)}
 						</label>
 						<AsyncMultiSelectField
 							placeholder={__(
 								'Search orders by number, customer, address…',
-								'wpo-advanced-order-manager'
+								'advanced-order-manager'
 							)}
 							selectedOptions={associatedOrderIds}
 							id="associated-orders"
@@ -388,7 +388,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				<div className="field-group">
 					<div>
 						<label htmlFor="description">
-							{__('Description', 'wpo-advanced-order-manager')}
+							{__('Description', 'advanced-order-manager')}
 						</label>
 						<textarea
 							id="description"
@@ -396,7 +396,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 							rows={6}
 							placeholder={__(
 								'Describe the task.',
-								'wpo-advanced-order-manager'
+								'advanced-order-manager'
 							)}
 							defaultValue={
 								task
@@ -414,7 +414,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 					onClick={onDone}
 					disabled={isSubmitting}
 				>
-					{__('Cancel', 'wpo-advanced-order-manager')}
+					{__('Cancel', 'advanced-order-manager')}
 				</button>
 				<button
 					type="submit"
@@ -423,8 +423,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				>
 					{isSubmitting && <span className="wpo-aom-spinner"></span>}
 					{task
-						? __('Update Task', 'wpo-advanced-order-manager')
-						: __('Create Task', 'wpo-advanced-order-manager')}
+						? __('Update Task', 'advanced-order-manager')
+						: __('Create Task', 'advanced-order-manager')}
 				</button>
 			</div>
 		</form>

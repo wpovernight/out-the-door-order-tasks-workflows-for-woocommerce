@@ -49,16 +49,16 @@ export const StatusTable = ({
 				<thead>
 					<tr>
 						<th id="label-header">
-							{__('Label', 'wpo-advanced-order-manager')}
+							{__('Label', 'advanced-order-manager')}
 						</th>
 						<th id="color-header">
-							{__('Color', 'wpo-advanced-order-manager')}
+							{__('Color', 'advanced-order-manager')}
 						</th>
 						<th id="slug-header">
-							{__('Slug', 'wpo-advanced-order-manager')}
+							{__('Slug', 'advanced-order-manager')}
 						</th>
 						<th id="actions-header">
-							{__('Actions', 'wpo-advanced-order-manager')}
+							{__('Actions', 'advanced-order-manager')}
 						</th>
 					</tr>
 				</thead>
@@ -121,11 +121,11 @@ export const StatusTable = ({
 												{isDeleting(status)
 													? __(
 															'Reassigning order statuses before deletion.',
-															'wpo-advanced-order-manager'
+															'advanced-order-manager'
 														)
 													: __(
 															'Deleting…',
-															'wpo-advanced-order-manager'
+															'advanced-order-manager'
 														)}
 											</span>
 										</>
@@ -148,7 +148,7 @@ export const StatusTable = ({
 													}
 													title={__(
 														'Edit',
-														'wpo-advanced-order-manager'
+														'advanced-order-manager'
 													)}
 													disabled={isBusy(
 														status
@@ -157,7 +157,7 @@ export const StatusTable = ({
 													<span className="screen-reader-text">
 														{__(
 															'Edit',
-															'wpo-advanced-order-manager'
+															'advanced-order-manager'
 														)}
 													</span>
 												</button>
@@ -170,7 +170,7 @@ export const StatusTable = ({
 													}
 													title={__(
 														'Delete',
-														'wpo-advanced-order-manager'
+														'advanced-order-manager'
 													)}
 													disabled={isBusy(
 														status
@@ -179,7 +179,7 @@ export const StatusTable = ({
 													<span className="screen-reader-text">
 														{__(
 															'Delete',
-															'wpo-advanced-order-manager'
+															'advanced-order-manager'
 														)}
 													</span>
 												</button>
@@ -206,7 +206,7 @@ export const StatusTable = ({
 					className="wpo-button wpo-button-primary"
 					onClick={onStartCreate}
 				>
-					{__('Add new status', 'wpo-advanced-order-manager')}
+					{__('Add new status', 'advanced-order-manager')}
 				</button>
 			)}
 		</>

@@ -13,7 +13,7 @@
  * Requires PHP:         8.1
  * WC requires at least: 8.2
  * WC tested up to:      10.0
- * Text Domain:          wpo-advanced-order-manager
+ * Text Domain:          advanced-order-manager
  * Domain Path:          /languages
  */
 

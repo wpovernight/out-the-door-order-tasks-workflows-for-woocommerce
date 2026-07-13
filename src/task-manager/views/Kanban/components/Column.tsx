@@ -245,7 +245,7 @@ export const Column: React.FC<ColumnProps> = ({
 
 	const handleAddTask = () => {
 		openCreateTaskModal({
-			title: __('Add Task', 'wpo-advanced-order-manager'),
+			title: __('Add Task', 'advanced-order-manager'),
 			initialValues: {
 				statusIndex: column.position - 1,
 			},
@@ -275,12 +275,12 @@ export const Column: React.FC<ColumnProps> = ({
 			addToast({
 				title: __(
 					'Failed to rename column.',
-					'wpo-advanced-order-manager'
+					'advanced-order-manager'
 				),
 				message:
 					error instanceof Error && error.message
 						? error.message
-						: __('Please try again.', 'wpo-advanced-order-manager'),
+						: __('Please try again.', 'advanced-order-manager'),
 				type: ToastType.ERROR,
 			});
 		});
@@ -306,13 +306,13 @@ export const Column: React.FC<ColumnProps> = ({
 
 		// Empty + not role-assigned → simple confirmation, nothing to lose.
 		const confirmed = await confirm({
-			title: __('Delete this column?', 'wpo-advanced-order-manager'),
+			title: __('Delete this column?', 'advanced-order-manager'),
 			message: __(
 				'This action cannot be undone.',
-				'wpo-advanced-order-manager'
+				'advanced-order-manager'
 			),
-			confirmText: __('Delete', 'wpo-advanced-order-manager'),
-			cancelText: __('Cancel', 'wpo-advanced-order-manager'),
+			confirmText: __('Delete', 'advanced-order-manager'),
+			cancelText: __('Cancel', 'advanced-order-manager'),
 			action: 'delete',
 		});
 
@@ -351,7 +351,7 @@ export const Column: React.FC<ColumnProps> = ({
 									<span className="screen-reader-text">
 										{__(
 											'Edit column name',
-											'wpo-advanced-order-manager'
+											'advanced-order-manager'
 										)}
 									</span>
 								</button>
@@ -386,7 +386,7 @@ export const Column: React.FC<ColumnProps> = ({
 										<span className="screen-reader-text">
 											{__(
 												'Cancel',
-												'wpo-advanced-order-manager'
+												'advanced-order-manager'
 											)}
 										</span>
 									</button>
@@ -398,7 +398,7 @@ export const Column: React.FC<ColumnProps> = ({
 										<span className="screen-reader-text">
 											{__(
 												'Save',
-												'wpo-advanced-order-manager'
+												'advanced-order-manager'
 											)}
 										</span>
 									</button>
@@ -416,7 +416,7 @@ export const Column: React.FC<ColumnProps> = ({
 								className="wpo-button wpo-button-icon wpo-aom-add-button"
 							>
 								<span className="screen-reader-text">
-									{__('Create', 'wpo-advanced-order-manager')}
+									{__('Create', 'advanced-order-manager')}
 								</span>
 							</button>
 						</li>
@@ -430,7 +430,7 @@ export const Column: React.FC<ColumnProps> = ({
 								}}
 							>
 								<span className="screen-reader-text">
-									{__('Options', 'wpo-advanced-order-manager')}
+									{__('Options', 'advanced-order-manager')}
 								</span>
 							</button>
 							<ul
@@ -447,7 +447,7 @@ export const Column: React.FC<ColumnProps> = ({
 								>
 									{__(
 										'Edit column title',
-										'wpo-advanced-order-manager'
+										'advanced-order-manager'
 									)}
 								</button>
 							</li>
@@ -459,7 +459,7 @@ export const Column: React.FC<ColumnProps> = ({
 								>
 									{__(
 										'Add column right',
-										'wpo-advanced-order-manager'
+										'advanced-order-manager'
 									)}
 								</button>
 							</li>
@@ -471,7 +471,7 @@ export const Column: React.FC<ColumnProps> = ({
 								>
 									{__(
 										'Add column left',
-										'wpo-advanced-order-manager'
+										'advanced-order-manager'
 									)}
 								</button>
 							</li>
@@ -481,7 +481,7 @@ export const Column: React.FC<ColumnProps> = ({
 									className="wpo-button delete-column"
 									onClick={handleDeleteColumn}
 								>
-									{__('Delete', 'wpo-advanced-order-manager')}
+									{__('Delete', 'advanced-order-manager')}
 								</button>
 							</li>
 						</ul>
@@ -505,7 +505,7 @@ export const Column: React.FC<ColumnProps> = ({
 							className="wpo-button kanban-column-add-task"
 							onClick={handleAddTask}
 						>
-							{__('Add new task', 'wpo-advanced-order-manager')}
+							{__('Add new task', 'advanced-order-manager')}
 						</button>
 					</div>
 				</div>

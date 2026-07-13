@@ -43,30 +43,30 @@ const TaskList: React.FC<TaskListProps> = ({
 
 		if (dateRangePreset !== 'custom') {
 			const presetLabels: Record<string, string> = {
-				today: __('Today', 'wpo-advanced-order-manager'),
-				tomorrow: __('Tomorrow', 'wpo-advanced-order-manager'),
-				yesterday: __('Yesterday', 'wpo-advanced-order-manager'),
+				today: __('Today', 'advanced-order-manager'),
+				tomorrow: __('Tomorrow', 'advanced-order-manager'),
+				yesterday: __('Yesterday', 'advanced-order-manager'),
 				'current-week': __(
 					'Current Week',
-					'wpo-advanced-order-manager'
+					'advanced-order-manager'
 				),
-				'next-week': __('Next Week', 'wpo-advanced-order-manager'),
-				'last-week': __('Last Week', 'wpo-advanced-order-manager'),
+				'next-week': __('Next Week', 'advanced-order-manager'),
+				'last-week': __('Last Week', 'advanced-order-manager'),
 				'current-month': __(
 					'Current Month',
-					'wpo-advanced-order-manager'
+					'advanced-order-manager'
 				),
-				'next-month': __('Next Month', 'wpo-advanced-order-manager'),
-				'last-month': __('Last Month', 'wpo-advanced-order-manager'),
+				'next-month': __('Next Month', 'advanced-order-manager'),
+				'last-month': __('Last Month', 'advanced-order-manager'),
 			};
 			const presetLabel =
 				presetLabels[dateRangePreset] ||
-				__('Today', 'wpo-advanced-order-manager');
+				__('Today', 'advanced-order-manager');
 			return (
 				<>
 					{sprintf(
 						/* translators: %s: date range label (e.g. "Today", "Current Week") */
-						__("%s's tasks", 'wpo-advanced-order-manager'),
+						__("%s's tasks", 'advanced-order-manager'),
 						presetLabel
 					)}{' '}
 					{taskCountBadge}
@@ -93,7 +93,7 @@ const TaskList: React.FC<TaskListProps> = ({
 		// Fallback
 		return (
 			<>
-				{__('Tasks', 'wpo-advanced-order-manager')} - {taskCountBadge}
+				{__('Tasks', 'advanced-order-manager')} - {taskCountBadge}
 			</>
 		);
 	};
@@ -133,7 +133,7 @@ const TaskList: React.FC<TaskListProps> = ({
 				<div className="calendar-task-empty-state">
 					{__(
 						'No tasks found for the selected date range',
-						'wpo-advanced-order-manager'
+						'advanced-order-manager'
 					)}
 				</div>
 			) : (

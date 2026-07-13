@@ -5,9 +5,9 @@ import { useTaskCreation } from '@shared/hooks/useTaskFormModal';
 import { useOnClickOutside } from '@shared/hooks/useOnClickOutside';
 
 const viewLabels: Record<string, string> = {
-	kanban: __('Board', 'wpo-advanced-order-manager'),
-	calendar: __('Calendar', 'wpo-advanced-order-manager'),
-	archive: __('Archive', 'wpo-advanced-order-manager'),
+	kanban: __('Board', 'advanced-order-manager'),
+	calendar: __('Calendar', 'advanced-order-manager'),
+	archive: __('Archive', 'advanced-order-manager'),
 };
 
 export default function Header() {
@@ -16,7 +16,7 @@ export default function Header() {
 
 	const handleAddTask = () => {
 		openCreateTaskModal({
-			title: __('Add Task', 'wpo-advanced-order-manager'),
+			title: __('Add Task', 'advanced-order-manager'),
 			initialValues: {
 				dueDate: new Date().toISOString().split('T')[0],
 			},
@@ -48,13 +48,13 @@ export default function Header() {
 				<div className="header-search">
 					<label htmlFor="header-search-input">
 						<span className="screen-reader-text">
-							{__('Search', 'wpo-advanced-order-manager')}
+							{__('Search', 'advanced-order-manager')}
 						</span>
 					</label>
 					<input
 						type="search"
 						id="header-search-input"
-						placeholder={__('Search', 'wpo-advanced-order-manager')}
+						placeholder={__('Search', 'advanced-order-manager')}
 						value={searchQuery}
 						onChange={(e) => setSearchQuery(e.target.value)}
 					/>
@@ -63,10 +63,10 @@ export default function Header() {
 					type="button"
 					className="wpo-button wpo-button-primary add-new-task"
 					onClick={handleAddTask}
-					title={__('Add new task', 'wpo-advanced-order-manager')}
+					title={__('Add new task', 'advanced-order-manager')}
 				>
 					<span className="screen-reader-text">
-						{__('Add new task', 'wpo-advanced-order-manager')}
+						{__('Add new task', 'advanced-order-manager')}
 					</span>
 				</button>
 			</div>

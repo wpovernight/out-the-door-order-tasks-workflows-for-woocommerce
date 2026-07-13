@@ -41,14 +41,14 @@ const TaskRow: React.FC<TaskRowProps> = ({ task }) => {
 		const confirmationResult = await confirm({
 			title: __(
 				'Permanently delete this task?',
-				'wpo-advanced-order-manager'
+				'advanced-order-manager'
 			),
 			message: __(
 				'Are you sure you want to delete this task? This action cannot be undone.',
-				'wpo-advanced-order-manager'
+				'advanced-order-manager'
 			),
-			confirmText: __('Delete', 'wpo-advanced-order-manager'),
-			cancelText: __('Cancel', 'wpo-advanced-order-manager'),
+			confirmText: __('Delete', 'advanced-order-manager'),
+			cancelText: __('Cancel', 'advanced-order-manager'),
 			action: 'delete',
 		});
 
@@ -62,13 +62,13 @@ const TaskRow: React.FC<TaskRowProps> = ({ task }) => {
 
 	const handleRestore = async (taskId: number) => {
 		const confirmationResult = await confirm({
-			title: __('Restore this task?', 'wpo-advanced-order-manager'),
+			title: __('Restore this task?', 'advanced-order-manager'),
 			message: __(
 				'Once restored, you can locate this task in the board tab.',
-				'wpo-advanced-order-manager'
+				'advanced-order-manager'
 			),
-			confirmText: __('Restore', 'wpo-advanced-order-manager'),
-			cancelText: __('Cancel', 'wpo-advanced-order-manager'),
+			confirmText: __('Restore', 'advanced-order-manager'),
+			cancelText: __('Cancel', 'advanced-order-manager'),
 			action: 'restore',
 		});
 
@@ -149,13 +149,13 @@ const TaskRow: React.FC<TaskRowProps> = ({ task }) => {
 							}}
 							title={__(
 								'Restore Task',
-								'wpo-advanced-order-manager'
+								'advanced-order-manager'
 							)}
 						>
 							<span className="screen-reader-text">
 								{__(
 									'Restore Task',
-									'wpo-advanced-order-manager'
+									'advanced-order-manager'
 								)}
 							</span>
 						</button>
@@ -170,13 +170,13 @@ const TaskRow: React.FC<TaskRowProps> = ({ task }) => {
 							}}
 							title={__(
 								'Delete Task',
-								'wpo-advanced-order-manager'
+								'advanced-order-manager'
 							)}
 						>
 							<span className="screen-reader-text">
 								{__(
 									'Delete Task',
-									'wpo-advanced-order-manager'
+									'advanced-order-manager'
 								)}
 							</span>
 						</button>

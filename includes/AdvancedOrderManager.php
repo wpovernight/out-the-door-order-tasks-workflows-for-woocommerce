@@ -38,7 +38,7 @@ final class AdvancedOrderManager {
 	 * @return void
 	 */
 	private function __clone() {
-		_doing_it_wrong( __FUNCTION__, esc_html__( 'Cloning is forbidden.', 'wpo-advanced-order-manager' ), '1.0.0' );
+		_doing_it_wrong( __FUNCTION__, esc_html__( 'Cloning is forbidden.', 'advanced-order-manager' ), '1.0.0' );
 	}
 
 	/**
@@ -89,7 +89,7 @@ final class AdvancedOrderManager {
 			} else {
 				_doing_it_wrong(
 					__METHOD__,
-					esc_html__( 'Each "wpo_aom_service_providers" entry must implement ServiceProvider.', 'wpo-advanced-order-manager' ),
+					esc_html__( 'Each "wpo_aom_service_providers" entry must implement ServiceProvider.', 'advanced-order-manager' ),
 					'1.0.0'
 				);
 			}
@@ -125,11 +125,11 @@ final class AdvancedOrderManager {
 	 * @return void
 	 */
 	public function translations(): void {
-		$text_domain             = 'wpo-advanced-order-manager';
+		$text_domain             = 'advanced-order-manager';
 		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- `plugin_locale` is a WordPress core filter that plugins apply when loading their own translations.
 		$locale                  = apply_filters( 'plugin_locale', determine_locale(), $text_domain );
-		$custom_translation_path = WP_LANG_DIR . '/wpo-advanced-order-manager/wpo-advanced-order-manager-' . $locale . '.mo';
-		$plugin_translation_path = WP_LANG_DIR . '/plugins/wpo-advanced-order-manager-' . $locale . '.mo';
+		$custom_translation_path = WP_LANG_DIR . '/advanced-order-manager/advanced-order-manager-' . $locale . '.mo';
+		$plugin_translation_path = WP_LANG_DIR . '/plugins/advanced-order-manager-' . $locale . '.mo';
 
 		unload_textdomain( $text_domain );
 		load_textdomain( $text_domain, $custom_translation_path );

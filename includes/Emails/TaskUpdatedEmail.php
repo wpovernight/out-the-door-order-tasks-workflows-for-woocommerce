@@ -25,8 +25,8 @@ class TaskUpdatedEmail extends WC_Email {
 		$this->task_manager_service = $task_manager_service;
 
 		$this->id             = 'wpo_aom_task_updated';
-		$this->title          = __( 'Task Updated', 'wpo-advanced-order-manager' );
-		$this->description    = __( 'Task updated emails are sent when a task is modified.', 'wpo-advanced-order-manager' );
+		$this->title          = __( 'Task Updated', 'advanced-order-manager' );
+		$this->description    = __( 'Task updated emails are sent when a task is modified.', 'advanced-order-manager' );
 
 		$this->template_html  = 'emails/task-updated.php';
 		$this->template_plain = 'emails/plain/task-updated.php';
@@ -52,7 +52,7 @@ class TaskUpdatedEmail extends WC_Email {
 	 * @return string
 	 */
 	public function get_default_subject(): string {
-		return __( '[{site_title}] Task Updated: {task_title}', 'wpo-advanced-order-manager' );
+		return __( '[{site_title}] Task Updated: {task_title}', 'advanced-order-manager' );
 	}
 
 	/**
@@ -61,7 +61,7 @@ class TaskUpdatedEmail extends WC_Email {
 	 * @return string
 	 */
 	public function get_default_heading(): string {
-		return __( 'Task Updated', 'wpo-advanced-order-manager' );
+		return __( 'Task Updated', 'advanced-order-manager' );
 	}
 
 	/**
@@ -234,32 +234,32 @@ class TaskUpdatedEmail extends WC_Email {
 		// Create sample task data with proper structure expected by email templates.
 		$this->task_data = array(
 			'id'          => 12345,
-			'title'       => __( 'Sample Task: Process Customer Order', 'wpo-advanced-order-manager' ),
-			'description' => __( 'This is a preview of how task update details will appear in the email notification. The task has been updated with new status and priority.', 'wpo-advanced-order-manager' ),
+			'title'       => __( 'Sample Task: Process Customer Order', 'advanced-order-manager' ),
+			'description' => __( 'This is a preview of how task update details will appear in the email notification. The task has been updated with new status and priority.', 'advanced-order-manager' ),
 			'slug'        => 'sample-task-process-customer-order',
 			'fields'      => array(
 				// Status field with options for formatting.
 				array(
 					'id'      => DefaultTaskFields::STATUS,
 					'slug'    => 'status',
-					'label'   => __( 'Status', 'wpo-advanced-order-manager' ),
+					'label'   => __( 'Status', 'advanced-order-manager' ),
 					'type'    => 'select',
 					'options' => array(
 						array(
 							'id'    => 1,
-							'label' => __( 'Pending', 'wpo-advanced-order-manager' ),
+							'label' => __( 'Pending', 'advanced-order-manager' ),
 							'slug'  => 'pending',
 							'color' => '#FFA500',
 						),
 						array(
 							'id'    => 2,
-							'label' => __( 'In Progress', 'wpo-advanced-order-manager' ),
+							'label' => __( 'In Progress', 'advanced-order-manager' ),
 							'slug'  => 'in-progress',
 							'color' => '#2271b1',
 						),
 						array(
 							'id'    => 3,
-							'label' => __( 'Done', 'wpo-advanced-order-manager' ),
+							'label' => __( 'Done', 'advanced-order-manager' ),
 							'slug'  => 'done',
 							'color' => '#00a32a',
 						),
@@ -269,7 +269,7 @@ class TaskUpdatedEmail extends WC_Email {
 							'raw'      => 2,
 							'resolved' => array(
 								'id'    => 2,
-								'label' => __( 'In Progress', 'wpo-advanced-order-manager' ),
+								'label' => __( 'In Progress', 'advanced-order-manager' ),
 								'slug'  => 'in-progress',
 								'color' => '#2271b1',
 							),
@@ -280,24 +280,24 @@ class TaskUpdatedEmail extends WC_Email {
 				array(
 					'id'      => DefaultTaskFields::PRIORITY,
 					'slug'    => 'priority',
-					'label'   => __( 'Priority', 'wpo-advanced-order-manager' ),
+					'label'   => __( 'Priority', 'advanced-order-manager' ),
 					'type'    => 'select',
 					'options' => array(
 						array(
 							'id'    => 1,
-							'label' => __( 'Low', 'wpo-advanced-order-manager' ),
+							'label' => __( 'Low', 'advanced-order-manager' ),
 							'slug'  => 'low',
 							'color' => '#00a32a',
 						),
 						array(
 							'id'    => 2,
-							'label' => __( 'Medium', 'wpo-advanced-order-manager' ),
+							'label' => __( 'Medium', 'advanced-order-manager' ),
 							'slug'  => 'medium',
 							'color' => '#FFA500',
 						),
 						array(
 							'id'    => 3,
-							'label' => __( 'High', 'wpo-advanced-order-manager' ),
+							'label' => __( 'High', 'advanced-order-manager' ),
 							'slug'  => 'high',
 							'color' => '#FF0000',
 						),
@@ -307,7 +307,7 @@ class TaskUpdatedEmail extends WC_Email {
 							'raw'      => 3,
 							'resolved' => array(
 								'id'    => 3,
-								'label' => __( 'High', 'wpo-advanced-order-manager' ),
+								'label' => __( 'High', 'advanced-order-manager' ),
 								'slug'  => 'high',
 								'color' => '#FF0000',
 							),
@@ -318,7 +318,7 @@ class TaskUpdatedEmail extends WC_Email {
 				array(
 					'id'     => DefaultTaskFields::DUE_DATE,
 					'slug'   => 'due_date',
-					'label'  => __( 'Due Date', 'wpo-advanced-order-manager' ),
+					'label'  => __( 'Due Date', 'advanced-order-manager' ),
 					'type'   => 'date',
 					'values' => array(
 						array(
@@ -339,23 +339,23 @@ class TaskUpdatedEmail extends WC_Email {
 	public function init_form_fields(): void {
 		$placeholder_text = sprintf(
 			'%s: %s',
-			__( 'Available placeholders', 'wpo-advanced-order-manager' ),
+			__( 'Available placeholders', 'advanced-order-manager' ),
 			'<code>' . esc_html( implode( '</code>, <code>', array_keys( $this->placeholders ) ) ) . '</code>'
 		);
 
 		$this->form_fields = array(
 			'enabled'    => array(
-				'title'   => __( 'Enable/Disable', 'wpo-advanced-order-manager' ),
+				'title'   => __( 'Enable/Disable', 'advanced-order-manager' ),
 				'type'    => 'checkbox',
-				'label'   => __( 'Enable this email notification', 'wpo-advanced-order-manager' ),
+				'label'   => __( 'Enable this email notification', 'advanced-order-manager' ),
 				'default' => 'no',
 			),
 			'recipient'  => array(
-				'title'       => __( 'Recipient(s)', 'wpo-advanced-order-manager' ),
+				'title'       => __( 'Recipient(s)', 'advanced-order-manager' ),
 				'type'        => 'text',
 				'description' => sprintf(
 					/* translators: %s: admin email */
-					__( 'Enter recipients (comma separated) for this email. Defaults to %s.', 'wpo-advanced-order-manager' ),
+					__( 'Enter recipients (comma separated) for this email. Defaults to %s.', 'advanced-order-manager' ),
 					'<code>' . esc_attr( get_option( 'admin_email' ) ) . '</code>'
 				),
 				'placeholder' => '',
@@ -363,7 +363,7 @@ class TaskUpdatedEmail extends WC_Email {
 				'desc_tip'    => true,
 			),
 			'subject'    => array(
-				'title'       => __( 'Subject', 'wpo-advanced-order-manager' ),
+				'title'       => __( 'Subject', 'advanced-order-manager' ),
 				'type'        => 'text',
 				'description' => $placeholder_text,
 				'placeholder' => $this->get_default_subject(),
@@ -371,7 +371,7 @@ class TaskUpdatedEmail extends WC_Email {
 				'desc_tip'    => true,
 			),
 			'heading'    => array(
-				'title'       => __( 'Email heading', 'wpo-advanced-order-manager' ),
+				'title'       => __( 'Email heading', 'advanced-order-manager' ),
 				'type'        => 'text',
 				'description' => $placeholder_text,
 				'placeholder' => $this->get_default_heading(),
@@ -379,39 +379,39 @@ class TaskUpdatedEmail extends WC_Email {
 				'desc_tip'    => true,
 			),
 			'additional_content' => array(
-				'title'       => __( 'Additional content', 'wpo-advanced-order-manager' ),
-				'description' => __( 'Text to appear below the main email content.', 'wpo-advanced-order-manager' ),
+				'title'       => __( 'Additional content', 'advanced-order-manager' ),
+				'description' => __( 'Text to appear below the main email content.', 'advanced-order-manager' ),
 				'css'         => 'width:400px; height: 75px;',
-				'placeholder' => __( 'N/A', 'wpo-advanced-order-manager' ),
+				'placeholder' => __( 'N/A', 'advanced-order-manager' ),
 				'type'        => 'textarea',
 				'default'     => '',
 				'desc_tip'    => true,
 			),
 			'notify_on_fields' => array(
-				'title'       => __( 'Notify On', 'wpo-advanced-order-manager' ),
+				'title'       => __( 'Notify On', 'advanced-order-manager' ),
 				'type'        => 'multiselect',
 				'class'       => 'wc-enhanced-select',
-				'description' => __( 'Select which fields changes should trigger this email notification.', 'wpo-advanced-order-manager' ),
+				'description' => __( 'Select which fields changes should trigger this email notification.', 'advanced-order-manager' ),
 				'default'     => array( 'status', 'priority' ),
 				'options'     => $this->get_notify_on_field_options(),
 				'desc_tip'    => true,
 			),
 			'notify_creator' => array(
-				'title'   => __( 'Notify Task Creator', 'wpo-advanced-order-manager' ),
+				'title'   => __( 'Notify Task Creator', 'advanced-order-manager' ),
 				'type'    => 'checkbox',
-				'label'   => __( 'Send notification to the user who created the task', 'wpo-advanced-order-manager' ),
+				'label'   => __( 'Send notification to the user who created the task', 'advanced-order-manager' ),
 				'default' => 'yes',
 			),
 			'notify_shop_managers' => array(
-				'title'   => __( 'Notify Shop Managers', 'wpo-advanced-order-manager' ),
+				'title'   => __( 'Notify Shop Managers', 'advanced-order-manager' ),
 				'type'    => 'checkbox',
-				'label'   => __( 'Send notification to all shop managers and administrators', 'wpo-advanced-order-manager' ),
+				'label'   => __( 'Send notification to all shop managers and administrators', 'advanced-order-manager' ),
 				'default' => 'no',
 			),
 			'email_type' => array(
-				'title'       => __( 'Email type', 'wpo-advanced-order-manager' ),
+				'title'       => __( 'Email type', 'advanced-order-manager' ),
 				'type'        => 'select',
-				'description' => __( 'Choose which format of email to send.', 'wpo-advanced-order-manager' ),
+				'description' => __( 'Choose which format of email to send.', 'advanced-order-manager' ),
 				'default'     => 'html',
 				'class'       => 'email_type wc-enhanced-select',
 				'options'     => $this->get_email_type_options(),
@@ -439,12 +439,12 @@ class TaskUpdatedEmail extends WC_Email {
 		return apply_filters(
 			'wpo_aom_task_updated_email_notify_on_field_options',
 			array(
-				'title'       => __( 'Title', 'wpo-advanced-order-manager' ),
-				'description' => __( 'Description', 'wpo-advanced-order-manager' ),
-				'status'      => __( 'Status', 'wpo-advanced-order-manager' ),
-				'priority'    => __( 'Priority', 'wpo-advanced-order-manager' ),
-				'order'       => __( 'Order', 'wpo-advanced-order-manager' ),
-				'due_date'    => __( 'Due Date', 'wpo-advanced-order-manager' ),
+				'title'       => __( 'Title', 'advanced-order-manager' ),
+				'description' => __( 'Description', 'advanced-order-manager' ),
+				'status'      => __( 'Status', 'advanced-order-manager' ),
+				'priority'    => __( 'Priority', 'advanced-order-manager' ),
+				'order'       => __( 'Order', 'advanced-order-manager' ),
+				'due_date'    => __( 'Due Date', 'advanced-order-manager' ),
 			)
 		);
 	}

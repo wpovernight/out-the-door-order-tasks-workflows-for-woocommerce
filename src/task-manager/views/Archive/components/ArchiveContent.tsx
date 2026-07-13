@@ -37,7 +37,7 @@ export const ArchiveContent: React.FC = () => {
 					<p>
 						{__(
 							'No archived tasks found.',
-							'wpo-advanced-order-manager'
+							'advanced-order-manager'
 						)}
 					</p>
 				</div>
@@ -55,7 +55,7 @@ export const ArchiveContent: React.FC = () => {
 									>
 										{__(
 											'Task',
-											'wpo-advanced-order-manager'
+											'advanced-order-manager'
 										)}{' '}
 										<SortIcon
 											column="title"
@@ -69,7 +69,7 @@ export const ArchiveContent: React.FC = () => {
 									>
 										{__(
 											'Order ID',
-											'wpo-advanced-order-manager'
+											'advanced-order-manager'
 										)}{' '}
 										<SortIcon
 											column="orderID"
@@ -85,7 +85,7 @@ export const ArchiveContent: React.FC = () => {
 									>
 										{__(
 											'Customer',
-											'wpo-advanced-order-manager'
+											'advanced-order-manager'
 										)}{' '}
 										<SortIcon
 											column="customerName"
@@ -99,7 +99,7 @@ export const ArchiveContent: React.FC = () => {
 									>
 										{__(
 											'Done',
-											'wpo-advanced-order-manager'
+											'advanced-order-manager'
 										)}{' '}
 										<SortIcon
 											column="doneDate"
@@ -115,7 +115,7 @@ export const ArchiveContent: React.FC = () => {
 									>
 										{__(
 											'Archived Date',
-											'wpo-advanced-order-manager'
+											'advanced-order-manager'
 										)}{' '}
 										<SortIcon
 											column="archivedDate"
@@ -126,7 +126,7 @@ export const ArchiveContent: React.FC = () => {
 									<th className="task-actions">
 										{__(
 											'Actions',
-											'wpo-advanced-order-manager'
+											'advanced-order-manager'
 										)}
 									</th>
 								</tr>
@@ -145,14 +145,14 @@ export const ArchiveContent: React.FC = () => {
 							onClick={() => setCurrentPage((p) => p - 1)}
 							disabled={currentPage === 1}
 						>
-							{__('Previous', 'wpo-advanced-order-manager')}
+							{__('Previous', 'advanced-order-manager')}
 						</button>
 						<span>
 							{sprintf(
 								/* translators: 1: current page, 2: total pages */
 								__(
 									'Page %1$d of %2$d',
-									'wpo-advanced-order-manager'
+									'advanced-order-manager'
 								),
 								currentPage,
 								totalPages
@@ -163,7 +163,7 @@ export const ArchiveContent: React.FC = () => {
 							onClick={() => setCurrentPage((page) => page + 1)}
 							disabled={currentPage === totalPages}
 						>
-							{__('Next', 'wpo-advanced-order-manager')}
+							{__('Next', 'advanced-order-manager')}
 						</button>
 					</div>
 				</>
