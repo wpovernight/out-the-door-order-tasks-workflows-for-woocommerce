@@ -170,7 +170,7 @@ final class Screen {
 
 		wp_enqueue_script(
 			'wpo-aom-order-edit',
-			WPO_AOM()->plugin_url() . '/assets/js/order-edit' . $suffix . '.js',
+			WPO_AOM()->plugin_url() . '/assets/js/order-edit.js',
 			array(),
 			WPO_AOM_VERSION,
 			true

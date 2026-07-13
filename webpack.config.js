@@ -10,6 +10,8 @@ module.exports = (env, argv) => {
 		entry: {
 			'order-manager': path.resolve(__dirname, 'src/order-manager/index.tsx'),
 			'order-edit-metabox': path.resolve(__dirname, 'src/order-edit/index.tsx'),
+			// Non-React admin script
+			'order-edit': path.resolve(__dirname, 'src/order-edit/fulfillment.js'),
 		},
 		output: {
 			filename: '[name].js',

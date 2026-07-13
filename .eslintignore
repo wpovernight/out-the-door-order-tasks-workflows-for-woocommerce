@@ -2,6 +2,8 @@ build/
 dist/
 node_modules/
 assets/js/
+# Legacy admin script — bundled by webpack but not written to the TSX/Prettier conventions.
+src/order-edit/fulfillment.js
 updater/
 webpack.config.js
 tsconfig.json
