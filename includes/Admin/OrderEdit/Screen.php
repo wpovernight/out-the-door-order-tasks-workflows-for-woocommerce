@@ -96,7 +96,7 @@ final class Screen {
 
 		// The screen ID is shared between the orders list and the edit/new screens (especially on HPOS).
 		// Restrict to the edit/new context only.
-		$action         = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : '';
+		$action         = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$is_edit_screen = in_array( $action, array( 'edit', 'new' ), true ) || 'add' === $screen->action;
 
 		if ( ! $is_edit_screen ) {
@@ -113,11 +113,13 @@ final class Screen {
 
 		// Fallback: resolve from query args (HPOS uses `id`, legacy uses `post`).
 		if ( 0 === $order_id ) {
+			// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Reading admin URL args to resolve the order ID; no form data is processed.
 			if ( isset( $_GET['id'] ) ) {
 				$order_id = absint( wp_unslash( $_GET['id'] ) );
 			} elseif ( isset( $_GET['post'] ) ) {
 				$order_id = absint( wp_unslash( $_GET['post'] ) );
 			}
+			// phpcs:enable WordPress.Security.NonceVerification.Recommended
 		}
 
 		// Fallback: global $post (legacy auto-draft).

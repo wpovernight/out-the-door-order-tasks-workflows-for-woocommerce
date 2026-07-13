@@ -205,7 +205,7 @@ final class TaskManagerService {
 		if ( ! $result ) {
 			$db_error = $this->task_repository->get_last_db_error();
 			throw new Exception(
-				'Failed to create task.' . ( $db_error ? ' Database error: ' . $db_error : '' )
+				'Failed to create task.' . ( $db_error ? ' Database error: ' . esc_html( $db_error ) : '' )
 			);
 		}
 
@@ -307,7 +307,7 @@ final class TaskManagerService {
 		if ( false === $result ) {
 			$db_error = $this->task_repository->get_last_db_error();
 			throw new RuntimeException(
-				'Failed to update task.' . ( $db_error ? ' Database error: ' . $db_error : '' )
+				'Failed to update task.' . ( $db_error ? ' Database error: ' . esc_html( $db_error ) : '' )
 			);
 		}
 
@@ -646,7 +646,7 @@ final class TaskManagerService {
 		if ( empty( $option_data['color'] ) ) {
 			$option_data['color'] = sprintf(
 				'#%06X',
-				mt_rand( 0, 0xFFFFFF )
+				wp_rand( 0, 0xFFFFFF )
 			);
 		}
 
@@ -678,7 +678,7 @@ final class TaskManagerService {
 		if ( ! $option_id ) {
 			$db_error = $this->task_field_option_repository->get_last_db_error();
 			throw new RuntimeException(
-				'Failed to create field option.' . ( $db_error ? ' Database error: ' . $db_error : '' )
+				'Failed to create field option.' . ( $db_error ? ' Database error: ' . esc_html( $db_error ) : '' )
 			);
 		}
 
@@ -754,7 +754,7 @@ final class TaskManagerService {
 		if ( false === $this->task_field_option_repository->save( $option ) ) {
 			$db_error = $this->task_field_option_repository->get_last_db_error();
 			throw new RuntimeException(
-				'Failed to persist field option.' . ( $db_error ? ' Database error: ' . $db_error : '' )
+				'Failed to persist field option.' . ( $db_error ? ' Database error: ' . esc_html( $db_error ) : '' )
 			);
 		}
 
@@ -1188,7 +1188,7 @@ final class TaskManagerService {
 		$finished_status_option = $this->task_field_option_repository->find( $done_option_id );
 
 		if ( ! $finished_status_option ) {
-			throw new RuntimeException( "The option assigned to the \"done\" role (ID $done_option_id) no longer exists." );
+			throw new RuntimeException( esc_html( "The option assigned to the \"done\" role (ID $done_option_id) no longer exists." ) );
 		}
 
 		$result = $this->move_task( $task_id, $finished_status_option->id, null, 'last' );

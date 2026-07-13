@@ -103,11 +103,11 @@ class TaskStatusRoleService {
 		$option = $this->task_field_option_repository->find( $option_id );
 
 		if ( null === $option ) {
-			throw new InvalidArgumentException( "No task field option found with ID $option_id." );
+			throw new InvalidArgumentException( esc_html( "No task field option found with ID $option_id." ) );
 		}
 
 		if ( $option->field_id !== DefaultTaskFields::STATUS ) {
-			throw new InvalidArgumentException( "Option $option_id does not belong to the status field." );
+			throw new InvalidArgumentException( esc_html( "Option $option_id does not belong to the status field." ) );
 		}
 	}
 

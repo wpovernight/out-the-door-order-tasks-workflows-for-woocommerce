@@ -198,7 +198,7 @@ final class Installer {
 		$wpdb->query( 'SET FOREIGN_KEY_CHECKS = 0' );
 
 		foreach ( $tables as $table ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Install-time DROP TABLE; $table is a trusted name from SHOW TABLES.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Install-time DROP TABLE; $table is a trusted identifier from SHOW TABLES and table names cannot be bound as prepared-statement placeholders.
 			$wpdb->query( "DROP TABLE IF EXISTS `{$table}`" );
 		}
 

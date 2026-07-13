@@ -225,7 +225,7 @@ class CustomOrderStatusService {
 			$db_error = $this->repository->get_last_db_error();
 			throw new Exception(
 				esc_html__( 'Failed to create custom order status', 'wpo-advanced-order-manager' )
-				. ( $db_error ? ' Database error: ' . $db_error : '' )
+				. ( $db_error ? ' Database error: ' . esc_html( $db_error ) : '' )
 			);
 		}
 
@@ -264,7 +264,7 @@ class CustomOrderStatusService {
 			$db_error = $this->repository->get_last_db_error();
 			throw new RuntimeException(
 				esc_html__( 'Failed to update custom order status', 'wpo-advanced-order-manager' )
-				. ( $db_error ? ' Database error: ' . $db_error : '' )
+				. ( $db_error ? ' Database error: ' . esc_html( $db_error ) : '' )
 			);
 		}
 

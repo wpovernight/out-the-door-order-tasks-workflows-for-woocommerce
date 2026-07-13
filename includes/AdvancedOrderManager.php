@@ -126,6 +126,7 @@ final class AdvancedOrderManager {
 	 */
 	public function translations(): void {
 		$text_domain             = 'wpo-advanced-order-manager';
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- `plugin_locale` is a WordPress core filter that plugins apply when loading their own translations.
 		$locale                  = apply_filters( 'plugin_locale', determine_locale(), $text_domain );
 		$custom_translation_path = WP_LANG_DIR . '/wpo-advanced-order-manager/wpo-advanced-order-manager-' . $locale . '.mo';
 		$plugin_translation_path = WP_LANG_DIR . '/plugins/wpo-advanced-order-manager-' . $locale . '.mo';

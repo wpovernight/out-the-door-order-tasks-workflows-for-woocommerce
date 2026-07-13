@@ -12,13 +12,12 @@
 .circleci/
 
 # Node & Composer
+# NOTE: WordPress.org requires the accompanying composer.json to be present, so it must not be excluded here.
 node_modules/
-composer.json
 composer.lock
 package.json
 package-lock.json
 yarn.lock
-**/composer.json
 **/composer.lock
 **/composer.phar
 **/package.json

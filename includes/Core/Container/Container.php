@@ -163,10 +163,12 @@ final class Container implements ContainerInterface {
 		// instead of recursing into a stack overflow.
 		if ( isset( $this->resolving[ $id ] ) ) {
 			throw new ContainerException(
-				sprintf(
-					'Circular dependency detected while resolving "%s" (chain: %s).',
-					$id,
-					implode( ' -> ', array_keys( $this->resolving ) ) . ' -> ' . $id
+				esc_html(
+					sprintf(
+						'Circular dependency detected while resolving "%s" (chain: %s).',
+						$id,
+						implode( ' -> ', array_keys( $this->resolving ) ) . ' -> ' . $id
+					)
 				)
 			);
 		}
@@ -199,7 +201,7 @@ final class Container implements ContainerInterface {
 		return function ( Container $container ) use ( $id ) {
 			if ( ! class_exists( $id ) ) {
 				throw new NotFoundException(
-					sprintf( 'Service "%s" is not bound and is not an instantiable class.', $id )
+					esc_html( sprintf( 'Service "%s" is not bound and is not an instantiable class.', $id ) )
 				);
 			}
 
@@ -224,7 +226,7 @@ final class Container implements ContainerInterface {
 					$args[] = null;
 				} else {
 					throw new ContainerException(
-						sprintf( 'Cannot autowire parameter "$%s" of %s.', $param->getName(), $id )
+						esc_html( sprintf( 'Cannot autowire parameter "$%s" of %s.', $param->getName(), $id ) )
 					);
 				}
 			}

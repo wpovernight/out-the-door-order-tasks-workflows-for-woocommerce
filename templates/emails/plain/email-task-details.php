@@ -30,13 +30,13 @@ if ( ! empty( $task_data['description'] ) ) {
 // Display task fields
 if ( ! empty( $task_data['fields'] ) ) {
 	echo "\n";
-	foreach ( $task_data['fields'] as $field ) {
-		if ( empty( $field['values'] ) || 'position' === $field['slug'] ) {
+	foreach ( $task_data['fields'] as $wpo_aom_field ) {
+		if ( empty( $wpo_aom_field['values'] ) || 'position' === $wpo_aom_field['slug'] ) {
 			continue;
 		}
-		$value = $email_service->format_by_field_type( $field['slug'], $field['values'][0], $field );
-		if ( ! empty( $value ) ) {
-			echo esc_html( $field['label'] ) . ': ' . esc_html( $value ) . "\n";
+		$wpo_aom_value = $email_service->format_by_field_type( $wpo_aom_field['slug'], $wpo_aom_field['values'][0], $wpo_aom_field );
+		if ( ! empty( $wpo_aom_value ) ) {
+			echo esc_html( $wpo_aom_field['label'] ) . ': ' . esc_html( $wpo_aom_value ) . "\n";
 		}
 	}
 }
