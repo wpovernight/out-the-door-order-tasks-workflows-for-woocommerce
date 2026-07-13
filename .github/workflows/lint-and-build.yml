@@ -15,14 +15,14 @@ on:
       - 'webpack.config.js'
       - 'tsconfig.json'
 
+# Verify-only: lints and builds the front-end to confirm it compiles. Built assets are
+# NOT committed — they are generated at release time by release-assets.yml.
 jobs:
   lint-and-build:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v5
-        with:
-          ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -30,17 +30,10 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Run ESLint with auto-fix
-        run: npm run lint:fix || true
+      - name: Run ESLint
+        run: npm run lint
 
-      - name: Build production files
+      - name: Build production files (verify compilation)
         run: npm run build
-
-      - name: Auto committing linted and built files
-        uses: stefanzweifel/git-auto-commit-action@v4
-        if: github.event_name == 'push'
-        with:
-          commit_message: "Lint and build JS/TS assets"
-          file_pattern: 'assets/js/*.js src/**'
