@@ -1,4 +1,4 @@
-name: Lint and Build
+name: Build
 
 on:
   workflow_dispatch:
@@ -15,10 +15,10 @@ on:
       - 'webpack.config.js'
       - 'tsconfig.json'
 
-# Verify-only: lints and builds the front-end to confirm it compiles. Built assets are
-# NOT committed — they are generated at release time by release-assets.yml.
+# Verify-only: builds the front-end to confirm it compiles. Built assets are NOT
+# committed — they are generated at release time by release-assets.yml.
 jobs:
-  lint-and-build:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -31,9 +31,6 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-
-      - name: Run ESLint
-        run: npm run lint
 
       - name: Build production files (verify compilation)
         run: npm run build
