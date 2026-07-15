@@ -4,6 +4,7 @@ namespace WPO\AOM\REST;
 
 use WP_REST_Request;
 use WP_REST_Response;
+use WPO\AOM\Utilities\Paginator;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -28,6 +29,70 @@ abstract class BaseRestController {
 		}
 
 		return rest_ensure_response( $payload );
+	}
+
+	/**
+	 * Build the REST `meta` block from a Paginator.
+	 *
+	 * @param Paginator $paginator
+	 *
+	 * @return array<string,int|null>
+	 */
+	protected function pagination_meta( Paginator $paginator ): array {
+		return array(
+			'current_page' => $paginator->current_page(),
+			'per_page'     => $paginator->per_page(),
+			'last_page'    => $paginator->last_page(),
+			'total'        => $paginator->total(),
+			'from'         => $paginator->from(),
+			'to'           => $paginator->to(),
+		);
+	}
+
+	/**
+	 * Read pagination params from the request.
+	 *
+	 * @param WP_REST_Request $request
+	 * @param int             $default_per_page
+	 *
+	 * @return array{page:int,per_page:int}|null
+	 */
+	protected function pagination_params( WP_REST_Request $request, int $default_per_page = 10 ): ?array {
+		$page     = $request->get_param( 'page' );
+		$per_page = $request->get_param( 'per_page' );
+
+		if ( null === $page && null === $per_page ) {
+			return null;
+		}
+
+		return array(
+			'page'     => max( 1, (int) $page ),
+			'per_page' => min( 100, max( 1, (int) $per_page ?: $default_per_page ) ),
+		);
+	}
+
+	/**
+	 * Standard `page` / `per_page` route args for opt-in pagination.
+	 *
+	 * NOTE: No defaults are set, so an absent param signals "return the full list".
+	 *
+	 * @return array<string,array<string,mixed>>
+	 */
+	protected function pagination_args(): array {
+		return array(
+			'page'     => array(
+				'type'              => 'integer',
+				'sanitize_callback' => 'absint',
+				'validate_callback' => static fn( $value ) => (int) $value >= 1,
+			),
+			'per_page' => array(
+				'type'              => 'integer',
+				'sanitize_callback' => 'absint',
+				// Only enforce the lower bound here; the upper bound is clamped
+				// to 100 in pagination_params() rather than rejected.
+				'validate_callback' => static fn( $value ) => (int) $value >= 1,
+			),
+		);
 	}
 
 	/**
