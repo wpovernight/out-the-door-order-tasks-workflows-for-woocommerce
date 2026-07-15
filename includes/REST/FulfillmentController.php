@@ -30,12 +30,14 @@ class FulfillmentController extends BaseRestController {
 		 * Endpoint to retrieve orders based on their fulfillment status.
 		 *
 		 * Example: GET /wc/v3/wpo/aom/fulfillments/orders?status=fulfilled
-		 * Query Parameter:
+		 * Query Parameters:
 		 * - status (string, optional): The fulfillment status to filter orders by.
 		 *   Valid values are 'not-fulfilled', 'fulfilled', and 'partially-fulfilled'.
+		 * - page (int, optional): Page number. Default 1.
+		 * - per_page (int, optional): Orders per page. Default 10, max 100.
 		 * Response:
-		 * - 200 OK: Returns a list of orders matching the specified fulfillment status.
-		 * - 400 Bad Request: If the 'status' parameter is missing or contains an invalid value.
+		 * - 200 OK: A paginated { data, meta } payload of orders matching the filter.
+		 * - 400 Bad Request: If the 'status' parameter contains an invalid value.
 		 */
 		register_rest_route(
 			$this->namespace,
@@ -45,6 +47,15 @@ class FulfillmentController extends BaseRestController {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_orders' ),
 					'permission_callback' => array( $this, 'check_permissions' ),
+					'args'                => array_merge(
+						array(
+							'status' => array(
+								'type'     => 'string',
+								'required' => false,
+							),
+						),
+						$this->pagination_args()
+					),
 				),
 			)
 		);
@@ -70,26 +81,29 @@ class FulfillmentController extends BaseRestController {
 
 		$fulfillment_service = $this->fulfillment_service;
 
-		$orders = $fulfillment_service->get_orders_by_fulfillment_status( $status );
-		$data   = array();
+		// Paginate only when page/per_page are provided, else full list.
+		$pagination = $this->pagination_params( $request );
+		$paginator  = $fulfillment_service->get_orders_by_fulfillment_status(
+			$status,
+			array(),
+			$pagination['page'] ?? null,
+			$pagination['per_page'] ?? null
+		);
 
-		foreach ( $orders as $order ) {
-			$order_data = $this->format_order( $order, $fulfillment_service );
-
-			if ( ! empty( $order_data['items'] ) ) {
-				$data[] = $order_data;
-			}
-		}
+		$data = array_map(
+			fn( $order ) => $this->format_order( $order, $fulfillment_service ),
+			$paginator->items()
+		);
 
 		/**
-		 * Filter the fulfillment orders response.
+		 * Filter the fulfillment orders response (the current page slice when paginated).
 		 *
 		 * @param array  $data    The formatted order data.
 		 * @param string $status  The requested fulfillment status filter.
 		 */
-		$data = apply_filters( 'wpo_aom_rest_get_fulfillment_orders', $data, $status );
+		$data = apply_filters( 'wpo_aom_rest_get_fulfillment_orders', array_values( $data ), $status );
 
-		return $this->respond( $data );
+		return $this->respond( $data, null === $pagination ? null : $this->pagination_meta( $paginator ) );
 	}
 
 	/**
@@ -120,8 +134,6 @@ class FulfillmentController extends BaseRestController {
 
 	/**
 	 * Format a single order item with its fulfillment data.
-	 *
-	 * Returns null for fully-fulfilled items (they don't need attention).
 	 *
 	 * @param \WC_Order_Item_Product $item
 	 * @param FulfillmentService $fulfillment_service
