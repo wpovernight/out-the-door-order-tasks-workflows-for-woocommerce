@@ -45,6 +45,7 @@ class CustomOrderStatusController extends BaseRestController {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'check_permissions' ),
+					'args'                => $this->pagination_args(),
 				),
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
@@ -84,17 +85,21 @@ class CustomOrderStatusController extends BaseRestController {
 	}
 
 	/**
-	 * Handle GET requests to retrieve a list of all custom order statuses.
+	 * Handle GET requests to retrieve a list of all custom order statuses, with opt-in pagination.
 	 *
 	 * @param WP_REST_Request $request
 	 *
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_items( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$custom_order_status_service = $this->custom_order_status_service;
-		$custom_order_statuses       = $custom_order_status_service->all();
+		// Paginate only when page/per_page are provided, else full list.
+		$pagination = $this->pagination_params( $request );
+		$paginator  = $this->custom_order_status_service->list(
+			$pagination['page'] ?? null,
+			$pagination['per_page'] ?? null
+		);
 
-		return $this->respond( $custom_order_statuses );
+		return $this->respond_paginated( $paginator->items(), $paginator, $pagination );
 	}
 
 	/**

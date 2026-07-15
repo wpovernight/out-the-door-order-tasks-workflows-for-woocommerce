@@ -8,6 +8,7 @@ use RuntimeException;
 use WPO\AOM\Models\CustomOrderStatus;
 use WPO\AOM\Core\Logger;
 use WPO\AOM\Repositories\CustomOrderStatusRepository;
+use WPO\AOM\Utilities\Paginator;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -182,6 +183,23 @@ class CustomOrderStatusService {
 		}
 
 		return $this->cached_statuses;
+	}
+
+	/**
+	 * List statuses, optionally paginated.
+	 *
+	 * @param int|null $page     Page number (1-based), or null for the full list.
+	 * @param int|null $per_page Items per page (required when $page is provided).
+	 *
+	 * @return Paginator
+	 */
+	public function list( ?int $page = null, ?int $per_page = null ): Paginator {
+		// A null page means "no pagination requested", return the full list on a single page.
+		if ( null === $page ) {
+			return Paginator::full( $this->all() );
+		}
+
+		return $this->repository->paginate( max( 1, (int) $per_page ), $page );
 	}
 
 	/**
