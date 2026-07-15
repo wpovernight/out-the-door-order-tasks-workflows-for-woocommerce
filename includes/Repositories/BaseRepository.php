@@ -5,6 +5,7 @@ namespace WPO\AOM\Repositories;
 use InvalidArgumentException;
 use RuntimeException;
 use WPO\AOM\Models\BaseModel;
+use WPO\AOM\Utilities\Paginator;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -39,6 +40,14 @@ abstract class BaseRepository {
 	private string $order_by = '';
 	private int $limit       = 0;
 	private int $offset      = 0;
+
+	/**
+	 * Primary key column, used as the fallback ORDER BY for stable pagination.
+	 * Override in child repositories whose key differs.
+	 *
+	 * @var string
+	 */
+	protected string $primary_key = 'id';
 
 	private static ?array $column_names = null;
 
@@ -100,6 +109,58 @@ abstract class BaseRepository {
 		}
 
 		return $raw ? $result : array_map( array( $this, 'map_to_model' ), $result );
+	}
+
+	/**
+	 * Count rows matching the current query (joins + where), ignoring ORDER BY / LIMIT / OFFSET.
+	 *
+	 * @param bool $reset
+	 *
+	 * @return int
+	 */
+	public function count( bool $reset = true ): int {
+		$query  = "SELECT COUNT(*) FROM {$this->get_table_full_name( true )}";
+		$query .= $this->compile_joins();
+		$query .= $this->compile_where();
+		$query  = $this->append_bindings( $query );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$total = (int) $this->wpdb->get_var( $query );
+
+		if ( $reset ) {
+			$this->reset_query();
+		}
+
+		return $total;
+	}
+
+	/**
+	 * Paginate the current query.
+	 *
+	 * @param int  $per_page Items per page.
+	 * @param int  $page     Page number (1-based).
+	 * @param bool $raw      Whether the page items are raw rows instead of models. Default false.
+	 *
+	 * @return Paginator
+	 */
+	public function paginate( int $per_page, int $page = 1, bool $raw = false ): Paginator {
+		$per_page = max( 1, $per_page );
+		$page     = max( 1, $page );
+
+		$total = $this->count( false );
+
+		// LIMIT/OFFSET paging needs a deterministic ORDER BY, otherwise rows can
+		// repeat or be skipped across pages. Fall back to the primary key when the
+		// caller hasn't set one.
+		if ( '' === $this->order_by ) {
+			$this->order_by( $this->primary_key );
+		}
+
+		$items = $this->limit( $per_page )
+			->offset( ( $page - 1 ) * $per_page )
+			->get( $raw );
+
+		return new Paginator( $items, $total, $per_page, $page );
 	}
 
 	/**
