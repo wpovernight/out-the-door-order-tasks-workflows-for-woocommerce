@@ -103,7 +103,7 @@ class FulfillmentController extends BaseRestController {
 		 */
 		$data = apply_filters( 'wpo_aom_rest_get_fulfillment_orders', array_values( $data ), $status );
 
-		return $this->respond( $data, null === $pagination ? null : $this->pagination_meta( $paginator ) );
+		return $this->respond_paginated( $data, $paginator, $pagination );
 	}
 
 	/**

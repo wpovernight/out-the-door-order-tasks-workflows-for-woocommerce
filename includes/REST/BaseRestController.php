@@ -50,6 +50,23 @@ abstract class BaseRestController {
 	}
 
 	/**
+	 * Respond with a page of already-formatted data, attaching pagination meta
+	 * only when pagination was actually requested (i.e. $pagination is not null).
+	 *
+	 * @param array<int,mixed>         $data       Formatted items for the current page.
+	 * @param Paginator                $paginator  Source of the meta block.
+	 * @param array{page:int,per_page:int}|null $pagination Result of pagination_params(): null = full list, no meta.
+	 *
+	 * @return WP_REST_Response
+	 */
+	protected function respond_paginated( array $data, Paginator $paginator, ?array $pagination ): WP_REST_Response {
+		return $this->respond(
+			array_values( $data ),
+			null === $pagination ? null : $this->pagination_meta( $paginator )
+		);
+	}
+
+	/**
 	 * Read pagination params from the request.
 	 *
 	 * @param WP_REST_Request $request
