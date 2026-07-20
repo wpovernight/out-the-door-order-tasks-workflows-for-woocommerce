@@ -4,26 +4,34 @@ import {
 	getApiRoot,
 	getApiNamespace,
 	getHeaders,
-	handleEnvelope,
+	handlePaginated,
 	handleResponse,
+	Paginated,
 } from './client';
 
 export async function fetchFulfillmentOrders(
-	status?: string
-): Promise<FulfillmentOrder[]> {
+	status?: string,
+	page = 1,
+	perPage = 10
+): Promise<Paginated<FulfillmentOrder>> {
 	const url = new URL(
 		`${getApiRoot()}/${getApiNamespace()}/fulfillments/orders`
 	);
+
 	if (status) {
 		url.searchParams.set('status', status);
 	}
+
+	url.searchParams.set('page', String(page));
+	url.searchParams.set('per_page', String(perPage));
+
 	const response = await fetch(url.toString(), {
 		method: 'GET',
 		credentials: 'include',
 		headers: getHeaders(),
 	});
 
-	return handleEnvelope<FulfillmentOrder[]>(response);
+	return handlePaginated<FulfillmentOrder>(response);
 }
 
 /**
