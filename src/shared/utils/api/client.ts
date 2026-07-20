@@ -87,11 +87,25 @@ export async function handleResponse<T>(response: Response): Promise<T> {
 
 /**
  * The uniform response wrapper for our wc/v3/wpo/aom/* endpoints.
- *
  */
 export interface Envelope<TData, TMeta = undefined> {
 	data: TData;
 	meta?: TMeta;
+}
+
+export interface PaginationMeta {
+	current_page: number;
+	per_page: number;
+	last_page: number;
+	total: number;
+	from: number | null;
+	to: number | null;
+}
+
+/** A paginated collection: an envelope whose meta is always present. */
+export interface Paginated<T> {
+	data: T[];
+	meta: PaginationMeta;
 }
 
 /**
@@ -102,4 +116,8 @@ export interface Envelope<TData, TMeta = undefined> {
 export async function handleEnvelope<T>(response: Response): Promise<T> {
 	const body = await handleResponse<Envelope<T> | undefined>(response);
 	return body?.data as T;
+}
+
+export async function handlePaginated<T>(response: Response): Promise<Paginated<T>> {
+	return handleResponse<Paginated<T>>(response);
 }
