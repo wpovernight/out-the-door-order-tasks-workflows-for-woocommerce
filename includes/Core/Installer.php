@@ -31,7 +31,7 @@ final class Installer {
 	 *
 	 * Deliberately decoupled from the plugin's version. Bump this by one whenever you add a migration.
 	 */
-	private const DB_VERSION = 1;
+	private const DB_VERSION = 2;
 
 	/**
 	 * Map of db schema version => array of migration method names (instance methods).
@@ -44,6 +44,9 @@ final class Installer {
 		1 => array(
 			'migrate_apply_option_slug_unique_index', /** @uses migrate_apply_option_slug_unique_index() */
 			'migrate_seed_status_role_assignments', /** @uses migrate_seed_status_role_assignments() */
+		),
+		2 => array(
+			'migrate_apply_foreign_keys', /** @uses migrate_apply_foreign_keys() */
 		),
 	);
 
@@ -142,9 +145,7 @@ final class Installer {
 			foreach ( self::MIGRATIONS as $version => $migration_callbacks ) {
 				if ( $current_db_version < $version ) {
 					foreach ( $migration_callbacks as $migration_method ) {
-						if ( is_callable( array( $this, $migration_method ) ) ) {
-							$this->{$migration_method}();
-						}
+						$this->{$migration_method}();
 					}
 				}
 			}
@@ -171,9 +172,162 @@ final class Installer {
 
 		dbDelta( self::get_schema() );
 
+		// dbDelta() does not handle foreign keys, so apply them manually.
+		self::apply_foreign_keys();
+
 		if ( $were_showing_errors ) {
 			$wpdb->show_errors();
 		}
+	}
+
+	/**
+	 * The foreign keys this plugin's schema relies on.
+	 *
+	 * @return array<int, array>
+	 */
+	private static function get_foreign_keys(): array {
+		return array(
+			array(
+				'table'         => 'wpo_aom_task_field_options',
+				'column'        => 'field_id',
+				'parent_table'  => 'wpo_aom_task_fields',
+				'parent_column' => 'id',
+			),
+			array(
+				'table'         => 'wpo_aom_task_field_values',
+				'column'        => 'task_id',
+				'parent_table'  => 'wpo_aom_tasks',
+				'parent_column' => 'id',
+			),
+			array(
+				'table'         => 'wpo_aom_task_field_values',
+				'column'        => 'field_id',
+				'parent_table'  => 'wpo_aom_task_fields',
+				'parent_column' => 'id',
+			),
+		);
+	}
+
+	/**
+	 * Add any missing foreign key constraints.
+	 *
+	 * @return void
+	 */
+	private static function apply_foreign_keys(): void {
+		global $wpdb;
+
+		foreach ( self::get_foreign_keys() as $foreign_key ) {
+			$table         = $wpdb->prefix . $foreign_key['table'];
+			$parent_table  = $wpdb->prefix . $foreign_key['parent_table'];
+			$column        = $foreign_key['column'];
+			$parent_column = $foreign_key['parent_column'];
+			$constraint    = $table . '_' . $column . '_fk';
+
+			if ( self::has_foreign_key( $table, $column, $parent_table, $parent_column ) ) {
+				continue;
+			}
+
+			// A non-InnoDB table accepts the constraint and silently ignores it.
+			if ( ! self::ensure_innodb( $table ) || ! self::ensure_innodb( $parent_table ) ) {
+				continue;
+			}
+
+			// Rows orphaned while the constraint was absent would reject it.
+			self::delete_orphans( $table, $column, $parent_table, $parent_column );
+
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Install-time schema change; every identifier is plugin-owned and table/column names cannot be bound as prepared-statement placeholders.
+			$wpdb->query( "
+				ALTER TABLE `{$table}`
+				ADD CONSTRAINT `{$constraint}`
+					FOREIGN KEY (`{$column}`)
+					REFERENCES `{$parent_table}` (`{$parent_column}`)
+					ON DELETE CASCADE
+			" );
+		}
+	}
+
+	/**
+	 * Check whether a column already has a foreign key to the given parent.
+	 *
+	 * @param string $table         Full child table name.
+	 * @param string $column        Child column holding the reference.
+	 * @param string $parent_table  Full parent table name.
+	 * @param string $parent_column Referenced parent column.
+	 *
+	 * @return bool
+	 */
+	private static function has_foreign_key( string $table, string $column, string $parent_table, string $parent_column ): bool {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Install-time schema introspection.
+		$count = $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT COUNT(*) FROM information_schema.KEY_COLUMN_USAGE
+				WHERE CONSTRAINT_SCHEMA = DATABASE()
+				AND TABLE_NAME = %s
+				AND COLUMN_NAME = %s
+				AND REFERENCED_TABLE_NAME = %s
+				AND REFERENCED_COLUMN_NAME = %s',
+				$table,
+				$column,
+				$parent_table,
+				$parent_column
+			)
+		);
+
+		return (int) $count > 0;
+	}
+
+	/**
+	 * Ensure a table uses InnoDB, converting it if it does not.
+	 *
+	 * @param string $table
+	 *
+	 * @return bool False when the table is missing or the conversion failed.
+	 */
+	private static function ensure_innodb( string $table ): bool {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Install-time schema introspection.
+		$engine = $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT ENGINE FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s',
+				$table
+			)
+		);
+
+		// The table does not exist.
+		if ( null === $engine ) {
+			return false;
+		}
+
+		if ( 0 === strcasecmp( (string) $engine, 'InnoDB' ) ) {
+			return true;
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Install-time schema change; $table is plugin-owned and cannot be bound as a prepared-statement placeholder.
+		return false !== $wpdb->query( "ALTER TABLE `{$table}` ENGINE=InnoDB" );
+	}
+
+	/**
+	 * Delete child rows whose parent no longer exists.
+	 *
+	 * @param string $table         Full child table name.
+	 * @param string $column        Child column holding the reference.
+	 * @param string $parent_table  Full parent table name.
+	 * @param string $parent_column Referenced parent column.
+	 *
+	 * @return void
+	 */
+	private static function delete_orphans( string $table, string $column, string $parent_table, string $parent_column ): void {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Install-time cleanup; every identifier is plugin-owned and cannot be bound as a prepared-statement placeholder.
+		$wpdb->query(
+			"DELETE child FROM `{$table}` AS child
+			LEFT JOIN `{$parent_table}` AS parent ON child.`{$column}` = parent.`{$parent_column}`
+			WHERE parent.`{$parent_column}` IS NULL"
+		);
 	}
 
 	/**
@@ -209,6 +363,9 @@ final class Installer {
 	/**
 	 * Get tables schema for dbDelta().
 	 *
+	 * Foreign keys are deliberately absent since dbDelta cannot parse them correctly.
+	 * They are applied separately by apply_foreign_keys().
+	 *
 	 * @return string
 	 */
 	private static function get_schema(): string {
@@ -224,7 +381,7 @@ final class Installer {
 			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 			PRIMARY KEY  (id)
-		) {$charset_collate};
+		) ENGINE=InnoDB {$charset_collate};
 		CREATE TABLE `{$wpdb->prefix}wpo_aom_task_fields` (
 			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			label VARCHAR(255) NOT NULL,
@@ -234,7 +391,7 @@ final class Installer {
 			is_editable TINYINT(1) NOT NULL DEFAULT 1,
 			is_protected TINYINT(1) NOT NULL DEFAULT 0,
 			PRIMARY KEY  (id)
-		) {$charset_collate};
+		) ENGINE=InnoDB {$charset_collate};
 		CREATE TABLE `{$wpdb->prefix}wpo_aom_task_field_options` (
 			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			field_id BIGINT(20) UNSIGNED NOT NULL,
@@ -243,19 +400,16 @@ final class Installer {
 			color VARCHAR(7) DEFAULT NULL,
 			position INT NOT NULL DEFAULT 0,
 			PRIMARY KEY  (id),
-			UNIQUE KEY field_slug_unique (field_id, slug),
-			FOREIGN KEY (field_id) REFERENCES {$wpdb->prefix}wpo_aom_task_fields(id) ON DELETE CASCADE
-		) {$charset_collate};
+			UNIQUE KEY field_slug_unique (field_id, slug)
+		) ENGINE=InnoDB {$charset_collate};
 		CREATE TABLE `{$wpdb->prefix}wpo_aom_task_field_values` (
 			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			task_id BIGINT(20) UNSIGNED NOT NULL,
 			field_id BIGINT(20) UNSIGNED NOT NULL,
 			value TEXT DEFAULT NULL,
 			PRIMARY KEY  (id),
-			KEY idx_task_field_lookup (task_id, field_id),
-			FOREIGN KEY (task_id) REFERENCES {$wpdb->prefix}wpo_aom_tasks(id) ON DELETE CASCADE,
-			FOREIGN KEY (field_id) REFERENCES {$wpdb->prefix}wpo_aom_task_fields(id) ON DELETE CASCADE
-		) {$charset_collate};
+			KEY idx_task_field_lookup (task_id, field_id)
+		) ENGINE=InnoDB {$charset_collate};
 		CREATE TABLE `{$wpdb->prefix}wpo_aom_custom_statuses` (
 			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			status_key VARCHAR(64) NOT NULL,
@@ -263,8 +417,8 @@ final class Installer {
 			background VARCHAR(32) DEFAULT NULL,
 			is_deleting TINYINT(1) NOT NULL DEFAULT 0,
 			PRIMARY KEY  (id),
-			UNIQUE KEY (status_key)
-		) {$charset_collate};
+			UNIQUE KEY status_key_unique (status_key)
+		) ENGINE=InnoDB {$charset_collate};
 		";
 	}
 
@@ -503,6 +657,60 @@ final class Installer {
 	 */
 	private function migrate_apply_option_slug_unique_index(): void {
 		self::create_tables();
+	}
+
+	/**
+	 * Apply the foreign keys that dbDelta never managed to create.
+	 *
+	 * @return void
+	 */
+	private function migrate_apply_foreign_keys(): void {
+		self::create_tables();
+		self::drop_legacy_status_key_index();
+	}
+
+	/**
+	 * Drop the auto-named unique index on wpo_aom_custom_statuses(status_key).
+	 *
+	 * @return void
+	 */
+	private static function drop_legacy_status_key_index(): void {
+		global $wpdb;
+
+		$table = $wpdb->prefix . 'wpo_aom_custom_statuses';
+
+		if ( ! self::has_index( $table, 'status_key_unique' ) || ! self::has_index( $table, 'status_key' ) ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Install-time schema change; $table is plugin-owned and cannot be bound as a prepared-statement placeholder.
+		$wpdb->query( "ALTER TABLE `{$table}` DROP INDEX `status_key`" );
+	}
+
+	/**
+	 * Check whether an index exists on a table.
+	 *
+	 * @param string $table Full table name.
+	 * @param string $index Index name.
+	 *
+	 * @return bool
+	 */
+	private static function has_index( string $table, string $index ): bool {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Install-time schema introspection.
+		$count = $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT COUNT(*) FROM information_schema.STATISTICS
+				WHERE TABLE_SCHEMA = DATABASE()
+				AND TABLE_NAME = %s
+				AND INDEX_NAME = %s',
+				$table,
+				$index
+			)
+		);
+
+		return (int) $count > 0;
 	}
 
 	/**
