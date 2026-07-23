@@ -48,6 +48,7 @@ This regenerates the files in `assets/js/`. See the repository's readme for full
 * Updated the database schema to version 2, adding foreign key constraints for task data integrity.
 * Custom order statuses that have no orders assigned are now deleted immediately, and a race condition during batch deletion has been fixed.
 * Added a close guard to the task form so unsaved changes are no longer lost when the form is dismissed.
+* Fixed slug validation on the custom order status form, which stopped working in recent browsers.
 * Changed the text domain from `wpo-advanced-order-manager` to `advanced-order-manager`.
 * Renamed the plugin folder and slug to `advanced-order-manager`.
 * Improved escaping and output sanitization across the admin screens and email templates.
