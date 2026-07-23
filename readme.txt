@@ -4,6 +4,8 @@ Tags: woocommerce, orders, order management, tasks, fulfillment
 Requires at least: 6.7
 Tested up to: 7.0
 Requires PHP: 8.1
+WC requires at least: 8.2
+WC tested up to: 10.0
 Stable tag: 1.0.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -47,6 +49,7 @@ This regenerates the files in `assets/js/`. See the repository's readme for full
 * Custom order statuses that have no orders assigned are now deleted immediately, and a race condition during batch deletion has been fixed.
 * Added a close guard to the task form so unsaved changes are no longer lost when the form is dismissed.
 * Changed the text domain from `wpo-advanced-order-manager` to `advanced-order-manager`.
+* Renamed the plugin folder and slug to `advanced-order-manager`.
 * Improved escaping and output sanitization across the admin screens and email templates.
 * Added OFL.txt for SIL Open Font License compliance.
 
