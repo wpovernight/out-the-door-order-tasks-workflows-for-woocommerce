@@ -20,6 +20,18 @@ npm run dev      # watch mode
 npm run build    # production build
 ```
 
+### WP-CLI
+
+The plugin registers commands under the `wp aom` namespace:
+
+```bash
+wp aom install              # Install DB tables and default data
+wp aom tasks generate       # Generate sample tasks (dev/testing)
+wp aom tasks remove         # Remove all tasks and their field values
+wp aom fulfillments clear   # Remove all fulfillment data
+wp aom options clear        # Remove all plugin wp_options entries
+```
+
 ## License
 
 GPLv3 — see [LICENSE](https://www.gnu.org/licenses/gpl-3.0.html).
