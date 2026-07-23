@@ -186,7 +186,7 @@
 .task-card .task-card-order a {
     display: inline-flex;
     justify-content: flex-start;
-    align-items: anchor-center;
+    align-items: center;
     gap: 0.3em;
     font-size: 0.9em;
     text-decoration: none;

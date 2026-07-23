@@ -332,7 +332,6 @@
 td.wpo-aom-fulfillment > div {
     display: flex;
     gap: 0.5em;
-    justify-content: flex-end;
     align-items: center;
 }
 
