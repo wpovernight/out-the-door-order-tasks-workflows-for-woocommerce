@@ -47,6 +47,11 @@ WPO_AOM();
 register_activation_hook(
 	WPO_AOM_PLUGIN_FILE,
 	static function (): void {
+		// Never create tables for an environment the plugin cannot run in.
+		if ( ! \WPO\AOM\Core\DependencyChecker::instance()->check_dependencies() ) {
+			return;
+		}
+
 		$kernel = new \WPO\AOM\Core\Kernel( new \WPO\AOM\Core\Container\Container() );
 		$kernel->add_provider( new \WPO\AOM\Core\Providers\CoreServiceProvider() );
 		$kernel->register();
