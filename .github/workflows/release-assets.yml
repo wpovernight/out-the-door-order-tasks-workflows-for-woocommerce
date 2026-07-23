@@ -56,11 +56,19 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.1'
-          tools: composer
+          tools: composer, wp-cli
 
       - name: Install production-only Composer dependencies
         working-directory: ${{ env.plugin_slug }}
         run: composer install --no-dev --optimize-autoloader --no-progress --prefer-dist
+
+      # Must run after the JS build: the catalog harvests strings from the built
+      # bundles in assets/js/, not from the TypeScript sources in src/.
+      - name: Generate translation template
+        working-directory: ${{ env.plugin_slug }}
+        run: |
+          wp i18n make-pot . languages/${{ env.plugin_slug }}.pot \
+            --exclude=src,docs
 
       - name: Check stable version in readme.txt
         run: |
