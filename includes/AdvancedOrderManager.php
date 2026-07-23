@@ -47,12 +47,6 @@ final class AdvancedOrderManager {
 	private function __construct() {
 		require $this->plugin_path() . '/vendor/autoload.php';
 
-		// Check dependencies.
-		$dependencies = DependencyChecker::instance();
-		if ( ! $dependencies->check_dependencies() ) {
-			return;
-		}
-
 		$this->define_constants();
 		$this->init_hooks();
 
@@ -66,6 +60,10 @@ final class AdvancedOrderManager {
 	 * @return void
 	 */
 	public function boot_kernel(): void {
+		if ( ! DependencyChecker::instance()->check_dependencies() ) {
+			return;
+		}
+
 		$this->kernel = new Kernel( new Container() );
 		$this->kernel->add_provider( new CoreServiceProvider() );
 
