@@ -24,6 +24,12 @@
     padding-right: 0.8em;
 }
 
+.dashboard-widget .content.is-loading {
+    opacity: 0.55;
+    pointer-events: none;
+    transition: opacity var(--wpo-aom-transition-fast);
+}
+
 .dashboard-widget > .header {
     align-items: center;
     padding: 1.85em 0 0.5em;
