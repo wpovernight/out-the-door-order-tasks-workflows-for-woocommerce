@@ -43,7 +43,10 @@ final class Screen {
 		add_action( 'woocommerce_admin_order_item_values', array( $this, 'order_items_values' ), 10, 3 );
 
 		// Save fulfillment quantity changes.
-		add_action( 'woocommerce_before_save_order_items', array( $this, 'on_save_order_items' ), 10, 2 );
+		add_action( 'woocommerce_before_save_order_items', array( $this, 'save_posted_fulfillment_quantities' ), 10, 2 );
+
+		// Recalculate the order-level status once WooCommerce has persisted the new item quantities.
+		add_action( 'woocommerce_saved_order_items', array( $this, 'refresh_order_fulfillment_status' ), 10, 2 );
 
 		// Cleanup fulfillment data on order item deletion.
 		add_action( 'woocommerce_before_delete_order_item', array( $this, 'on_delete_order_item' ), 10, 2 );
@@ -382,14 +385,14 @@ final class Screen {
 	}
 
 	/**
-	 * Handle saving of fulfillment quantities for order items.
+	 * Persist the fulfillment quantities submitted with the order items form.
 	 *
 	 * @param int   $order_id Order ID.
 	 * @param array $items Order items to save.
 	 *
 	 * @return void
 	 */
-	public function on_save_order_items( int $order_id, array $items ): void {
+	public function save_posted_fulfillment_quantities( int $order_id, array $items ): void {
 		if (
 			! isset( $items['wpo-aom-fulfillment-quantity'] ) ||
 			! is_array( $items['wpo-aom-fulfillment-quantity'] ) ) {
@@ -413,8 +416,19 @@ final class Screen {
 				$fulfillment_id > 0 ? $fulfillment_id : null
 			);
 		}
+	}
 
-		// Update the order-level fulfillment status cache.
+	/**
+	 * Update the order-level fulfillment status cache after order items have been saved.
+	 *
+	 * This must run on `woocommerce_saved_order_items` rather than on the `before` hook.
+	 *
+	 * @param int   $order_id Order ID.
+	 * @param array $items Order items that were saved.
+	 *
+	 * @return void
+	 */
+	public function refresh_order_fulfillment_status( int $order_id, array $items ): void {
 		$this->fulfillment_service->update_order_fulfillment_status_meta( $order_id );
 	}
 
