@@ -13,7 +13,7 @@ use WPO\AOM\Core\Providers\CliServiceProvider;
 defined( 'ABSPATH' ) || exit;
 
 final class AdvancedOrderManager {
-	public const VERSION = '1.0.0-beta.2';
+	public const VERSION = '1.0.0';
 
 	private ?Kernel $kernel = null;
 
