@@ -1,29 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { __ } from '@wordpress/i18n';
 import { TodayTasks } from '@orderManager/views/Dashboard/components/TodayTasks';
 import { PartialFulfillments } from '@orderManager/views/Dashboard/components/PartialFulfillments';
+import { FulfillmentOrderSkeleton } from '@orderManager/views/Dashboard/components/FulfillmentOrderSkeleton';
+import { useFulfillmentOrders } from '@orderManager/views/Dashboard/hooks/useFulfillmentOrders';
 import { useTasks } from '@shared/context/TaskContext';
 import { useAsyncLoader } from '@shared/hooks/useAsyncLoader';
 import { SidebarModalProvider } from '@shared/context/SidebarModalContext';
 import { TaskCardSkeleton } from '@shared/components/TaskCardSkeleton';
-import { ErrorState, SkeletonLine } from '@shared/components/LoadingSkeleton';
-import { fetchFulfillmentOrders } from '@shared/utils/api';
-import { FulfillmentOrder } from '@shared/types/fulfillment';
+import { ErrorState } from '@shared/components/LoadingSkeleton';
 
 export const DashboardView = () => {
 	const { loadTasks, loadTaskFields, loadFieldOptions } = useTasks();
-	const [fulfillmentOrders, setFulfillmentOrders] = useState<
-		FulfillmentOrder[]
-	>([]);
+	const {
+		orders: fulfillmentOrders,
+		meta: fulfillmentMeta,
+		isLoading: fulfillmentLoading,
+		error: fulfillmentError,
+		goToPage: goToFulfillmentPage,
+	} = useFulfillmentOrders();
 
 	const { loadingStatus, loadingError } = useAsyncLoader(async () => {
 		await Promise.all([
 			loadTasks(),
 			loadFieldOptions('status'),
 			loadFieldOptions('priority'),
-			fetchFulfillmentOrders('partially-fulfilled').then(
-				setFulfillmentOrders
-			),
 		]);
 	}, [loadTasks, loadFieldOptions]);
 
@@ -94,7 +95,13 @@ export const DashboardView = () => {
 			<SidebarModalProvider>
 				<div className="dashboard-view">
 					<TodayTasks />
-					<PartialFulfillments orders={fulfillmentOrders} />
+					<PartialFulfillments
+						orders={fulfillmentOrders}
+						meta={fulfillmentMeta}
+						isLoading={fulfillmentLoading}
+						error={fulfillmentError}
+						onPageChange={goToFulfillmentPage}
+					/>
 				</div>
 			</SidebarModalProvider>
 		</>
