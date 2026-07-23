@@ -1,14 +1,27 @@
 import React, { useState } from 'react';
 import { __ } from '@wordpress/i18n';
-import { EmptyState } from '@shared/components/LoadingSkeleton';
+import { EmptyState, ErrorState } from '@shared/components/LoadingSkeleton';
+import { FulfillmentOrderSkeleton } from '@orderManager/views/Dashboard/components/FulfillmentOrderSkeleton';
+import { Pager } from '@shared/components/Pager';
 import { useScrollable } from '@shared/hooks/useScrollable';
 import { FulfillmentOrder, FulfillmentItem } from '@shared/types/fulfillment';
+import { PaginationMeta } from '@shared/utils/api';
 
 interface PartialFulfillmentsProps {
 	orders: FulfillmentOrder[];
+	meta: PaginationMeta | null;
+	isLoading: boolean;
+	error?: Error | null;
+	onPageChange: (page: number) => void;
 }
 
-export const PartialFulfillments = ({ orders }: PartialFulfillmentsProps) => {
+export const PartialFulfillments = ({
+	orders,
+	meta,
+	isLoading,
+	error,
+	onPageChange,
+}: PartialFulfillmentsProps) => {
 	const [expandedOrders, setExpandedOrders] = useState<Set<number>>(
 		new Set()
 	);
@@ -53,6 +66,7 @@ export const PartialFulfillments = ({ orders }: PartialFulfillmentsProps) => {
 	};
 
 	const hasOrders = orders && orders.length > 0;
+	const showSkeleton = isLoading && orders.length === 0;
 
 	return (
 		<div className="dashboard-widget" id="partial-fulfillments">
@@ -64,8 +78,23 @@ export const PartialFulfillments = ({ orders }: PartialFulfillmentsProps) => {
 					)}
 				</h3>
 			</div>
-			<div className="content" ref={contentRef}>
-				{!hasOrders ? (
+			<div
+				className={`content${isLoading ? ' is-loading' : ''}`}
+				ref={contentRef}
+			>
+				{showSkeleton && <FulfillmentOrderSkeleton />}
+				{!showSkeleton && error && (
+					<ErrorState
+						message={
+							error.message ||
+							__(
+								'Error loading fulfillments. Please try again.',
+								'advanced-order-manager'
+							)
+						}
+					/>
+				)}
+				{!showSkeleton && !error && !hasOrders && (
 					<EmptyState
 						icon="box"
 						message={__(
@@ -73,7 +102,8 @@ export const PartialFulfillments = ({ orders }: PartialFulfillmentsProps) => {
 							'advanced-order-manager'
 						)}
 					/>
-				) : (
+				)}
+				{!showSkeleton && !error && hasOrders && (
 					<ul className="fulfillment-order-list">
 						{orders.map((order) => {
 							const isExpanded = expandedOrders.has(
@@ -201,15 +231,29 @@ export const PartialFulfillments = ({ orders }: PartialFulfillmentsProps) => {
 					</ul>
 				)}
 			</div>
-			{!hasOrders && (
+			{hasOrders && meta && meta.last_page > 1 ? (
 				<div className="footer">
-					<a
-						href="edit.php?post_type=shop_order"
-						className="wpo-button view-all-link"
-					>
-						{__('View all orders', 'advanced-order-manager')}
-					</a>
+					<Pager
+						currentPage={meta.current_page}
+						lastPage={meta.last_page}
+						onChange={onPageChange}
+						disabled={isLoading}
+					/>
 				</div>
+			) : (
+				!isLoading && (
+					<div className="footer">
+						<a
+							href="edit.php?post_type=shop_order"
+							className="wpo-button view-all-link"
+						>
+							{__(
+								'View all orders',
+								'advanced-order-manager'
+							)}
+						</a>
+					</div>
+				)
 			)}
 		</div>
 	);
