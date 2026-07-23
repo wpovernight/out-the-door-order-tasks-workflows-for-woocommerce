@@ -146,6 +146,10 @@ export const StatusForm = ({
 							<label htmlFor="cos-key">
 								{__('Slug', 'advanced-order-manager')}
 							</label>
+							{/*
+								`pattern` is compiled with the regex `v` flag, which treats a
+								bare `-` as reserved inside a character class, so it is escaped.
+							*/}
 							<input
 								id="cos-key"
 								type="text"
@@ -154,7 +158,7 @@ export const StatusForm = ({
 									setKeyManuallyEdited(true);
 									setStatusKey(e.target.value);
 								}}
-								pattern="^[a-z0-9_-]+$"
+								pattern="^[a-z0-9_\-]+$"
 								title={__(
 									'Only lowercase letters, numbers, hyphens, and underscores.',
 									'advanced-order-manager'
