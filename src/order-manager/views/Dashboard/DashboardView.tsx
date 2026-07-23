@@ -63,44 +63,7 @@ export const DashboardView = () => {
 						</h3>
 					</div>
 					<div className="content">
-						<ul className="fulfillment-order-list">
-							{[1, 2, 3].map((i) => (
-								<li key={i} className="fulfillment-order">
-									<div
-										style={{
-											display: 'flex',
-											gap: '0.3em',
-										}}
-									>
-										<SkeletonLine
-											width="0.9em"
-											height="0.9em"
-											style={{
-												borderRadius: '50%',
-												flexShrink: 0,
-											}}
-										/>
-										<div
-											style={{
-												display: 'flex',
-												flexDirection: 'column',
-												gap: '0.3em',
-												flex: 1,
-											}}
-										>
-											<SkeletonLine
-												width="50%"
-												height="1em"
-											/>
-											<SkeletonLine
-												width="30%"
-												height="0.8em"
-											/>
-										</div>
-									</div>
-								</li>
-							))}
-						</ul>
+						<FulfillmentOrderSkeleton />
 					</div>
 				</div>
 			</div>
