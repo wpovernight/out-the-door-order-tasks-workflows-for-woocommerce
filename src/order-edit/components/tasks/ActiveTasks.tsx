@@ -1,14 +1,14 @@
 import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { __ } from '@wordpress/i18n';
-import { Task } from '@shared/types/task';
-import { TaskCard } from '@shared/components/TaskCard';
+import { Task } from '@sdk/types/task';
+import { TaskCard } from '@sdk/components/TaskCard';
 import { useOrderTask } from '@orderEdit/context/OrderTaskContext';
 import { useOrderEditData } from '@orderEdit/hooks/useOrderEditData';
-import { useTaskEdit, useTaskCreation } from '@shared/hooks/useTaskFormModal';
-import { EmptyState, ErrorState } from '@shared/components/LoadingSkeleton';
-import { TaskCardSkeleton } from '@shared/components/TaskCardSkeleton';
-import { useTasks } from '@shared/context/TaskContext';
-import { useConfirm } from '@shared/context/DialogContext';
+import { useTaskEdit, useTaskCreation } from '@sdk/hooks/useTaskFormModal';
+import { EmptyState, ErrorState } from '@sdk/components/LoadingSkeleton';
+import { TaskCardSkeleton } from '@sdk/components/TaskCardSkeleton';
+import { useTasks } from '@sdk/context/TaskContext';
+import { useConfirm } from '@sdk/context/DialogContext';
 
 interface ArchivedEntry {
 	task: Task;

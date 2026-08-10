@@ -1,5 +1,5 @@
 import React from 'react';
-import { SkeletonBox, SkeletonLine } from '@shared/components/LoadingSkeleton';
+import { SkeletonBox, SkeletonLine } from '@sdk/components/LoadingSkeleton';
 
 export const TaskFormSkeleton: React.FC = () => {
 	return (

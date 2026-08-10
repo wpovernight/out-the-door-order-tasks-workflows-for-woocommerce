@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { __ } from '@wordpress/i18n';
-import { EmptyState, ErrorState } from '@shared/components/LoadingSkeleton';
+import { EmptyState, ErrorState } from '@sdk/components/LoadingSkeleton';
 import { FulfillmentOrderSkeleton } from '@orderManager/views/Dashboard/components/FulfillmentOrderSkeleton';
-import { Pager } from '@shared/components/Pager';
-import { useScrollable } from '@shared/hooks/useScrollable';
-import { FulfillmentOrder, FulfillmentItem } from '@shared/types/fulfillment';
-import { PaginationMeta } from '@shared/utils/api';
+import { Pager } from '@sdk/components/Pager';
+import { useScrollable } from '@sdk/hooks/useScrollable';
+import { FulfillmentOrder, FulfillmentItem } from '@sdk/types/fulfillment';
+import { PaginationMeta } from '@sdk/utils/api';
 
 interface PartialFulfillmentsProps {
 	orders: FulfillmentOrder[];

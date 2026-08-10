@@ -1,5 +1,5 @@
-import { FulfillmentOrder } from '@shared/types/fulfillment';
-import { WooFulfillment } from '@shared/types/wooFulfillment';
+import { FulfillmentOrder } from '@sdk/types/fulfillment';
+import { WooFulfillment } from '@sdk/types/wooFulfillment';
 import {
 	getApiRoot,
 	getApiNamespace,

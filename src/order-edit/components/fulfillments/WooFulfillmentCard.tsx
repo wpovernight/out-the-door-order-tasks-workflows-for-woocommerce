@@ -3,13 +3,13 @@ import { __, sprintf } from '@wordpress/i18n';
 import {
 	WooFulfillment,
 	getWooFulfillmentMeta,
-} from '@shared/types/wooFulfillment';
+} from '@sdk/types/wooFulfillment';
 import {
 	getShippingMethodLabel,
 	getTrackingInfo,
 	formatDate,
 } from '@orderEdit/components/utils/wooFulfillmentUtils';
-import { getColorStyle } from '@shared/utils/colorUtils';
+import { getColorStyle } from '@sdk/utils/colorUtils';
 
 interface WooFulfillmentCardProps {
 	fulfillment: WooFulfillment;

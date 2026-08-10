@@ -1,17 +1,17 @@
 import React from 'react';
-import { isFieldOption, Task } from '@shared/types/task';
-import { getColorStyle } from '@shared/utils/colorUtils';
-import { truncateText } from '@shared/utils/textUtils';
-import { TaskActionMenu } from '@shared/components/TaskActionMenu';
+import { isFieldOption, Task } from '@sdk/types/task';
+import { getColorStyle } from '@sdk/utils/colorUtils';
+import { truncateText } from '@sdk/utils/textUtils';
+import { TaskActionMenu } from '@sdk/components/TaskActionMenu';
 import {
 	getFieldObjectValue,
 	getTaskDateField,
-} from '@shared/utils/fieldUtils';
+} from '@sdk/utils/fieldUtils';
 import { __ } from '@wordpress/i18n';
-import { useTasks } from '@shared/context/TaskContext';
-import { useConfirm } from '@shared/context/DialogContext';
+import { useTasks } from '@sdk/context/TaskContext';
+import { useConfirm } from '@sdk/context/DialogContext';
 import { createInterpolateElement } from '@wordpress/element';
-import { useStatusRoles } from '@shared/context/StatusRoleContext';
+import { useStatusRoles } from '@sdk/context/StatusRoleContext';
 
 type HeadingLevel = 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 type TagsPosition = 'none' | 'top' | 'bottom';

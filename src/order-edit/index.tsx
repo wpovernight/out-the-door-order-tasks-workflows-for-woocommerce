@@ -1,11 +1,11 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { MetaBox } from './components/Metabox';
-import { SidebarModalProvider } from '@shared/context/SidebarModalContext';
-import { DialogProvider } from '@shared/context/DialogContext';
-import { ToastProvider } from '@shared/context/ToastContext';
-import { TaskProvider } from '@shared/context/TaskContext';
-import { StatusRoleProvider } from '@shared/context/StatusRoleContext';
+import { SidebarModalProvider } from '@sdk/context/SidebarModalContext';
+import { DialogProvider } from '@sdk/context/DialogContext';
+import { ToastProvider } from '@sdk/context/ToastContext';
+import { TaskProvider } from '@sdk/context/TaskContext';
+import { StatusRoleProvider } from '@sdk/context/StatusRoleContext';
 import { OrderTaskProvider } from './context/OrderTaskContext';
 import { OrderWooFulfillmentProvider } from './context/OrderWooFulfillmentContext';
 

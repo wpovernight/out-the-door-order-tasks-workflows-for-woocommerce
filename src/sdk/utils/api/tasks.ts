@@ -1,4 +1,4 @@
-import { Task } from '@shared/types/task';
+import { Task } from '@sdk/types/task';
 import {
 	getApiRoot,
 	getApiNamespace,

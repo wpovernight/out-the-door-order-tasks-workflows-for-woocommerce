@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
-import { useOnClickOutside } from '@shared/hooks/useOnClickOutside';
+import { useOnClickOutside } from '@sdk/hooks/useOnClickOutside';
 
 interface Option {
 	id: number;

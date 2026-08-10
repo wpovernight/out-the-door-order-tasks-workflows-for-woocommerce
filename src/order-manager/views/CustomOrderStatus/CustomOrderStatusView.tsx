@@ -4,9 +4,9 @@ import {
 	ErrorState,
 	EmptyState,
 	SkeletonLine,
-} from '@shared/components/LoadingSkeleton';
+} from '@sdk/components/LoadingSkeleton';
 import { StatusTable } from './components/StatusTable';
-import { useConfirm } from '@shared/context/DialogContext';
+import { useConfirm } from '@sdk/context/DialogContext';
 import {
 	useCustomOrderStatuses,
 	CustomOrderStatusInput,

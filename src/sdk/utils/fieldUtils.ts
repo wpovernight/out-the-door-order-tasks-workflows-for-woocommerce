@@ -1,4 +1,4 @@
-import { FieldResolved, Task } from '@shared/types/task';
+import { FieldResolved, Task } from '@sdk/types/task';
 
 export const getFieldBySlug = (task: Task, slug: string) => {
 	return task.fields?.find((field) => field.slug === slug);

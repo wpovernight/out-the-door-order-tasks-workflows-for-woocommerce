@@ -1,8 +1,8 @@
 import React, { useRef, useState } from 'react';
 import { __ } from '@wordpress/i18n';
 import { AVAILABLE_VIEWS, useView } from '../context/ViewContext';
-import { useTaskCreation } from '@shared/hooks/useTaskFormModal';
-import { useOnClickOutside } from '@shared/hooks/useOnClickOutside';
+import { useTaskCreation } from '@sdk/hooks/useTaskFormModal';
+import { useOnClickOutside } from '@sdk/hooks/useOnClickOutside';
 
 const viewLabels: Record<string, string> = {
 	kanban: __('Board', 'advanced-order-manager'),

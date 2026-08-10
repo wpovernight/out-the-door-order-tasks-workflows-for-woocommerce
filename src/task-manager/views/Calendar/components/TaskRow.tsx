@@ -1,18 +1,18 @@
 import React from 'react';
-import { Task, isFieldOption } from '@shared/types/task';
+import { Task, isFieldOption } from '@sdk/types/task';
 import {
 	getFieldValue,
 	getTaskDateField,
 	getFieldObjectValue,
-} from '@shared/utils/fieldUtils';
+} from '@sdk/utils/fieldUtils';
 import { formatDate } from '../utils';
-import { getColorStyle } from '@shared/utils/colorUtils';
+import { getColorStyle } from '@sdk/utils/colorUtils';
 import { __ } from '@wordpress/i18n';
-import { truncateText } from '@shared/utils/textUtils';
-import { useTasks } from '@shared/context/TaskContext';
-import { useTaskEdit } from '@shared/hooks/useTaskFormModal';
-import { TaskActionMenu } from '@shared/components/TaskActionMenu';
-import { useConfirm } from '@shared/context/DialogContext';
+import { truncateText } from '@sdk/utils/textUtils';
+import { useTasks } from '@sdk/context/TaskContext';
+import { useTaskEdit } from '@sdk/hooks/useTaskFormModal';
+import { TaskActionMenu } from '@sdk/components/TaskActionMenu';
+import { useConfirm } from '@sdk/context/DialogContext';
 
 interface TaskRowProps {
 	task: Task;

@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react';
-import { Task } from '@shared/types/task';
+import { Task } from '@sdk/types/task';
 import {
 	getTaskDateField,
 	getFieldObjectValue,
 	getFieldRawValues,
 	getFieldValue,
-} from '@shared/utils/fieldUtils';
+} from '@sdk/utils/fieldUtils';
 
 export type SortColumn =
 	| 'title'

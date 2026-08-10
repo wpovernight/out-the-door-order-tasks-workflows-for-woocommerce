@@ -3,7 +3,7 @@ import {
 	LoadingSkeleton,
 	SkeletonBox,
 	SkeletonLine,
-} from '@shared/components/LoadingSkeleton';
+} from '@sdk/components/LoadingSkeleton';
 
 interface CalendarSkeletonProps {
 	className?: string;

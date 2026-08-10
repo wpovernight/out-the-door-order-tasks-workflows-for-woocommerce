@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
 import { __ } from '@wordpress/i18n';
-import { useTasks } from '@shared/context/TaskContext';
+import { useTasks } from '@sdk/context/TaskContext';
 import { Board } from './components/Board';
 import { ViewTaskProvider } from './context/ViewTaskContext';
-import { useAsyncLoader } from '@shared/hooks/useAsyncLoader';
+import { useAsyncLoader } from '@sdk/hooks/useAsyncLoader';
 import { BoardSkeleton } from '@taskManager/views/Kanban/components/BoardSkeleton';
 
 export const KanbanView: React.FC = () => {

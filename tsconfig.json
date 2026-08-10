@@ -2,7 +2,7 @@
 	"compilerOptions": {
 		"baseUrl": "./src",
 		"paths": {
-			"@shared/*": ["shared/*"],
+			"@sdk/*": ["sdk/*"],
 			"@orderManager/*": ["order-manager/*"],
 			"@taskManager/*": ["task-manager/*"],
 			"@orderEdit/*": ["order-edit/*"]

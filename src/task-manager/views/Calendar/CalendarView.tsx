@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
 import { __ } from '@wordpress/i18n';
-import { useTasks } from '@shared/context/TaskContext';
+import { useTasks } from '@sdk/context/TaskContext';
 import { ViewTaskProvider } from './context/ViewTaskContext';
 import { CalendarContent } from './components/CalendarContent';
-import { useAsyncLoader } from '@shared/hooks/useAsyncLoader';
+import { useAsyncLoader } from '@sdk/hooks/useAsyncLoader';
 import { CalendarSkeleton } from '@taskManager/views/Calendar/components/CalendarSkeleton';
 
 export const CalendarView: React.FC = () => {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { __ } from '@wordpress/i18n';
-import { CustomOrderStatus } from '@shared/types/customOrderStatus';
+import { CustomOrderStatus } from '@sdk/types/customOrderStatus';
 import { StatusForm } from './StatusForm';
 
 interface StatusTableProps {

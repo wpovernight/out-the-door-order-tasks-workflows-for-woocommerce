@@ -1,5 +1,5 @@
 import { __ } from '@wordpress/i18n';
-import { WooFulfillmentMetaData } from '@shared/types/wooFulfillment';
+import { WooFulfillmentMetaData } from '@sdk/types/wooFulfillment';
 
 export const getShippingMethodLabel = (
 	fulfillmentMeta: WooFulfillmentMetaData

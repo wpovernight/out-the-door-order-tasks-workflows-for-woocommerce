@@ -12,7 +12,7 @@ import {
 	type Edge,
 } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
 
-import { FieldOption, Task } from '@shared/types/task';
+import { FieldOption, Task } from '@sdk/types/task';
 import {
 	getColumnData,
 	getColumnDropTargetData,
@@ -21,13 +21,13 @@ import {
 } from '../data';
 import { Card } from './Card';
 import { __ } from '@wordpress/i18n';
-import { useTasks } from '@shared/context/TaskContext';
-import { useConfirm } from '@shared/context/DialogContext';
-import { ToastType, useToast } from '@shared/context/ToastContext';
-import { useOnClickOutside } from '@shared/hooks/useOnClickOutside';
-import { useStatusRoles } from '@shared/context/StatusRoleContext';
+import { useTasks } from '@sdk/context/TaskContext';
+import { useConfirm } from '@sdk/context/DialogContext';
+import { ToastType, useToast } from '@sdk/context/ToastContext';
+import { useOnClickOutside } from '@sdk/hooks/useOnClickOutside';
+import { useStatusRoles } from '@sdk/context/StatusRoleContext';
 import { DeleteColumnDialog } from './DeleteColumnDialog';
-import { useTaskCreation } from '@shared/hooks/useTaskFormModal';
+import { useTaskCreation } from '@sdk/hooks/useTaskFormModal';
 
 interface ColumnProps {
 	column: FieldOption;

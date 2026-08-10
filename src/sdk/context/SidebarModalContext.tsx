@@ -5,7 +5,7 @@ import React, {
 	useRef,
 	useState,
 } from 'react';
-import { SidebarModal } from '@shared/components/SidebarModal';
+import { SidebarModal } from '@sdk/components/SidebarModal';
 
 type OpenOptions = {
 	title?: string;

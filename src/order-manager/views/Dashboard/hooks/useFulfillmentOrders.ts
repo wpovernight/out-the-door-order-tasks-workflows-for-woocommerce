@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
-import { fetchFulfillmentOrders, PaginationMeta } from '@shared/utils/api';
-import { useAsyncLoader } from '@shared/hooks/useAsyncLoader';
-import { FulfillmentOrder } from '@shared/types/fulfillment';
+import { fetchFulfillmentOrders, PaginationMeta } from '@sdk/utils/api';
+import { useAsyncLoader } from '@sdk/hooks/useAsyncLoader';
+import { FulfillmentOrder } from '@sdk/types/fulfillment';
 
 export interface UseFulfillmentOrdersResult {
 	orders: FulfillmentOrder[];

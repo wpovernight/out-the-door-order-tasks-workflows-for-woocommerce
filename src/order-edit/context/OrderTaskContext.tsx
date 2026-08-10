@@ -5,12 +5,12 @@ import React, {
 	useCallback,
 	useRef,
 } from 'react';
-import { useTasks } from '@shared/context/TaskContext';
-import { getFieldRawValues, isTaskArchived } from '@shared/utils/fieldUtils';
-import { Task } from '@shared/types/task';
-import { AsyncLoaderStatus } from '@shared/hooks/useAsyncLoader';
+import { useTasks } from '@sdk/context/TaskContext';
+import { getFieldRawValues, isTaskArchived } from '@sdk/utils/fieldUtils';
+import { Task } from '@sdk/types/task';
+import { AsyncLoaderStatus } from '@sdk/hooks/useAsyncLoader';
 import { __ } from '@wordpress/i18n';
-import { useStatusRoles } from '@shared/context/StatusRoleContext';
+import { useStatusRoles } from '@sdk/context/StatusRoleContext';
 
 // Type for creating/updating tasks via API
 export type TaskPayload = Partial<Task> & {

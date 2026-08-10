@@ -2,7 +2,7 @@ import React from 'react';
 import {
 	LoadingSkeleton,
 	SkeletonBox,
-} from '@shared/components/LoadingSkeleton';
+} from '@sdk/components/LoadingSkeleton';
 
 interface BoardSkeletonProps {
 	count?: number;

@@ -5,7 +5,7 @@ import React, {
 	useRef,
 	useState,
 } from 'react';
-import { Dialog, DialogAction, DialogVariant } from '@shared/components/Dialog';
+import { Dialog, DialogAction, DialogVariant } from '@sdk/components/Dialog';
 
 export interface DialogOptions {
 	title: string;

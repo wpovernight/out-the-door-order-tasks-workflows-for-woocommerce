@@ -1,9 +1,9 @@
 import React from 'react';
 import { __ } from '@wordpress/i18n';
-import { Task } from '@shared/types/task';
+import { Task } from '@sdk/types/task';
 import TaskRow from './TaskRow';
-import { useTaskSort } from '@shared/hooks/useTaskSort';
-import SortIcon from '@shared/components/SortIcon';
+import { useTaskSort } from '@sdk/hooks/useTaskSort';
+import SortIcon from '@sdk/components/SortIcon';
 
 interface TaskDayGroupProps {
 	date: Date | null;

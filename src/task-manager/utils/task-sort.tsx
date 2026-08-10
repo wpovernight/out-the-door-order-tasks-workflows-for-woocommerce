@@ -1,4 +1,4 @@
-import { FieldOption, Task } from '@shared/types/task';
+import { FieldOption, Task } from '@sdk/types/task';
 
 export function groupAndSortTasks(
 	tasks: Task[],

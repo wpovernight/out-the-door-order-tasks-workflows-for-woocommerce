@@ -1,4 +1,4 @@
-import { TaskField } from '@shared/types/task';
+import { TaskField } from '@sdk/types/task';
 import {
 	getApiRoot,
 	getApiNamespace,

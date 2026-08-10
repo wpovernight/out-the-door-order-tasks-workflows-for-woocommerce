@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useState, useCallback } from 'react';
-import { Task } from '@shared/types/task';
-import { useTasks } from '@shared/context/TaskContext';
+import { Task } from '@sdk/types/task';
+import { useTasks } from '@sdk/context/TaskContext';
 import { groupAndSortTasks } from '../../../utils/task-sort';
-import { isTaskArchived } from '@shared/utils/fieldUtils';
+import { isTaskArchived } from '@sdk/utils/fieldUtils';
 import { useView } from '@taskManager/context/ViewContext';
-import { useStatusRoles } from '@shared/context/StatusRoleContext';
+import { useStatusRoles } from '@sdk/context/StatusRoleContext';
 
 interface ViewTaskContextType {
 	viewTasks: Record<string, Task[]>;

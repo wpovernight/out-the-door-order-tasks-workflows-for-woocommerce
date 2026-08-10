@@ -1,4 +1,4 @@
-import { StatusRoles } from '@shared/types/task';
+import { StatusRoles } from '@sdk/types/task';
 
 /**
  * Empty fallback returned when no bootstrap data is present (e.g. in dev or

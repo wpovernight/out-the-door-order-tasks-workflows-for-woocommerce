@@ -1,14 +1,14 @@
 import React, { useMemo, useState } from 'react';
 import { __ } from '@wordpress/i18n';
-import { useTasks } from '@shared/context/TaskContext';
-import { TaskCard } from '@shared/components/TaskCard';
-import { useTaskCreation, useTaskEdit } from '@shared/hooks/useTaskFormModal';
-import { useScrollable } from '@shared/hooks/useScrollable';
-import { getTaskDateField, isTaskArchived } from '@shared/utils/fieldUtils';
-import { Task } from '@shared/types/task';
-import { EmptyState } from '@shared/components/LoadingSkeleton';
-import { useConfirm } from '@shared/context/DialogContext';
-import { useStatusRoles } from '@shared/context/StatusRoleContext';
+import { useTasks } from '@sdk/context/TaskContext';
+import { TaskCard } from '@sdk/components/TaskCard';
+import { useTaskCreation, useTaskEdit } from '@sdk/hooks/useTaskFormModal';
+import { useScrollable } from '@sdk/hooks/useScrollable';
+import { getTaskDateField, isTaskArchived } from '@sdk/utils/fieldUtils';
+import { Task } from '@sdk/types/task';
+import { EmptyState } from '@sdk/components/LoadingSkeleton';
+import { useConfirm } from '@sdk/context/DialogContext';
+import { useStatusRoles } from '@sdk/context/StatusRoleContext';
 
 export const TodayTasks = () => {
 	const { tasks, deleteTask } = useTasks();

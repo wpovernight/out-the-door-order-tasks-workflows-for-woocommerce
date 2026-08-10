@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useState } from 'react';
-import { StatusRoles } from '@shared/types/task';
-import { getInitialStatusRoles } from '@shared/hooks/getInitialStatusRoles';
-import { updateStatusRoles as updateStatusRolesAPI } from '@shared/utils/api';
+import { StatusRoles } from '@sdk/types/task';
+import { getInitialStatusRoles } from '@sdk/hooks/getInitialStatusRoles';
+import { updateStatusRoles as updateStatusRolesAPI } from '@sdk/utils/api';
 
 interface StatusRoleContextType {
 	statusRoles: StatusRoles;

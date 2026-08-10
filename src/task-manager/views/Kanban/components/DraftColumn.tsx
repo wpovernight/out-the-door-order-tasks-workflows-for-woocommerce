@@ -1,8 +1,8 @@
 import React, { useRef } from 'react';
 import { __ } from '@wordpress/i18n';
 
-import { useTasks } from '@shared/context/TaskContext';
-import { ToastType, useToast } from '@shared/context/ToastContext';
+import { useTasks } from '@sdk/context/TaskContext';
+import { ToastType, useToast } from '@sdk/context/ToastContext';
 
 interface DraftColumnProps {
 	fieldId: number;

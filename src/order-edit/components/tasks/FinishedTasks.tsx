@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { __ } from '@wordpress/i18n';
-import { TaskCard } from '@shared/components/TaskCard';
+import { TaskCard } from '@sdk/components/TaskCard';
 import { useOrderTask } from '@orderEdit/context/OrderTaskContext';
-import { useTaskEdit } from '@shared/hooks/useTaskFormModal';
-import { useConfirm, useNotice } from '@shared/context/DialogContext';
+import { useTaskEdit } from '@sdk/hooks/useTaskFormModal';
+import { useConfirm, useNotice } from '@sdk/context/DialogContext';
 
 const FinishedTasks: React.FC = () => {
 	const { finishedTasks, finishedCount, deleteTask, loadingStatus } =

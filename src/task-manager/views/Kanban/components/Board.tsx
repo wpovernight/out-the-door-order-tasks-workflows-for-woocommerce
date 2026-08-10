@@ -5,7 +5,7 @@ import { monitorForElements } from '@atlaskit/pragmatic-drag-and-drop/element/ad
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
 import { autoScrollForElements } from '@atlaskit/pragmatic-drag-and-drop-auto-scroll/element';
 import { extractClosestEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
-import { useTasks } from '@shared/context/TaskContext';
+import { useTasks } from '@sdk/context/TaskContext';
 import {
 	isCardData,
 	isColumnData,

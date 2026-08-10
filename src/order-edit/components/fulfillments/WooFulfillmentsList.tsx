@@ -3,8 +3,8 @@ import { __ } from '@wordpress/i18n';
 import { useOrderWooFulfillment } from '@orderEdit/context/OrderWooFulfillmentContext';
 import { WooFulfillmentCard } from './WooFulfillmentCard';
 import { WooFulfillmentCardSkeleton } from './WooFulfillmentCardSkeleton';
-import { EmptyState, ErrorState } from '@shared/components/LoadingSkeleton';
-import { AsyncLoaderStatus } from '@shared/hooks/useAsyncLoader';
+import { EmptyState, ErrorState } from '@sdk/components/LoadingSkeleton';
+import { AsyncLoaderStatus } from '@sdk/hooks/useAsyncLoader';
 
 interface WooFulfillmentsListProps {
 	loadingStatus: AsyncLoaderStatus;

@@ -1,7 +1,7 @@
 import React, { useContext, useState, useMemo } from 'react';
-import { Task } from '@shared/types/task';
-import { useTasks } from '@shared/context/TaskContext';
-import { getTaskDateField, isTaskArchived } from '@shared/utils/fieldUtils';
+import { Task } from '@sdk/types/task';
+import { useTasks } from '@sdk/context/TaskContext';
+import { getTaskDateField, isTaskArchived } from '@sdk/utils/fieldUtils';
 import { getDateRangeFromPreset, DateRange, DateRangePreset } from '../utils';
 import { useView } from '@taskManager/context/ViewContext';
 

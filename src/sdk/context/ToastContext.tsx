@@ -5,7 +5,7 @@ import React, {
 	useRef,
 	useState,
 } from 'react';
-import { Toast } from '@shared/components/Toast';
+import { Toast } from '@sdk/components/Toast';
 
 export enum ToastType {
 	SUCCESS = 'success',

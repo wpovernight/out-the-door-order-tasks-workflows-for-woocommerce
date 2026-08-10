@@ -1,4 +1,4 @@
-import { CustomOrderStatus } from '@shared/types/customOrderStatus';
+import { CustomOrderStatus } from '@sdk/types/customOrderStatus';
 import {
 	getApiRoot,
 	getApiNamespace,

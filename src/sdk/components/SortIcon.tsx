@@ -1,5 +1,5 @@
 import React from 'react';
-import { SortColumn, SortDirection } from '@shared/hooks/useTaskSort';
+import { SortColumn, SortDirection } from '@sdk/hooks/useTaskSort';
 
 interface SortIconProps {
 	column: SortColumn;

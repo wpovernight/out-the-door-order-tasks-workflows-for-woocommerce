@@ -1,4 +1,4 @@
-import { StatusRoles } from '@shared/types/task';
+import { StatusRoles } from '@sdk/types/task';
 import {
 	getApiRoot,
 	getApiNamespace,

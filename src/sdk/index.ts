@@ -1,15 +1,15 @@
 /**
- * Public API of the shared runtime.
+ * Public API of the SDK runtime.
  *
- * This barrel is compiled to `assets/js/shared.js` and exposed on the page as
- * `window.wpo.aom.shared`. Both the core bundles and add-on plugins (Pro) link
+ * This barrel is compiled to `assets/js/sdk.js` and exposed on the page as
+ * `window.wpo.aom.sdk`. Both the core bundles and add-on plugins (Pro) link
  * against that single global instead of bundling their own copy.
  *
  * Anything exported here is a public contract, removing or renaming an export
  * is a breaking change for add-ons and needs a core version bump.
  *
  * Keep the exports named: `export *` does not forward default exports, and the
- * webpack external maps every `@shared/*` request onto this one flat namespace.
+ * webpack external maps every `@sdk/*` request onto this one flat namespace.
  */
 
 // Components.

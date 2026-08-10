@@ -1,4 +1,4 @@
-import { Task, FieldResolved } from '@shared/types/task';
+import { Task, FieldResolved } from '@sdk/types/task';
 
 export const getMonthData = (date: Date) => {
 	const year = date.getFullYear();

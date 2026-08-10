@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { FieldOption } from '@shared/types/task';
-import { useOnClickOutside } from '@shared/hooks/useOnClickOutside';
-import { getColorStyle } from '@shared/utils/colorUtils';
+import { FieldOption } from '@sdk/types/task';
+import { useOnClickOutside } from '@sdk/hooks/useOnClickOutside';
+import { getColorStyle } from '@sdk/utils/colorUtils';
 
 interface DropdownProps {
 	placeholder: string;

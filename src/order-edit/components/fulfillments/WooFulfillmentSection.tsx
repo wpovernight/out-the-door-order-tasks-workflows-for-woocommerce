@@ -1,7 +1,7 @@
 import React from 'react';
 import Header from '@orderEdit/components/fulfillments/Header';
 import WooFulfillmentsList from '@orderEdit/components/fulfillments/WooFulfillmentsList';
-import { useAsyncLoader } from '@shared/hooks/useAsyncLoader';
+import { useAsyncLoader } from '@sdk/hooks/useAsyncLoader';
 import { useOrderWooFulfillment } from '@orderEdit/context/OrderWooFulfillmentContext';
 
 const WooFulfillmentSection: React.FC = () => {

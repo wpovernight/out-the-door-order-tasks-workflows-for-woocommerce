@@ -7,10 +7,10 @@ import React, {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { __ } from '@wordpress/i18n';
-import { Task } from '@shared/types/task';
-import { useTasks } from '@shared/context/TaskContext';
-import { useConfirm } from '@shared/context/DialogContext';
-import { useStatusRoles } from '@shared/context/StatusRoleContext';
+import { Task } from '@sdk/types/task';
+import { useTasks } from '@sdk/context/TaskContext';
+import { useConfirm } from '@sdk/context/DialogContext';
+import { useStatusRoles } from '@sdk/context/StatusRoleContext';
 import { createInterpolateElement } from '@wordpress/element';
 
 interface TaskActionMenuProps {

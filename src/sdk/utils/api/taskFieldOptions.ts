@@ -1,4 +1,4 @@
-import { FieldOption } from '@shared/types/task';
+import { FieldOption } from '@sdk/types/task';
 import {
 	getApiRoot,
 	getApiNamespace,

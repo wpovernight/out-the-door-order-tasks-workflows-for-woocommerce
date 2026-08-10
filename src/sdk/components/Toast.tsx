@@ -1,6 +1,6 @@
 import React from 'react';
 import { __ } from '@wordpress/i18n';
-import { ToastType } from '@shared/context/ToastContext';
+import { ToastType } from '@sdk/context/ToastContext';
 
 interface ToastProps {
 	title: string;

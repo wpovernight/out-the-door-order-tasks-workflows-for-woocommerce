@@ -5,13 +5,13 @@ import {
 	createCustomOrderStatus,
 	updateCustomOrderStatus,
 	deleteCustomOrderStatus,
-} from '@shared/utils/api';
-import { CustomOrderStatus } from '@shared/types/customOrderStatus';
+} from '@sdk/utils/api';
+import { CustomOrderStatus } from '@sdk/types/customOrderStatus';
 import {
 	useAsyncLoader,
 	AsyncLoaderStatus,
-} from '@shared/hooks/useAsyncLoader';
-import { useToast, ToastType } from '@shared/context/ToastContext';
+} from '@sdk/hooks/useAsyncLoader';
+import { useToast, ToastType } from '@sdk/context/ToastContext';
 
 /** Fields editable through the create/edit form. */
 export type CustomOrderStatusInput = Pick<

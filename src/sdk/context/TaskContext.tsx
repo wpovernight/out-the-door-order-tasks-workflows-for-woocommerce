@@ -5,7 +5,7 @@ import React, {
 	useCallback,
 	useRef,
 } from 'react';
-import { Task, FieldOption, TaskField } from '@shared/types/task';
+import { Task, FieldOption, TaskField } from '@sdk/types/task';
 import {
 	fetchTasks,
 	fetchTaskFields,
@@ -21,9 +21,9 @@ import {
 	updateFieldOption as updateFieldOptionAPI,
 	deleteFieldOption as deleteFieldOptionAPI,
 	reorderFieldOptions as reorderFieldOptionsAPI,
-} from '@shared/utils/api';
-import { updateTaskFields } from '@shared/utils/fieldUtils';
-import { useStatusRoles } from '@shared/context/StatusRoleContext';
+} from '@sdk/utils/api';
+import { updateTaskFields } from '@sdk/utils/fieldUtils';
+import { useStatusRoles } from '@sdk/context/StatusRoleContext';
 
 interface TaskContextType {
 	tasks: Task[];

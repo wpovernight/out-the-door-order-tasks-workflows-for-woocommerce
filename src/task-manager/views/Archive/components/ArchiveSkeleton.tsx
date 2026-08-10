@@ -1,5 +1,5 @@
 import React from 'react';
-import { SkeletonLine } from '@shared/components/LoadingSkeleton';
+import { SkeletonLine } from '@sdk/components/LoadingSkeleton';
 
 const ITEMS_PER_PAGE = 10;
 
