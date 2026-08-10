@@ -1,5 +1,7 @@
 const path = require('path');
 const TerserPlugin = require('terser-webpack-plugin');
+const SDK_DIR = path.resolve(__dirname, 'src/sdk');
+const ROUTER_SHIM = path.resolve(__dirname, 'src/sdk/vendor/router.ts');
 
 module.exports = (env, argv) => {
 	const mode = argv.mode || 'development';
@@ -8,6 +10,14 @@ module.exports = (env, argv) => {
 	return {
 		mode,
 		entry: {
+			sdk: {
+				import: path.resolve(__dirname, 'src/sdk/index.ts'),
+				library: { name: ['wpo', 'aom', 'sdk'], type: 'window' },
+			},
+			router: {
+				import: ROUTER_SHIM,
+				library: { name: ['wpo', 'aom', 'router'], type: 'window' },
+			},
 			'order-manager': path.resolve(__dirname, 'src/order-manager/index.tsx'),
 			'order-edit-metabox': path.resolve(__dirname, 'src/order-edit/index.tsx'),
 			// Non-React admin script
@@ -21,7 +31,7 @@ module.exports = (env, argv) => {
 		resolve: {
 			extensions: ['.ts', '.tsx', '.js'],
 			alias: {
-				'@shared': path.resolve(__dirname, 'src/shared/'),
+				'@sdk': path.resolve(__dirname, 'src/sdk/'),
 				'@orderManager': path.resolve(__dirname, 'src/order-manager/'),
 				'@taskManager': path.resolve(__dirname, 'src/task-manager/'),
 				'@orderEdit': path.resolve(__dirname, 'src/order-edit/'),
@@ -36,14 +46,34 @@ module.exports = (env, argv) => {
 				},
 			],
 		},
-		// Prevent bundling dependencies that are provided by WordPress.
-		externals: {
-			react: 'React',
-			'react-dom': 'ReactDOM',
-			'@wordpress/i18n': ['wp', 'i18n'],
-			'@wordpress/hooks': ['wp', 'hooks'],
-			'@wordpress/element': ['wp', 'element'],
-		},
+		// Prevent bundling dependencies that are provided by WordPress, plus our own
+		// SDK runtime (see the entries above).
+		externals: [
+			{
+				react: 'React',
+				'react-dom': 'ReactDOM',
+				'@wordpress/i18n': ['wp', 'i18n'],
+				'@wordpress/hooks': ['wp', 'hooks'],
+				'@wordpress/element': ['wp', 'element'],
+			},
+			({ context, request, contextInfo }, callback) => {
+				const issuer = contextInfo && contextInfo.issuer;
+
+				if (request === 'react-router-dom' && issuer !== ROUTER_SHIM) {
+					return callback(null, ['wpo', 'aom', 'router'], 'window');
+				}
+
+				if (
+					request &&
+					request.startsWith('@sdk') &&
+					!(context || '').startsWith(SDK_DIR)
+				) {
+					return callback(null, ['wpo', 'aom', 'sdk'], 'window');
+				}
+
+				return callback();
+			},
+		],
 		devtool: isProduction ? false : 'source-map',
 		optimization: {
 			minimize: isProduction,
