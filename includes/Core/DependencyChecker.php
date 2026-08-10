@@ -8,8 +8,6 @@ final class DependencyChecker {
 	private const PHP_MIN_VERSION = '8.1';
 	private const WC_MIN_VERSION  = '8.2';
 
-	private readonly array $activated_plugins;
-
 	protected static ?self $_instance = null;
 
 	/**
@@ -28,12 +26,7 @@ final class DependencyChecker {
 	/**
 	 * Constructor.
 	 */
-	private function __construct() {
-		$this->activated_plugins = array_merge(
-			(array) get_option( 'active_plugins', array() ),
-			(array) get_site_option( 'active_sitewide_plugins', array() )
-		);
-	}
+	private function __construct() {}
 
 	/**
 	 * Check if all dependencies are met.
@@ -84,18 +77,6 @@ final class DependencyChecker {
 	}
 
 	/**
-	 * Check if the plugin is active.
-	 *
-	 * @param string $plugin_slug
-	 *
-	 * @return bool
-	 */
-	private function is_active( string $plugin_slug ): bool {
-		return in_array( $plugin_slug, $this->activated_plugins, true ) ||
-		       array_key_exists( $plugin_slug, $this->activated_plugins );
-	}
-
-	/**
 	 * Check if the required PHP version is met.
 	 *
 	 * @return bool
@@ -110,7 +91,7 @@ final class DependencyChecker {
 	 * @return bool
 	 */
 	private function is_wc_activated(): bool {
-		return $this->is_active( 'woocommerce/woocommerce.php' );
+		return class_exists( 'WooCommerce' );
 	}
 
 	/**

@@ -235,7 +235,7 @@ final class Installer {
 			// Rows orphaned while the constraint was absent would reject it.
 			self::delete_orphans( $table, $column, $parent_table, $parent_column );
 
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Install-time schema change; every identifier is plugin-owned and table/column names cannot be bound as prepared-statement placeholders.
+			// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Install-time schema change; every identifier is plugin-owned and table/column names cannot be bound as prepared-statement placeholders.
 			$wpdb->query( "
 				ALTER TABLE `{$table}`
 				ADD CONSTRAINT `{$constraint}`
@@ -243,6 +243,7 @@ final class Installer {
 					REFERENCES `{$parent_table}` (`{$parent_column}`)
 					ON DELETE CASCADE
 			" );
+			// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 		}
 	}
 
@@ -322,12 +323,13 @@ final class Installer {
 	private static function delete_orphans( string $table, string $column, string $parent_table, string $parent_column ): void {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Install-time cleanup; every identifier is plugin-owned and cannot be bound as a prepared-statement placeholder.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Install-time cleanup; every identifier is plugin-owned and cannot be bound as a prepared-statement placeholder.
 		$wpdb->query(
 			"DELETE child FROM `{$table}` AS child
 			LEFT JOIN `{$parent_table}` AS parent ON child.`{$column}` = parent.`{$parent_column}`
 			WHERE parent.`{$parent_column}` IS NULL"
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 	}
 
 	/**

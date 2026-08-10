@@ -8,7 +8,7 @@
  * Author URI:           https://www.wpovernight.com
  * License:              GPLv3
  * License URI:          https://www.gnu.org/licenses/gpl-3.0.html
- * Version:              1.0.0-beta.2
+ * Version:              1.0.0
  * Requires at least:    6.7
  * Requires PHP:         8.1
  * WC requires at least: 8.2
@@ -47,6 +47,11 @@ WPO_AOM();
 register_activation_hook(
 	WPO_AOM_PLUGIN_FILE,
 	static function (): void {
+		// Never create tables for an environment the plugin cannot run in.
+		if ( ! \WPO\AOM\Core\DependencyChecker::instance()->check_dependencies() ) {
+			return;
+		}
+
 		$kernel = new \WPO\AOM\Core\Kernel( new \WPO\AOM\Core\Container\Container() );
 		$kernel->add_provider( new \WPO\AOM\Core\Providers\CoreServiceProvider() );
 		$kernel->register();
