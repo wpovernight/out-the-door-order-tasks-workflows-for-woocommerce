@@ -2,6 +2,7 @@
 
 namespace WPO\AOM\Admin\OrderManager;
 
+use WPO\AOM\Admin\Assets;
 use WPO\AOM\Services\TaskStatusRoleService;
 
 defined( 'ABSPATH' ) || exit;
@@ -44,11 +45,19 @@ final class Screen {
 			return;
 		}
 
+		Assets::register_runtime();
+		/**
+		 * Filters the script dependencies of the Order Manager app.
+		 *
+		 * @param string[] $deps Script handles the app depends on.
+		 */
+		$dependencies = apply_filters( 'wpo_aom_order_manager_script_deps', Assets::runtime_dependencies( true ) );
+
 		// Do not need the suffix, since it's a React app and we are using webpack to handle the minification.
 		wp_enqueue_script(
 			'wpo-aom-admin-order-manager',
 			WPO_AOM()->plugin_url() . '/assets/js/order-manager.js',
-			array( 'wp-hooks', 'wp-element', 'wp-components', 'wp-i18n' ),
+			$dependencies,
 			WPO_AOM_VERSION,
 			true
 		);

@@ -4,6 +4,7 @@ namespace WPO\AOM\Admin\OrderEdit;
 
 defined( 'ABSPATH' ) || exit;
 
+use WPO\AOM\Admin\Assets;
 use WPO\AOM\Enums\FulfillmentStatuses;
 use WPO\AOM\Models\Fulfillment;
 use WPO\AOM\Services\FulfillmentService;
@@ -143,11 +144,19 @@ final class Screen {
 
 		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
+		Assets::register_runtime();
+		/**
+		 * Filters the script dependencies of the order edit metabox app.
+		 *
+		 * @param string[] $deps Script handles the metabox depends on.
+		 */
+		$dependencies = apply_filters( 'wpo_aom_order_edit_metabox_script_deps', Assets::runtime_dependencies() );
+
 		// Do not need the suffix, since it's a React app and we are using webpack to handle the minification.
 		wp_enqueue_script(
 			'wpo-aom-order-edit-metabox',
 			WPO_AOM()->plugin_url() . '/assets/js/order-edit-metabox.js',
-			array( 'wp-hooks', 'wp-element', 'wp-components', 'wp-i18n' ),
+			$dependencies,
 			WPO_AOM_VERSION,
 			true
 		);
