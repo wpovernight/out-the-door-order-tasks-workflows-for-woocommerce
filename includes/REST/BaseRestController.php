@@ -4,6 +4,7 @@ namespace WPO\AOM\REST;
 
 use WP_REST_Request;
 use WP_REST_Response;
+use WPO\AOM\Utilities\Paginator;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -28,6 +29,87 @@ abstract class BaseRestController {
 		}
 
 		return rest_ensure_response( $payload );
+	}
+
+	/**
+	 * Build the REST `meta` block from a Paginator.
+	 *
+	 * @param Paginator $paginator
+	 *
+	 * @return array<string,int|null>
+	 */
+	protected function pagination_meta( Paginator $paginator ): array {
+		return array(
+			'current_page' => $paginator->current_page(),
+			'per_page'     => $paginator->per_page(),
+			'last_page'    => $paginator->last_page(),
+			'total'        => $paginator->total(),
+			'from'         => $paginator->from(),
+			'to'           => $paginator->to(),
+		);
+	}
+
+	/**
+	 * Respond with a page of already-formatted data, attaching pagination meta
+	 * only when pagination was actually requested (i.e. $pagination is not null).
+	 *
+	 * @param array<int,mixed>         $data       Formatted items for the current page.
+	 * @param Paginator                $paginator  Source of the meta block.
+	 * @param array{page:int,per_page:int}|null $pagination Result of pagination_params(): null = full list, no meta.
+	 *
+	 * @return WP_REST_Response
+	 */
+	protected function respond_paginated( array $data, Paginator $paginator, ?array $pagination ): WP_REST_Response {
+		return $this->respond(
+			array_values( $data ),
+			null === $pagination ? null : $this->pagination_meta( $paginator )
+		);
+	}
+
+	/**
+	 * Read pagination params from the request.
+	 *
+	 * @param WP_REST_Request $request
+	 * @param int             $default_per_page
+	 *
+	 * @return array{page:int,per_page:int}|null
+	 */
+	protected function pagination_params( WP_REST_Request $request, int $default_per_page = 10 ): ?array {
+		$page     = $request->get_param( 'page' );
+		$per_page = $request->get_param( 'per_page' );
+
+		if ( null === $page && null === $per_page ) {
+			return null;
+		}
+
+		return array(
+			'page'     => max( 1, (int) $page ),
+			'per_page' => min( 100, max( 1, (int) $per_page ?: $default_per_page ) ),
+		);
+	}
+
+	/**
+	 * Standard `page` / `per_page` route args for opt-in pagination.
+	 *
+	 * NOTE: No defaults are set, so an absent param signals "return the full list".
+	 *
+	 * @return array<string,array<string,mixed>>
+	 */
+	protected function pagination_args(): array {
+		return array(
+			'page'     => array(
+				'type'              => 'integer',
+				'sanitize_callback' => 'absint',
+				'validate_callback' => static fn( $value ) => (int) $value >= 1,
+			),
+			'per_page' => array(
+				'type'              => 'integer',
+				'sanitize_callback' => 'absint',
+				// Only enforce the lower bound here; the upper bound is clamped
+				// to 100 in pagination_params() rather than rejected.
+				'validate_callback' => static fn( $value ) => (int) $value >= 1,
+			),
+		);
 	}
 
 	/**

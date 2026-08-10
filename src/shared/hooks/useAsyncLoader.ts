@@ -10,11 +10,17 @@ interface UseAsyncLoaderResult {
 /**
  * Generic async loader hook that handles loading/error state
  * for any async function.
+ *
+ * The callback receives an `isActive()` probe: when the loader re-runs (deps
+ * changed) or unmounts, it returns false. Callbacks that set their own state
+ * from the resolved value should check it first, so a superseded response
+ * doesn't overwrite newer state.
+ *
  * @param asyncFunction
  * @param dependencies
  */
 export function useAsyncLoader(
-	asyncFunction: () => Promise<void>,
+	asyncFunction: ( isActive: () => boolean ) => Promise<void>,
 	dependencies: React.DependencyList = []
 ): UseAsyncLoaderResult {
 	const [status, setStatus] = useState<AsyncLoaderStatus>('idle');
@@ -26,7 +32,7 @@ export function useAsyncLoader(
 		(async () => {
 			setStatus('loading');
 			try {
-				await asyncFunction();
+				await asyncFunction(() => isActive);
 				if (isActive) {
 					setStatus('loaded');
 				}

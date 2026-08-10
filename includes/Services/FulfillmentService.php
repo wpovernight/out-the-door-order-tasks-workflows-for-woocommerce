@@ -5,6 +5,7 @@ namespace WPO\AOM\Services;
 use WPO\AOM\Core\Logger;
 use WPO\AOM\Enums\FulfillmentStatuses;
 use WPO\AOM\Models\Fulfillment;
+use WPO\AOM\Utilities\Paginator;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -240,7 +241,7 @@ final class FulfillmentService {
 	 * @return int Number of orders cleared.
 	 */
 	public function clear_all(): int {
-		$orders = $this->get_orders_by_fulfillment_status();
+		$orders = $this->get_orders_by_fulfillment_status()->items();
 		$count  = 0;
 
 		foreach ( $orders as $order ) {
@@ -260,18 +261,58 @@ final class FulfillmentService {
 	/**
 	 * Query orders by their cached fulfillment status.
 	 *
-	 * Pass an empty string to retrieve all orders that have any fulfillment data.
+	 * @param string   $status   One of FulfillmentStatuses constants, or empty for all.
+	 * @param array    $args     Additional wc_get_orders() arguments.
+	 * @param int|null $page     Page number (1-based), or null for the full list.
+	 * @param int|null $per_page Orders per page (required when $page is provided).
+	 *
+	 * @return Paginator
+	 */
+	public function get_orders_by_fulfillment_status(
+		string $status = '',
+		array $args = array(),
+		?int $page = null,
+		?int $per_page = null
+	): Paginator {
+		if ( ! empty( $status ) && ! FulfillmentStatuses::is_valid( $status ) ) {
+			return Paginator::full( array() );
+		}
+
+		$query_args = $this->build_status_query_args( $status, $args );
+
+		// No pagination requested: return the full list as a single page.
+		if ( null === $page ) {
+			return Paginator::full( wc_get_orders( $query_args ) );
+		}
+
+		$page     = max( 1, $page );
+		$per_page = max( 1, (int) $per_page );
+
+		$query_args = array_merge(
+			$query_args,
+			array(
+				'paginate' => true,
+				'limit'    => $per_page,
+				'paged'    => $page,
+				'orderby'  => 'date',
+				'order'    => 'DESC',
+			)
+		);
+
+		$result = wc_get_orders( $query_args );
+
+		return new Paginator( $result->orders, (int) $result->total, $per_page, $page );
+	}
+
+	/**
+	 * Build the shared wc_get_orders() arguments for fulfillment-status queries.
 	 *
 	 * @param string $status One of FulfillmentStatuses constants, or empty for all.
 	 * @param array  $args   Additional wc_get_orders() arguments.
 	 *
-	 * @return \WC_Abstract_Order[]
+	 * @return array<string,mixed>
 	 */
-	public function get_orders_by_fulfillment_status( string $status = '', array $args = array() ): array {
-		if ( ! empty( $status ) && ! FulfillmentStatuses::is_valid( $status ) ) {
-			return array();
-		}
-
+	private function build_status_query_args( string $status, array $args ): array {
 		/**
 		 * Filter the number of days to look back when querying orders by fulfillment status.
 		 *
@@ -279,7 +320,6 @@ final class FulfillmentService {
 		 */
 		$days = (int) apply_filters( 'wpo_aom_fulfillment_status_query_days', 0 );
 
-		// ToDo: Needs updates. Maybe ORDERBY and filters for it?
 		$defaults = array(
 			'meta_key' => self::ORDER_FULFILLMENT_STATUS_META_KEY, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			'limit'    => -1,
@@ -302,8 +342,6 @@ final class FulfillmentService {
 		 * @param array  $query_args The merged query arguments.
 		 * @param string $status     The fulfillment status being queried (empty = all).
 		 */
-		$query_args = apply_filters( 'wpo_aom_fulfillment_status_query_args', wp_parse_args( $args, $defaults ), $status );
-
-		return wc_get_orders( $query_args );
+		return apply_filters( 'wpo_aom_fulfillment_status_query_args', wp_parse_args( $args, $defaults ), $status );
 	}
 }
