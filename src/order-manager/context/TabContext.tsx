@@ -6,15 +6,6 @@ export const CORE_TABS = ['dashboard', 'task-manager', 'custom-order-status'];
 
 type Tab = string;
 
-/**
- * The list of tabs to render, after add-on plugins (e.g. Pro) have had a
- * chance to extend it.
- *
- * @return {string[]} The (possibly extended) list of tab slugs.
- */
-export const getAvailableTabs = (): Tab[] =>
-	applyFilters('wpo_aom.tabs', CORE_TABS) as Tab[];
-
 interface TabContextType {
 	tab: Tab;
 	setTab: (tab: Tab) => void;
@@ -29,8 +20,7 @@ export const TabProvider: React.FC<{ children: React.ReactNode }> = ({
 	const navigate = useNavigate();
 	const location = useLocation();
 
-	// Resolved once per render so late-registered filters still take effect.
-	const tabs = useMemo<Tab[]>(() => getAvailableTabs(), []);
+	const tabs = applyFilters('wpo_aom.tabs', CORE_TABS) as Tab[];
 
 	// Extract tab from the first path segment (e.g., "/task-manager/kanban" -> "task-manager").
 	const tab = useMemo<Tab>(() => {
