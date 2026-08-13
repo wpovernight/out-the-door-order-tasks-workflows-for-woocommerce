@@ -6,7 +6,7 @@ Tested up to: 7.0
 Requires PHP: 8.1
 WC requires at least: 8.2
 WC tested up to: 10.0
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -42,6 +42,11 @@ To build the compiled assets from source:
 This regenerates the files in `assets/js/`. See the repository's readme for full development instructions.
 
 == Changelog ==
+
+= 1.1.0 =
+* Added pagination to the partial fulfillments widget.
+* Added pagination support across the REST API for large result sets.
+* Reworked the admin JavaScript into a shared SDK runtime.
 
 = 1.0.0 =
 * First stable release.
