@@ -3,7 +3,7 @@ import { __ } from '@wordpress/i18n';
 import { Task } from '@sdk/types/task';
 import TaskRow from './TaskRow';
 import { useTaskSort } from '@sdk/hooks/useTaskSort';
-import SortIcon from '@sdk/components/SortIcon';
+import { SortIcon } from '@sdk/components/SortIcon';
 
 interface TaskDayGroupProps {
 	date: Date | null;

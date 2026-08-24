@@ -7,7 +7,7 @@ interface SortIconProps {
 	sortDirection: SortDirection;
 }
 
-const SortIcon: React.FC<SortIconProps> = ({
+export const SortIcon: React.FC<SortIconProps> = ({
 	column,
 	sortColumn,
 	sortDirection,
@@ -21,5 +21,3 @@ const SortIcon: React.FC<SortIconProps> = ({
 		/>
 	);
 };
-
-export default SortIcon;

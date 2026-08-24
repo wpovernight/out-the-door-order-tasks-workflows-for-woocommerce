@@ -18,14 +18,15 @@ export * from './components/DatePicker';
 export * from './components/Dialog';
 export * from './components/FieldOptionDropdownField';
 export * from './components/LoadingSkeleton';
+export * from './components/Pager';
 export * from './components/SidebarModal';
+export * from './components/SortIcon';
 export * from './components/TaskActionMenu';
 export * from './components/TaskCard';
 export * from './components/TaskCardSkeleton';
 export * from './components/TaskForm';
 export * from './components/TaskFormSkeleton';
 export * from './components/Toast';
-export { default as SortIcon } from './components/SortIcon';
 
 // Context providers and their hooks.
 export * from './context/DialogContext';
