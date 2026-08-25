@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { __ } from '@wordpress/i18n';
 import { useTasks } from '@sdk/context/TaskContext';
 import { Board } from './components/Board';
+import { KanbanToolbar } from './components/KanbanToolbar';
 import { ViewTaskProvider } from './context/ViewTaskContext';
 import { useAsyncLoader } from '@sdk/hooks/useAsyncLoader';
 import { BoardSkeleton } from '@taskManager/views/Kanban/components/BoardSkeleton';
@@ -46,6 +47,7 @@ export const KanbanView: React.FC = () => {
 				{__('Task Board', 'advanced-order-manager')}
 			</h3>
 			<ViewTaskProvider>
+				<KanbanToolbar />
 				<Board />
 			</ViewTaskProvider>
 		</>

@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState, useCallback } from 'react';
+import { applyFilters } from '@wordpress/hooks';
 import { Task } from '@sdk/types/task';
 import { useTasks } from '@sdk/context/TaskContext';
 import { groupAndSortTasks } from '../../../utils/task-sort';
@@ -6,9 +7,13 @@ import { isTaskArchived } from '@sdk/utils/fieldUtils';
 import { useView } from '@taskManager/context/ViewContext';
 import { useStatusRoles } from '@sdk/context/StatusRoleContext';
 
+export type BoardControls = Record<string, unknown>;
+
 interface ViewTaskContextType {
 	viewTasks: Record<string, Task[]>;
 	setViewTasks: React.Dispatch<React.SetStateAction<Record<string, Task[]>>>;
+	boardControls: BoardControls;
+	setBoardControls: React.Dispatch<React.SetStateAction<BoardControls>>;
 	selectedTask: Task | null;
 	selectTask: (task: Task) => void;
 	clearSelectedTask: () => void;
@@ -31,6 +36,7 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 	} = useTasks();
 	const { searchQuery } = useView();
 	const [viewTasks, setViewTasks] = useState<Record<string, Task[]>>({});
+	const [boardControls, setBoardControls] = useState<BoardControls>({});
 	const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 	const { statusRoles } = useStatusRoles();
 
@@ -205,7 +211,11 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				(task.description ?? '').toLowerCase().includes(query)
 			);
 		});
-		const grouped = groupAndSortTasks(activeTasks, statuses);
+		const grouped = applyFilters(
+			'wpo_aom.kanban_view_tasks',
+			groupAndSortTasks(activeTasks, statuses),
+			{ tasks: activeTasks, statuses, controls: boardControls }
+		) as Record<string, Task[]>;
 
 		// Only update if the grouped tasks are actually different
 		// This prevents unnecessary rerenders when global tasks update
@@ -251,13 +261,15 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 
 			return hasChanges ? grouped : prev;
 		});
-	}, [tasks, fieldOptions, searchQuery]);
+	}, [tasks, fieldOptions, searchQuery, boardControls]);
 
 	return (
 		<ViewTaskContext.Provider
 			value={{
 				viewTasks,
 				setViewTasks,
+				boardControls,
+				setBoardControls,
 				selectedTask,
 				selectTask,
 				clearSelectedTask,
