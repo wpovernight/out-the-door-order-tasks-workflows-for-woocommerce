@@ -1,7 +1,5 @@
 import React, { useContext, useMemo } from 'react';
-import { Task } from '@sdk/types/task';
-import { useTasks } from '@sdk/context/TaskContext';
-import { isTaskArchived } from '@sdk/utils/fieldUtils';
+import { Task, useTasks, isTaskArchived } from '@sdk';
 import { useView } from '@taskManager/context/ViewContext';
 
 interface ViewTaskContextType {

@@ -1,12 +1,7 @@
 import React, { useState } from 'react';
 import { __ } from '@wordpress/i18n';
-import {
-	ErrorState,
-	EmptyState,
-	SkeletonLine,
-} from '@sdk/components/LoadingSkeleton';
+import { ErrorState, EmptyState, SkeletonLine, useConfirm } from '@sdk';
 import { StatusTable } from './components/StatusTable';
-import { useConfirm } from '@sdk/context/DialogContext';
 import {
 	useCustomOrderStatuses,
 	CustomOrderStatusInput,

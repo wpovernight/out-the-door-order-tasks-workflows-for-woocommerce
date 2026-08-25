@@ -1,15 +1,11 @@
 import React from 'react';
 import { __, sprintf } from '@wordpress/i18n';
-import {
-	WooFulfillment,
-	getWooFulfillmentMeta,
-} from '@sdk/types/wooFulfillment';
+import { WooFulfillment, getWooFulfillmentMeta, getColorStyle } from '@sdk';
 import {
 	getShippingMethodLabel,
 	getTrackingInfo,
 	formatDate,
 } from '@orderEdit/components/utils/wooFulfillmentUtils';
-import { getColorStyle } from '@sdk/utils/colorUtils';
 
 interface WooFulfillmentCardProps {
 	fulfillment: WooFulfillment;

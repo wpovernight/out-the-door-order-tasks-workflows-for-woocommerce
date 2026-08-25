@@ -1,8 +1,7 @@
 import React, { useMemo } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
-import { Task } from '@sdk/types/task';
+import { Task, getTaskDateField } from '@sdk';
 import TaskDayGroup from './TaskDayGroup';
-import { getTaskDateField } from '@sdk/utils/fieldUtils';
 import {
 	formatDate,
 	formatDateRange,

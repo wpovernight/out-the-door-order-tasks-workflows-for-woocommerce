@@ -3,10 +3,12 @@ import { createRoot } from 'react-dom/client';
 import { HashRouter } from 'react-router-dom';
 import { TabProvider } from '@orderManager/context/TabContext';
 import Page from '@orderManager/components/Page';
-import { TaskProvider } from '@sdk/context/TaskContext';
-import { StatusRoleProvider } from '@sdk/context/StatusRoleContext';
-import { DialogProvider } from '@sdk/context/DialogContext';
-import { ToastProvider } from '@sdk/context/ToastContext';
+import {
+	TaskProvider,
+	StatusRoleProvider,
+	DialogProvider,
+	ToastProvider,
+} from '@sdk';
 
 const container = document.getElementById('wpo-aom-order-manager');
 

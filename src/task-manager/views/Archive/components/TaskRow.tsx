@@ -1,16 +1,16 @@
 import React from 'react';
-import { Task } from '@sdk/types/task';
 import {
+	Task,
 	getFieldObjectValue,
 	getFieldRawValue,
 	getFieldValue,
 	getTaskDateField,
-} from '@sdk/utils/fieldUtils';
-import { useTasks } from '@sdk/context/TaskContext';
-import { truncateText } from '@sdk/utils/textUtils';
+	useTasks,
+	truncateText,
+	useConfirm,
+} from '@sdk';
 import { formatDate } from '@taskManager/views/Calendar/utils';
 import { __ } from '@wordpress/i18n';
-import { useConfirm } from '@sdk/context/DialogContext';
 
 interface TaskRowProps {
 	task: Task;

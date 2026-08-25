@@ -2,7 +2,7 @@
  * Global type declarations for the WPO AOM Order Edit metabox.
  */
 
-import type { StatusRoles } from '@sdk/types/task';
+import type { StatusRoles } from '@sdk';
 
 export interface WpoAomOrderEditMetaBoxData {
 	apiRoot: string;

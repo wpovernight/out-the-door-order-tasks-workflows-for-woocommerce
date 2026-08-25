@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { useTasks } from '@sdk/context/TaskContext';
+import { useTasks } from '@sdk';
 
 /**
  * Orchestration helpers for the column-deletion flow. The backend blocks the

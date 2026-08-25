@@ -4,11 +4,13 @@ import { TodayTasks } from '@orderManager/views/Dashboard/components/TodayTasks'
 import { PartialFulfillments } from '@orderManager/views/Dashboard/components/PartialFulfillments';
 import { FulfillmentOrderSkeleton } from '@orderManager/views/Dashboard/components/FulfillmentOrderSkeleton';
 import { useFulfillmentOrders } from '@orderManager/views/Dashboard/hooks/useFulfillmentOrders';
-import { useTasks } from '@sdk/context/TaskContext';
-import { useAsyncLoader } from '@sdk/hooks/useAsyncLoader';
-import { SidebarModalProvider } from '@sdk/context/SidebarModalContext';
-import { TaskCardSkeleton } from '@sdk/components/TaskCardSkeleton';
-import { ErrorState } from '@sdk/components/LoadingSkeleton';
+import {
+	useTasks,
+	useAsyncLoader,
+	SidebarModalProvider,
+	TaskCardSkeleton,
+	ErrorState,
+} from '@sdk';
 
 export const DashboardView = () => {
 	const { loadTasks, loadTaskFields, loadFieldOptions } = useTasks();

@@ -3,7 +3,7 @@ import { __ } from '@wordpress/i18n';
 import SectionHeader from '@orderEdit/components/common/SectionHeader';
 import { useOrderEditData } from '@orderEdit/hooks/useOrderEditData';
 import { useOrderTask } from '@orderEdit/context/OrderTaskContext';
-import { useTaskCreation } from '@sdk/hooks/useTaskFormModal';
+import { useTaskCreation } from '@sdk';
 
 const Header: React.FC = () => {
 	const { orderId } = useOrderEditData();

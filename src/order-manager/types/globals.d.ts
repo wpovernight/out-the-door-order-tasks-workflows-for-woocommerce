@@ -1,7 +1,7 @@
 /**
  * Global type declarations for the WPO AOM Order Manager.
  */
-import type { StatusRoles } from '@sdk/types/task';
+import type { StatusRoles } from '@sdk';
 
 export interface WpoAomOrderManagerData {
 	apiRoot: string;

@@ -2,9 +2,10 @@ import React, { useCallback, useContext, useState } from 'react';
 import {
 	WooFulfillment,
 	WooFulfillmentItem,
-} from '@sdk/types/wooFulfillment';
-import { fetchWooFulfillments, fetchOrder } from '@sdk/utils/api';
-import { AsyncLoaderStatus } from '@sdk/hooks/useAsyncLoader';
+	fetchWooFulfillments,
+	fetchOrder,
+	AsyncLoaderStatus,
+} from '@sdk';
 import { __ } from '@wordpress/i18n';
 
 interface Order {

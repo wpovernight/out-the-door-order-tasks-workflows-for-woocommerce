@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-	LoadingSkeleton,
-	SkeletonBox,
-	SkeletonLine,
-} from '@sdk/components/LoadingSkeleton';
+import { LoadingSkeleton, SkeletonBox, SkeletonLine } from '@sdk';
 
 interface CalendarSkeletonProps {
 	className?: string;

@@ -1,10 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
-import { FieldOption, StatusRoles, Task } from '@sdk/types/task';
+import {
+	FieldOption,
+	StatusRoles,
+	Task,
+	useConfirm,
+	useStatusRoles,
+	useTasks,
+} from '@sdk';
 import { useColumnDeletion } from '@taskManager/hooks/useColumnDeletion';
-import { useConfirm } from '@sdk/context/DialogContext';
-import { useStatusRoles } from '@sdk/context/StatusRoleContext';
-import { useTasks } from '@sdk/context/TaskContext';
 
 // ============================================================================
 // Helpers

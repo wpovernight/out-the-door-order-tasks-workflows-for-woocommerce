@@ -2,6 +2,12 @@
 	"compilerOptions": {
 		"baseUrl": "./src",
 		"paths": {
+			// Consumers outside src/sdk must import the flat '@sdk' specifier:
+			// that is the only shape webpack's external can resolve, so type
+			// checking it against the barrel is what keeps the two in step.
+			"@sdk": ["sdk/index.ts"],
+			// Deep paths stay mapped for SDK-internal imports, which are bundled
+			// normally rather than externalised.
 			"@sdk/*": ["sdk/*"],
 			"@orderManager/*": ["order-manager/*"],
 			"@taskManager/*": ["task-manager/*"],

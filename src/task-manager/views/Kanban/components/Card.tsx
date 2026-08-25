@@ -10,14 +10,10 @@ import {
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
 import invariant from 'tiny-invariant';
 
-import { Task } from '@sdk/types/task';
+import { Task, useTaskEdit, TaskCard, useTasks, useConfirm } from '@sdk';
 import { getCardData, getCardDropTargetData, isCardData } from '../data';
 import { useViewTasks } from '../context/ViewTaskContext';
-import { useTaskEdit } from '@sdk/hooks/useTaskFormModal';
 import { __ } from '@wordpress/i18n';
-import { TaskCard } from '@sdk/components/TaskCard';
-import { useTasks } from '@sdk/context/TaskContext';
-import { useConfirm } from '@sdk/context/DialogContext';
 
 type CardState =
 	| { type: 'idle' } // Indicates no drag interaction occurring

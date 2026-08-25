@@ -1,7 +1,10 @@
 import { useCallback, useState } from 'react';
-import { fetchFulfillmentOrders, PaginationMeta } from '@sdk/utils/api';
-import { useAsyncLoader } from '@sdk/hooks/useAsyncLoader';
-import { FulfillmentOrder } from '@sdk/types/fulfillment';
+import {
+	fetchFulfillmentOrders,
+	PaginationMeta,
+	useAsyncLoader,
+	FulfillmentOrder,
+} from '@sdk';
 
 export interface UseFulfillmentOrdersResult {
 	orders: FulfillmentOrder[];
@@ -20,18 +23,21 @@ export function useFulfillmentOrders(
 	const [meta, setMeta] = useState<PaginationMeta | null>(null);
 	const [page, setPage] = useState(1);
 
-	const { loadingStatus, loadingError } = useAsyncLoader(async (isActive) => {
-		const result = await fetchFulfillmentOrders(status, page, perPage);
+	const { loadingStatus, loadingError } = useAsyncLoader(
+		async (isActive) => {
+			const result = await fetchFulfillmentOrders(status, page, perPage);
 
-		// Ignore a superseded response (page changed, or unmounted) so it
-		// doesn't overwrite newer state.
-		if (!isActive()) {
-			return;
-		}
+			// Ignore a superseded response (page changed, or unmounted) so it
+			// doesn't overwrite newer state.
+			if (!isActive()) {
+				return;
+			}
 
-		setOrders(result.data);
-		setMeta(result.meta);
-	}, [status, page, perPage]);
+			setOrders(result.data);
+			setMeta(result.meta);
+		},
+		[status, page, perPage]
+	);
 
 	const goToPage = useCallback(
 		(next: number) => {

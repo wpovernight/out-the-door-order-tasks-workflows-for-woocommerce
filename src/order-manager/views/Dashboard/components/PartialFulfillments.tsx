@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { __ } from '@wordpress/i18n';
-import { EmptyState, ErrorState } from '@sdk/components/LoadingSkeleton';
+import {
+	EmptyState,
+	ErrorState,
+	Pager,
+	useScrollable,
+	FulfillmentOrder,
+	FulfillmentItem,
+	PaginationMeta,
+} from '@sdk';
 import { FulfillmentOrderSkeleton } from '@orderManager/views/Dashboard/components/FulfillmentOrderSkeleton';
-import { Pager } from '@sdk/components/Pager';
-import { useScrollable } from '@sdk/hooks/useScrollable';
-import { FulfillmentOrder, FulfillmentItem } from '@sdk/types/fulfillment';
-import { PaginationMeta } from '@sdk/utils/api';
 
 interface PartialFulfillmentsProps {
 	orders: FulfillmentOrder[];
@@ -247,10 +251,7 @@ export const PartialFulfillments = ({
 							href="edit.php?post_type=shop_order"
 							className="wpo-button view-all-link"
 						>
-							{__(
-								'View all orders',
-								'advanced-order-manager'
-							)}
+							{__('View all orders', 'advanced-order-manager')}
 						</a>
 					</div>
 				)

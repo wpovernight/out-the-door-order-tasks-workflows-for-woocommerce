@@ -1,8 +1,5 @@
 import React from 'react';
-import {
-	LoadingSkeleton,
-	SkeletonBox,
-} from '@sdk/components/LoadingSkeleton';
+import { LoadingSkeleton, SkeletonBox } from '@sdk';
 
 interface BoardSkeletonProps {
 	count?: number;

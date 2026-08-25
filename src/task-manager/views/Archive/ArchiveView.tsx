@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
-import { useTasks } from '@sdk/context/TaskContext';
-import { useAsyncLoader } from '@sdk/hooks/useAsyncLoader';
+import { useTasks, useAsyncLoader } from '@sdk';
 import { ArchiveSkeleton } from '@taskManager/views/Archive/components/ArchiveSkeleton';
 import { __ } from '@wordpress/i18n';
 import { ViewTaskProvider } from '@taskManager/views/Archive/context/ViewTaskContext';

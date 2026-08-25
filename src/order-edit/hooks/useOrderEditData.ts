@@ -1,4 +1,4 @@
-import { useLocalized } from '@sdk/hooks/useLocalized';
+import { useLocalized } from '@sdk';
 import { WpoAomOrderEditMetaBoxData } from '@orderEdit/types/globals';
 
 /**

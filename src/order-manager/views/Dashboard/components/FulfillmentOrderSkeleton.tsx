@@ -1,5 +1,5 @@
 import React from 'react';
-import { SkeletonLine } from '@sdk/components/LoadingSkeleton';
+import { SkeletonLine } from '@sdk';
 
 interface FulfillmentOrderSkeletonProps {
 	count?: number;

@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useViewTasks } from '@taskManager/views/Archive/context/ViewTaskContext';
 import { __, sprintf } from '@wordpress/i18n';
-import { useTaskSort } from '@sdk/hooks/useTaskSort';
-import { SortIcon } from '@sdk/components/SortIcon';
+import { useTaskSort, SortIcon } from '@sdk';
 import TaskRow from '@taskManager/views/Archive/components/TaskRow';
 
 const ITEMS_PER_PAGE = 10; // ToDo: Make this user-configurable in settings.
