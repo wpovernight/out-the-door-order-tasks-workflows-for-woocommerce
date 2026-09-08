@@ -124,7 +124,7 @@ abstract class BaseRepository {
 		$query .= $this->compile_where();
 		$query  = $this->append_bindings( $query );
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Query is prepared inside append_bindings().
 		$total = (int) $this->wpdb->get_var( $query );
 
 		if ( $reset ) {
