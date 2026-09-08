@@ -100,7 +100,7 @@ export const OrderWooFulfillmentProvider: React.FC<{
 											orderItem?.name ??
 											__(
 												'Item',
-												'advanced-order-manager'
+												'advanced-order-manager-for-woocommerce'
 											),
 									};
 								}),
@@ -122,7 +122,7 @@ export const OrderWooFulfillmentProvider: React.FC<{
 						: new Error(
 								__(
 									'Failed to load fulfillments',
-									'advanced-order-manager'
+									'advanced-order-manager-for-woocommerce'
 								)
 							)
 				);

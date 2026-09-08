@@ -38,11 +38,11 @@ export const DraftColumn: React.FC<DraftColumnProps> = ({
 			addToast({
 				title: __(
 					'A column with this name already exists.',
-					'advanced-order-manager'
+					'advanced-order-manager-for-woocommerce'
 				),
 				message: __(
 					'Please choose a different name.',
-					'advanced-order-manager'
+					'advanced-order-manager-for-woocommerce'
 				),
 				type: ToastType.ERROR,
 			});
@@ -60,12 +60,12 @@ export const DraftColumn: React.FC<DraftColumnProps> = ({
 				addToast({
 					title: __(
 						'Failed to create column.',
-						'advanced-order-manager'
+						'advanced-order-manager-for-woocommerce'
 					),
 					message:
 						error instanceof Error && error.message
 							? error.message
-							: __('Please try again.', 'advanced-order-manager'),
+							: __('Please try again.', 'advanced-order-manager-for-woocommerce'),
 					type: ToastType.ERROR,
 				});
 				inputRef.current?.select();
@@ -82,7 +82,7 @@ export const DraftColumn: React.FC<DraftColumnProps> = ({
 							type="text"
 							defaultValue={__(
 								'New Column',
-								'advanced-order-manager'
+								'advanced-order-manager-for-woocommerce'
 							)}
 							className="edit-title-input"
 							// eslint-disable-next-line jsx-a11y/no-autofocus
@@ -105,7 +105,7 @@ export const DraftColumn: React.FC<DraftColumnProps> = ({
 								className="wpo-button wpo-button-icon cancel-edit-title-button"
 							>
 								<span className="screen-reader-text">
-									{__('Cancel', 'advanced-order-manager')}
+									{__('Cancel', 'advanced-order-manager-for-woocommerce')}
 								</span>
 							</button>
 							<span className="wpo-aom-vertical-divider" />
@@ -115,7 +115,7 @@ export const DraftColumn: React.FC<DraftColumnProps> = ({
 								className="wpo-button wpo-button-icon save-title-button"
 							>
 								<span className="screen-reader-text">
-									{__('Save', 'advanced-order-manager')}
+									{__('Save', 'advanced-order-manager-for-woocommerce')}
 								</span>
 							</button>
 						</div>

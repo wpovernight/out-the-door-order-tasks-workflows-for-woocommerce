@@ -122,7 +122,7 @@ export const OrderTaskProvider: React.FC<{
 						: new Error(
 								__(
 									'Failed to load tasks',
-									'advanced-order-manager'
+									'advanced-order-manager-for-woocommerce'
 								)
 							)
 				);

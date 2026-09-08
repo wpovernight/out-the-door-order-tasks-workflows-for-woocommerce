@@ -121,7 +121,7 @@ export const Pager = ({
 				onClick={() => onChange(currentPage - 1)}
 				disabled={disabled || isFirst}
 			>
-				{__('Previous', 'advanced-order-manager')}
+				{__('Previous', 'advanced-order-manager-for-woocommerce')}
 			</button>
 
 			<div className="wpo-aom-pager-pages">
@@ -153,7 +153,7 @@ export const Pager = ({
 				onClick={() => onChange(currentPage + 1)}
 				disabled={disabled || isLast}
 			>
-				{__('Next', 'advanced-order-manager')}
+				{__('Next', 'advanced-order-manager-for-woocommerce')}
 			</button>
 		</nav>
 	);

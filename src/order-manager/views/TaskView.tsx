@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
 export const TaskView = () => (
 	<>
 		<h2 className="screen-reader-text">
-			{__('Task Manager', 'advanced-order-manager')}
+			{__('Task Manager', 'advanced-order-manager-for-woocommerce')}
 		</h2>
 		<ViewProvider>
 			<SidebarModalProvider>

@@ -49,16 +49,16 @@ export const StatusTable = ({
 				<thead>
 					<tr>
 						<th id="label-header">
-							{__('Label', 'advanced-order-manager')}
+							{__('Label', 'advanced-order-manager-for-woocommerce')}
 						</th>
 						<th id="color-header">
-							{__('Color', 'advanced-order-manager')}
+							{__('Color', 'advanced-order-manager-for-woocommerce')}
 						</th>
 						<th id="slug-header">
-							{__('Slug', 'advanced-order-manager')}
+							{__('Slug', 'advanced-order-manager-for-woocommerce')}
 						</th>
 						<th id="actions-header">
-							{__('Actions', 'advanced-order-manager')}
+							{__('Actions', 'advanced-order-manager-for-woocommerce')}
 						</th>
 					</tr>
 				</thead>
@@ -119,11 +119,11 @@ export const StatusTable = ({
 												{isDeleting(status)
 													? __(
 															'Reassigning order statuses before deletion.',
-															'advanced-order-manager'
+															'advanced-order-manager-for-woocommerce'
 														)
 													: __(
 															'Deleting…',
-															'advanced-order-manager'
+															'advanced-order-manager-for-woocommerce'
 														)}
 											</span>
 										</>
@@ -146,14 +146,14 @@ export const StatusTable = ({
 													}
 													title={__(
 														'Edit',
-														'advanced-order-manager'
+														'advanced-order-manager-for-woocommerce'
 													)}
 													disabled={isBusy(status)}
 												>
 													<span className="screen-reader-text">
 														{__(
 															'Edit',
-															'advanced-order-manager'
+															'advanced-order-manager-for-woocommerce'
 														)}
 													</span>
 												</button>
@@ -167,14 +167,14 @@ export const StatusTable = ({
 													}
 													title={__(
 														'Delete',
-														'advanced-order-manager'
+														'advanced-order-manager-for-woocommerce'
 													)}
 													disabled={isBusy(status)}
 												>
 													<span className="screen-reader-text">
 														{__(
 															'Delete',
-															'advanced-order-manager'
+															'advanced-order-manager-for-woocommerce'
 														)}
 													</span>
 												</button>
@@ -201,7 +201,7 @@ export const StatusTable = ({
 					className="wpo-button wpo-button-primary"
 					onClick={onStartCreate}
 				>
-					{__('Add new status', 'advanced-order-manager')}
+					{__('Add new status', 'advanced-order-manager-for-woocommerce')}
 				</button>
 			)}
 		</>

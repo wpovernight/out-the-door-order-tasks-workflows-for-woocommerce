@@ -58,17 +58,17 @@ final class DependencyChecker {
 		if ( ! $this->is_php_version_compatible() ) {
 			$errors[] = sprintf(
 				/* translators: %s: minimum PHP version */
-				__( 'PHP %s+ is required.', 'advanced-order-manager' ),
+				__( 'PHP %s+ is required.', 'advanced-order-manager-for-woocommerce' ),
 				self::PHP_MIN_VERSION
 			);
 		}
 
 		if ( ! $this->is_wc_activated() ) {
-			$errors[] = __( 'WooCommerce must be activated.', 'advanced-order-manager' );
+			$errors[] = __( 'WooCommerce must be activated.', 'advanced-order-manager-for-woocommerce' );
 		} elseif ( ! $this->is_wc_version_compatible() ) {
 			$errors[] = sprintf(
 				/* translators: %s: minimum WooCommerce version */
-				__( 'WooCommerce %s+ is required.', 'advanced-order-manager' ),
+				__( 'WooCommerce %s+ is required.', 'advanced-order-manager-for-woocommerce' ),
 				self::WC_MIN_VERSION
 			);
 		}
@@ -111,8 +111,8 @@ final class DependencyChecker {
 	 * @return void
 	 */
 	public function display_admin_notice( array $errors ): void {
-		$title   = '<strong>' . esc_html__( 'Advanced Order Manager for WooCommerce', 'advanced-order-manager' ) . '</strong>';
-		$content = esc_html__( 'can’t run because:', 'advanced-order-manager' );
+		$title   = '<strong>' . esc_html__( 'Advanced Order Manager for WooCommerce', 'advanced-order-manager-for-woocommerce' ) . '</strong>';
+		$content = esc_html__( 'can’t run because:', 'advanced-order-manager-for-woocommerce' );
 		$list    = '<ul><li>' . implode( '</li><li>', array_map( 'esc_html', $errors ) ) . '</li></ul>';
 
 		printf(

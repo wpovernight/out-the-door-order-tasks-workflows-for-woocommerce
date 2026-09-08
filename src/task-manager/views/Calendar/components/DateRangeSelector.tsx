@@ -128,7 +128,7 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 							htmlFor="date-input-start"
 							className="screen-reader-text"
 						>
-							{__('From', 'advanced-order-manager')}
+							{__('From', 'advanced-order-manager-for-woocommerce')}
 						</label>
 						<input
 							id="date-input-start"
@@ -143,7 +143,7 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 							htmlFor="date-input-end"
 							className="screen-reader-text"
 						>
-							{__('To', 'advanced-order-manager')}
+							{__('To', 'advanced-order-manager-for-woocommerce')}
 						</label>
 						<input
 							id="date-input-end"
@@ -160,7 +160,7 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 							htmlFor="date-input-single"
 							className="screen-reader-text"
 						>
-							{__('Select Date', 'advanced-order-manager')}
+							{__('Select Date', 'advanced-order-manager-for-woocommerce')}
 						</label>
 						<input
 							id="date-input-single"
@@ -181,13 +181,13 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 					className="wpo-button wpo-clear-button"
 					onClick={onCancel}
 				>
-					{__('Clear', 'advanced-order-manager')}
+					{__('Clear', 'advanced-order-manager-for-woocommerce')}
 				</button>
 				<button
 					className="wpo-button wpo-apply-button"
 					onClick={onApply}
 				>
-					{__('Apply', 'advanced-order-manager')}
+					{__('Apply', 'advanced-order-manager-for-woocommerce')}
 				</button>
 			</div>
 		</div>

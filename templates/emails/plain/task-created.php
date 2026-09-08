@@ -18,7 +18,7 @@ echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n";
 echo esc_html( wp_strip_all_tags( $email_heading ) );
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-echo esc_html__( 'A new task has been created:', 'advanced-order-manager' ) . "\n\n";
+echo esc_html__( 'A new task has been created:', 'advanced-order-manager-for-woocommerce' ) . "\n\n";
 
 /**
  * @hooked WPO_AOM_Emails::email_task_details() Shows the task details.

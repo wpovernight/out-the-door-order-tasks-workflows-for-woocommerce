@@ -57,7 +57,7 @@ export function useCustomOrderStatuses(): UseCustomOrderStatusesResult {
 					? error.message
 					: __(
 							'Something went wrong. Please try again.',
-							'advanced-order-manager'
+							'advanced-order-manager-for-woocommerce'
 						),
 			type: ToastType.ERROR,
 		});
@@ -73,7 +73,7 @@ export function useCustomOrderStatuses(): UseCustomOrderStatusesResult {
 		} catch (error) {
 			reportError(
 				error,
-				__('Could not create status', 'advanced-order-manager')
+				__('Could not create status', 'advanced-order-manager-for-woocommerce')
 			);
 			throw error;
 		} finally {
@@ -94,7 +94,7 @@ export function useCustomOrderStatuses(): UseCustomOrderStatusesResult {
 		} catch (error) {
 			reportError(
 				error,
-				__('Could not update status', 'advanced-order-manager')
+				__('Could not update status', 'advanced-order-manager-for-woocommerce')
 			);
 			throw error;
 		} finally {
@@ -120,7 +120,7 @@ export function useCustomOrderStatuses(): UseCustomOrderStatusesResult {
 		} catch (error) {
 			reportError(
 				error,
-				__('Could not delete status', 'advanced-order-manager')
+				__('Could not delete status', 'advanced-order-manager-for-woocommerce')
 			);
 			throw error;
 		} finally {

@@ -64,7 +64,7 @@ final class Screen {
 
 		wp_set_script_translations(
 			'wpo-aom-admin-order-manager',
-			'advanced-order-manager',
+			'advanced-order-manager-for-woocommerce',
 			WPO_AOM()->plugin_path() . '/languages'
 		);
 
@@ -150,8 +150,8 @@ final class Screen {
 	public function add_screen(): void {
 		add_submenu_page(
 			'woocommerce',
-			esc_html__( 'Order Manager', 'advanced-order-manager' ),
-			esc_html__( 'Order Manager', 'advanced-order-manager' ),
+			esc_html__( 'Order Manager', 'advanced-order-manager-for-woocommerce' ),
+			esc_html__( 'Order Manager', 'advanced-order-manager-for-woocommerce' ),
 			'manage_woocommerce',
 			'wpo_aom_order_manager',
 			array( $this, 'render_page' )

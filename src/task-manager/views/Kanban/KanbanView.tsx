@@ -34,7 +34,7 @@ export const KanbanView: React.FC = () => {
 			<div className="error-message">
 				{__(
 					'Error loading tasks. Please try again.',
-					'advanced-order-manager'
+					'advanced-order-manager-for-woocommerce'
 				)}
 			</div>
 		);
@@ -43,7 +43,7 @@ export const KanbanView: React.FC = () => {
 	return (
 		<>
 			<h3 className="screen-reader-text">
-				{__('Task Board', 'advanced-order-manager')}
+				{__('Task Board', 'advanced-order-manager-for-woocommerce')}
 			</h3>
 			<ViewTaskProvider>
 				<KanbanToolbar />

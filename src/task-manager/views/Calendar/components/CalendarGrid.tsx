@@ -9,32 +9,32 @@ interface CalendarGridProps {
 
 const WEEKDAYS = [
 	{
-		abbr: __('Monday', 'advanced-order-manager'),
-		short: __('Mo', 'advanced-order-manager'),
+		abbr: __('Monday', 'advanced-order-manager-for-woocommerce'),
+		short: __('Mo', 'advanced-order-manager-for-woocommerce'),
 	},
 	{
-		abbr: __('Tuesday', 'advanced-order-manager'),
-		short: __('Tu', 'advanced-order-manager'),
+		abbr: __('Tuesday', 'advanced-order-manager-for-woocommerce'),
+		short: __('Tu', 'advanced-order-manager-for-woocommerce'),
 	},
 	{
-		abbr: __('Wednesday', 'advanced-order-manager'),
-		short: __('We', 'advanced-order-manager'),
+		abbr: __('Wednesday', 'advanced-order-manager-for-woocommerce'),
+		short: __('We', 'advanced-order-manager-for-woocommerce'),
 	},
 	{
-		abbr: __('Thursday', 'advanced-order-manager'),
-		short: __('Th', 'advanced-order-manager'),
+		abbr: __('Thursday', 'advanced-order-manager-for-woocommerce'),
+		short: __('Th', 'advanced-order-manager-for-woocommerce'),
 	},
 	{
-		abbr: __('Friday', 'advanced-order-manager'),
-		short: __('Fr', 'advanced-order-manager'),
+		abbr: __('Friday', 'advanced-order-manager-for-woocommerce'),
+		short: __('Fr', 'advanced-order-manager-for-woocommerce'),
 	},
 	{
-		abbr: __('Saturday', 'advanced-order-manager'),
-		short: __('Sa', 'advanced-order-manager'),
+		abbr: __('Saturday', 'advanced-order-manager-for-woocommerce'),
+		short: __('Sa', 'advanced-order-manager-for-woocommerce'),
 	},
 	{
-		abbr: __('Sunday', 'advanced-order-manager'),
-		short: __('Su', 'advanced-order-manager'),
+		abbr: __('Sunday', 'advanced-order-manager-for-woocommerce'),
+		short: __('Su', 'advanced-order-manager-for-woocommerce'),
 	},
 ];
 

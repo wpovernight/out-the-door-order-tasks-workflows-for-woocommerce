@@ -1,15 +1,15 @@
 {
-	"name": "wpovernight/advanced-order-manager",
-	"description": "Advanced Order Manager for WooCommerce",
-	"autoload": {
-		"psr-4": {
-			"WPO\\AOM\\": "includes/"
-		}
-	},
-	"require-dev": {
-		"php-stubs/wordpress-stubs": "^7.0"
-	},
-	"require": {
-		"psr/container": "^2.0"
-	}
+  "name": "wpovernight/advanced-order-manager-for-woocommerce",
+  "description": "Advanced Order Manager for WooCommerce",
+  "autoload": {
+    "psr-4": {
+      "WPO\\AOM\\": "includes/"
+    }
+  },
+  "require-dev": {
+    "php-stubs/wordpress-stubs": "^7.0",
+  },
+  "require": {
+    "psr/container": "^2.0"
+  }
 }

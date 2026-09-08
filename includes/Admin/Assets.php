@@ -39,7 +39,7 @@ final class Assets {
 		// are no longer inlined into the consuming bundles.
 		wp_set_script_translations(
 			self::SDK_HANDLE,
-			'advanced-order-manager',
+			'advanced-order-manager-for-woocommerce',
 			WPO_AOM()->plugin_path() . '/languages'
 		);
 	}

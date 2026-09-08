@@ -276,7 +276,7 @@ class TaskController extends BaseRestController {
 							'required'          => true,
 							'type'              => 'array',
 							'items'             => array( 'type' => 'integer' ),
-							'description'       => __( 'Array of option IDs in desired order.', 'advanced-order-manager' ),
+							'description'       => __( 'Array of option IDs in desired order.', 'advanced-order-manager-for-woocommerce' ),
 							'validate_callback' => function ( $param ) {
 								return is_array( $param ) && ! empty( $param );
 							},
@@ -359,7 +359,7 @@ class TaskController extends BaseRestController {
 			return $this->respond( $task );
 		} catch ( \Throwable $e ) {
 			Logger::error( 'Task creation failed: ' . $e->getMessage() );
-			return new WP_Error( 'task_creation_failed', __( 'Failed to create task.', 'advanced-order-manager' ), array( 'status' => 500 ) );
+			return new WP_Error( 'task_creation_failed', __( 'Failed to create task.', 'advanced-order-manager-for-woocommerce' ), array( 'status' => 500 ) );
 		}
 	}
 
@@ -450,7 +450,7 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'not_found', $e->getMessage(), array( 'status' => 404 ) );
 		} catch ( \Throwable $e ) {
 			Logger::error( 'Task update failed: ' . $e->getMessage() );
-			return new WP_Error( 'task_update_failed', __( 'Failed to update task.', 'advanced-order-manager' ), array( 'status' => 500 ) );
+			return new WP_Error( 'task_update_failed', __( 'Failed to update task.', 'advanced-order-manager-for-woocommerce' ), array( 'status' => 500 ) );
 		}
 	}
 
@@ -474,7 +474,7 @@ class TaskController extends BaseRestController {
 			$task_manager_service->delete_task( $id );
 		} catch ( \Exception $e ) {
 			Logger::error( 'Task deletion failed: ' . $e->getMessage() );
-			return new WP_Error( 'task_deletion_failed', __( 'Failed to delete task.', 'advanced-order-manager' ), array( 'status' => 500 ) );
+			return new WP_Error( 'task_deletion_failed', __( 'Failed to delete task.', 'advanced-order-manager-for-woocommerce' ), array( 'status' => 500 ) );
 		}
 
 		return $this->respond( array( 'message' => 'Task deleted successfully' ) );
@@ -492,31 +492,31 @@ class TaskController extends BaseRestController {
 			'type'       => 'object',
 			'properties' => array(
 				'id'          => array(
-					'description' => __( 'Task ID.', 'advanced-order-manager' ),
+					'description' => __( 'Task ID.', 'advanced-order-manager-for-woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'title'       => array(
-					'description' => __( 'Task title.', 'advanced-order-manager' ),
+					'description' => __( 'Task title.', 'advanced-order-manager-for-woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit', 'create' ),
 					'required'    => true,
 				),
 				'description' => array(
-					'description' => __( 'Task description.', 'advanced-order-manager' ),
+					'description' => __( 'Task description.', 'advanced-order-manager-for-woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit', 'create' ),
 				),
 				'created_at'  => array(
-					'description' => __( 'Task creation timestamp.', 'advanced-order-manager' ),
+					'description' => __( 'Task creation timestamp.', 'advanced-order-manager-for-woocommerce' ),
 					'type'        => 'string',
 					'format'      => 'date-time',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'updated_at'  => array(
-					'description' => __( 'Task last update timestamp.', 'advanced-order-manager' ),
+					'description' => __( 'Task last update timestamp.', 'advanced-order-manager-for-woocommerce' ),
 					'type'        => 'string',
 					'format'      => 'date-time',
 					'context'     => array( 'view' ),
@@ -784,7 +784,7 @@ class TaskController extends BaseRestController {
 			return $this->respond(
 				array(
 					'success' => true,
-					'message' => __( 'Field option positions updated successfully', 'advanced-order-manager' ),
+					'message' => __( 'Field option positions updated successfully', 'advanced-order-manager-for-woocommerce' ),
 				)
 			);
 		} catch ( \InvalidArgumentException $e ) {
@@ -818,29 +818,29 @@ class TaskController extends BaseRestController {
 			'type'       => 'object',
 			'properties' => array(
 				'id'       => array(
-					'description' => __( 'Option ID.', 'advanced-order-manager' ),
+					'description' => __( 'Option ID.', 'advanced-order-manager-for-woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'field_id' => array(
-					'description' => __( 'Field ID this option belongs to.', 'advanced-order-manager' ),
+					'description' => __( 'Field ID this option belongs to.', 'advanced-order-manager-for-woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'label'    => array(
-					'description' => __( 'Option label.', 'advanced-order-manager' ),
+					'description' => __( 'Option label.', 'advanced-order-manager-for-woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'color'    => array(
-					'description' => __( 'Option color.', 'advanced-order-manager' ),
+					'description' => __( 'Option color.', 'advanced-order-manager-for-woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'position' => array(
-					'description' => __( 'Option position for ordering.', 'advanced-order-manager' ),
+					'description' => __( 'Option position for ordering.', 'advanced-order-manager-for-woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
@@ -877,11 +877,11 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'invalid_params', $e->getMessage(), array( 'status' => 400 ) );
 		} catch ( \Exception $e ) {
 			Logger::error( 'Task move failed: ' . $e->getMessage() );
-			return new WP_Error( 'task_move_failed', __( 'Failed to move task.', 'advanced-order-manager' ), array( 'status' => 500 ) );
+			return new WP_Error( 'task_move_failed', __( 'Failed to move task.', 'advanced-order-manager-for-woocommerce' ), array( 'status' => 500 ) );
 		}
 
 		if ( ! $new_position ) {
-			return new WP_Error( 'task_move_failed', __( 'Failed to move task.', 'advanced-order-manager' ), array( 'status' => 500 ) );
+			return new WP_Error( 'task_move_failed', __( 'Failed to move task.', 'advanced-order-manager-for-woocommerce' ), array( 'status' => 500 ) );
 		}
 
 		return $this->respond( array( 'new_position' => $new_position ) );
@@ -917,7 +917,7 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'task_finish_failed', $e->getMessage(), array( 'status' => 409 ) );
 		} catch ( \Exception $e ) {
 			Logger::error( 'Task finish failed: ' . $e->getMessage() );
-			return new WP_Error( 'task_finish_failed', __( 'Failed to finish task.', 'advanced-order-manager' ), array( 'status' => 500 ) );
+			return new WP_Error( 'task_finish_failed', __( 'Failed to finish task.', 'advanced-order-manager-for-woocommerce' ), array( 'status' => 500 ) );
 		}
 	}
 
@@ -944,7 +944,7 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'not_found', $e->getMessage(), array( 'status' => 404 ) );
 		} catch ( \Exception $e ) {
 			Logger::error( 'Task archive failed: ' . $e->getMessage() );
-			return new WP_Error( 'task_archive_failed', __( 'Failed to archive task.', 'advanced-order-manager' ), array( 'status' => 500 ) );
+			return new WP_Error( 'task_archive_failed', __( 'Failed to archive task.', 'advanced-order-manager-for-woocommerce' ), array( 'status' => 500 ) );
 		}
 
 		return $this->respond( array(
@@ -975,7 +975,7 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'not_found', $e->getMessage(), array( 'status' => 404 ) );
 		} catch ( \Exception $e ) {
 			Logger::error( 'Task unarchive failed: ' . $e->getMessage() );
-			return new WP_Error( 'task_unarchive_failed', __( 'Failed to unarchive task.', 'advanced-order-manager' ), array( 'status' => 500 ) );
+			return new WP_Error( 'task_unarchive_failed', __( 'Failed to unarchive task.', 'advanced-order-manager-for-woocommerce' ), array( 'status' => 500 ) );
 		}
 
 		return $this->respond( array(

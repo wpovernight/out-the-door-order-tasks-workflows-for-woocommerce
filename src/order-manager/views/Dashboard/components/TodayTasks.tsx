@@ -72,7 +72,7 @@ export const TodayTasks = () => {
 
 	const handleAddTask = () => {
 		openCreateTaskModal({
-			title: __('Add Task', 'advanced-order-manager'),
+			title: __('Add Task', 'advanced-order-manager-for-woocommerce'),
 			initialValues: {
 				dueDate: new Date().toISOString().split('T')[0],
 			},
@@ -87,19 +87,19 @@ export const TodayTasks = () => {
 
 		openEditTaskModal({
 			task,
-			title: __('Edit task', 'advanced-order-manager'),
+			title: __('Edit task', 'advanced-order-manager-for-woocommerce'),
 		});
 	};
 
 	const handleDeleteClick = async (taskId: number) => {
 		const confirmationResult = await confirm({
-			title: __('Delete this task?', 'advanced-order-manager'),
+			title: __('Delete this task?', 'advanced-order-manager-for-woocommerce'),
 			message: __(
 				'Are you sure you want to delete this task? This action cannot be undone.',
-				'advanced-order-manager'
+				'advanced-order-manager-for-woocommerce'
 			),
-			confirmText: __('Delete', 'advanced-order-manager'),
-			cancelText: __('Cancel', 'advanced-order-manager'),
+			confirmText: __('Delete', 'advanced-order-manager-for-woocommerce'),
+			cancelText: __('Cancel', 'advanced-order-manager-for-woocommerce'),
 			action: 'delete',
 		});
 
@@ -145,7 +145,7 @@ export const TodayTasks = () => {
 		<div className="dashboard-widget" id="today-tasks">
 			<div className="header">
 				<h3>
-					{__("Today's tasks", 'advanced-order-manager')}{' '}
+					{__("Today's tasks", 'advanced-order-manager-for-woocommerce')}{' '}
 					<span className="wpo-count-badge">
 						{todayActive.length}
 					</span>
@@ -154,10 +154,10 @@ export const TodayTasks = () => {
 					type="button"
 					className="wpo-button wpo-button-icon add-new-task"
 					onClick={handleAddTask}
-					title={__('Add Task', 'advanced-order-manager')}
+					title={__('Add Task', 'advanced-order-manager-for-woocommerce')}
 				>
 					<span className="screen-reader-text">
-						{__('Add Task', 'advanced-order-manager')}
+						{__('Add Task', 'advanced-order-manager-for-woocommerce')}
 					</span>
 				</button>
 			</div>
@@ -166,9 +166,9 @@ export const TodayTasks = () => {
 					<EmptyState
 						message={__(
 							'No tasks due today.',
-							'advanced-order-manager'
+							'advanced-order-manager-for-woocommerce'
 						)}
-						actionText={__('Add Task', 'advanced-order-manager')}
+						actionText={__('Add Task', 'advanced-order-manager-for-woocommerce')}
 					/>
 				) : (
 					<>
@@ -178,7 +178,7 @@ export const TodayTasks = () => {
 								<h4 className="screen-reader-text">
 									{__(
 										'Active tasks due today',
-										'advanced-order-manager'
+										'advanced-order-manager-for-woocommerce'
 									)}
 								</h4>
 								{renderTaskList(todayActive, 'active')}
@@ -201,7 +201,7 @@ export const TodayTasks = () => {
 									>
 										{__(
 											'Tasks that are overdue',
-											'advanced-order-manager'
+											'advanced-order-manager-for-woocommerce'
 										)}{' '}
 										<span className="wpo-count-badge">
 											{overdue.length}
@@ -233,7 +233,7 @@ export const TodayTasks = () => {
 									>
 										{__(
 											'Tasks marked as done',
-											'advanced-order-manager'
+											'advanced-order-manager-for-woocommerce'
 										)}{' '}
 										<span className="wpo-count-badge">
 											{done.length}
@@ -253,7 +253,7 @@ export const TodayTasks = () => {
 			</div>
 			<div className="footer">
 				<a href="#/task-manager/" className="wpo-button view-all-link">
-					{__('View all tasks', 'advanced-order-manager')}
+					{__('View all tasks', 'advanced-order-manager-for-woocommerce')}
 				</a>
 			</div>
 		</div>

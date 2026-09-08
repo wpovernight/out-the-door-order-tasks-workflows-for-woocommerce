@@ -2,7 +2,7 @@
 /**
  * Plugin Name:          Advanced Order Manager for WooCommerce
  * Requires Plugins:     woocommerce
- * Plugin URI:           https://wpovernight.com/downloads/advanced-order-manager/
+ * Plugin URI:           https://wpovernight.com/downloads/advanced-order-manager-for-woocommerce/
  * Description:          A powerful order management plugin for WooCommerce that enhances the order management experience with advanced features.
  * Author:               WP Overnight
  * Author URI:           https://www.wpovernight.com
@@ -13,7 +13,7 @@
  * Requires PHP:         8.1
  * WC requires at least: 8.2
  * WC tested up to:      10.0
- * Text Domain:          advanced-order-manager
+ * Text Domain:          advanced-order-manager-for-woocommerce
  * Domain Path:          /languages
  */
 

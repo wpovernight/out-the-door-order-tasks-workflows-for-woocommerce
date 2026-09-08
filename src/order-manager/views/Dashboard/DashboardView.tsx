@@ -43,7 +43,7 @@ export const DashboardView = () => {
 				<div className="dashboard-widget" id="today-tasks">
 					<div className="header">
 						<h3>
-							{__("Today's tasks", 'advanced-order-manager')}{' '}
+							{__("Today's tasks", 'advanced-order-manager-for-woocommerce')}{' '}
 							<span className="wpo-count-badge">0</span>
 						</h3>
 					</div>
@@ -52,7 +52,7 @@ export const DashboardView = () => {
 					</div>
 					<div className="footer">
 						<span className="wpo-button view-all-link">
-							{__('View all tasks', 'advanced-order-manager')}
+							{__('View all tasks', 'advanced-order-manager-for-woocommerce')}
 						</span>
 					</div>
 				</div>
@@ -61,7 +61,7 @@ export const DashboardView = () => {
 						<h3>
 							{__(
 								'Partially shipped fulfillments',
-								'advanced-order-manager'
+								'advanced-order-manager-for-woocommerce'
 							)}
 						</h3>
 					</div>
@@ -81,7 +81,7 @@ export const DashboardView = () => {
 						loadingError?.message ||
 						__(
 							'Error loading tasks. Please try again.',
-							'advanced-order-manager'
+							'advanced-order-manager-for-woocommerce'
 						)
 					}
 				/>
@@ -92,7 +92,7 @@ export const DashboardView = () => {
 	return (
 		<>
 			<h2 className="screen-reader-text">
-				{__('Dashboard', 'advanced-order-manager')}
+				{__('Dashboard', 'advanced-order-manager-for-woocommerce')}
 			</h2>
 			<SidebarModalProvider>
 				<div className="dashboard-view">

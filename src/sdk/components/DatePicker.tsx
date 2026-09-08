@@ -20,48 +20,48 @@ interface DateParts {
 
 const DAYS_OF_WEEK = [
 	{
-		short: __('Mo', 'advanced-order-manager'),
-		full: __('Monday', 'advanced-order-manager'),
+		short: __('Mo', 'advanced-order-manager-for-woocommerce'),
+		full: __('Monday', 'advanced-order-manager-for-woocommerce'),
 	},
 	{
-		short: __('Tu', 'advanced-order-manager'),
-		full: __('Tuesday', 'advanced-order-manager'),
+		short: __('Tu', 'advanced-order-manager-for-woocommerce'),
+		full: __('Tuesday', 'advanced-order-manager-for-woocommerce'),
 	},
 	{
-		short: __('We', 'advanced-order-manager'),
-		full: __('Wednesday', 'advanced-order-manager'),
+		short: __('We', 'advanced-order-manager-for-woocommerce'),
+		full: __('Wednesday', 'advanced-order-manager-for-woocommerce'),
 	},
 	{
-		short: __('Th', 'advanced-order-manager'),
-		full: __('Thursday', 'advanced-order-manager'),
+		short: __('Th', 'advanced-order-manager-for-woocommerce'),
+		full: __('Thursday', 'advanced-order-manager-for-woocommerce'),
 	},
 	{
-		short: __('Fr', 'advanced-order-manager'),
-		full: __('Friday', 'advanced-order-manager'),
+		short: __('Fr', 'advanced-order-manager-for-woocommerce'),
+		full: __('Friday', 'advanced-order-manager-for-woocommerce'),
 	},
 	{
-		short: __('Sa', 'advanced-order-manager'),
-		full: __('Saturday', 'advanced-order-manager'),
+		short: __('Sa', 'advanced-order-manager-for-woocommerce'),
+		full: __('Saturday', 'advanced-order-manager-for-woocommerce'),
 	},
 	{
-		short: __('Su', 'advanced-order-manager'),
-		full: __('Sunday', 'advanced-order-manager'),
+		short: __('Su', 'advanced-order-manager-for-woocommerce'),
+		full: __('Sunday', 'advanced-order-manager-for-woocommerce'),
 	},
 ];
 
 const MONTH_LABELS = [
-	__('Jan', 'advanced-order-manager'),
-	__('Feb', 'advanced-order-manager'),
-	__('Mar', 'advanced-order-manager'),
-	__('Apr', 'advanced-order-manager'),
-	__('May', 'advanced-order-manager'),
-	__('Jun', 'advanced-order-manager'),
-	__('Jul', 'advanced-order-manager'),
-	__('Aug', 'advanced-order-manager'),
-	__('Sep', 'advanced-order-manager'),
-	__('Oct', 'advanced-order-manager'),
-	__('Nov', 'advanced-order-manager'),
-	__('Dec', 'advanced-order-manager'),
+	__('Jan', 'advanced-order-manager-for-woocommerce'),
+	__('Feb', 'advanced-order-manager-for-woocommerce'),
+	__('Mar', 'advanced-order-manager-for-woocommerce'),
+	__('Apr', 'advanced-order-manager-for-woocommerce'),
+	__('May', 'advanced-order-manager-for-woocommerce'),
+	__('Jun', 'advanced-order-manager-for-woocommerce'),
+	__('Jul', 'advanced-order-manager-for-woocommerce'),
+	__('Aug', 'advanced-order-manager-for-woocommerce'),
+	__('Sep', 'advanced-order-manager-for-woocommerce'),
+	__('Oct', 'advanced-order-manager-for-woocommerce'),
+	__('Nov', 'advanced-order-manager-for-woocommerce'),
+	__('Dec', 'advanced-order-manager-for-woocommerce'),
 ];
 
 function chunk<T>(items: T[], size: number): T[][] {
@@ -391,17 +391,17 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 				{selectedDate
 					? formatDisplayDate(selectedDate)
 					: placeholder ||
-						__('Date picker', 'advanced-order-manager')}
+						__('Date picker', 'advanced-order-manager-for-woocommerce')}
 			</button>
 			{selectedDate && (
 				<button
 					type="button"
 					className="wpo-button wpo-button-icon wpo-aom-datepicker-clear"
 					onClick={handleClear}
-					title={__('Clear date', 'advanced-order-manager')}
+					title={__('Clear date', 'advanced-order-manager-for-woocommerce')}
 				>
 					<span className="screen-reader-text">
-						{__('Clear date', 'advanced-order-manager')}
+						{__('Clear date', 'advanced-order-manager-for-woocommerce')}
 					</span>
 				</button>
 			)}
@@ -412,10 +412,10 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 							type="button"
 							className="wpo-button wpo-button-icon wpo-aom-datepicker-nav prev"
 							onClick={goPrevious}
-							title={__('Previous', 'advanced-order-manager')}
+							title={__('Previous', 'advanced-order-manager-for-woocommerce')}
 						>
 							<span className="screen-reader-text">
-								{__('Previous', 'advanced-order-manager')}
+								{__('Previous', 'advanced-order-manager-for-woocommerce')}
 							</span>
 						</button>
 						<button
@@ -430,10 +430,10 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 							type="button"
 							className="wpo-button wpo-button-icon wpo-aom-datepicker-nav next"
 							onClick={goNext}
-							title={__('Next', 'advanced-order-manager')}
+							title={__('Next', 'advanced-order-manager-for-woocommerce')}
 						>
 							<span className="screen-reader-text">
-								{__('Next', 'advanced-order-manager')}
+								{__('Next', 'advanced-order-manager-for-woocommerce')}
 							</span>
 						</button>
 					</div>
@@ -617,7 +617,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 								className="wpo-button cancel"
 								onClick={closePicker}
 							>
-								{__('Cancel', 'advanced-order-manager')}
+								{__('Cancel', 'advanced-order-manager-for-woocommerce')}
 							</button>
 						</li>
 						<li>
@@ -626,7 +626,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 								className="wpo-button wpo-button-primary today"
 								onClick={handleToday}
 							>
-								{__('Today', 'advanced-order-manager')}
+								{__('Today', 'advanced-order-manager-for-woocommerce')}
 							</button>
 						</li>
 					</ul>

@@ -13,7 +13,7 @@ const Header: React.FC = () => {
 	const handleAddTask = (e: React.MouseEvent) => {
 		e.preventDefault();
 		openCreateTaskModal({
-			title: __('Add Task', 'advanced-order-manager'),
+			title: __('Add Task', 'advanced-order-manager-for-woocommerce'),
 			initialValues: { orderIds: [orderId] },
 		});
 	};
@@ -24,8 +24,8 @@ const Header: React.FC = () => {
 
 	return (
 		<SectionHeader
-			title={__('Tasks', 'advanced-order-manager')}
-			details={`${activeCount} ${__('Active', 'advanced-order-manager')}`}
+			title={__('Tasks', 'advanced-order-manager-for-woocommerce')}
+			details={`${activeCount} ${__('Active', 'advanced-order-manager-for-woocommerce')}`}
 			progressValue={
 				completionPercentage !== null ? completionPercentage : undefined
 			}
@@ -36,7 +36,7 @@ const Header: React.FC = () => {
 					onClick={handleAddTask}
 				>
 					<span className="screen-reader-text">
-						{__('Add Task', 'advanced-order-manager')}
+						{__('Add Task', 'advanced-order-manager-for-woocommerce')}
 					</span>
 				</button>,
 			]}

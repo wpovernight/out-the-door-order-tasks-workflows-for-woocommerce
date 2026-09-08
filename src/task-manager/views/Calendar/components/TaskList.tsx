@@ -42,24 +42,24 @@ const TaskList: React.FC<TaskListProps> = ({
 
 		if (dateRangePreset !== 'custom') {
 			const presetLabels: Record<string, string> = {
-				today: __('Today', 'advanced-order-manager'),
-				tomorrow: __('Tomorrow', 'advanced-order-manager'),
-				yesterday: __('Yesterday', 'advanced-order-manager'),
-				'current-week': __('Current Week', 'advanced-order-manager'),
-				'next-week': __('Next Week', 'advanced-order-manager'),
-				'last-week': __('Last Week', 'advanced-order-manager'),
-				'current-month': __('Current Month', 'advanced-order-manager'),
-				'next-month': __('Next Month', 'advanced-order-manager'),
-				'last-month': __('Last Month', 'advanced-order-manager'),
+				today: __('Today', 'advanced-order-manager-for-woocommerce'),
+				tomorrow: __('Tomorrow', 'advanced-order-manager-for-woocommerce'),
+				yesterday: __('Yesterday', 'advanced-order-manager-for-woocommerce'),
+				'current-week': __('Current Week', 'advanced-order-manager-for-woocommerce'),
+				'next-week': __('Next Week', 'advanced-order-manager-for-woocommerce'),
+				'last-week': __('Last Week', 'advanced-order-manager-for-woocommerce'),
+				'current-month': __('Current Month', 'advanced-order-manager-for-woocommerce'),
+				'next-month': __('Next Month', 'advanced-order-manager-for-woocommerce'),
+				'last-month': __('Last Month', 'advanced-order-manager-for-woocommerce'),
 			};
 			const presetLabel =
 				presetLabels[dateRangePreset] ||
-				__('Today', 'advanced-order-manager');
+				__('Today', 'advanced-order-manager-for-woocommerce');
 			return (
 				<>
 					{sprintf(
 						/* translators: %s: date range label (e.g. "Today", "Current Week") */
-						__("%s's tasks", 'advanced-order-manager'),
+						__("%s's tasks", 'advanced-order-manager-for-woocommerce'),
 						presetLabel
 					)}{' '}
 					{taskCountBadge}
@@ -86,7 +86,7 @@ const TaskList: React.FC<TaskListProps> = ({
 		// Fallback
 		return (
 			<>
-				{__('Tasks', 'advanced-order-manager')} - {taskCountBadge}
+				{__('Tasks', 'advanced-order-manager-for-woocommerce')} - {taskCountBadge}
 			</>
 		);
 	};
@@ -126,7 +126,7 @@ const TaskList: React.FC<TaskListProps> = ({
 				<div className="calendar-task-empty-state">
 					{__(
 						'No tasks found for the selected date range',
-						'advanced-order-manager'
+						'advanced-order-manager-for-woocommerce'
 					)}
 				</div>
 			) : (

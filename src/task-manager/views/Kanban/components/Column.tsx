@@ -249,7 +249,7 @@ export const Column: React.FC<ColumnProps> = ({
 
 	const handleAddTask = () => {
 		openCreateTaskModal({
-			title: __('Add Task', 'advanced-order-manager'),
+			title: __('Add Task', 'advanced-order-manager-for-woocommerce'),
 			initialValues: {
 				statusIndex: column.position - 1,
 			},
@@ -277,11 +277,11 @@ export const Column: React.FC<ColumnProps> = ({
 		}).catch((error) => {
 			// The optimistic update already reverted the title, inform the user why.
 			addToast({
-				title: __('Failed to rename column.', 'advanced-order-manager'),
+				title: __('Failed to rename column.', 'advanced-order-manager-for-woocommerce'),
 				message:
 					error instanceof Error && error.message
 						? error.message
-						: __('Please try again.', 'advanced-order-manager'),
+						: __('Please try again.', 'advanced-order-manager-for-woocommerce'),
 				type: ToastType.ERROR,
 			});
 		});
@@ -307,13 +307,13 @@ export const Column: React.FC<ColumnProps> = ({
 
 		// Empty + not role-assigned → simple confirmation, nothing to lose.
 		const confirmed = await confirm({
-			title: __('Delete this column?', 'advanced-order-manager'),
+			title: __('Delete this column?', 'advanced-order-manager-for-woocommerce'),
 			message: __(
 				'This action cannot be undone.',
-				'advanced-order-manager'
+				'advanced-order-manager-for-woocommerce'
 			),
-			confirmText: __('Delete', 'advanced-order-manager'),
-			cancelText: __('Cancel', 'advanced-order-manager'),
+			confirmText: __('Delete', 'advanced-order-manager-for-woocommerce'),
+			cancelText: __('Cancel', 'advanced-order-manager-for-woocommerce'),
 			action: 'delete',
 		});
 
@@ -352,7 +352,7 @@ export const Column: React.FC<ColumnProps> = ({
 									<span className="screen-reader-text">
 										{__(
 											'Edit column name',
-											'advanced-order-manager'
+											'advanced-order-manager-for-woocommerce'
 										)}
 									</span>
 								</button>
@@ -387,7 +387,7 @@ export const Column: React.FC<ColumnProps> = ({
 										<span className="screen-reader-text">
 											{__(
 												'Cancel',
-												'advanced-order-manager'
+												'advanced-order-manager-for-woocommerce'
 											)}
 										</span>
 									</button>
@@ -399,7 +399,7 @@ export const Column: React.FC<ColumnProps> = ({
 										<span className="screen-reader-text">
 											{__(
 												'Save',
-												'advanced-order-manager'
+												'advanced-order-manager-for-woocommerce'
 											)}
 										</span>
 									</button>
@@ -417,7 +417,7 @@ export const Column: React.FC<ColumnProps> = ({
 								className="wpo-button wpo-button-icon wpo-aom-add-button"
 							>
 								<span className="screen-reader-text">
-									{__('Create', 'advanced-order-manager')}
+									{__('Create', 'advanced-order-manager-for-woocommerce')}
 								</span>
 							</button>
 						</li>
@@ -431,7 +431,7 @@ export const Column: React.FC<ColumnProps> = ({
 								}}
 							>
 								<span className="screen-reader-text">
-									{__('Options', 'advanced-order-manager')}
+									{__('Options', 'advanced-order-manager-for-woocommerce')}
 								</span>
 							</button>
 							<ul
@@ -448,7 +448,7 @@ export const Column: React.FC<ColumnProps> = ({
 									>
 										{__(
 											'Edit column title',
-											'advanced-order-manager'
+											'advanced-order-manager-for-woocommerce'
 										)}
 									</button>
 								</li>
@@ -460,7 +460,7 @@ export const Column: React.FC<ColumnProps> = ({
 									>
 										{__(
 											'Add column right',
-											'advanced-order-manager'
+											'advanced-order-manager-for-woocommerce'
 										)}
 									</button>
 								</li>
@@ -472,7 +472,7 @@ export const Column: React.FC<ColumnProps> = ({
 									>
 										{__(
 											'Add column left',
-											'advanced-order-manager'
+											'advanced-order-manager-for-woocommerce'
 										)}
 									</button>
 								</li>
@@ -482,7 +482,7 @@ export const Column: React.FC<ColumnProps> = ({
 										className="wpo-button delete-column"
 										onClick={handleDeleteColumn}
 									>
-										{__('Delete', 'advanced-order-manager')}
+										{__('Delete', 'advanced-order-manager-for-woocommerce')}
 									</button>
 								</li>
 							</ul>
@@ -506,7 +506,7 @@ export const Column: React.FC<ColumnProps> = ({
 							className="wpo-button kanban-column-add-task"
 							onClick={handleAddTask}
 						>
-							{__('Add new task', 'advanced-order-manager')}
+							{__('Add new task', 'advanced-order-manager-for-woocommerce')}
 						</button>
 					</div>
 				</div>

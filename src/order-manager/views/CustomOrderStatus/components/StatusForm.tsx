@@ -51,11 +51,11 @@ export const StatusForm = ({
 
 	const foreground = getForegroundColor(background);
 
-	let submitLabel = __('Create', 'advanced-order-manager');
+	let submitLabel = __('Create', 'advanced-order-manager-for-woocommerce');
 	if (isSaving) {
-		submitLabel = __('Saving…', 'advanced-order-manager');
+		submitLabel = __('Saving…', 'advanced-order-manager-for-woocommerce');
 	} else if (isEditing) {
-		submitLabel = __('Update', 'advanced-order-manager');
+		submitLabel = __('Update', 'advanced-order-manager-for-woocommerce');
 	}
 
 	const handleSubmit = (e: React.FormEvent) => {
@@ -77,7 +77,7 @@ export const StatusForm = ({
 					<fieldset>
 						<div id="label-field" className="form-field">
 							<label htmlFor="cos-label">
-								{__('Status Name', 'advanced-order-manager')}
+								{__('Status Name', 'advanced-order-manager-for-woocommerce')}
 							</label>
 							<input
 								id="cos-label"
@@ -86,14 +86,14 @@ export const StatusForm = ({
 								onChange={(e) => setLabel(e.target.value)}
 								placeholder={__(
 									'e.g., In production',
-									'advanced-order-manager'
+									'advanced-order-manager-for-woocommerce'
 								)}
 								required
 							/>
 						</div>
 						<div id="preview-field" className="form-field">
 							<span className="label">
-								{__('Preview', 'advanced-order-manager')}
+								{__('Preview', 'advanced-order-manager-for-woocommerce')}
 							</span>
 							<span
 								className="status-preview"
@@ -103,12 +103,12 @@ export const StatusForm = ({
 								}}
 							>
 								{label ||
-									__('Status', 'advanced-order-manager')}
+									__('Status', 'advanced-order-manager-for-woocommerce')}
 							</span>
 						</div>
 						<div id="color-field" className="form-field">
 							<label htmlFor="cos-background">
-								{__('Color', 'advanced-order-manager')}
+								{__('Color', 'advanced-order-manager-for-woocommerce')}
 							</label>
 							<div
 								className="color-input-group"
@@ -144,7 +144,7 @@ export const StatusForm = ({
 						</div>
 						<div id="slug-field" className="form-field">
 							<label htmlFor="cos-key">
-								{__('Slug', 'advanced-order-manager')}
+								{__('Slug', 'advanced-order-manager-for-woocommerce')}
 							</label>
 							{/*
 								`pattern` is compiled with the regex `v` flag, which treats a
@@ -161,7 +161,7 @@ export const StatusForm = ({
 								pattern="^[a-z0-9_\-]+$"
 								title={__(
 									'Only lowercase letters, numbers, hyphens, and underscores.',
-									'advanced-order-manager'
+									'advanced-order-manager-for-woocommerce'
 								)}
 								required
 								disabled={isEditing}
@@ -190,7 +190,7 @@ export const StatusForm = ({
 								onClick={onCancel}
 								disabled={isSaving}
 							>
-								{__('Cancel', 'advanced-order-manager')}
+								{__('Cancel', 'advanced-order-manager-for-woocommerce')}
 							</button>
 						</li>
 					</ul>

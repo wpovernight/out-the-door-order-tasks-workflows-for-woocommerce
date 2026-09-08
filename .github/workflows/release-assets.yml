@@ -14,12 +14,14 @@ jobs:
         run: |
           # process existing variables
           # The distributed plugin slug must not contain the restricted terms, like "wp"
-          PLUGIN_SLUG="advanced-order-manager"
+          PLUGIN_SLUG="advanced-order-manager-for-woocommerce"
+          TEXT_DOMAIN="$PLUGIN_SLUG"
           VERSION="${TAG_NAME#v}"
           ZIP_FILE_NAME=$PLUGIN_SLUG.$VERSION.zip
 
           # set environment variables
           echo "plugin_slug=$PLUGIN_SLUG" >> $GITHUB_ENV
+          echo "text_domain=$TEXT_DOMAIN" >> $GITHUB_ENV
           echo "version=$VERSION" >> $GITHUB_ENV
           echo "zip_file_name=$ZIP_FILE_NAME" >> $GITHUB_ENV
 
@@ -67,7 +69,7 @@ jobs:
       - name: Generate translation template
         working-directory: ${{ env.plugin_slug }}
         run: |
-          wp i18n make-pot . languages/${{ env.plugin_slug }}.pot \
+          wp i18n make-pot . languages/${{ env.text_domain }}.pot \
             --exclude=src,docs
 
       - name: Check stable version in readme.txt

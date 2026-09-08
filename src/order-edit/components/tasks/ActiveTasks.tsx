@@ -135,19 +135,19 @@ const ActiveTasks: React.FC = () => {
 
 		openEditTaskModal({
 			task,
-			title: __('Edit task', 'advanced-order-manager'),
+			title: __('Edit task', 'advanced-order-manager-for-woocommerce'),
 		});
 	};
 
 	const handleDeleteClick = async (taskId: number) => {
 		const confirmationResult = await confirm({
-			title: __('Delete this task?', 'advanced-order-manager'),
+			title: __('Delete this task?', 'advanced-order-manager-for-woocommerce'),
 			message: __(
 				'Are you sure you want to delete this task? This action cannot be undone.',
-				'advanced-order-manager'
+				'advanced-order-manager-for-woocommerce'
 			),
-			confirmText: __('Delete', 'advanced-order-manager'),
-			cancelText: __('Cancel', 'advanced-order-manager'),
+			confirmText: __('Delete', 'advanced-order-manager-for-woocommerce'),
+			cancelText: __('Cancel', 'advanced-order-manager-for-woocommerce'),
 			action: 'delete',
 		});
 
@@ -199,7 +199,7 @@ const ActiveTasks: React.FC = () => {
 					loadingError?.message ||
 					__(
 						'Error loading data. Please try again.',
-						'advanced-order-manager'
+						'advanced-order-manager-for-woocommerce'
 					)
 				}
 				onRetry={refreshTasks}
@@ -214,8 +214,8 @@ const ActiveTasks: React.FC = () => {
 		return (
 			<EmptyState
 				icon="note"
-				message={__('No tasks found.', 'advanced-order-manager')}
-				actionText={__('Add Task', 'advanced-order-manager')}
+				message={__('No tasks found.', 'advanced-order-manager-for-woocommerce')}
+				actionText={__('Add Task', 'advanced-order-manager-for-woocommerce')}
 			/>
 		);
 	}
@@ -223,7 +223,7 @@ const ActiveTasks: React.FC = () => {
 	return (
 		<div className="task-list-container active-tasks-container">
 			<h4 className="screen-reader-text">
-				{__('Active Tasks', 'advanced-order-manager')}
+				{__('Active Tasks', 'advanced-order-manager-for-woocommerce')}
 			</h4>
 			<ul className="task-list">
 				{visibleTasks.map((item) => {
@@ -247,7 +247,7 @@ const ActiveTasks: React.FC = () => {
 										<span className="task-archived-message">
 											{__(
 												'You archived this task',
-												'advanced-order-manager'
+												'advanced-order-manager-for-woocommerce'
 											)}
 										</span>
 										<a
@@ -256,7 +256,7 @@ const ActiveTasks: React.FC = () => {
 										>
 											{__(
 												'Go to archive',
-												'advanced-order-manager'
+												'advanced-order-manager-for-woocommerce'
 											)}
 											{' \u2192'}
 										</a>
@@ -268,7 +268,7 @@ const ActiveTasks: React.FC = () => {
 											handleUndoArchive(taskId)
 										}
 									>
-										{__('Undo', 'advanced-order-manager')}
+										{__('Undo', 'advanced-order-manager-for-woocommerce')}
 									</button>
 								</div>
 							</li>

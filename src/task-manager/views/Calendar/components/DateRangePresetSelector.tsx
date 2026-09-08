@@ -15,7 +15,7 @@ const DateRangePresetSelector: React.FC<DateRangePresetSelectorProps> = ({
 		<div className="calendar-date-range-preset-selector">
 			<label htmlFor="date-range-preset-select">
 				<span className="screen-reader-text">
-					{__('Date Range Preset', 'advanced-order-manager')}
+					{__('Date Range Preset', 'advanced-order-manager-for-woocommerce')}
 				</span>
 			</label>
 			<select
@@ -24,34 +24,34 @@ const DateRangePresetSelector: React.FC<DateRangePresetSelectorProps> = ({
 				onChange={(e) => onChange(e.target.value as DateRangePreset)}
 			>
 				<option value="today">
-					{__('Today', 'advanced-order-manager')}
+					{__('Today', 'advanced-order-manager-for-woocommerce')}
 				</option>
 				<option value="tomorrow">
-					{__('Tomorrow', 'advanced-order-manager')}
+					{__('Tomorrow', 'advanced-order-manager-for-woocommerce')}
 				</option>
 				<option value="yesterday">
-					{__('Yesterday', 'advanced-order-manager')}
+					{__('Yesterday', 'advanced-order-manager-for-woocommerce')}
 				</option>
 				<option value="current-week">
-					{__('Current Week', 'advanced-order-manager')}
+					{__('Current Week', 'advanced-order-manager-for-woocommerce')}
 				</option>
 				<option value="next-week">
-					{__('Next Week', 'advanced-order-manager')}
+					{__('Next Week', 'advanced-order-manager-for-woocommerce')}
 				</option>
 				<option value="last-week">
-					{__('Last Week', 'advanced-order-manager')}
+					{__('Last Week', 'advanced-order-manager-for-woocommerce')}
 				</option>
 				<option value="current-month">
-					{__('Current Month', 'advanced-order-manager')}
+					{__('Current Month', 'advanced-order-manager-for-woocommerce')}
 				</option>
 				<option value="next-month">
-					{__('Next Month', 'advanced-order-manager')}
+					{__('Next Month', 'advanced-order-manager-for-woocommerce')}
 				</option>
 				<option value="last-month">
-					{__('Last Month', 'advanced-order-manager')}
+					{__('Last Month', 'advanced-order-manager-for-woocommerce')}
 				</option>
 				<option value="custom">
-					{__('Custom', 'advanced-order-manager')}
+					{__('Custom', 'advanced-order-manager-for-woocommerce')}
 				</option>
 			</select>
 		</div>
