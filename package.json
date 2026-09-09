@@ -1,6 +1,6 @@
 {
   "name": "advanced-order-manager-for-woocommerce",
-  "version": "1.1.0",
+  "version": "1.0.0",
   "main": "webpack.config.js",
   "scripts": {
     "build": "webpack --mode production",
