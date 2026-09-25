@@ -49,16 +49,28 @@ export const StatusTable = ({
 				<thead>
 					<tr>
 						<th id="label-header">
-							{__('Label', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+							{__(
+								'Label',
+								'out-the-door-order-tasks-workflows-for-woocommerce'
+							)}
 						</th>
 						<th id="color-header">
-							{__('Color', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+							{__(
+								'Color',
+								'out-the-door-order-tasks-workflows-for-woocommerce'
+							)}
 						</th>
 						<th id="slug-header">
-							{__('Slug', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+							{__(
+								'Slug',
+								'out-the-door-order-tasks-workflows-for-woocommerce'
+							)}
 						</th>
 						<th id="actions-header">
-							{__('Actions', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+							{__(
+								'Actions',
+								'out-the-door-order-tasks-workflows-for-woocommerce'
+							)}
 						</th>
 					</tr>
 				</thead>
@@ -201,7 +213,10 @@ export const StatusTable = ({
 					className="wpo-button wpo-button-primary"
 					onClick={onStartCreate}
 				>
-					{__('Add new status', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+					{__(
+						'Add new status',
+						'out-the-door-order-tasks-workflows-for-woocommerce'
+					)}
 				</button>
 			)}
 		</>

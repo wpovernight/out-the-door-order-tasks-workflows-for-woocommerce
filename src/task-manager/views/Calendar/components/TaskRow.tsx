@@ -59,13 +59,22 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onTaskClick }) => {
 
 	const handleDelete = async (taskId: number) => {
 		const confirmationResult = await confirm({
-			title: __('Delete this task?', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+			title: __(
+				'Delete this task?',
+				'out-the-door-order-tasks-workflows-for-woocommerce'
+			),
 			message: __(
 				'Are you sure you want to delete this task? This action cannot be undone.',
 				'out-the-door-order-tasks-workflows-for-woocommerce'
 			),
-			confirmText: __('Delete', 'out-the-door-order-tasks-workflows-for-woocommerce'),
-			cancelText: __('Cancel', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+			confirmText: __(
+				'Delete',
+				'out-the-door-order-tasks-workflows-for-woocommerce'
+			),
+			cancelText: __(
+				'Cancel',
+				'out-the-door-order-tasks-workflows-for-woocommerce'
+			),
 			action: 'delete',
 		});
 

@@ -47,8 +47,14 @@ const TaskRow: React.FC<TaskRowProps> = ({ task }) => {
 				'Are you sure you want to delete this task? This action cannot be undone.',
 				'out-the-door-order-tasks-workflows-for-woocommerce'
 			),
-			confirmText: __('Delete', 'out-the-door-order-tasks-workflows-for-woocommerce'),
-			cancelText: __('Cancel', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+			confirmText: __(
+				'Delete',
+				'out-the-door-order-tasks-workflows-for-woocommerce'
+			),
+			cancelText: __(
+				'Cancel',
+				'out-the-door-order-tasks-workflows-for-woocommerce'
+			),
 			action: 'delete',
 		});
 
@@ -62,13 +68,22 @@ const TaskRow: React.FC<TaskRowProps> = ({ task }) => {
 
 	const handleRestore = async (taskId: number) => {
 		const confirmationResult = await confirm({
-			title: __('Restore this task?', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+			title: __(
+				'Restore this task?',
+				'out-the-door-order-tasks-workflows-for-woocommerce'
+			),
 			message: __(
 				'Once restored, you can locate this task in the board tab.',
 				'out-the-door-order-tasks-workflows-for-woocommerce'
 			),
-			confirmText: __('Restore', 'out-the-door-order-tasks-workflows-for-woocommerce'),
-			cancelText: __('Cancel', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+			confirmText: __(
+				'Restore',
+				'out-the-door-order-tasks-workflows-for-woocommerce'
+			),
+			cancelText: __(
+				'Cancel',
+				'out-the-door-order-tasks-workflows-for-woocommerce'
+			),
 			action: 'restore',
 		});
 
@@ -147,10 +162,16 @@ const TaskRow: React.FC<TaskRowProps> = ({ task }) => {
 								e.stopPropagation();
 								handleRestore(task.id);
 							}}
-							title={__('Restore Task', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+							title={__(
+								'Restore Task',
+								'out-the-door-order-tasks-workflows-for-woocommerce'
+							)}
 						>
 							<span className="screen-reader-text">
-								{__('Restore Task', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+								{__(
+									'Restore Task',
+									'out-the-door-order-tasks-workflows-for-woocommerce'
+								)}
 							</span>
 						</button>
 					</li>
@@ -162,10 +183,16 @@ const TaskRow: React.FC<TaskRowProps> = ({ task }) => {
 								e.stopPropagation();
 								handleDelete(task.id);
 							}}
-							title={__('Delete Task', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+							title={__(
+								'Delete Task',
+								'out-the-door-order-tasks-workflows-for-woocommerce'
+							)}
 						>
 							<span className="screen-reader-text">
-								{__('Delete Task', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+								{__(
+									'Delete Task',
+									'out-the-door-order-tasks-workflows-for-woocommerce'
+								)}
 							</span>
 						</button>
 					</li>

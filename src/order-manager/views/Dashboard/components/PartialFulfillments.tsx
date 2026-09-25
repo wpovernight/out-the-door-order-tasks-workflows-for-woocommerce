@@ -251,7 +251,10 @@ export const PartialFulfillments = ({
 							href="edit.php?post_type=shop_order"
 							className="wpo-button view-all-link"
 						>
-							{__('View all orders', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+							{__(
+								'View all orders',
+								'out-the-door-order-tasks-workflows-for-woocommerce'
+							)}
 						</a>
 					</div>
 				)

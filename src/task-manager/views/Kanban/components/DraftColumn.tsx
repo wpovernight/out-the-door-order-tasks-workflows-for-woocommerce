@@ -65,7 +65,10 @@ export const DraftColumn: React.FC<DraftColumnProps> = ({
 					message:
 						error instanceof Error && error.message
 							? error.message
-							: __('Please try again.', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+							: __(
+									'Please try again.',
+									'out-the-door-order-tasks-workflows-for-woocommerce'
+								),
 					type: ToastType.ERROR,
 				});
 				inputRef.current?.select();
@@ -105,7 +108,10 @@ export const DraftColumn: React.FC<DraftColumnProps> = ({
 								className="wpo-button wpo-button-icon cancel-edit-title-button"
 							>
 								<span className="screen-reader-text">
-									{__('Cancel', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+									{__(
+										'Cancel',
+										'out-the-door-order-tasks-workflows-for-woocommerce'
+									)}
 								</span>
 							</button>
 							<span className="wpo-otd-vertical-divider" />
@@ -115,7 +121,10 @@ export const DraftColumn: React.FC<DraftColumnProps> = ({
 								className="wpo-button wpo-button-icon save-title-button"
 							>
 								<span className="screen-reader-text">
-									{__('Save', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+									{__(
+										'Save',
+										'out-the-door-order-tasks-workflows-for-woocommerce'
+									)}
 								</span>
 							</button>
 						</div>

@@ -22,7 +22,10 @@ interface AsyncMultiSelectProps {
 }
 
 export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
-	placeholder = __('Search…', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+	placeholder = __(
+		'Search…',
+		'out-the-door-order-tasks-workflows-for-woocommerce'
+	),
 	selectedOptions = [],
 	id,
 	className,
@@ -202,7 +205,10 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 			<div className="screen-reader-text" aria-live="polite">
 				{(() => {
 					if (loading) {
-						return __('Loading results…', 'out-the-door-order-tasks-workflows-for-woocommerce');
+						return __(
+							'Loading results…',
+							'out-the-door-order-tasks-workflows-for-woocommerce'
+						);
 					}
 					if (showResults) {
 						return results.length
@@ -214,7 +220,10 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 									),
 									results.length
 								)
-							: __('No results found', 'out-the-door-order-tasks-workflows-for-woocommerce');
+							: __(
+									'No results found',
+									'out-the-door-order-tasks-workflows-for-woocommerce'
+								);
 					}
 					return '';
 				})()}
@@ -222,12 +231,22 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 
 			{showResults && loading && (
 				<div className="wpo-otd-async-multi-select-message">
-					<p>{__('Loading…', 'out-the-door-order-tasks-workflows-for-woocommerce')}</p>
+					<p>
+						{__(
+							'Loading…',
+							'out-the-door-order-tasks-workflows-for-woocommerce'
+						)}
+					</p>
 				</div>
 			)}
 			{showResults && !loading && !Boolean(results.length) && (
 				<div className="wpo-otd-async-multi-select-message">
-					<p>{__('No results found', 'out-the-door-order-tasks-workflows-for-woocommerce')}</p>
+					<p>
+						{__(
+							'No results found',
+							'out-the-door-order-tasks-workflows-for-woocommerce'
+						)}
+					</p>
 				</div>
 			)}
 			{showResults && !loading && Boolean(results.length) && (
@@ -275,7 +294,10 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 								onClick={() => handleRemoveOption(option.id)}
 							>
 								<span className="screen-reader-text">
-									{__('Close', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+									{__(
+										'Close',
+										'out-the-door-order-tasks-workflows-for-woocommerce'
+									)}
 								</span>
 							</button>
 						</li>

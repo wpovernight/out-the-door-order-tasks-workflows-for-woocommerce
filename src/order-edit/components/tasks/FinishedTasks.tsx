@@ -19,19 +19,31 @@ const FinishedTasks: React.FC = () => {
 
 		openEditTaskModal({
 			task,
-			title: __('Edit task', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+			title: __(
+				'Edit task',
+				'out-the-door-order-tasks-workflows-for-woocommerce'
+			),
 		});
 	};
 
 	const handleDeleteClick = async (taskId: number) => {
 		const confirmationResult = await confirm({
-			title: __('Delete this task?', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+			title: __(
+				'Delete this task?',
+				'out-the-door-order-tasks-workflows-for-woocommerce'
+			),
 			message: __(
 				'Are you sure you want to delete this task? This action cannot be undone.',
 				'out-the-door-order-tasks-workflows-for-woocommerce'
 			),
-			confirmText: __('Delete', 'out-the-door-order-tasks-workflows-for-woocommerce'),
-			cancelText: __('Cancel', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+			confirmText: __(
+				'Delete',
+				'out-the-door-order-tasks-workflows-for-woocommerce'
+			),
+			cancelText: __(
+				'Cancel',
+				'out-the-door-order-tasks-workflows-for-woocommerce'
+			),
 			action: 'delete',
 		});
 
@@ -43,7 +55,10 @@ const FinishedTasks: React.FC = () => {
 			await deleteTask(taskId);
 		} catch {
 			await notice({
-				title: __('Delete failed', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+				title: __(
+					'Delete failed',
+					'out-the-door-order-tasks-workflows-for-woocommerce'
+				),
 				message: __(
 					'Failed to delete task. Please try again.',
 					'out-the-door-order-tasks-workflows-for-woocommerce'
@@ -70,8 +85,11 @@ const FinishedTasks: React.FC = () => {
 				style={!isExpanded ? { display: 'none' } : {}}
 			>
 				<h4>
-					{__('Done Tasks', 'out-the-door-order-tasks-workflows-for-woocommerce')} (
-					{finishedCount})
+					{__(
+						'Done Tasks',
+						'out-the-door-order-tasks-workflows-for-woocommerce'
+					)}{' '}
+					({finishedCount})
 				</h4>
 				<ul className="task-list">
 					{finishedTasks.map((task) => (
@@ -98,8 +116,14 @@ const FinishedTasks: React.FC = () => {
 				type="button"
 			>
 				{isExpanded
-					? __('Hide Done Tasks', 'out-the-door-order-tasks-workflows-for-woocommerce')
-					: __('View Done Tasks', 'out-the-door-order-tasks-workflows-for-woocommerce')}{' '}
+					? __(
+							'Hide Done Tasks',
+							'out-the-door-order-tasks-workflows-for-woocommerce'
+						)
+					: __(
+							'View Done Tasks',
+							'out-the-door-order-tasks-workflows-for-woocommerce'
+						)}{' '}
 				({finishedCount})
 			</button>
 		</div>

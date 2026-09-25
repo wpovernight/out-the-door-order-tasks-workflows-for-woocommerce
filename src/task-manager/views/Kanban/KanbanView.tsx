@@ -43,7 +43,10 @@ export const KanbanView: React.FC = () => {
 	return (
 		<>
 			<h3 className="screen-reader-text">
-				{__('Task Board', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+				{__(
+					'Task Board',
+					'out-the-door-order-tasks-workflows-for-woocommerce'
+				)}
 			</h3>
 			<ViewTaskProvider>
 				<KanbanToolbar />

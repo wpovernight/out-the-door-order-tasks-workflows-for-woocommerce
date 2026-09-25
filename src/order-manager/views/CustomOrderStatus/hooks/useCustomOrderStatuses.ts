@@ -73,7 +73,10 @@ export function useCustomOrderStatuses(): UseCustomOrderStatusesResult {
 		} catch (error) {
 			reportError(
 				error,
-				__('Could not create status', 'out-the-door-order-tasks-workflows-for-woocommerce')
+				__(
+					'Could not create status',
+					'out-the-door-order-tasks-workflows-for-woocommerce'
+				)
 			);
 			throw error;
 		} finally {
@@ -94,7 +97,10 @@ export function useCustomOrderStatuses(): UseCustomOrderStatusesResult {
 		} catch (error) {
 			reportError(
 				error,
-				__('Could not update status', 'out-the-door-order-tasks-workflows-for-woocommerce')
+				__(
+					'Could not update status',
+					'out-the-door-order-tasks-workflows-for-woocommerce'
+				)
 			);
 			throw error;
 		} finally {
@@ -120,7 +126,10 @@ export function useCustomOrderStatuses(): UseCustomOrderStatusesResult {
 		} catch (error) {
 			reportError(
 				error,
-				__('Could not delete status', 'out-the-door-order-tasks-workflows-for-woocommerce')
+				__(
+					'Could not delete status',
+					'out-the-door-order-tasks-workflows-for-woocommerce'
+				)
 			);
 			throw error;
 		} finally {

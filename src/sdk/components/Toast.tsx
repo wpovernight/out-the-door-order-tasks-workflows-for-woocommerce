@@ -32,7 +32,10 @@ export const Toast: React.FC<ToastProps> = ({
 					onClick={onClose}
 				>
 					<span className="screen-reader-text">
-						{__('Close', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+						{__(
+							'Close',
+							'out-the-door-order-tasks-workflows-for-woocommerce'
+						)}
 					</span>
 				</button>
 			</div>

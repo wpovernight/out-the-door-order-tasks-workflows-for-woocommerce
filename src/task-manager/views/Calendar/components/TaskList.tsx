@@ -42,24 +42,57 @@ const TaskList: React.FC<TaskListProps> = ({
 
 		if (dateRangePreset !== 'custom') {
 			const presetLabels: Record<string, string> = {
-				today: __('Today', 'out-the-door-order-tasks-workflows-for-woocommerce'),
-				tomorrow: __('Tomorrow', 'out-the-door-order-tasks-workflows-for-woocommerce'),
-				yesterday: __('Yesterday', 'out-the-door-order-tasks-workflows-for-woocommerce'),
-				'current-week': __('Current Week', 'out-the-door-order-tasks-workflows-for-woocommerce'),
-				'next-week': __('Next Week', 'out-the-door-order-tasks-workflows-for-woocommerce'),
-				'last-week': __('Last Week', 'out-the-door-order-tasks-workflows-for-woocommerce'),
-				'current-month': __('Current Month', 'out-the-door-order-tasks-workflows-for-woocommerce'),
-				'next-month': __('Next Month', 'out-the-door-order-tasks-workflows-for-woocommerce'),
-				'last-month': __('Last Month', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+				today: __(
+					'Today',
+					'out-the-door-order-tasks-workflows-for-woocommerce'
+				),
+				tomorrow: __(
+					'Tomorrow',
+					'out-the-door-order-tasks-workflows-for-woocommerce'
+				),
+				yesterday: __(
+					'Yesterday',
+					'out-the-door-order-tasks-workflows-for-woocommerce'
+				),
+				'current-week': __(
+					'Current Week',
+					'out-the-door-order-tasks-workflows-for-woocommerce'
+				),
+				'next-week': __(
+					'Next Week',
+					'out-the-door-order-tasks-workflows-for-woocommerce'
+				),
+				'last-week': __(
+					'Last Week',
+					'out-the-door-order-tasks-workflows-for-woocommerce'
+				),
+				'current-month': __(
+					'Current Month',
+					'out-the-door-order-tasks-workflows-for-woocommerce'
+				),
+				'next-month': __(
+					'Next Month',
+					'out-the-door-order-tasks-workflows-for-woocommerce'
+				),
+				'last-month': __(
+					'Last Month',
+					'out-the-door-order-tasks-workflows-for-woocommerce'
+				),
 			};
 			const presetLabel =
 				presetLabels[dateRangePreset] ||
-				__('Today', 'out-the-door-order-tasks-workflows-for-woocommerce');
+				__(
+					'Today',
+					'out-the-door-order-tasks-workflows-for-woocommerce'
+				);
 			return (
 				<>
 					{sprintf(
 						/* translators: %s: date range label (e.g. "Today", "Current Week") */
-						__("%s's tasks", 'out-the-door-order-tasks-workflows-for-woocommerce'),
+						__(
+							"%s's tasks",
+							'out-the-door-order-tasks-workflows-for-woocommerce'
+						),
 						presetLabel
 					)}{' '}
 					{taskCountBadge}
@@ -86,7 +119,11 @@ const TaskList: React.FC<TaskListProps> = ({
 		// Fallback
 		return (
 			<>
-				{__('Tasks', 'out-the-door-order-tasks-workflows-for-woocommerce')} - {taskCountBadge}
+				{__(
+					'Tasks',
+					'out-the-door-order-tasks-workflows-for-woocommerce'
+				)}{' '}
+				- {taskCountBadge}
 			</>
 		);
 	};

@@ -51,11 +51,20 @@ export const StatusForm = ({
 
 	const foreground = getForegroundColor(background);
 
-	let submitLabel = __('Create', 'out-the-door-order-tasks-workflows-for-woocommerce');
+	let submitLabel = __(
+		'Create',
+		'out-the-door-order-tasks-workflows-for-woocommerce'
+	);
 	if (isSaving) {
-		submitLabel = __('Saving…', 'out-the-door-order-tasks-workflows-for-woocommerce');
+		submitLabel = __(
+			'Saving…',
+			'out-the-door-order-tasks-workflows-for-woocommerce'
+		);
 	} else if (isEditing) {
-		submitLabel = __('Update', 'out-the-door-order-tasks-workflows-for-woocommerce');
+		submitLabel = __(
+			'Update',
+			'out-the-door-order-tasks-workflows-for-woocommerce'
+		);
 	}
 
 	const handleSubmit = (e: React.FormEvent) => {
@@ -77,7 +86,10 @@ export const StatusForm = ({
 					<fieldset>
 						<div id="label-field" className="form-field">
 							<label htmlFor="cos-label">
-								{__('Status Name', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+								{__(
+									'Status Name',
+									'out-the-door-order-tasks-workflows-for-woocommerce'
+								)}
 							</label>
 							<input
 								id="cos-label"
@@ -93,7 +105,10 @@ export const StatusForm = ({
 						</div>
 						<div id="preview-field" className="form-field">
 							<span className="label">
-								{__('Preview', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+								{__(
+									'Preview',
+									'out-the-door-order-tasks-workflows-for-woocommerce'
+								)}
 							</span>
 							<span
 								className="status-preview"
@@ -103,12 +118,18 @@ export const StatusForm = ({
 								}}
 							>
 								{label ||
-									__('Status', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+									__(
+										'Status',
+										'out-the-door-order-tasks-workflows-for-woocommerce'
+									)}
 							</span>
 						</div>
 						<div id="color-field" className="form-field">
 							<label htmlFor="cos-background">
-								{__('Color', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+								{__(
+									'Color',
+									'out-the-door-order-tasks-workflows-for-woocommerce'
+								)}
 							</label>
 							<div
 								className="color-input-group"
@@ -144,7 +165,10 @@ export const StatusForm = ({
 						</div>
 						<div id="slug-field" className="form-field">
 							<label htmlFor="cos-key">
-								{__('Slug', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+								{__(
+									'Slug',
+									'out-the-door-order-tasks-workflows-for-woocommerce'
+								)}
 							</label>
 							{/*
 								`pattern` is compiled with the regex `v` flag, which treats a
@@ -190,7 +214,10 @@ export const StatusForm = ({
 								onClick={onCancel}
 								disabled={isSaving}
 							>
-								{__('Cancel', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+								{__(
+									'Cancel',
+									'out-the-door-order-tasks-workflows-for-woocommerce'
+								)}
 							</button>
 						</li>
 					</ul>

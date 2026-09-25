@@ -72,7 +72,10 @@ export const TodayTasks = () => {
 
 	const handleAddTask = () => {
 		openCreateTaskModal({
-			title: __('Add Task', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+			title: __(
+				'Add Task',
+				'out-the-door-order-tasks-workflows-for-woocommerce'
+			),
 			initialValues: {
 				dueDate: new Date().toISOString().split('T')[0],
 			},
@@ -87,19 +90,31 @@ export const TodayTasks = () => {
 
 		openEditTaskModal({
 			task,
-			title: __('Edit task', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+			title: __(
+				'Edit task',
+				'out-the-door-order-tasks-workflows-for-woocommerce'
+			),
 		});
 	};
 
 	const handleDeleteClick = async (taskId: number) => {
 		const confirmationResult = await confirm({
-			title: __('Delete this task?', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+			title: __(
+				'Delete this task?',
+				'out-the-door-order-tasks-workflows-for-woocommerce'
+			),
 			message: __(
 				'Are you sure you want to delete this task? This action cannot be undone.',
 				'out-the-door-order-tasks-workflows-for-woocommerce'
 			),
-			confirmText: __('Delete', 'out-the-door-order-tasks-workflows-for-woocommerce'),
-			cancelText: __('Cancel', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+			confirmText: __(
+				'Delete',
+				'out-the-door-order-tasks-workflows-for-woocommerce'
+			),
+			cancelText: __(
+				'Cancel',
+				'out-the-door-order-tasks-workflows-for-woocommerce'
+			),
 			action: 'delete',
 		});
 
@@ -145,7 +160,10 @@ export const TodayTasks = () => {
 		<div className="dashboard-widget" id="today-tasks">
 			<div className="header">
 				<h3>
-					{__("Today's tasks", 'out-the-door-order-tasks-workflows-for-woocommerce')}{' '}
+					{__(
+						"Today's tasks",
+						'out-the-door-order-tasks-workflows-for-woocommerce'
+					)}{' '}
 					<span className="wpo-count-badge">
 						{todayActive.length}
 					</span>
@@ -154,10 +172,16 @@ export const TodayTasks = () => {
 					type="button"
 					className="wpo-button wpo-button-icon add-new-task"
 					onClick={handleAddTask}
-					title={__('Add Task', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+					title={__(
+						'Add Task',
+						'out-the-door-order-tasks-workflows-for-woocommerce'
+					)}
 				>
 					<span className="screen-reader-text">
-						{__('Add Task', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+						{__(
+							'Add Task',
+							'out-the-door-order-tasks-workflows-for-woocommerce'
+						)}
 					</span>
 				</button>
 			</div>
@@ -168,7 +192,10 @@ export const TodayTasks = () => {
 							'No tasks due today.',
 							'out-the-door-order-tasks-workflows-for-woocommerce'
 						)}
-						actionText={__('Add Task', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+						actionText={__(
+							'Add Task',
+							'out-the-door-order-tasks-workflows-for-woocommerce'
+						)}
 					/>
 				) : (
 					<>
@@ -253,7 +280,10 @@ export const TodayTasks = () => {
 			</div>
 			<div className="footer">
 				<a href="#/task-manager/" className="wpo-button view-all-link">
-					{__('View all tasks', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+					{__(
+						'View all tasks',
+						'out-the-door-order-tasks-workflows-for-woocommerce'
+					)}
 				</a>
 			</div>
 		</div>

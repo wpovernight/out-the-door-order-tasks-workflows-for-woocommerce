@@ -121,7 +121,10 @@ export const Pager = ({
 				onClick={() => onChange(currentPage - 1)}
 				disabled={disabled || isFirst}
 			>
-				{__('Previous', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+				{__(
+					'Previous',
+					'out-the-door-order-tasks-workflows-for-woocommerce'
+				)}
 			</button>
 
 			<div className="wpo-otd-pager-pages">
@@ -153,7 +156,10 @@ export const Pager = ({
 				onClick={() => onChange(currentPage + 1)}
 				disabled={disabled || isLast}
 			>
-				{__('Next', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+				{__(
+					'Next',
+					'out-the-door-order-tasks-workflows-for-woocommerce'
+				)}
 			</button>
 		</nav>
 	);

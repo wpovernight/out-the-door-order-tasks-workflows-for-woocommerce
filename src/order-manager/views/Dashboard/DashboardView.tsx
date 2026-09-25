@@ -43,7 +43,10 @@ export const DashboardView = () => {
 				<div className="dashboard-widget" id="today-tasks">
 					<div className="header">
 						<h3>
-							{__("Today's tasks", 'out-the-door-order-tasks-workflows-for-woocommerce')}{' '}
+							{__(
+								"Today's tasks",
+								'out-the-door-order-tasks-workflows-for-woocommerce'
+							)}{' '}
 							<span className="wpo-count-badge">0</span>
 						</h3>
 					</div>
@@ -52,7 +55,10 @@ export const DashboardView = () => {
 					</div>
 					<div className="footer">
 						<span className="wpo-button view-all-link">
-							{__('View all tasks', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+							{__(
+								'View all tasks',
+								'out-the-door-order-tasks-workflows-for-woocommerce'
+							)}
 						</span>
 					</div>
 				</div>
@@ -92,7 +98,10 @@ export const DashboardView = () => {
 	return (
 		<>
 			<h2 className="screen-reader-text">
-				{__('Dashboard', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+				{__(
+					'Dashboard',
+					'out-the-door-order-tasks-workflows-for-woocommerce'
+				)}
 			</h2>
 			<SidebarModalProvider>
 				<div className="dashboard-view">

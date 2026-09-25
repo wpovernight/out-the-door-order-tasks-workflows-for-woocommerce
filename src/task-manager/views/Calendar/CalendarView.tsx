@@ -42,7 +42,10 @@ export const CalendarView: React.FC = () => {
 	return (
 		<>
 			<h3 className="screen-reader-text">
-				{__('Task Calendar', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+				{__(
+					'Task Calendar',
+					'out-the-door-order-tasks-workflows-for-woocommerce'
+				)}
 			</h3>
 			<ViewTaskProvider>
 				<CalendarContent />

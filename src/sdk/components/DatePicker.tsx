@@ -21,31 +21,52 @@ interface DateParts {
 const DAYS_OF_WEEK = [
 	{
 		short: __('Mo', 'out-the-door-order-tasks-workflows-for-woocommerce'),
-		full: __('Monday', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+		full: __(
+			'Monday',
+			'out-the-door-order-tasks-workflows-for-woocommerce'
+		),
 	},
 	{
 		short: __('Tu', 'out-the-door-order-tasks-workflows-for-woocommerce'),
-		full: __('Tuesday', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+		full: __(
+			'Tuesday',
+			'out-the-door-order-tasks-workflows-for-woocommerce'
+		),
 	},
 	{
 		short: __('We', 'out-the-door-order-tasks-workflows-for-woocommerce'),
-		full: __('Wednesday', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+		full: __(
+			'Wednesday',
+			'out-the-door-order-tasks-workflows-for-woocommerce'
+		),
 	},
 	{
 		short: __('Th', 'out-the-door-order-tasks-workflows-for-woocommerce'),
-		full: __('Thursday', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+		full: __(
+			'Thursday',
+			'out-the-door-order-tasks-workflows-for-woocommerce'
+		),
 	},
 	{
 		short: __('Fr', 'out-the-door-order-tasks-workflows-for-woocommerce'),
-		full: __('Friday', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+		full: __(
+			'Friday',
+			'out-the-door-order-tasks-workflows-for-woocommerce'
+		),
 	},
 	{
 		short: __('Sa', 'out-the-door-order-tasks-workflows-for-woocommerce'),
-		full: __('Saturday', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+		full: __(
+			'Saturday',
+			'out-the-door-order-tasks-workflows-for-woocommerce'
+		),
 	},
 	{
 		short: __('Su', 'out-the-door-order-tasks-workflows-for-woocommerce'),
-		full: __('Sunday', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+		full: __(
+			'Sunday',
+			'out-the-door-order-tasks-workflows-for-woocommerce'
+		),
 	},
 ];
 
@@ -391,17 +412,26 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 				{selectedDate
 					? formatDisplayDate(selectedDate)
 					: placeholder ||
-						__('Date picker', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+						__(
+							'Date picker',
+							'out-the-door-order-tasks-workflows-for-woocommerce'
+						)}
 			</button>
 			{selectedDate && (
 				<button
 					type="button"
 					className="wpo-button wpo-button-icon wpo-otd-datepicker-clear"
 					onClick={handleClear}
-					title={__('Clear date', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+					title={__(
+						'Clear date',
+						'out-the-door-order-tasks-workflows-for-woocommerce'
+					)}
 				>
 					<span className="screen-reader-text">
-						{__('Clear date', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+						{__(
+							'Clear date',
+							'out-the-door-order-tasks-workflows-for-woocommerce'
+						)}
 					</span>
 				</button>
 			)}
@@ -412,10 +442,16 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 							type="button"
 							className="wpo-button wpo-button-icon wpo-otd-datepicker-nav prev"
 							onClick={goPrevious}
-							title={__('Previous', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+							title={__(
+								'Previous',
+								'out-the-door-order-tasks-workflows-for-woocommerce'
+							)}
 						>
 							<span className="screen-reader-text">
-								{__('Previous', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+								{__(
+									'Previous',
+									'out-the-door-order-tasks-workflows-for-woocommerce'
+								)}
 							</span>
 						</button>
 						<button
@@ -430,10 +466,16 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 							type="button"
 							className="wpo-button wpo-button-icon wpo-otd-datepicker-nav next"
 							onClick={goNext}
-							title={__('Next', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+							title={__(
+								'Next',
+								'out-the-door-order-tasks-workflows-for-woocommerce'
+							)}
 						>
 							<span className="screen-reader-text">
-								{__('Next', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+								{__(
+									'Next',
+									'out-the-door-order-tasks-workflows-for-woocommerce'
+								)}
 							</span>
 						</button>
 					</div>
@@ -617,7 +659,10 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 								className="wpo-button cancel"
 								onClick={closePicker}
 							>
-								{__('Cancel', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+								{__(
+									'Cancel',
+									'out-the-door-order-tasks-workflows-for-woocommerce'
+								)}
 							</button>
 						</li>
 						<li>
@@ -626,7 +671,10 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 								className="wpo-button wpo-button-primary today"
 								onClick={handleToday}
 							>
-								{__('Today', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+								{__(
+									'Today',
+									'out-the-door-order-tasks-workflows-for-woocommerce'
+								)}
 							</button>
 						</li>
 					</ul>

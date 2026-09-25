@@ -177,7 +177,10 @@ interface ErrorStateProps {
 export const ErrorState: React.FC<ErrorStateProps> = ({
 	message,
 	onRetry,
-	retryText = __('Try Again', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+	retryText = __(
+		'Try Again',
+		'out-the-door-order-tasks-workflows-for-woocommerce'
+	),
 }: {
 	message: string;
 	onRetry?: Function;

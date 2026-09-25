@@ -249,7 +249,10 @@ export const Column: React.FC<ColumnProps> = ({
 
 	const handleAddTask = () => {
 		openCreateTaskModal({
-			title: __('Add Task', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+			title: __(
+				'Add Task',
+				'out-the-door-order-tasks-workflows-for-woocommerce'
+			),
 			initialValues: {
 				statusIndex: column.position - 1,
 			},
@@ -277,11 +280,17 @@ export const Column: React.FC<ColumnProps> = ({
 		}).catch((error) => {
 			// The optimistic update already reverted the title, inform the user why.
 			addToast({
-				title: __('Failed to rename column.', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+				title: __(
+					'Failed to rename column.',
+					'out-the-door-order-tasks-workflows-for-woocommerce'
+				),
 				message:
 					error instanceof Error && error.message
 						? error.message
-						: __('Please try again.', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+						: __(
+								'Please try again.',
+								'out-the-door-order-tasks-workflows-for-woocommerce'
+							),
 				type: ToastType.ERROR,
 			});
 		});
@@ -307,13 +316,22 @@ export const Column: React.FC<ColumnProps> = ({
 
 		// Empty + not role-assigned → simple confirmation, nothing to lose.
 		const confirmed = await confirm({
-			title: __('Delete this column?', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+			title: __(
+				'Delete this column?',
+				'out-the-door-order-tasks-workflows-for-woocommerce'
+			),
 			message: __(
 				'This action cannot be undone.',
 				'out-the-door-order-tasks-workflows-for-woocommerce'
 			),
-			confirmText: __('Delete', 'out-the-door-order-tasks-workflows-for-woocommerce'),
-			cancelText: __('Cancel', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+			confirmText: __(
+				'Delete',
+				'out-the-door-order-tasks-workflows-for-woocommerce'
+			),
+			cancelText: __(
+				'Cancel',
+				'out-the-door-order-tasks-workflows-for-woocommerce'
+			),
 			action: 'delete',
 		});
 
@@ -417,7 +435,10 @@ export const Column: React.FC<ColumnProps> = ({
 								className="wpo-button wpo-button-icon wpo-otd-add-button"
 							>
 								<span className="screen-reader-text">
-									{__('Create', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+									{__(
+										'Create',
+										'out-the-door-order-tasks-workflows-for-woocommerce'
+									)}
 								</span>
 							</button>
 						</li>
@@ -431,7 +452,10 @@ export const Column: React.FC<ColumnProps> = ({
 								}}
 							>
 								<span className="screen-reader-text">
-									{__('Options', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+									{__(
+										'Options',
+										'out-the-door-order-tasks-workflows-for-woocommerce'
+									)}
 								</span>
 							</button>
 							<ul
@@ -482,7 +506,10 @@ export const Column: React.FC<ColumnProps> = ({
 										className="wpo-button delete-column"
 										onClick={handleDeleteColumn}
 									>
-										{__('Delete', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+										{__(
+											'Delete',
+											'out-the-door-order-tasks-workflows-for-woocommerce'
+										)}
 									</button>
 								</li>
 							</ul>
@@ -506,7 +533,10 @@ export const Column: React.FC<ColumnProps> = ({
 							className="wpo-button kanban-column-add-task"
 							onClick={handleAddTask}
 						>
-							{__('Add new task', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+							{__(
+								'Add new task',
+								'out-the-door-order-tasks-workflows-for-woocommerce'
+							)}
 						</button>
 					</div>
 				</div>

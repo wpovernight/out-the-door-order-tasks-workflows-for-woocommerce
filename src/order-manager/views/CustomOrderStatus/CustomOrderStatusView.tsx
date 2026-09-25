@@ -43,13 +43,22 @@ export const CustomOrderStatusView = () => {
 
 	const handleDelete = async (id: number) => {
 		const confirmationResult = await confirm({
-			title: __('Delete this status?', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+			title: __(
+				'Delete this status?',
+				'out-the-door-order-tasks-workflows-for-woocommerce'
+			),
 			message: __(
 				'Are you sure you want to delete this status? Orders with this status will be moved to On Hold.',
 				'out-the-door-order-tasks-workflows-for-woocommerce'
 			),
-			confirmText: __('Delete', 'out-the-door-order-tasks-workflows-for-woocommerce'),
-			cancelText: __('Cancel', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+			confirmText: __(
+				'Delete',
+				'out-the-door-order-tasks-workflows-for-woocommerce'
+			),
+			cancelText: __(
+				'Cancel',
+				'out-the-door-order-tasks-workflows-for-woocommerce'
+			),
 			action: 'delete',
 		});
 
@@ -67,7 +76,12 @@ export const CustomOrderStatusView = () => {
 	if (loadingStatus === 'loading') {
 		return (
 			<div className="custom-order-status-view">
-				<h3>{__('Active Statuses', 'out-the-door-order-tasks-workflows-for-woocommerce')}</h3>
+				<h3>
+					{__(
+						'Active Statuses',
+						'out-the-door-order-tasks-workflows-for-woocommerce'
+					)}
+				</h3>
 				<div className="cos-skeleton">
 					<SkeletonLine width="100%" height="2.5em" />
 					<SkeletonLine width="100%" height="2.5em" />
@@ -97,10 +111,18 @@ export const CustomOrderStatusView = () => {
 	return (
 		<>
 			<h2 className="screen-reader-text">
-				{__('Custom Order Statuses', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+				{__(
+					'Custom Order Statuses',
+					'out-the-door-order-tasks-workflows-for-woocommerce'
+				)}
 			</h2>
 			<div className="custom-order-status-view">
-				<h3>{__('Active Statuses', 'out-the-door-order-tasks-workflows-for-woocommerce')}</h3>
+				<h3>
+					{__(
+						'Active Statuses',
+						'out-the-door-order-tasks-workflows-for-woocommerce'
+					)}
+				</h3>
 				{statuses.length === 0 && !isCreating ? (
 					<EmptyState
 						icon="🏷"

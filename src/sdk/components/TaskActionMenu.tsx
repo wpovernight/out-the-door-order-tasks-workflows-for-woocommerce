@@ -103,7 +103,10 @@ export const TaskActionMenu: React.FC<TaskActionMenuProps> = ({
 		closeMenu(e);
 
 		const confirmationResult = await confirm({
-			title: __('Archive this task?', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+			title: __(
+				'Archive this task?',
+				'out-the-door-order-tasks-workflows-for-woocommerce'
+			),
 			message: createInterpolateElement(
 				__(
 					'Once archived, you can locate this task in the <strong>Task → Archive</strong> tab.',
@@ -111,8 +114,14 @@ export const TaskActionMenu: React.FC<TaskActionMenuProps> = ({
 				),
 				{ strong: <strong /> }
 			),
-			confirmText: __('Archive', 'out-the-door-order-tasks-workflows-for-woocommerce'),
-			cancelText: __('Cancel', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+			confirmText: __(
+				'Archive',
+				'out-the-door-order-tasks-workflows-for-woocommerce'
+			),
+			cancelText: __(
+				'Cancel',
+				'out-the-door-order-tasks-workflows-for-woocommerce'
+			),
 			action: 'archive',
 		});
 
@@ -274,7 +283,10 @@ export const TaskActionMenu: React.FC<TaskActionMenuProps> = ({
 				onClick={handleToggle}
 			>
 				<span className="screen-reader-text">
-					{__('Options', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+					{__(
+						'Options',
+						'out-the-door-order-tasks-workflows-for-woocommerce'
+					)}
 				</span>
 			</button>
 			{isOpen &&
@@ -291,7 +303,10 @@ export const TaskActionMenu: React.FC<TaskActionMenuProps> = ({
 									className="wpo-button task-edit-menu-item"
 									onClick={handleEditClick}
 								>
-									{__('Edit', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+									{__(
+										'Edit',
+										'out-the-door-order-tasks-workflows-for-woocommerce'
+									)}
 								</button>
 							</li>
 						)}
@@ -322,7 +337,10 @@ export const TaskActionMenu: React.FC<TaskActionMenuProps> = ({
 								className="wpo-button task-archive-menu-item"
 								onClick={handleArchiveClick}
 							>
-								{__('Archive', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+								{__(
+									'Archive',
+									'out-the-door-order-tasks-workflows-for-woocommerce'
+								)}
 							</button>
 						</li>
 						{showDelete && (
@@ -332,7 +350,10 @@ export const TaskActionMenu: React.FC<TaskActionMenuProps> = ({
 									className="wpo-button task-delete-menu-item"
 									onClick={handleDeleteClick}
 								>
-									{__('Delete', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+									{__(
+										'Delete',
+										'out-the-door-order-tasks-workflows-for-woocommerce'
+									)}
 								</button>
 							</li>
 						)}

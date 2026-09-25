@@ -43,8 +43,14 @@ const WooFulfillmentsList: React.FC<WooFulfillmentsListProps> = ({
 		return (
 			<EmptyState
 				icon="box"
-				message={__('No fulfillments yet.', 'out-the-door-order-tasks-workflows-for-woocommerce')}
-				actionText={__('Add Fulfillment', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+				message={__(
+					'No fulfillments yet.',
+					'out-the-door-order-tasks-workflows-for-woocommerce'
+				)}
+				actionText={__(
+					'Add Fulfillment',
+					'out-the-door-order-tasks-workflows-for-woocommerce'
+				)}
 				actionButtonProps={
 					{
 						'data-order-id': orderId,
@@ -58,7 +64,10 @@ const WooFulfillmentsList: React.FC<WooFulfillmentsListProps> = ({
 	return (
 		<div className="fulfillments-list-container">
 			<h4 className="screen-reader-text">
-				{__('Fulfillments', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+				{__(
+					'Fulfillments',
+					'out-the-door-order-tasks-workflows-for-woocommerce'
+				)}
 			</h4>
 			<ul className="fulfillments-list">
 				{fulfillments.map((fulfillment, index) => (

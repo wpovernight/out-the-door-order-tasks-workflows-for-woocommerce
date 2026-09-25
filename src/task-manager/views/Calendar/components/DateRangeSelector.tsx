@@ -128,7 +128,10 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 							htmlFor="date-input-start"
 							className="screen-reader-text"
 						>
-							{__('From', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+							{__(
+								'From',
+								'out-the-door-order-tasks-workflows-for-woocommerce'
+							)}
 						</label>
 						<input
 							id="date-input-start"
@@ -143,7 +146,10 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 							htmlFor="date-input-end"
 							className="screen-reader-text"
 						>
-							{__('To', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+							{__(
+								'To',
+								'out-the-door-order-tasks-workflows-for-woocommerce'
+							)}
 						</label>
 						<input
 							id="date-input-end"
@@ -160,7 +166,10 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 							htmlFor="date-input-single"
 							className="screen-reader-text"
 						>
-							{__('Select Date', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+							{__(
+								'Select Date',
+								'out-the-door-order-tasks-workflows-for-woocommerce'
+							)}
 						</label>
 						<input
 							id="date-input-single"
@@ -181,13 +190,19 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 					className="wpo-button wpo-clear-button"
 					onClick={onCancel}
 				>
-					{__('Clear', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+					{__(
+						'Clear',
+						'out-the-door-order-tasks-workflows-for-woocommerce'
+					)}
 				</button>
 				<button
 					className="wpo-button wpo-apply-button"
 					onClick={onApply}
 				>
-					{__('Apply', 'out-the-door-order-tasks-workflows-for-woocommerce')}
+					{__(
+						'Apply',
+						'out-the-door-order-tasks-workflows-for-woocommerce'
+					)}
 				</button>
 			</div>
 		</div>
