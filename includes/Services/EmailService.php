@@ -30,7 +30,7 @@ final class EmailService {
 		add_filter( 'woocommerce_email_actions', array( $this, 'register_email_actions' ) );
 
 		// Add action to include task details in email templates.
-		add_action( 'wpo_aom_email_task_details', array( $this, 'email_task_details' ), 10, 4 );
+		add_action( 'wpo_otd_email_task_details', array( $this, 'email_task_details' ), 10, 4 );
 	}
 
 	/**
@@ -41,8 +41,8 @@ final class EmailService {
 	 * @return array Modified email classes.
 	 */
 	public function register_email_classes( array $email_classes ): array {
-		$email_classes['WPO_AOM_Task_Created_Email'] = new TaskCreatedEmail();
-		$email_classes['WPO_AOM_Task_Updated_Email'] = new TaskUpdatedEmail( $this->task_manager_service );
+		$email_classes['WPO_OTD_Task_Created_Email'] = new TaskCreatedEmail();
+		$email_classes['WPO_OTD_Task_Updated_Email'] = new TaskUpdatedEmail( $this->task_manager_service );
 
 		return $email_classes;
 	}
@@ -55,8 +55,8 @@ final class EmailService {
 	 * @return array Modified email actions.
 	 */
 	public function register_email_actions( array $actions ): array {
-		$actions[] = 'wpo_aom_task_created';
-		$actions[] = 'wpo_aom_task_updated';
+		$actions[] = 'wpo_otd_task_created';
+		$actions[] = 'wpo_otd_task_updated';
 
 		return $actions;
 	}
@@ -119,7 +119,7 @@ final class EmailService {
 		 * @param array $field_types Map of field type => list of field slugs.
 		 */
 		$field_types = apply_filters(
-			'wpo_aom_email_task_updated_field_types',
+			'wpo_otd_email_task_updated_field_types',
 			array(
 				'select' => array( 'status', 'priority' ),
 				'date'   => array( 'due_date', 'done_date', 'archived_date' ),
@@ -157,7 +157,7 @@ final class EmailService {
 		 * @param string      $field_slug   The field slug.
 		 * @param array       $field_object The complete field object.
 		 */
-		$value = apply_filters( 'wpo_aom_email_task_updated_field_value', $value, $field_slug, $field_object );
+		$value = apply_filters( 'wpo_otd_email_task_updated_field_value', $value, $field_slug, $field_object );
 
 		return ! is_null( $value ) ? (string) $value : null;
 	}

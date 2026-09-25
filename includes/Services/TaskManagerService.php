@@ -50,7 +50,7 @@ final class TaskManagerService {
 	 */
 	public function register_hooks(): void {
 		// Rebalance task positions hook.
-		add_action( 'wpo_aom_rebalance_task_positions', array( $this, 'rebalance_task_positions' ) );
+		add_action( 'wpo_otd_rebalance_task_positions', array( $this, 'rebalance_task_positions' ) );
 	}
 
 	/** ================================
@@ -254,7 +254,7 @@ final class TaskManagerService {
 		 * @param array $task_with_fields Complete task data with fields and values.
 		 * @param array $field_values     Field values that were set on creation.
 		 */
-		do_action( 'wpo_aom_task_created', $task->id, $task_with_fields, $field_values_array );
+		do_action( 'wpo_otd_task_created', $task->id, $task_with_fields, $field_values_array );
 
 		return $task_with_fields;
 	}
@@ -418,7 +418,7 @@ final class TaskManagerService {
 		 * @param array $updated_fields   Associative array of field slugs that were changed,
 		 *                                with 'old_value' and 'new_value' for each.
 		 */
-		do_action( 'wpo_aom_task_updated', $task_id, $task_with_fields, $updated_fields );
+		do_action( 'wpo_otd_task_updated', $task_id, $task_with_fields, $updated_fields );
 
 		return $task_with_fields;
 	}
@@ -441,7 +441,7 @@ final class TaskManagerService {
 			 *
 			 * @param int       $task_id The ID of the deleted task.
 			 */
-			do_action( 'wpo_aom_task_deleted', $task_id );
+			do_action( 'wpo_otd_task_deleted', $task_id );
 		}
 
 		return $result;
@@ -472,7 +472,7 @@ final class TaskManagerService {
 			 * @param int   $field_id The ID of the created field.
 			 * @param array $data     The field data.
 			 */
-			do_action( 'wpo_aom_field_created', $field->id, $data );
+			do_action( 'wpo_otd_field_created', $field->id, $data );
 		} else {
 			$db_error = $this->task_field_repository->get_last_db_error();
 			Logger::error(
@@ -508,7 +508,7 @@ final class TaskManagerService {
 			 * @param int   $field_id The ID of the updated field.
 			 * @param array $data     The updated field data.
 			 */
-			do_action( 'wpo_aom_field_updated', $field_id, $data );
+			do_action( 'wpo_otd_field_updated', $field_id, $data );
 		} else {
 			$db_error = $this->task_field_repository->get_last_db_error();
 			Logger::error(
@@ -539,7 +539,7 @@ final class TaskManagerService {
 			 *
 			 * @param int $field_id The ID of the deleted field.
 			 */
-			do_action( 'wpo_aom_field_deleted', $field_id );
+			do_action( 'wpo_otd_field_deleted', $field_id );
 		}
 
 		return $result;
@@ -694,7 +694,7 @@ final class TaskManagerService {
 		 * @param int   $field_id    The ID of the field the option belongs to.
 		 * @param array $option_data The option data.
 		 */
-		do_action( 'wpo_aom_field_option_created', $option_id, $field_id, $option_data );
+		do_action( 'wpo_otd_field_option_created', $option_id, $field_id, $option_data );
 
 		return $option_data;
 	}
@@ -766,7 +766,7 @@ final class TaskManagerService {
 		 * @param int   $option_id   The ID of the updated option.
 		 * @param array $option_data The updated option data.
 		 */
-		do_action( 'wpo_aom_field_option_updated', $option_id, $option_data );
+		do_action( 'wpo_otd_field_option_updated', $option_id, $option_data );
 
 		return $option->to_array();
 	}
@@ -821,7 +821,7 @@ final class TaskManagerService {
 			 *
 			 * @param int $option_id The ID of the deleted option.
 			 */
-			do_action( 'wpo_aom_field_option_deleted', $option_id );
+			do_action( 'wpo_otd_field_option_deleted', $option_id );
 		}
 
 		return $result !== false;
@@ -889,7 +889,7 @@ final class TaskManagerService {
 		 * @param array $ordered_option_ids The array of ordered option IDs.
 		 * @param int   $field_id           The ID of the field the options belong to.
 		 */
-		$ordered_option_ids = apply_filters( 'wpo_aom_field_ordered_option_ids', $ordered_option_ids, $field_id );
+		$ordered_option_ids = apply_filters( 'wpo_otd_field_ordered_option_ids', $ordered_option_ids, $field_id );
 
 		// Update positions in the database.
 		$this->task_field_option_repository->update_positions( $field_id, $ordered_option_ids );
@@ -1060,7 +1060,7 @@ final class TaskManagerService {
 		 * @return float The new position.
 		 */
 		$new_position = apply_filters(
-			'wpo_aom_task_calculated_new_position',
+			'wpo_otd_task_calculated_new_position',
 			(float) number_format( $new_position, 5, '.', '' ),
 			$task_id,
 			$previous_task_id,
@@ -1114,7 +1114,7 @@ final class TaskManagerService {
 		 * @param array $updated_fields   Associative array of fields that were changed,
 		 *                                with 'old_value' and 'new_value' for each.
 		 */
-		do_action( 'wpo_aom_task_moved', $task_id, $target_status_id, $new_position, $updated_fields );
+		do_action( 'wpo_otd_task_moved', $task_id, $target_status_id, $new_position, $updated_fields );
 
 		return $new_position;
 	}
@@ -1151,7 +1151,7 @@ final class TaskManagerService {
 		 *
 		 * @return float The precision threshold.
 		 */
-		$precision_threshold = apply_filters( 'wpo_aom_task_position_precision_threshold', 0.0001 );
+		$precision_threshold = apply_filters( 'wpo_otd_task_position_precision_threshold', 0.0001 );
 
 		// Check for precision.
 		if ( abs( $next_position - $previous_position ) < $precision_threshold ) {
@@ -1199,7 +1199,7 @@ final class TaskManagerService {
 			 *
 			 * @param int $task_id The ID of the finished task.
 			 */
-			do_action( 'wpo_aom_task_marked_finished', $task_id );
+			do_action( 'wpo_otd_task_marked_finished', $task_id );
 		}
 
 		return (bool) $result;
@@ -1237,7 +1237,7 @@ final class TaskManagerService {
 		 *
 		 * @param int $task_id The ID of the archived task.
 		 */
-		do_action( 'wpo_aom_task_archived', $task_id );
+		do_action( 'wpo_otd_task_archived', $task_id );
 
 		return true;
 	}
@@ -1264,7 +1264,7 @@ final class TaskManagerService {
 		 *
 		 * @param int $task_id The ID of the unarchived task.
 		 */
-		do_action( 'wpo_aom_task_unarchived', $task_id );
+		do_action( 'wpo_otd_task_unarchived', $task_id );
 
 		return true;
 	}
@@ -1370,7 +1370,7 @@ final class TaskManagerService {
 		 * @param TaskFieldValue $field_value Original field value object.
 		 * @param TaskField      $field       Field definition object.
 		 */
-		return apply_filters( 'wpo_aom_task_get_field_value', $value, $field_value, $field );
+		return apply_filters( 'wpo_otd_task_get_field_value', $value, $field_value, $field );
 	}
 
 	/**
@@ -1389,13 +1389,13 @@ final class TaskManagerService {
 			return;
 		}
 
-		$hook_key = 'wpo_aom_rebalance_task_positions';
+		$hook_key = 'wpo_otd_rebalance_task_positions';
 
 		if (
 			\as_has_scheduled_action(
 				$hook_key,
 				array( 'status_id' => $status_id ),
-				'wpo_aom'
+				'wpo_otd'
 			)
 		) {
 			return;
@@ -1409,7 +1409,7 @@ final class TaskManagerService {
 		 * @return int The modified timestamp.
 		 */
 		$timestamp = apply_filters(
-			'wpo_aom_rebalance_task_positions_scheduled_time',
+			'wpo_otd_rebalance_task_positions_scheduled_time',
 			strtotime( '+1 minute' )
 		);
 
@@ -1417,7 +1417,7 @@ final class TaskManagerService {
 			$timestamp,
 			$hook_key,
 			array( 'status_id' => $status_id ),
-			'wpo_aom'
+			'wpo_otd'
 		);
 	}
 

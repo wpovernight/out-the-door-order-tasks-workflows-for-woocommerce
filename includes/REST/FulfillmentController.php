@@ -29,7 +29,7 @@ class FulfillmentController extends BaseRestController {
 		/**
 		 * Endpoint to retrieve orders based on their fulfillment status.
 		 *
-		 * Example: GET /wc/v3/wpo/aom/fulfillments/orders?status=fulfilled
+		 * Example: GET /wc/v3/wpo/otd/fulfillments/orders?status=fulfilled
 		 * Query Parameters:
 		 * - status (string, optional): The fulfillment status to filter orders by.
 		 *   Valid values are 'not-fulfilled', 'fulfilled', and 'partially-fulfilled'.
@@ -101,7 +101,7 @@ class FulfillmentController extends BaseRestController {
 		 * @param array  $data    The formatted order data.
 		 * @param string $status  The requested fulfillment status filter.
 		 */
-		$data = apply_filters( 'wpo_aom_rest_get_fulfillment_orders', array_values( $data ), $status );
+		$data = apply_filters( 'wpo_otd_rest_get_fulfillment_orders', array_values( $data ), $status );
 
 		return $this->respond_paginated( $data, $paginator, $pagination );
 	}

@@ -7,7 +7,7 @@ defined( 'ABSPATH' ) || exit;
 final class Logger {
 	private static ?\WC_Logger_Interface $wc_logger = null;
 
-	private static array $context = array( 'source' => 'wpo-aom' );
+	private static array $context = array( 'source' => 'wpo-otd' );
 
 	/**
 	 * Get the WC_Logger instance, initializing it on first use.
@@ -46,7 +46,7 @@ final class Logger {
 		 * @param string $level   The log level of the message.
 		 * @param string $message The message being logged.
 		 */
-		if ( ! apply_filters( 'wpo_aom_logging_enabled', true, $level, $message ) ) {
+		if ( ! apply_filters( 'wpo_otd_logging_enabled', true, $level, $message ) ) {
 			return;
 		}
 

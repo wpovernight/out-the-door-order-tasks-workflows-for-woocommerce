@@ -111,7 +111,7 @@ This layer ensures that workflow operations remain centralized and reusable.
 
 ### 5. REST API Endpoints
 Implements the API communication layer, exposing internal logic to both the frontend and external systems.
-All endpoints are prefixed with `wc/v3/wpo/aom/`.
+All endpoints are prefixed with `wc/v3/wpo/otd/`.
 
 📁 `includes/REST/`
 

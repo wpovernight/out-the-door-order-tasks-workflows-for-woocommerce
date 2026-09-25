@@ -27,7 +27,7 @@ do_action( 'woocommerce_email_header', $email_heading, $email );
 /**
  * @hooked EmailService::email_task_details() Shows the task details.
  */
-do_action( 'wpo_aom_email_task_details', $task_data, $sent_to_admin, $plain_text, $email );
+do_action( 'wpo_otd_email_task_details', $task_data, $sent_to_admin, $plain_text, $email );
 ?>
 
 <?php

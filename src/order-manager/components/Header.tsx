@@ -13,7 +13,7 @@ export default function Header() {
 	const { tab, setTab, tabs } = useTab();
 
 	const tabLabels = applyFilters(
-		'wpo_aom.tab_labels',
+		'wpo_otd.tab_labels',
 		coreTabLabels
 	) as Record<string, string>;
 

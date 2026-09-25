@@ -79,7 +79,7 @@ final class OutTheDoor {
 		 *
 		 * @param ServiceProvider[] $providers
 		 */
-		$providers = (array) apply_filters( 'wpo_aom_service_providers', array() );
+		$providers = (array) apply_filters( 'wpo_otd_service_providers', array() );
 
 		foreach ( $providers as $provider ) {
 			if ( $provider instanceof ServiceProvider ) {
@@ -87,7 +87,7 @@ final class OutTheDoor {
 			} else {
 				_doing_it_wrong(
 					__METHOD__,
-					esc_html__( 'Each "wpo_aom_service_providers" entry must implement ServiceProvider.', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
+					esc_html__( 'Each "wpo_otd_service_providers" entry must implement ServiceProvider.', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
 					'1.0.0'
 				);
 			}

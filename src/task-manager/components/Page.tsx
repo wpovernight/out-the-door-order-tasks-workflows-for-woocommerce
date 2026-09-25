@@ -20,7 +20,7 @@ const coreRoutes: TaskManagerRoute[] = [
 
 export default function Page() {
 	const routes = applyFilters(
-		'wpo_aom.task_manager_routes',
+		'wpo_otd.task_manager_routes',
 		coreRoutes
 	) as TaskManagerRoute[];
 

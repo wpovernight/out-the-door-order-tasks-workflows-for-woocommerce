@@ -9,7 +9,7 @@ use WPO\OTD\Utilities\Paginator;
 defined( 'ABSPATH' ) || exit;
 
 abstract class BaseRestController {
-	protected string $namespace = 'wc/v3/wpo/aom';
+	protected string $namespace = 'wc/v3/wpo/otd';
 
 	abstract public function register_routes(): void;
 
@@ -128,7 +128,7 @@ abstract class BaseRestController {
 		 *
 		 * @return bool Modified permission check result
 		 */
-		return (bool) apply_filters( 'wpo_aom_rest_api_permissions_check', wc_rest_check_manager_permissions( 'settings', 'edit' ), $request );
+		return (bool) apply_filters( 'wpo_otd_rest_api_permissions_check', wc_rest_check_manager_permissions( 'settings', 'edit' ), $request );
 	}
 
 	/**
@@ -146,7 +146,7 @@ abstract class BaseRestController {
 		 * @param array $rules The validation rules.
 		 * @param array $data  The data being validated.
 		 */
-		$rules = apply_filters( 'wpo_aom_rest_validation_rules', $rules, $data );
+		$rules = apply_filters( 'wpo_otd_rest_validation_rules', $rules, $data );
 
 		$errors = array();
 

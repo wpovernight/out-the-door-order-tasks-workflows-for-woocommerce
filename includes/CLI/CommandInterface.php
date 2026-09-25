@@ -16,7 +16,7 @@ interface CommandInterface {
 	public function __invoke( array $arguments, array $options ): void;
 
 	/**
-	 * The full WP-CLI command name (e.g. "aom generate-tasks").
+	 * The full WP-CLI command name (e.g. "otd generate-tasks").
 	 *
 	 * @return string
 	 */

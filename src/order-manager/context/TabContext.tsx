@@ -20,7 +20,7 @@ export const TabProvider: React.FC<{ children: React.ReactNode }> = ({
 	const navigate = useNavigate();
 	const location = useLocation();
 
-	const tabs = applyFilters('wpo_aom.tabs', CORE_TABS) as Tab[];
+	const tabs = applyFilters('wpo_otd.tabs', CORE_TABS) as Tab[];
 
 	// Extract tab from the first path segment (e.g., "/task-manager/kanban" -> "task-manager").
 	const tab = useMemo<Tab>(() => {

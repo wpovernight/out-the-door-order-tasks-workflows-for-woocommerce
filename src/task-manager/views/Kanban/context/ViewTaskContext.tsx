@@ -209,7 +209,7 @@ export const ViewTaskProvider: React.FC<{ children: React.ReactNode }> = ({
 			);
 		});
 		const grouped = applyFilters(
-			'wpo_aom.kanban_view_tasks',
+			'wpo_otd.kanban_view_tasks',
 			groupAndSortTasks(activeTasks, statuses),
 			{ tasks: activeTasks, statuses, controls: boardControls }
 		) as Record<string, Task[]>;

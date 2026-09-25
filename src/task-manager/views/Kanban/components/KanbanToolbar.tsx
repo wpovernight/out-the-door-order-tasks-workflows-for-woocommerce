@@ -5,7 +5,7 @@ import { useViewTasks } from '../context/ViewTaskContext';
 export const KanbanToolbar: React.FC = () => {
 	const { boardControls, setBoardControls } = useViewTasks();
 
-	const content = applyFilters('wpo_aom.kanban_toolbar', null, {
+	const content = applyFilters('wpo_otd.kanban_toolbar', null, {
 		controls: boardControls,
 		setControls: setBoardControls,
 	}) as React.ReactNode;

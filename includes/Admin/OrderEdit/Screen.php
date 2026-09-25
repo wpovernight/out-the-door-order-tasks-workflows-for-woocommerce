@@ -55,7 +55,7 @@ final class Screen {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 
 		// AJAX handler for saving fulfillment.
-		add_action( 'wp_ajax_wpo_aom_save_fulfillment', array( $this, 'ajax_save_fulfillment' ) );
+		add_action( 'wp_ajax_wpo_otd_save_fulfillment', array( $this, 'ajax_save_fulfillment' ) );
 	}
 
 	/**
@@ -150,7 +150,7 @@ final class Screen {
 		 *
 		 * @param string[] $deps Script handles the metabox depends on.
 		 */
-		$dependencies = apply_filters( 'wpo_aom_order_edit_metabox_script_deps', Assets::runtime_dependencies() );
+		$dependencies = apply_filters( 'wpo_otd_order_edit_metabox_script_deps', Assets::runtime_dependencies() );
 
 		// Do not need the suffix, since it's a React app and we are using webpack to handle the minification.
 		wp_enqueue_script(
@@ -169,10 +169,10 @@ final class Screen {
 			array(
 				'orderId'                  => absint( $order_id ),
 				'apiRoot'                  => esc_url_raw( rest_url( '/wc/v3' ) ),
-				'apiNamespace'             => 'wpo/aom',
+				'apiNamespace'             => 'wpo/otd',
 				'nonce'                    => wp_create_nonce( 'wp_rest' ),
 				'isWooFulfillmentsEnabled' => wc_string_to_bool( get_option( 'woocommerce_feature_fulfillments_enabled', 'no' ) ),
-				'archivePageUrl'           => esc_url( admin_url( 'admin.php?page=wpo_aom_order_manager#/task-manager/archive' ) ),
+				'archivePageUrl'           => esc_url( admin_url( 'admin.php?page=wpo_otd_order_manager#/task-manager/archive' ) ),
 				'statusRoles'              => array(
 					'done'   => $this->task_status_role_service->get_done_field_option_id(),
 					'undone' => $this->task_status_role_service->get_undone_field_option_id(),
@@ -192,7 +192,7 @@ final class Screen {
 			'wpo-aom-order-edit',
 			'WPO_AOM_OrderEdit',
 			array(
-				'nonce' => wp_create_nonce( 'wpo_aom_order_edit' ),
+				'nonce' => wp_create_nonce( 'wpo_otd_order_edit' ),
 			)
 		);
 
@@ -468,7 +468,7 @@ final class Screen {
 		// Check nonce for security.
 		if (
 			! isset( $_POST['nonce'] ) ||
-			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'wpo_aom_order_edit' )
+			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'wpo_otd_order_edit' )
 		) {
 			wp_send_json_error(
 				array(

@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 		// Send AJAX request
 		const formData = new FormData();
-		formData.append('action', 'wpo_aom_save_fulfillment');
+		formData.append('action', 'wpo_otd_save_fulfillment');
 		formData.append('nonce', WPO_AOM_OrderEdit.nonce);
 		formData.append('item_id', itemId);
 		formData.append('fulfillment_id', fulfillmentId);

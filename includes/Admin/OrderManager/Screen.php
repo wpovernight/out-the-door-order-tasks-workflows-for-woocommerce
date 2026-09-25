@@ -41,7 +41,7 @@ final class Screen {
 		$screen = get_current_screen();
 		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
-		if ( ! $screen || 'woocommerce_page_wpo_aom_order_manager' !== $screen->id ) {
+		if ( ! $screen || 'woocommerce_page_wpo_otd_order_manager' !== $screen->id ) {
 			return;
 		}
 
@@ -51,7 +51,7 @@ final class Screen {
 		 *
 		 * @param string[] $deps Script handles the app depends on.
 		 */
-		$dependencies = apply_filters( 'wpo_aom_order_manager_script_deps', Assets::runtime_dependencies( true ) );
+		$dependencies = apply_filters( 'wpo_otd_order_manager_script_deps', Assets::runtime_dependencies( true ) );
 
 		// Do not need the suffix, since it's a React app and we are using webpack to handle the minification.
 		wp_enqueue_script(
@@ -73,7 +73,7 @@ final class Screen {
 			'WPO_AOM_OrderManager',
 			array(
 				'apiRoot'      => esc_url_raw( rest_url( '/wc/v3' ) ),
-				'apiNamespace' => 'wpo/aom',
+				'apiNamespace' => 'wpo/otd',
 				'nonce'        => wp_create_nonce( 'wp_rest' ),
 				'statusRoles'  => array(
 					'done'   => $this->task_status_role_service->get_done_field_option_id(),
@@ -153,7 +153,7 @@ final class Screen {
 			esc_html__( 'Order Manager', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
 			esc_html__( 'Order Manager', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
 			'manage_woocommerce',
-			'wpo_aom_order_manager',
+			'wpo_otd_order_manager',
 			array( $this, 'render_page' )
 		);
 	}

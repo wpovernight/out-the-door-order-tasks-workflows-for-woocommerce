@@ -10,10 +10,10 @@ use WPO\OTD\Services\TaskStatusRoleService;
 defined( 'ABSPATH' ) || exit;
 
 final class Installer {
-	private const OPTION_VERSION      = 'wpo_aom_version';
-	private const OPTION_DB_VERSION   = 'wpo_aom_db_version';
-	private const OPTION_UPGRADE_LOCK = 'wpo_aom_upgrade_lock';
-	private const TABLE_PREFIX        = 'wpo_aom_';
+	private const OPTION_VERSION      = 'wpo_otd_version';
+	private const OPTION_DB_VERSION   = 'wpo_otd_db_version';
+	private const OPTION_UPGRADE_LOCK = 'wpo_otd_upgrade_lock';
+	private const TABLE_PREFIX        = 'wpo_otd_';
 
 	/**
 	 * The install-state options this plugin writes to the wp_options table.
@@ -188,21 +188,21 @@ final class Installer {
 	private static function get_foreign_keys(): array {
 		return array(
 			array(
-				'table'         => 'wpo_aom_task_field_options',
+				'table'         => 'wpo_otd_task_field_options',
 				'column'        => 'field_id',
-				'parent_table'  => 'wpo_aom_task_fields',
+				'parent_table'  => 'wpo_otd_task_fields',
 				'parent_column' => 'id',
 			),
 			array(
-				'table'         => 'wpo_aom_task_field_values',
+				'table'         => 'wpo_otd_task_field_values',
 				'column'        => 'task_id',
-				'parent_table'  => 'wpo_aom_tasks',
+				'parent_table'  => 'wpo_otd_tasks',
 				'parent_column' => 'id',
 			),
 			array(
-				'table'         => 'wpo_aom_task_field_values',
+				'table'         => 'wpo_otd_task_field_values',
 				'column'        => 'field_id',
-				'parent_table'  => 'wpo_aom_task_fields',
+				'parent_table'  => 'wpo_otd_task_fields',
 				'parent_column' => 'id',
 			),
 		);
@@ -376,7 +376,7 @@ final class Installer {
 		$charset_collate = $wpdb->get_charset_collate();
 
 		return "
-		CREATE TABLE `{$wpdb->prefix}wpo_aom_tasks` (
+		CREATE TABLE `{$wpdb->prefix}wpo_otd_tasks` (
 			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			title VARCHAR(255) NOT NULL,
 			description TEXT DEFAULT NULL,
@@ -384,7 +384,7 @@ final class Installer {
 			updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 			PRIMARY KEY  (id)
 		) ENGINE=InnoDB {$charset_collate};
-		CREATE TABLE `{$wpdb->prefix}wpo_aom_task_fields` (
+		CREATE TABLE `{$wpdb->prefix}wpo_otd_task_fields` (
 			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			label VARCHAR(255) NOT NULL,
 			type VARCHAR(20) NOT NULL,
@@ -394,7 +394,7 @@ final class Installer {
 			is_protected TINYINT(1) NOT NULL DEFAULT 0,
 			PRIMARY KEY  (id)
 		) ENGINE=InnoDB {$charset_collate};
-		CREATE TABLE `{$wpdb->prefix}wpo_aom_task_field_options` (
+		CREATE TABLE `{$wpdb->prefix}wpo_otd_task_field_options` (
 			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			field_id BIGINT(20) UNSIGNED NOT NULL,
 			slug VARCHAR(255) NOT NULL,
@@ -404,7 +404,7 @@ final class Installer {
 			PRIMARY KEY  (id),
 			UNIQUE KEY field_slug_unique (field_id, slug)
 		) ENGINE=InnoDB {$charset_collate};
-		CREATE TABLE `{$wpdb->prefix}wpo_aom_task_field_values` (
+		CREATE TABLE `{$wpdb->prefix}wpo_otd_task_field_values` (
 			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			task_id BIGINT(20) UNSIGNED NOT NULL,
 			field_id BIGINT(20) UNSIGNED NOT NULL,
@@ -412,7 +412,7 @@ final class Installer {
 			PRIMARY KEY  (id),
 			KEY idx_task_field_lookup (task_id, field_id)
 		) ENGINE=InnoDB {$charset_collate};
-		CREATE TABLE `{$wpdb->prefix}wpo_aom_custom_statuses` (
+		CREATE TABLE `{$wpdb->prefix}wpo_otd_custom_statuses` (
 			id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 			status_key VARCHAR(64) NOT NULL,
 			label VARCHAR(255) NOT NULL,
@@ -595,7 +595,7 @@ final class Installer {
 			unset( $field_data['options'] );
 
 			// Use raw INSERT to ensure the exact ID is used.
-			$table_name = $wpdb->prefix . 'wpo_aom_task_fields';
+			$table_name = $wpdb->prefix . 'wpo_otd_task_fields';
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Install-time seeding; preserves the exact field ID.
 			$result     = $wpdb->insert( $table_name, $field_data );
 
@@ -629,10 +629,10 @@ final class Installer {
 
 		// Reset auto-increment to prevent gaps if needed.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Install-time check; cache would be stale immediately after seeding.
-		$max_id = $wpdb->get_var( "SELECT MAX(id) FROM {$wpdb->prefix}wpo_aom_task_fields" );
+		$max_id = $wpdb->get_var( "SELECT MAX(id) FROM {$wpdb->prefix}wpo_otd_task_fields" );
 		if ( $max_id ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Install-time AUTO_INCREMENT reset; schema change is intentional.
-			$wpdb->query( $wpdb->prepare( "ALTER TABLE {$wpdb->prefix}wpo_aom_task_fields AUTO_INCREMENT = %d", $max_id + 1 ) );
+			$wpdb->query( $wpdb->prepare( "ALTER TABLE {$wpdb->prefix}wpo_otd_task_fields AUTO_INCREMENT = %d", $max_id + 1 ) );
 		}
 	}
 
@@ -648,8 +648,8 @@ final class Installer {
 	/**
 	 * Re-run create_tables() so dbDelta applies pending schema changes for the
 	 * beta.2 upgrade. Two changes ride along on this single dbDelta pass:
-	 *  - the new UNIQUE KEY on wpo_aom_task_field_options(field_id, slug), and
-	 *  - the new is_deleting column on wpo_aom_custom_statuses.
+	 *  - the new UNIQUE KEY on wpo_otd_task_field_options(field_id, slug), and
+	 *  - the new is_deleting column on wpo_otd_custom_statuses.
 	 *
 	 * Existing beta.1 installs only contain the seeded options (no public
 	 * create-option path existed), so seed data is already unique and no dedupe
@@ -672,14 +672,14 @@ final class Installer {
 	}
 
 	/**
-	 * Drop the auto-named unique index on wpo_aom_custom_statuses(status_key).
+	 * Drop the auto-named unique index on wpo_otd_custom_statuses(status_key).
 	 *
 	 * @return void
 	 */
 	private static function drop_legacy_status_key_index(): void {
 		global $wpdb;
 
-		$table = $wpdb->prefix . 'wpo_aom_custom_statuses';
+		$table = $wpdb->prefix . 'wpo_otd_custom_statuses';
 
 		if ( ! self::has_index( $table, 'status_key_unique' ) || ! self::has_index( $table, 'status_key' ) ) {
 			return;

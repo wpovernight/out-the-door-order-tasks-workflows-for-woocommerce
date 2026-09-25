@@ -32,8 +32,8 @@ class CustomOrderStatusController extends BaseRestController {
 	 */
 	public function register_routes(): void {
 		/**
-		 * GET /wp-json/wpo-aom/v1/custom-order-statuses
-		 * POST /wp-json/wpo-aom/v1/custom-order-statuses
+		 * GET /wp-json/wpo-otd/v1/custom-order-statuses
+		 * POST /wp-json/wpo-otd/v1/custom-order-statuses
 		 *
 		 * Description: Retrieve a list of all custom order statuses.
 		 */
@@ -57,9 +57,9 @@ class CustomOrderStatusController extends BaseRestController {
 
 		/**
 		 * Single item endpoints:
-		 * GET /wp-json/wpo-aom/v1/custom-order-statuses/{id}
-		 * PUT /wp-json/wpo-aom/v1/custom-order-statuses/{id}
-		 * DELETE /wp-json/wpo-aom/v1/custom-order-statuses/{id}
+		 * GET /wp-json/wpo-otd/v1/custom-order-statuses/{id}
+		 * PUT /wp-json/wpo-otd/v1/custom-order-statuses/{id}
+		 * DELETE /wp-json/wpo-otd/v1/custom-order-statuses/{id}
 		 */
 		register_rest_route(
 			$this->namespace,

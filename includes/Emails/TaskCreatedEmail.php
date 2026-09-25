@@ -16,7 +16,7 @@ class TaskCreatedEmail extends WC_Email {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->id             = 'wpo_aom_task_created';
+		$this->id             = 'wpo_otd_task_created';
 		$this->title          = __( 'Task Created', 'out-the-door-order-tasks-workflows-for-woocommerce' );
 		$this->description    = __( 'Task created emails are sent when a new task is created.', 'out-the-door-order-tasks-workflows-for-woocommerce' );
 
@@ -29,7 +29,7 @@ class TaskCreatedEmail extends WC_Email {
 		);
 
 		// Triggers for this email.
-		add_action( 'wpo_aom_task_created', array( $this, 'trigger' ), 10, 3 );
+		add_action( 'wpo_otd_task_created', array( $this, 'trigger' ), 10, 3 );
 
 		parent::__construct();
 
@@ -90,7 +90,7 @@ class TaskCreatedEmail extends WC_Email {
 					 * @param array $task_with_fields Complete task data.
 					 * @param array $field_values     Field values set on creation.
 					 */
-					do_action( 'wpo_aom_task_created_email_sent', $task_id, $task_with_fields, $field_values );
+					do_action( 'wpo_otd_task_created_email_sent', $task_id, $task_with_fields, $field_values );
 				}
 			}
 		} finally {

@@ -11,7 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 abstract class BaseRepository {
 	protected \wpdb $wpdb;
-	private string $plugin_table_prefix = 'wpo_aom_';
+	private string $plugin_table_prefix = 'wpo_otd_';
 	private string $table_name;
 	protected bool $enable_cache = false;
 	protected static array $cache = array();

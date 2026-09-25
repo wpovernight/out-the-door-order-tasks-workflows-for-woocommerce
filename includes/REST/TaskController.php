@@ -307,7 +307,7 @@ class TaskController extends BaseRestController {
 			 * @param array           $tasks    The array of task objects.
 			 * @param WP_REST_Request $request  The original REST request object.
 			 */
-			$tasks = apply_filters( 'wpo_aom_rest_prepare_tasks', $tasks, $request );
+			$tasks = apply_filters( 'wpo_otd_rest_prepare_tasks', $tasks, $request );
 
 			return $this->respond( $tasks );
 		} catch ( \Throwable $e ) {
@@ -354,7 +354,7 @@ class TaskController extends BaseRestController {
 			 * @param array           $task     The created task object.
 			 * @param WP_REST_Request $request  The original REST request object.
 			 */
-			$task = apply_filters( 'wpo_aom_rest_prepare_task', $task, $request );
+			$task = apply_filters( 'wpo_otd_rest_prepare_task', $task, $request );
 
 			return $this->respond( $task );
 		} catch ( \Throwable $e ) {
@@ -394,7 +394,7 @@ class TaskController extends BaseRestController {
 			 * @param array           $task     The task object.
 			 * @param WP_REST_Request $request  The original REST request object.
 			 */
-			$task = apply_filters( 'wpo_aom_rest_prepare_task', $task, $request );
+			$task = apply_filters( 'wpo_otd_rest_prepare_task', $task, $request );
 
 			return $this->respond( $task );
 		} catch ( \Throwable $e ) {
@@ -443,7 +443,7 @@ class TaskController extends BaseRestController {
 			 * @param array           $task     The updated task object.
 			 * @param WP_REST_Request $request  The original REST request object.
 			 */
-			$task = apply_filters( 'wpo_aom_rest_prepare_task', $task, $request );
+			$task = apply_filters( 'wpo_otd_rest_prepare_task', $task, $request );
 
 			return $this->respond( $task );
 		} catch ( \InvalidArgumentException $e ) {
@@ -653,7 +653,7 @@ class TaskController extends BaseRestController {
 			 * @param array           $option   The created field option object.
 			 * @param WP_REST_Request $request  The original REST request object.
 			 */
-			$option = apply_filters( 'wpo_aom_rest_prepare_field_option', $option, $request );
+			$option = apply_filters( 'wpo_otd_rest_prepare_field_option', $option, $request );
 
 			return $this->respond( $option );
 		} catch ( \Throwable $e ) {
@@ -709,7 +709,7 @@ class TaskController extends BaseRestController {
 			 * @param array $option The updated field option object.
 			 * @param WP_REST_Request $request The original REST request object.
 			 */
-			$option = apply_filters( 'wpo_aom_rest_prepare_field_option', $option, $request );
+			$option = apply_filters( 'wpo_otd_rest_prepare_field_option', $option, $request );
 
 			return $this->respond( $option );
 		} catch ( \InvalidArgumentException $e ) {

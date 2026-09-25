@@ -10,8 +10,8 @@ use WPO\OTD\Utilities\Paginator;
 defined( 'ABSPATH' ) || exit;
 
 final class FulfillmentService {
-	public const FULFILLMENT_DATA_META_KEY            = '_wpo_aom_fulfillment_data';
-	public const ORDER_FULFILLMENT_STATUS_META_KEY   = '_wpo_aom_fulfillment_status';
+	public const FULFILLMENT_DATA_META_KEY            = '_wpo_otd_fulfillment_data';
+	public const ORDER_FULFILLMENT_STATUS_META_KEY   = '_wpo_otd_fulfillment_status';
 
 	/**
 	 * Get fulfillment data for an order item.
@@ -169,7 +169,7 @@ final class FulfillmentService {
 			 * @param int $item_id  The order item ID.
 			 * @param int $quantity The fulfillment quantity that was saved.
 			 */
-			do_action( 'wpo_aom_fulfillment_quantity_saved', $item_id, $quantity );
+			do_action( 'wpo_otd_fulfillment_quantity_saved', $item_id, $quantity );
 		}
 
 		return $result ? $saved_id : null;
@@ -191,7 +191,7 @@ final class FulfillmentService {
 			 *
 			 * @param int $item_id The order item ID.
 			 */
-			do_action( 'wpo_aom_fulfillment_data_deleted', $item_id );
+			do_action( 'wpo_otd_fulfillment_data_deleted', $item_id );
 		}
 
 		return $result;
@@ -229,7 +229,7 @@ final class FulfillmentService {
 			 * @param string             $status     The new fulfillment status.
 			 * @param string             $old_status The previous fulfillment status.
 			 */
-			do_action( 'wpo_aom_order_fulfillment_status_changed', $order, $status, $old_status );
+			do_action( 'wpo_otd_order_fulfillment_status_changed', $order, $status, $old_status );
 		}
 
 		return $status;
@@ -318,7 +318,7 @@ final class FulfillmentService {
 		 *
 		 * @param int $days Number of days. Default 0 (no date limit).
 		 */
-		$days = (int) apply_filters( 'wpo_aom_fulfillment_status_query_days', 0 );
+		$days = (int) apply_filters( 'wpo_otd_fulfillment_status_query_days', 0 );
 
 		$defaults = array(
 			'meta_key' => self::ORDER_FULFILLMENT_STATUS_META_KEY, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
@@ -342,6 +342,6 @@ final class FulfillmentService {
 		 * @param array  $query_args The merged query arguments.
 		 * @param string $status     The fulfillment status being queried (empty = all).
 		 */
-		return apply_filters( 'wpo_aom_fulfillment_status_query_args', wp_parse_args( $args, $defaults ), $status );
+		return apply_filters( 'wpo_otd_fulfillment_status_query_args', wp_parse_args( $args, $defaults ), $status );
 	}
 }

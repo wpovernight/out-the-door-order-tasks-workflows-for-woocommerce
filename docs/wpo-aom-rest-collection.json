@@ -2652,11 +2652,11 @@
   "variable": [
     {
       "key": "base_url",
-      "value": "https://wpovernight/wp-json/wc/v3/wpo/aom"
+      "value": "https://wpovernight/wp-json/wc/v3/wpo/otd"
     },
     {
       "key": "namespace",
-      "value": "wpo/aom"
+      "value": "wpo/otd"
     },
     {
       "key": "wc_base_url",

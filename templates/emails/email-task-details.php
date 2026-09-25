@@ -49,21 +49,21 @@ defined( 'ABSPATH' ) || exit;
 
 		// Display task fields
 		if ( ! empty( $task_data['fields'] ) ) :
-			foreach ( $task_data['fields'] as $wpo_aom_field ) :
-				if ( empty( $wpo_aom_field['values'] ) || 'position' === $wpo_aom_field['slug'] ) {
+			foreach ( $task_data['fields'] as $wpo_otd_field ) :
+				if ( empty( $wpo_otd_field['values'] ) || 'position' === $wpo_otd_field['slug'] ) {
 					continue;
 				}
 
-				$wpo_aom_value = $email_service->format_by_field_type( $wpo_aom_field['slug'], $wpo_aom_field['values'][0], $wpo_aom_field );
-				if ( empty( $wpo_aom_value ) ) {
+				$wpo_otd_value = $email_service->format_by_field_type( $wpo_otd_field['slug'], $wpo_otd_field['values'][0], $wpo_otd_field );
+				if ( empty( $wpo_otd_value ) ) {
 					continue;
 				}
 				?>
 				<tr>
 					<td class="td" style="padding: 12px;">
-						<strong><?php echo esc_html( $wpo_aom_field['label'] ); ?>:</strong>
+						<strong><?php echo esc_html( $wpo_otd_field['label'] ); ?>:</strong>
 						<?php
-						echo esc_html( $wpo_aom_value );
+						echo esc_html( $wpo_otd_value );
 						?>
 					</td>
 				</tr>

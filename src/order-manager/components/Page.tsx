@@ -21,7 +21,7 @@ const coreRoutes: AomRoute[] = [
 export default function Page() {
 	const { tab } = useTab();
 
-	const routes = applyFilters('wpo_aom.routes', coreRoutes) as AomRoute[];
+	const routes = applyFilters('wpo_otd.routes', coreRoutes) as AomRoute[];
 
 	return (
 		<div className="inner">

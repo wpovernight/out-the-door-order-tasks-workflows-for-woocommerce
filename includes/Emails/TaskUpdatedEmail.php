@@ -24,7 +24,7 @@ class TaskUpdatedEmail extends WC_Email {
 	public function __construct( TaskManagerService $task_manager_service ) {
 		$this->task_manager_service = $task_manager_service;
 
-		$this->id             = 'wpo_aom_task_updated';
+		$this->id             = 'wpo_otd_task_updated';
 		$this->title          = __( 'Task Updated', 'out-the-door-order-tasks-workflows-for-woocommerce' );
 		$this->description    = __( 'Task updated emails are sent when a task is modified.', 'out-the-door-order-tasks-workflows-for-woocommerce' );
 
@@ -37,8 +37,8 @@ class TaskUpdatedEmail extends WC_Email {
 		);
 
 		// Triggers for this email.
-		add_action( 'wpo_aom_task_updated', array( $this, 'trigger' ), 10, 3 );
-		add_action( 'wpo_aom_task_moved', array( $this, 'trigger_on_task_moved' ), 10, 4 );
+		add_action( 'wpo_otd_task_updated', array( $this, 'trigger' ), 10, 3 );
+		add_action( 'wpo_otd_task_moved', array( $this, 'trigger_on_task_moved' ), 10, 4 );
 
 		parent::__construct();
 
@@ -118,7 +118,7 @@ class TaskUpdatedEmail extends WC_Email {
 					 * @param array $task_with_fields Complete task data.
 					 * @param array $updated_fields   Array of updated field slugs with old and new values.
 					 */
-					do_action( 'wpo_aom_task_updated_email_sent', $task_id, $task_with_fields, $updated_fields );
+					do_action( 'wpo_otd_task_updated_email_sent', $task_id, $task_with_fields, $updated_fields );
 				}
 			}
 		} finally {
@@ -437,7 +437,7 @@ class TaskUpdatedEmail extends WC_Email {
 		 * @param array $options Map of field slug => human-readable label.
 		 */
 		return apply_filters(
-			'wpo_aom_task_updated_email_notify_on_field_options',
+			'wpo_otd_task_updated_email_notify_on_field_options',
 			array(
 				'title'       => __( 'Title', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
 				'description' => __( 'Description', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
@@ -462,7 +462,7 @@ class TaskUpdatedEmail extends WC_Email {
 		 *
 		 * @param array $monitored List of monitored field slugs.
 		 */
-		return apply_filters( 'wpo_aom_task_updated_email_monitored_fields', (array) $monitored );
+		return apply_filters( 'wpo_otd_task_updated_email_monitored_fields', (array) $monitored );
 	}
 
 }

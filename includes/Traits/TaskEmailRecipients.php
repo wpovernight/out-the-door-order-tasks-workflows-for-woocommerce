@@ -57,7 +57,7 @@ trait TaskEmailRecipients {
 		 * @param array $task_with_fields  Complete task data.
 		 * @param self  $email             The email instance.
 		 */
-		return apply_filters( 'wpo_aom_email_recipients', $recipients, $task_with_fields, $this );
+		return apply_filters( 'wpo_otd_email_recipients', $recipients, $task_with_fields, $this );
 	}
 
 	/**

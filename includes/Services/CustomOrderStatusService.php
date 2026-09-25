@@ -48,7 +48,7 @@ class CustomOrderStatusService {
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_dynamic_style' ), 99 );
 
 		// Drain & finalize a custom status deletion, one batch per scheduled run.
-		add_action( 'wpo_aom_reassign_orders', array( $this, 'process_deletion_batch' ), 10, 3 );
+		add_action( 'wpo_otd_reassign_orders', array( $this, 'process_deletion_batch' ), 10, 3 );
 	}
 
 	/** ================================
@@ -255,7 +255,7 @@ class CustomOrderStatusService {
 		 *
 		 * @param CustomOrderStatus $status The newly created custom order status.
 		 */
-		do_action( 'wpo_aom_custom_order_status_created', $status );
+		do_action( 'wpo_otd_custom_order_status_created', $status );
 
 		return $status;
 	}
@@ -294,7 +294,7 @@ class CustomOrderStatusService {
 		 * @param CustomOrderStatus $custom_status  The updated custom order status.
 		 * @param array             $data           The data used for the update.
 		 */
-		do_action( 'wpo_aom_custom_order_status_updated', $custom_status, $data );
+		do_action( 'wpo_otd_custom_order_status_updated', $custom_status, $data );
 
 		return $custom_status;
 	}
@@ -347,9 +347,9 @@ class CustomOrderStatusService {
 
 		as_schedule_single_action(
 			time(),
-			'wpo_aom_reassign_orders',
+			'wpo_otd_reassign_orders',
 			array( $status->status_key, $fallback_status, $id ),
-			'wpo-aom'
+			'wpo-otd'
 		);
 
 		return true;
@@ -361,7 +361,7 @@ class CustomOrderStatusService {
 	 * Reassigns up to a (filterable) batch of orders from the deleted status to
 	 * the fallback, then either reschedules itself for the next batch or — once
 	 * no orders remain — deletes the custom status row and fires the deleted
-	 * action. Runs via the 'wpo_aom_reassign_orders' scheduled action.
+	 * action. Runs via the 'wpo_otd_reassign_orders' scheduled action.
 	 *
 	 * @param string $from_status The status key to reassign from (without 'wc-' prefix).
 	 * @param string $to_status   The status key to reassign to (without 'wc-' prefix).
@@ -375,7 +375,7 @@ class CustomOrderStatusService {
 		 *
 		 * @param int $limit Maximum orders processed per batch. Default 50.
 		 */
-		$limit  = apply_filters( 'wpo_aom_reassign_orders_batch_size', 50 );
+		$limit  = apply_filters( 'wpo_otd_reassign_orders_batch_size', 50 );
 		$orders = wc_get_orders(
 			array(
 				'status' => $from_status,
@@ -391,7 +391,7 @@ class CustomOrderStatusService {
 				 * @param string $to_status The fallback status key (without 'wc-' prefix).
 				 * @param mixed  $order     The order being reassigned.
 				 */
-				$resolved_to_status = apply_filters( 'wpo_aom_reassign_orders_to_status', $to_status, $order );
+				$resolved_to_status = apply_filters( 'wpo_otd_reassign_orders_to_status', $to_status, $order );
 
 				if ( is_callable( array( $order, 'update_status' ) ) ) {
 					$order->update_status(
@@ -414,9 +414,9 @@ class CustomOrderStatusService {
 		if ( count( $orders ) === $limit ) {
 			as_schedule_single_action(
 				time(),
-				'wpo_aom_reassign_orders',
+				'wpo_otd_reassign_orders',
 				array( $from_status, $to_status, $status_id ),
-				'wpo-aom'
+				'wpo-otd'
 			);
 
 			return;
@@ -435,9 +435,9 @@ class CustomOrderStatusService {
 		if ( 0 !== count( $remaining_orders ) ) {
 			as_schedule_single_action(
 				time(),
-				'wpo_aom_reassign_orders',
+				'wpo_otd_reassign_orders',
 				array( $from_status, $to_status, $status_id ),
-				'wpo-aom'
+				'wpo-otd'
 			);
 
 			return;
@@ -470,6 +470,6 @@ class CustomOrderStatusService {
 		 * @param string $from_status The status key that was deleted (without 'wc-' prefix).
 		 * @param string $to_status   The fallback status key that orders were reassigned to (without 'wc-' prefix).
 		 */
-		do_action( 'wpo_aom_custom_order_status_deleted', $status_id, $from_status, $to_status );
+		do_action( 'wpo_otd_custom_order_status_deleted', $status_id, $from_status, $to_status );
 	}
 }

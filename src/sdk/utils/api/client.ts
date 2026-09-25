@@ -86,7 +86,7 @@ export async function handleResponse<T>(response: Response): Promise<T> {
 }
 
 /**
- * The uniform response wrapper for our wc/v3/wpo/aom/* endpoints.
+ * The uniform response wrapper for our wc/v3/wpo/otd/* endpoints.
  */
 export interface Envelope<TData, TMeta = undefined> {
 	data: TData;
