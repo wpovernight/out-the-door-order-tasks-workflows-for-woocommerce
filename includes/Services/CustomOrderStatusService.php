@@ -396,7 +396,7 @@ class CustomOrderStatusService {
 				if ( is_callable( array( $order, 'update_status' ) ) ) {
 					$order->update_status(
 						$resolved_to_status,
-						'WPO AOM: ' . __( 'Status changed due to custom order status deletion.', 'out-the-door-order-tasks-workflows-for-woocommerce' )
+						'Out the Door: ' . __( 'Status changed due to custom order status deletion.', 'out-the-door-order-tasks-workflows-for-woocommerce' )
 					);
 				}
 			} catch ( \Throwable $e ) {

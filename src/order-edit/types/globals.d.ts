@@ -1,5 +1,5 @@
 /**
- * Global type declarations for the WPO AOM Order Edit metabox.
+ * Global type declarations for the Out the Door Order Edit metabox.
  */
 
 import type { StatusRoles } from '@sdk';

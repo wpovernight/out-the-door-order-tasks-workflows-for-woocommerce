@@ -1,4 +1,4 @@
-# Advanced Order Manager for WooCommerce
+# Out the Door – Order Tasks & Workflows for WooCommerce
 
 A WordPress plugin that extends WooCommerce's order management with advanced features, such as a task system, custom order statuses, and a modern admin UI.
 

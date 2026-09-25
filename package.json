@@ -10,7 +10,7 @@
   },
   "author": "WP Overnight",
   "license": "GPL-3.0-or-later",
-  "description": "Advanced Order Manager for WooCommerce — extends WooCommerce order management.",
+  "description": "Out the Door – Order Tasks & Workflows for WooCommerce: extends WooCommerce order management.",
   "repository": {
     "type": "git",
     "url": "https://github.com/wpovernight/wpo-advanced-order-manager.git"

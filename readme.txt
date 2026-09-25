@@ -1,4 +1,4 @@
-=== Advanced Order Manager for WooCommerce ===
+=== Out the Door – Order Tasks & Workflows for WooCommerce ===
 Contributors: wpovernight
 Tags: woocommerce, orders, order management, tasks, fulfillment
 Requires at least: 6.7
@@ -14,7 +14,7 @@ A powerful order management plugin for WooCommerce that enhances the order manag
 
 == Description ==
 
-Advanced Order Manager extends WooCommerce's order management with a flexible task system, custom order statuses, and a streamlined admin interface designed for stores that handle complex fulfillment workflows.
+Out the Door extends WooCommerce's order management with a flexible task system, custom order statuses, and a streamlined admin interface designed for stores that handle complex fulfillment workflows.
 
 **Features**
 

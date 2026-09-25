@@ -111,7 +111,7 @@ final class DependencyChecker {
 	 * @return void
 	 */
 	public function display_admin_notice( array $errors ): void {
-		$title   = '<strong>' . esc_html__( 'Advanced Order Manager for WooCommerce', 'out-the-door-order-tasks-workflows-for-woocommerce' ) . '</strong>';
+		$title   = '<strong>' . esc_html__( 'Out the Door – Order Tasks & Workflows for WooCommerce', 'out-the-door-order-tasks-workflows-for-woocommerce' ) . '</strong>';
 		$content = esc_html__( 'can’t run because:', 'out-the-door-order-tasks-workflows-for-woocommerce' );
 		$list    = '<ul><li>' . implode( '</li><li>', array_map( 'esc_html', $errors ) ) . '</li></ul>';
 

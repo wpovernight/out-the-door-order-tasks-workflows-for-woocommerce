@@ -1,4 +1,4 @@
-# Advanced Order Manager
+# Out the Door
 
 This plugin extends WooCommerce's native order system to improve internal workflows for e-commerce operations.
 
@@ -6,7 +6,7 @@ This plugin extends WooCommerce's native order system to improve internal workfl
 
 ## ⚙️ Architecture Overview
 
-The Advanced Order Manager plugin is built on a modular, service-oriented architecture that extends classical MVC concepts and adapts them to the WordPress development model. Its structure is designed for scalability, testability, and maintainability, ensuring each component serves a single, well-defined responsibility.
+The Out the Door plugin is built on a modular, service-oriented architecture that extends classical MVC concepts and adapts them to the WordPress development model. Its structure is designed for scalability, testability, and maintainability, ensuring each component serves a single, well-defined responsibility.
 
 At the foundation lies the data layer, which is composed of model classes representing entities such as tasks, fields, and options, and a set of repository classes that encapsulate data persistence logic. The repositories abstract direct database operations, allowing the rest of the system to interact with data through a clean, object-oriented API rather than raw SQL or WordPress queries.
 

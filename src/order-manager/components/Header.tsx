@@ -28,7 +28,7 @@ export default function Header() {
 
 	return (
 		<div className="header">
-			<h1>Advanced Order Manager</h1>
+			<h1>Out the Door</h1>
 			<nav className="tabs" id="main-tabs">
 				<ul>
 					{tabs.map((availableTab) => (

@@ -1,8 +1,8 @@
 {
   "info": {
     "_postman_id": "a5489fa9-35ea-459b-85f8-0c0b9ed01518",
-    "name": "Advanced Order Manager",
-    "description": "This collection includes example requests for the Advanced Order Manager REST API.",
+    "name": "Out the Door",
+    "description": "This collection includes example requests for the Out the Door REST API.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "9716324"
   },

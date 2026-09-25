@@ -1,5 +1,5 @@
 /**
- * Global type declarations for the WPO AOM Order Manager.
+ * Global type declarations for the Out the Door Order Manager.
  */
 import type { StatusRoles } from '@sdk';
 

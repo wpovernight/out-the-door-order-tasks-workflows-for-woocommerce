@@ -1,5 +1,5 @@
 /**
- * Global type declarations for the WPO AOM Task Manager plugin.
+ * Global type declarations for the Out the Door Task Manager plugin.
  */
 
 export interface WpoOtdTaskManagerData {
