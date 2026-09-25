@@ -5,8 +5,8 @@ namespace WPO\OTD\Admin;
 defined( 'ABSPATH' ) || exit;
 
 final class Assets {
-	public const SDK_HANDLE    = 'wpo-aom-sdk';
-	public const ROUTER_HANDLE = 'wpo-aom-router';
+	public const SDK_HANDLE    = 'wpo-otd-sdk';
+	public const ROUTER_HANDLE = 'wpo-otd-router';
 	private const WP_DEPS      = array( 'wp-hooks', 'wp-element', 'wp-components', 'wp-i18n' );
 
 	/**

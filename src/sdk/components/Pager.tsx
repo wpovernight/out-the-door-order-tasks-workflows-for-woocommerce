@@ -113,23 +113,23 @@ export const Pager = ({
 
 	return (
 		<nav
-			className={`wpo-aom-pager${disabled ? ' is-loading' : ''}`}
+			className={`wpo-otd-pager${disabled ? ' is-loading' : ''}`}
 		>
 			<button
 				type="button"
-				className="wpo-aom-pager-nav wpo-aom-pager-prev"
+				className="wpo-otd-pager-nav wpo-otd-pager-prev"
 				onClick={() => onChange(currentPage - 1)}
 				disabled={disabled || isFirst}
 			>
 				{__('Previous', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 			</button>
 
-			<div className="wpo-aom-pager-pages">
+			<div className="wpo-otd-pager-pages">
 				{tokens.map((token, index) =>
 					token === 'ellipsis' ? (
 						<span
 							key={`ellipsis-${index}`}
-							className="wpo-aom-pager-ellipsis"
+							className="wpo-otd-pager-ellipsis"
 						>
 							&hellip;
 						</span>
@@ -137,7 +137,7 @@ export const Pager = ({
 						<button
 							key={token}
 							type="button"
-							className={`wpo-aom-pager-page${token === currentPage ? ' is-current' : ''}`}
+							className={`wpo-otd-pager-page${token === currentPage ? ' is-current' : ''}`}
 							onClick={() => onChange(token)}
 							disabled={disabled || token === currentPage}
 						>
@@ -149,7 +149,7 @@ export const Pager = ({
 
 			<button
 				type="button"
-				className="wpo-aom-pager-nav wpo-aom-pager-next"
+				className="wpo-otd-pager-nav wpo-otd-pager-next"
 				onClick={() => onChange(currentPage + 1)}
 				disabled={disabled || isLast}
 			>

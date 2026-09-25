@@ -7,12 +7,12 @@ import { useTab } from '@orderManager/context/TabContext';
 import { DashboardView } from '@orderManager/views/Dashboard/DashboardView';
 import { CustomOrderStatusView } from '@orderManager/views/CustomOrderStatus/CustomOrderStatusView';
 
-export interface AomRoute {
+export interface OtdRoute {
 	path: string;
 	element: React.ReactNode;
 }
 
-const coreRoutes: AomRoute[] = [
+const coreRoutes: OtdRoute[] = [
 	{ path: '/dashboard', element: <DashboardView /> },
 	{ path: '/task-manager/*', element: <TaskView /> },
 	{ path: '/custom-order-status', element: <CustomOrderStatusView /> },
@@ -21,7 +21,7 @@ const coreRoutes: AomRoute[] = [
 export default function Page() {
 	const { tab } = useTab();
 
-	const routes = applyFilters('wpo_otd.routes', coreRoutes) as AomRoute[];
+	const routes = applyFilters('wpo_otd.routes', coreRoutes) as OtdRoute[];
 
 	return (
 		<div className="inner">

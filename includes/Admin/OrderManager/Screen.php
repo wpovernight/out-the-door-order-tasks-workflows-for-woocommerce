@@ -55,7 +55,7 @@ final class Screen {
 
 		// Do not need the suffix, since it's a React app and we are using webpack to handle the minification.
 		wp_enqueue_script(
-			'wpo-aom-admin-order-manager',
+			'wpo-otd-admin-order-manager',
 			WPO_OTD()->plugin_url() . '/assets/js/order-manager.js',
 			$dependencies,
 			WPO_OTD_VERSION,
@@ -63,14 +63,14 @@ final class Screen {
 		);
 
 		wp_set_script_translations(
-			'wpo-aom-admin-order-manager',
+			'wpo-otd-admin-order-manager',
 			'out-the-door-order-tasks-workflows-for-woocommerce',
 			WPO_OTD()->plugin_path() . '/languages'
 		);
 
 		wp_localize_script(
-			'wpo-aom-admin-order-manager',
-			'WPO_AOM_OrderManager',
+			'wpo-otd-admin-order-manager',
+			'WPO_OTD_OrderManager',
 			array(
 				'apiRoot'      => esc_url_raw( rest_url( '/wc/v3' ) ),
 				'apiNamespace' => 'wpo/otd',
@@ -86,56 +86,56 @@ final class Screen {
 		 * Enqueue styles.
 		 */
 		wp_enqueue_style(
-			'wpo-aom-admin-common',
+			'wpo-otd-admin-common',
 			WPO_OTD()->plugin_url() . '/assets/css/common' . $suffix . '.css',
 			array(),
 			WPO_OTD_VERSION
 		);
 
 		wp_enqueue_style(
-			'wpo-aom-admin-order-manager',
+			'wpo-otd-admin-order-manager',
 			WPO_OTD()->plugin_url() . '/assets/css/order-manager' . $suffix . '.css',
 			array(),
 			WPO_OTD_VERSION
 		);
 
 		wp_enqueue_style(
-			'wpo-aom-admin-task-card',
+			'wpo-otd-admin-task-card',
 			WPO_OTD()->plugin_url() . '/assets/css/task-card' . $suffix . '.css',
 			array(),
 			WPO_OTD_VERSION
 		);
 
 		wp_enqueue_style(
-			'wpo-aom-admin-sidebar-modal',
+			'wpo-otd-admin-sidebar-modal',
 			WPO_OTD()->plugin_url() . '/assets/css/sidebar-modal' . $suffix . '.css',
 			array(),
 			WPO_OTD_VERSION
 		);
 
 		wp_enqueue_style(
-			'wpo-aom-admin-dashboard',
+			'wpo-otd-admin-dashboard',
 			WPO_OTD()->plugin_url() . '/assets/css/dashboard' . $suffix . '.css',
 			array(),
 			WPO_OTD_VERSION
 		);
 
 		wp_enqueue_style(
-			'wpo-aom-admin-task-manager',
+			'wpo-otd-admin-task-manager',
 			WPO_OTD()->plugin_url() . '/assets/css/task-manager' . $suffix . '.css',
 			array(),
 			WPO_OTD_VERSION
 		);
 
 		wp_enqueue_style(
-			'wpo-aom-admin-custom-order-status',
+			'wpo-otd-admin-custom-order-status',
 			WPO_OTD()->plugin_url() . '/assets/css/custom-order-status' . $suffix . '.css',
 			array(),
 			WPO_OTD_VERSION
 		);
 
 		wp_enqueue_style(
-			'wpo-aom-admin-skeleton',
+			'wpo-otd-admin-skeleton',
 			WPO_OTD()->plugin_url() . '/assets/css/skeleton' . $suffix . '.css',
 			array(),
 			WPO_OTD_VERSION
@@ -169,6 +169,6 @@ final class Screen {
 		}
 
 		// Handles using the React app.
-		echo '<div id="wpo-aom-order-manager"></div>';
+		echo '<div id="wpo-otd-order-manager"></div>';
 	}
 }

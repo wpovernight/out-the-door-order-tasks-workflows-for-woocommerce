@@ -1,47 +1,47 @@
-.wpo-aom-metabox-section {
+.wpo-otd-metabox-section {
     container-type: inline-size;
-    border: 1px solid var(--wpo-aom-border-color);
-    border-radius: var(--wpo-aom-radius-m);
+    border: 1px solid var(--wpo-otd-border-color);
+    border-radius: var(--wpo-otd-radius-m);
     margin-top: 1em;
 }
 
-.wpo-aom-metabox-section .header {
+.wpo-otd-metabox-section .header {
     display: flex;
     align-items: center;
     gap: 2em;
-    border-bottom: 1px solid var(--wpo-aom-border-color);
+    border-bottom: 1px solid var(--wpo-otd-border-color);
     padding: 1em;
 }
 
-.wpo-aom-metabox-section .header .actions,
-.wpo-aom-metabox-section .header .actions > li {
+.wpo-otd-metabox-section .header .actions,
+.wpo-otd-metabox-section .header .actions > li {
     padding: 0;
     margin: 0;
 }
 
-.wpo-aom-metabox-section .header .actions .add-button {
-    color: var(--wpo-aom-purple-primary);
+.wpo-otd-metabox-section .header .actions .add-button {
+    color: var(--wpo-otd-purple-primary);
     width: 2em;
     height: 2em;
     font-size: 1.5em;
-    border: 1px solid var(--wpo-aom-purple-primary);
+    border: 1px solid var(--wpo-otd-purple-primary);
 }
 
-.wpo-aom-metabox-section .header .actions .add-button::before {
+.wpo-otd-metabox-section .header .actions .add-button::before {
     content: '\f543';
     font-family: 'dashicons';
     display: block;
 }
 
-.wpo-aom-metabox-section .header .title-details {
+.wpo-otd-metabox-section .header .title-details {
     display: flex;
     align-items: center;
     gap: 1em;
     flex-grow: 1;
 }
 
-.wpo-aom-metabox-section .header .task-progress > progress {
-    accent-color: var(--wpo-aom-purple-primary);
+.wpo-otd-metabox-section .header .task-progress > progress {
+    accent-color: var(--wpo-otd-purple-primary);
 }
 
 #order-tasks .header .title-details::before {
@@ -51,7 +51,7 @@
     height: 3em;
     background-repeat: no-repeat;
     background-size: contain;
-    background-image: var(--wpo-aom-icon-task-header);
+    background-image: var(--wpo-otd-icon-task-header);
 }
 
 #order-fulfillments .header .title-details::before {
@@ -61,21 +61,21 @@
     height: 3em;
     background-repeat: no-repeat;
     background-size: contain;
-    background-image: var(--wpo-aom-icon-fulfillment-header);
+    background-image: var(--wpo-otd-icon-fulfillment-header);
 }
 
-.wpo-aom-metabox-section .header .title-details > h3 {
+.wpo-otd-metabox-section .header .title-details > h3 {
     margin: 0;
     padding: 0;
 }
 
-.wpo-aom-metabox-section .header .title-details > span {
+.wpo-otd-metabox-section .header .title-details > span {
     display: inline-block;
-    border-radius: var(--wpo-aom-radius-l);
+    border-radius: var(--wpo-otd-radius-l);
     padding: 0.3em 0.7em;
     margin: 0;
     white-space: nowrap;
-    background: var(--wpo-aom-bg-lighter);
+    background: var(--wpo-otd-bg-lighter);
 }
 
 /********************************
@@ -113,12 +113,12 @@
 }
 
 .finished-tasks-container {
-    border-top: 1px solid var(--wpo-aom-border-color);
+    border-top: 1px solid var(--wpo-otd-border-color);
     padding-top: 1em;
 }
 
 .finished-tasks-toggle {
-    color: var(--wpo-aom-wp-blue);
+    color: var(--wpo-otd-wp-blue);
 }
 
 .finished-tasks-toggle::after {
@@ -131,11 +131,11 @@
 
 .finished-tasks-toggle.expanded::after {
     content: "\f343";
-    transition: transform var(--wpo-aom-transition-normal);
+    transition: transform var(--wpo-otd-transition-normal);
 }
 
 .finished-tasks-list-container .task-card {
-    background-color: var(--wpo-aom-bg-gray-alt);
+    background-color: var(--wpo-otd-bg-gray-alt);
 }
 
 .task-list .task-list-empty > p {
@@ -149,7 +149,7 @@
 .task-archived-item {
     position: relative;
     transition: opacity 0.3s ease-out;
-    background: var(--wpo-aom-bg-light);
+    background: var(--wpo-otd-bg-light);
 }
 
 .task-archived-item .task-card {
@@ -166,8 +166,8 @@
     align-items: center;
     gap: 1em;
     background: #fff;
-    border: 1px solid var(--wpo-aom-purple-primary);
-    border-radius: var(--wpo-aom-radius-m);
+    border: 1px solid var(--wpo-otd-purple-primary);
+    border-radius: var(--wpo-otd-radius-m);
     padding: 0.6em 1em;
     z-index: 1;
 }
@@ -180,12 +180,12 @@
 
 .task-archived-message {
     font-weight: 600;
-    color: var(--wpo-aom-text-primary);
+    color: var(--wpo-otd-text-primary);
 }
 
 .task-archived-link {
     font-size: 0.95em;
-    color: var(--wpo-aom-purple-primary);
+    color: var(--wpo-otd-purple-primary);
     text-decoration: none;
 }
 
@@ -196,9 +196,9 @@
 .task-archived-undo {
     display: flex;
     align-items: center;
-    color: var(--wpo-aom-purple-primary);
+    color: var(--wpo-otd-purple-primary);
     background: #f3eaff;
-    border-radius: var(--wpo-aom-radius-l);
+    border-radius: var(--wpo-otd-radius-l);
     padding: 0.4em 1em;
     font-weight: 600;
     font-size: 0.95em;
@@ -218,7 +218,7 @@
     opacity: 0;
 }
 
-#order-tasks .wpo-aom-loading-skeleton-container {
+#order-tasks .wpo-otd-loading-skeleton-container {
     padding: 1em;
 }
 
@@ -226,7 +226,7 @@
  * Fulfillment List Styles (Woo)
  ******************************/
 
-#order-fulfillments .wpo-aom-loading-skeleton-container {
+#order-fulfillments .wpo-otd-loading-skeleton-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
     padding: 1em;
@@ -258,16 +258,16 @@
     display: flex;
     flex-direction: column;
     gap: 0.6em;
-    background: var(--wpo-aom-card-bg);
+    background: var(--wpo-otd-card-bg);
     padding: 0.875em;
-    border: 1px solid var(--wpo-aom-border-color);
-    border-radius: var(--wpo-aom-radius-m);
+    border: 1px solid var(--wpo-otd-border-color);
+    border-radius: var(--wpo-otd-radius-m);
 }
 
 .fulfillment-card h4 {
     font-size: 1.1em;
     font-weight: 600;
-    color: var(--wpo-aom-text-primary);
+    color: var(--wpo-otd-text-primary);
     margin: 0;
 }
 
@@ -322,106 +322,106 @@
 .fulfillment-card-details > dd {
     display: flex;
     justify-content: flex-end;
-    border-left: 1px solid var(--wpo-aom-border-color);
+    border-left: 1px solid var(--wpo-otd-border-color);
 }
 
 /********************************
  * Fulfillment
  ******************************/
 
-td.wpo-aom-fulfillment > div {
+td.wpo-otd-fulfillment > div {
     display: flex;
     gap: 0.5em;
     align-items: center;
 }
 
-.wpo-aom-fulfillment span.wpo-aom-tag {
-    border-radius: var(--wpo-aom-radius-l);
+.wpo-otd-fulfillment span.wpo-otd-tag {
+    border-radius: var(--wpo-otd-radius-l);
     padding: 0.2em 0.9em;
 }
 
-.wpo-aom-fulfillment span.wpo-aom-tag.not-fulfilled {
-    background-color: var(--wpo-aom-bg-lighter);
+.wpo-otd-fulfillment span.wpo-otd-tag.not-fulfilled {
+    background-color: var(--wpo-otd-bg-lighter);
     color: #414651;
 }
 
-.wpo-aom-fulfillment span.wpo-aom-tag.fully-fulfilled {
-    background-color: var(--wpo-aom-success-bg);
-    color: var(--wpo-aom-success-text);
+.wpo-otd-fulfillment span.wpo-otd-tag.fully-fulfilled {
+    background-color: var(--wpo-otd-success-bg);
+    color: var(--wpo-otd-success-text);
 }
 
-.wpo-aom-fulfillment span.wpo-aom-tag.partially-fulfilled {
-    background-color: var(--wpo-aom-warning-bg);
-    color: var(--wpo-aom-warning-text);
+.wpo-otd-fulfillment span.wpo-otd-tag.partially-fulfilled {
+    background-color: var(--wpo-otd-warning-bg);
+    color: var(--wpo-otd-warning-text);
 }
 
-#woocommerce-order-items tbody tr:hover .wpo-aom-edit-fulfillment {
+#woocommerce-order-items tbody tr:hover .wpo-otd-edit-fulfillment {
     opacity: 1;
 }
 
-.wpo-aom-edit-fulfillment {
-    color: var(--wpo-aom-gray-medium);
+.wpo-otd-edit-fulfillment {
+    color: var(--wpo-otd-gray-medium);
     font-size: 1.2em;
     opacity: 0;
 }
 
-.wpo-aom-edit-fulfillment::before {
+.wpo-otd-edit-fulfillment::before {
     content: '\f464';
     font-family: 'dashicons';
     display: block;
 }
 
-.wpo-aom-edit-fulfillment:hover {
-    color: var(--wpo-aom-gray-dark);
+.wpo-otd-edit-fulfillment:hover {
+    color: var(--wpo-otd-gray-dark);
     background-color: transparent;
 }
 
-.wpo-aom-fulfillment-actions {
+.wpo-otd-fulfillment-actions {
     display: flex;
     gap: 0.3em;
 }
 
-.wpo-aom-fulfillment-actions,
-.wpo-aom-fulfillment-actions > li {
+.wpo-otd-fulfillment-actions,
+.wpo-otd-fulfillment-actions > li {
     margin: 0;
     padding: 0;
 }
 
-.wpo-aom-fulfillment-actions button {
+.wpo-otd-fulfillment-actions button {
     border-radius: 2px;
     width: 1.8em;
     height: 1.8em;
 }
 
-.wpo-aom-save-fulfillment {
-    background-color: var(--wpo-aom-purple-primary);
+.wpo-otd-save-fulfillment {
+    background-color: var(--wpo-otd-purple-primary);
 }
 
-.wpo-aom-save-fulfillment:hover {
-    background-color: var(--wpo-aom-purple-dark);
+.wpo-otd-save-fulfillment:hover {
+    background-color: var(--wpo-otd-purple-dark);
 }
 
-.wpo-aom-save-fulfillment::before {
+.wpo-otd-save-fulfillment::before {
     content: '';
     display: inline-block;
     width: 1.1em;
     height: 1.1em;
     background-color: #fff;
-    mask-image: var(--wpo-aom-icon-checkmark);
+    mask-image: var(--wpo-otd-icon-checkmark);
     mask-size: contain;
     mask-repeat: no-repeat;
-    -webkit-mask-image: var(--wpo-aom-icon-checkmark);
+    -webkit-mask-image: var(--wpo-otd-icon-checkmark);
     -webkit-mask-size: contain;
     -webkit-mask-repeat: no-repeat;
     text-align: center;
     vertical-align: bottom;
 }
 
-.wpo-aom-cancel-fulfillment {
-    border: 1px solid var(--wpo-aom-border-color);
+.wpo-otd-cancel-fulfillment {
+    border: 1px solid var(--wpo-otd-border-color);
 }
 
-.wpo-aom-cancel-fulfillment::before {
+.wpo-otd-cancel-fulfillment::before {
     content: '\f335';
     font-family: 'dashicons';
     display: block;
@@ -432,12 +432,12 @@ td.wpo-aom-fulfillment > div {
 
 
 @container (max-width: 300px) {
-    .wpo-aom-metabox-section .header {
+    .wpo-otd-metabox-section .header {
         flex-wrap: wrap;
         gap: 0.5em;
     }
 
-    .wpo-aom-metabox-section .header > .task-progress {
+    .wpo-otd-metabox-section .header > .task-progress {
         order: 3;
         flex-basis: 100%;
         display: inline-flex;
@@ -446,7 +446,7 @@ td.wpo-aom-fulfillment > div {
         gap: 0.5em;
     }
 
-    .wpo-aom-metabox-section .header > .task-progress progress {
+    .wpo-otd-metabox-section .header > .task-progress progress {
         flex-grow: 1;
     }
 

@@ -272,7 +272,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 		<form
 			onSubmit={submit}
 			onChange={handleFormChange}
-			className={`wpo-aom-task-form ${isSubmitting ? 'submitting' : ''}`}
+			className={`wpo-otd-task-form ${isSubmitting ? 'submitting' : ''}`}
 		>
 			<fieldset disabled={isSubmitting}>
 				<div className="field-group">
@@ -403,7 +403,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 					className="wpo-button wpo-button-primary"
 					disabled={isSubmitting}
 				>
-					{isSubmitting && <span className="wpo-aom-spinner"></span>}
+					{isSubmitting && <span className="wpo-otd-spinner"></span>}
 					{task
 						? __('Update Task', 'out-the-door-order-tasks-workflows-for-woocommerce')
 						: __('Create Task', 'out-the-door-order-tasks-workflows-for-woocommerce')}

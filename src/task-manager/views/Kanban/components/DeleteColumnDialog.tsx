@@ -72,7 +72,7 @@ const ColumnPickerPhase: React.FC<ColumnPickerPhaseProps> = ({
 			<label className="dialog-field" htmlFor="column-picker">
 				{fieldLabel}
 				<select
-					className="wpo-aom-select"
+					className="wpo-otd-select"
 					id="column-picker"
 					value={selectedOptionId ?? ''}
 					onChange={(e) =>
@@ -733,7 +733,7 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 		// eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
 		<dialog
 			ref={dialogRef}
-			className={`wpo-aom-dialog column-deletion-dialog ${phase === 'processing' ? 'processing-action' : 'action-delete'}`}
+			className={`wpo-otd-dialog column-deletion-dialog ${phase === 'processing' ? 'processing-action' : 'action-delete'}`}
 			onClose={onClose}
 			onClick={handleBackdropClick}
 		>

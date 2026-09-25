@@ -2,7 +2,7 @@
  * Public API of the SDK runtime.
  *
  * This barrel is compiled to `assets/js/sdk.js` and exposed on the page as
- * `window.wpo.aom.sdk`. Both the core bundles and add-on plugins (Pro) link
+ * `window.wpo.otd.sdk`. Both the core bundles and add-on plugins (Pro) link
  * against that single global instead of bundling their own copy.
  *
  * Anything exported here is a public contract, removing or renaming an export

@@ -19,7 +19,7 @@ export const Toast: React.FC<ToastProps> = ({
 }) => {
 	return (
 		<div
-			className={`wpo-aom-toast toast-${type}${isExiting ? ' is-exiting' : ''}`}
+			className={`wpo-otd-toast toast-${type}${isExiting ? ' is-exiting' : ''}`}
 		>
 			<div>
 				<div className="toast-content">

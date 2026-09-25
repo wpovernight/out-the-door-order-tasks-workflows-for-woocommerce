@@ -111,7 +111,7 @@ export const FieldOptionDropdown: React.FC<DropdownProps> = ({
 	return (
 		<div
 			ref={containerRef}
-			className="wpo-aom-field-option-dropdown-container"
+			className="wpo-otd-field-option-dropdown-container"
 		>
 			{name && selectedOption && (
 				<input type="hidden" name={name} value={selectedOption.id} />
@@ -126,7 +126,7 @@ export const FieldOptionDropdown: React.FC<DropdownProps> = ({
 				onClick={toggleOpen}
 				onKeyDown={handleButtonKeyDown}
 			>
-				<span className="wpo-aom-tag" style={selectedStyle}>
+				<span className="wpo-otd-tag" style={selectedStyle}>
 					{selectedOption ? selectedOption.label : placeholder}
 				</span>
 			</button>
@@ -143,7 +143,7 @@ export const FieldOptionDropdown: React.FC<DropdownProps> = ({
 								onKeyDown={handleOptionKeyDown}
 							>
 								<span
-									className="wpo-aom-tag"
+									className="wpo-otd-tag"
 									style={getColorStyle(option.color)}
 								>
 									{option.label}

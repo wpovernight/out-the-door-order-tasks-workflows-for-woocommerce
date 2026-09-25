@@ -108,7 +108,7 @@ export const DraftColumn: React.FC<DraftColumnProps> = ({
 									{__('Cancel', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 								</span>
 							</button>
-							<span className="wpo-aom-vertical-divider" />
+							<span className="wpo-otd-vertical-divider" />
 							<button
 								type="button"
 								onClick={handleSave}

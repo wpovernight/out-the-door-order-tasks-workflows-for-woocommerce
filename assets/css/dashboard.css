@@ -7,8 +7,8 @@
 }
 
 .dashboard-widget {
-    border: 1px solid var(--wpo-aom-border-light);
-    border-radius: var(--wpo-aom-radius-l);
+    border: 1px solid var(--wpo-otd-border-light);
+    border-radius: var(--wpo-otd-radius-l);
     box-shadow: 0 1px 2px 0 #0A0D120D;
     padding: 0 1.85em;
     flex: 1;
@@ -27,13 +27,13 @@
 .dashboard-widget .content.is-loading {
     opacity: 0.55;
     pointer-events: none;
-    transition: opacity var(--wpo-aom-transition-fast);
+    transition: opacity var(--wpo-otd-transition-fast);
 }
 
 .dashboard-widget > .header {
     align-items: center;
     padding: 1.85em 0 0.5em;
-    border-bottom: 1px solid var(--wpo-aom-border-light);
+    border-bottom: 1px solid var(--wpo-otd-border-light);
     display: flex;
     justify-content: space-between;
 }
@@ -43,7 +43,7 @@
     font-size: 1.85em;
     line-height: 1.4em;
     font-weight: 600;
-    color: var(--wpo-aom-text-primary);
+    color: var(--wpo-otd-text-primary);
 }
 
 .dashboard-widget > .header > h3 .wpo-count-badge {
@@ -60,16 +60,16 @@
     font-size: 1.08em;
     padding: 0.5em 1em;
     display: flex;
-    border: 1px solid var(--wpo-aom-border-light);
+    border: 1px solid var(--wpo-otd-border-light);
     justify-content: center;
 }
 
 .dashboard-widget > .footer .view-all-link:not(:hover) {
-    color: var(--wpo-aom-text-primary);
+    color: var(--wpo-otd-text-primary);
 }
 
 #today-tasks .header .add-new-task {
-    border-radius: var(--wpo-aom-radius-m);
+    border-radius: var(--wpo-otd-radius-m);
     font-size: 1em;
     height: 2em;
     width: 2em;
@@ -94,8 +94,8 @@
     -webkit-mask-size: contain;
     -webkit-mask-repeat: no-repeat;
     -webkit-mask-position: center;
-    mask-image: var(--wpo-aom-icon-add);
-    -webkit-mask-image: var(--wpo-aom-icon-add);
+    mask-image: var(--wpo-otd-icon-add);
+    -webkit-mask-image: var(--wpo-otd-icon-add);
 }
 
 /* Today Tasks List */
@@ -108,7 +108,7 @@
 #today-tasks ul.today-tasks-list > li {
     margin: 0;
     padding: 1em 0;
-    border-bottom: 1px solid var(--wpo-aom-border-light);
+    border-bottom: 1px solid var(--wpo-otd-border-light);
 }
 
 #today-tasks ul.today-tasks-list > li .task-card {
@@ -139,8 +139,8 @@
 /* Section Toggles */
 #today-tasks .today-tasks-section {
     padding: 0 1em;
-    border: 1px solid var(--wpo-aom-border-light);
-    border-radius: var(--wpo-aom-radius-m);
+    border: 1px solid var(--wpo-otd-border-light);
+    border-radius: var(--wpo-otd-radius-m);
 }
 
 #today-tasks .today-tasks-section:not(:last-child) {
@@ -153,7 +153,7 @@
 }
 
 #today-tasks .today-tasks-section.expanded > h4 {
-    border-bottom: 1px solid var(--wpo-aom-border-light);
+    border-bottom: 1px solid var(--wpo-otd-border-light);
 }
 
 #today-tasks .today-tasks-section .today-tasks-list.expanded {
@@ -177,8 +177,8 @@
     cursor: pointer;
     font-size: 1.23em;
     font-weight: 600;
-    color: var(--wpo-aom-text-primary);
-    transition: background-color var(--wpo-aom-transition-fast);
+    color: var(--wpo-otd-text-primary);
+    transition: background-color var(--wpo-otd-transition-fast);
 }
 
 #today-tasks .today-tasks-section .today-tasks-section-toggle .wpo-count-badge {
@@ -199,15 +199,15 @@
 }
 
 #today-tasks #overdue-tasks-section .today-tasks-section-toggle::before {
-    background-color: var(--wpo-aom-error);
-    mask-image: var(--wpo-aom-icon-error);
-    -webkit-mask-image: var(--wpo-aom-icon-error);
+    background-color: var(--wpo-otd-error);
+    mask-image: var(--wpo-otd-icon-error);
+    -webkit-mask-image: var(--wpo-otd-icon-error);
 }
 
 #today-tasks #done-tasks-section .today-tasks-section-toggle::before {
-    background-color: var(--wpo-aom-success);
-    mask-image: var(--wpo-aom-icon-finish);
-    -webkit-mask-image: var(--wpo-aom-icon-finish);
+    background-color: var(--wpo-otd-success);
+    mask-image: var(--wpo-otd-icon-finish);
+    -webkit-mask-image: var(--wpo-otd-icon-finish);
 }
 
 #today-tasks #done-tasks-section .task-card h3,
@@ -224,17 +224,17 @@
     content: '';
     width: 1em;
     height: 1em;
-    background-color: var(--wpo-aom-text-gray-light);
+    background-color: var(--wpo-otd-text-gray-light);
     mask-size: contain;
     mask-repeat: no-repeat;
     mask-position: center;
     -webkit-mask-size: contain;
     -webkit-mask-repeat: no-repeat;
     -webkit-mask-position: center;
-    transition: var(--wpo-aom-transition-fast) all;
+    transition: var(--wpo-otd-transition-fast) all;
     margin-left: auto;
-    mask-image: var(--wpo-aom-icon-chevron-down);
-    -webkit-mask-image: var(--wpo-aom-icon-chevron-down);
+    mask-image: var(--wpo-otd-icon-chevron-down);
+    -webkit-mask-image: var(--wpo-otd-icon-chevron-down);
 }
 
 #today-tasks .today-tasks-section .today-tasks-section-toggle.collapsed::after {
@@ -242,7 +242,7 @@
 }
 
 #today-tasks .today-tasks-section .today-tasks-section-toggle:hover::after {
-    background-color: var(--wpo-aom-text-gray);
+    background-color: var(--wpo-otd-text-gray);
 }
 
 /* Partial Fulfillments Widget */
@@ -253,8 +253,8 @@
 }
 
 #partial-fulfillments .fulfillment-order {
-    border: 1px solid var(--wpo-aom-border-light);
-    border-radius: var(--wpo-aom-radius-s);
+    border: 1px solid var(--wpo-otd-border-light);
+    border-radius: var(--wpo-otd-radius-s);
     padding: 0.9em;
     margin: 0 0 1.23em;
 }
@@ -281,11 +281,11 @@
     width: 0.9em;
     height: 0.9em;
     margin-top: 0.3em;
-    background-color: var(--wpo-aom-gray-icon);
-    mask-image: var(--wpo-aom-icon-person);
+    background-color: var(--wpo-otd-gray-icon);
+    mask-image: var(--wpo-otd-icon-person);
     mask-size: contain;
     mask-repeat: no-repeat;
-    -webkit-mask-image: var(--wpo-aom-icon-person);
+    -webkit-mask-image: var(--wpo-otd-icon-person);
     -webkit-mask-size: contain;
     -webkit-mask-repeat: no-repeat;
 }
@@ -294,17 +294,17 @@
     content: '';
     width: 1em;
     height: 1em;
-    background-color: var(--wpo-aom-text-gray-light);
+    background-color: var(--wpo-otd-text-gray-light);
     mask-size: contain;
     mask-repeat: no-repeat;
     mask-position: center;
     -webkit-mask-size: contain;
     -webkit-mask-repeat: no-repeat;
     -webkit-mask-position: center;
-    transition: var(--wpo-aom-transition-fast) all;
+    transition: var(--wpo-otd-transition-fast) all;
     margin-left: auto;
-    mask-image: var(--wpo-aom-icon-chevron-down);
-    -webkit-mask-image: var(--wpo-aom-icon-chevron-down);
+    mask-image: var(--wpo-otd-icon-chevron-down);
+    -webkit-mask-image: var(--wpo-otd-icon-chevron-down);
 }
 
 #partial-fulfillments .fulfillment-order-toggle.collapsed::after {
@@ -312,7 +312,7 @@
 }
 
 #partial-fulfillments .fulfillment-order-toggle:hover::after {
-    background-color: var(--wpo-aom-text-gray);
+    background-color: var(--wpo-otd-text-gray);
 }
 
 
@@ -332,7 +332,7 @@
 
 #partial-fulfillments .customer-location {
     font-size: 0.8em;
-    color: var(--wpo-aom-text-gray);
+    color: var(--wpo-otd-text-gray);
 }
 
 /* Expanded items list */
@@ -353,8 +353,8 @@
     align-items: center;
     gap: 0.8em;
     padding: 0.8em;
-    border: 1px solid var(--wpo-aom-border-light);
-    border-radius: var(--wpo-aom-radius-m);
+    border: 1px solid var(--wpo-otd-border-light);
+    border-radius: var(--wpo-otd-radius-m);
     margin: 0 0 0 1em;
 }
 
@@ -363,8 +363,8 @@
     height: 4em;
     min-width: 4em;
     object-fit: cover;
-    border-radius: var(--wpo-aom-radius-s);
-    border: 1px solid var(--wpo-aom-border-light);
+    border-radius: var(--wpo-otd-radius-s);
+    border: 1px solid var(--wpo-otd-border-light);
 }
 
 #partial-fulfillments .item-details {
@@ -386,7 +386,7 @@
 
 #partial-fulfillments .item-attributes {
     font-size: 0.78em;
-    color: var(--wpo-aom-text-gray-light);
+    color: var(--wpo-otd-text-gray-light);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -401,20 +401,20 @@
 #partial-fulfillments .progress-bar {
     width: 100%;
     height: 6px;
-    background-color: var(--wpo-aom-border-light);
+    background-color: var(--wpo-otd-border-light);
     border-radius: 3px;
     overflow: hidden;
 }
 
 #partial-fulfillments .progress-fill {
     height: 100%;
-    background-color: var(--wpo-aom-purple-primary);
+    background-color: var(--wpo-otd-purple-primary);
     border-radius: 3px;
-    transition: width var(--wpo-aom-transition-normal);
+    transition: width var(--wpo-otd-transition-normal);
 }
 
 #partial-fulfillments .progress-text {
     font-size: 0.75em;
-    color: var(--wpo-aom-text-gray);
+    color: var(--wpo-otd-text-gray);
     white-space: nowrap;
 }

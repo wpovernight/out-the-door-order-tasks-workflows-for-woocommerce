@@ -12,11 +12,11 @@ module.exports = (env, argv) => {
 		entry: {
 			sdk: {
 				import: path.resolve(__dirname, 'src/sdk/index.ts'),
-				library: { name: ['wpo', 'aom', 'sdk'], type: 'window' },
+				library: { name: ['wpo', 'otd', 'sdk'], type: 'window' },
 			},
 			router: {
 				import: ROUTER_SHIM,
-				library: { name: ['wpo', 'aom', 'router'], type: 'window' },
+				library: { name: ['wpo', 'otd', 'router'], type: 'window' },
 			},
 			'order-manager': path.resolve(__dirname, 'src/order-manager/index.tsx'),
 			'order-edit-metabox': path.resolve(__dirname, 'src/order-edit/index.tsx'),
@@ -60,7 +60,7 @@ module.exports = (env, argv) => {
 				const issuer = contextInfo && contextInfo.issuer;
 
 				if (request === 'react-router-dom' && issuer !== ROUTER_SHIM) {
-					return callback(null, ['wpo', 'aom', 'router'], 'window');
+					return callback(null, ['wpo', 'otd', 'router'], 'window');
 				}
 
 				if (
@@ -68,7 +68,7 @@ module.exports = (env, argv) => {
 					request.startsWith('@sdk') &&
 					!(context || '').startsWith(SDK_DIR)
 				) {
-					return callback(null, ['wpo', 'aom', 'sdk'], 'window');
+					return callback(null, ['wpo', 'otd', 'sdk'], 'window');
 				}
 
 				return callback();

@@ -1,29 +1,29 @@
-#wpo-aom-order-manager .task-manager-tab .view {
+#wpo-otd-order-manager .task-manager-tab .view {
     display: none;
 }
 
-#wpo-aom-order-manager .task-manager-tab .view.active {
+#wpo-otd-order-manager .task-manager-tab .view.active {
     display: block;
 }
 
-#wpo-aom-order-manager .task-manager-tab .view.calendar-view {
+#wpo-otd-order-manager .task-manager-tab .view.calendar-view {
     padding: 0 2em;
 }
 
-#wpo-aom-order-manager .task-manager-tab .view.kanban-view {
+#wpo-otd-order-manager .task-manager-tab .view.kanban-view {
     height: calc(100vh - 23em);
     padding: 2.4em;
 }
 
-#wpo-aom-order-manager .task-manager-tab .options-button {
-    border-radius: var(--wpo-aom-radius-m);
+#wpo-otd-order-manager .task-manager-tab .options-button {
+    border-radius: var(--wpo-otd-radius-m);
     font-size: 1em;
     padding: 0;
     margin: 0;
     position: relative;
 }
 
-#wpo-aom-order-manager .task-manager-tab .options-button::before {
+#wpo-otd-order-manager .task-manager-tab .options-button::before {
     content: '';
     position: absolute;
     transform: translate(-50%, -50%);
@@ -38,11 +38,11 @@
     -webkit-mask-size: contain;
     -webkit-mask-repeat: no-repeat;
     -webkit-mask-position: center;
-    mask-image: var(--wpo-aom-icon-dots-three);
-    -webkit-mask-image: var(--wpo-aom-icon-dots-three);
+    mask-image: var(--wpo-otd-icon-dots-three);
+    -webkit-mask-image: var(--wpo-otd-icon-dots-three);
 }
 
-#wpo-aom-order-manager .task-manager-tab .header {
+#wpo-otd-order-manager .task-manager-tab .header {
     align-items: end;
     border-bottom: 2px solid #091E4224;
     margin: 1.6em 2.4em 0;
@@ -51,91 +51,91 @@
     position: relative;
 }
 
-#wpo-aom-order-manager .task-manager-tab ul.add-menu {
+#wpo-otd-order-manager .task-manager-tab ul.add-menu {
     position: fixed;
     right: 999vw;
 }
 
-#wpo-aom-order-manager .task-manager-tab ul.add-menu.open {
+#wpo-otd-order-manager .task-manager-tab ul.add-menu.open {
     position: absolute;
     width: 15em;
     right: 0;
     top: 3.5em;
 }
 
-#wpo-aom-order-manager .task-manager-tab ul.add-menu > li > button {
+#wpo-otd-order-manager .task-manager-tab ul.add-menu > li > button {
     padding: 0.9em;
     display: flex;
     align-items: center;
     border-radius: 0;
 }
 
-#wpo-aom-order-manager .task-manager-tab button.add-task-menu-item::before {
+#wpo-otd-order-manager .task-manager-tab button.add-task-menu-item::before {
     content: '';
     display: inline-block;
     width: 1em;
     height: 1em;
     background-color: currentColor;
-    mask-image: var(--wpo-aom-icon-list-bullet);
+    mask-image: var(--wpo-otd-icon-list-bullet);
     mask-size: contain;
     mask-repeat: no-repeat;
     mask-position: center;
-    -webkit-mask-image: var(--wpo-aom-icon-list-bullet);
+    -webkit-mask-image: var(--wpo-otd-icon-list-bullet);
     -webkit-mask-size: contain;
     -webkit-mask-repeat: no-repeat;
     -webkit-mask-position: center;
 }
 
-#wpo-aom-order-manager .task-manager-tab button.add-column-menu-item::before {
+#wpo-otd-order-manager .task-manager-tab button.add-column-menu-item::before {
     content: '';
     display: inline-block;
     width: 1em;
     height: 1em;
     background-color: currentColor;
-    mask-image: var(--wpo-aom-icon-access-list);
+    mask-image: var(--wpo-otd-icon-access-list);
     mask-size: contain;
     mask-repeat: no-repeat;
     mask-position: center;
-    -webkit-mask-image: var(--wpo-aom-icon-access-list);
+    -webkit-mask-image: var(--wpo-otd-icon-access-list);
     -webkit-mask-size: contain;
     -webkit-mask-repeat: no-repeat;
     -webkit-mask-position: center;
 }
 
 
-#wpo-aom-order-manager .task-manager-tab .header-actions {
+#wpo-otd-order-manager .task-manager-tab .header-actions {
     display: flex;
     align-items: center;
     gap: 0.75em;
 }
 
-#wpo-aom-order-manager .task-manager-tab .header-actions .header-search {
+#wpo-otd-order-manager .task-manager-tab .header-actions .header-search {
     position: relative;
     display: flex;
     align-items: center;
 }
 
-#wpo-aom-order-manager .task-manager-tab .header-actions #header-search-input {
-    border: 1px solid var(--wpo-aom-border-color);
-    border-radius: var(--wpo-aom-radius-m);
+#wpo-otd-order-manager .task-manager-tab .header-actions #header-search-input {
+    border: 1px solid var(--wpo-otd-border-color);
+    border-radius: var(--wpo-otd-radius-m);
     font-size: 1.08em;
     width: 20em;
-    color: var(--wpo-aom-text-primary);
+    color: var(--wpo-otd-text-primary);
     outline: none;
-    transition: border-color var(--wpo-aom-transition-fast);
+    transition: border-color var(--wpo-otd-transition-fast);
     margin: 0.5em 0;
-    background-image: var(--wpo-aom-icon-search);
+    background-image: var(--wpo-otd-icon-search);
     background-position: 0.8em;
     background-repeat: no-repeat;
     padding: 0.37em 1em 0.37em 3em;
 }
 
-#wpo-aom-order-manager .task-manager-tab #header-search-input:focus {
-    border-color: var(--wpo-aom-purple-primary);
+#wpo-otd-order-manager .task-manager-tab #header-search-input:focus {
+    border-color: var(--wpo-otd-purple-primary);
 }
 
-#wpo-aom-order-manager .task-manager-tab .header-actions .add-new-task {
-    border-radius: var(--wpo-aom-radius-m);
+#wpo-otd-order-manager .task-manager-tab .header-actions .add-new-task {
+    border-radius: var(--wpo-otd-radius-m);
     font-size: 1.5em;
     height: 2.055em;
     width: 2.055em;
@@ -143,7 +143,7 @@
     margin: 0;
 }
 
-#wpo-aom-order-manager .task-manager-tab .header-actions .add-new-task::before {
+#wpo-otd-order-manager .task-manager-tab .header-actions .add-new-task::before {
     content: '';
     position: absolute;
     transform: translate(-50%, -50%);
@@ -156,8 +156,8 @@
     -webkit-mask-size: contain;
     -webkit-mask-repeat: no-repeat;
     -webkit-mask-position: center;
-    mask-image: var(--wpo-aom-icon-add);
-    -webkit-mask-image: var(--wpo-aom-icon-add);
+    mask-image: var(--wpo-otd-icon-add);
+    -webkit-mask-image: var(--wpo-otd-icon-add);
 }
 
 .kanban-board {
@@ -182,10 +182,10 @@
 }
 
 .kanban-board .kanban-column .kanban-column-inner {
-    background: var(--wpo-aom-bg-light);
-    border-radius: var(--wpo-aom-radius-xl);
+    background: var(--wpo-otd-bg-light);
+    border-radius: var(--wpo-otd-radius-xl);
     padding-bottom: 1em;
-    border: 1px solid var(--wpo-aom-border-light);
+    border: 1px solid var(--wpo-otd-border-light);
     display: flex;
     flex-direction: column;
     position: relative;
@@ -207,8 +207,8 @@
     top: 0;
     bottom: 0;
     width: 3px;
-    background: var(--wpo-aom-primary-color);
-    border-radius: var(--wpo-aom-radius-l);
+    background: var(--wpo-otd-primary-color);
+    border-radius: var(--wpo-otd-radius-l);
     z-index: 100;
 }
 
@@ -219,15 +219,15 @@
     top: 0;
     bottom: 0;
     width: 3px;
-    background: var(--wpo-aom-primary-color);
-    border-radius: var(--wpo-aom-radius-l);
+    background: var(--wpo-otd-primary-color);
+    border-radius: var(--wpo-otd-radius-l);
     z-index: 100;
 }
 
 .kanban-board .kanban-column-scrollable {
     flex: 1;
     overflow-y: auto;
-    scrollbar-color: var(--wpo-aom-gray-medium) transparent;
+    scrollbar-color: var(--wpo-otd-gray-medium) transparent;
     margin-right: 0.615em; /* Account for scrollbar width to prevent layout shift */
     padding: 0 0.615em 0 1.23em;
 }
@@ -241,12 +241,12 @@
 }
 
 .kanban-board .kanban-column-scrollable::-webkit-scrollbar-thumb {
-    background-color: var(--wpo-aom-gray-medium);
+    background-color: var(--wpo-otd-gray-medium);
     border-radius: 3px;
 }
 
 .kanban-board .kanban-column-scrollable::-webkit-scrollbar-thumb:hover {
-    background-color: var(--wpo-aom-gray-dark);
+    background-color: var(--wpo-otd-gray-dark);
 }
 
 .kanban-board .kanban-column-container {
@@ -262,17 +262,17 @@
     margin-top: auto; /* Push to the bottom when the column isn't filled with cards */
     margin-bottom: 0.33em; /* The sum of this and .kanban-column-inner margin should be equals to the margin of the header */
     cursor: pointer;
-    border-radius: var(--wpo-aom-radius-m);
-    background: var(--wpo-aom-card-bg);
+    border-radius: var(--wpo-otd-radius-m);
+    background: var(--wpo-otd-card-bg);
     border: 1px solid #E9EAEB;
-    box-shadow: var(--wpo-aom-card-shadow);
-    color: var(--wpo-aom-text-gray);
+    box-shadow: var(--wpo-otd-card-shadow);
+    color: var(--wpo-otd-text-gray);
     font-weight: 600;
     font-size: 1.1em;
 }
 
 .kanban-board .kanban-column-add-task:hover {
-    color: var(--wpo-aom-primary-color);
+    color: var(--wpo-otd-primary-color);
 }
 
 .kanban-board .kanban-column-header {
@@ -328,11 +328,11 @@
     width: 1.1em;
     height: 1.1em;
     background-color: #888D91;
-    mask-image: var(--wpo-aom-icon-edit);
+    mask-image: var(--wpo-otd-icon-edit);
     mask-size: contain;
     mask-repeat: no-repeat;
     mask-position: center;
-    -webkit-mask-image: var(--wpo-aom-icon-edit);
+    -webkit-mask-image: var(--wpo-otd-icon-edit);
     -webkit-mask-size: contain;
     -webkit-mask-repeat: no-repeat;
     -webkit-mask-position: center;
@@ -345,7 +345,7 @@
 
 .kanban-board .kanban-column-header .kanban-column-header-title input.edit-title-input:focus {
     outline-width: 0;
-    border: 1px solid var(--wpo-aom-purple-lighter) !important;
+    border: 1px solid var(--wpo-otd-purple-lighter) !important;
     box-shadow: none;
 }
 
@@ -366,11 +366,11 @@
     width: 1.1em;
     height: 1.1em;
     background-color: #66CC66;
-    mask-image: var(--wpo-aom-icon-checkmark);
+    mask-image: var(--wpo-otd-icon-checkmark);
     mask-size: contain;
     mask-repeat: no-repeat;
     mask-position: center;
-    -webkit-mask-image: var(--wpo-aom-icon-checkmark);
+    -webkit-mask-image: var(--wpo-otd-icon-checkmark);
     -webkit-mask-size: contain;
     -webkit-mask-repeat: no-repeat;
     -webkit-mask-position: center;
@@ -396,19 +396,19 @@
     gap: 0.3em;
 }
 
-#wpo-aom-order-manager .task-manager-tab ul.column-action-menu {
+#wpo-otd-order-manager .task-manager-tab ul.column-action-menu {
     position: fixed;
     right: 999vw;
 }
 
-#wpo-aom-order-manager .task-manager-tab ul.column-action-menu.is-open {
+#wpo-otd-order-manager .task-manager-tab ul.column-action-menu.is-open {
     position: absolute;
     width: 15em;
     right: 1.5em;
     top: 3em;
 }
 
-#wpo-aom-order-manager .task-manager-tab ul.column-action-menu li > button::before {
+#wpo-otd-order-manager .task-manager-tab ul.column-action-menu li > button::before {
     content: '';
     display: inline-block;
     width: 1em;
@@ -422,60 +422,60 @@
     -webkit-mask-position: center;
 }
 
-#wpo-aom-order-manager .task-manager-tab ul.column-action-menu li > button {
+#wpo-otd-order-manager .task-manager-tab ul.column-action-menu li > button {
     padding: 0.9em;
     display: flex;
     align-items: center;
     border-radius: 0;
 }
 
-#wpo-aom-order-manager .task-manager-tab ul.column-action-menu li > button.edit-column-title::before {
-    mask-image: var(--wpo-aom-icon-edit);
-    -webkit-mask-image: var(--wpo-aom-icon-edit);
+#wpo-otd-order-manager .task-manager-tab ul.column-action-menu li > button.edit-column-title::before {
+    mask-image: var(--wpo-otd-icon-edit);
+    -webkit-mask-image: var(--wpo-otd-icon-edit);
 }
 
-#wpo-aom-order-manager .task-manager-tab ul.column-action-menu li > button.collapse-column::before {
-    mask-image: var(--wpo-aom-icon-collapse);
-    -webkit-mask-image: var(--wpo-aom-icon-collapse);
+#wpo-otd-order-manager .task-manager-tab ul.column-action-menu li > button.collapse-column::before {
+    mask-image: var(--wpo-otd-icon-collapse);
+    -webkit-mask-image: var(--wpo-otd-icon-collapse);
 }
 
-#wpo-aom-order-manager .task-manager-tab ul.column-action-menu li > button.hide-column::before {
-    mask-image: var(--wpo-aom-icon-hide);
-    -webkit-mask-image: var(--wpo-aom-icon-hide);
+#wpo-otd-order-manager .task-manager-tab ul.column-action-menu li > button.hide-column::before {
+    mask-image: var(--wpo-otd-icon-hide);
+    -webkit-mask-image: var(--wpo-otd-icon-hide);
 }
 
-#wpo-aom-order-manager .task-manager-tab ul.column-action-menu li > button.add-column-right::before {
-    mask-image: var(--wpo-aom-icon-add-column-right);
-    -webkit-mask-image: var(--wpo-aom-icon-add-column-right);
+#wpo-otd-order-manager .task-manager-tab ul.column-action-menu li > button.add-column-right::before {
+    mask-image: var(--wpo-otd-icon-add-column-right);
+    -webkit-mask-image: var(--wpo-otd-icon-add-column-right);
 }
 
-#wpo-aom-order-manager .task-manager-tab ul.column-action-menu li > button.add-column-left::before {
-    mask-image: var(--wpo-aom-icon-add-column-left);
-    -webkit-mask-image: var(--wpo-aom-icon-add-column-left);
+#wpo-otd-order-manager .task-manager-tab ul.column-action-menu li > button.add-column-left::before {
+    mask-image: var(--wpo-otd-icon-add-column-left);
+    -webkit-mask-image: var(--wpo-otd-icon-add-column-left);
 }
 
-#wpo-aom-order-manager .task-manager-tab ul.column-action-menu li > button.delete-column {
-    color: var(--wpo-aom-danger);
+#wpo-otd-order-manager .task-manager-tab ul.column-action-menu li > button.delete-column {
+    color: var(--wpo-otd-danger);
 }
 
-#wpo-aom-order-manager .task-manager-tab ul.column-action-menu li > button.delete-column::before {
-    mask-image: var(--wpo-aom-icon-delete);
-    -webkit-mask-image: var(--wpo-aom-icon-delete);
-    color: var(--wpo-aom-danger);
+#wpo-otd-order-manager .task-manager-tab ul.column-action-menu li > button.delete-column::before {
+    mask-image: var(--wpo-otd-icon-delete);
+    -webkit-mask-image: var(--wpo-otd-icon-delete);
+    color: var(--wpo-otd-danger);
 }
 
 .kanban-board .kanban-column h4 {
     margin: 0;
     letter-spacing: .5px;
-    color: var(--wpo-aom-text-primary);
+    color: var(--wpo-otd-text-primary);
     font-size: 1.54em;
     padding-left: 0.5em;
 }
 
 .task-card {
     cursor: grab;
-    box-shadow: var(--wpo-aom-card-shadow);
-    border-radius: var(--wpo-aom-radius-xl);
+    box-shadow: var(--wpo-otd-card-shadow);
+    border-radius: var(--wpo-otd-radius-xl);
     border: 1px solid #E9EAEB;
     padding: 1.37em;
 }
@@ -496,12 +496,12 @@
 }
 
 .task-card:hover {
-    border-color: var(--wpo-aom-primary-color);
+    border-color: var(--wpo-otd-primary-color);
 }
 
 .task-card.dragging,
 .task-card.selected {
-    border-color: var(--wpo-aom-primary-color);
+    border-color: var(--wpo-otd-primary-color);
 }
 
 .task-card.dragging {
@@ -516,8 +516,8 @@
     left: 0;
     right: 0;
     height: 3px;
-    background: var(--wpo-aom-primary-color);
-    border-radius: var(--wpo-aom-radius-l);
+    background: var(--wpo-otd-primary-color);
+    border-radius: var(--wpo-otd-radius-l);
     z-index: 10;
     top: -7.5px;
 }
@@ -529,8 +529,8 @@
     left: 0;
     right: 0;
     height: 3px;
-    background: var(--wpo-aom-primary-color);
-    border-radius: var(--wpo-aom-radius-l);
+    background: var(--wpo-otd-primary-color);
+    border-radius: var(--wpo-otd-radius-l);
     z-index: 10;
     bottom: -7.5px;
 }
@@ -538,8 +538,8 @@
 .kanban-column-container.show-drop-indicator:not(:has(.task-card-wrapper))::before {
     content: "";
     height: 3px;
-    background: var(--wpo-aom-primary-color);
-    border-radius: var(--wpo-aom-radius-l);
+    background: var(--wpo-otd-primary-color);
+    border-radius: var(--wpo-otd-radius-l);
     z-index: 10;
 }
 
@@ -563,8 +563,8 @@
 .calendar-sidebar {
     display: flex;
     flex-direction: column;
-    background: var(--wpo-aom-bg-lighter);
-    border-right: 1px solid var(--wpo-aom-border-light);
+    background: var(--wpo-otd-bg-lighter);
+    border-right: 1px solid var(--wpo-otd-border-light);
     width: 25em;
     height: 100%;
 }
@@ -577,14 +577,14 @@
 .calendar-date-range-preset-selector > select {
     font-size: 1.23em;
     width: 100%;
-    border: 1px solid var(--wpo-aom-border-color);
-    border-radius: var(--wpo-aom-radius-m);
+    border: 1px solid var(--wpo-otd-border-color);
+    border-radius: var(--wpo-otd-radius-m);
     outline: none;
-    transition: border-color var(--wpo-aom-transition-fast), box-shadow var(--wpo-aom-transition-fast);
+    transition: border-color var(--wpo-otd-transition-fast), box-shadow var(--wpo-otd-transition-fast);
 }
 
 .calendar-date-range-preset-selector:focus {
-    border-color: var(--wpo-aom-purple-light);
+    border-color: var(--wpo-otd-purple-light);
     box-shadow: 0 0 0 0.1875em rgba(124, 58, 237, 0.1);
 }
 
@@ -650,13 +650,13 @@
 }
 
 .wpo-navigate-previous::before {
-    mask-image: var(--wpo-aom-icon-chevron-left);
-    -webkit-mask-image: var(--wpo-aom-icon-chevron-left);
+    mask-image: var(--wpo-otd-icon-chevron-left);
+    -webkit-mask-image: var(--wpo-otd-icon-chevron-left);
 }
 
 .wpo-navigate-next::before {
-    mask-image: var(--wpo-aom-icon-chevron-right);
-    -webkit-mask-image: var(--wpo-aom-icon-chevron-right);
+    mask-image: var(--wpo-otd-icon-chevron-right);
+    -webkit-mask-image: var(--wpo-otd-icon-chevron-right);
 }
 
 .date-range-inputs {
@@ -670,15 +670,15 @@
     text-align: center;
     flex: 1;
     width: 100%;
-    border: 1px solid var(--wpo-aom-border-color);
-    border-radius: var(--wpo-aom-radius-m);
+    border: 1px solid var(--wpo-otd-border-color);
+    border-radius: var(--wpo-otd-radius-m);
     outline: none;
-    transition: border-color var(--wpo-aom-transition-fast), box-shadow var(--wpo-aom-transition-fast);
+    transition: border-color var(--wpo-otd-transition-fast), box-shadow var(--wpo-otd-transition-fast);
     cursor: text;
 }
 
 .date-range-inputs > input:focus {
-    border-color: var(--wpo-aom-purple-light);
+    border-color: var(--wpo-otd-purple-light);
     box-shadow: 0 0 0 0.1875em rgba(124, 58, 237, 0.1);
 }
 
@@ -699,16 +699,16 @@
     background: transparent;
     border-radius: 50%;
     cursor: pointer;
-    color: var(--wpo-aom-text-primary);
-    transition: background-color var(--wpo-aom-transition-fast);
+    color: var(--wpo-otd-text-primary);
+    transition: background-color var(--wpo-otd-transition-fast);
     width: 2.5em;
     height: 2.5em;
     line-height: 1;
 }
 
 .calendar-day:hover:not(:disabled) {
-    background-color: var(--wpo-aom-purple-bg);
-    color: var(--wpo-aom-purple-lighter);
+    background-color: var(--wpo-otd-purple-bg);
+    color: var(--wpo-otd-purple-lighter);
 }
 
 .calendar-day:disabled {
@@ -716,24 +716,24 @@
 }
 
 .calendar-day.calendar-day-other-month {
-    color: var(--wpo-aom-text-gray-light);
+    color: var(--wpo-otd-text-gray-light);
     cursor: default;
 }
 
 .calendar-day.calendar-day-today:not(.calendar-day-selected) {
-    border: 0.125em solid var(--wpo-aom-purple-light);
+    border: 0.125em solid var(--wpo-otd-purple-light);
     font-weight: 600;
 }
 
 .calendar-day.calendar-day-selected {
-    background-color: var(--wpo-aom-purple-primary);
+    background-color: var(--wpo-otd-purple-primary);
     color: white;
     font-weight: 600;
 }
 
 .calendar-day.calendar-day-in-range:not(.calendar-day-selected) {
-    background-color: var(--wpo-aom-purple-bg);
-    color: var(--wpo-aom-purple-lighter);
+    background-color: var(--wpo-otd-purple-bg);
+    color: var(--wpo-otd-purple-lighter);
 }
 
 
@@ -748,27 +748,27 @@
 .calendar-actions > button {
     font-weight: 500;
     flex: 1;
-    transition: all var(--wpo-aom-transition-fast);
-    border-radius: var(--wpo-aom-radius-m);
+    transition: all var(--wpo-otd-transition-fast);
+    border-radius: var(--wpo-otd-radius-m);
     padding: 0.75em 0;
 }
 
 .calendar-actions > .wpo-clear-button {
     background: white;
-    border: 1px solid var(--wpo-aom-border-color);
+    border: 1px solid var(--wpo-otd-border-color);
 }
 
 .calendar-actions > .wpo-clear-button:hover {
-    background-color: var(--wpo-aom-bg-gray);
+    background-color: var(--wpo-otd-bg-gray);
 }
 
 .calendar-actions > .wpo-apply-button {
-    background: var(--wpo-aom-purple-primary);
+    background: var(--wpo-otd-purple-primary);
     color: white;
 }
 
 .calendar-actions > .wpo-apply-button:hover {
-    background-color: var(--wpo-aom-purple-dark);
+    background-color: var(--wpo-otd-purple-dark);
 }
 
 .calendar-task-list-container > .calendar-task-list-title {
@@ -783,12 +783,12 @@
 .calendar-task-table-wrapper > table {
     width: 100%;
     border-collapse: collapse;
-    border-left: 0.0625em solid var(--wpo-aom-border-light);
-    border-right: 0.0625em solid var(--wpo-aom-border-light);
+    border-left: 0.0625em solid var(--wpo-otd-border-light);
+    border-right: 0.0625em solid var(--wpo-otd-border-light);
 }
 
 .calendar-task-table-wrapper > table > tbody {
-    border: 0.0625em solid var(--wpo-aom-border-light);
+    border: 0.0625em solid var(--wpo-otd-border-light);
 }
 
 .calendar-task-table-wrapper > table > thead th {
@@ -814,11 +814,11 @@
 }
 
 .calendar-task-table-wrapper .th-sortable {
-    transition: background-color var(--wpo-aom-transition-normal);
+    transition: background-color var(--wpo-otd-transition-normal);
 }
 
 .calendar-task-table-wrapper .th-sortable:hover {
-    background-color: var(--wpo-aom-bg-gray-medium);
+    background-color: var(--wpo-otd-bg-gray-medium);
 }
 
 .sort-icon {
@@ -827,7 +827,7 @@
     width: 0.75em;
     height: 0.85em;
     vertical-align: middle;
-    transition: background-color var(--wpo-aom-transition-fast);
+    transition: background-color var(--wpo-otd-transition-fast);
     mask-size: contain;
     mask-repeat: no-repeat;
     mask-position: center;
@@ -837,15 +837,15 @@
 }
 
 .sort-icon.unsorted {
-    background-color: var(--wpo-aom-text-gray);
-    mask-image: var(--wpo-aom-icon-unsorted);
-    -webkit-mask-image: var(--wpo-aom-icon-unsorted);
+    background-color: var(--wpo-otd-text-gray);
+    mask-image: var(--wpo-otd-icon-unsorted);
+    -webkit-mask-image: var(--wpo-otd-icon-unsorted);
 }
 
 .sort-icon.sorted {
-    background-color: var(--wpo-aom-purple-light);
-    mask-image: var(--wpo-aom-icon-sorted);
-    -webkit-mask-image: var(--wpo-aom-icon-sorted);
+    background-color: var(--wpo-otd-purple-light);
+    mask-image: var(--wpo-otd-icon-sorted);
+    -webkit-mask-image: var(--wpo-otd-icon-sorted);
 }
 
 .sort-icon.sorted.asc {
@@ -853,22 +853,22 @@
 }
 
 .calendar-task-table-wrapper > table > tbody > tr {
-    border-bottom: 0.0625em solid var(--wpo-aom-border-light);
-    transition: background-color var(--wpo-aom-transition-fast);
+    border-bottom: 0.0625em solid var(--wpo-otd-border-light);
+    transition: background-color var(--wpo-otd-transition-fast);
     vertical-align: middle;
 }
 
 .calendar-task-table-wrapper > table > tbody > tr:hover {
-    background-color: var(--wpo-aom-bg-gray);
+    background-color: var(--wpo-otd-bg-gray);
 }
 
 .calendar-task-table-wrapper > table > tbody > tr:nth-child(odd) {
-    background-color: var(--wpo-aom-bg-gray-alt);
+    background-color: var(--wpo-otd-bg-gray-alt);
 }
 
 .calendar-task-table-wrapper > table > tbody > tr > td {
     padding: 1em;
-    color: var(--wpo-aom-text-primary);
+    color: var(--wpo-otd-text-primary);
 }
 
 .calendar-task-table-wrapper > table > tbody > tr > td.task-actions > div {
@@ -918,10 +918,10 @@
     width: 1em;
     height: 1em;
     background-color: currentColor;
-    mask-image: var(--wpo-aom-icon-person);
+    mask-image: var(--wpo-otd-icon-person);
     mask-size: contain;
     mask-repeat: no-repeat;
-    -webkit-mask-image: var(--wpo-aom-icon-person);
+    -webkit-mask-image: var(--wpo-otd-icon-person);
     -webkit-mask-size: contain;
     -webkit-mask-repeat: no-repeat;
 }
@@ -932,13 +932,13 @@
 }
 
 .calendar-task-table-wrapper > table > tbody > tr > td.task-info > div > p {
-    color: var(--wpo-aom-text-gray);
+    color: var(--wpo-otd-text-gray);
 }
 
 .calendar-task-table-wrapper > table > tbody > td > span {
     display: inline-block;
     padding: 0.125em 0.7em;
-    border-radius: var(--wpo-aom-radius-l);
+    border-radius: var(--wpo-otd-radius-l);
     font-size: 0.9em;
     font-weight: 600;
     white-space: nowrap;
@@ -947,13 +947,13 @@
 .calendar-task-empty-state {
     padding: 2em 1em;
     text-align: center;
-    color: var(--wpo-aom-text-gray);
+    color: var(--wpo-otd-text-gray);
     font-size: 0.875em;
 }
 
 .calendar-task-day-group {
-    border: 1px solid var(--wpo-aom-border-light);
-    border-radius: var(--wpo-aom-radius-l);
+    border: 1px solid var(--wpo-otd-border-light);
+    border-radius: var(--wpo-otd-radius-l);
     margin-bottom: 1.5em;
     margin-left: 2.3em;
 }
@@ -963,7 +963,7 @@
     align-items: center;
     gap: 0.6em;
     padding: 0.9em 1.5em;
-    border-bottom: 1px solid var(--wpo-aom-border-light);
+    border-bottom: 1px solid var(--wpo-otd-border-light);
 }
 
 .calendar-task-table-wrapper {
@@ -972,7 +972,7 @@
 
 .calendar-task-day-label {
     font-size: 1.54em;
-    color: var(--wpo-aom-text-primary);
+    color: var(--wpo-otd-text-primary);
     margin: 0;
     border-right: 1px solid #E9EAEB;
     padding-right: 0.6em;
@@ -985,7 +985,7 @@
 
 .calendar-task-day-weekday {
     font-size: 1.23em;
-    color: var(--wpo-aom-text-gray);
+    color: var(--wpo-otd-text-gray);
 }
 
 /* Remove redundant left/right borders from table inside the card */
@@ -994,17 +994,17 @@
     border-right: none;
 }
 
-.kanban-view .wpo-aom-loading-skeleton-container,
-.calendar-view .wpo-aom-loading-skeleton-container {
+.kanban-view .wpo-otd-loading-skeleton-container,
+.calendar-view .wpo-otd-loading-skeleton-container {
     flex-direction: row;
 }
 
-.calendar-view .wpo-aom-loading-skeleton-container > .task-list-container {
+.calendar-view .wpo-otd-loading-skeleton-container > .task-list-container {
     margin-top: 1em;
     flex: 1;
 }
 
-.calendar-view .wpo-aom-skeleton-box.calendar-task-list {
+.calendar-view .wpo-otd-skeleton-box.calendar-task-list {
     margin-top: 1em;
 }
 
@@ -1012,7 +1012,7 @@
    Archive View
    ======================================== */
 
-#wpo-aom-order-manager .task-manager-tab .view.archive-view {
+#wpo-otd-order-manager .task-manager-tab .view.archive-view {
     padding: 1.85em 2.4em;
 }
 
@@ -1023,7 +1023,7 @@
 .archive-view-container .no-tasks {
     padding: 3em;
     text-align: center;
-    color: var(--wpo-aom-text-gray);
+    color: var(--wpo-otd-text-gray);
 }
 
 .archived-task-table-wrapper > table {
@@ -1037,9 +1037,9 @@
     font-weight: 500;
     white-space: nowrap;
     user-select: none;
-    background-color: var(--wpo-aom-bg-gray-alt);
-    border-bottom: 1px solid var(--wpo-aom-border-light);
-    color: var(--wpo-aom-text-gray);
+    background-color: var(--wpo-otd-bg-gray-alt);
+    border-bottom: 1px solid var(--wpo-otd-border-light);
+    color: var(--wpo-otd-text-gray);
     width: 10em;
 }
 
@@ -1052,26 +1052,26 @@
 }
 
 .archived-task-table-wrapper .th-sortable {
-    transition: background-color var(--wpo-aom-transition-normal);
+    transition: background-color var(--wpo-otd-transition-normal);
 }
 
 .archived-task-table-wrapper .th-sortable:hover {
-    background-color: var(--wpo-aom-bg-gray);
+    background-color: var(--wpo-otd-bg-gray);
 }
 
 .archived-task-table-wrapper > table > tbody > tr {
-    border-bottom: 1px solid var(--wpo-aom-border-light);
-    transition: background-color var(--wpo-aom-transition-fast);
+    border-bottom: 1px solid var(--wpo-otd-border-light);
+    transition: background-color var(--wpo-otd-transition-fast);
     vertical-align: top;
 }
 
 .archived-task-table-wrapper > table > tbody > tr:hover {
-    background-color: var(--wpo-aom-bg-gray);
+    background-color: var(--wpo-otd-bg-gray);
 }
 
 .archived-task-table-wrapper > table > tbody > tr > td {
     padding: 1em;
-    color: var(--wpo-aom-text-primary);
+    color: var(--wpo-otd-text-primary);
     vertical-align: middle;
 }
 
@@ -1081,7 +1081,7 @@
 }
 
 .archived-task-table-wrapper > table > tbody > tr > td.task-info > div > span {
-    color: var(--wpo-aom-text-primary);
+    color: var(--wpo-otd-text-primary);
     font-weight: 500;
     font-size: 1em;
 }
@@ -1105,7 +1105,7 @@
 .archived-task-table-wrapper > table > tbody > tr > td.task-done-date,
 .archived-task-table-wrapper > table > tbody > tr > td.task-archived-date {
     white-space: nowrap;
-    color: var(--wpo-aom-text-gray);
+    color: var(--wpo-otd-text-gray);
 }
 
 .archived-task-table-wrapper > table > tbody > tr > td.task-actions {
@@ -1117,11 +1117,11 @@
     align-items: center;
     justify-content: space-between;
     padding: 0.75em 1em;
-    border-top: 1px solid var(--wpo-aom-border-light);
+    border-top: 1px solid var(--wpo-otd-border-light);
 }
 
 .archive-pagination span {
-    color: var(--wpo-aom-text-primary);
+    color: var(--wpo-otd-text-primary);
     font-size: 0.9em;
 }
 
@@ -1131,36 +1131,36 @@
 }
 
 .archive-pagination > button {
-    border: 1px solid var(--wpo-aom-border-color);
+    border: 1px solid var(--wpo-otd-border-color);
     padding: 0.4em 1em;
 }
 
-.wpo-aom-dialog.column-deletion-dialog .dialog-actions > li > button.wpo-button.action-move {
+.wpo-otd-dialog.column-deletion-dialog .dialog-actions > li > button.wpo-button.action-move {
     background-color: #FEF3F2;
     border: #FEF3F2;
 }
 
-.wpo-aom-dialog.column-deletion-dialog .wpo-aom-select {
+.wpo-otd-dialog.column-deletion-dialog .wpo-otd-select {
     width: 100%;
     font-size: inherit;
-    border-color: var(--wpo-aom-border-color);
-    border-radius: var(--wpo-aom-radius-m);
+    border-color: var(--wpo-otd-border-color);
+    border-radius: var(--wpo-otd-radius-m);
     padding: 0.27em 0.8em;
 }
 
-.wpo-aom-dialog.column-deletion-dialog .wpo-aom-select:focus {
-    border-color: var(--wpo-aom-wp-blue);
-    box-shadow: 0 0 0 1px var(--wpo-aom-wp-blue);
+.wpo-otd-dialog.column-deletion-dialog .wpo-otd-select:focus {
+    border-color: var(--wpo-otd-wp-blue);
+    box-shadow: 0 0 0 1px var(--wpo-otd-wp-blue);
     outline: 2px solid transparent;
 }
 
-.wpo-aom-dialog .dialog-content #delete-progress {
+.wpo-otd-dialog .dialog-content #delete-progress {
     display: flex;
     width: 100%;
     gap: 1em;
     justify-content: center;
     align-items: center;
-    accent-color: var(--wpo-aom-purple-primary);
+    accent-color: var(--wpo-otd-purple-primary);
 }
 
 

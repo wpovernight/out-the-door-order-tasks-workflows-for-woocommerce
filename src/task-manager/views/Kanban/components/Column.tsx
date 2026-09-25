@@ -391,7 +391,7 @@ export const Column: React.FC<ColumnProps> = ({
 											)}
 										</span>
 									</button>
-									<span className="wpo-aom-vertical-divider" />
+									<span className="wpo-otd-vertical-divider" />
 									<button
 										onClick={handleTitleSave}
 										className="wpo-button wpo-button-icon save-title-button"
@@ -409,12 +409,12 @@ export const Column: React.FC<ColumnProps> = ({
 					</div>
 					<ul
 						ref={actionsContainerRef}
-						className="kanban-column-header-actions wpo-aom-row-actions"
+						className="kanban-column-header-actions wpo-otd-row-actions"
 					>
 						<li>
 							<button
 								onClick={handleAddTask}
-								className="wpo-button wpo-button-icon wpo-aom-add-button"
+								className="wpo-button wpo-button-icon wpo-otd-add-button"
 							>
 								<span className="screen-reader-text">
 									{__('Create', 'out-the-door-order-tasks-workflows-for-woocommerce')}

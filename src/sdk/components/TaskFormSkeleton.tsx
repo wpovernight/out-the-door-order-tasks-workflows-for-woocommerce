@@ -3,7 +3,7 @@ import { SkeletonBox, SkeletonLine } from '@sdk/components/LoadingSkeleton';
 
 export const TaskFormSkeleton: React.FC = () => {
 	return (
-		<div className="wpo-aom-task-form-skeleton">
+		<div className="wpo-otd-task-form-skeleton">
 			{/* Status, Priority, Due Date row */}
 			<div className="skeleton-field-group">
 				<div>

@@ -10,7 +10,7 @@ import {
 	ToastProvider,
 } from '@sdk';
 
-const container = document.getElementById('wpo-aom-order-manager');
+const container = document.getElementById('wpo-otd-order-manager');
 
 if (container) {
 	const root = createRoot(container);

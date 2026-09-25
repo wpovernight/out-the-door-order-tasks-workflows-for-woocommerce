@@ -25,7 +25,7 @@ export const SkeletonLine: React.FC<SkeletonLineProps> = ({
 }) => {
 	return (
 		<div
-			className={`wpo-aom-skeleton-line ${className}`}
+			className={`wpo-otd-skeleton-line ${className}`}
 			style={{ width, height, ...style }}
 		/>
 	);
@@ -58,7 +58,7 @@ export const SkeletonBox: React.FC<SkeletonBoxProps> = ({
 }) => {
 	return (
 		<div
-			className={`wpo-aom-skeleton-box ${className}`}
+			className={`wpo-otd-skeleton-box ${className}`}
 			style={{ width, height, ...style }}
 		>
 			{children}
@@ -96,7 +96,7 @@ export const LoadingSkeleton: React.FC<LoadingSkeletonProps> = ({
 	children,
 }) => {
 	return (
-		<div className={`wpo-aom-loading-skeleton-container ${className}`}>
+		<div className={`wpo-otd-loading-skeleton-container ${className}`}>
 			{Array.from({ length: count }).map((_, index) => (
 				<React.Fragment key={index}>{children}</React.Fragment>
 			))}
@@ -133,19 +133,19 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 	const { className: customClassName, ...restButtonProps } =
 		actionButtonProps || {};
 	const buttonClassName = customClassName
-		? `wpo-aom-empty-state-action ${customClassName}`
-		: 'wpo-aom-empty-state-action';
+		? `wpo-otd-empty-state-action ${customClassName}`
+		: 'wpo-otd-empty-state-action';
 
 	const isSvgIcon = icon === 'note' || icon === 'box';
 
 	return (
-		<div className="wpo-aom-empty-state">
+		<div className="wpo-otd-empty-state">
 			<div
-				className={`wpo-aom-empty-state-icon${isSvgIcon ? ` wpo-aom-empty-state-icon--${icon}` : ''}`}
+				className={`wpo-otd-empty-state-icon${isSvgIcon ? ` wpo-otd-empty-state-icon--${icon}` : ''}`}
 			>
 				{!isSvgIcon && icon}
 			</div>
-			<p className="wpo-aom-empty-state-message">{message}</p>
+			<p className="wpo-otd-empty-state-message">{message}</p>
 			{actionText && onAction && (
 				<button
 					type="button"
@@ -184,13 +184,13 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
 	retryText?: string;
 }) => {
 	return (
-		<div className="wpo-aom-error-state">
-			<div className="wpo-aom-error-state-icon">⚠️</div>
-			<p className="wpo-aom-error-state-message">{message}</p>
+		<div className="wpo-otd-error-state">
+			<div className="wpo-otd-error-state-icon">⚠️</div>
+			<p className="wpo-otd-error-state-message">{message}</p>
 			{onRetry && (
 				<button
 					type="button"
-					className="wpo-aom-error-state-retry"
+					className="wpo-otd-error-state-retry"
 					onClick={() => onRetry()}
 				>
 					{retryText}

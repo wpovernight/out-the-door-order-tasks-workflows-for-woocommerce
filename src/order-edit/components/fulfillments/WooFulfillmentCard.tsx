@@ -30,7 +30,7 @@ export const WooFulfillmentCard: React.FC<WooFulfillmentCardProps> = ({
 					)}
 				</h4>
 				<span
-					className="wpo-aom-tag fulfillment-card-status"
+					className="wpo-otd-tag fulfillment-card-status"
 					style={getColorStyle(
 						fulfillment.status === 'fulfilled'
 							? '#c6e1c6'

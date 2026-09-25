@@ -1,6 +1,6 @@
 function getApiConfig() {
-	const orderManagerData = (window as any).WPO_AOM_OrderManager;
-	const orderEditMetaBoxData = (window as any).WPO_AOM_OrderEdit_MetaBox;
+	const orderManagerData = (window as any).WPO_OTD_OrderManager;
+	const orderEditMetaBoxData = (window as any).WPO_OTD_OrderEdit_MetaBox;
 
 	const config = orderManagerData || orderEditMetaBoxData;
 

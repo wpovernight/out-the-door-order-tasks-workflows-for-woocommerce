@@ -3,7 +3,7 @@
  */
 import type { StatusRoles } from '@sdk';
 
-export interface WpoAomOrderManagerData {
+export interface WpoOtdOrderManagerData {
 	apiRoot: string;
 	apiNamespace: string;
 	nonce: string;
@@ -12,7 +12,7 @@ export interface WpoAomOrderManagerData {
 
 declare global {
 	interface Window {
-        WPO_AOM_OrderManager: WpoAomOrderManagerData;
+        WPO_OTD_OrderManager: WpoOtdOrderManagerData;
 	}
 }
 

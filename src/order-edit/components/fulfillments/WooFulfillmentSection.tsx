@@ -13,7 +13,7 @@ const WooFulfillmentSection: React.FC = () => {
 	}, [loadFulfillments]);
 
 	return (
-		<div className="wpo-aom-metabox-section" id="order-fulfillments">
+		<div className="wpo-otd-metabox-section" id="order-fulfillments">
 			<Header />
 			<WooFulfillmentsList
 				loadingStatus={loadingStatus}

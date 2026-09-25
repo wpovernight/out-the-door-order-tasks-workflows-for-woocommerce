@@ -169,7 +169,7 @@ export const StatusForm = ({
 						</div>
 					</fieldset>
 
-					<ul className="wpo-aom-form-actions">
+					<ul className="wpo-otd-form-actions">
 						<li>
 							<button
 								type="submit"

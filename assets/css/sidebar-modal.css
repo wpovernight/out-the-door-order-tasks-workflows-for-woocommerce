@@ -1,22 +1,22 @@
 
-.wpo-aom-sidebar-close {
+.wpo-otd-sidebar-close {
     width: 1.3em;
     height: 1.3em;
     font-size: 1.7em;
 }
 
-.wpo-aom-sidebar-close::before {
+.wpo-otd-sidebar-close::before {
     font-family: dashicons;
     content: '\f335';
     font-size: 1.4em;
-    color: var(--wpo-aom-text-gray);
+    color: var(--wpo-otd-text-gray);
     display: flex;
     align-items: center;
     justify-content: center;
     line-height: 1;
 }
 
-.wpo-aom-sidebar-modal {
+.wpo-otd-sidebar-modal {
     position: fixed;
     inset: 0;
     top: 32px; /* Adjust for admin bar height */
@@ -27,12 +27,12 @@
     width: 47em;
     overflow: hidden;
     overscroll-behavior-y: none;
-    border-left: 1px solid var(--wpo-aom-border-light);
-    background: var(--wpo-aom-card-bg);
+    border-left: 1px solid var(--wpo-otd-border-light);
+    background: var(--wpo-otd-card-bg);
     font-family: Inter; /* To prevent WP overriding our styles in the Order Edit page */
 }
 
-.wpo-aom-sidebar-modal > .inner {
+.wpo-otd-sidebar-modal > .inner {
     overflow-y: auto;
     height: 100%;
     scrollbar-gutter: stable;
@@ -40,22 +40,22 @@
     flex-direction: column;
 }
 
-.wpo-aom-sidebar-content {
+.wpo-otd-sidebar-content {
     height: 100%;
 }
 
-.wpo-aom-task-form {
+.wpo-otd-task-form {
     height: 100%;
     display: flex;
     flex-direction: column;
 }
 
-.wpo-aom-task-form.submitting {
+.wpo-otd-task-form.submitting {
     cursor: wait;
 }
 
-.wpo-aom-task-form > .action-group {
-    border-top: 1px solid var(--wpo-aom-border-color);
+.wpo-otd-task-form > .action-group {
+    border-top: 1px solid var(--wpo-otd-border-color);
     padding: 2em 1em;
     margin-top: auto;
     display: flex;
@@ -64,22 +64,22 @@
     justify-content: space-between;
 }
 
-.wpo-aom-task-form > .action-group > .wpo-button {
+.wpo-otd-task-form > .action-group > .wpo-button {
     flex: 1;
-    border: 1px solid var(--wpo-aom-border-light);
+    border: 1px solid var(--wpo-otd-border-light);
     font-size: 1.23em;
     font-weight: 600;
-    border-radius: var(--wpo-aom-radius-m);
+    border-radius: var(--wpo-otd-radius-m);
     padding: 0.65em 0;
 }
 
-.wpo-aom-task-form > .action-group > .wpo-button.wpo-button-primary {
+.wpo-otd-task-form > .action-group > .wpo-button.wpo-button-primary {
     border: none
 }
 
-.wpo-aom-sidebar-backdrop {
+.wpo-otd-sidebar-backdrop {
     inset: 0;
-    background: var(--wpo-aom-backdrop);
+    background: var(--wpo-otd-backdrop);
     position: fixed;
     top: 0;
     height: 100%;
@@ -89,27 +89,27 @@
     z-index: 9990;
 }
 
-#poststuff .wpo-aom-sidebar-header > h2, /* To prevent WP overriding our styles in the Order Edit page */
-.wpo-aom-sidebar-header > h2 {
+#poststuff .wpo-otd-sidebar-header > h2, /* To prevent WP overriding our styles in the Order Edit page */
+.wpo-otd-sidebar-header > h2 {
     padding: 0;
     margin: 0;
     font-size: 1.4em;
 }
-.wpo-aom-task-form > fieldset {
+.wpo-otd-task-form > fieldset {
     display: flex;
     flex-direction: column;
     gap: 2.5em;
     margin-bottom: 2em;
 }
 
-.wpo-aom-sidebar-header {
+.wpo-otd-sidebar-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 2em;
 }
 
-.wpo-aom-sidebar-header h2 {
+.wpo-otd-sidebar-header h2 {
     overflow-wrap: break-word;
     word-break: break-word;
     display: -webkit-box;
@@ -119,44 +119,44 @@
     overflow: hidden;
 }
 
-.wpo-aom-task-form .field-group {
+.wpo-otd-task-form .field-group {
     display: flex;
     padding: 0 2em;
     gap: 0.5em;
 }
 
-.wpo-aom-task-form .field-group input,
-.wpo-aom-task-form .field-group select,
-.wpo-aom-task-form .field-group textarea {
+.wpo-otd-task-form .field-group input,
+.wpo-otd-task-form .field-group select,
+.wpo-otd-task-form .field-group textarea {
     font-size: inherit;
-    border-color: var(--wpo-aom-border-color);
-    border-radius: var(--wpo-aom-radius-m);
+    border-color: var(--wpo-otd-border-color);
+    border-radius: var(--wpo-otd-radius-m);
     padding: 0.63em 0.8em;
 }
 
-.wpo-aom-task-form .field-group input:focus,
-.wpo-aom-task-form .field-group select:focus,
-.wpo-aom-task-form .field-group textarea:focus {
-    border-color: var(--wpo-aom-wp-blue);
-    box-shadow: 0 0 0 1px var(--wpo-aom-wp-blue);
+.wpo-otd-task-form .field-group input:focus,
+.wpo-otd-task-form .field-group select:focus,
+.wpo-otd-task-form .field-group textarea:focus {
+    border-color: var(--wpo-otd-wp-blue);
+    box-shadow: 0 0 0 1px var(--wpo-otd-wp-blue);
     outline: 2px solid transparent;
 }
 
-.wpo-aom-task-form .field-group > * {
+.wpo-otd-task-form .field-group > * {
     width: 100%;
     display: flex;
     flex-direction: column;
     gap: 5px;
 }
 
-.wpo-aom-field-option-dropdown-container {
+.wpo-otd-field-option-dropdown-container {
     position: relative;
 }
 
-.wpo-aom-field-option-dropdown-container > button {
+.wpo-otd-field-option-dropdown-container > button {
     background: transparent;
-    border: 1px solid var(--wpo-aom-border-color);
-    border-radius: var(--wpo-aom-radius-m);
+    border: 1px solid var(--wpo-otd-border-color);
+    border-radius: var(--wpo-otd-radius-m);
     width: 100%;
     height: 3.4em;
     text-align: left;
@@ -166,73 +166,73 @@
     padding: 0 0.8em;
 }
 
-.wpo-aom-field-option-dropdown-container > button:focus {
-    border-color: var(--wpo-aom-wp-blue);
-    box-shadow: 0 0 0 1px var(--wpo-aom-wp-blue);
+.wpo-otd-field-option-dropdown-container > button:focus {
+    border-color: var(--wpo-otd-wp-blue);
+    box-shadow: 0 0 0 1px var(--wpo-otd-wp-blue);
     /* Only visible in Windows High Contrast mode */
     outline: 2px solid transparent;
 }
 
-.wpo-aom-field-option-dropdown-container > button::after {
+.wpo-otd-field-option-dropdown-container > button::after {
     font-family: 'dashicons';
     content: "\f347";
     margin-left: auto;
-    color: var(--wpo-aom-text-gray);
+    color: var(--wpo-otd-text-gray);
     font-size: 1.2em;
 }
 
-.wpo-aom-field-option-dropdown-container > ul > li > button {
+.wpo-otd-field-option-dropdown-container > ul > li > button {
     padding: 0.7em 1em;
 }
 
-.wpo-aom-async-multi-select-container {
+.wpo-otd-async-multi-select-container {
     position: relative;
 }
 
-.wpo-aom-async-multi-select-container > input {
+.wpo-otd-async-multi-select-container > input {
     width: 100%;
 }
 
-.wpo-aom-async-multi-select-container > ul.wpo-aom-async-multi-select-options {
+.wpo-otd-async-multi-select-container > ul.wpo-otd-async-multi-select-options {
     position: absolute;
     cursor: pointer;
-    box-shadow: var(--wpo-aom-floating-shadow);
+    box-shadow: var(--wpo-otd-floating-shadow);
     padding: 0;
-    border-radius: var(--wpo-aom-radius-m);
+    border-radius: var(--wpo-otd-radius-m);
     overflow: hidden;
     margin: 5px 0 0;
-    background: var(--wpo-aom-card-bg);
+    background: var(--wpo-otd-card-bg);
     width: 100%;
     z-index: 1;
 }
 
-.wpo-aom-async-multi-select-container > .wpo-aom-async-multi-select-message {
+.wpo-otd-async-multi-select-container > .wpo-otd-async-multi-select-message {
     position: absolute;
-    box-shadow: var(--wpo-aom-floating-shadow);
-    border-radius: var(--wpo-aom-radius-m);
+    box-shadow: var(--wpo-otd-floating-shadow);
+    border-radius: var(--wpo-otd-radius-m);
     overflow: hidden;
     margin: 5px 0 0;
-    background: var(--wpo-aom-card-bg);
+    background: var(--wpo-otd-card-bg);
     width: 100%;
     z-index: 1;
 }
 
-.wpo-aom-async-multi-select-container > .wpo-aom-async-multi-select-message > p {
+.wpo-otd-async-multi-select-container > .wpo-otd-async-multi-select-message > p {
     margin: 0.5em;
 }
 
-.wpo-aom-async-multi-select-container > ul.wpo-aom-async-multi-select-options > li > button:hover,
-.wpo-aom-async-multi-select-container > ul.wpo-aom-async-multi-select-options > li > button:focus {
-    background-color: var(--wpo-aom-hover-overlay);
+.wpo-otd-async-multi-select-container > ul.wpo-otd-async-multi-select-options > li > button:hover,
+.wpo-otd-async-multi-select-container > ul.wpo-otd-async-multi-select-options > li > button:focus {
+    background-color: var(--wpo-otd-hover-overlay);
     outline: none;
 }
 
-.wpo-aom-async-multi-select-container > ul.wpo-aom-async-multi-select-options > li {
+.wpo-otd-async-multi-select-container > ul.wpo-otd-async-multi-select-options > li {
     margin: 0;
     padding: 0;
 }
 
-.wpo-aom-async-multi-select-container > ul.wpo-aom-async-multi-select-options > li > button {
+.wpo-otd-async-multi-select-container > ul.wpo-otd-async-multi-select-options > li > button {
     border: none;
     background: transparent;
     width: 100%;
@@ -241,7 +241,7 @@
     cursor: pointer;
 }
 
-.wpo-aom-async-multi-select-container > ul.wpo-aom-async-multi-select-selected-options {
+.wpo-otd-async-multi-select-container > ul.wpo-otd-async-multi-select-selected-options {
     display: flex;
     column-gap: 0.5em;
     align-items: center;
@@ -250,28 +250,28 @@
     font-size: 0.9em;
 }
 
-.wpo-aom-async-multi-select-container > ul.wpo-aom-async-multi-select-selected-options > li {
-    background: var(--wpo-aom-bg-light);
-    border-radius: var(--wpo-aom-radius-l);
+.wpo-otd-async-multi-select-container > ul.wpo-otd-async-multi-select-selected-options > li {
+    background: var(--wpo-otd-bg-light);
+    border-radius: var(--wpo-otd-radius-l);
     padding: 0 0 0 0.7em;
     display: flex;
     align-items: center;
     font-size: 0.9em;
 }
 
-.wpo-aom-async-multi-select-container > ul.wpo-aom-async-multi-select-selected-options > li > .wpo-button {
-    border-radius: var(--wpo-aom-radius-l);
+.wpo-otd-async-multi-select-container > ul.wpo-otd-async-multi-select-selected-options > li > .wpo-button {
+    border-radius: var(--wpo-otd-radius-l);
 }
 
 /* DatePicker */
-.wpo-aom-datepicker-container {
+.wpo-otd-datepicker-container {
     position: relative;
 }
 
-.wpo-aom-datepicker-trigger {
+.wpo-otd-datepicker-trigger {
     background: transparent;
-    border: 1px solid var(--wpo-aom-border-color);
-    border-radius: var(--wpo-aom-radius-m);
+    border: 1px solid var(--wpo-otd-border-color);
+    border-radius: var(--wpo-otd-radius-m);
     width: 100%;
     height: 3.4em;
     text-align: left;
@@ -280,43 +280,43 @@
     align-items: center;
     padding: 0 0.8em;
     gap: 0.5em;
-    color: var(--wpo-aom-text-primary);
+    color: var(--wpo-otd-text-primary);
     font-size: inherit;
 }
 
-.wpo-aom-datepicker-trigger:focus {
-    border-color: var(--wpo-aom-wp-blue);
-    box-shadow: 0 0 0 1px var(--wpo-aom-wp-blue);
+.wpo-otd-datepicker-trigger:focus {
+    border-color: var(--wpo-otd-wp-blue);
+    box-shadow: 0 0 0 1px var(--wpo-otd-wp-blue);
     outline: 2px solid transparent;
 }
 
-.wpo-aom-datepicker-container:has(.wpo-aom-datepicker-clear) .wpo-aom-datepicker-trigger {
+.wpo-otd-datepicker-container:has(.wpo-otd-datepicker-clear) .wpo-otd-datepicker-trigger {
     padding-right: 2.5em;
 }
 
-.wpo-aom-datepicker-trigger::before {
+.wpo-otd-datepicker-trigger::before {
     content: '';
     display: inline-block;
     width: 1.15em;
     height: 1.28em;
     flex-shrink: 0;
-    background-color: var(--wpo-aom-text-gray);
-    mask-image: var(--wpo-aom-icon-calendar);
+    background-color: var(--wpo-otd-text-gray);
+    mask-image: var(--wpo-otd-icon-calendar);
     mask-size: contain;
     mask-repeat: no-repeat;
     mask-position: center;
 
-    -webkit-mask-image: var(--wpo-aom-icon-calendar);
+    -webkit-mask-image: var(--wpo-otd-icon-calendar);
     -webkit-mask-size: contain;
     -webkit-mask-repeat: no-repeat;
     -webkit-mask-position: center;
 }
 
-.wpo-aom-datepicker-trigger.wpo-aom-placeholder {
-    color: var(--wpo-aom-text-gray-light);
+.wpo-otd-datepicker-trigger.wpo-otd-placeholder {
+    color: var(--wpo-otd-text-gray-light);
 }
 
-.wpo-aom-datepicker-clear {
+.wpo-otd-datepicker-clear {
     position: absolute;
     top: 50%;
     right: 0.5em;
@@ -325,93 +325,93 @@
     height: 1.7em;
 }
 
-.wpo-aom-datepicker-clear::before {
+.wpo-otd-datepicker-clear::before {
     content: '\f335';
     font-family: 'dashicons';
     font-size: 1.7em;
-    color: var(--wpo-aom-text-gray-light);
+    color: var(--wpo-otd-text-gray-light);
     display: flex;
     align-items: center;
     justify-content: center;
     line-height: 1;
 }
 
-.wpo-aom-datepicker-clear:hover::before {
-    color: var(--wpo-aom-text-primary);
+.wpo-otd-datepicker-clear:hover::before {
+    color: var(--wpo-otd-text-primary);
 }
 
-.wpo-aom-datepicker-dropdown {
+.wpo-otd-datepicker-dropdown {
     position: absolute;
     top: calc(100% + 6px);
     right: 0;
     z-index: 100;
-    background: var(--wpo-aom-card-bg);
-    border-radius: var(--wpo-aom-radius-l);
-    box-shadow: var(--wpo-aom-floating-shadow);
+    background: var(--wpo-otd-card-bg);
+    border-radius: var(--wpo-otd-radius-l);
+    box-shadow: var(--wpo-otd-floating-shadow);
     width: 16.5em;
     padding: 1em;
     user-select: none;
 }
 
-.wpo-aom-datepicker-header {
+.wpo-otd-datepicker-header {
     display: flex;
     align-items: center;
     gap: 0.5em;
     margin-bottom: 1em;
 }
 
-.wpo-aom-datepicker-nav {
+.wpo-otd-datepicker-nav {
     width: 2em;
     height: 2em;
-    border-radius: var(--wpo-aom-radius-s);
+    border-radius: var(--wpo-otd-radius-s);
     flex-shrink: 0;
 }
 
-.wpo-aom-datepicker-nav::before {
+.wpo-otd-datepicker-nav::before {
     font-family: 'dashicons';
     font-size: 1.4em;
-    color: var(--wpo-aom-text-gray);
+    color: var(--wpo-otd-text-gray);
     display: flex;
     align-items: center;
     justify-content: center;
     line-height: 1;
 }
 
-.wpo-aom-datepicker-nav.prev::before {
+.wpo-otd-datepicker-nav.prev::before {
     content: '\f341';
 }
 
-.wpo-aom-datepicker-nav.next::before {
+.wpo-otd-datepicker-nav.next::before {
     content: '\f345';
 }
 
-.wpo-aom-datepicker-nav:hover {
-    background: var(--wpo-aom-hover-overlay);
+.wpo-otd-datepicker-nav:hover {
+    background: var(--wpo-otd-hover-overlay);
 }
 
-.wpo-aom-datepicker-title {
+.wpo-otd-datepicker-title {
     flex: 1;
     background: transparent;
     border: none;
     cursor: pointer;
     font-weight: 600;
     font-size: 1.23em;
-    color: var(--wpo-aom-text-primary);
+    color: var(--wpo-otd-text-primary);
     padding: 0.55em 0.8em;
-    border-radius: var(--wpo-aom-radius-m);
+    border-radius: var(--wpo-otd-radius-m);
     text-align: center;
 }
 
-.wpo-aom-datepicker-title:hover {
-    background-color: var(--wpo-aom-bg-lighter);
+.wpo-otd-datepicker-title:hover {
+    background-color: var(--wpo-otd-bg-lighter);
     transition: background-color 0.3s;
 }
 
-.wpo-aom-datepicker-title:disabled {
+.wpo-otd-datepicker-title:disabled {
     cursor: default;
 }
 
-.wpo-aom-datepicker-calendar {
+.wpo-otd-datepicker-calendar {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0 0.2em;
@@ -419,59 +419,59 @@
     text-align: center;
 }
 
-.wpo-aom-datepicker-calendar th {
+.wpo-otd-datepicker-calendar th {
     font-size: 1em;
     font-weight: 600;
-    color: var(--wpo-aom-text-gray);
+    color: var(--wpo-otd-text-gray);
     padding: 0.4em 0;
 }
 
-.wpo-aom-datepicker-calendar td {
+.wpo-otd-datepicker-calendar td {
     cursor: pointer;
     font-size: 1em;
-    color: var(--wpo-aom-text-primary);
+    color: var(--wpo-otd-text-primary);
     padding: 0.5em 0;
 }
 
-.wpo-aom-datepicker-calendar.days td {
+.wpo-otd-datepicker-calendar.days td {
     border-radius: 50%;
 }
 
-.wpo-aom-datepicker-calendar.months td,
-.wpo-aom-datepicker-calendar.years td {
+.wpo-otd-datepicker-calendar.months td,
+.wpo-otd-datepicker-calendar.years td {
     padding: 1.5em 0;
-    border-radius: var(--wpo-aom-radius-l);
+    border-radius: var(--wpo-otd-radius-l);
 }
 
-.wpo-aom-datepicker-calendar td:hover {
-    background: var(--wpo-aom-hover-overlay);
+.wpo-otd-datepicker-calendar td:hover {
+    background: var(--wpo-otd-hover-overlay);
 }
 
-.wpo-aom-datepicker-calendar td.adjacent {
-    color: var(--wpo-aom-text-gray-light);
+.wpo-otd-datepicker-calendar td.adjacent {
+    color: var(--wpo-otd-text-gray-light);
 }
 
-.wpo-aom-datepicker-calendar td.current {
+.wpo-otd-datepicker-calendar td.current {
     font-weight: 700;
 }
 
-.wpo-aom-datepicker-calendar td.selected,
-.wpo-aom-datepicker-calendar td.selected:hover {
-    background: var(--wpo-aom-purple-bg);
-    color: var(--wpo-aom-purple-primary);
+.wpo-otd-datepicker-calendar td.selected,
+.wpo-otd-datepicker-calendar td.selected:hover {
+    background: var(--wpo-otd-purple-bg);
+    color: var(--wpo-otd-purple-primary);
     font-weight: 600;
 }
 
-.wpo-aom-datepicker-actions {
+.wpo-otd-datepicker-actions {
     display: flex;
     gap: 0.6em;
     margin-top: 0.6em;
     margin-bottom: 0;
     padding-top: 1em;
-    border-top: 1px solid var(--wpo-aom-border-light);
+    border-top: 1px solid var(--wpo-otd-border-light);
 }
 
-.wpo-aom-datepicker-actions > li {
+.wpo-otd-datepicker-actions > li {
     flex: 1;
     margin: 0;
     padding: 0;
@@ -481,34 +481,34 @@
     text-align: center;
 }
 
-.wpo-aom-datepicker-actions button {
+.wpo-otd-datepicker-actions button {
     width: 100%;
     height: 3em;
-    border-radius: var(--wpo-aom-radius-m);
+    border-radius: var(--wpo-otd-radius-m);
 }
 
-.wpo-aom-datepicker-actions button.cancel {
+.wpo-otd-datepicker-actions button.cancel {
     background: transparent;
-    border: 1px solid var(--wpo-aom-border-color);
-    color: var(--wpo-aom-text-primary);
+    border: 1px solid var(--wpo-otd-border-color);
+    color: var(--wpo-otd-text-primary);
 }
 
-.wpo-aom-datepicker-actions button.cancel:hover {
-    background: var(--wpo-aom-hover-overlay);
+.wpo-otd-datepicker-actions button.cancel:hover {
+    background: var(--wpo-otd-hover-overlay);
 }
 
-.wpo-aom-datepicker-actions button.today {
-    background: var(--wpo-aom-purple-bg);
+.wpo-otd-datepicker-actions button.today {
+    background: var(--wpo-otd-purple-bg);
     border: none;
-    color: var(--wpo-aom-purple-primary);
+    color: var(--wpo-otd-purple-primary);
 }
 
-.wpo-aom-datepicker-actions button.today:hover {
+.wpo-otd-datepicker-actions button.today:hover {
     filter: brightness(0.95);
 }
 
 /* Task form Skeleton */
-.wpo-aom-task-form-skeleton {
+.wpo-otd-task-form-skeleton {
     padding: 0 1em;
     height: 100%;
     display: flex;
@@ -516,19 +516,19 @@
     gap: 2.5em;
 }
 
-.wpo-aom-task-form-skeleton .skeleton-field-group {
+.wpo-otd-task-form-skeleton .skeleton-field-group {
     display: flex;
     gap: 1em;
 }
 
-.wpo-aom-task-form-skeleton .skeleton-field-group > * {
+.wpo-otd-task-form-skeleton .skeleton-field-group > * {
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: 0.5em;
 }
 
-.wpo-aom-task-form-skeleton .skeleton-action-group {
+.wpo-otd-task-form-skeleton .skeleton-action-group {
     display: flex;
     gap: 1em;
     margin-top: auto;

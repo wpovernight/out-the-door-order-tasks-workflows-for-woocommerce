@@ -372,7 +372,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 		: '';
 
 	return (
-		<div ref={containerRef} className="wpo-aom-datepicker-container">
+		<div ref={containerRef} className="wpo-otd-datepicker-container">
 			{name && (
 				<input type="hidden" name={name} value={selectedDateString} />
 			)}
@@ -380,9 +380,9 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 				type="button"
 				id={id}
 				className={[
-					'wpo-aom-datepicker-trigger',
+					'wpo-otd-datepicker-trigger',
 					open && 'open',
-					!selectedDate && 'wpo-aom-placeholder',
+					!selectedDate && 'wpo-otd-placeholder',
 				]
 					.filter(Boolean)
 					.join(' ')}
@@ -396,7 +396,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 			{selectedDate && (
 				<button
 					type="button"
-					className="wpo-button wpo-button-icon wpo-aom-datepicker-clear"
+					className="wpo-button wpo-button-icon wpo-otd-datepicker-clear"
 					onClick={handleClear}
 					title={__('Clear date', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 				>
@@ -406,11 +406,11 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 				</button>
 			)}
 			{open && (
-				<div className="wpo-aom-datepicker-dropdown">
-					<div className="wpo-aom-datepicker-header">
+				<div className="wpo-otd-datepicker-dropdown">
+					<div className="wpo-otd-datepicker-header">
 						<button
 							type="button"
-							className="wpo-button wpo-button-icon wpo-aom-datepicker-nav prev"
+							className="wpo-button wpo-button-icon wpo-otd-datepicker-nav prev"
 							onClick={goPrevious}
 							title={__('Previous', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 						>
@@ -420,7 +420,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 						</button>
 						<button
 							type="button"
-							className="wpo-aom-datepicker-title"
+							className="wpo-otd-datepicker-title"
 							onClick={handleTitleClick}
 							disabled={viewMode === 'year'}
 						>
@@ -428,7 +428,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 						</button>
 						<button
 							type="button"
-							className="wpo-button wpo-button-icon wpo-aom-datepicker-nav next"
+							className="wpo-button wpo-button-icon wpo-otd-datepicker-nav next"
 							onClick={goNext}
 							title={__('Next', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 						>
@@ -439,7 +439,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 					</div>
 
 					{viewMode === 'day' && (
-						<table className="wpo-aom-datepicker-calendar days">
+						<table className="wpo-otd-datepicker-calendar days">
 							<caption className="screen-reader-text">
 								{headerLabel}
 							</caption>
@@ -500,7 +500,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 					)}
 
 					{viewMode === 'month' && (
-						<table className="wpo-aom-datepicker-calendar months">
+						<table className="wpo-otd-datepicker-calendar months">
 							<caption className="screen-reader-text">
 								{headerLabel}
 							</caption>
@@ -560,7 +560,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 					)}
 
 					{viewMode === 'year' && (
-						<table className="wpo-aom-datepicker-calendar years">
+						<table className="wpo-otd-datepicker-calendar years">
 							<caption className="screen-reader-text">
 								{headerLabel}
 							</caption>
@@ -610,7 +610,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 						</table>
 					)}
 
-					<ul className="wpo-aom-datepicker-actions">
+					<ul className="wpo-otd-datepicker-actions">
 						<li>
 							<button
 								type="button"

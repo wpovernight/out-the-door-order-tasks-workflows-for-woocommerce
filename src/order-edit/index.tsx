@@ -11,10 +11,10 @@ import {
 import { OrderTaskProvider } from './context/OrderTaskContext';
 import { OrderWooFulfillmentProvider } from './context/OrderWooFulfillmentContext';
 
-const container = document.getElementById('wpo-aom-order-meta-box-content');
+const container = document.getElementById('wpo-otd-order-meta-box-content');
 
 if (container) {
-	const orderId = window.WPO_AOM_OrderEdit_MetaBox?.orderId || 0;
+	const orderId = window.WPO_OTD_OrderEdit_MetaBox?.orderId || 0;
 
 	const root = createRoot(container);
 	root.render(

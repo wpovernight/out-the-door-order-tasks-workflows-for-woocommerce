@@ -74,7 +74,7 @@ final class Screen {
 		}
 
 		add_meta_box(
-			'wpo-aom-order-meta-box',
+			'wpo-otd-order-meta-box',
 			esc_html__( 'Advanced Order Management', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
 			array( $this, 'render_meta_box' ),
 			$screen_id,
@@ -154,18 +154,18 @@ final class Screen {
 
 		// Do not need the suffix, since it's a React app and we are using webpack to handle the minification.
 		wp_enqueue_script(
-			'wpo-aom-order-edit-metabox',
+			'wpo-otd-order-edit-metabox',
 			WPO_OTD()->plugin_url() . '/assets/js/order-edit-metabox.js',
 			$dependencies,
 			WPO_OTD_VERSION,
 			true
 		);
 
-		wp_set_script_translations( 'wpo-aom-order-edit-metabox', 'out-the-door-order-tasks-workflows-for-woocommerce', WPO_OTD()->plugin_path() . '/languages' );
+		wp_set_script_translations( 'wpo-otd-order-edit-metabox', 'out-the-door-order-tasks-workflows-for-woocommerce', WPO_OTD()->plugin_path() . '/languages' );
 
 		wp_localize_script(
-			'wpo-aom-order-edit-metabox',
-			'WPO_AOM_OrderEdit_MetaBox',
+			'wpo-otd-order-edit-metabox',
+			'WPO_OTD_OrderEdit_MetaBox',
 			array(
 				'orderId'                  => absint( $order_id ),
 				'apiRoot'                  => esc_url_raw( rest_url( '/wc/v3' ) ),
@@ -181,7 +181,7 @@ final class Screen {
 		);
 
 		wp_enqueue_script(
-			'wpo-aom-order-edit',
+			'wpo-otd-order-edit',
 			WPO_OTD()->plugin_url() . '/assets/js/order-edit.js',
 			array(),
 			WPO_OTD_VERSION,
@@ -189,43 +189,43 @@ final class Screen {
 		);
 
 		wp_localize_script(
-			'wpo-aom-order-edit',
-			'WPO_AOM_OrderEdit',
+			'wpo-otd-order-edit',
+			'WPO_OTD_OrderEdit',
 			array(
 				'nonce' => wp_create_nonce( 'wpo_otd_order_edit' ),
 			)
 		);
 
 		wp_enqueue_style(
-			'wpo-aom-admin-common',
+			'wpo-otd-admin-common',
 			WPO_OTD()->plugin_url() . '/assets/css/common' . $suffix . '.css',
 			array(),
 			WPO_OTD_VERSION
 		);
 
 		wp_enqueue_style(
-			'wpo-aom-admin-skeleton',
+			'wpo-otd-admin-skeleton',
 			WPO_OTD()->plugin_url() . '/assets/css/skeleton' . $suffix . '.css',
 			array(),
 			WPO_OTD_VERSION
 		);
 
 		wp_enqueue_style(
-			'wpo-aom-admin-task-card',
+			'wpo-otd-admin-task-card',
 			WPO_OTD()->plugin_url() . '/assets/css/task-card' . $suffix . '.css',
 			array(),
 			WPO_OTD_VERSION
 		);
 
 		wp_enqueue_style(
-			'wpo-aom-admin-sidebar-modal',
+			'wpo-otd-admin-sidebar-modal',
 			WPO_OTD()->plugin_url() . '/assets/css/sidebar-modal' . $suffix . '.css',
 			array(),
 			WPO_OTD_VERSION
 		);
 
 		wp_enqueue_style(
-			'wpo-aom-admin-order-edit',
+			'wpo-otd-admin-order-edit',
 			WPO_OTD()->plugin_url() . '/assets/css/order-edit' . $suffix . '.css',
 			array(),
 			WPO_OTD_VERSION
@@ -238,7 +238,7 @@ final class Screen {
 	 * @return void
 	 */
 	public function render_meta_box(): void {
-		echo '<div id="wpo-aom-order-meta-box-content"></div>';
+		echo '<div id="wpo-otd-order-meta-box-content"></div>';
 	}
 
 	/**************************
@@ -289,7 +289,7 @@ final class Screen {
 		// View mode
 		$fulfillment_status_html = $this->get_fulfillment_status_html( $fulfillment_status, $fulfillment_quantity, $total_quantity );
 		$edit_button_html        = sprintf(
-			'<button type="button" class="wpo-button wpo-button-icon wpo-aom-edit-fulfillment" data-item-id="%1$d" title="%2$s">
+			'<button type="button" class="wpo-button wpo-button-icon wpo-otd-edit-fulfillment" data-item-id="%1$d" title="%2$s">
 				<span class="screen-reader-text">%2$s</span>
 			</button>',
 			esc_attr( $item_id ),
@@ -302,10 +302,10 @@ final class Screen {
 			'<label>
 				<input
 					type="number"
-					name="wpo-aom-fulfillment-quantity[%1$d][%4$s]"
+					name="wpo-otd-fulfillment-quantity[%1$d][%4$s]"
 					min="0"
 					max="%2$d"
-					class="wpo-aom-fulfillment-quantity"
+					class="wpo-otd-fulfillment-quantity"
 					value="%3$d"
 					data-fulfillment-id="%4$s"
 				/>
@@ -318,11 +318,11 @@ final class Screen {
 			esc_html__( 'Fulfillment Quantity', 'out-the-door-order-tasks-workflows-for-woocommerce' )
 		);
 		$edit_button_html = sprintf(
-			'<ul class="wpo-aom-fulfillment-actions" style="display: none;">
+			'<ul class="wpo-otd-fulfillment-actions" style="display: none;">
 					<li>
 						<button
 							type="button"
-							class="wpo-button wpo-button-icon wpo-aom-save-fulfillment"
+							class="wpo-button wpo-button-icon wpo-otd-save-fulfillment"
 							data-item-id="%1$d"
 							data-fulfillment-id="%2$s"
 							title="%3$s"
@@ -333,7 +333,7 @@ final class Screen {
 					<li>
 						<button
 							type="button"
-							class="wpo-button wpo-button-icon wpo-aom-cancel-fulfillment"
+							class="wpo-button wpo-button-icon wpo-otd-cancel-fulfillment"
 							data-item-id="%1$d"
 							data-fulfillment-id="%2$s"
 							title="%4$s"
@@ -356,7 +356,7 @@ final class Screen {
 
 		// Output the fulfillment cell.
 		printf(
-			'<td class="wpo-aom-fulfillment">%s%s</td>',
+			'<td class="wpo-otd-fulfillment">%s%s</td>',
 			$view_html, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			$edit_html  // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		);
@@ -387,7 +387,7 @@ final class Screen {
 
 
 		return sprintf(
-			'<span class="wpo-aom-tag %1$s">%2$s</span>',
+			'<span class="wpo-otd-tag %1$s">%2$s</span>',
 			esc_attr( $class ),
 			$label // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		);
@@ -403,12 +403,12 @@ final class Screen {
 	 */
 	public function save_posted_fulfillment_quantities( int $order_id, array $items ): void {
 		if (
-			! isset( $items['wpo-aom-fulfillment-quantity'] ) ||
-			! is_array( $items['wpo-aom-fulfillment-quantity'] ) ) {
+			! isset( $items['wpo-otd-fulfillment-quantity'] ) ||
+			! is_array( $items['wpo-otd-fulfillment-quantity'] ) ) {
 			return;
 		}
 
-		foreach ( $items['wpo-aom-fulfillment-quantity'] as $item_id => $fulfillment_data ) {
+		foreach ( $items['wpo-otd-fulfillment-quantity'] as $item_id => $fulfillment_data ) {
 			$item_id = absint( $item_id );
 			if ( ! $item_id || ! is_array( $fulfillment_data ) || empty( $fulfillment_data ) ) {
 				continue;

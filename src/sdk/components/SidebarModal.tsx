@@ -22,7 +22,7 @@ export const SidebarModal: React.FC<SidebarModalProps> = ({
 					{/* Backdrop */}
 					<motion.div
 						key="backdrop"
-						className="wpo-aom-sidebar-backdrop"
+						className="wpo-otd-sidebar-backdrop"
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0 }}
@@ -33,18 +33,18 @@ export const SidebarModal: React.FC<SidebarModalProps> = ({
 					{/* Sidebar Modal */}
 					<motion.div
 						key="sidebar-modal"
-						className="wpo-aom-sidebar-modal"
+						className="wpo-otd-sidebar-modal"
 						initial={{ x: '100%' }}
 						animate={{ x: 0 }}
 						exit={{ x: '100%' }}
 						transition={{ type: 'tween', duration: 0.3 }}
 					>
 						<div className="inner">
-							<div className="wpo-aom-sidebar-header">
+							<div className="wpo-otd-sidebar-header">
 								{title && <h2>{title}</h2>}
 								<button
 									type="button"
-									className="wpo-button wpo-button-icon wpo-aom-sidebar-close"
+									className="wpo-button wpo-button-icon wpo-otd-sidebar-close"
 									onClick={onClose}
 								>
 									<span className="screen-reader-text">
@@ -53,7 +53,7 @@ export const SidebarModal: React.FC<SidebarModalProps> = ({
 								</button>
 							</div>
 
-							<div className="wpo-aom-sidebar-content">
+							<div className="wpo-otd-sidebar-content">
 								{children}
 							</div>
 						</div>

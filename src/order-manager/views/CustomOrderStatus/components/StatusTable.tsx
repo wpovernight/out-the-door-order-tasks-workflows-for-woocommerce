@@ -114,7 +114,7 @@ export const StatusTable = ({
 								>
 									{isBusy(status) && (
 										<>
-											<span className="wpo-aom-loader"></span>
+											<span className="wpo-otd-loader"></span>
 											<span className="deleting-notice">
 												{isDeleting(status)
 													? __(
@@ -136,11 +136,11 @@ export const StatusTable = ({
 								</td>
 								<td className="actions-column">
 									{!isBusy(status) && (
-										<ul className="wpo-aom-row-actions">
+										<ul className="wpo-otd-row-actions">
 											<li>
 												<button
 													type="button"
-													className="wpo-button wpo-button-icon wpo-aom-edit-button"
+													className="wpo-button wpo-button-icon wpo-otd-edit-button"
 													onClick={() =>
 														onEdit(status.id)
 													}
@@ -161,7 +161,7 @@ export const StatusTable = ({
 											<li>
 												<button
 													type="button"
-													className="wpo-button wpo-button-icon wpo-aom-delete-button"
+													className="wpo-button wpo-button-icon wpo-otd-delete-button"
 													onClick={() =>
 														onDelete(status.id)
 													}

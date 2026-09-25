@@ -114,7 +114,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 						isFieldOption(statusValue) &&
 						!excludeTags?.includes(statusField?.slug || '') && (
 							<li
-								className={`wpo-aom-tag task-card-status status-${statusValue.slug}`}
+								className={`wpo-otd-tag task-card-status status-${statusValue.slug}`}
 								style={getColorStyle(statusValue.color)}
 							>
 								{statusValue.label}
@@ -125,7 +125,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 						isFieldOption(priorityValue) &&
 						!excludeTags?.includes(priorityField?.slug || '') && (
 							<li
-								className={`wpo-aom-tag task-card-priority priority-${priorityValue.slug}`}
+								className={`wpo-otd-tag task-card-priority priority-${priorityValue.slug}`}
 								style={getColorStyle(priorityValue.color)}
 							>
 								{priorityValue.label}
@@ -232,7 +232,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 		}
 
 		return (
-			<ul className="wpo-aom-task-actions task-card-actions">
+			<ul className="wpo-otd-task-actions task-card-actions">
 				{IncludedActions.includes('edit') && onEditClick && (
 					<li>
 						<button

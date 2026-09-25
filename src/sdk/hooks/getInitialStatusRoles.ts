@@ -8,8 +8,8 @@ import { StatusRoles } from '@sdk/types/task';
 const EMPTY_ROLES: StatusRoles = { done: null, undone: null };
 
 type WindowWithBootstrap = Window & {
-	WPO_AOM_OrderManager?: { statusRoles?: StatusRoles };
-	WPO_AOM_OrderEdit_MetaBox?: { statusRoles?: StatusRoles };
+	WPO_OTD_OrderManager?: { statusRoles?: StatusRoles };
+	WPO_OTD_OrderEdit_MetaBox?: { statusRoles?: StatusRoles };
 };
 
 /**
@@ -17,7 +17,7 @@ type WindowWithBootstrap = Window & {
  */
 export function getInitialStatusRoles(): StatusRoles {
 	const win = window as WindowWithBootstrap;
-	const data = win.WPO_AOM_OrderManager ?? win.WPO_AOM_OrderEdit_MetaBox;
+	const data = win.WPO_OTD_OrderManager ?? win.WPO_OTD_OrderEdit_MetaBox;
 
 	return data?.statusRoles ?? EMPTY_ROLES;
 }

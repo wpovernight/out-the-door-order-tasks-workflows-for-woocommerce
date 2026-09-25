@@ -110,7 +110,7 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onTaskClick }) => {
 
 			<td className="task-priority">
 				<span
-					className="wpo-aom-tag"
+					className="wpo-otd-tag"
 					style={getColorStyle(priorityColor)}
 				>
 					{priorityLabel}
@@ -119,7 +119,7 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, onTaskClick }) => {
 
 			<td className="task-status">
 				<span
-					className="wpo-aom-tag"
+					className="wpo-otd-tag"
 					style={getColorStyle(statusColor)}
 				>
 					{statusLabel}

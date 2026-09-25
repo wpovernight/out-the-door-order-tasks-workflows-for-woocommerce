@@ -138,11 +138,11 @@ const TaskRow: React.FC<TaskRowProps> = ({ task }) => {
 			</td>
 
 			<td className="task-actions">
-				<ul className="wpo-aom-row-actions">
+				<ul className="wpo-otd-row-actions">
 					<li>
 						<button
 							type="button"
-							className="wpo-button wpo-button-icon wpo-aom-restore-button"
+							className="wpo-button wpo-button-icon wpo-otd-restore-button"
 							onClick={(e) => {
 								e.stopPropagation();
 								handleRestore(task.id);
@@ -157,7 +157,7 @@ const TaskRow: React.FC<TaskRowProps> = ({ task }) => {
 					<li>
 						<button
 							type="button"
-							className="wpo-button wpo-button-icon wpo-aom-delete-button"
+							className="wpo-button wpo-button-icon wpo-otd-delete-button"
 							onClick={(e) => {
 								e.stopPropagation();
 								handleDelete(task.id);

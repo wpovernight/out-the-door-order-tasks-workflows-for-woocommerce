@@ -148,7 +148,7 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 		if (e.key === 'ArrowDown') {
 			e.preventDefault();
 			const first = containerRef.current?.querySelector(
-				'.wpo-aom-async-multi-select-options li'
+				'.wpo-otd-async-multi-select-options li'
 			) as HTMLElement | null;
 
 			(
@@ -185,7 +185,7 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 	return (
 		<div
 			ref={containerRef}
-			className={`wpo-aom-async-multi-select-container ${className ?? ''}`}
+			className={`wpo-otd-async-multi-select-container ${className ?? ''}`}
 		>
 			<input
 				ref={inputRef}
@@ -221,17 +221,17 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 			</div>
 
 			{showResults && loading && (
-				<div className="wpo-aom-async-multi-select-message">
+				<div className="wpo-otd-async-multi-select-message">
 					<p>{__('Loading…', 'out-the-door-order-tasks-workflows-for-woocommerce')}</p>
 				</div>
 			)}
 			{showResults && !loading && !Boolean(results.length) && (
-				<div className="wpo-aom-async-multi-select-message">
+				<div className="wpo-otd-async-multi-select-message">
 					<p>{__('No results found', 'out-the-door-order-tasks-workflows-for-woocommerce')}</p>
 				</div>
 			)}
 			{showResults && !loading && Boolean(results.length) && (
-				<ul className="wpo-aom-async-multi-select-options">
+				<ul className="wpo-otd-async-multi-select-options">
 					{results.map((option) => (
 						<li key={option.id}>
 							<button
@@ -246,7 +246,7 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 				</ul>
 			)}
 
-			<ul className="wpo-aom-async-multi-select-selected-options">
+			<ul className="wpo-otd-async-multi-select-selected-options">
 				{selected &&
 					selected.map((option) => (
 						<li key={option.id}>
@@ -271,7 +271,7 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 							)}
 							<button
 								type="button"
-								className="wpo-button wpo-button-icon wpo-aom-sidebar-close"
+								className="wpo-button wpo-button-icon wpo-otd-sidebar-close"
 								onClick={() => handleRemoveOption(option.id)}
 							>
 								<span className="screen-reader-text">

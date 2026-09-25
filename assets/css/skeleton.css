@@ -2,22 +2,22 @@
    Loading Skeleton Components
    ============================================ */
 
-.wpo-aom-loading-skeleton-container {
+.wpo-otd-loading-skeleton-container {
     display: flex;
     flex-direction: column;
     gap: 1em;
 }
 
-.wpo-aom-skeleton-box {
-    background: var(--wpo-aom-bg-lighter);
-    border-radius: var(--wpo-aom-radius-m);
+.wpo-otd-skeleton-box {
+    background: var(--wpo-otd-bg-lighter);
+    border-radius: var(--wpo-otd-radius-m);
     padding: 1em;
     position: relative;
     overflow: hidden;
     box-sizing: border-box;
 }
 
-.wpo-aom-skeleton-box::before {
+.wpo-otd-skeleton-box::before {
     content: '';
     position: absolute;
     top: 0;
@@ -43,9 +43,9 @@
     }
 }
 
-.wpo-aom-skeleton-line {
-    background: var(--wpo-aom-gray-light);
-    border-radius: var(--wpo-aom-radius-m);
+.wpo-otd-skeleton-line {
+    background: var(--wpo-otd-gray-light);
+    border-radius: var(--wpo-otd-radius-m);
     position: relative;
 }
 
@@ -53,7 +53,7 @@
    Empty State Component
    ============================================ */
 
-.wpo-aom-empty-state {
+.wpo-otd-empty-state {
     text-align: center;
     padding: 1em 1em;
     display: flex;
@@ -63,14 +63,14 @@
     justify-content: center;
 }
 
-.wpo-aom-empty-state-icon {
+.wpo-otd-empty-state-icon {
     font-size: 3em;
     opacity: 0.5;
     line-height: 1;
 }
 
-.wpo-aom-empty-state-icon--note,
-.wpo-aom-empty-state-icon--box {
+.wpo-otd-empty-state-icon--note,
+.wpo-otd-empty-state-icon--box {
     width: 9em;
     height: 6em;
     background-size: contain;
@@ -78,63 +78,63 @@
     font-size: initial;
 }
 
-.wpo-aom-empty-state-icon--note {
-    background-image: var(--wpo-aom-icon-note);
+.wpo-otd-empty-state-icon--note {
+    background-image: var(--wpo-otd-icon-note);
 }
 
-.wpo-aom-empty-state-icon--box {
-    background-image: var(--wpo-aom-icon-box);
+.wpo-otd-empty-state-icon--box {
+    background-image: var(--wpo-otd-icon-box);
 }
 
-.wpo-aom-empty-state-message {
+.wpo-otd-empty-state-message {
     font-size: 1em;
     margin: 0;
 }
 
-.wpo-aom-empty-state-action {
-    background: var(--wpo-aom-wp-blue);
+.wpo-otd-empty-state-action {
+    background: var(--wpo-otd-wp-blue);
     color: #fff;
     border: none;
-    border-radius: var(--wpo-aom-radius-m);
+    border-radius: var(--wpo-otd-radius-m);
     padding: 0.5em 1.5em;
     cursor: pointer;
     font-size: 1em;
 }
 
-.wpo-aom-empty-state-action:hover {
-    background: var(--wpo-aom-wp-blue-dark);
+.wpo-otd-empty-state-action:hover {
+    background: var(--wpo-otd-wp-blue-dark);
 }
 
 /* ============================================
    Error State Component
    ============================================ */
 
-.wpo-aom-error-state {
+.wpo-otd-error-state {
     text-align: center;
     padding: 2em 1em;
-    color: var(--wpo-aom-error);
+    color: var(--wpo-otd-error);
 }
 
-.wpo-aom-error-state-icon {
+.wpo-otd-error-state-icon {
     font-size: 3em;
     margin-bottom: 0.5em;
 }
 
-.wpo-aom-error-state-message {
+.wpo-otd-error-state-message {
     margin: 0.5em 0 1em;
     font-size: 1em;
 }
 
-.wpo-aom-error-state-retry {
-    background: var(--wpo-aom-error);
+.wpo-otd-error-state-retry {
+    background: var(--wpo-otd-error);
     color: #fff;
     border: none;
-    border-radius: var(--wpo-aom-radius-m);
+    border-radius: var(--wpo-otd-radius-m);
     padding: 0.5em 1.5em;
     cursor: pointer;
     font-size: 1em;
 }
 
-.wpo-aom-error-state-retry:hover {
-    background: var(--wpo-aom-danger-dark);
+.wpo-otd-error-state-retry:hover {
+    background: var(--wpo-otd-danger-dark);
 }

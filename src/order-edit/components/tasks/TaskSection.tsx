@@ -12,7 +12,7 @@ const TaskSection: React.FC = () => {
 	}, [loadTaskData]);
 
 	return (
-		<div className="wpo-aom-metabox-section" id="order-tasks">
+		<div className="wpo-otd-metabox-section" id="order-tasks">
 			<Header />
 			<ActiveTasks />
 			<FinishedTasks />

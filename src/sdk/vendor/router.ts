@@ -1,5 +1,5 @@
 /**
- * Re-exports react-router-dom as `window.wpo.aom.router`.
+ * Re-exports react-router-dom as `window.wpo.otd.router`.
  *
  * Add-on views are mounted as route elements inside the core `<HashRouter>`.
  * If an add-on bundled its own react-router-dom it would get a second router

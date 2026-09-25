@@ -4,7 +4,7 @@
 
 import type { StatusRoles } from '@sdk';
 
-export interface WpoAomOrderEditMetaBoxData {
+export interface WpoOtdOrderEditMetaBoxData {
 	apiRoot: string;
 	apiNamespace: string;
 	nonce: string;
@@ -16,7 +16,7 @@ export interface WpoAomOrderEditMetaBoxData {
 
 declare global {
 	interface Window {
-        WPO_AOM_OrderEdit_MetaBox: WpoAomOrderEditMetaBoxData;
+        WPO_OTD_OrderEdit_MetaBox: WpoOtdOrderEditMetaBoxData;
 	}
 }
 
