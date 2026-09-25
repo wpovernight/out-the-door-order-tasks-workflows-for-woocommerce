@@ -1,14 +1,14 @@
 <?php
 
-namespace WPO\AOM\REST;
+namespace WPO\OTD\REST;
 
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 use WP_Error;
-use WPO\AOM\Core\Logger;
-use WPO\AOM\Services\TaskManagerService;
-use WPO\AOM\Services\TaskStatusRoleService;
+use WPO\OTD\Core\Logger;
+use WPO\OTD\Services\TaskManagerService;
+use WPO\OTD\Services\TaskStatusRoleService;
 
 defined( 'ABSPATH' ) || exit;
 

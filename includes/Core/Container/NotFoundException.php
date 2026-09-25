@@ -1,6 +1,6 @@
 <?php
 
-namespace WPO\AOM\Core\Container;
+namespace WPO\OTD\Core\Container;
 
 use InvalidArgumentException;
 use Psr\Container\NotFoundExceptionInterface;

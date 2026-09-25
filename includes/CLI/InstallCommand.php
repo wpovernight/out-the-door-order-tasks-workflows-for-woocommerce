@@ -1,8 +1,8 @@
 <?php
 
-namespace WPO\AOM\CLI;
+namespace WPO\OTD\CLI;
 
-use WPO\AOM\Core\Installer;
+use WPO\OTD\Core\Installer;
 use WP_CLI;
 
 defined( 'ABSPATH' ) || exit;

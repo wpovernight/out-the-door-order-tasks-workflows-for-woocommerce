@@ -1,6 +1,6 @@
 <?php
 
-namespace WPO\AOM\Repositories;
+namespace WPO\OTD\Repositories;
 
 defined( 'ABSPATH' ) || exit;
 

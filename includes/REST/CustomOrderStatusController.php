@@ -1,13 +1,13 @@
 <?php
 
-namespace WPO\AOM\REST;
+namespace WPO\OTD\REST;
 
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 use WP_Error;
-use WPO\AOM\Core\Logger;
-use WPO\AOM\Services\CustomOrderStatusService;
+use WPO\OTD\Core\Logger;
+use WPO\OTD\Services\CustomOrderStatusService;
 
 defined( 'ABSPATH' ) || exit;
 

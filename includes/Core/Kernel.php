@@ -1,10 +1,10 @@
 <?php
 
-namespace WPO\AOM\Core;
+namespace WPO\OTD\Core;
 
-use WPO\AOM\Core\Container\Container;
-use WPO\AOM\Core\Container\DeferrableProvider;
-use WPO\AOM\Core\Container\ServiceProvider;
+use WPO\OTD\Core\Container\Container;
+use WPO\OTD\Core\Container\DeferrableProvider;
+use WPO\OTD\Core\Container\ServiceProvider;
 
 defined( 'ABSPATH' ) || exit;
 

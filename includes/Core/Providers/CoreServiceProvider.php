@@ -1,29 +1,29 @@
 <?php
 
-namespace WPO\AOM\Core\Providers;
+namespace WPO\OTD\Core\Providers;
 
-use WPO\AOM\Core\Container\Container;
-use WPO\AOM\Core\Container\ServiceProvider;
-use WPO\AOM\Core\Installer;
-use WPO\AOM\Models\CustomOrderStatus;
-use WPO\AOM\Models\Task;
-use WPO\AOM\Models\TaskField;
-use WPO\AOM\Models\TaskFieldOption;
-use WPO\AOM\Models\TaskFieldValue;
-use WPO\AOM\Repositories\CustomOrderStatusRepository;
-use WPO\AOM\Repositories\RepositoryRegistry;
-use WPO\AOM\Repositories\TaskRepository;
-use WPO\AOM\Repositories\TaskFieldRepository;
-use WPO\AOM\Repositories\TaskFieldOptionRepository;
-use WPO\AOM\Repositories\TaskFieldValueRepository;
-use WPO\AOM\Services\EmailService;
-use WPO\AOM\Services\CustomOrderStatusService;
-use WPO\AOM\Services\TaskManagerService;
-use WPO\AOM\REST\TaskController;
-use WPO\AOM\REST\FulfillmentController;
-use WPO\AOM\REST\CustomOrderStatusController;
-use WPO\AOM\Admin\OrderManager\Screen as OrderManagerScreen;
-use WPO\AOM\Admin\OrderEdit\Screen as OrderEditScreen;
+use WPO\OTD\Core\Container\Container;
+use WPO\OTD\Core\Container\ServiceProvider;
+use WPO\OTD\Core\Installer;
+use WPO\OTD\Models\CustomOrderStatus;
+use WPO\OTD\Models\Task;
+use WPO\OTD\Models\TaskField;
+use WPO\OTD\Models\TaskFieldOption;
+use WPO\OTD\Models\TaskFieldValue;
+use WPO\OTD\Repositories\CustomOrderStatusRepository;
+use WPO\OTD\Repositories\RepositoryRegistry;
+use WPO\OTD\Repositories\TaskRepository;
+use WPO\OTD\Repositories\TaskFieldRepository;
+use WPO\OTD\Repositories\TaskFieldOptionRepository;
+use WPO\OTD\Repositories\TaskFieldValueRepository;
+use WPO\OTD\Services\EmailService;
+use WPO\OTD\Services\CustomOrderStatusService;
+use WPO\OTD\Services\TaskManagerService;
+use WPO\OTD\REST\TaskController;
+use WPO\OTD\REST\FulfillmentController;
+use WPO\OTD\REST\CustomOrderStatusController;
+use WPO\OTD\Admin\OrderManager\Screen as OrderManagerScreen;
+use WPO\OTD\Admin\OrderEdit\Screen as OrderEditScreen;
 
 defined( 'ABSPATH' ) || exit;
 

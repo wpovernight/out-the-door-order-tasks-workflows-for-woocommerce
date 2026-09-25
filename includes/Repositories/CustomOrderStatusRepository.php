@@ -1,8 +1,8 @@
 <?php
 
-namespace WPO\AOM\Repositories;
+namespace WPO\OTD\Repositories;
 
-use WPO\AOM\Models\CustomOrderStatus;
+use WPO\OTD\Models\CustomOrderStatus;
 
 defined( 'ABSPATH' ) || exit;
 

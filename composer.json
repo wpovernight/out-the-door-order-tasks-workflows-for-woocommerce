@@ -3,7 +3,7 @@
   "description": "Advanced Order Manager for WooCommerce",
   "autoload": {
     "psr-4": {
-      "WPO\\AOM\\": "includes/"
+      "WPO\\OTD\\": "includes/"
     }
   },
   "require-dev": {

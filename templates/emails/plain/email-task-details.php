@@ -10,7 +10,7 @@
  * @var WC_Email $email         Email object.
  */
 
-use WPO\AOM\Services\EmailService;
+use WPO\OTD\Services\EmailService;
 
 defined( 'ABSPATH' ) || exit;
 

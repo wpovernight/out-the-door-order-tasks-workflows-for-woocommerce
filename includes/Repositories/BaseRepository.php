@@ -1,11 +1,11 @@
 <?php
 
-namespace WPO\AOM\Repositories;
+namespace WPO\OTD\Repositories;
 
 use InvalidArgumentException;
 use RuntimeException;
-use WPO\AOM\Models\BaseModel;
-use WPO\AOM\Utilities\Paginator;
+use WPO\OTD\Models\BaseModel;
+use WPO\OTD\Utilities\Paginator;
 
 defined( 'ABSPATH' ) || exit;
 

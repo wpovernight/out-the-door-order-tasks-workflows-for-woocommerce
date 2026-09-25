@@ -1,8 +1,8 @@
 <?php
 
-namespace WPO\AOM\Repositories;
+namespace WPO\OTD\Repositories;
 
-use WPO\AOM\Models\TaskFieldValue;
+use WPO\OTD\Models\TaskFieldValue;
 
 defined( 'ABSPATH' ) || exit;
 

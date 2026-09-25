@@ -1,11 +1,11 @@
 <?php
 
-namespace WPO\AOM\Core;
+namespace WPO\OTD\Core;
 
-use WPO\AOM\AdvancedOrderManager;
-use WPO\AOM\Repositories\TaskFieldOptionRepository;
-use WPO\AOM\Repositories\TaskFieldRepository;
-use WPO\AOM\Services\TaskStatusRoleService;
+use WPO\OTD\OutTheDoor;
+use WPO\OTD\Repositories\TaskFieldOptionRepository;
+use WPO\OTD\Repositories\TaskFieldRepository;
+use WPO\OTD\Services\TaskStatusRoleService;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -87,7 +87,7 @@ final class Installer {
 		$this->seed_initial_state();
 
 		// Record the installed plugin version and the current schema version.
-		update_option( self::OPTION_VERSION, AdvancedOrderManager::VERSION, true );
+		update_option( self::OPTION_VERSION, OutTheDoor::VERSION, true );
 		update_option( self::OPTION_DB_VERSION, self::DB_VERSION, true );
 	}
 
@@ -152,7 +152,7 @@ final class Installer {
 
 			// Record the new schema version and refresh the stored plugin version.
 			update_option( self::OPTION_DB_VERSION, self::DB_VERSION, true );
-			update_option( self::OPTION_VERSION, AdvancedOrderManager::VERSION, true );
+			update_option( self::OPTION_VERSION, OutTheDoor::VERSION, true );
 		} finally {
 			$this->release_upgrade_lock();
 		}

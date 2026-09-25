@@ -1,6 +1,6 @@
 <?php
 
-namespace WPO\AOM\Contracts;
+namespace WPO\OTD\Contracts;
 
 defined( 'ABSPATH' ) || exit;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace WPO\AOM\Admin;
+namespace WPO\OTD\Admin;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -21,17 +21,17 @@ final class Assets {
 
 		wp_register_script(
 			self::ROUTER_HANDLE,
-			WPO_AOM()->plugin_url() . '/assets/js/router.js',
+			WPO_OTD()->plugin_url() . '/assets/js/router.js',
 			array( 'wp-element' ),
-			WPO_AOM_VERSION,
+			WPO_OTD_VERSION,
 			true
 		);
 
 		wp_register_script(
 			self::SDK_HANDLE,
-			WPO_AOM()->plugin_url() . '/assets/js/sdk.js',
+			WPO_OTD()->plugin_url() . '/assets/js/sdk.js',
 			self::WP_DEPS,
-			WPO_AOM_VERSION,
+			WPO_OTD_VERSION,
 			true
 		);
 
@@ -40,7 +40,7 @@ final class Assets {
 		wp_set_script_translations(
 			self::SDK_HANDLE,
 			'advanced-order-manager-for-woocommerce',
-			WPO_AOM()->plugin_path() . '/languages'
+			WPO_OTD()->plugin_path() . '/languages'
 		);
 	}
 

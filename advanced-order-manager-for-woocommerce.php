@@ -19,25 +19,25 @@
 
 defined( 'ABSPATH' ) || exit;
 
-if ( ! defined( 'WPO_AOM_PLUGIN_FILE' ) ) {
-	define( 'WPO_AOM_PLUGIN_FILE', __FILE__ );
+if ( ! defined( 'WPO_OTD_PLUGIN_FILE' ) ) {
+	define( 'WPO_OTD_PLUGIN_FILE', __FILE__ );
 }
 
 // Include the main class for the plugin.
-if ( ! class_exists( '\\WPO\\AOM\\AdvancedOrderManager' ) ) {
-	include_once dirname( WPO_AOM_PLUGIN_FILE ) . '/includes/AdvancedOrderManager.php';
+if ( ! class_exists( '\\WPO\\OTD\\OutTheDoor' ) ) {
+	include_once dirname( WPO_OTD_PLUGIN_FILE ) . '/includes/OutTheDoor.php';
 }
 
 /**
- * Get the main instance of WPO_AOM.
+ * Get the main instance of WPO_OTD.
  *
- * @return \WPO\AOM\AdvancedOrderManager
+ * @return \WPO\OTD\OutTheDoor
  */
-function WPO_AOM(): \WPO\AOM\AdvancedOrderManager {
-	return \WPO\AOM\AdvancedOrderManager::instance();
+function WPO_OTD(): \WPO\OTD\OutTheDoor {
+	return \WPO\OTD\OutTheDoor::instance();
 }
 
-WPO_AOM();
+WPO_OTD();
 
 /**
  * Activation composition root.
@@ -45,17 +45,17 @@ WPO_AOM();
  * The activation request never reaches the `plugins_loaded` boot, so wire a dedicated root here.
  */
 register_activation_hook(
-	WPO_AOM_PLUGIN_FILE,
+	WPO_OTD_PLUGIN_FILE,
 	static function (): void {
 		// Never create tables for an environment the plugin cannot run in.
-		if ( ! \WPO\AOM\Core\DependencyChecker::instance()->check_dependencies() ) {
+		if ( ! \WPO\OTD\Core\DependencyChecker::instance()->check_dependencies() ) {
 			return;
 		}
 
-		$kernel = new \WPO\AOM\Core\Kernel( new \WPO\AOM\Core\Container\Container() );
-		$kernel->add_provider( new \WPO\AOM\Core\Providers\CoreServiceProvider() );
+		$kernel = new \WPO\OTD\Core\Kernel( new \WPO\OTD\Core\Container\Container() );
+		$kernel->add_provider( new \WPO\OTD\Core\Providers\CoreServiceProvider() );
 		$kernel->register();
 
-		$kernel->container()->get( \WPO\AOM\Core\Installer::class )->install();
+		$kernel->container()->get( \WPO\OTD\Core\Installer::class )->install();
 	}
 );

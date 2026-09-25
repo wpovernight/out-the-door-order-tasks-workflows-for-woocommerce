@@ -1,9 +1,9 @@
 <?php
 
-namespace WPO\AOM\Models;
+namespace WPO\OTD\Models;
 
-use WPO\AOM\Core\Logger;
-use WPO\AOM\Enums\TaskFieldTypes;
+use WPO\OTD\Core\Logger;
+use WPO\OTD\Enums\TaskFieldTypes;
 
 defined( 'ABSPATH' ) || exit;
 

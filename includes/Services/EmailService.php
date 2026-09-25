@@ -1,9 +1,9 @@
 <?php
 
-namespace WPO\AOM\Services;
+namespace WPO\OTD\Services;
 
-use WPO\AOM\Emails\TaskCreatedEmail;
-use WPO\AOM\Emails\TaskUpdatedEmail;
+use WPO\OTD\Emails\TaskCreatedEmail;
+use WPO\OTD\Emails\TaskUpdatedEmail;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -85,7 +85,7 @@ final class EmailService {
 					'email_service' => $this,
 				),
 				'',
-				WPO_AOM()->plugin_path() . '/templates/'
+				WPO_OTD()->plugin_path() . '/templates/'
 			);
 		} else {
 			wc_get_template(
@@ -98,7 +98,7 @@ final class EmailService {
 					'email_service' => $this,
 				),
 				'',
-				WPO_AOM()->plugin_path() . '/templates/'
+				WPO_OTD()->plugin_path() . '/templates/'
 			);
 		}
 	}

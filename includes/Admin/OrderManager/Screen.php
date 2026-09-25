@@ -1,9 +1,9 @@
 <?php
 
-namespace WPO\AOM\Admin\OrderManager;
+namespace WPO\OTD\Admin\OrderManager;
 
-use WPO\AOM\Admin\Assets;
-use WPO\AOM\Services\TaskStatusRoleService;
+use WPO\OTD\Admin\Assets;
+use WPO\OTD\Services\TaskStatusRoleService;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -56,16 +56,16 @@ final class Screen {
 		// Do not need the suffix, since it's a React app and we are using webpack to handle the minification.
 		wp_enqueue_script(
 			'wpo-aom-admin-order-manager',
-			WPO_AOM()->plugin_url() . '/assets/js/order-manager.js',
+			WPO_OTD()->plugin_url() . '/assets/js/order-manager.js',
 			$dependencies,
-			WPO_AOM_VERSION,
+			WPO_OTD_VERSION,
 			true
 		);
 
 		wp_set_script_translations(
 			'wpo-aom-admin-order-manager',
 			'advanced-order-manager-for-woocommerce',
-			WPO_AOM()->plugin_path() . '/languages'
+			WPO_OTD()->plugin_path() . '/languages'
 		);
 
 		wp_localize_script(
@@ -87,58 +87,58 @@ final class Screen {
 		 */
 		wp_enqueue_style(
 			'wpo-aom-admin-common',
-			WPO_AOM()->plugin_url() . '/assets/css/common' . $suffix . '.css',
+			WPO_OTD()->plugin_url() . '/assets/css/common' . $suffix . '.css',
 			array(),
-			WPO_AOM_VERSION
+			WPO_OTD_VERSION
 		);
 
 		wp_enqueue_style(
 			'wpo-aom-admin-order-manager',
-			WPO_AOM()->plugin_url() . '/assets/css/order-manager' . $suffix . '.css',
+			WPO_OTD()->plugin_url() . '/assets/css/order-manager' . $suffix . '.css',
 			array(),
-			WPO_AOM_VERSION
+			WPO_OTD_VERSION
 		);
 
 		wp_enqueue_style(
 			'wpo-aom-admin-task-card',
-			WPO_AOM()->plugin_url() . '/assets/css/task-card' . $suffix . '.css',
+			WPO_OTD()->plugin_url() . '/assets/css/task-card' . $suffix . '.css',
 			array(),
-			WPO_AOM_VERSION
+			WPO_OTD_VERSION
 		);
 
 		wp_enqueue_style(
 			'wpo-aom-admin-sidebar-modal',
-			WPO_AOM()->plugin_url() . '/assets/css/sidebar-modal' . $suffix . '.css',
+			WPO_OTD()->plugin_url() . '/assets/css/sidebar-modal' . $suffix . '.css',
 			array(),
-			WPO_AOM_VERSION
+			WPO_OTD_VERSION
 		);
 
 		wp_enqueue_style(
 			'wpo-aom-admin-dashboard',
-			WPO_AOM()->plugin_url() . '/assets/css/dashboard' . $suffix . '.css',
+			WPO_OTD()->plugin_url() . '/assets/css/dashboard' . $suffix . '.css',
 			array(),
-			WPO_AOM_VERSION
+			WPO_OTD_VERSION
 		);
 
 		wp_enqueue_style(
 			'wpo-aom-admin-task-manager',
-			WPO_AOM()->plugin_url() . '/assets/css/task-manager' . $suffix . '.css',
+			WPO_OTD()->plugin_url() . '/assets/css/task-manager' . $suffix . '.css',
 			array(),
-			WPO_AOM_VERSION
+			WPO_OTD_VERSION
 		);
 
 		wp_enqueue_style(
 			'wpo-aom-admin-custom-order-status',
-			WPO_AOM()->plugin_url() . '/assets/css/custom-order-status' . $suffix . '.css',
+			WPO_OTD()->plugin_url() . '/assets/css/custom-order-status' . $suffix . '.css',
 			array(),
-			WPO_AOM_VERSION
+			WPO_OTD_VERSION
 		);
 
 		wp_enqueue_style(
 			'wpo-aom-admin-skeleton',
-			WPO_AOM()->plugin_url() . '/assets/css/skeleton' . $suffix . '.css',
+			WPO_OTD()->plugin_url() . '/assets/css/skeleton' . $suffix . '.css',
 			array(),
-			WPO_AOM_VERSION
+			WPO_OTD_VERSION
 		);
 	}
 

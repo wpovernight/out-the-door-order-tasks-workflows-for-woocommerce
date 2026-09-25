@@ -1,8 +1,8 @@
 <?php
 
-namespace WPO\AOM\Repositories;
+namespace WPO\OTD\Repositories;
 
-use WPO\AOM\Models\TaskFieldOption;
+use WPO\OTD\Models\TaskFieldOption;
 
 defined( 'ABSPATH' ) || exit;
 

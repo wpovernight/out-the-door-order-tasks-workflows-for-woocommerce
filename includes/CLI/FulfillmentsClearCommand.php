@@ -1,9 +1,9 @@
 <?php
 
-namespace WPO\AOM\CLI;
+namespace WPO\OTD\CLI;
 
 use WP_CLI;
-use WPO\AOM\Services\FulfillmentService;
+use WPO\OTD\Services\FulfillmentService;
 
 defined( 'ABSPATH' ) || exit;
 

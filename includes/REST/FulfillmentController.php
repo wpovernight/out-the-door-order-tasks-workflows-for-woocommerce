@@ -1,13 +1,13 @@
 <?php
 
-namespace WPO\AOM\REST;
+namespace WPO\OTD\REST;
 
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 use WP_Error;
-use WPO\AOM\Enums\FulfillmentStatuses;
-use WPO\AOM\Services\FulfillmentService;
+use WPO\OTD\Enums\FulfillmentStatuses;
+use WPO\OTD\Services\FulfillmentService;
 
 defined( 'ABSPATH' ) || exit;
 

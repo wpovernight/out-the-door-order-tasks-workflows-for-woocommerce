@@ -1,18 +1,18 @@
 <?php
 
-namespace WPO\AOM;
+namespace WPO\OTD;
 
-use WPO\AOM\Core\DependencyChecker;
+use WPO\OTD\Core\DependencyChecker;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
-use WPO\AOM\Core\Kernel;
-use WPO\AOM\Core\Container\Container;
-use WPO\AOM\Core\Container\ServiceProvider;
-use WPO\AOM\Core\Providers\CoreServiceProvider;
-use WPO\AOM\Core\Providers\CliServiceProvider;
+use WPO\OTD\Core\Kernel;
+use WPO\OTD\Core\Container\Container;
+use WPO\OTD\Core\Container\ServiceProvider;
+use WPO\OTD\Core\Providers\CoreServiceProvider;
+use WPO\OTD\Core\Providers\CliServiceProvider;
 
 defined( 'ABSPATH' ) || exit;
 
-final class AdvancedOrderManager {
+final class OutTheDoor {
 	public const VERSION = '1.0.0';
 
 	private ?Kernel $kernel = null;
@@ -102,7 +102,7 @@ final class AdvancedOrderManager {
 	 * @return void
 	 */
 	private function define_constants(): void {
-		defined( 'WPO_AOM_VERSION' ) || define( 'WPO_AOM_VERSION', self::VERSION );
+		defined( 'WPO_OTD_VERSION' ) || define( 'WPO_OTD_VERSION', self::VERSION );
 	}
 
 	/**
@@ -142,7 +142,7 @@ final class AdvancedOrderManager {
 	public function woo_features_compatibility(): void {
 		if ( class_exists( FeaturesUtil::class ) ) {
 			// HPOS (compatible)
-			FeaturesUtil::declare_compatibility( 'custom_order_tables', WPO_AOM_PLUGIN_FILE, true );
+			FeaturesUtil::declare_compatibility( 'custom_order_tables', WPO_OTD_PLUGIN_FILE, true );
 		}
 	}
 
@@ -152,7 +152,7 @@ final class AdvancedOrderManager {
 	 * @return string
 	 */
 	public function plugin_url(): string {
-		return untrailingslashit( plugins_url( '/', WPO_AOM_PLUGIN_FILE ) );
+		return untrailingslashit( plugins_url( '/', WPO_OTD_PLUGIN_FILE ) );
 	}
 
 	/**
@@ -161,6 +161,6 @@ final class AdvancedOrderManager {
 	 * @return string
 	 */
 	public function plugin_path(): string {
-		return untrailingslashit( plugin_dir_path( WPO_AOM_PLUGIN_FILE ) );
+		return untrailingslashit( plugin_dir_path( WPO_OTD_PLUGIN_FILE ) );
 	}
 }

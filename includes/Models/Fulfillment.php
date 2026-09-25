@@ -1,6 +1,6 @@
 <?php
 
-namespace WPO\AOM\Models;
+namespace WPO\OTD\Models;
 
 defined( 'ABSPATH' ) || exit;
 

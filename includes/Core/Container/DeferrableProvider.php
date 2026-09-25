@@ -13,7 +13,7 @@
  * resolved on a normal request).
  */
 
-namespace WPO\AOM\Core\Container;
+namespace WPO\OTD\Core\Container;
 
 defined( 'ABSPATH' ) || exit;
 

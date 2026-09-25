@@ -1,16 +1,16 @@
 <?php
 
-namespace WPO\AOM\Core\Providers;
+namespace WPO\OTD\Core\Providers;
 
 use WP_CLI;
-use WPO\AOM\CLI\CommandInterface;
-use WPO\AOM\CLI\FulfillmentsClearCommand;
-use WPO\AOM\CLI\InstallCommand;
-use WPO\AOM\CLI\OptionsClearCommand;
-use WPO\AOM\CLI\TasksGenerateCommand;
-use WPO\AOM\CLI\TasksRemoveCommand;
-use WPO\AOM\Core\Container\Container;
-use WPO\AOM\Core\Container\ServiceProvider;
+use WPO\OTD\CLI\CommandInterface;
+use WPO\OTD\CLI\FulfillmentsClearCommand;
+use WPO\OTD\CLI\InstallCommand;
+use WPO\OTD\CLI\OptionsClearCommand;
+use WPO\OTD\CLI\TasksGenerateCommand;
+use WPO\OTD\CLI\TasksRemoveCommand;
+use WPO\OTD\Core\Container\Container;
+use WPO\OTD\Core\Container\ServiceProvider;
 
 defined( 'ABSPATH' ) || exit;
 

@@ -1,10 +1,10 @@
 <?php
 
-namespace WPO\AOM\Emails;
+namespace WPO\OTD\Emails;
 
 use WC_Email;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
-use WPO\AOM\Traits\TaskEmailRecipients;
+use WPO\OTD\Traits\TaskEmailRecipients;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -22,7 +22,7 @@ class TaskCreatedEmail extends WC_Email {
 
 		$this->template_html  = 'emails/task-created.php';
 		$this->template_plain = 'emails/plain/task-created.php';
-		$this->template_base  = WPO_AOM()->plugin_path() . '/templates/';
+		$this->template_base  = WPO_OTD()->plugin_path() . '/templates/';
 		$this->placeholders = array(
 			'{task_title}' => '',
 			'{task_id}'    => '',

@@ -1,10 +1,10 @@
 <?php
 
-namespace WPO\AOM\Repositories;
+namespace WPO\OTD\Repositories;
 
 use InvalidArgumentException;
-use WPO\AOM\Enums\DefaultTaskFields;
-use WPO\AOM\Models\Task;
+use WPO\OTD\Enums\DefaultTaskFields;
+use WPO\OTD\Models\Task;
 
 defined( 'ABSPATH' ) || exit;
 

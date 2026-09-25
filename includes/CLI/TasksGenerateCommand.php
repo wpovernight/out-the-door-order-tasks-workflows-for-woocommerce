@@ -1,12 +1,12 @@
 <?php
 
-namespace WPO\AOM\CLI;
+namespace WPO\OTD\CLI;
 
 use WP_CLI;
-use WPO\AOM\Repositories\TaskFieldOptionRepository;
-use WPO\AOM\Repositories\TaskFieldRepository;
-use WPO\AOM\Repositories\TaskFieldValueRepository;
-use WPO\AOM\Repositories\TaskRepository;
+use WPO\OTD\Repositories\TaskFieldOptionRepository;
+use WPO\OTD\Repositories\TaskFieldRepository;
+use WPO\OTD\Repositories\TaskFieldValueRepository;
+use WPO\OTD\Repositories\TaskRepository;
 
 defined( 'ABSPATH' ) || exit;
 

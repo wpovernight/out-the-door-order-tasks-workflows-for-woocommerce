@@ -1,6 +1,6 @@
 <?php
 
-namespace WPO\AOM\Services;
+namespace WPO\OTD\Services;
 
 defined( 'ABSPATH' ) || exit;
 

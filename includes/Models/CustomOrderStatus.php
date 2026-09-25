@@ -1,8 +1,8 @@
 <?php
 
-namespace WPO\AOM\Models;
+namespace WPO\OTD\Models;
 
-use WPO\AOM\Contracts\ArraySerializableModel;
+use WPO\OTD\Contracts\ArraySerializableModel;
 
 defined( 'ABSPATH' ) || exit;
 

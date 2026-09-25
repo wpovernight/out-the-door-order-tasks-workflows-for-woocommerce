@@ -1,9 +1,9 @@
 <?php
 
-namespace WPO\AOM\CLI;
+namespace WPO\OTD\CLI;
 
-use WPO\AOM\Core\Installer;
-use WPO\AOM\Services\TaskManagerSettingsService;
+use WPO\OTD\Core\Installer;
+use WPO\OTD\Services\TaskManagerSettingsService;
 use WP_CLI;
 
 defined( 'ABSPATH' ) || exit;

@@ -1,13 +1,13 @@
 <?php
 
-namespace WPO\AOM\Emails;
+namespace WPO\OTD\Emails;
 
 use WC_Email;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
-use WPO\AOM\Core\Logger;
-use WPO\AOM\Services\TaskManagerService;
-use WPO\AOM\Traits\TaskEmailRecipients;
-use WPO\AOM\Enums\DefaultTaskFields;
+use WPO\OTD\Core\Logger;
+use WPO\OTD\Services\TaskManagerService;
+use WPO\OTD\Traits\TaskEmailRecipients;
+use WPO\OTD\Enums\DefaultTaskFields;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -30,7 +30,7 @@ class TaskUpdatedEmail extends WC_Email {
 
 		$this->template_html  = 'emails/task-updated.php';
 		$this->template_plain = 'emails/plain/task-updated.php';
-		$this->template_base  = WPO_AOM()->plugin_path() . '/templates/';
+		$this->template_base  = WPO_OTD()->plugin_path() . '/templates/';
 		$this->placeholders = array(
 			'{task_title}' => '',
 			'{task_id}'    => '',

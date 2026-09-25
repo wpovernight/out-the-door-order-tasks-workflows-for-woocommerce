@@ -1,9 +1,9 @@
 <?php
 
-namespace WPO\AOM\Models;
+namespace WPO\OTD\Models;
 
-use WPO\AOM\Repositories\BaseRepository;
-use WPO\AOM\Repositories\RepositoryRegistry;
+use WPO\OTD\Repositories\BaseRepository;
+use WPO\OTD\Repositories\RepositoryRegistry;
 
 defined( 'ABSPATH' ) || exit;
 

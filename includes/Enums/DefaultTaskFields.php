@@ -1,6 +1,6 @@
 <?php
 
-namespace WPO\AOM\Enums;
+namespace WPO\OTD\Enums;
 
 defined( 'ABSPATH' ) || exit;
 

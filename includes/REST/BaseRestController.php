@@ -1,10 +1,10 @@
 <?php
 
-namespace WPO\AOM\REST;
+namespace WPO\OTD\REST;
 
 use WP_REST_Request;
 use WP_REST_Response;
-use WPO\AOM\Utilities\Paginator;
+use WPO\OTD\Utilities\Paginator;
 
 defined( 'ABSPATH' ) || exit;
 

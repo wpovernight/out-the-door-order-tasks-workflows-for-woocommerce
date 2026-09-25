@@ -1,6 +1,6 @@
 <?php
 
-namespace WPO\AOM\CLI;
+namespace WPO\OTD\CLI;
 
 defined( 'ABSPATH' ) || exit;
 
