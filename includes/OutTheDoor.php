@@ -38,7 +38,7 @@ final class OutTheDoor {
 	 * @return void
 	 */
 	private function __clone() {
-		_doing_it_wrong( __FUNCTION__, esc_html__( 'Cloning is forbidden.', 'advanced-order-manager-for-woocommerce' ), '1.0.0' );
+		_doing_it_wrong( __FUNCTION__, esc_html__( 'Cloning is forbidden.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), '1.0.0' );
 	}
 
 	/**
@@ -87,7 +87,7 @@ final class OutTheDoor {
 			} else {
 				_doing_it_wrong(
 					__METHOD__,
-					esc_html__( 'Each "wpo_aom_service_providers" entry must implement ServiceProvider.', 'advanced-order-manager-for-woocommerce' ),
+					esc_html__( 'Each "wpo_aom_service_providers" entry must implement ServiceProvider.', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
 					'1.0.0'
 				);
 			}
@@ -123,11 +123,11 @@ final class OutTheDoor {
 	 * @return void
 	 */
 	public function translations(): void {
-		$text_domain             = 'advanced-order-manager-for-woocommerce';
+		$text_domain             = 'out-the-door-order-tasks-workflows-for-woocommerce';
 		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- `plugin_locale` is a WordPress core filter that plugins apply when loading their own translations.
 		$locale                  = apply_filters( 'plugin_locale', determine_locale(), $text_domain );
-		$custom_translation_path = WP_LANG_DIR . '/advanced-order-manager-for-woocommerce/advanced-order-manager-for-woocommerce-' . $locale . '.mo';
-		$plugin_translation_path = WP_LANG_DIR . '/plugins/advanced-order-manager-for-woocommerce-' . $locale . '.mo';
+		$custom_translation_path = WP_LANG_DIR . '/out-the-door-order-tasks-workflows-for-woocommerce/out-the-door-order-tasks-workflows-for-woocommerce-' . $locale . '.mo';
+		$plugin_translation_path = WP_LANG_DIR . '/plugins/out-the-door-order-tasks-workflows-for-woocommerce-' . $locale . '.mo';
 
 		unload_textdomain( $text_domain );
 		load_textdomain( $text_domain, $custom_translation_path );

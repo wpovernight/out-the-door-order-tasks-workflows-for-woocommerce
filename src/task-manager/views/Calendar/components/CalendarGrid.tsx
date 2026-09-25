@@ -9,32 +9,32 @@ interface CalendarGridProps {
 
 const WEEKDAYS = [
 	{
-		abbr: __('Monday', 'advanced-order-manager-for-woocommerce'),
-		short: __('Mo', 'advanced-order-manager-for-woocommerce'),
+		abbr: __('Monday', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+		short: __('Mo', 'out-the-door-order-tasks-workflows-for-woocommerce'),
 	},
 	{
-		abbr: __('Tuesday', 'advanced-order-manager-for-woocommerce'),
-		short: __('Tu', 'advanced-order-manager-for-woocommerce'),
+		abbr: __('Tuesday', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+		short: __('Tu', 'out-the-door-order-tasks-workflows-for-woocommerce'),
 	},
 	{
-		abbr: __('Wednesday', 'advanced-order-manager-for-woocommerce'),
-		short: __('We', 'advanced-order-manager-for-woocommerce'),
+		abbr: __('Wednesday', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+		short: __('We', 'out-the-door-order-tasks-workflows-for-woocommerce'),
 	},
 	{
-		abbr: __('Thursday', 'advanced-order-manager-for-woocommerce'),
-		short: __('Th', 'advanced-order-manager-for-woocommerce'),
+		abbr: __('Thursday', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+		short: __('Th', 'out-the-door-order-tasks-workflows-for-woocommerce'),
 	},
 	{
-		abbr: __('Friday', 'advanced-order-manager-for-woocommerce'),
-		short: __('Fr', 'advanced-order-manager-for-woocommerce'),
+		abbr: __('Friday', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+		short: __('Fr', 'out-the-door-order-tasks-workflows-for-woocommerce'),
 	},
 	{
-		abbr: __('Saturday', 'advanced-order-manager-for-woocommerce'),
-		short: __('Sa', 'advanced-order-manager-for-woocommerce'),
+		abbr: __('Saturday', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+		short: __('Sa', 'out-the-door-order-tasks-workflows-for-woocommerce'),
 	},
 	{
-		abbr: __('Sunday', 'advanced-order-manager-for-woocommerce'),
-		short: __('Su', 'advanced-order-manager-for-woocommerce'),
+		abbr: __('Sunday', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+		short: __('Su', 'out-the-door-order-tasks-workflows-for-woocommerce'),
 	},
 ];
 

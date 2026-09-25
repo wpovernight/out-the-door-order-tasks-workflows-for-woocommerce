@@ -15,14 +15,14 @@ use WPO\OTD\Services\EmailService;
 defined( 'ABSPATH' ) || exit;
 
 echo "========================================\n";
-echo esc_html( strtoupper( __( 'Task Details', 'advanced-order-manager-for-woocommerce' ) ) ) . "\n";
+echo esc_html( strtoupper( __( 'Task Details', 'out-the-door-order-tasks-workflows-for-woocommerce' ) ) ) . "\n";
 echo "========================================\n\n";
 
-echo esc_html__( 'Task ID:', 'advanced-order-manager-for-woocommerce' ) . ' #' . esc_html( $task_data['id'] ) . "\n";
-echo esc_html__( 'Title:', 'advanced-order-manager-for-woocommerce' ) . ' ' . esc_html( $task_data['title'] ) . "\n";
+echo esc_html__( 'Task ID:', 'out-the-door-order-tasks-workflows-for-woocommerce' ) . ' #' . esc_html( $task_data['id'] ) . "\n";
+echo esc_html__( 'Title:', 'out-the-door-order-tasks-workflows-for-woocommerce' ) . ' ' . esc_html( $task_data['title'] ) . "\n";
 
 if ( ! empty( $task_data['description'] ) ) {
-	echo esc_html__( 'Description:', 'advanced-order-manager-for-woocommerce' ) . "\n" . esc_html( $task_data['description'] ) . "\n";
+	echo esc_html__( 'Description:', 'out-the-door-order-tasks-workflows-for-woocommerce' ) . "\n" . esc_html( $task_data['description'] ) . "\n";
 }
 
 /** @var EmailService $email_service Passed in from EmailService::email_task_details(). */

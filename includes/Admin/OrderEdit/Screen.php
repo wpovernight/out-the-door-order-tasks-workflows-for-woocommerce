@@ -75,7 +75,7 @@ final class Screen {
 
 		add_meta_box(
 			'wpo-aom-order-meta-box',
-			esc_html__( 'Advanced Order Management', 'advanced-order-manager-for-woocommerce' ),
+			esc_html__( 'Advanced Order Management', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
 			array( $this, 'render_meta_box' ),
 			$screen_id,
 			'normal',
@@ -161,7 +161,7 @@ final class Screen {
 			true
 		);
 
-		wp_set_script_translations( 'wpo-aom-order-edit-metabox', 'advanced-order-manager-for-woocommerce', WPO_OTD()->plugin_path() . '/languages' );
+		wp_set_script_translations( 'wpo-aom-order-edit-metabox', 'out-the-door-order-tasks-workflows-for-woocommerce', WPO_OTD()->plugin_path() . '/languages' );
 
 		wp_localize_script(
 			'wpo-aom-order-edit-metabox',
@@ -251,7 +251,7 @@ final class Screen {
 	 * @return void
 	 */
 	public function order_items_headers(): void {
-		echo '<th>' . esc_html__( 'Fulfillments', 'advanced-order-manager-for-woocommerce' ) . '</th>';
+		echo '<th>' . esc_html__( 'Fulfillments', 'out-the-door-order-tasks-workflows-for-woocommerce' ) . '</th>';
 	}
 
 	/**
@@ -293,7 +293,7 @@ final class Screen {
 				<span class="screen-reader-text">%2$s</span>
 			</button>',
 			esc_attr( $item_id ),
-			esc_html__( 'Edit fulfillment quantity', 'advanced-order-manager-for-woocommerce' )
+			esc_html__( 'Edit fulfillment quantity', 'out-the-door-order-tasks-workflows-for-woocommerce' )
 		);
 		$view_html               = sprintf( '<div class="view">%s%s</div>', $fulfillment_status_html, $edit_button_html );
 
@@ -315,7 +315,7 @@ final class Screen {
 			esc_attr( $total_quantity ),
 			esc_attr( $fulfillment_quantity ),
 			esc_attr( $fulfillment ? $fulfillment->id : '' ),
-			esc_html__( 'Fulfillment Quantity', 'advanced-order-manager-for-woocommerce' )
+			esc_html__( 'Fulfillment Quantity', 'out-the-door-order-tasks-workflows-for-woocommerce' )
 		);
 		$edit_button_html = sprintf(
 			'<ul class="wpo-aom-fulfillment-actions" style="display: none;">
@@ -344,8 +344,8 @@ final class Screen {
 				</ul>',
 			esc_attr( $item_id ),
 			esc_attr( $fulfillment ? $fulfillment->id : '' ),
-			esc_html__( 'Save fulfillment quantity', 'advanced-order-manager-for-woocommerce' ),
-			esc_html__( 'Cancel fulfillment edit', 'advanced-order-manager-for-woocommerce' )
+			esc_html__( 'Save fulfillment quantity', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
+			esc_html__( 'Cancel fulfillment edit', 'out-the-door-order-tasks-workflows-for-woocommerce' )
 		);
 		$edit_html        = sprintf(
 			'<div class="edit" style="display:none;">%s%s</div>',
@@ -382,7 +382,7 @@ final class Screen {
 			'%1$d / %2$d %3$s',
 			$shipped_quantity,
 			$total_quantity,
-			esc_html__( 'fulfilled', 'advanced-order-manager-for-woocommerce' )
+			esc_html__( 'fulfilled', 'out-the-door-order-tasks-workflows-for-woocommerce' )
 		);
 
 
@@ -472,7 +472,7 @@ final class Screen {
 		) {
 			wp_send_json_error(
 				array(
-					'message' => esc_html__( 'Security verification failed.', 'advanced-order-manager-for-woocommerce' ),
+					'message' => esc_html__( 'Security verification failed.', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
 				)
 			);
 		}
@@ -481,7 +481,7 @@ final class Screen {
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
 			wp_send_json_error(
 				array(
-					'message' => esc_html__( 'You do not have permission to perform this action.', 'advanced-order-manager-for-woocommerce' ),
+					'message' => esc_html__( 'You do not have permission to perform this action.', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
 				)
 			);
 		}
@@ -494,7 +494,7 @@ final class Screen {
 		if ( $item_id <= 0 ) {
 			wp_send_json_error(
 				array(
-					'message' => esc_html__( 'Invalid item ID.', 'advanced-order-manager-for-woocommerce' ),
+					'message' => esc_html__( 'Invalid item ID.', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
 				)
 			);
 		}
@@ -504,7 +504,7 @@ final class Screen {
 		if ( ! $order_item ) {
 			wp_send_json_error(
 				array(
-					'message' => esc_html__( 'Order item not found.', 'advanced-order-manager-for-woocommerce' ),
+					'message' => esc_html__( 'Order item not found.', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
 				)
 			);
 		}
@@ -515,7 +515,7 @@ final class Screen {
 				array(
 					'message' => sprintf(
 						/* translators: %d: total quantity */
-						esc_html__( 'Fulfillment quantity cannot exceed %d.', 'advanced-order-manager-for-woocommerce' ),
+						esc_html__( 'Fulfillment quantity cannot exceed %d.', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
 						$total_quantity
 					),
 				)
@@ -532,7 +532,7 @@ final class Screen {
 		if ( null === $saved_fulfillment_id ) {
 			wp_send_json_error(
 				array(
-					'message' => esc_html__( 'Failed to save fulfillment quantity.', 'advanced-order-manager-for-woocommerce' ),
+					'message' => esc_html__( 'Failed to save fulfillment quantity.', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
 				)
 			);
 		}
@@ -558,7 +558,7 @@ final class Screen {
 			$order->add_order_note(
 				sprintf(
 					/* translators: 1: product name, 2: fulfilled quantity, 3: total quantity */
-					esc_html__( 'Fulfillment updated for "%1$s": %2$d of %3$d fulfilled.', 'advanced-order-manager-for-woocommerce' ),
+					esc_html__( 'Fulfillment updated for "%1$s": %2$d of %3$d fulfilled.', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
 					$order_item->get_name(),
 					$quantity,
 					$total_quantity
@@ -569,7 +569,7 @@ final class Screen {
 		// Return the updated HTML.
 		wp_send_json_success(
 			array(
-				'message'        => esc_html__( 'Fulfillment quantity saved successfully.', 'advanced-order-manager-for-woocommerce' ),
+				'message'        => esc_html__( 'Fulfillment quantity saved successfully.', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
 				'html'           => $this->get_fulfillment_status_html( $fulfillment_status, $quantity, $total_quantity ),
 				'fulfillment_id' => $saved_fulfillment_id,
 			)

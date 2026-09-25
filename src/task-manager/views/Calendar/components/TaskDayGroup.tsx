@@ -19,7 +19,7 @@ const TaskDayGroup: React.FC<TaskDayGroupProps> = ({
 
 	const dayLabel = date
 		? date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-		: __('No due date', 'advanced-order-manager-for-woocommerce');
+		: __('No due date', 'out-the-door-order-tasks-workflows-for-woocommerce');
 
 	const weekdayLabel = date
 		? date.toLocaleDateString(undefined, { weekday: 'long' })
@@ -45,7 +45,7 @@ const TaskDayGroup: React.FC<TaskDayGroupProps> = ({
 								className="task-info th-sortable"
 								onClick={() => handleSort('title')}
 							>
-								{__('Task', 'advanced-order-manager-for-woocommerce')}{' '}
+								{__('Task', 'out-the-door-order-tasks-workflows-for-woocommerce')}{' '}
 								<SortIcon
 									column="title"
 									sortColumn={sortColumn}
@@ -56,7 +56,7 @@ const TaskDayGroup: React.FC<TaskDayGroupProps> = ({
 								className="task-priority th-sortable"
 								onClick={() => handleSort('priority')}
 							>
-								{__('Priority', 'advanced-order-manager-for-woocommerce')}{' '}
+								{__('Priority', 'out-the-door-order-tasks-workflows-for-woocommerce')}{' '}
 								<SortIcon
 									column="priority"
 									sortColumn={sortColumn}
@@ -67,7 +67,7 @@ const TaskDayGroup: React.FC<TaskDayGroupProps> = ({
 								className="task-status th-sortable"
 								onClick={() => handleSort('status')}
 							>
-								{__('Status', 'advanced-order-manager-for-woocommerce')}{' '}
+								{__('Status', 'out-the-door-order-tasks-workflows-for-woocommerce')}{' '}
 								<SortIcon
 									column="status"
 									sortColumn={sortColumn}
@@ -75,13 +75,13 @@ const TaskDayGroup: React.FC<TaskDayGroupProps> = ({
 								/>
 							</th>
 							<th className="task-due-date">
-								{__('Due', 'advanced-order-manager-for-woocommerce')}
+								{__('Due', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 							</th>
 							<th
 								className="task-done-date th-sortable"
 								onClick={() => handleSort('doneDate')}
 							>
-								{__('Done', 'advanced-order-manager-for-woocommerce')}
+								{__('Done', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 								<SortIcon
 									column="doneDate"
 									sortColumn={sortColumn}
@@ -89,7 +89,7 @@ const TaskDayGroup: React.FC<TaskDayGroupProps> = ({
 								/>
 							</th>
 							<th className="task-actions">
-								{__('Actions', 'advanced-order-manager-for-woocommerce')}
+								{__('Actions', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 							</th>
 						</tr>
 					</thead>

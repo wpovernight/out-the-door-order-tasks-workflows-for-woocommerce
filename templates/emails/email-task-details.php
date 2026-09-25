@@ -21,25 +21,25 @@ defined( 'ABSPATH' ) || exit;
 	<thead>
 		<tr>
 			<th class="td" scope="col" style="background-color: #f8f8f8; padding: 12px;">
-				<?php esc_html_e( 'Task Details', 'advanced-order-manager-for-woocommerce' ); ?>
+				<?php esc_html_e( 'Task Details', 'out-the-door-order-tasks-workflows-for-woocommerce' ); ?>
 			</th>
 		</tr>
 	</thead>
 	<tbody>
 		<tr>
 			<td class="td" style="padding: 12px;">
-				<strong><?php esc_html_e( 'Task ID:', 'advanced-order-manager-for-woocommerce' ); ?></strong> #<?php echo esc_html( $task_data['id'] ); ?>
+				<strong><?php esc_html_e( 'Task ID:', 'out-the-door-order-tasks-workflows-for-woocommerce' ); ?></strong> #<?php echo esc_html( $task_data['id'] ); ?>
 			</td>
 		</tr>
 		<tr>
 			<td class="td" style="padding: 12px;">
-				<strong><?php esc_html_e( 'Title:', 'advanced-order-manager-for-woocommerce' ); ?></strong> <?php echo esc_html( $task_data['title'] ); ?>
+				<strong><?php esc_html_e( 'Title:', 'out-the-door-order-tasks-workflows-for-woocommerce' ); ?></strong> <?php echo esc_html( $task_data['title'] ); ?>
 			</td>
 		</tr>
 		<?php if ( ! empty( $task_data['description'] ) ) : ?>
 		<tr>
 			<td class="td" style="padding: 12px;">
-				<strong><?php esc_html_e( 'Description:', 'advanced-order-manager-for-woocommerce' ); ?></strong><br>
+				<strong><?php esc_html_e( 'Description:', 'out-the-door-order-tasks-workflows-for-woocommerce' ); ?></strong><br>
 				<?php echo wp_kses_post( nl2br( $task_data['description'] ) ); ?>
 			</td>
 		</tr>

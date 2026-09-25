@@ -82,7 +82,7 @@ const ColumnPickerPhase: React.FC<ColumnPickerPhaseProps> = ({
 					}
 				>
 					<option value="">
-						{__('Select', 'advanced-order-manager-for-woocommerce')}
+						{__('Select', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 					</option>
 					{availableColumns.map((column) => (
 						<option key={column.id} value={column.id}>
@@ -138,14 +138,14 @@ const ChooseOperationPhase: React.FC<ChooseOperationPhaseProps> = ({
 			<h2>
 				{sprintf(
 					/* translators: %s: column label */
-					__('Delete "%s" column?', 'advanced-order-manager-for-woocommerce'),
+					__('Delete "%s" column?', 'out-the-door-order-tasks-workflows-for-woocommerce'),
 					columnLabel
 				)}
 			</h2>
 			<p>
 				{__(
 					'What would you like to do with the items currently inside it?',
-					'advanced-order-manager-for-woocommerce'
+					'out-the-door-order-tasks-workflows-for-woocommerce'
 				)}
 			</p>
 		</div>
@@ -156,7 +156,7 @@ const ChooseOperationPhase: React.FC<ChooseOperationPhaseProps> = ({
 					className="wpo-button wpo-button-primary action-delete"
 					onClick={onDeleteEverything}
 				>
-					{__('Delete everything', 'advanced-order-manager-for-woocommerce')}
+					{__('Delete everything', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 				</button>
 			</li>
 			<li>
@@ -165,12 +165,12 @@ const ChooseOperationPhase: React.FC<ChooseOperationPhaseProps> = ({
 					className="wpo-button action-move"
 					onClick={onMoveItems}
 				>
-					{__('Move items', 'advanced-order-manager-for-woocommerce')}
+					{__('Move items', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 				</button>
 			</li>
 			<li>
 				<button type="button" className="wpo-button" onClick={onCancel}>
-					{__('Cancel', 'advanced-order-manager-for-woocommerce')}
+					{__('Cancel', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 				</button>
 			</li>
 		</ul>
@@ -205,13 +205,13 @@ const ProcessingPhase: React.FC<ProcessingPhaseProps> = ({
 				<h2>
 					{__(
 						'We are currently moving your items',
-						'advanced-order-manager-for-woocommerce'
+						'out-the-door-order-tasks-workflows-for-woocommerce'
 					)}
 				</h2>
 				<p>
 					{__(
 						'This might take a while, depending on the number of items that need to be moved.',
-						'advanced-order-manager-for-woocommerce'
+						'out-the-door-order-tasks-workflows-for-woocommerce'
 					)}
 				</p>
 				<label id="delete-progress" htmlFor="delete-progress">
@@ -219,7 +219,7 @@ const ProcessingPhase: React.FC<ProcessingPhaseProps> = ({
 						{percent}%
 					</progress>
 					<span className="screen-reader-text">
-						{__('Progress', 'advanced-order-manager-for-woocommerce')}
+						{__('Progress', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 					</span>
 					{percent}%
 				</label>
@@ -233,8 +233,8 @@ const ProcessingPhase: React.FC<ProcessingPhaseProps> = ({
 						disabled={canceling}
 					>
 						{canceling
-							? __('Canceling…', 'advanced-order-manager-for-woocommerce')
-							: __('Cancel', 'advanced-order-manager-for-woocommerce')}
+							? __('Canceling…', 'out-the-door-order-tasks-workflows-for-woocommerce')
+							: __('Cancel', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 					</button>
 				</li>
 			</ul>
@@ -255,13 +255,13 @@ const ErrorPhase: React.FC<ErrorPhaseProps> = ({
 }) => (
 	<>
 		<div className="dialog-content">
-			<h2>{__('Something went wrong', 'advanced-order-manager-for-woocommerce')}</h2>
+			<h2>{__('Something went wrong', 'out-the-door-order-tasks-workflows-for-woocommerce')}</h2>
 			<p>{message}</p>
 		</div>
 		<ul className="dialog-actions dialog-actions-horizontal">
 			<li>
 				<button type="button" className="wpo-button" onClick={onClose}>
-					{__('Close', 'advanced-order-manager-for-woocommerce')}
+					{__('Close', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 				</button>
 			</li>
 			<li>
@@ -270,7 +270,7 @@ const ErrorPhase: React.FC<ErrorPhaseProps> = ({
 					className="wpo-button wpo-button-primary"
 					onClick={onRetry}
 				>
-					{__('Retry', 'advanced-order-manager-for-woocommerce')}
+					{__('Retry', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 				</button>
 			</li>
 		</ul>
@@ -443,7 +443,7 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 			setErrorMessage(
 				extractErrorMessage(
 					error,
-					__('Failed to delete the column.', 'advanced-order-manager-for-woocommerce')
+					__('Failed to delete the column.', 'out-the-door-order-tasks-workflows-for-woocommerce')
 				)
 			);
 			setPhase('error');
@@ -473,7 +473,7 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 					error,
 					__(
 						'Failed to move items and delete the column.',
-						'advanced-order-manager-for-woocommerce'
+						'out-the-door-order-tasks-workflows-for-woocommerce'
 					)
 				)
 			);
@@ -491,13 +491,13 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 		}
 
 		const confirmed = await confirm({
-			title: __('Delete everything?', 'advanced-order-manager-for-woocommerce'),
+			title: __('Delete everything?', 'out-the-door-order-tasks-workflows-for-woocommerce'),
 			message: __(
 				'Are you sure you want to delete this column and all the items inside it? This action cannot be undone.',
-				'advanced-order-manager-for-woocommerce'
+				'out-the-door-order-tasks-workflows-for-woocommerce'
 			),
-			confirmText: __('Delete', 'advanced-order-manager-for-woocommerce'),
-			cancelText: __('Cancel', 'advanced-order-manager-for-woocommerce'),
+			confirmText: __('Delete', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+			cancelText: __('Cancel', 'out-the-door-order-tasks-workflows-for-woocommerce'),
 			action: 'delete',
 		});
 
@@ -566,7 +566,7 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 					throw new Error(
 						__(
 							'No destination column was selected.',
-							'advanced-order-manager-for-woocommerce'
+							'out-the-door-order-tasks-workflows-for-woocommerce'
 						)
 					);
 				}
@@ -587,7 +587,7 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 					error,
 					__(
 						'Failed to reassign the role and delete the column.',
-						'advanced-order-manager-for-woocommerce'
+						'out-the-door-order-tasks-workflows-for-woocommerce'
 					)
 				)
 			);
@@ -632,7 +632,7 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 							/* translators: %s: column label */
 							__(
 								'Move items from "%s"?',
-								'advanced-order-manager-for-woocommerce'
+								'out-the-door-order-tasks-workflows-for-woocommerce'
 							),
 							column.label
 						)}
@@ -640,22 +640,22 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 							/* translators: %s: column label */
 							__(
 								'Where would you like to move the items currently in this column? Once the items are reassigned, the "%s" column will be permanently deleted.',
-								'advanced-order-manager-for-woocommerce'
+								'out-the-door-order-tasks-workflows-for-woocommerce'
 							),
 							column.label
 						)}
-						fieldLabel={__('Destination', 'advanced-order-manager-for-woocommerce')}
+						fieldLabel={__('Destination', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 						availableColumns={availableColumnsToMove}
 						selectedOptionId={moveTargetOptionId}
 						onSelectionChange={setMoveTargetOptionId}
 						primaryActionLabel={
 							needsRoleSelection
-								? __('Continue', 'advanced-order-manager-for-woocommerce')
-								: __('Move & delete', 'advanced-order-manager-for-woocommerce')
+								? __('Continue', 'out-the-door-order-tasks-workflows-for-woocommerce')
+								: __('Move & delete', 'out-the-door-order-tasks-workflows-for-woocommerce')
 						}
 						secondaryActionLabel={__(
 							'Cancel',
-							'advanced-order-manager-for-woocommerce'
+							'out-the-door-order-tasks-workflows-for-woocommerce'
 						)}
 						onPrimaryAction={handleMovePickerConfirmation}
 						onSecondaryAction={onClose}
@@ -666,8 +666,8 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 				// One translatable label per role. Adding a role to StatusRoles
 				// means adding one line here — the only role-aware spot left.
 				const roleLabels: Record<keyof StatusRoles, string> = {
-					done: __('done', 'advanced-order-manager-for-woocommerce'),
-					undone: __('undone', 'advanced-order-manager-for-woocommerce'),
+					done: __('done', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+					undone: __('undone', 'out-the-door-order-tasks-workflows-for-woocommerce'),
 				};
 				const roleLabel = attachedRole
 					? roleLabels[attachedRole]
@@ -675,28 +675,28 @@ export const DeleteColumnDialog: React.FC<DeleteColumnDialogProps> = ({
 
 				return (
 					<ColumnPickerPhase
-						title={__('Reassign role?', 'advanced-order-manager-for-woocommerce')}
+						title={__('Reassign role?', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 						description={sprintf(
 							/* translators: 1: column label being deleted, 2: role name ("done" or "undone") */
 							__(
 								'You are deleting your "%1$s" column. Which column should we use to mark tasks as "%2$s" from now on?',
-								'advanced-order-manager-for-woocommerce'
+								'out-the-door-order-tasks-workflows-for-woocommerce'
 							),
 							column.label,
 							roleLabel
 						)}
-						fieldLabel={__('Column', 'advanced-order-manager-for-woocommerce')}
+						fieldLabel={__('Column', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 						availableColumns={availableColumnsForRoleReassign}
 						selectedOptionId={roleTargetOptionId}
 						onSelectionChange={setRoleTargetOptionId}
 						primaryActionLabel={__(
 							'Save & delete',
-							'advanced-order-manager-for-woocommerce'
+							'out-the-door-order-tasks-workflows-for-woocommerce'
 						)}
 						secondaryActionLabel={
 							directRoleAssignment
-								? __('Cancel', 'advanced-order-manager-for-woocommerce')
-								: __('Back', 'advanced-order-manager-for-woocommerce')
+								? __('Cancel', 'out-the-door-order-tasks-workflows-for-woocommerce')
+								: __('Back', 'out-the-door-order-tasks-workflows-for-woocommerce')
 						}
 						onPrimaryAction={handleRoleReassignConfirmation}
 						onSecondaryAction={

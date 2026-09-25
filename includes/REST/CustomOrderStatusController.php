@@ -120,7 +120,7 @@ class CustomOrderStatusController extends BaseRestController {
 		) );
 
 		if ( ! empty( $errors ) ) {
-			return new WP_Error( 'invalid_data', __( 'Invalid data provided', 'advanced-order-manager-for-woocommerce' ), array(
+			return new WP_Error( 'invalid_data', __( 'Invalid data provided', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array(
 				'status' => 400,
 				'errors' => $errors
 			) );
@@ -149,14 +149,14 @@ class CustomOrderStatusController extends BaseRestController {
 		$id = (int) $request->get_param( 'id' );
 
 		if ( $id <= 0 ) {
-			return new WP_Error( 'invalid_id', __( 'Invalid ID provided', 'advanced-order-manager-for-woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( 'invalid_id', __( 'Invalid ID provided', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$custom_order_status_service = $this->custom_order_status_service;
 		$status                      = $custom_order_status_service->find( $id );
 
 		if ( ! $status ) {
-			return new WP_Error( 'not_found', __( 'Custom order status not found', 'advanced-order-manager-for-woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'not_found', __( 'Custom order status not found', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		return $this->respond( $status );
@@ -173,7 +173,7 @@ class CustomOrderStatusController extends BaseRestController {
 		$id = (int) $request->get_param( 'id' );
 
 		if ( $id <= 0 ) {
-			return new WP_Error( 'invalid_id', __( 'Invalid ID provided', 'advanced-order-manager-for-woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( 'invalid_id', __( 'Invalid ID provided', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$data = $request->get_json_params();
@@ -186,7 +186,7 @@ class CustomOrderStatusController extends BaseRestController {
 		) );
 
 		if ( ! empty( $errors ) ) {
-			return new WP_Error( 'invalid_data', __( 'Invalid data provided', 'advanced-order-manager-for-woocommerce' ), array(
+			return new WP_Error( 'invalid_data', __( 'Invalid data provided', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array(
 				'status' => 400,
 				'errors' => $errors
 			) );
@@ -217,7 +217,7 @@ class CustomOrderStatusController extends BaseRestController {
 		$id = (int) $request->get_param( 'id' );
 
 		if ( $id <= 0 ) {
-			return new WP_Error( 'invalid_id', __( 'Invalid ID provided', 'advanced-order-manager-for-woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( 'invalid_id', __( 'Invalid ID provided', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$custom_order_status_service = $this->custom_order_status_service;
@@ -231,7 +231,7 @@ class CustomOrderStatusController extends BaseRestController {
 
 		return $this->respond( array(
 			'success' => true,
-			'message' => __( 'Custom order status deleted successfully', 'advanced-order-manager-for-woocommerce' )
+			'message' => __( 'Custom order status deleted successfully', 'out-the-door-order-tasks-workflows-for-woocommerce' )
 		) );
 	}
 }

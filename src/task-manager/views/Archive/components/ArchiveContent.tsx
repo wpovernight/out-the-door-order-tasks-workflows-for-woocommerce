@@ -36,7 +36,7 @@ export const ArchiveContent: React.FC = () => {
 					<p>
 						{__(
 							'No archived tasks found.',
-							'advanced-order-manager-for-woocommerce'
+							'out-the-door-order-tasks-workflows-for-woocommerce'
 						)}
 					</p>
 				</div>
@@ -52,7 +52,7 @@ export const ArchiveContent: React.FC = () => {
 										className="task-info th-sortable"
 										onClick={() => handleSort('title')}
 									>
-										{__('Task', 'advanced-order-manager-for-woocommerce')}{' '}
+										{__('Task', 'out-the-door-order-tasks-workflows-for-woocommerce')}{' '}
 										<SortIcon
 											column="title"
 											sortColumn={sortColumn}
@@ -65,7 +65,7 @@ export const ArchiveContent: React.FC = () => {
 									>
 										{__(
 											'Order ID',
-											'advanced-order-manager-for-woocommerce'
+											'out-the-door-order-tasks-workflows-for-woocommerce'
 										)}{' '}
 										<SortIcon
 											column="orderID"
@@ -81,7 +81,7 @@ export const ArchiveContent: React.FC = () => {
 									>
 										{__(
 											'Customer',
-											'advanced-order-manager-for-woocommerce'
+											'out-the-door-order-tasks-workflows-for-woocommerce'
 										)}{' '}
 										<SortIcon
 											column="customerName"
@@ -93,7 +93,7 @@ export const ArchiveContent: React.FC = () => {
 										className="task-done-date th-sortable"
 										onClick={() => handleSort('doneDate')}
 									>
-										{__('Done', 'advanced-order-manager-for-woocommerce')}{' '}
+										{__('Done', 'out-the-door-order-tasks-workflows-for-woocommerce')}{' '}
 										<SortIcon
 											column="doneDate"
 											sortColumn={sortColumn}
@@ -108,7 +108,7 @@ export const ArchiveContent: React.FC = () => {
 									>
 										{__(
 											'Archived Date',
-											'advanced-order-manager-for-woocommerce'
+											'out-the-door-order-tasks-workflows-for-woocommerce'
 										)}{' '}
 										<SortIcon
 											column="archivedDate"
@@ -119,7 +119,7 @@ export const ArchiveContent: React.FC = () => {
 									<th className="task-actions">
 										{__(
 											'Actions',
-											'advanced-order-manager-for-woocommerce'
+											'out-the-door-order-tasks-workflows-for-woocommerce'
 										)}
 									</th>
 								</tr>
@@ -138,14 +138,14 @@ export const ArchiveContent: React.FC = () => {
 							onClick={() => setCurrentPage((p) => p - 1)}
 							disabled={currentPage === 1}
 						>
-							{__('Previous', 'advanced-order-manager-for-woocommerce')}
+							{__('Previous', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 						</button>
 						<span>
 							{sprintf(
 								/* translators: 1: current page, 2: total pages */
 								__(
 									'Page %1$d of %2$d',
-									'advanced-order-manager-for-woocommerce'
+									'out-the-door-order-tasks-workflows-for-woocommerce'
 								),
 								currentPage,
 								totalPages
@@ -156,7 +156,7 @@ export const ArchiveContent: React.FC = () => {
 							onClick={() => setCurrentPage((page) => page + 1)}
 							disabled={currentPage === totalPages}
 						>
-							{__('Next', 'advanced-order-manager-for-woocommerce')}
+							{__('Next', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 						</button>
 					</div>
 				</>

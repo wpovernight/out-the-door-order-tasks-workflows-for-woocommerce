@@ -201,13 +201,13 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 
 	const handleDeleteClick = async () => {
 		const confirmationResult = await confirm({
-			title: __('Delete this task?', 'advanced-order-manager-for-woocommerce'),
+			title: __('Delete this task?', 'out-the-door-order-tasks-workflows-for-woocommerce'),
 			message: __(
 				'Are you sure you want to delete this task? This action cannot be undone.',
-				'advanced-order-manager-for-woocommerce'
+				'out-the-door-order-tasks-workflows-for-woocommerce'
 			),
-			confirmText: __('Delete', 'advanced-order-manager-for-woocommerce'),
-			cancelText: __('Cancel', 'advanced-order-manager-for-woocommerce'),
+			confirmText: __('Delete', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+			cancelText: __('Cancel', 'out-the-door-order-tasks-workflows-for-woocommerce'),
 			action: 'delete',
 		});
 
@@ -278,7 +278,7 @@ export const Card: React.FC<CardProps> = ({ task }) => {
 					return updated;
 				});
 			},
-			title: `${__('Edit Task', 'advanced-order-manager-for-woocommerce')}: ${task.title}`,
+			title: `${__('Edit Task', 'out-the-door-order-tasks-workflows-for-woocommerce')}: ${task.title}`,
 		});
 	};
 

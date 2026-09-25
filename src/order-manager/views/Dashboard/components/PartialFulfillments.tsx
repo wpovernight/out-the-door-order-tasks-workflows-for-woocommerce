@@ -78,7 +78,7 @@ export const PartialFulfillments = ({
 				<h3>
 					{__(
 						'Partially shipped fulfillments',
-						'advanced-order-manager-for-woocommerce'
+						'out-the-door-order-tasks-workflows-for-woocommerce'
 					)}
 				</h3>
 			</div>
@@ -93,7 +93,7 @@ export const PartialFulfillments = ({
 							error.message ||
 							__(
 								'Error loading fulfillments. Please try again.',
-								'advanced-order-manager-for-woocommerce'
+								'out-the-door-order-tasks-workflows-for-woocommerce'
 							)
 						}
 					/>
@@ -103,7 +103,7 @@ export const PartialFulfillments = ({
 						icon="box"
 						message={__(
 							'No partially shipped orders.',
-							'advanced-order-manager-for-woocommerce'
+							'out-the-door-order-tasks-workflows-for-woocommerce'
 						)}
 					/>
 				)}
@@ -141,12 +141,12 @@ export const PartialFulfillments = ({
 													{order.customer_name ||
 														__(
 															'Guest',
-															'advanced-order-manager-for-woocommerce'
+															'out-the-door-order-tasks-workflows-for-woocommerce'
 														)}{' '}
 													&bull;{' '}
 													{__(
 														'Order',
-														'advanced-order-manager-for-woocommerce'
+														'out-the-door-order-tasks-workflows-for-woocommerce'
 													)}{' '}
 													#{order.order_id}{' '}
 													<span className="wpo-count-badge">
@@ -220,7 +220,7 @@ export const PartialFulfillments = ({
 																{item.quantity}{' '}
 																{__(
 																	'fulfilled',
-																	'advanced-order-manager-for-woocommerce'
+																	'out-the-door-order-tasks-workflows-for-woocommerce'
 																)}
 															</span>
 														</div>
@@ -251,7 +251,7 @@ export const PartialFulfillments = ({
 							href="edit.php?post_type=shop_order"
 							className="wpo-button view-all-link"
 						>
-							{__('View all orders', 'advanced-order-manager-for-woocommerce')}
+							{__('View all orders', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 						</a>
 					</div>
 				)

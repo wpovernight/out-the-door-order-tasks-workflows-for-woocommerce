@@ -33,7 +33,7 @@ export const CalendarView: React.FC = () => {
 			<div className="error-message">
 				{__(
 					'Error loading tasks. Please try again.',
-					'advanced-order-manager-for-woocommerce'
+					'out-the-door-order-tasks-workflows-for-woocommerce'
 				)}
 			</div>
 		);
@@ -42,7 +42,7 @@ export const CalendarView: React.FC = () => {
 	return (
 		<>
 			<h3 className="screen-reader-text">
-				{__('Task Calendar', 'advanced-order-manager-for-woocommerce')}
+				{__('Task Calendar', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 			</h3>
 			<ViewTaskProvider>
 				<CalendarContent />

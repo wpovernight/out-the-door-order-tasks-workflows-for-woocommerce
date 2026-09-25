@@ -26,7 +26,7 @@ Advanced Order Manager extends WooCommerce's order management with a flexible ta
 
 == Installation ==
 
-1. Upload the plugin files to `/wp-content/plugins/advanced-order-manager-for-woocommerce`, or install through the WordPress Plugins screen directly.
+1. Upload the plugin files to `/wp-content/plugins/out-the-door-order-tasks-workflows-for-woocommerce`, or install through the WordPress Plugins screen directly.
 2. Activate the plugin through the *Plugins* screen in WordPress.
 3. Make sure WooCommerce 8.2 or later is installed and active.
 

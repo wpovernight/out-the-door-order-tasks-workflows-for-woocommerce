@@ -61,13 +61,13 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 		}
 
 		return await confirm({
-			title: __('Save your changes?', 'advanced-order-manager-for-woocommerce'),
+			title: __('Save your changes?', 'out-the-door-order-tasks-workflows-for-woocommerce'),
 			message: __(
 				'You have unsaved work. Discarding will permanently erase your recent edits.',
-				'advanced-order-manager-for-woocommerce'
+				'out-the-door-order-tasks-workflows-for-woocommerce'
 			),
-			confirmText: __('Discard', 'advanced-order-manager-for-woocommerce'),
-			cancelText: __('Keep editing', 'advanced-order-manager-for-woocommerce'),
+			confirmText: __('Discard', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+			cancelText: __('Keep editing', 'out-the-door-order-tasks-workflows-for-woocommerce'),
 			action: 'save',
 			invertActions: true,
 		});
@@ -166,11 +166,11 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				title: isUpdate
 					? __(
 							'The task has been successfully updated.',
-							'advanced-order-manager-for-woocommerce'
+							'out-the-door-order-tasks-workflows-for-woocommerce'
 						)
 					: __(
 							'A new task has been successfully created.',
-							'advanced-order-manager-for-woocommerce'
+							'out-the-door-order-tasks-workflows-for-woocommerce'
 						),
 				type: ToastType.SUCCESS,
 			});
@@ -179,12 +179,12 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 			console.error('Failed to save task:', error);
 			addToast({
 				title: isUpdate
-					? __('Failed to update task.', 'advanced-order-manager-for-woocommerce')
-					: __('Failed to create task.', 'advanced-order-manager-for-woocommerce'),
+					? __('Failed to update task.', 'out-the-door-order-tasks-workflows-for-woocommerce')
+					: __('Failed to create task.', 'out-the-door-order-tasks-workflows-for-woocommerce'),
 				message:
 					error instanceof Error && error.message
 						? error.message
-						: __('Please try again.', 'advanced-order-manager-for-woocommerce'),
+						: __('Please try again.', 'out-the-door-order-tasks-workflows-for-woocommerce'),
 				type: ToastType.ERROR,
 			});
 		} finally {
@@ -210,7 +210,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 			<div className="error-message">
 				{__(
 					'Error loading data. Please try again.',
-					'advanced-order-manager-for-woocommerce'
+					'out-the-door-order-tasks-workflows-for-woocommerce'
 				)}
 			</div>
 		);
@@ -278,10 +278,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				<div className="field-group">
 					<div>
 						<label htmlFor="status">
-							{__('Status', 'advanced-order-manager-for-woocommerce')}
+							{__('Status', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 						</label>
 						<FieldOptionDropdown
-							placeholder={__('Select', 'advanced-order-manager-for-woocommerce')}
+							placeholder={__('Select', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 							options={fieldOptions.status}
 							id="status"
 							name="field_status"
@@ -291,10 +291,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 					</div>
 					<div>
 						<label htmlFor="priority">
-							{__('Priority', 'advanced-order-manager-for-woocommerce')}
+							{__('Priority', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 						</label>
 						<FieldOptionDropdown
-							placeholder={__('Select', 'advanced-order-manager-for-woocommerce')}
+							placeholder={__('Select', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 							options={fieldOptions?.priority || []}
 							id="priority"
 							name="field_priority"
@@ -304,7 +304,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 					</div>
 					<div>
 						<label htmlFor="due-date">
-							{__('Due Date', 'advanced-order-manager-for-woocommerce')}
+							{__('Due Date', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 						</label>
 						<DatePicker
 							id="due-date"
@@ -317,7 +317,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				<div className="field-group">
 					<div>
 						<label htmlFor="title">
-							{__('Title', 'advanced-order-manager-for-woocommerce')}
+							{__('Title', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 						</label>
 						<input
 							id="title"
@@ -328,7 +328,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 							}
 							placeholder={__(
 								'Write a name for your task.',
-								'advanced-order-manager-for-woocommerce'
+								'out-the-door-order-tasks-workflows-for-woocommerce'
 							)}
 							required
 						/>
@@ -337,12 +337,12 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				<div className="field-group">
 					<div>
 						<label htmlFor="associated-orders">
-							{__('Associated Orders', 'advanced-order-manager-for-woocommerce')}
+							{__('Associated Orders', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 						</label>
 						<AsyncMultiSelectField
 							placeholder={__(
 								'Search orders by number, customer, address…',
-								'advanced-order-manager-for-woocommerce'
+								'out-the-door-order-tasks-workflows-for-woocommerce'
 							)}
 							selectedOptions={associatedOrderIds}
 							id="associated-orders"
@@ -370,7 +370,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				<div className="field-group">
 					<div>
 						<label htmlFor="description">
-							{__('Description', 'advanced-order-manager-for-woocommerce')}
+							{__('Description', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 						</label>
 						<textarea
 							id="description"
@@ -378,7 +378,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 							rows={6}
 							placeholder={__(
 								'Describe the task.',
-								'advanced-order-manager-for-woocommerce'
+								'out-the-door-order-tasks-workflows-for-woocommerce'
 							)}
 							defaultValue={
 								task
@@ -396,7 +396,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 					onClick={onDone}
 					disabled={isSubmitting}
 				>
-					{__('Cancel', 'advanced-order-manager-for-woocommerce')}
+					{__('Cancel', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 				</button>
 				<button
 					type="submit"
@@ -405,8 +405,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				>
 					{isSubmitting && <span className="wpo-aom-spinner"></span>}
 					{task
-						? __('Update Task', 'advanced-order-manager-for-woocommerce')
-						: __('Create Task', 'advanced-order-manager-for-woocommerce')}
+						? __('Update Task', 'out-the-door-order-tasks-workflows-for-woocommerce')
+						: __('Create Task', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 				</button>
 			</div>
 		</form>

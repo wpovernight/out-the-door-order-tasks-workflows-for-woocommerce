@@ -204,16 +204,16 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 		e.stopPropagation();
 
 		const confirmationResult = await confirm({
-			title: __('Archive this task?', 'advanced-order-manager-for-woocommerce'),
+			title: __('Archive this task?', 'out-the-door-order-tasks-workflows-for-woocommerce'),
 			message: createInterpolateElement(
 				__(
 					'Once archived, you can locate this task in the <strong>Task → Archive</strong> tab.',
-					'advanced-order-manager-for-woocommerce'
+					'out-the-door-order-tasks-workflows-for-woocommerce'
 				),
 				{ strong: <strong /> }
 			),
-			confirmText: __('Archive', 'advanced-order-manager-for-woocommerce'),
-			cancelText: __('Cancel', 'advanced-order-manager-for-woocommerce'),
+			confirmText: __('Archive', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+			cancelText: __('Cancel', 'out-the-door-order-tasks-workflows-for-woocommerce'),
 			action: 'archive',
 		});
 
@@ -242,10 +242,10 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 								e.stopPropagation();
 								onEditClick(task.id);
 							}}
-							title={__('Edit', 'advanced-order-manager-for-woocommerce')}
+							title={__('Edit', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 						>
 							<span className="screen-reader-text">
-								{__('Edit', 'advanced-order-manager-for-woocommerce')}
+								{__('Edit', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 							</span>
 						</button>
 					</li>
@@ -256,10 +256,10 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 							className="wpo-button wpo-button-icon task-archive"
 							type="button"
 							onClick={handleArchiveClick}
-							title={__('Archive', 'advanced-order-manager-for-woocommerce')}
+							title={__('Archive', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 						>
 							<span className="screen-reader-text">
-								{__('Archive', 'advanced-order-manager-for-woocommerce')}
+								{__('Archive', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 							</span>
 						</button>
 					</li>
@@ -280,11 +280,11 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 									isDone
 										? __(
 												'Mark as In Progress',
-												'advanced-order-manager-for-woocommerce'
+												'out-the-door-order-tasks-workflows-for-woocommerce'
 											)
 										: __(
 												'Mark as Done',
-												'advanced-order-manager-for-woocommerce'
+												'out-the-door-order-tasks-workflows-for-woocommerce'
 											)
 								}
 							>
@@ -292,11 +292,11 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 									{isDone
 										? __(
 												'Mark as In Progress',
-												'advanced-order-manager-for-woocommerce'
+												'out-the-door-order-tasks-workflows-for-woocommerce'
 											)
 										: __(
 												'Mark as Done',
-												'advanced-order-manager-for-woocommerce'
+												'out-the-door-order-tasks-workflows-for-woocommerce'
 											)}
 								</span>
 							</button>
@@ -311,10 +311,10 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 								e.stopPropagation();
 								onDeleteClick(task.id);
 							}}
-							title={__('Delete', 'advanced-order-manager-for-woocommerce')}
+							title={__('Delete', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 						>
 							<span className="screen-reader-text">
-								{__('Delete', 'advanced-order-manager-for-woocommerce')}
+								{__('Delete', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 							</span>
 						</button>
 					</li>
@@ -345,9 +345,9 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 							{isDone
 								? __(
 										'Mark as In Progress',
-										'advanced-order-manager-for-woocommerce'
+										'out-the-door-order-tasks-workflows-for-woocommerce'
 									)
-								: __('Mark as Done', 'advanced-order-manager-for-woocommerce')}
+								: __('Mark as Done', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 						</span>
 						<input
 							id={`task-finish-${task.id}`}

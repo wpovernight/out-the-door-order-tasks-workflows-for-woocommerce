@@ -14,7 +14,7 @@ jobs:
         run: |
           # process existing variables
           # The distributed plugin slug must not contain the restricted terms, like "wp"
-          PLUGIN_SLUG="advanced-order-manager-for-woocommerce"
+          PLUGIN_SLUG="out-the-door-order-tasks-workflows-for-woocommerce"
           TEXT_DOMAIN="$PLUGIN_SLUG"
           VERSION="${TAG_NAME#v}"
           ZIP_FILE_NAME=$PLUGIN_SLUG.$VERSION.zip

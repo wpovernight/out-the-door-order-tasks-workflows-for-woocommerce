@@ -20,48 +20,48 @@ interface DateParts {
 
 const DAYS_OF_WEEK = [
 	{
-		short: __('Mo', 'advanced-order-manager-for-woocommerce'),
-		full: __('Monday', 'advanced-order-manager-for-woocommerce'),
+		short: __('Mo', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+		full: __('Monday', 'out-the-door-order-tasks-workflows-for-woocommerce'),
 	},
 	{
-		short: __('Tu', 'advanced-order-manager-for-woocommerce'),
-		full: __('Tuesday', 'advanced-order-manager-for-woocommerce'),
+		short: __('Tu', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+		full: __('Tuesday', 'out-the-door-order-tasks-workflows-for-woocommerce'),
 	},
 	{
-		short: __('We', 'advanced-order-manager-for-woocommerce'),
-		full: __('Wednesday', 'advanced-order-manager-for-woocommerce'),
+		short: __('We', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+		full: __('Wednesday', 'out-the-door-order-tasks-workflows-for-woocommerce'),
 	},
 	{
-		short: __('Th', 'advanced-order-manager-for-woocommerce'),
-		full: __('Thursday', 'advanced-order-manager-for-woocommerce'),
+		short: __('Th', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+		full: __('Thursday', 'out-the-door-order-tasks-workflows-for-woocommerce'),
 	},
 	{
-		short: __('Fr', 'advanced-order-manager-for-woocommerce'),
-		full: __('Friday', 'advanced-order-manager-for-woocommerce'),
+		short: __('Fr', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+		full: __('Friday', 'out-the-door-order-tasks-workflows-for-woocommerce'),
 	},
 	{
-		short: __('Sa', 'advanced-order-manager-for-woocommerce'),
-		full: __('Saturday', 'advanced-order-manager-for-woocommerce'),
+		short: __('Sa', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+		full: __('Saturday', 'out-the-door-order-tasks-workflows-for-woocommerce'),
 	},
 	{
-		short: __('Su', 'advanced-order-manager-for-woocommerce'),
-		full: __('Sunday', 'advanced-order-manager-for-woocommerce'),
+		short: __('Su', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+		full: __('Sunday', 'out-the-door-order-tasks-workflows-for-woocommerce'),
 	},
 ];
 
 const MONTH_LABELS = [
-	__('Jan', 'advanced-order-manager-for-woocommerce'),
-	__('Feb', 'advanced-order-manager-for-woocommerce'),
-	__('Mar', 'advanced-order-manager-for-woocommerce'),
-	__('Apr', 'advanced-order-manager-for-woocommerce'),
-	__('May', 'advanced-order-manager-for-woocommerce'),
-	__('Jun', 'advanced-order-manager-for-woocommerce'),
-	__('Jul', 'advanced-order-manager-for-woocommerce'),
-	__('Aug', 'advanced-order-manager-for-woocommerce'),
-	__('Sep', 'advanced-order-manager-for-woocommerce'),
-	__('Oct', 'advanced-order-manager-for-woocommerce'),
-	__('Nov', 'advanced-order-manager-for-woocommerce'),
-	__('Dec', 'advanced-order-manager-for-woocommerce'),
+	__('Jan', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+	__('Feb', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+	__('Mar', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+	__('Apr', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+	__('May', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+	__('Jun', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+	__('Jul', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+	__('Aug', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+	__('Sep', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+	__('Oct', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+	__('Nov', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+	__('Dec', 'out-the-door-order-tasks-workflows-for-woocommerce'),
 ];
 
 function chunk<T>(items: T[], size: number): T[][] {
@@ -391,17 +391,17 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 				{selectedDate
 					? formatDisplayDate(selectedDate)
 					: placeholder ||
-						__('Date picker', 'advanced-order-manager-for-woocommerce')}
+						__('Date picker', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 			</button>
 			{selectedDate && (
 				<button
 					type="button"
 					className="wpo-button wpo-button-icon wpo-aom-datepicker-clear"
 					onClick={handleClear}
-					title={__('Clear date', 'advanced-order-manager-for-woocommerce')}
+					title={__('Clear date', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 				>
 					<span className="screen-reader-text">
-						{__('Clear date', 'advanced-order-manager-for-woocommerce')}
+						{__('Clear date', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 					</span>
 				</button>
 			)}
@@ -412,10 +412,10 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 							type="button"
 							className="wpo-button wpo-button-icon wpo-aom-datepicker-nav prev"
 							onClick={goPrevious}
-							title={__('Previous', 'advanced-order-manager-for-woocommerce')}
+							title={__('Previous', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 						>
 							<span className="screen-reader-text">
-								{__('Previous', 'advanced-order-manager-for-woocommerce')}
+								{__('Previous', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 							</span>
 						</button>
 						<button
@@ -430,10 +430,10 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 							type="button"
 							className="wpo-button wpo-button-icon wpo-aom-datepicker-nav next"
 							onClick={goNext}
-							title={__('Next', 'advanced-order-manager-for-woocommerce')}
+							title={__('Next', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 						>
 							<span className="screen-reader-text">
-								{__('Next', 'advanced-order-manager-for-woocommerce')}
+								{__('Next', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 							</span>
 						</button>
 					</div>
@@ -617,7 +617,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 								className="wpo-button cancel"
 								onClick={closePicker}
 							>
-								{__('Cancel', 'advanced-order-manager-for-woocommerce')}
+								{__('Cancel', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 							</button>
 						</li>
 						<li>
@@ -626,7 +626,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 								className="wpo-button wpo-button-primary today"
 								onClick={handleToday}
 							>
-								{__('Today', 'advanced-order-manager-for-woocommerce')}
+								{__('Today', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 							</button>
 						</li>
 					</ul>

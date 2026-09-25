@@ -29,7 +29,7 @@ export const ArchiveView: React.FC = () => {
 			<div className="error-message">
 				{__(
 					'Error loading tasks. Please try again.',
-					'advanced-order-manager-for-woocommerce'
+					'out-the-door-order-tasks-workflows-for-woocommerce'
 				)}
 			</div>
 		);
@@ -38,7 +38,7 @@ export const ArchiveView: React.FC = () => {
 	return (
 		<>
 			<h3 className="screen-reader-text">
-				{__('Task Archive', 'advanced-order-manager-for-woocommerce')}
+				{__('Task Archive', 'out-the-door-order-tasks-workflows-for-woocommerce')}
 			</h3>
 			<ViewTaskProvider>
 				<ArchiveContent />

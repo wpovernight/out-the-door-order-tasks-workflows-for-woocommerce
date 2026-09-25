@@ -4,9 +4,9 @@ import { applyFilters } from '@wordpress/hooks';
 import { useTab } from '@orderManager/context/TabContext';
 
 const coreTabLabels: Record<string, string> = {
-	dashboard: __('Dashboard', 'advanced-order-manager-for-woocommerce'),
-	'task-manager': __('Task Manager', 'advanced-order-manager-for-woocommerce'),
-	'custom-order-status': __('Custom Order Status', 'advanced-order-manager-for-woocommerce'),
+	dashboard: __('Dashboard', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+	'task-manager': __('Task Manager', 'out-the-door-order-tasks-workflows-for-woocommerce'),
+	'custom-order-status': __('Custom Order Status', 'out-the-door-order-tasks-workflows-for-woocommerce'),
 };
 
 export default function Header() {

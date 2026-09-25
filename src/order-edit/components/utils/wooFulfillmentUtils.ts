@@ -9,14 +9,14 @@ export const getShippingMethodLabel = (
 			return (
 				fulfillmentMeta.provider_name?.toUpperCase() ||
 				fulfillmentMeta.shipment_provider?.toUpperCase() ||
-				__('Tracking Number', 'advanced-order-manager-for-woocommerce')
+				__('Tracking Number', 'out-the-door-order-tasks-workflows-for-woocommerce')
 			);
 		case 'manual-entry':
-			return __('Manual Entry', 'advanced-order-manager-for-woocommerce');
+			return __('Manual Entry', 'out-the-door-order-tasks-workflows-for-woocommerce');
 		case 'no-info':
-			return __('No Info', 'advanced-order-manager-for-woocommerce');
+			return __('No Info', 'out-the-door-order-tasks-workflows-for-woocommerce');
 		default:
-			return __('Unknown', 'advanced-order-manager-for-woocommerce');
+			return __('Unknown', 'out-the-door-order-tasks-workflows-for-woocommerce');
 	}
 };
 
