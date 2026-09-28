@@ -12,7 +12,7 @@
  * Requires at least:    6.7
  * Requires PHP:         8.1
  * WC requires at least: 8.2
- * WC tested up to:      10.0
+ * WC tested up to:      11.1
  * Text Domain:          out-the-door-order-tasks-workflows-for-woocommerce
  * Domain Path:          /languages
  */
