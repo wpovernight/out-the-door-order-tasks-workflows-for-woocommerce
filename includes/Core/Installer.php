@@ -31,7 +31,7 @@ final class Installer {
 	 *
 	 * Deliberately decoupled from the plugin's version. Bump this by one whenever you add a migration.
 	 */
-	private const DB_VERSION = 2;
+	private const DB_VERSION = 1;
 
 	/**
 	 * Map of db schema version => array of migration method names (instance methods).
@@ -40,15 +40,7 @@ final class Installer {
 	 *
 	 * @var array<int, string[]>
 	 */
-	private const MIGRATIONS = array(
-		1 => array(
-			'migrate_apply_option_slug_unique_index', /** @uses migrate_apply_option_slug_unique_index() */
-			'migrate_seed_status_role_assignments', /** @uses migrate_seed_status_role_assignments() */
-		),
-		2 => array(
-			'migrate_apply_foreign_keys', /** @uses migrate_apply_foreign_keys() */
-		),
-	);
+	private const MIGRATIONS = array();
 
 	private readonly TaskFieldRepository $task_field_repository;
 	private readonly TaskFieldOptionRepository $task_field_option_repository;
@@ -642,86 +634,6 @@ final class Installer {
 	 * @return void
 	 */
 	private function seed_initial_state(): void {
-		$this->task_status_role_service->seed_default_role_assignments();
-	}
-
-	/**
-	 * Re-run create_tables() so dbDelta applies pending schema changes for the
-	 * beta.2 upgrade. Two changes ride along on this single dbDelta pass:
-	 *  - the new UNIQUE KEY on wpo_otd_task_field_options(field_id, slug), and
-	 *  - the new is_deleting column on wpo_otd_custom_statuses.
-	 *
-	 * Existing beta.1 installs only contain the seeded options (no public
-	 * create-option path existed), so seed data is already unique and no dedupe
-	 * is needed.
-	 *
-	 * @return void
-	 */
-	private function migrate_apply_option_slug_unique_index(): void {
-		self::create_tables();
-	}
-
-	/**
-	 * Apply the foreign keys that dbDelta never managed to create.
-	 *
-	 * @return void
-	 */
-	private function migrate_apply_foreign_keys(): void {
-		self::create_tables();
-		self::drop_legacy_status_key_index();
-	}
-
-	/**
-	 * Drop the auto-named unique index on wpo_otd_custom_statuses(status_key).
-	 *
-	 * @return void
-	 */
-	private static function drop_legacy_status_key_index(): void {
-		global $wpdb;
-
-		$table = $wpdb->prefix . 'wpo_otd_custom_statuses';
-
-		if ( ! self::has_index( $table, 'status_key_unique' ) || ! self::has_index( $table, 'status_key' ) ) {
-			return;
-		}
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Install-time schema change; $table is plugin-owned and cannot be bound as a prepared-statement placeholder.
-		$wpdb->query( "ALTER TABLE `{$table}` DROP INDEX `status_key`" );
-	}
-
-	/**
-	 * Check whether an index exists on a table.
-	 *
-	 * @param string $table Full table name.
-	 * @param string $index Index name.
-	 *
-	 * @return bool
-	 */
-	private static function has_index( string $table, string $index ): bool {
-		global $wpdb;
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Install-time schema introspection.
-		$count = $wpdb->get_var(
-			$wpdb->prepare(
-				'SELECT COUNT(*) FROM information_schema.STATISTICS
-				WHERE TABLE_SCHEMA = DATABASE()
-				AND TABLE_NAME = %s
-				AND INDEX_NAME = %s',
-				$table,
-				$index
-			)
-		);
-
-		return (int) $count > 0;
-	}
-
-	/**
-	 * Seed the default "done" / "undone" status role assignments for installs
-	 * that predate the role feature.
-	 *
-	 * @return void
-	 */
-	private function migrate_seed_status_role_assignments(): void {
 		$this->task_status_role_service->seed_default_role_assignments();
 	}
 
