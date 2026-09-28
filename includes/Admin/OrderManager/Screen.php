@@ -150,8 +150,8 @@ final class Screen {
 	public function add_screen(): void {
 		add_submenu_page(
 			'woocommerce',
-			esc_html__( 'Order Manager', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
-			esc_html__( 'Order Manager', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
+			esc_html__( 'Out the Door', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
+			esc_html__( 'Out the Door', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
 			'manage_woocommerce',
 			'wpo_otd_order_manager',
 			array( $this, 'render_page' )
