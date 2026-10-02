@@ -13,11 +13,11 @@
   "description": "Out the Door – Order Tasks & Workflows for WooCommerce: extends WooCommerce order management.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/wpovernight/wpo-advanced-order-manager.git"
+    "url": "https://github.com/wpovernight/out-the-door-order-tasks-workflows-for-woocommerce.git"
   },
-  "homepage": "https://github.com/wpovernight/wpo-advanced-order-manager#readme",
+  "homepage": "https://github.com/wpovernight/out-the-door-order-tasks-workflows-for-woocommerce#readme",
   "bugs": {
-    "url": "https://github.com/wpovernight/wpo-advanced-order-manager/issues"
+    "url": "https://github.com/wpovernight/out-the-door-order-tasks-workflows-for-woocommerce/issues"
   },
   "dependencies": {
     "@atlaskit/pragmatic-drag-and-drop": "^1.7.7",

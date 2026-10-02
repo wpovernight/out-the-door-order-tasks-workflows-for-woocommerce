@@ -32,7 +32,7 @@ Out the Door extends WooCommerce's order management with a flexible task system,
 
 == Where is the source code? ==
 
-All PHP ships as human-readable source. The admin interface is written in React/TypeScript and compiled with webpack. The complete, unminified source and the build tooling are available in the public repository at https://github.com/wpovernight/wpo-advanced-order-manager.
+All PHP ships as human-readable source. The admin interface is written in React/TypeScript and compiled with webpack. The complete, unminified source and the build tooling are available in the public repository at https://github.com/wpovernight/out-the-door-order-tasks-workflows-for-woocommerce.
 
 To build the compiled assets from source:
 
