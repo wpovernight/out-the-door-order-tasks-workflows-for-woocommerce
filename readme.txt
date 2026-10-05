@@ -5,7 +5,7 @@ Requires at least: 6.7
 Tested up to: 7.1
 Requires PHP: 8.1
 WC requires at least: 8.2
-WC tested up to: 10.0
+WC tested up to: 11.1
 Stable tag: 1.0.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -19,10 +19,10 @@ Out the Door extends WooCommerce's order management with a flexible task system,
 **Features**
 
 * Task management system attached to orders
-* Fulfillment workflow
+* Fulfillment workflow with a partial fulfillments overview
 * Custom order statuses
+* Email notifications when tasks are created or updated
 * REST API for tasks and order data
-* Built on a layered, service-oriented architecture
 
 == Installation ==
 
@@ -44,11 +44,4 @@ This regenerates the files in `assets/js/`. See the repository's readme for full
 == Changelog ==
 
 = 1.0.0 =
-* First release.
-* Task management system attached to orders, with a Kanban board for creating, renaming, reordering, and deleting columns.
-* Task status roles that map columns to done/undone states.
-* Fulfillment workflow, including a partial fulfillments overview.
-* Custom order statuses, with asynchronous batch deletion, progress feedback, and cancellation support.
-* REST API for tasks and order data, with pagination for large result sets.
-* Email notifications for created and updated tasks.
-* Built on a layered, service-oriented architecture with a PSR-11 service container.
+* Initial release.
