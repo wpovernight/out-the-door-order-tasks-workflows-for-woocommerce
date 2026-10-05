@@ -195,7 +195,9 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 				type="text"
 				id={id}
 				className={className}
-				name={name}
+				// No `name`: this is only a search box. Selections are submitted
+				// through the hidden `${name}[]` inputs below, so typed text that
+				// doesn't match an order is never saved.
 				placeholder={placeholder}
 				onFocus={handleInputFocus}
 				onChange={(e) => setQuery(e.target.value)}

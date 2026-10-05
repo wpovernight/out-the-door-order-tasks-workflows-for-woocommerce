@@ -111,26 +111,18 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 			const field = taskFields[fieldSlug];
 			const formFieldName = `field_${fieldSlugFormatted}`;
 
-			// For multiple value fields, try with [] suffix first
-			let rawValue: FormDataEntryValue[];
-			if (arrayInputs.includes(fieldSlug)) {
-				rawValue = formData.getAll(`${formFieldName}[]`);
-				// Fallback to without [] if nothing found
-				if (rawValue.length === 0) {
-					rawValue = formData.getAll(formFieldName);
-				}
-			} else {
-				rawValue = formData.getAll(formFieldName);
-			}
-
-			if (rawValue.length === 0) {
-				continue; // Skip if no value provided
-			}
-
 			let value: any;
 			if (arrayInputs.includes(fieldSlug)) {
-				value = rawValue;
+				// Multiple value fields are always sent, even when empty, so that
+				// removing every selection clears the stored values.
+				value = formData
+					.getAll(`${formFieldName}[]`)
+					.filter((entry) => entry !== '');
 			} else {
+				const rawValue = formData.getAll(formFieldName);
+				if (rawValue.length === 0) {
+					continue; // Skip if no value provided
+				}
 				value = rawValue[0];
 			}
 
@@ -397,11 +389,25 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 									query,
 									signal
 								);
-								return results.map((order) => ({
-									id: order.id,
-									label: `#${order.id}`,
-									searchLabel: `#${order.id} - ${order.billing?.first_name} ${order.billing?.last_name}`,
-								}));
+								return results.map((order) => {
+									const customerName =
+										[
+											order.billing?.first_name,
+											order.billing?.last_name,
+										]
+											.filter(Boolean)
+											.join(' ')
+											.trim() ||
+										order.billing?.company?.trim();
+
+									return {
+										id: order.id,
+										label: `#${order.id}`,
+										searchLabel: customerName
+											? `#${order.id} - ${customerName}`
+											: `#${order.id}`,
+									};
+								})
 							}}
 						/>
 					</div>
