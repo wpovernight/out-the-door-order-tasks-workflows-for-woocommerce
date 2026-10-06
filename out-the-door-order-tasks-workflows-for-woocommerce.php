@@ -2,7 +2,7 @@
 /**
  * Plugin Name:          Out the Door – Order Tasks & Workflows for WooCommerce
  * Requires Plugins:     woocommerce
- * Plugin URI:           https://wpovernight.com/downloads/out-the-door-order-tasks-workflows-for-woocommerce/
+ * Plugin URI:           https://wpovernight.com/out-the-door-order-tasks-workflows-for-woocommerce/
  * Description:          A powerful order management plugin for WooCommerce that enhances the order management experience with advanced features.
  * Author:               WP Overnight
  * Author URI:           https://www.wpovernight.com
