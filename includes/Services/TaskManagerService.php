@@ -535,6 +535,10 @@ final class TaskManagerService {
 		$result = $this->task_field_repository->delete( $field_id );
 
 		if ( $result ) {
+			// The field and, through the foreign key, its options are gone: drop any cached copies.
+			$this->task_field_repository::clear_cache();
+			$this->task_field_option_repository::clear_cache();
+
 			/**
 			 * Fires after a task field has been deleted.
 			 *
@@ -817,6 +821,8 @@ final class TaskManagerService {
 		$result = $this->task_field_option_repository->delete( $option_id );
 
 		if ( $result ) {
+			$this->task_field_option_repository::clear_cache();
+
 			/**
 			 * Fires after a field option has been deleted.
 			 *
