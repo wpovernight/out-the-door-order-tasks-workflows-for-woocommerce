@@ -37,6 +37,7 @@ phpunit.xml
 phpunit.xml.dist
 phpunit-unit.xml
 .phpunit.result.cache
+build/
 multisite.xml
 multisite.xml.dist
 .editorconfig

@@ -12,3 +12,7 @@
 # It harvests strings from the built assets/js/ bundles, so a hand-generated copy
 # only ever reflects whatever build happened to be on disk at the time.
 /languages/*.pot
+
+# Test artifacts — PHPUnit's result cache and the coverage reports from `composer test:coverage`.
+.phpunit.result.cache
+/build/

@@ -6,10 +6,50 @@
       "WPO\\OTD\\": "includes/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "WPO\\OTD\\Tests\\": "tests/"
+    }
+  },
   "require-dev": {
-    "php-stubs/wordpress-stubs": "^7.0"
+    "php-stubs/wordpress-stubs": "^7.0",
+    "phpunit/phpunit": "^9.6",
+    "yoast/phpunit-polyfills": "^4.0",
+    "wp-phpunit/wp-phpunit": "^7.1",
+    "brain/monkey": "^2.6",
+    "mockery/mockery": "^1.6",
+    "phpunit/phpcov": "^8.2"
   },
   "require": {
     "psr/container": "^2.0"
+  },
+  "scripts": {
+    "test": [
+      "@test:unit",
+      "@test:integration"
+    ],
+    "test:unit": "@php vendor/bin/phpunit -c phpunit-unit.xml",
+    "test:install": [
+      "Composer\\Config::disableProcessTimeout",
+      "@php tests/bin/install-wordpress.php"
+    ],
+    "test:integration": [
+      "Composer\\Config::disableProcessTimeout",
+      "@php vendor/bin/phpunit -c phpunit.xml.dist"
+    ],
+    "test:coverage": [
+      "Composer\\Config::disableProcessTimeout",
+      "@php -r \"array_map('unlink', glob('build/coverage/*.cov') ?: array());\"",
+      "@php vendor/bin/phpunit -c phpunit-unit.xml --coverage-php build/coverage/unit.cov",
+      "@php vendor/bin/phpunit -c phpunit.xml.dist --coverage-php build/coverage/integration.cov",
+      "@php vendor/bin/phpcov merge build/coverage --html build/coverage/html --clover build/coverage/clover.xml --text php://stdout"
+    ]
+  },
+  "scripts-descriptions": {
+    "test": "Run the unit suite, then the integration suite.",
+    "test:unit": "Run the unit tests. Fast, no WordPress or database needed.",
+    "test:install": "Download WordPress and WooCommerce into build/wordpress/ for the integration suite. Not needed when the plugin sits inside a WordPress site next to WooCommerce.",
+    "test:integration": "Run the integration tests against WordPress, WooCommerce and the wpo_otd_tests database (see tests/environment.php). Set WP_TESTS_HPOS=1 to store orders in HPOS tables.",
+    "test:coverage": "Run both suites with coverage and merge them into build/coverage/ (HTML + Clover). Needs Xdebug or PCOV."
   }
 }
