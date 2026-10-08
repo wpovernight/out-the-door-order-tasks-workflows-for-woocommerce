@@ -23,6 +23,13 @@ abstract class BaseRepository {
 	private array $joins = array();
 
 	/**
+	 * Tables joined into the current query, keyed by the alias (or table name) the query refers to them by.
+	 *
+	 * @var array<string, string>
+	 */
+	private array $joined_tables = array();
+
+	/**
 	 * Each where item is an array of:
 	 * [0] => string column
 	 * [1] => string operator
@@ -587,21 +594,25 @@ abstract class BaseRepository {
 	}
 
 	/**
-	 * Get column names from the table.
+	 * Get column names from a table.
 	 * This caches the column names to avoid repeated queries.
+	 *
+	 * @param string|null $table Full table name. Defaults to this repository's table.
 	 *
 	 * @return array
 	 */
-	protected function get_column_names(): array {
-		if ( isset( self::$column_names[ $this->table_name ] ) ) {
-			return self::$column_names[ $this->table_name ];
+	protected function get_column_names( ?string $table = null ): array {
+		$table ??= $this->get_table_full_name();
+
+		if ( isset( self::$column_names[ $table ] ) ) {
+			return self::$column_names[ $table ];
 		}
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Direct query is safe here as table name is validated internally and cannot be parameterized.
-		$columns = (array) $this->wpdb->get_col( "DESCRIBE {$this->get_table_full_name()}" );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table names cannot be parameterized; this one is the repository's own or one passed to join() by plugin code.
+		$columns = (array) $this->wpdb->get_col( "DESCRIBE {$table}" );
 		$columns = array_map( 'strtolower', $columns );
 
-		self::$column_names[ $this->table_name ] = $columns;
+		self::$column_names[ $table ] = $columns;
 
 		return $columns;
 	}
@@ -691,6 +702,13 @@ abstract class BaseRepository {
 		}
 
 		$this->joins[] = "{$type} JOIN {$table} ON {$on_condition}";
+
+		// Remember which table the alias refers to. Anything other than "table", "table alias" or
+		// "table AS alias" (a subquery, say) is not recorded: columns qualified with it are checked
+		// against this repository's table, as before.
+		if ( preg_match( '/^`?([\w$]+)`?(?:\s+(?:AS\s+)?`?([\w$]+)`?)?$/i', trim( $table ), $matches ) ) {
+			$this->joined_tables[ $matches[2] ?? $matches[1] ] = $matches[1];
+		}
 
 		return $this;
 	}
@@ -983,13 +1001,17 @@ abstract class BaseRepository {
 				$column = $parts[0];
 			}
 
-			// Handle table.column format.
+			// Handle table.column format. A qualifier naming a joined table is checked against that table.
+			$table = null;
+
 			if ( str_contains( $column, '.' ) ) {
-				$parts  = explode( '.', $column );
-				$column = end( $parts );
+				$parts     = explode( '.', $column );
+				$column    = array_pop( $parts );
+				$qualifier = end( $parts );
+				$table     = $this->joined_tables[ $qualifier ] ?? null;
 			}
 
-			if ( '*' !== $column && ! in_array( strtolower( $column ), $this->get_column_names(), true ) ) {
+			if ( '*' !== $column && ! in_array( strtolower( $column ), $this->get_column_names( $table ), true ) ) {
 				throw new InvalidArgumentException( esc_html( "Column $column does not exist in the table." ) );
 			}
 		}
@@ -1042,14 +1064,15 @@ abstract class BaseRepository {
 	 * @return void
 	 */
 	private function reset_query(): void {
-		$this->alias    = null;
-		$this->columns  = array( '*' );
-		$this->joins    = array();
-		$this->wheres   = array();
-		$this->bindings = array();
-		$this->order_by = '';
-		$this->limit    = 0;
-		$this->offset   = 0;
+		$this->alias         = null;
+		$this->columns       = array( '*' );
+		$this->joins         = array();
+		$this->joined_tables = array();
+		$this->wheres        = array();
+		$this->bindings      = array();
+		$this->order_by      = '';
+		$this->limit         = 0;
+		$this->offset        = 0;
 	}
 
 	/**
