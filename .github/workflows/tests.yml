@@ -1,0 +1,137 @@
+name: Tests
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '**.php'
+      - 'composer.json'
+      - 'composer.lock'
+      - 'phpunit*.xml*'
+      - 'tests/**'
+      - '.github/workflows/tests.yml'
+
+jobs:
+  unit:
+    name: Unit (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.1', '8.2', '8.3', '8.4', '8.5']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+
+      - name: Install Composer dependencies
+        uses: ramsey/composer-install@v3
+
+      - name: Run unit tests
+        run: composer test:unit
+
+  integration:
+    name: Integration (PHP ${{ matrix.php }}, orders in ${{ matrix.orders }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.1', '8.5']
+        orders: ['posts', 'hpos']
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      WP_TESTS_DB_PASSWORD: root
+      WP_TESTS_HPOS: ${{ matrix.orders == 'hpos' && '1' || '0' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mysqli, zip
+          coverage: none
+
+      - name: Install Composer dependencies
+        uses: ramsey/composer-install@v3
+
+      - name: Install WordPress and WooCommerce
+        run: composer test:install
+
+      - name: Run integration tests
+        run: composer test:integration
+
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      WP_TESTS_DB_PASSWORD: root
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mysqli, zip
+          coverage: pcov
+
+      - name: Install Composer dependencies
+        uses: ramsey/composer-install@v3
+
+      - name: Install WordPress and WooCommerce
+        run: composer test:install
+
+      - name: Run both suites with coverage
+        run: |
+          set -o pipefail
+          composer test:coverage | tee coverage.txt
+          {
+            echo '### Coverage'
+            echo '```'
+            sed -n '/Summary:/,/Lines:/p' coverage.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the HTML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html
+          path: build/coverage/html
