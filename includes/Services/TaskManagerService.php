@@ -1003,6 +1003,7 @@ final class TaskManagerService {
 	 *                                      Only should be used for internal operations like marking as done, not for general uses.
 	 *
 	 * @return float
+	 * @throws InvalidArgumentException If the task does not exist, or the placement or target status is invalid.
 	 * @throws Exception|\Throwable
 	 */
 	public function move_task(
@@ -1015,6 +1016,10 @@ final class TaskManagerService {
 		// Validate fallback placement.
 		if ( ! in_array( $fallback_placement, array( 'first', 'last' ), true ) ) {
 			throw new InvalidArgumentException( 'Invalid default position. Must be "first" or "last".' );
+		}
+
+		if ( ! $this->task_repository->find( $task_id ) ) {
+			throw new InvalidArgumentException( 'Task not found.' );
 		}
 
 		// Check if the new status ID is valid.

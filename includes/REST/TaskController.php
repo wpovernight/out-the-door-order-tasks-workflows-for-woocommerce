@@ -872,6 +872,10 @@ class TaskController extends BaseRestController {
 		$task_service = $this->task_manager_service;
 
 		try {
+			if ( ! $task_service->get_task( $task_id ) ) {
+				return new WP_Error( 'not_found', 'Task not found', array( 'status' => 404 ) );
+			}
+
 			$new_position = $task_service->move_task( $task_id, $target_status_id, $previous_task_id );
 		} catch ( \InvalidArgumentException $e ) {
 			return new WP_Error( 'invalid_params', $e->getMessage(), array( 'status' => 400 ) );
