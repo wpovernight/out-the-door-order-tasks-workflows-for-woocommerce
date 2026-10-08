@@ -344,16 +344,17 @@ final class TaskManagerService {
 					}
 				}
 
-				// Normalize both values to arrays for consistent comparison.
-				$current_normalized = (array) $current_value;
-				$new_normalized     = (array) $value;
+				// Normalize both values to arrays of strings for consistent comparison: stored values
+				// come back from the database as strings, so 6 and "6" are the same value.
+				$current_normalized = array_map( array( $this, 'normalize_for_comparison' ), (array) $current_value );
+				$new_normalized     = array_map( array( $this, 'normalize_for_comparison' ), (array) $value );
 
 				// Sort arrays to handle order differences.
-				sort( $current_normalized );
-				sort( $new_normalized );
+				sort( $current_normalized, SORT_STRING );
+				sort( $new_normalized, SORT_STRING );
 
 				// Check if the field value actually changed.
-				$has_changed = wp_json_encode( $current_normalized ) !== wp_json_encode( $new_normalized );
+				$has_changed = $current_normalized !== $new_normalized;
 
 				if ( $has_changed ) {
 					$updated_fields[ $field_slug ] = array(
@@ -1371,6 +1372,17 @@ final class TaskManagerService {
 		 * @param TaskField      $field       Field definition object.
 		 */
 		return apply_filters( 'wpo_otd_task_get_field_value', $value, $field_value, $field );
+	}
+
+	/**
+	 * Turn a field value into the string the database would store, so values can be compared.
+	 *
+	 * @param mixed $value
+	 *
+	 * @return string
+	 */
+	private function normalize_for_comparison( mixed $value ): string {
+		return is_scalar( $value ) || null === $value ? (string) $value : (string) wp_json_encode( $value );
 	}
 
 	/**
