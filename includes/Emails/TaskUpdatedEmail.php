@@ -36,9 +36,10 @@ class TaskUpdatedEmail extends WC_Email {
 			'{task_id}'    => '',
 		);
 
-		// Triggers for this email.
-		add_action( 'wpo_otd_task_updated', array( $this, 'trigger' ), 10, 3 );
-		add_action( 'wpo_otd_task_moved', array( $this, 'trigger_on_task_moved' ), 10, 4 );
+		// Triggers for this email. WooCommerce re-fires each registered email action as "<action>_notification"
+		// once its mailer, and so this email, exists (see EmailService::register_email_actions()).
+		add_action( 'wpo_otd_task_updated_notification', array( $this, 'trigger' ), 10, 3 );
+		add_action( 'wpo_otd_task_moved_notification', array( $this, 'trigger_on_task_moved' ), 10, 4 );
 
 		parent::__construct();
 

@@ -50,6 +50,9 @@ final class EmailService {
 	/**
 	 * Register custom email actions with WooCommerce mailer.
 	 *
+	 * WooCommerce hooks into each of these actions, builds its mailer (and so our emails) if this
+	 * request has not yet, then fires "<action>_notification", which the emails listen to.
+	 *
 	 * @param array $actions Existing email actions.
 	 *
 	 * @return array Modified email actions.
@@ -57,6 +60,7 @@ final class EmailService {
 	public function register_email_actions( array $actions ): array {
 		$actions[] = 'wpo_otd_task_created';
 		$actions[] = 'wpo_otd_task_updated';
+		$actions[] = 'wpo_otd_task_moved';
 
 		return $actions;
 	}

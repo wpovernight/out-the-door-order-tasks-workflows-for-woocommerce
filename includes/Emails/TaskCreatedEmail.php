@@ -28,8 +28,9 @@ class TaskCreatedEmail extends WC_Email {
 			'{task_id}'    => '',
 		);
 
-		// Triggers for this email.
-		add_action( 'wpo_otd_task_created', array( $this, 'trigger' ), 10, 3 );
+		// Triggers for this email. WooCommerce re-fires each registered email action as "<action>_notification"
+		// once its mailer, and so this email, exists (see EmailService::register_email_actions()).
+		add_action( 'wpo_otd_task_created_notification', array( $this, 'trigger' ), 10, 3 );
 
 		parent::__construct();
 
