@@ -194,6 +194,31 @@ final class TaskManagerService {
 			throw new Exception( 'Task title is required and must be a string.' );
 		}
 
+		$status_id          = null;
+		$field_values_array = array();
+
+		foreach ( $field_values ?? array() as $field_value ) {
+			$field_id                        = (int) $field_value['field_id'];
+			$value                           = $field_value['value'];
+			$field_values_array[ $field_id ] = $value;
+
+			if ( DefaultTaskFields::STATUS === $field_id && ! empty( $value ) ) {
+				$status_id = (int) $value;
+			}
+		}
+
+		// Every task sits in a status column: without one, it starts in the first.
+		if ( null === $status_id ) {
+			$first_status = $this->get_field_options_by_field_id( DefaultTaskFields::STATUS )[0] ?? null;
+
+			if ( ! $first_status ) {
+				throw new RuntimeException( 'There is no status to place the task in.' );
+			}
+
+			$status_id                                       = $first_status->id;
+			$field_values_array[ DefaultTaskFields::STATUS ] = $status_id;
+		}
+
 		$task_data = array(
 			'title'       => sanitize_text_field( $title ),
 			'description' => sanitize_textarea_field( $description )
@@ -209,19 +234,7 @@ final class TaskManagerService {
 			);
 		}
 
-		$task->id           = $result;
-		$status_id          = 1; // Default status ID
-		$field_values_array = array();
-
-		foreach ( $field_values ?? array() as $field_value ) {
-			$field_id                        = $field_value['field_id'];
-			$value                           = $field_value['value'];
-			$field_values_array[ $field_id ] = $value;
-
-			if ( isset( $field_value['field_slug'] ) && $field_value['field_slug'] === 'status' ) {
-				$status_id = $value;
-			}
-		}
+		$task->id = $result;
 
 		// Set the position field manually to be last in the status column.
 		$last_position = $this->task_repository->get_last_task_position( null, $status_id );
@@ -231,7 +244,7 @@ final class TaskManagerService {
 		$done_option_id = $this->task_status_role_service->get_done_field_option_id();
 
 		// Auto-set "done_date" if creating with the option assigned to the "done" role.
-		$status_option = $this->get_field_option( (int) $status_id );
+		$status_option = $this->get_field_option( $status_id );
 		if (
 			$status_option &&
 			$status_option->id === $done_option_id &&
