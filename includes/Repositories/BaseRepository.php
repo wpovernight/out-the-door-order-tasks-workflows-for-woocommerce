@@ -439,8 +439,8 @@ abstract class BaseRepository {
 			throw new RuntimeException( 'No WHERE clause specified for update.' );
 		}
 
-		// Add bindings
-		$this->bindings = array_merge( $this->bindings, $bindings );
+		// The SET placeholders come before the WHERE ones in the query, so their bindings go first.
+		$this->bindings = array_merge( $bindings, $this->bindings );
 
 		$query = "UPDATE {$this->get_table_full_name()} SET {$set_clause}";
 		$query = $this->append_query_clauses( $query );
