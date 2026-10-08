@@ -1,0 +1,419 @@
+<?php
+
+namespace WPO\OTD\Tests\Integration\Services;
+
+use WPO\OTD\Models\CustomOrderStatus;
+use WPO\OTD\Repositories\CustomOrderStatusRepository;
+use WPO\OTD\Services\CustomOrderStatusService;
+use WPO\OTD\Tests\IntegrationTestCase;
+
+class CustomOrderStatusServiceTest extends IntegrationTestCase {
+	private const REASSIGN_HOOK = 'wpo_otd_reassign_orders';
+
+	private CustomOrderStatusService $service;
+
+	public function set_up() {
+		parent::set_up();
+
+		$this->service = new CustomOrderStatusService();
+	}
+
+	/** ================================
+	 *   CRUD
+	 *  ================================ */
+
+	public function test_create_stores_the_status_and_fires_an_action(): void {
+		$created = array();
+		add_action(
+			'wpo_otd_custom_order_status_created',
+			static function ( $status ) use ( &$created ) {
+				$created[] = $status;
+			}
+		);
+
+		$status = $this->service->create( array( 'label' => 'Awaiting Pickup', 'background' => '#000000' ) );
+
+		$this->assertGreaterThan( 0, $status->id );
+		$this->assertSame( 'awaiting-pickup', $status->status_key );
+		$this->assertSame( '#afaf96', $status->foreground );
+		$this->assertSame( array( $status ), $created );
+		$this->assertEquals( $status, $this->service->find( $status->id ) );
+	}
+
+	public function test_create_makes_the_key_unique(): void {
+		$this->service->create( array( 'label' => 'Packed' ) );
+
+		$this->assertSame( 'packed-2', $this->service->create( array( 'label' => 'Packed' ) )->status_key );
+		$this->assertSame( 'packed-3', $this->service->create( array( 'label' => 'Other', 'status_key' => 'packed' ) )->status_key );
+	}
+
+	public function test_all_is_refreshed_after_each_change(): void {
+		$this->assertSame( array(), $this->service->all() );
+
+		$status = $this->service->create( array( 'label' => 'Packed' ) );
+		$this->assertSame( array( 'Packed' ), $this->labels( $this->service->all() ) );
+
+		$this->service->update( $status->id, array( 'label' => 'Boxed' ) );
+		$this->assertSame( array( 'Boxed' ), $this->labels( $this->service->all() ) );
+
+		$this->service->request_deletion( $status->id );
+		$this->assertSame( array(), $this->service->all() );
+	}
+
+	public function test_update_saves_and_fires_an_action(): void {
+		$status = $this->service->create( array( 'label' => 'Packed' ) );
+		$fired  = array();
+		add_action(
+			'wpo_otd_custom_order_status_updated',
+			static function ( $updated, $data ) use ( &$fired ) {
+				$fired[] = array( $updated->label, $data );
+			},
+			10,
+			2
+		);
+
+		$updated = $this->service->update( $status->id, array( 'label' => 'Boxed', 'background' => '#123456' ) );
+
+		$this->assertSame( 'Boxed', $updated->label );
+		$this->assertSame( '#123456', $this->service->find( $status->id )->background );
+		$this->assertSame( 'packed', $updated->status_key, 'The key stays when only the label changes.' );
+		$this->assertSame( array( array( 'Boxed', array( 'label' => 'Boxed', 'background' => '#123456' ) ) ), $fired );
+	}
+
+	public function test_an_update_cannot_flag_a_status_for_deletion(): void {
+		$status = $this->service->create( array( 'label' => 'Packed' ) );
+
+		$this->service->update( $status->id, array( 'is_deleting' => true, 'label' => 'Boxed' ) );
+
+		$this->assertFalse( $this->service->find( $status->id )->is_deleting, 'Only request_deletion() starts a deletion.' );
+		$this->assertSame( 'Boxed', $this->service->find( $status->id )->label );
+	}
+
+	public function test_updating_a_missing_status_is_rejected(): void {
+		$this->expectException( \InvalidArgumentException::class );
+
+		$this->service->update( 999999, array( 'label' => 'Ghost' ) );
+	}
+
+	public function test_list_returns_everything_or_one_page(): void {
+		foreach ( array( 'A', 'B', 'C' ) as $label ) {
+			$this->service->create( array( 'label' => $label ) );
+		}
+
+		$full = $this->service->list();
+		$this->assertSame( array( 'A', 'B', 'C' ), $this->labels( $full->items() ) );
+		$this->assertSame( 3, $full->per_page() );
+
+		$page = $this->service->list( 2, 2 );
+		$this->assertSame( array( 'C' ), $this->labels( $page->items() ) );
+		$this->assertSame( 3, $page->total() );
+
+		$this->assertSame( 1, $this->service->list( 1, null )->per_page(), 'A missing page size falls back to one.' );
+	}
+
+	/** ================================
+	 *   WooCommerce integration
+	 *  ================================ */
+
+	public function test_statuses_are_added_to_woocommerce_including_ones_being_deleted(): void {
+		$this->service->create( array( 'label' => 'Packed <b>now</b>' ) );
+		$deleting = $this->service->create( array( 'label' => 'Leaving' ) );
+		$this->mark_deleting( $deleting->id );
+
+		$statuses = $this->service->add_to_order_statuses( array( 'wc-pending' => 'Pending payment' ) );
+
+		$this->assertSame(
+			array(
+				'wc-pending'   => 'Pending payment',
+				'wc-packed-now' => 'Packed &lt;b&gt;now&lt;/b&gt;',
+				'wc-leaving'   => 'Leaving',
+			),
+			$statuses
+		);
+	}
+
+	public function test_statuses_are_registered_as_order_post_statuses(): void {
+		$this->service->create( array( 'label' => 'Packed' ) );
+
+		$registered = $this->service->register_order_statuses( array() );
+
+		$this->assertSame( array( 'wc-packed' ), array_keys( $registered ) );
+		$this->assertSame( 'Packed', $registered['wc-packed']['label'] );
+		$this->assertTrue( $registered['wc-packed']['public'] );
+		$this->assertTrue( $registered['wc-packed']['show_in_admin_status_list'] );
+		$this->assertSame( 'Packed <span class="count">(%s)</span>', $registered['wc-packed']['label_count']['singular'] );
+	}
+
+	public function test_bulk_actions_go_after_the_last_mark_action_and_skip_deleting_statuses(): void {
+		$this->service->create( array( 'label' => 'Packed' ) );
+		$deleting = $this->service->create( array( 'label' => 'Leaving' ) );
+		$this->mark_deleting( $deleting->id );
+
+		$actions = $this->service->add_to_bulk_action(
+			array(
+				'edit'            => 'Edit',
+				'mark_processing' => 'Change status to processing',
+				'mark_completed'  => 'Change status to completed',
+				'trash'           => 'Move to Trash',
+			)
+		);
+
+		$this->assertSame( array( 'edit', 'mark_processing', 'mark_completed', 'mark_packed', 'trash' ), array_keys( $actions ) );
+		$this->assertSame( 'Change status to Packed', $actions['mark_packed'] );
+	}
+
+	public function test_bulk_actions_are_appended_when_there_is_no_mark_action(): void {
+		$this->service->create( array( 'label' => 'Packed' ) );
+
+		$this->assertSame( array( 'trash', 'mark_packed' ), array_keys( $this->service->add_to_bulk_action( array( 'trash' => 'Move to Trash' ) ) ) );
+	}
+
+	public function test_status_colors_are_added_to_the_woocommerce_admin_styles(): void {
+		wp_register_style( 'woocommerce_admin_styles', 'admin.css', array(), '1' );
+		$this->service->create( array( 'label' => 'Packed', 'background' => '#000000' ) );
+
+		$this->service->add_dynamic_style();
+
+		$this->assertSame(
+			array( 'mark.status-packed { background-color: #000000; color: #afaf96; }' ),
+			wp_styles()->get_data( 'woocommerce_admin_styles', 'after' )
+		);
+	}
+
+	/** ================================
+	 *   Deletion
+	 *  ================================ */
+
+	public function test_requesting_deletion_of_a_missing_status_fails(): void {
+		$this->assertFalse( $this->service->request_deletion( 999999 ) );
+	}
+
+	public function test_a_status_without_orders_is_deleted_at_once(): void {
+		$status  = $this->service->create( array( 'label' => 'Packed' ) );
+		$deleted = $this->capture_deletions();
+
+		$this->assertTrue( $this->service->request_deletion( $status->id, 'processing' ) );
+
+		$this->assertNull( $this->service->find( $status->id ) );
+		$this->assertSame( array( array( $status->id, 'packed', 'processing' ) ), $deleted() );
+		$this->assertFalse( as_has_scheduled_action( self::REASSIGN_HOOK ) );
+	}
+
+	public function test_a_status_with_orders_is_flagged_and_drained_in_the_background(): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$this->order_in( 'packed' );
+
+		$this->assertTrue( $this->service->request_deletion( $status->id ) );
+
+		$this->assertTrue( $this->service->find( $status->id )->is_deleting );
+		$this->assertTrue( as_has_scheduled_action( self::REASSIGN_HOOK, array( 'packed', 'on-hold', $status->id ), 'wpo-otd' ) );
+
+		$this->assertTrue( $this->service->request_deletion( $status->id ), 'A second request is accepted.' );
+		$this->assertCount( 1, as_get_scheduled_actions( array( 'hook' => self::REASSIGN_HOOK, 'status' => 'pending' ), 'ids' ), '...without scheduling again.' );
+	}
+
+	public function test_the_last_batch_moves_the_orders_and_deletes_the_status(): void {
+		$status  = $this->create_registered_status( 'Packed' );
+		$orders  = array( $this->order_in( 'packed' ), $this->order_in( 'packed' ) );
+		$deleted = $this->capture_deletions();
+
+		$this->service->process_deletion_batch( 'packed', 'on-hold', $status->id );
+
+		foreach ( $orders as $order_id ) {
+			$order = wc_get_order( $order_id );
+			$this->assertSame( 'on-hold', $order->get_status() );
+		}
+
+		$this->assertNull( $this->service->find( $status->id ) );
+		$this->assertSame( array( array( $status->id, 'packed', 'on-hold' ) ), $deleted() );
+	}
+
+	public function test_a_full_batch_schedules_the_next_one(): void {
+		add_filter( 'wpo_otd_reassign_orders_batch_size', static fn() => 1 );
+		$status = $this->create_registered_status( 'Packed' );
+		$this->order_in( 'packed' );
+		$this->order_in( 'packed' );
+
+		$this->service->process_deletion_batch( 'packed', 'on-hold', $status->id );
+
+		$this->assertNotNull( $this->service->find( $status->id ), 'The status stays until it is empty.' );
+		$this->assertCount( 1, wc_get_orders( array( 'status' => 'packed', 'return' => 'ids' ) ) );
+		$this->assertTrue( as_has_scheduled_action( self::REASSIGN_HOOK, array( 'packed', 'on-hold', $status->id ), 'wpo-otd' ) );
+	}
+
+	public function test_orders_still_in_the_status_after_a_batch_schedule_another(): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$this->order_in( 'packed' );
+
+		// An order that is not moved stands in for one that arrived while the batch ran.
+		add_filter( 'wpo_otd_reassign_orders_to_status', static fn( $to, $order ) => 'packed', 10, 2 );
+
+		$this->service->process_deletion_batch( 'packed', 'on-hold', $status->id );
+
+		$this->assertNotNull( $this->service->find( $status->id ) );
+		$this->assertTrue( as_has_scheduled_action( self::REASSIGN_HOOK, array( 'packed', 'on-hold', $status->id ), 'wpo-otd' ) );
+	}
+
+	public function test_the_fallback_status_can_be_filtered_per_order(): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$first  = $this->order_in( 'packed' );
+		$second = $this->order_in( 'packed' );
+
+		add_filter(
+			'wpo_otd_reassign_orders_to_status',
+			static fn( $to, $order ) => $order->get_id() === $first ? 'processing' : $to,
+			10,
+			2
+		);
+
+		$this->service->process_deletion_batch( 'packed', 'on-hold', $status->id );
+
+		$this->assertSame( 'processing', wc_get_order( $first )->get_status() );
+		$this->assertSame( 'on-hold', wc_get_order( $second )->get_status() );
+	}
+
+	public function test_an_order_that_cannot_be_reassigned_is_logged_and_retried(): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$order  = $this->order_in( 'packed' );
+		$logs   = array();
+		add_filter(
+			'wpo_otd_logging_enabled',
+			static function ( $enabled, $level, $message ) use ( &$logs ) {
+				$logs[] = "{$level}: {$message}";
+
+				return false;
+			},
+			10,
+			3
+		);
+		add_filter(
+			'wpo_otd_reassign_orders_to_status',
+			static function () {
+				throw new \RuntimeException( 'Order is locked' );
+			}
+		);
+
+		$this->service->process_deletion_batch( 'packed', 'processing', $status->id );
+
+		$this->assertSame( 'packed', wc_get_order( $order )->get_status() );
+		$this->assertSame( array( "warning: Failed to reassign order {$order} from status \"packed\" to \"processing\": Order is locked" ), $logs );
+		$this->assertNotNull( $this->service->find( $status->id ), 'The status stays while orders remain.' );
+		$this->assertTrue( as_has_scheduled_action( self::REASSIGN_HOOK, array( 'packed', 'processing', $status->id ), 'wpo-otd' ) );
+	}
+
+	public function test_the_scheduled_hook_runs_a_batch(): void {
+		$status = $this->create_registered_status( 'Packed' );
+
+		do_action( self::REASSIGN_HOOK, 'packed', 'on-hold', $status->id );
+
+		$this->assertNull( $this->service->find( $status->id ) );
+	}
+
+	/**
+	 * Create a status and make WooCommerce and WordPress recognize it, as on a real request.
+	 *
+	 * The plugin's own service instance caches the statuses it read earlier in the run, so it
+	 * is swapped for the one under test.
+	 *
+	 * @param string $label
+	 *
+	 * @return CustomOrderStatus
+	 */
+	private function create_registered_status( string $label ): CustomOrderStatus {
+		foreach ( array( 'wc_order_statuses', 'woocommerce_register_shop_order_post_statuses', self::REASSIGN_HOOK ) as $hook ) {
+			$this->remove_plugin_callbacks( $hook );
+		}
+
+		$this->service->register_hooks();
+		$status = $this->service->create( array( 'label' => $label ) );
+
+		// Unregistered post statuses are ignored by order queries on the posts table.
+		\WC_Post_Types::register_post_status();
+
+		return $status;
+	}
+
+	/**
+	 * Remove the CustomOrderStatusService callbacks the plugin hooked at boot.
+	 *
+	 * @param string $hook
+	 *
+	 * @return void
+	 */
+	private function remove_plugin_callbacks( string $hook ): void {
+		global $wp_filter;
+
+		if ( ! isset( $wp_filter[ $hook ] ) ) {
+			return;
+		}
+
+		foreach ( $wp_filter[ $hook ]->callbacks as $priority => $callbacks ) {
+			foreach ( $callbacks as $callback ) {
+				if ( is_array( $callback['function'] ) && $callback['function'][0] instanceof CustomOrderStatusService ) {
+					remove_filter( $hook, $callback['function'], $priority );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Create an order in the given status.
+	 *
+	 * @param string $status
+	 *
+	 * @return int
+	 */
+	private function order_in( string $status ): int {
+		$order = $this->create_order();
+		$order->set_status( $status );
+		$order->save();
+
+		$this->assertSame( $status, wc_get_order( $order->get_id() )->get_status() );
+
+		return $order->get_id();
+	}
+
+	/**
+	 * Flag a status as being deleted, as request_deletion() does while orders are drained.
+	 *
+	 * @param int $id
+	 *
+	 * @return void
+	 */
+	private function mark_deleting( int $id ): void {
+		( new CustomOrderStatusRepository() )->where( 'id', $id )->update( array( 'is_deleting' => 1 ) );
+	}
+
+	/**
+	 * Record every wpo_otd_custom_order_status_deleted call.
+	 *
+	 * @return callable Returns the recorded argument lists.
+	 */
+	private function capture_deletions(): callable {
+		$calls = array();
+
+		add_action(
+			'wpo_otd_custom_order_status_deleted',
+			static function ( ...$args ) use ( &$calls ) {
+				$calls[] = $args;
+			},
+			10,
+			3
+		);
+
+		return static function () use ( &$calls ) {
+			return $calls;
+		};
+	}
+
+	/**
+	 * Get the labels of a list of statuses.
+	 *
+	 * @param CustomOrderStatus[] $statuses
+	 *
+	 * @return string[]
+	 */
+	private function labels( array $statuses ): array {
+		return array_map( static fn( $status ) => $status->label, $statuses );
+	}
+}
