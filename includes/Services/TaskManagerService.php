@@ -277,12 +277,16 @@ final class TaskManagerService {
 			throw new InvalidArgumentException( 'Task not found.' );
 		}
 
+		// Only the title and description can change here. Callers such as the REST API pass their
+		// whole payload, which must not reach other properties (the ID, the timestamps).
+		$task_data = array_intersect_key( $task_data, array_flip( array( 'title', 'description' ) ) );
+
 		// Sanitize input before filling the model.
-		if ( isset( $task_data['title'] ) ) {
-			$task_data['title'] = sanitize_text_field( $task_data['title'] );
+		if ( array_key_exists( 'title', $task_data ) ) {
+			$task_data['title'] = sanitize_text_field( (string) $task_data['title'] );
 		}
-		if ( isset( $task_data['description'] ) ) {
-			$task_data['description'] = sanitize_textarea_field( $task_data['description'] );
+		if ( array_key_exists( 'description', $task_data ) ) {
+			$task_data['description'] = sanitize_textarea_field( (string) $task_data['description'] );
 		}
 
 		// Track which fields were actually updated with old and new values.

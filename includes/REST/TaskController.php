@@ -371,7 +371,7 @@ class TaskController extends BaseRestController {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_item( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$id             = (int) $request->get_param( 'id' );
+		$id             = (int) $this->url_param( $request, 'id' );
 		$include_fields = $request->get_param( 'include_fields' ) ?? true;
 
 		if ( $id <= 0 ) {
@@ -411,7 +411,7 @@ class TaskController extends BaseRestController {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function update_item( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$id = (int) $request->get_param( 'id' );
+		$id = (int) $this->url_param( $request, 'id' );
 
 		if ( $id <= 0 ) {
 			return new WP_Error( 'invalid_id', 'Invalid task ID provided', array( 'status' => 400 ) );
@@ -462,7 +462,7 @@ class TaskController extends BaseRestController {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function delete_item( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$id = (int) $request->get_param( 'id' );
+		$id = (int) $this->url_param( $request, 'id' );
 
 		if ( $id <= 0 ) {
 			return new WP_Error( 'invalid_id', 'Invalid task ID provided', array( 'status' => 400 ) );
@@ -553,7 +553,7 @@ class TaskController extends BaseRestController {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_field_options( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$field_id = (int) $request->get_param( 'field_id' );
+		$field_id = (int) $this->url_param( $request, 'field_id' );
 
 		if ( $field_id <= 0 ) {
 			return new WP_Error( 'invalid_field_id', 'Invalid field ID provided', array( 'status' => 400 ) );
@@ -582,7 +582,7 @@ class TaskController extends BaseRestController {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_field_options_by_slug( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$field_slug = $request->get_param( 'field_slug' );
+		$field_slug = $this->url_param( $request, 'field_slug' );
 
 		if ( empty( $field_slug ) || ! is_string( $field_slug ) ) {
 			return new WP_Error( 'invalid_field_slug', 'Invalid field slug provided', array( 'status' => 400 ) );
@@ -611,7 +611,7 @@ class TaskController extends BaseRestController {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function create_field_option( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$field_id = (int) $request->get_param( 'field_id' );
+		$field_id = (int) $this->url_param( $request, 'field_id' );
 
 		// Validate field_id.
 		if ( $field_id <= 0 ) {
@@ -670,13 +670,13 @@ class TaskController extends BaseRestController {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function update_field_option( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$field_id = (int) $request->get_param( 'field_id' );
+		$field_id = (int) $this->url_param( $request, 'field_id' );
 
 		if ( $field_id <= 0 ) {
 			return new WP_Error( 'invalid_field_id', 'Invalid field ID provided', array( 'status' => 400 ) );
 		}
 
-		$option_id = (int) $request->get_param( 'option_id' );
+		$option_id = (int) $this->url_param( $request, 'option_id' );
 
 		if ( $option_id <= 0 ) {
 			return new WP_Error( 'invalid_option_id', 'Invalid option ID provided', array( 'status' => 400 ) );
@@ -728,13 +728,13 @@ class TaskController extends BaseRestController {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function delete_field_option( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$field_id = (int) $request->get_param( 'field_id' );
+		$field_id = (int) $this->url_param( $request, 'field_id' );
 
 		if ( $field_id <= 0 ) {
 			return new WP_Error( 'invalid_field_id', 'Invalid field ID provided', array( 'status' => 400 ) );
 		}
 
-		$option_id = (int) $request->get_param( 'option_id' );
+		$option_id = (int) $this->url_param( $request, 'option_id' );
 
 		if ( $option_id <= 0 ) {
 			return new WP_Error( 'invalid_option_id', 'Invalid option ID provided', array( 'status' => 400 ) );
@@ -763,7 +763,7 @@ class TaskController extends BaseRestController {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function reorder_field_options( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$field_id           = (int) $request->get_param( 'field_id' );
+		$field_id           = (int) $this->url_param( $request, 'field_id' );
 		$ordered_option_ids = $request->get_param( 'ordered_option_ids' );
 
 		// Validate field_id.
@@ -857,7 +857,7 @@ class TaskController extends BaseRestController {
 	 * @throws \Throwable
 	 */
 	public function move_task( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$task_id          = (int) $request->get_param( 'id' );
+		$task_id          = (int) $this->url_param( $request, 'id' );
 		$previous_task_id = $request->get_param( 'previous_task_id' ) ? (int) $request->get_param( 'previous_task_id' ) : null;
 		$target_status_id = (int) $request->get_param( 'target_status_id' );
 
@@ -900,7 +900,7 @@ class TaskController extends BaseRestController {
 	 * @throws \Exception
 	 */
 	public function finish_task( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$task_id = (int) $request->get_param( 'id' );
+		$task_id = (int) $this->url_param( $request, 'id' );
 
 		if ( $task_id <= 0 ) {
 			return new WP_Error( 'invalid_id', 'Invalid task ID provided', array( 'status' => 400 ) );
@@ -934,7 +934,7 @@ class TaskController extends BaseRestController {
 	 * @throws \Exception
 	 */
 	public function archive_task( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$task_id = (int) $request->get_param( 'id' );
+		$task_id = (int) $this->url_param( $request, 'id' );
 
 		if ( $task_id <= 0 ) {
 			return new WP_Error( 'invalid_id', 'Invalid task ID provided', array( 'status' => 400 ) );
@@ -965,7 +965,7 @@ class TaskController extends BaseRestController {
 	 * @throws \Exception
 	 */
 	public function unarchive_task( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$task_id = (int) $request->get_param( 'id' );
+		$task_id = (int) $this->url_param( $request, 'id' );
 
 		if ( $task_id <= 0 ) {
 			return new WP_Error( 'invalid_id', 'Invalid task ID provided', array( 'status' => 400 ) );

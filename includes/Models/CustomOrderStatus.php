@@ -16,6 +16,9 @@ class CustomOrderStatus extends BaseModel implements ArraySerializableModel {
 
 	protected array $non_db_properties = array( 'foreground' );
 
+	// Only request_deletion() starts a deletion.
+	protected array $guarded = array( 'id', 'is_deleting' );
+
 	/**
 	 * Constructor.
 	 *

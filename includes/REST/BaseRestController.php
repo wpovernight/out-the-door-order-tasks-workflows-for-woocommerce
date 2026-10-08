@@ -67,6 +67,23 @@ abstract class BaseRestController {
 	}
 
 	/**
+	 * Read a parameter of the route itself, such as the ID in /tasks/(?P<id>[\d]+).
+	 *
+	 * get_param() would let the body or the query string override it: PUT /tasks/5 with {"id": 6}
+	 * would update task 6.
+	 *
+	 * @param WP_REST_Request $request
+	 * @param string          $name
+	 *
+	 * @return string|null Null when the route has no such parameter.
+	 */
+	protected function url_param( WP_REST_Request $request, string $name ): ?string {
+		$params = $request->get_url_params();
+
+		return isset( $params[ $name ] ) ? (string) $params[ $name ] : null;
+	}
+
+	/**
 	 * Read pagination params from the request.
 	 *
 	 * @param WP_REST_Request $request

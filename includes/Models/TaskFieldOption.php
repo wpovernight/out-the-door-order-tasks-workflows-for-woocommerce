@@ -12,6 +12,8 @@ class TaskFieldOption extends BaseModel {
 	public string $color;
 	public int $position;
 
+	// An option never moves to another field.
+	protected array $guarded = array( 'id', 'field_id' );
 
 	/**
 	 * Constructor.

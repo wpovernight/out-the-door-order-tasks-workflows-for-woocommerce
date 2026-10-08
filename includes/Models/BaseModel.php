@@ -13,16 +13,32 @@ abstract class BaseModel {
 
 	/**
 	 * Fill the model with data from an associative array.
-	 * Guarded properties (like 'id') cannot be changed via fill().
+	 * Only public properties are filled, and guarded ones (like 'id') never are.
 	 *
 	 * @param array<string, mixed> $data
 	 */
 	public function fill( array $data ): void {
 		foreach ( $data as $key => $value ) {
-			if ( property_exists( $this, $key ) && ! in_array( $key, $this->guarded, true ) ) {
+			if ( $this->is_fillable( (string) $key ) ) {
 				$this->{$key} = $value;
 			}
 		}
+	}
+
+	/**
+	 * Whether fill() may set a property.
+	 *
+	 * Non-public properties are the model's own bookkeeping ($guarded, $non_db_properties): letting
+	 * data reach them would let it lift the guard on 'id'.
+	 *
+	 * @param string $property
+	 *
+	 * @return bool
+	 */
+	private function is_fillable( string $property ): bool {
+		return property_exists( $this, $property )
+			&& ( new \ReflectionProperty( $this, $property ) )->isPublic()
+			&& ! in_array( $property, $this->guarded, true );
 	}
 
 	/**

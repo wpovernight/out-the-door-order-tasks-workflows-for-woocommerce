@@ -146,7 +146,7 @@ class CustomOrderStatusController extends BaseRestController {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_item( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$id = (int) $request->get_param( 'id' );
+		$id = (int) $this->url_param( $request, 'id' );
 
 		if ( $id <= 0 ) {
 			return new WP_Error( 'invalid_id', __( 'Invalid ID provided', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 400 ) );
@@ -170,7 +170,7 @@ class CustomOrderStatusController extends BaseRestController {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function update_item( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$id = (int) $request->get_param( 'id' );
+		$id = (int) $this->url_param( $request, 'id' );
 
 		if ( $id <= 0 ) {
 			return new WP_Error( 'invalid_id', __( 'Invalid ID provided', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 400 ) );
@@ -214,7 +214,7 @@ class CustomOrderStatusController extends BaseRestController {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function delete_item( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$id = (int) $request->get_param( 'id' );
+		$id = (int) $this->url_param( $request, 'id' );
 
 		if ( $id <= 0 ) {
 			return new WP_Error( 'invalid_id', __( 'Invalid ID provided', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 400 ) );
