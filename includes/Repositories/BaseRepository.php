@@ -541,6 +541,8 @@ abstract class BaseRepository {
 	/**
 	 * Execute a callback within a database transaction.
 	 *
+	 * On failure, get_last_db_error() still reports the error that made it fail, not the rollback's.
+	 *
 	 * @param callable $callback
 	 *
 	 * @return mixed Result of the callback, or false on failure.
@@ -553,7 +555,7 @@ abstract class BaseRepository {
 			$result = $callback( $this );
 
 			if ( false === $result ) {
-				$this->wpdb->query( 'ROLLBACK' );
+				$this->rollback();
 				return false;
 			}
 
@@ -562,9 +564,24 @@ abstract class BaseRepository {
 			return $result;
 
 		} catch ( \Throwable $e ) {
-			$this->wpdb->query( 'ROLLBACK' );
+			$this->rollback();
 			throw $e;
 		}
+	}
+
+	/**
+	 * Roll the open transaction back, keeping the error that caused it.
+	 *
+	 * Every $wpdb query resets last_error, so the ROLLBACK itself would otherwise erase it.
+	 *
+	 * @return void
+	 */
+	private function rollback(): void {
+		$error = $this->wpdb->last_error;
+
+		$this->wpdb->query( 'ROLLBACK' );
+
+		$this->wpdb->last_error = $error;
 	}
 
 	/**
