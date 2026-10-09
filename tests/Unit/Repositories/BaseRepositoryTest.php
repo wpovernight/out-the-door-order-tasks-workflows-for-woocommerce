@@ -329,6 +329,63 @@ class BaseRepositoryTest extends TestCase {
 		$this->repository->where( 'p.sku', 'X1' );
 	}
 
+	/** ================================
+	 *   A failure discards the half-built query
+	 *  ================================ */
+
+	public function test_a_rejected_where_discards_the_query_being_built(): void {
+		$this->repository->alias( 'g' )->join( 'wp_tags AS t', 't.gadget_id = g.id' )->where( 'name', 'Lamp' );
+
+		$this->assert_throws( InvalidArgumentException::class, fn() => $this->repository->where( 'colour', 'red' ) );
+
+		$this->assertSame( 'SELECT * FROM ' . self::TABLE, $this->repository->get_query(), 'The repository is shared; leftovers would leak into the next query.' );
+	}
+
+	public function test_a_rejected_join_order_or_update_discards_the_query_being_built(): void {
+		$attempts = array(
+			fn() => $this->repository->where( 'name', 'Lamp' )->join( 'wp_parts AS p', 'p.gadget_id = id', null, null, 'OUTER' ),
+			fn() => $this->repository->where( 'name', 'Lamp' )->order_by( 'name', 'sideways' ),
+			fn() => $this->repository->where( 'id', '>', 4 )->update( array( 'name' => 'x' ) ),
+		);
+
+		foreach ( $attempts as $attempt ) {
+			$this->assert_throws( \Throwable::class, $attempt );
+			$this->assertSame( 'SELECT * FROM ' . self::TABLE, $this->repository->get_query() );
+		}
+	}
+
+	public function test_a_column_lookup_that_throws_discards_the_query_being_built(): void {
+		$this->wpdb->shouldReceive( 'get_col' )->with( 'DESCRIBE wp_parts' )->andThrow( new RuntimeException( 'Gone away' ) );
+
+		$this->assert_throws(
+			RuntimeException::class,
+			fn() => $this->repository->where( 'name', 'Lamp' )->join( 'wp_parts AS p', 'p.gadget_id = id' )->where( 'p.sku', 'X1' )
+		);
+
+		$this->assertSame( 'SELECT * FROM ' . self::TABLE, $this->repository->get_query() );
+	}
+
+	/**
+	 * @dataProvider failing_query_provider
+	 */
+	public function test_a_query_that_throws_discards_the_builder_even_when_asked_to_keep_it( string $wpdb_method, callable $run ): void {
+		$this->wpdb->shouldReceive( $wpdb_method )->andThrow( new RuntimeException( 'Gone away' ) );
+
+		$this->repository->alias( 'g' )->where( 'name', 'Lamp' );
+
+		$this->assert_throws( RuntimeException::class, fn() => $run( $this->repository ) );
+		$this->assertSame( 'SELECT * FROM ' . self::TABLE, $this->repository->get_query() );
+	}
+
+	public function failing_query_provider(): array {
+		return array(
+			'get, keeping the builder'   => array( 'get_results', static fn( $repository ) => $repository->get( false, false ) ),
+			'count, keeping the builder' => array( 'get_var', static fn( $repository ) => $repository->count( false ) ),
+			'paginate'                   => array( 'get_var', static fn( $repository ) => $repository->paginate( 5 ) ),
+			'delete_raw'                 => array( 'query', static fn( $repository ) => $repository->delete_raw() ),
+		);
+	}
+
 	public function test_get_query_keeps_the_builder_unless_asked_to_reset(): void {
 		$this->repository->where( 'name', 'Lamp' );
 

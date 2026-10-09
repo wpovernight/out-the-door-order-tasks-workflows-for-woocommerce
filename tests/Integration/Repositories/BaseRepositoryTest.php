@@ -135,6 +135,22 @@ class BaseRepositoryTest extends IntegrationTestCase {
 		);
 	}
 
+	public function test_a_query_that_throws_does_not_poison_the_next_one(): void {
+		$this->insert_statuses( array( 'alpha' => null ) );
+
+		// Only the aliased query throws; a leftover alias would make the next query throw too.
+		$this->throw_on_queries( '/ AS s WHERE /', new \RuntimeException( 'Gone away' ) );
+
+		try {
+			$this->repository->alias( 's' )->where( 's.status_key', 'alpha' )->get();
+			$this->fail( 'The exception must propagate.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertSame( 'Gone away', $e->getMessage() );
+		}
+
+		$this->assertSame( array( 'alpha' ), $this->keys( $this->repository->get() ) );
+	}
+
 	public function test_find_by_slug_on_a_table_with_slugs(): void {
 		$option = ( new TaskFieldOptionRepository() )->find_by_slug( 'in_progress' );
 

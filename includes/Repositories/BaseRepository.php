@@ -109,7 +109,7 @@ abstract class BaseRepository {
 		$query = $this->get_query( false );
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Query is prepared inside append_bindings().
-		$result = $this->wpdb->get_results( $query, ARRAY_A ) ?? array();
+		$result = $this->run_query( fn() => $this->wpdb->get_results( $query, ARRAY_A ) ) ?? array();
 
 		if ( $reset ) {
 			$this->reset_query();
@@ -132,7 +132,7 @@ abstract class BaseRepository {
 		$query  = $this->append_bindings( $query );
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Query is prepared inside append_bindings().
-		$total = (int) $this->wpdb->get_var( $query );
+		$total = (int) $this->run_query( fn() => $this->wpdb->get_var( $query ) );
 
 		if ( $reset ) {
 			$this->reset_query();
@@ -311,7 +311,7 @@ abstract class BaseRepository {
 		}
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Query is prepared above.
-		$result = $this->wpdb->query( $query );
+		$result = $this->run_query( fn() => $this->wpdb->query( $query ) );
 
 		if ( $reset ) {
 			$this->reset_query();
@@ -329,7 +329,7 @@ abstract class BaseRepository {
 	 */
 	public function insert( array $data ): int|false {
 		if ( empty( $data ) ) {
-			throw new InvalidArgumentException( 'Data must be a non-empty array.' );
+			throw $this->discard( new InvalidArgumentException( 'Data must be a non-empty array.' ) );
 		}
 
 		$this->validate_columns( array_keys( $data ) );
@@ -341,7 +341,7 @@ abstract class BaseRepository {
 			}
 		}
 
-		$result = $this->wpdb->insert( $this->get_table_full_name(), $data );
+		$result = $this->run_query( fn() => $this->wpdb->insert( $this->get_table_full_name(), $data ) );
 
 		$this->reset_query();
 
@@ -360,7 +360,7 @@ abstract class BaseRepository {
 	 */
 	protected function insert_raw( string $columns, array $rows, array $bindings ): int|false {
 		if ( '' === trim( $columns ) || empty( $rows ) || empty( $bindings ) ) {
-			throw new InvalidArgumentException( 'Columns, rows, and bindings must not be empty.' );
+			throw $this->discard( new InvalidArgumentException( 'Columns, rows, and bindings must not be empty.' ) );
 		}
 
 		$placeholders = implode( ', ', $rows );
@@ -373,7 +373,7 @@ abstract class BaseRepository {
 		$query = $this->append_bindings( $query );
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Query is prepared above.
-		$result = $this->wpdb->query( $query );
+		$result = $this->run_query( fn() => $this->wpdb->query( $query ) );
 
 		$this->reset_query();
 
@@ -392,12 +392,12 @@ abstract class BaseRepository {
 	public function update( array $data ): int|false {
 		// Validate the data array.
 		if ( empty( $data ) ) {
-			throw new InvalidArgumentException( 'Data must be a non-empty array.' );
+			throw $this->discard( new InvalidArgumentException( 'Data must be a non-empty array.' ) );
 		}
 
 		// Ensure that the WHERE clause is set.
 		if ( empty( $this->wheres ) ) {
-			throw new RuntimeException( 'No WHERE clause specified for update.' );
+			throw $this->discard( new RuntimeException( 'No WHERE clause specified for update.' ) );
 		}
 
 		$this->validate_columns( array_keys( $data ) );
@@ -408,7 +408,7 @@ abstract class BaseRepository {
 		$where = array();
 		foreach ( $this->wheres as [$column, $operator, $value, $logical_operator] ) {
 			if ( '=' !== $operator ) {
-				throw new InvalidArgumentException( 'Only equality checks are supported in WHERE clause for update.' );
+				throw $this->discard( new InvalidArgumentException( 'Only equality checks are supported in WHERE clause for update.' ) );
 			}
 			$where[ $column ] = $value;
 		}
@@ -431,12 +431,12 @@ abstract class BaseRepository {
 	protected function update_raw( string $set_clause, array $bindings ): int|false {
 		// Ensure that the SET clause is not empty.
 		if ( '' === trim( $set_clause ) ) {
-			throw new InvalidArgumentException( 'SET clause must not be empty.' );
+			throw $this->discard( new InvalidArgumentException( 'SET clause must not be empty.' ) );
 		}
 
 		// Ensure that the WHERE clause is set.
 		if ( empty( $this->wheres ) ) {
-			throw new RuntimeException( 'No WHERE clause specified for update.' );
+			throw $this->discard( new RuntimeException( 'No WHERE clause specified for update.' ) );
 		}
 
 		// The SET placeholders come before the WHERE ones in the query, so their bindings go first.
@@ -449,7 +449,7 @@ abstract class BaseRepository {
 		$this->reset_query();
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Query is prepared above.
-		$result = $this->wpdb->query( $query );
+		$result = $this->run_query( fn() => $this->wpdb->query( $query ) );
 
 		return false === $result ? false : (int) $result;
 	}
@@ -492,7 +492,7 @@ abstract class BaseRepository {
 		}
 
 		if ( empty( $this->wheres ) ) {
-			throw new RuntimeException( 'No WHERE clause specified for delete.' );
+			throw $this->discard( new RuntimeException( 'No WHERE clause specified for delete.' ) );
 		}
 
 		// Prepare WHERE array
@@ -501,7 +501,7 @@ abstract class BaseRepository {
 		$where = array();
 		foreach ( $this->wheres as [$column, $operator, $value, $logical_operator] ) {
 			if ( '=' !== $operator ) {
-				throw new InvalidArgumentException( 'Only equality checks are supported in WHERE clause for delete.' );
+				throw $this->discard( new InvalidArgumentException( 'Only equality checks are supported in WHERE clause for delete.' ) );
 			}
 			$where[ $column ] = $value;
 		}
@@ -519,7 +519,7 @@ abstract class BaseRepository {
 	 */
 	public function delete_raw(): int|false {
 		if ( empty( $this->wheres ) ) {
-			throw new RuntimeException( 'No WHERE clause specified for delete.' );
+			throw $this->discard( new RuntimeException( 'No WHERE clause specified for delete.' ) );
 		}
 
 		$query = "DELETE FROM {$this->get_table_full_name()}";
@@ -527,7 +527,7 @@ abstract class BaseRepository {
 		$query = $this->append_bindings( $query );
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Query is prepared above.
-		$result = $this->wpdb->query( $query );
+		$result = $this->run_query( fn() => $this->wpdb->query( $query ) );
 
 		$this->reset_query();
 
@@ -626,7 +626,7 @@ abstract class BaseRepository {
 		}
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table names cannot be parameterized; this one is the repository's own or one passed to join() by plugin code.
-		$columns = (array) $this->wpdb->get_col( "DESCRIBE {$table}" );
+		$columns = (array) $this->run_query( fn() => $this->wpdb->get_col( "DESCRIBE {$table}" ) );
 		$columns = array_map( 'strtolower', $columns );
 
 		self::$column_names[ $table ] = $columns;
@@ -704,7 +704,7 @@ abstract class BaseRepository {
 		$valid_types = array( 'INNER', 'LEFT', 'RIGHT', 'FULL', 'CROSS' );
 
 		if ( ! in_array( $type, $valid_types, true ) ) {
-			throw new InvalidArgumentException( 'Invalid join type provided.' );
+			throw $this->discard( new InvalidArgumentException( 'Invalid join type provided.' ) );
 		}
 
 		if ( $operator === null && $second === null ) {
@@ -715,7 +715,7 @@ abstract class BaseRepository {
 			$this->validate_operator( $operator );
 			$on_condition = "{$first} {$operator} {$second}";
 		} else {
-			throw new InvalidArgumentException( 'Invalid arguments for JOIN clause.' );
+			throw $this->discard( new InvalidArgumentException( 'Invalid arguments for JOIN clause.' ) );
 		}
 
 		$this->joins[] = "{$type} JOIN {$table} ON {$on_condition}";
@@ -754,7 +754,7 @@ abstract class BaseRepository {
 
 		if ( $value === null ) {
 			if ( ! in_array( $operator, array( 'IS', 'IS NOT' ) ) ) {
-				throw new InvalidArgumentException( esc_html( "Cannot use NULL with operator $operator" ) );
+				throw $this->discard( new InvalidArgumentException( esc_html( "Cannot use NULL with operator $operator" ) ) );
 			}
 
 			// Add IS NULL / IS NOT NULL as a raw clause (no placeholder or binding needed).
@@ -1029,7 +1029,7 @@ abstract class BaseRepository {
 			}
 
 			if ( '*' !== $column && ! in_array( strtolower( $column ), $this->get_column_names( $table ), true ) ) {
-				throw new InvalidArgumentException( esc_html( "Column $column does not exist in the table." ) );
+				throw $this->discard( new InvalidArgumentException( esc_html( "Column $column does not exist in the table." ) ) );
 			}
 		}
 	}
@@ -1045,7 +1045,7 @@ abstract class BaseRepository {
 		$valid_operators = array( '=', '!=', '<', '>', '<=', '>=', 'LIKE', 'NOT LIKE', 'IN', 'NOT IN', 'IS', 'IS NOT' );
 
 		if ( ! in_array( $operator, $valid_operators, true ) ) {
-			throw new InvalidArgumentException( 'Invalid operator provided.' );
+			throw $this->discard( new InvalidArgumentException( 'Invalid operator provided.' ) );
 		}
 	}
 
@@ -1058,7 +1058,7 @@ abstract class BaseRepository {
 	 */
 	private function validate_logical_operator( string $logical_operator ): void {
 		if ( ! in_array( strtoupper( $logical_operator ), array( 'AND', 'OR' ), true ) ) {
-			throw new InvalidArgumentException( 'Logical operator must be either AND or OR.' );
+			throw $this->discard( new InvalidArgumentException( 'Logical operator must be either AND or OR.' ) );
 		}
 	}
 
@@ -1071,8 +1071,39 @@ abstract class BaseRepository {
 	 */
 	private function validate_direction( string $direction ): void {
 		if ( ! in_array( strtoupper( $direction ), array( 'ASC', 'DESC' ), true ) ) {
-			throw new InvalidArgumentException( 'Invalid sort direction.' );
+			throw $this->discard( new InvalidArgumentException( 'Invalid sort direction.' ) );
 		}
+	}
+
+	/**
+	 * Run a $wpdb call, discarding the half-built query if it throws.
+	 *
+	 * @param callable $query
+	 *
+	 * @return mixed What the call returned.
+	 */
+	private function run_query( callable $query ): mixed {
+		try {
+			return $query();
+		} catch ( \Throwable $exception ) {
+			throw $this->discard( $exception );
+		}
+	}
+
+	/**
+	 * Drop the half-built query before an exception leaves the builder.
+	 *
+	 * Repositories are shared through the container, so a query abandoned halfway would otherwise
+	 * leak its joins and conditions into the next query run on the same instance.
+	 *
+	 * @param \Throwable $exception
+	 *
+	 * @return \Throwable The same exception, to throw.
+	 */
+	private function discard( \Throwable $exception ): \Throwable {
+		$this->reset_query();
+
+		return $exception;
 	}
 
 	/**
