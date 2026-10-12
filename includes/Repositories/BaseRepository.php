@@ -194,7 +194,8 @@ abstract class BaseRepository {
 	 * @return TModel|null
 	 */
 	public function find_by( string $column, $value ): ?BaseModel {
-		$cached = $this->get_cache( $column, $value );
+		// A locking read must reach the database: a cached model would take no lock and could be stale.
+		$cached = $this->lock_for_update ? null : $this->get_cache( $column, $value );
 		if ( $cached ) {
 			return $cached;
 		}

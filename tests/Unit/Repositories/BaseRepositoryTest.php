@@ -554,6 +554,24 @@ class BaseRepositoryTest extends TestCase {
 		$this->assertSame( $first, ( new CachedGadgetRepository() )->find( 4 ), 'The cache is shared by every instance.' );
 	}
 
+	public function test_a_locking_read_skips_the_cache_and_leaves_no_lock_behind(): void {
+		$repository = new CachedGadgetRepository();
+
+		$this->wpdb->shouldReceive( 'get_results' )
+			->once()
+			->with( 'SELECT * FROM ' . self::TABLE . ' WHERE id = %s LIMIT 1 -- ["4"]', ARRAY_A )
+			->andReturn( array( array( 'id' => '4', 'name' => 'Four' ) ) );
+		$this->wpdb->shouldReceive( 'get_results' )
+			->once()
+			->with( 'SELECT * FROM ' . self::TABLE . ' WHERE id = %s LIMIT 1 FOR UPDATE -- ["4"]', ARRAY_A )
+			->andReturn( array( array( 'id' => '4', 'name' => 'Four, changed' ) ) );
+
+		$repository->find( 4 );
+
+		$this->assertSame( 'Four, changed', $repository->lock_for_update()->find( 4 )->name, 'The row is read and locked, not taken from the cache.' );
+		$this->assertSame( 'SELECT * FROM ' . self::TABLE, $repository->get_query() );
+	}
+
 	public function test_a_missing_row_is_not_cached(): void {
 		$repository = new CachedGadgetRepository();
 
