@@ -177,6 +177,15 @@ class BaseRepositoryTest extends IntegrationTestCase {
 		$this->assertSame( 'kept', $this->repository->find( $id )->status_key );
 	}
 
+	public function test_a_locking_read_inside_a_transaction_returns_the_row(): void {
+		$id = $this->repository->insert( array( 'status_key' => 'locked', 'label' => 'Locked' ) );
+
+		$status = $this->repository->transaction( fn( $repository ) => $repository->where( 'id', $id )->lock_for_update()->first() );
+
+		$this->assertInstanceOf( CustomOrderStatus::class, $status );
+		$this->assertSame( 'locked', $status->status_key );
+	}
+
 	public function test_a_transaction_returning_false_rolls_its_writes_back(): void {
 		$this->insert_statuses( array( 'before' => null ) );
 

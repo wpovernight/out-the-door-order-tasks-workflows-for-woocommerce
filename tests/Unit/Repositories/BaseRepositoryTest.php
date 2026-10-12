@@ -194,6 +194,29 @@ class BaseRepositoryTest extends TestCase {
 		);
 	}
 
+	public function test_a_locking_read_ends_with_for_update(): void {
+		$this->assertSame(
+			'SELECT * FROM ' . self::TABLE . ' WHERE id = %s ORDER BY name DESC LIMIT 1 OFFSET 2 FOR UPDATE -- ["5"]',
+			$this->repository->where( 'id', 5 )->order_by( 'name', 'desc' )->limit( 1 )->offset( 2 )->lock_for_update()->get_query()
+		);
+	}
+
+	public function test_the_lock_is_forgotten_when_the_query_resets(): void {
+		$this->repository->lock_for_update()->get_query( true );
+
+		$this->assertSame( 'SELECT * FROM ' . self::TABLE, $this->repository->get_query() );
+	}
+
+	public function test_first_can_lock_the_row_it_reads(): void {
+		$this->wpdb->shouldReceive( 'get_results' )
+			->once()
+			->with( 'SELECT * FROM ' . self::TABLE . ' WHERE id = %s LIMIT 1 FOR UPDATE -- ["5"]', ARRAY_A )
+			->andReturn( array( array( 'id' => '5', 'name' => 'Lamp' ) ) );
+
+		$this->assertSame( 5, $this->repository->where( 'id', 5 )->lock_for_update()->first()->id );
+		$this->assertSame( 'SELECT * FROM ' . self::TABLE, $this->repository->get_query(), 'The lock does not outlive the read.' );
+	}
+
 	public function test_negative_limits_and_offsets_are_made_absolute(): void {
 		$this->assertSame(
 			'SELECT * FROM ' . self::TABLE . ' LIMIT 2 OFFSET 4',

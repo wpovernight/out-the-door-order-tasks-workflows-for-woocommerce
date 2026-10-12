@@ -43,10 +43,11 @@ abstract class BaseRepository {
 	/** @var array<int, mixed> */
 	private array $bindings = array();
 
-	private array $columns   = array( '*' );
-	private string $order_by = '';
-	private int $limit       = 0;
-	private int $offset      = 0;
+	private array $columns        = array( '*' );
+	private string $order_by      = '';
+	private int $limit            = 0;
+	private int $offset           = 0;
+	private bool $lock_for_update = false;
 
 	/**
 	 * Primary key column, used as the fallback ORDER BY for stable pagination.
@@ -87,6 +88,7 @@ abstract class BaseRepository {
 		$columns = implode( ', ', $this->columns );
 		$query   = "SELECT {$columns} FROM {$this->get_table_full_name( true )}";
 		$query   = $this->append_query_clauses( $query );
+		$query  .= $this->lock_for_update ? ' FOR UPDATE' : '';
 		$query   = $this->append_bindings( $query );
 
 		if ( $reset ) {
@@ -863,6 +865,18 @@ abstract class BaseRepository {
 		return $this;
 	}
 
+	/**
+	 * Lock the rows this query reads until the transaction ends, so no other transaction can change them in
+	 * between (SELECT ... FOR UPDATE). Only meaningful inside transaction().
+	 *
+	 * @return self
+	 */
+	public function lock_for_update(): self {
+		$this->lock_for_update = true;
+
+		return $this;
+	}
+
 	/** ================================
 	 *   Internal
 	 *  ================================ */
@@ -1112,15 +1126,16 @@ abstract class BaseRepository {
 	 * @return void
 	 */
 	private function reset_query(): void {
-		$this->alias         = null;
-		$this->columns       = array( '*' );
-		$this->joins         = array();
-		$this->joined_tables = array();
-		$this->wheres        = array();
-		$this->bindings      = array();
-		$this->order_by      = '';
-		$this->limit         = 0;
-		$this->offset        = 0;
+		$this->alias           = null;
+		$this->columns         = array( '*' );
+		$this->joins           = array();
+		$this->joined_tables   = array();
+		$this->wheres          = array();
+		$this->bindings        = array();
+		$this->order_by        = '';
+		$this->limit           = 0;
+		$this->offset          = 0;
+		$this->lock_for_update = false;
 	}
 
 	/**
