@@ -994,6 +994,70 @@ class BaseRepositoryTest extends TestCase {
 		$this->assert_throws( InvalidArgumentException::class, fn() => $this->repository->where( 'id', 4 )->increment( 'price', 1, array( 'sold' ) ) );
 	}
 
+	public function test_update_matching_sets_columns_under_any_where(): void {
+		// The SET values are bound first, in order, then the WHERE values; NULL is written without a binding.
+		$this->wpdb->shouldReceive( 'query' )
+			->once()
+			->with(
+				'UPDATE ' . self::TABLE . ' SET status = %s, name = NULL, price = %d, created_at = %s WHERE price < %d  AND ( status = %s  OR created_at <= %s ) -- ["sold",3,"2026-10-02 06:14:03",9,"active","2026-10-01 00:00:00"]'
+			)
+			->andReturn( 2 );
+
+		$changed = $this->repository
+			->where( 'price', '<', 9 )
+			->where_group( fn( $query ) => $query->where( 'status', 'active' )->where( 'created_at', '<=', '2026-10-01 00:00:00', 'OR' ) )
+			->update_matching(
+				array(
+					'status'     => 'sold',
+					'Name'       => null,
+					'price'      => 3,
+					'created_at' => new DateTime( '2026-10-02 06:14:03' ),
+				)
+			);
+
+		$this->assertSame( 2, $changed );
+		$this->assertSame( 'SELECT * FROM ' . self::TABLE, $this->repository->get_query(), 'The builder is reset after the update.' );
+	}
+
+	public function test_update_matching_reports_a_failed_query(): void {
+		$this->wpdb->shouldReceive( 'query' )->once()->andReturn( false );
+
+		$this->assertFalse( $this->repository->where( 'price', '>', 4 )->update_matching( array( 'status' => 'sold' ) ) );
+	}
+
+	public function test_update_matching_validates_its_columns_and_wheres_and_discards_the_query(): void {
+		$this->wpdb->shouldNotReceive( 'query' );
+
+		$attempts = array(
+			InvalidArgumentException::class => fn() => $this->repository->where( 'id', 4 )->update_matching( array() ),
+			RuntimeException::class         => fn() => $this->repository->update_matching( array( 'status' => 'sold' ) ),
+		);
+
+		foreach ( $attempts as $exception => $attempt ) {
+			$this->assert_throws( $exception, $attempt );
+			$this->assertSame( 'SELECT * FROM ' . self::TABLE, $this->repository->get_query() );
+		}
+
+		$this->assert_throws( \Throwable::class, fn() => $this->repository->where( 'id', 4 )->update_matching( array( 'colour' => 'red' ) ) );
+		$this->assertSame( 'SELECT * FROM ' . self::TABLE, $this->repository->get_query() );
+	}
+
+	/**
+	 * @dataProvider unsettable_column_provider
+	 */
+	public function test_update_matching_only_sets_bare_column_names( string $column ): void {
+		$this->wpdb->shouldNotReceive( 'query' );
+
+		$this->assert_throws( InvalidArgumentException::class, fn() => $this->repository->where( 'id', 4 )->update_matching( array( $column => 'x' ) ) );
+		$this->assertSame( 'SELECT * FROM ' . self::TABLE, $this->repository->get_query(), 'The query being built is discarded.' );
+	}
+
+	public function test_update_matching_rejects_columns_given_as_a_list(): void {
+		$this->wpdb->shouldNotReceive( 'query' );
+
+		$this->assert_throws( InvalidArgumentException::class, fn() => $this->repository->where( 'id', 4 )->update_matching( array( 'sold' ) ) );
+	}
+
 	public function test_last_db_error_is_read_from_wpdb(): void {
 		$this->wpdb->last_error = 'Duplicate entry';
 

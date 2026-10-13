@@ -416,10 +416,34 @@ abstract class BaseRepository {
 	}
 
 	/**
+	 * Set columns of the rows matching the WHERE clauses, whatever they are.
+	 *
+	 * Unlike update(), every kind of WHERE clause works here (any operator, OR, groups), so a row can be checked and
+	 * changed in one atomic statement: the database re-checks the conditions on the latest version of each row it
+	 * changes.
+	 *
+	 * @param array<string, mixed> $data Columns to set, to their values. Null sets NULL.
+	 *
+	 * @return int|false Number of rows changed, or false on error. A row that already held the values is not counted.
+	 * @throws RuntimeException If no WHERE clause is specified.
+	 * @throws InvalidArgumentException If data is empty, or a key is not a bare name of this table's columns.
+	 */
+	public function update_matching( array $data ): int|false {
+		if ( empty( $data ) ) {
+			throw $this->discard( new InvalidArgumentException( 'Data must be a non-empty array.' ) );
+		}
+
+		$this->validate_set_columns( array_keys( $data ) );
+
+		[ $sets, $bindings ] = $this->compile_sets( $data );
+
+		return $this->update_raw( implode( ', ', $sets ), $bindings );
+	}
+
+	/**
 	 * Add to a numeric column of the matching rows, setting other columns in the same statement.
 	 *
-	 * Unlike update(), every kind of WHERE clause works here, so a row can be checked and changed in one atomic
-	 * statement: the database re-checks the conditions on the latest version of each row it changes.
+	 * Like update_matching(), every kind of WHERE clause works here.
 	 *
 	 * @param string               $column Column to add to.
 	 * @param int                  $amount Amount to add; a negative amount subtracts.
@@ -432,11 +456,30 @@ abstract class BaseRepository {
 	public function increment( string $column, int $amount = 1, array $extra = array() ): int|false {
 		$this->validate_set_columns( array_merge( array( $column ), array_keys( $extra ) ) );
 
-		$column   = strtolower( $column );
-		$sets     = array( "{$column} = {$column} + %d" );
-		$bindings = array( $amount );
+		$column = strtolower( $column );
 
-		foreach ( $extra as $name => $value ) {
+		[ $sets, $bindings ] = $this->compile_sets( $extra );
+
+		return $this->update_raw(
+			implode( ', ', array_merge( array( "{$column} = {$column} + %d" ), $sets ) ),
+			array_merge( array( $amount ), $bindings )
+		);
+	}
+
+	/**
+	 * Turn columns and their values into SET assignments and the values they bind, in order.
+	 *
+	 * The columns must already be validated as bare names of this table's columns.
+	 *
+	 * @param array<string, mixed> $data Columns to set, to their values. Null is written as NULL, with no binding.
+	 *
+	 * @return array{0: string[], 1: array<int, mixed>}
+	 */
+	private function compile_sets( array $data ): array {
+		$sets     = array();
+		$bindings = array();
+
+		foreach ( $data as $name => $value ) {
 			$name = strtolower( $name );
 
 			if ( null === $value ) {
@@ -452,7 +495,7 @@ abstract class BaseRepository {
 			$bindings[] = $value;
 		}
 
-		return $this->update_raw( implode( ', ', $sets ), $bindings );
+		return array( $sets, $bindings );
 	}
 
 	/**

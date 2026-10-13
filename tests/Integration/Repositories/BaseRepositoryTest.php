@@ -128,6 +128,24 @@ class BaseRepositoryTest extends IntegrationTestCase {
 		$this->assertSame( 'Beta', $this->repository->find( $ids['beta'] )->label, 'Other rows are untouched.' );
 	}
 
+	public function test_update_matching_changes_only_the_rows_its_conditions_still_match(): void {
+		$ids = $this->insert_statuses( array( 'alpha' => '#111', 'beta' => null, 'gamma' => '#333' ) );
+
+		$take = fn() => $this->repository
+			->where( 'id', '>=', $ids['alpha'] )
+			->where( 'id', '<=', $ids['beta'] )
+			->where_group( fn( $query ) => $query->where( 'background', '#111' )->where( 'background', 'IS', null, 'OR' ) )
+			->update_matching( array( 'label' => 'Taken', 'background' => '#000' ) );
+
+		$this->assertSame( 2, $take() );
+		$this->assertSame( 0, $take(), 'Their background changed, so the same statement no longer matches.' );
+
+		$this->assertSame(
+			array( 'Taken', 'Taken', 'Gamma' ),
+			array_map( static fn( $status ) => $status->label, $this->repository->where( 'id', 'IN', array_values( $ids ) )->order_by( 'id' )->get() )
+		);
+	}
+
 	public function test_order_limit_offset_and_count(): void {
 		$this->insert_statuses( array( 'c' => null, 'a' => null, 'd' => null, 'b' => null ) );
 
