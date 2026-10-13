@@ -329,6 +329,7 @@ abstract class BaseRepository {
 	 * @param array<string, mixed> $data
 	 *
 	 * @return int|false Insert id or false on failure.
+	 * @throws InvalidArgumentException If data is empty, or a key is not a bare name of this table's columns.
 	 */
 	public function insert( array $data ): int|false {
 		if ( empty( $data ) ) {
@@ -390,7 +391,9 @@ abstract class BaseRepository {
 	 *
 	 * @return int|false Number of rows updated, or false on error. Returns 0 if no rows were affected (data unchanged).
 	 * @throws RuntimeException If no WHERE clause is specified.
-	 * @throws InvalidArgumentException If data is empty or columns are invalid.
+	 * @throws InvalidArgumentException If data is empty, a key is not a bare name of this table's columns, or a WHERE
+	 *                                  clause is not "column = value" joined by AND: another operator, an OR, a
+	 *                                  group, a column compared twice, or a name that is not bare.
 	 */
 	public function update( array $data ): int|false {
 		// Validate the data array.
@@ -518,7 +521,9 @@ abstract class BaseRepository {
 	 *
 	 * @return int|false Number of rows deleted or false on failure.
 	 * @throws RuntimeException If no WHERE clause is specified.
-	 * @throws InvalidArgumentException If invalid arguments are sent to where().
+	 * @throws InvalidArgumentException If invalid arguments are sent to where(), or a WHERE clause is not
+	 *                                  "column = value" joined by AND: another operator, an OR, a group, a column
+	 *                                  compared twice (the id included), or a name that is not bare.
 	 */
 	public function delete( ?int $id = null ): int|false {
 		if ( ! empty( $id ) ) {
