@@ -85,6 +85,20 @@ class BaseRepositoryTest extends IntegrationTestCase {
 		$this->assertSame( array( 'gamma' ), $this->keys( $rows ) );
 	}
 
+	public function test_update_and_delete_refuse_an_or_and_leave_every_row_alone(): void {
+		$ids = $this->insert_statuses( array( 'alpha' => '#111', 'beta' => '#222', 'gamma' => '#333' ) );
+
+		// Read as an AND, these would match no row; with the second column overwriting the first, they would match beta.
+		$wheres = fn() => $this->repository->where( 'id', $ids['alpha'] )->where( 'status_key', '=', 'beta', 'OR' );
+
+		$this->assert_throws_invalid_argument( fn() => $wheres()->update( array( 'label' => 'Changed' ) ) );
+		$this->assert_throws_invalid_argument( fn() => $wheres()->delete() );
+		$this->assert_throws_invalid_argument( fn() => $this->repository->where( 'status_key', 'alpha' )->where( 'status_key', 'beta' )->delete() );
+
+		$this->assertSame( array( 'Alpha', 'Beta', 'Gamma' ), array_map( static fn( $status ) => $status->label, $this->repository->order_by( 'id' )->get() ) );
+		$this->assertSame( 1, $this->repository->where( 'id', $ids['alpha'] )->where( 'status_key', 'alpha' )->update( array( 'label' => 'Changed' ) ), 'The query builder is usable again.' );
+	}
+
 	public function test_increment_changes_only_the_rows_its_conditions_still_match(): void {
 		$ids = $this->insert_statuses( array( 'alpha' => '#111', 'beta' => null ) );
 
@@ -269,6 +283,25 @@ class BaseRepositoryTest extends IntegrationTestCase {
 		}
 
 		return $ids;
+	}
+
+	/**
+	 * Assert that a callback throws InvalidArgumentException.
+	 *
+	 * @param callable $callback
+	 *
+	 * @return void
+	 */
+	private function assert_throws_invalid_argument( callable $callback ): void {
+		try {
+			$callback();
+		} catch ( \InvalidArgumentException $e ) {
+			$this->addToAssertionCount( 1 );
+
+			return;
+		}
+
+		$this->fail( 'Expected InvalidArgumentException to be thrown.' );
 	}
 
 	/**

@@ -768,6 +768,53 @@ class BaseRepositoryTest extends TestCase {
 		$this->assert_throws( InvalidArgumentException::class, fn() => ( new GadgetRepository() )->where( 'id', 'IN', array( 1 ) )->delete() );
 	}
 
+	/**
+	 * WHERE clauses that $wpdb->update() and $wpdb->delete() cannot express, which would widen or change the rows
+	 * they match if written as an equality array.
+	 *
+	 * @return array<string, array{callable}>
+	 */
+	public function inexpressible_where_provider(): array {
+		return array(
+			'an OR'                   => array( static fn( $query ) => $query->where( 'id', 4 )->where( 'status', '=', 'active', 'OR' ) ),
+			'an OR in lowercase'      => array( static fn( $query ) => $query->where( 'id', 4 )->where( 'status', '=', 'active', 'or' ) ),
+			'a column compared twice' => array( static fn( $query ) => $query->where( 'id', 4 )->where( 'id', 5 ) ),
+			'a null comparison'       => array( static fn( $query ) => $query->where( 'id', 4 )->where( 'name', 'IS', null ) ),
+		);
+	}
+
+	/**
+	 * @dataProvider inexpressible_where_provider
+	 */
+	public function test_update_and_delete_refuse_wheres_they_cannot_express( callable $wheres ): void {
+		$this->wpdb->shouldNotReceive( 'update' );
+		$this->wpdb->shouldNotReceive( 'delete' );
+
+		$attempts = array(
+			fn() => $wheres( $this->repository )->update( array( 'name' => 'x' ) ),
+			fn() => $wheres( $this->repository )->delete(),
+		);
+
+		foreach ( $attempts as $attempt ) {
+			$this->assert_throws( InvalidArgumentException::class, $attempt );
+			$this->assertSame( 'SELECT * FROM ' . self::TABLE, $this->repository->get_query(), 'The query being built is discarded.' );
+		}
+	}
+
+	public function test_delete_by_id_refuses_a_where_on_the_same_column(): void {
+		$this->wpdb->shouldNotReceive( 'delete' );
+
+		$this->assert_throws( InvalidArgumentException::class, fn() => $this->repository->where( 'id', 5 )->delete( 4 ) );
+	}
+
+	public function test_an_or_on_the_first_clause_joins_nothing_and_is_accepted(): void {
+		$this->wpdb->shouldReceive( 'update' )->once()->with( self::TABLE, array( 'name' => 'x' ), array( 'id' => 4, 'status' => 'active' ) )->andReturn( 1 );
+		$this->wpdb->shouldReceive( 'delete' )->once()->with( self::TABLE, array( 'id' => 4 ) )->andReturn( 1 );
+
+		$this->assertSame( 1, $this->repository->where( 'id', '=', 4, 'OR' )->where( 'status', 'active' )->update( array( 'name' => 'x' ) ) );
+		$this->assertSame( 1, $this->repository->where( 'id', '=', 4, 'OR' )->delete() );
+	}
+
 	public function test_delete_raw_supports_any_operator(): void {
 		$this->wpdb->shouldReceive( 'query' )
 			->once()

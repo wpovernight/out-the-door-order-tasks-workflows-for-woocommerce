@@ -405,16 +405,7 @@ abstract class BaseRepository {
 
 		$this->validate_columns( array_keys( $data ) );
 
-		// Prepare WHERE array
-		// This method compiles the WHERE clauses using the `where` method of the query builder.
-		// It only works with equality checks (i.e., `=` operator), as we are using WordPress's built-in update method.
-		$where = array();
-		foreach ( $this->wheres as [$column, $operator, $value, $logical_operator] ) {
-			if ( '=' !== $operator ) {
-				throw $this->discard( new InvalidArgumentException( 'Only equality checks are supported in WHERE clause for update.' ) );
-			}
-			$where[ $column ] = $value;
-		}
+		$where = $this->equality_where_array( 'update' );
 
 		$this->reset_query();
 
@@ -538,16 +529,7 @@ abstract class BaseRepository {
 			throw $this->discard( new RuntimeException( 'No WHERE clause specified for delete.' ) );
 		}
 
-		// Prepare WHERE array
-		// This method compiles the WHERE clauses using the `where` method of the query builder.
-		// It only works with equality checks (i.e., `=` operator), as we are using WordPress's built-in update method.
-		$where = array();
-		foreach ( $this->wheres as [$column, $operator, $value, $logical_operator] ) {
-			if ( '=' !== $operator ) {
-				throw $this->discard( new InvalidArgumentException( 'Only equality checks are supported in WHERE clause for delete.' ) );
-			}
-			$where[ $column ] = $value;
-		}
+		$where = $this->equality_where_array( 'delete' );
 
 		$this->reset_query();
 
@@ -1138,6 +1120,41 @@ abstract class BaseRepository {
 				throw $this->discard( new InvalidArgumentException( esc_html( "Column $column does not exist in the table." ) ) );
 			}
 		}
+	}
+
+	/**
+	 * Turn the WHERE clauses into the column => value array $wpdb->update() and $wpdb->delete() take.
+	 *
+	 * That array can only say "every column equals its value", so any clause it cannot say exactly is refused rather
+	 * than dropped or changed: an operator other than =, an OR, a group, or a column compared twice. Each would
+	 * otherwise make the statement match other rows than the query asked for.
+	 *
+	 * @param string $statement update | delete, for the error message.
+	 *
+	 * @return array<string, mixed>
+	 * @throws InvalidArgumentException If a clause cannot be written as column = value joined by AND.
+	 */
+	private function equality_where_array( string $statement ): array {
+		$where = array();
+
+		foreach ( $this->wheres as $index => [$column, $operator, $value, $logical_operator] ) {
+			if ( '=' !== $operator ) {
+				throw $this->discard( new InvalidArgumentException( esc_html( "Only equality checks are supported in WHERE clause for {$statement}." ) ) );
+			}
+
+			// The first clause's logical operator joins it to nothing, so only the later ones matter.
+			if ( 0 < $index && 'AND' !== $logical_operator ) {
+				throw $this->discard( new InvalidArgumentException( esc_html( "Only AND is supported in WHERE clause for {$statement}." ) ) );
+			}
+
+			if ( array_key_exists( $column, $where ) ) {
+				throw $this->discard( new InvalidArgumentException( esc_html( "Column {$column} is compared more than once in WHERE clause for {$statement}." ) ) );
+			}
+
+			$where[ $column ] = $value;
+		}
+
+		return $where;
 	}
 
 	/**
