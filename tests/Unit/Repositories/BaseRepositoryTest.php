@@ -888,6 +888,44 @@ class BaseRepositoryTest extends TestCase {
 		$this->assert_throws( RuntimeException::class, fn() => $this->repository->increment( 'price' ) );
 	}
 
+	/**
+	 * Columns a SELECT accepts but a SET clause cannot write.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public function unsettable_column_provider(): array {
+		return array(
+			'qualified with the table' => array( self::TABLE . '.price' ),
+			'qualified with an alias'  => array( 'g.price' ),
+			'with an alias'            => array( 'price AS cost' ),
+			'star'                     => array( '*' ),
+			'empty'                    => array( '' ),
+		);
+	}
+
+	/**
+	 * @dataProvider unsettable_column_provider
+	 */
+	public function test_increment_only_sets_bare_column_names( string $column ): void {
+		$this->wpdb->shouldNotReceive( 'query' );
+
+		$attempts = array(
+			fn() => $this->repository->where( 'id', 4 )->increment( $column ),
+			fn() => $this->repository->where( 'id', 4 )->increment( 'price', 1, array( $column => 'x' ) ),
+		);
+
+		foreach ( $attempts as $attempt ) {
+			$this->assert_throws( InvalidArgumentException::class, $attempt );
+			$this->assertSame( 'SELECT * FROM ' . self::TABLE, $this->repository->get_query(), 'The query being built is discarded.' );
+		}
+	}
+
+	public function test_increment_rejects_extra_columns_given_as_a_list(): void {
+		$this->wpdb->shouldNotReceive( 'query' );
+
+		$this->assert_throws( InvalidArgumentException::class, fn() => $this->repository->where( 'id', 4 )->increment( 'price', 1, array( 'sold' ) ) );
+	}
+
 	public function test_last_db_error_is_read_from_wpdb(): void {
 		$this->wpdb->last_error = 'Duplicate entry';
 

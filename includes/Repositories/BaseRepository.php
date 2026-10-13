@@ -433,10 +433,10 @@ abstract class BaseRepository {
 	 *
 	 * @return int|false Number of rows changed, or false on error.
 	 * @throws RuntimeException If no WHERE clause is specified.
-	 * @throws InvalidArgumentException If a column does not exist.
+	 * @throws InvalidArgumentException If a column is not a bare name of this table's columns.
 	 */
 	public function increment( string $column, int $amount = 1, array $extra = array() ): int|false {
-		$this->validate_columns( array_merge( array( $column ), array_keys( $extra ) ) );
+		$this->validate_set_columns( array_merge( array( $column ), array_keys( $extra ) ) );
 
 		$column   = strtolower( $column );
 		$sets     = array( "{$column} = {$column} + %d" );
@@ -1138,6 +1138,26 @@ abstract class BaseRepository {
 				throw $this->discard( new InvalidArgumentException( esc_html( "Column $column does not exist in the table." ) ) );
 			}
 		}
+	}
+
+	/**
+	 * Validate the columns a SET clause writes.
+	 *
+	 * A SET clause names this table's own columns only, so a qualified name, an alias or * is rejected even where
+	 * a SELECT would accept it.
+	 *
+	 * @param array $columns
+	 *
+	 * @return void
+	 */
+	private function validate_set_columns( array $columns ): void {
+		foreach ( $columns as $column ) {
+			if ( ! is_string( $column ) || ! preg_match( '/^\w+$/', $column ) ) {
+				throw $this->discard( new InvalidArgumentException( esc_html( "Column $column cannot be set: only a bare column name can." ) ) );
+			}
+		}
+
+		$this->validate_columns( $columns );
 	}
 
 	/**
