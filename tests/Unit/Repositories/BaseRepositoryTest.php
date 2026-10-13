@@ -168,6 +168,75 @@ class BaseRepositoryTest extends TestCase {
 		$this->repository->where_raw_public( '1 = 1', 'XOR' );
 	}
 
+	public function test_a_where_group_is_parenthesised_and_binds_its_values_in_place(): void {
+		$query = $this->repository
+			->where( 'name', 'Lamp' )
+			->where_group(
+				fn( $query ) => $query
+					->where( 'status', 'active' )
+					->where_group( fn( $query ) => $query->where( 'status', 'draft' )->where( 'price', '<=', 10 ), 'or' )
+			)
+			->where( 'id', '>', 3 )
+			->get_query();
+
+		$this->assertSame(
+			'SELECT * FROM ' . self::TABLE . ' WHERE name = %s  AND ( status = %s  OR ( status = %s  AND price <= %d ) )  AND id > %d -- ["Lamp","active","draft",10,3]',
+			$query
+		);
+	}
+
+	public function test_a_where_group_can_come_first_and_hold_raw_clauses(): void {
+		$query = $this->repository
+			->where_group( fn( $query ) => $query->where_raw_public( 'price * 2 > 10' )->where( 'name', 'IS', null, 'OR' ) )
+			->get_query();
+
+		$this->assertSame( 'SELECT * FROM ' . self::TABLE . ' WHERE ( price * 2 > 10  OR name IS NULL )', $query );
+	}
+
+	public function test_an_empty_where_group_adds_nothing(): void {
+		$this->wpdb->shouldNotReceive( 'prepare' );
+
+		$this->assertSame( 'SELECT * FROM ' . self::TABLE, $this->repository->where_group( static fn() => null )->get_query() );
+	}
+
+	public function test_a_where_group_rejects_an_unsupported_logical_operator(): void {
+		$this->expectException( InvalidArgumentException::class );
+
+		$this->repository->where_group( static fn() => null, 'XOR' );
+	}
+
+	public function test_a_where_group_whose_callback_throws_discards_the_query_being_built(): void {
+		$this->repository->where( 'name', 'Lamp' );
+
+		$this->assert_throws(
+			RuntimeException::class,
+			fn() => $this->repository->where_group(
+				static function ( $query ) {
+					$query->where( 'status', 'active' );
+
+					throw new RuntimeException( 'Gone away' );
+				}
+			)
+		);
+
+		$this->assertSame( 'SELECT * FROM ' . self::TABLE, $this->repository->get_query() );
+	}
+
+	public function test_a_where_group_with_a_rejected_clause_discards_the_query_being_built(): void {
+		$this->repository->where( 'name', 'Lamp' );
+
+		$this->assert_throws( InvalidArgumentException::class, fn() => $this->repository->where_group( fn( $query ) => $query->where( 'colour', 'red' ) ) );
+
+		$this->assertSame( 'SELECT * FROM ' . self::TABLE, $this->repository->get_query() );
+	}
+
+	public function test_update_and_delete_reject_a_where_group(): void {
+		$group = static fn( $query ) => $query->where( 'id', 4 );
+
+		$this->assert_throws( InvalidArgumentException::class, fn() => $this->repository->where_group( $group )->update( array( 'name' => 'x' ) ) );
+		$this->assert_throws( InvalidArgumentException::class, fn() => $this->repository->where_group( $group )->delete() );
+	}
+
 	public function test_select_accepts_aliases_qualified_names_and_star(): void {
 		$query = $this->repository->select( array( 'g.name AS label', 'price', '*' ) )->get_query();
 
@@ -760,6 +829,63 @@ class BaseRepositoryTest extends TestCase {
 	public function test_update_raw_validates_input(): void {
 		$this->assert_throws( InvalidArgumentException::class, fn() => $this->repository->where( 'id', 1 )->update_raw_public( '', array() ) );
 		$this->assert_throws( RuntimeException::class, fn() => ( new GadgetRepository() )->update_raw_public( 'price = 1', array() ) );
+	}
+
+	public function test_increment_adds_to_a_column_and_sets_the_others_under_any_where(): void {
+		// The SET values are bound first, in order, then the WHERE values; NULL is written without a binding.
+		$this->wpdb->shouldReceive( 'query' )
+			->once()
+			->with(
+				'UPDATE ' . self::TABLE . ' SET price = price + %d, status = %s, name = NULL, created_at = %s WHERE id = %s  AND price < %d  AND ( status = %s  OR status = %s ) -- [1,"sold","2026-10-02 06:14:03","4",9,"active","draft"]'
+			)
+			->andReturn( 1 );
+
+		$changed = $this->repository
+			->where( 'id', 4 )
+			->where( 'price', '<', 9 )
+			->where_group( fn( $query ) => $query->where( 'status', 'active' )->where( 'status', '=', 'draft', 'OR' ) )
+			->increment(
+				'PRICE',
+				1,
+				array(
+					'status'     => 'sold',
+					'Name'       => null,
+					'created_at' => new DateTime( '2026-10-02 06:14:03' ),
+				)
+			);
+
+		$this->assertSame( 1, $changed );
+		$this->assertSame( 'SELECT * FROM ' . self::TABLE, $this->repository->get_query(), 'The builder is reset after the update.' );
+	}
+
+	public function test_increment_can_subtract_without_other_columns(): void {
+		$this->wpdb->shouldReceive( 'query' )
+			->once()
+			->with( 'UPDATE ' . self::TABLE . ' SET price = price + %d WHERE status = %s -- [-2,"active"]' )
+			->andReturn( 3 );
+
+		$this->assertSame( 3, $this->repository->where( 'status', 'active' )->increment( 'price', -2 ) );
+	}
+
+	public function test_increment_reports_a_failed_query(): void {
+		$this->wpdb->shouldReceive( 'query' )->once()->andReturn( false );
+
+		$this->assertFalse( $this->repository->where( 'id', 4 )->increment( 'price' ) );
+	}
+
+	public function test_increment_validates_its_columns_and_wheres_and_discards_the_query(): void {
+		$attempts = array(
+			fn() => $this->repository->where( 'id', 4 )->increment( 'colour' ),
+			fn() => $this->repository->where( 'id', 4 )->increment( 'price', 1, array( 'colour' => 'red' ) ),
+			fn() => $this->repository->increment( 'price' ),
+		);
+
+		foreach ( $attempts as $attempt ) {
+			$this->assert_throws( \Throwable::class, $attempt );
+			$this->assertSame( 'SELECT * FROM ' . self::TABLE, $this->repository->get_query() );
+		}
+
+		$this->assert_throws( RuntimeException::class, fn() => $this->repository->increment( 'price' ) );
 	}
 
 	public function test_last_db_error_is_read_from_wpdb(): void {

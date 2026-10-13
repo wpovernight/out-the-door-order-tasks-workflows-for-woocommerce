@@ -72,6 +72,36 @@ class BaseRepositoryTest extends IntegrationTestCase {
 		$this->assertEqualsCanonicalizing( array( 'alpha', 'delta' ), $this->keys( $this->repository->where( 'status_key', 'alpha' )->where( 'status_key', '=', 'delta', 'OR' )->get() ) );
 	}
 
+	public function test_where_groups_against_real_rows(): void {
+		$this->insert_statuses( array( 'alpha' => '#111', 'beta' => null, 'gamma' => '#333', 'delta' => '#444' ) );
+
+		// Without the parentheses this would read "alpha OR beta AND ..." and also return alpha.
+		$rows = $this->repository
+			->where( 'background', 'IS NOT', null )
+			->where_group( fn( $query ) => $query->where( 'status_key', 'alpha' )->where( 'status_key', '=', 'gamma', 'OR' ) )
+			->where( 'status_key', '!=', 'alpha' )
+			->get();
+
+		$this->assertSame( array( 'gamma' ), $this->keys( $rows ) );
+	}
+
+	public function test_increment_changes_only_the_rows_its_conditions_still_match(): void {
+		$ids = $this->insert_statuses( array( 'alpha' => '#111', 'beta' => null ) );
+
+		$claim = fn() => $this->repository
+			->where( 'id', $ids['alpha'] )
+			->where( 'is_deleting', '<', 1 )
+			->where_group( fn( $query ) => $query->where( 'background', '#111' )->where( 'background', 'IS', null, 'OR' ) )
+			->increment( 'is_deleting', 1, array( 'label' => 'Claimed', 'background' => null ) );
+
+		$this->assertSame( 1, $claim() );
+		$this->assertSame( 0, $claim(), 'The counter is now 1, so the same statement no longer matches.' );
+
+		$alpha = $this->repository->select( array( 'label', 'background', 'is_deleting' ) )->where( 'id', $ids['alpha'] )->get( true );
+		$this->assertSame( array( array( 'label' => 'Claimed', 'background' => null, 'is_deleting' => '1' ) ), $alpha );
+		$this->assertSame( 'Beta', $this->repository->find( $ids['beta'] )->label, 'Other rows are untouched.' );
+	}
+
 	public function test_order_limit_offset_and_count(): void {
 		$this->insert_statuses( array( 'c' => null, 'a' => null, 'd' => null, 'b' => null ) );
 

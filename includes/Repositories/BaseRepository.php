@@ -31,12 +31,12 @@ abstract class BaseRepository {
 
 	/**
 	 * Each where item is an array of:
-	 * [0] => string column
-	 * [1] => string operator
+	 * [0] => string column, or for a GROUP the group's own where items
+	 * [1] => string operator, RAW or GROUP
 	 * [2] => mixed value
 	 * [3] => string logical operator (AND|OR)
 	 *
-	 * @var array<int, string|array{0:string,1:string,2:mixed,3:string}>
+	 * @var array<int, array{0:string|array,1:string,2:mixed,3:string}>
 	 */
 	private array $wheres = array();
 
@@ -419,6 +419,46 @@ abstract class BaseRepository {
 		$this->reset_query();
 
 		return $this->wpdb->update( $this->get_table_full_name(), $data, $where );
+	}
+
+	/**
+	 * Add to a numeric column of the matching rows, setting other columns in the same statement.
+	 *
+	 * Unlike update(), every kind of WHERE clause works here, so a row can be checked and changed in one atomic
+	 * statement: the database re-checks the conditions on the latest version of each row it changes.
+	 *
+	 * @param string               $column Column to add to.
+	 * @param int                  $amount Amount to add; a negative amount subtracts.
+	 * @param array<string, mixed> $extra  Other columns to set, to their values. Null sets NULL.
+	 *
+	 * @return int|false Number of rows changed, or false on error.
+	 * @throws RuntimeException If no WHERE clause is specified.
+	 * @throws InvalidArgumentException If a column does not exist.
+	 */
+	public function increment( string $column, int $amount = 1, array $extra = array() ): int|false {
+		$this->validate_columns( array_merge( array( $column ), array_keys( $extra ) ) );
+
+		$column   = strtolower( $column );
+		$sets     = array( "{$column} = {$column} + %d" );
+		$bindings = array( $amount );
+
+		foreach ( $extra as $name => $value ) {
+			$name = strtolower( $name );
+
+			if ( null === $value ) {
+				$sets[] = "{$name} = NULL";
+				continue;
+			}
+
+			if ( $value instanceof \DateTime ) {
+				$value = $value->format( 'Y-m-d H:i:s' );
+			}
+
+			$sets[]     = "{$name} = {$this->placeholder_for( $value )}";
+			$bindings[] = $value;
+		}
+
+		return $this->update_raw( implode( ', ', $sets ), $bindings );
 	}
 
 	/**
@@ -808,6 +848,41 @@ abstract class BaseRepository {
 	}
 
 	/**
+	 * Add a parenthesised group of WHERE clauses, such as "a = 1 AND ( b = 2 OR c = 3 )".
+	 *
+	 * The callback adds the group's clauses with where(), where_group() or where_raw() on the query it is given.
+	 * A group the callback leaves empty adds nothing.
+	 *
+	 * @param callable $callback         Receives this query and adds the group's clauses.
+	 * @param string   $logical_operator How the group joins the clauses before it: AND|OR (default AND).
+	 *
+	 * @return self
+	 * @throws InvalidArgumentException If invalid logical operator is provided.
+	 */
+	public function where_group( callable $callback, string $logical_operator = 'AND' ): self {
+		$this->validate_logical_operator( $logical_operator );
+
+		// The group's clauses are collected on their own, then put back as one item in place of them.
+		$outer        = $this->wheres;
+		$this->wheres = array();
+
+		try {
+			$callback( $this );
+		} catch ( \Throwable $exception ) {
+			throw $this->discard( $exception );
+		}
+
+		$group        = $this->wheres;
+		$this->wheres = $outer;
+
+		if ( ! empty( $group ) ) {
+			$this->wheres[] = array( $group, 'GROUP', null, strtoupper( $logical_operator ) );
+		}
+
+		return $this;
+	}
+
+	/**
 	 * Add an ORDER BY clause to the query.
 	 *
 	 * @param string $column
@@ -937,12 +1012,28 @@ abstract class BaseRepository {
 			return '';
 		}
 
+		return ' WHERE ' . $this->compile_conditions( $this->wheres );
+	}
+
+	/**
+	 * Compile where items into SQL conditions, a group's in parentheses.
+	 *
+	 * @param array $wheres Where items.
+	 *
+	 * @return string
+	 */
+	private function compile_conditions( array $wheres ): string {
 		$parts = array();
 
-		foreach ( $this->wheres as $index => $where ) {
+		foreach ( $wheres as $index => $where ) {
 			[ $column, $operator, $value, $logical_operator ] = $where;
 
 			$prefix = ( 0 === $index ) ? '' : " {$logical_operator} ";
+
+			if ( 'GROUP' === $operator ) {
+				$parts[] = "{$prefix}( {$this->compile_conditions( $column )} )";
+				continue;
+			}
 
 			if ( 'RAW' === $operator ) {
 				$parts[] = "{$prefix}{$column}";
@@ -959,7 +1050,7 @@ abstract class BaseRepository {
 			}
 		}
 
-		return ' WHERE ' . implode( ' ', $parts );
+		return implode( ' ', $parts );
 	}
 
 	/**
