@@ -335,7 +335,7 @@ abstract class BaseRepository {
 			throw $this->discard( new InvalidArgumentException( 'Data must be a non-empty array.' ) );
 		}
 
-		$this->validate_columns( array_keys( $data ) );
+		$this->validate_set_columns( array_keys( $data ) );
 
 		// Convert DateTime objects to strings.
 		foreach ( $data as $key => $value ) {
@@ -403,7 +403,7 @@ abstract class BaseRepository {
 			throw $this->discard( new RuntimeException( 'No WHERE clause specified for update.' ) );
 		}
 
-		$this->validate_columns( array_keys( $data ) );
+		$this->validate_set_columns( array_keys( $data ) );
 
 		$where = $this->equality_where_array( 'update' );
 
@@ -1127,7 +1127,8 @@ abstract class BaseRepository {
 	 *
 	 * That array can only say "every column equals its value", so any clause it cannot say exactly is refused rather
 	 * than dropped or changed: an operator other than =, an OR, a group, or a column compared twice. Each would
-	 * otherwise make the statement match other rows than the query asked for.
+	 * otherwise make the statement match other rows than the query asked for. $wpdb writes each key into the SQL
+	 * as a quoted name, so only a bare column name is passed on.
 	 *
 	 * @param string $statement update | delete, for the error message.
 	 *
@@ -1141,6 +1142,8 @@ abstract class BaseRepository {
 			if ( '=' !== $operator ) {
 				throw $this->discard( new InvalidArgumentException( esc_html( "Only equality checks are supported in WHERE clause for {$statement}." ) ) );
 			}
+
+			$this->validate_bare_column_names( array( $column ), "compared in WHERE clause for {$statement}" );
 
 			// The first clause's logical operator joins it to nothing, so only the later ones matter.
 			if ( 0 < $index && 'AND' !== $logical_operator ) {
@@ -1158,9 +1161,9 @@ abstract class BaseRepository {
 	}
 
 	/**
-	 * Validate the columns a SET clause writes.
+	 * Validate the columns a statement writes.
 	 *
-	 * A SET clause names this table's own columns only, so a qualified name, an alias or * is rejected even where
+	 * A write names this table's own columns only, so a qualified name, an alias or * is rejected even where
 	 * a SELECT would accept it.
 	 *
 	 * @param array $columns
@@ -1168,13 +1171,28 @@ abstract class BaseRepository {
 	 * @return void
 	 */
 	private function validate_set_columns( array $columns ): void {
+		$this->validate_bare_column_names( $columns, 'set' );
+		$this->validate_columns( $columns );
+	}
+
+	/**
+	 * Reject anything but bare column names: letters, digits and underscores only.
+	 *
+	 * validate_columns() checks a name only up to its table qualifier or alias, so whatever surrounds the name
+	 * would otherwise reach the SQL unchecked.
+	 *
+	 * @param array  $columns
+	 * @param string $use     What the column is used for, completing "cannot be ...".
+	 *
+	 * @return void
+	 * @throws InvalidArgumentException If a column is not a bare name.
+	 */
+	private function validate_bare_column_names( array $columns, string $use ): void {
 		foreach ( $columns as $column ) {
 			if ( ! is_string( $column ) || ! preg_match( '/^\w+$/', $column ) ) {
-				throw $this->discard( new InvalidArgumentException( esc_html( "Column $column cannot be set: only a bare column name can." ) ) );
+				throw $this->discard( new InvalidArgumentException( esc_html( "Column $column cannot be {$use}: only a bare column name can." ) ) );
 			}
 		}
-
-		$this->validate_columns( $columns );
 	}
 
 	/**

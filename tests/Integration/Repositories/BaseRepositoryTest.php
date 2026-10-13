@@ -99,6 +99,18 @@ class BaseRepositoryTest extends IntegrationTestCase {
 		$this->assertSame( 1, $this->repository->where( 'id', $ids['alpha'] )->where( 'status_key', 'alpha' )->update( array( 'label' => 'Changed' ) ), 'The query builder is usable again.' );
 	}
 
+	public function test_writes_refuse_a_column_name_that_would_rewrite_the_statement(): void {
+		$ids = $this->insert_statuses( array( 'alpha' => '#111', 'beta' => '#222' ) );
+
+		// Each name passes the column check up to its alias, and $wpdb would write the rest into the SQL.
+		$this->assert_throws_invalid_argument( fn() => $this->repository->where( 'id', $ids['alpha'] )->update( array( 'label AS x` = 1, `label' => 'Changed' ) ) );
+		$this->assert_throws_invalid_argument( fn() => $this->repository->where( 'id AS x` = 0 OR `id', $ids['alpha'] )->update( array( 'label' => 'Changed' ) ) );
+		$this->assert_throws_invalid_argument( fn() => $this->repository->where( 'id AS x` = 0 OR `id', $ids['alpha'] )->delete() );
+		$this->assert_throws_invalid_argument( fn() => $this->repository->insert( array( 'status_key AS x`, `label' => 'gamma' ) ) );
+
+		$this->assertSame( array( 'Alpha', 'Beta' ), array_map( static fn( $status ) => $status->label, $this->repository->order_by( 'id' )->get() ) );
+	}
+
 	public function test_increment_changes_only_the_rows_its_conditions_still_match(): void {
 		$ids = $this->insert_statuses( array( 'alpha' => '#111', 'beta' => null ) );
 

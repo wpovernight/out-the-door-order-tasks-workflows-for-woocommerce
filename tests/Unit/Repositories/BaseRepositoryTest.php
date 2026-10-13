@@ -780,7 +780,27 @@ class BaseRepositoryTest extends TestCase {
 			'an OR in lowercase'      => array( static fn( $query ) => $query->where( 'id', 4 )->where( 'status', '=', 'active', 'or' ) ),
 			'a column compared twice' => array( static fn( $query ) => $query->where( 'id', 4 )->where( 'id', 5 ) ),
 			'a null comparison'       => array( static fn( $query ) => $query->where( 'id', 4 )->where( 'name', 'IS', null ) ),
+			'a qualified column'      => array( static fn( $query ) => $query->where( self::TABLE . '.id', 4 ) ),
+			'an aliased column'       => array( static fn( $query ) => $query->where( 'id AS x` = 1 OR `id', 4 ) ),
 		);
+	}
+
+	/**
+	 * @dataProvider unsettable_column_provider
+	 */
+	public function test_insert_and_update_only_write_bare_column_names( string $column ): void {
+		$this->wpdb->shouldNotReceive( 'insert' );
+		$this->wpdb->shouldNotReceive( 'update' );
+
+		$attempts = array(
+			fn() => $this->repository->insert( array( $column => 'x' ) ),
+			fn() => $this->repository->where( 'id', 4 )->update( array( $column => 'x' ) ),
+		);
+
+		foreach ( $attempts as $attempt ) {
+			$this->assert_throws( InvalidArgumentException::class, $attempt );
+			$this->assertSame( 'SELECT * FROM ' . self::TABLE, $this->repository->get_query(), 'The query being built is discarded.' );
+		}
 	}
 
 	/**
@@ -946,6 +966,7 @@ class BaseRepositoryTest extends TestCase {
 			'qualified with an alias'  => array( 'g.price' ),
 			'with an alias'            => array( 'price AS cost' ),
 			'star'                     => array( '*' ),
+			'breaking out of quotes'   => array( 'price AS p`, `status' ),
 			'empty'                    => array( '' ),
 		);
 	}
