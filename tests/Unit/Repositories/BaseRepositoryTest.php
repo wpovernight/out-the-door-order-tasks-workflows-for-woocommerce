@@ -1092,6 +1092,114 @@ class BaseRepositoryTest extends TestCase {
 		$this->assertFalse( $this->repository->transaction( static fn() => false ) );
 	}
 
+	public function test_a_transaction_the_database_cannot_start_runs_nothing(): void {
+		$this->wpdb->shouldReceive( 'query' )->once()->with( 'START TRANSACTION' )->andReturn( false );
+		$this->wpdb->shouldNotReceive( 'query' )->with( 'COMMIT' );
+		$this->wpdb->shouldNotReceive( 'query' )->with( 'ROLLBACK' );
+
+		$ran = false;
+
+		$this->assertFalse(
+			$this->repository->transaction(
+				static function () use ( &$ran ) {
+					$ran = true;
+
+					return 1;
+				}
+			)
+		);
+		$this->assertFalse( $ran, 'Its writes would not be atomic.' );
+	}
+
+	public function test_a_transaction_the_database_cannot_commit_is_rolled_back_and_fails(): void {
+		$this->wpdb->shouldReceive( 'query' )->once()->ordered()->with( 'START TRANSACTION' );
+		$this->wpdb->shouldReceive( 'query' )->once()->ordered()->with( 'COMMIT' )->andReturnUsing(
+			function () {
+				$this->wpdb->last_error = 'Lost connection';
+
+				return false;
+			}
+		);
+		$this->wpdb->shouldReceive( 'query' )->once()->ordered()->with( 'ROLLBACK' )->andReturnUsing(
+			function () {
+				$this->wpdb->last_error = '';
+			}
+		);
+
+		$this->assertFalse( $this->repository->transaction( static fn() => 1 ) );
+		$this->assertSame( 'Lost connection', $this->repository->get_last_db_error(), 'The commit error is kept.' );
+	}
+
+	public function test_a_transaction_whose_commit_ran_again_on_a_new_connection_is_rolled_back_and_fails(): void {
+		$this->wpdb->dbh = new \stdClass();
+		$this->wpdb->shouldReceive( 'query' )->once()->ordered()->with( 'START TRANSACTION' );
+		// The server went away, so $wpdb reconnected and ran the COMMIT on a connection without the transaction.
+		$this->wpdb->shouldReceive( 'query' )->once()->ordered()->with( 'COMMIT' )->andReturnUsing(
+			function () {
+				$this->wpdb->dbh = new \stdClass();
+
+				return 0;
+			}
+		);
+		$this->wpdb->shouldReceive( 'query' )->once()->ordered()->with( 'ROLLBACK' );
+
+		$this->assertFalse( $this->repository->transaction( static fn() => 1 ) );
+		$this->assertSame( 'The database connection was lost and reopened during the transaction, so its writes may be partly kept.', $this->repository->get_last_db_error() );
+	}
+
+	public function test_a_transaction_whose_connection_was_reopened_inside_it_fails_after_its_commit(): void {
+		$this->wpdb->dbh = new \stdClass();
+		$this->wpdb->shouldReceive( 'query' )->once()->ordered()->with( 'START TRANSACTION' );
+		$this->wpdb->shouldReceive( 'query' )->once()->ordered()->with( 'COMMIT' );
+		$this->wpdb->shouldReceive( 'query' )->once()->ordered()->with( 'ROLLBACK' );
+
+		$result = $this->repository->transaction(
+			function () {
+				// A write inside it met a server that went away, and ran again on a new connection.
+				$this->wpdb->dbh = new \stdClass();
+
+				return 1;
+			}
+		);
+
+		$this->assertFalse( $result );
+		$this->assertSame( 'The database connection was lost and reopened during the transaction, so its writes may be partly kept.', $this->repository->get_last_db_error() );
+	}
+
+	public function test_a_transaction_whose_read_went_to_another_connection_still_commits(): void {
+		$primary         = new \stdClass();
+		$this->wpdb->dbh = $primary;
+		$this->wpdb->shouldReceive( 'query' )->once()->ordered()->with( 'START TRANSACTION' );
+		// Back on the connection the START went to, as a drop-in sends every write and the COMMIT.
+		$this->wpdb->shouldReceive( 'query' )->once()->ordered()->with( 'COMMIT' )->andReturnUsing(
+			function () use ( $primary ) {
+				$this->wpdb->dbh = $primary;
+
+				return 0;
+			}
+		);
+		$this->wpdb->shouldNotReceive( 'query' )->with( 'ROLLBACK' );
+
+		$result = $this->repository->transaction(
+			function () {
+				// A database drop-in sent a read to a replica.
+				$this->wpdb->dbh = new \stdClass();
+
+				return 1;
+			}
+		);
+
+		$this->assertSame( 1, $result );
+	}
+
+	public function test_a_transaction_on_the_same_connection_throughout_commits(): void {
+		$this->wpdb->dbh = new \stdClass();
+		$this->wpdb->shouldReceive( 'query' )->once()->ordered()->with( 'START TRANSACTION' );
+		$this->wpdb->shouldReceive( 'query' )->once()->ordered()->with( 'COMMIT' );
+
+		$this->assertSame( 1, $this->repository->transaction( static fn() => 1 ) );
+	}
+
 	public function test_transaction_rolls_back_and_rethrows(): void {
 		$this->wpdb->shouldReceive( 'query' )->once()->ordered()->with( 'START TRANSACTION' );
 		$this->wpdb->shouldReceive( 'query' )->once()->ordered()->with( 'ROLLBACK' );

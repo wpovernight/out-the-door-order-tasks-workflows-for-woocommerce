@@ -616,13 +616,31 @@ abstract class BaseRepository {
 	 *
 	 * On failure, get_last_db_error() still reports the error that made it fail, not the rollback's.
 	 *
+	 * A transaction the database cannot start runs nothing, since its writes would not be atomic. One it cannot
+	 * commit is rolled back. Both fail like a callback that returns false.
+	 *
+	 * So does one whose connection was lost and reopened before it committed, which shows as a different connection
+	 * after the COMMIT than at the start. $wpdb reconnects when the server has gone away and runs the statement again
+	 * on the new connection, where the transaction no longer exists: the writes made before the reconnect are lost
+	 * with the old connection, and the statement run again and every one after it, the COMMIT included, run in
+	 * autocommit and are already kept. The rollback cannot undo those, so such a transaction is not all or nothing:
+	 * it fails, and its caller must treat its writes as unknown. Only turning off $wpdb's retry would close that gap.
+	 *
+	 * The connection is compared only after the COMMIT, which always goes to the connection the START went to:
+	 * database drop-ins that pick a connection per query may send a read inside the callback to another one.
+	 *
 	 * @param callable $callback
 	 *
 	 * @return mixed Result of the callback, or false on failure.
 	 * @throws \Throwable
 	 */
 	public function transaction( callable $callback ): mixed {
-		$this->wpdb->query( 'START TRANSACTION' );
+		if ( false === $this->wpdb->query( 'START TRANSACTION' ) ) {
+			return false;
+		}
+
+		// Held, not just identified, so the object cannot be freed and its identity reused by a later connection.
+		$connection = $this->connection();
 
 		try {
 			$result = $callback( $this );
@@ -632,7 +650,14 @@ abstract class BaseRepository {
 				return false;
 			}
 
-			$this->wpdb->query( 'COMMIT' );
+			if ( false === $this->wpdb->query( 'COMMIT' ) ) {
+				$this->rollback();
+				return false;
+			}
+
+			if ( $this->connection() !== $connection ) {
+				return $this->fail_reconnected();
+			}
 
 			return $result;
 
@@ -640,6 +665,28 @@ abstract class BaseRepository {
 			$this->rollback();
 			throw $e;
 		}
+	}
+
+	/**
+	 * The database connection $wpdb is using now. A reconnect replaces it with a new one.
+	 *
+	 * @return mixed The connection handle, or null when $wpdb has none.
+	 */
+	private function connection(): mixed {
+		return $this->wpdb->dbh ?? null;
+	}
+
+	/**
+	 * Fail a transaction whose connection was lost and reopened before it committed.
+	 *
+	 * @return false
+	 */
+	private function fail_reconnected(): bool {
+		$this->rollback();
+
+		$this->wpdb->last_error = 'The database connection was lost and reopened during the transaction, so its writes may be partly kept.';
+
+		return false;
 	}
 
 	/**

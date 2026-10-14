@@ -275,6 +275,26 @@ class BaseRepositoryTest extends IntegrationTestCase {
 		$this->assertSame( array( 'before' ), $this->keys( $this->repository->get() ), 'Only the write inside the transaction is undone.' );
 	}
 
+	public function test_a_transaction_the_database_cannot_commit_rolls_its_writes_back_and_fails(): void {
+		$this->insert_statuses( array( 'before' => null ) );
+
+		// The COMMIT fails, as when the connection drops before it reaches the server.
+		$this->fail_queries( '/^COMMIT$/' );
+
+		$result = $this->repository->transaction( static fn( $repository ) => $repository->insert( array( 'status_key' => 'discarded', 'label' => 'Discarded' ) ) );
+
+		$this->assertFalse( $result );
+		$this->assertNotSame( '', $this->repository->get_last_db_error(), 'The commit error is kept.' );
+		$this->assertSame( array( 'before' ), $this->keys( $this->repository->get() ) );
+	}
+
+	public function test_a_transaction_can_see_which_connection_wpdb_is_on(): void {
+		global $wpdb;
+
+		// A transaction compares this before and after its commit, so a reconnect is noticed only if it can be read.
+		$this->assertInstanceOf( \mysqli::class, $wpdb->dbh ?? null );
+	}
+
 	public function test_a_transaction_that_throws_rolls_back_and_rethrows(): void {
 		try {
 			$this->repository->transaction(
