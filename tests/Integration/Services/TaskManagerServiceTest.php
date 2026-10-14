@@ -388,6 +388,107 @@ class TaskManagerServiceTest extends IntegrationTestCase {
 		$this->assertSame( array(), $reported() );
 	}
 
+	public function test_create_task_fails_when_its_field_values_cannot_be_saved(): void {
+		$created = 0;
+		add_action(
+			'wpo_otd_task_created',
+			static function () use ( &$created ) {
+				++$created;
+			}
+		);
+		$tasks = $this->count_rows( 'tasks' );
+		$this->fail_queries( '/^INSERT INTO \S*task_field_values /' );
+
+		$this->assert_throws(
+			\Exception::class,
+			"Failed to save the task's field values. Database error: ",
+			fn() => $this->service->create_task( 'Unsaved', '', array( $this->status( $this->status_option_id( 'not_started' ) ) ) )
+		);
+		$this->assertSame( 0, $created, 'A task without its values is not announced.' );
+		$this->assertSame( $tasks, $this->count_rows( 'tasks' ), 'A task without a status column is not kept.' );
+	}
+
+	public function test_a_created_task_that_cannot_be_removed_after_its_values_failed_is_logged(): void {
+		$logs = array();
+		add_filter(
+			'wpo_otd_logging_enabled',
+			static function ( $enabled, $level, $message ) use ( &$logs ) {
+				$logs[] = $message;
+
+				return false;
+			},
+			10,
+			3
+		);
+		$this->fail_queries( '/^INSERT INTO \S*task_field_values /' );
+		$this->fail_queries( '/^DELETE FROM `?\w*wpo_otd_tasks`? /' );
+
+		$this->assert_throws(
+			\Exception::class,
+			"Failed to save the task's field values.",
+			fn() => $this->service->create_task( 'Stuck', '', array( $this->status( $this->status_option_id( 'not_started' ) ) ) )
+		);
+		$this->assertCount( 1, $logs );
+		$this->assertMatchesRegularExpression( '/^Task \d+ was created without its field values and could not be removed: \S/', $logs[0] );
+	}
+
+	public function test_update_task_fails_when_its_field_values_cannot_be_saved(): void {
+		$id      = $this->create_task( 'Values', $this->status_option_id( 'not_started' ) );
+		$updated = 0;
+		add_action(
+			'wpo_otd_task_updated',
+			static function () use ( &$updated ) {
+				++$updated;
+			}
+		);
+		$this->fail_queries( '/^INSERT INTO \S*task_field_values /' );
+
+		$this->assert_throws(
+			\Exception::class,
+			"Failed to save the task's field values.",
+			fn() => $this->service->update_task( $id, array(), array( array( 'field_id' => DefaultTaskFields::ORDER, 'field_slug' => 'order', 'value' => '12' ) ) )
+		);
+		$this->assertSame( 0, $updated );
+	}
+
+	public function test_a_status_change_saves_its_position_and_done_date_in_the_same_write(): void {
+		$id     = $this->create_task( 'Moving', $this->status_option_id( 'not_started' ) );
+		$writes = 0;
+		add_filter(
+			'query',
+			static function ( $query ) use ( &$writes ) {
+				if ( preg_match( '/^INSERT INTO \S*task_field_values /', (string) $query ) ) {
+					++$writes;
+				}
+
+				return $query;
+			}
+		);
+
+		$this->service->update_task( $id, array(), array( $this->status( $this->status_option_id( 'done' ) ) ) );
+
+		$this->assertSame( 1, $writes, 'So they are saved together or not at all.' );
+		$this->assertSame( (string) $this->status_option_id( 'done' ), $this->field_value( $id, DefaultTaskFields::STATUS ) );
+		$this->assertNotNull( $this->field_value( $id, DefaultTaskFields::DONE_DATE ) );
+	}
+
+	public function test_a_status_change_that_cannot_be_saved_changes_nothing(): void {
+		$this->create_task( 'Already done', $this->status_option_id( 'done' ) );
+		$id = $this->create_task( 'Moving', $this->status_option_id( 'not_started' ) );
+		$this->fail_queries( '/^INSERT INTO \S*task_field_values /' );
+
+		$this->assert_throws(
+			\Exception::class,
+			"Failed to save the task's field values.",
+			fn() => $this->service->update_task( $id, array(), array( $this->status( $this->status_option_id( 'done' ) ) ) )
+		);
+
+		// The status, its position and its done date are one write.
+		$this->assertSame( (string) $this->status_option_id( 'not_started' ), $this->field_value( $id, DefaultTaskFields::STATUS ) );
+		$this->assertSame( '1', $this->field_value( $id, DefaultTaskFields::POSITION ) );
+		$this->assertNull( $this->field_value( $id, DefaultTaskFields::DONE_DATE ) );
+	}
+
 	public function test_changing_the_status_moves_the_task_to_the_end_of_the_new_column(): void {
 		$todo  = $this->status_option_id( 'not_started' );
 		$doing = $this->status_option_id( 'in_progress' );

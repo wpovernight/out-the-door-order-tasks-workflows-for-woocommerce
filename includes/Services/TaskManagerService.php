@@ -253,8 +253,17 @@ final class TaskManagerService {
 			$field_values_array[ DefaultTaskFields::DONE_DATE ] = gmdate( 'Y-m-d H:i:s' );
 		}
 
-		// Set field values.
-		$this->task_field_value_repository->update_task_multiple_field_values( $task->id, $field_values_array );
+		// Set field values. A task without them has no status column to sit in, so it is not kept; nothing has
+		// announced it yet.
+		try {
+			$this->save_field_values( $task->id, $field_values_array );
+		} catch ( \Throwable $exception ) {
+			if ( ! $this->task_repository->delete( $task->id ) ) {
+				Logger::error( "Task {$task->id} was created without its field values and could not be removed: " . $this->task_repository->get_last_db_error() );
+			}
+
+			throw $exception;
+		}
 
 		$fields_and_values = $this->get_task_fields_and_values( $task->id );
 
@@ -274,6 +283,9 @@ final class TaskManagerService {
 
 	/**
 	 * Update a Task by ID.
+	 *
+	 * The task's own columns are saved before its field values. When the field values then fail, those columns stay
+	 * changed: the exception means the update was partly saved, and wpo_otd_task_updated does not fire.
 	 *
 	 * @param int $task_id
 	 * @param array<string, mixed> $task_data
@@ -389,39 +401,39 @@ final class TaskManagerService {
 				}
 			}
 
-			$this->task_field_value_repository->update_task_multiple_field_values( $task_id, $field_values_array );
-		}
+			// Update position and done_date if the status has been changed. Worked out before the write, so they
+			// are saved with the status in one write, or not at all. The task's own position is left out of the
+			// column it moves to, so reading it before the status is saved gives the same result.
+			// Note: $field_values_array[STATUS] is guaranteed to exist here because $current_status_value
+			// is only set when the status field is present in $field_values (above loop).
+			if ( isset( $current_status_value ) && (string) $current_status_value->value !== (string) $new_status_value ) {
+				$last_position = $this->task_repository->get_last_task_position(
+					$task_id,
+					(int) $field_values_array[ DefaultTaskFields::STATUS ],
+				);
 
-		// Update position and done_date if the status has been changed.
-		// Note: $field_values_array[STATUS] is guaranteed to exist here because $current_status_value
-		// is only set when the status field is present in $field_values (above if-statement).
-		if ( isset( $current_status_value ) && (string) $current_status_value->value !== (string) $new_status_value ) {
-			$last_position = $this->task_repository->get_last_task_position(
-				$task_id,
-				(int) $field_values_array[ DefaultTaskFields::STATUS ],
-			);
+				$field_values_array[ DefaultTaskFields::POSITION ] = $last_position ? $last_position + 1.0 : 1.0;
 
-			$field_values_array[ DefaultTaskFields::POSITION ] = $last_position ? $last_position + 1.0 : 1.0;
+				$done_option_id = $this->task_status_role_service->get_done_field_option_id();
 
-			$done_option_id = $this->task_status_role_service->get_done_field_option_id();
-
-			// Auto-set "done_date" when moving into the option assigned to the "done" role.
-			$new_status_option = $this->get_field_option( (int) $new_status_value );
-			if (
-				$new_status_option &&
-				$new_status_option->id === $done_option_id &&
-				! isset( $field_values_array[ DefaultTaskFields::DONE_DATE ] )
-			) {
-				$field_values_array[ DefaultTaskFields::DONE_DATE ] = gmdate( 'Y-m-d H:i:s' );
-			} elseif (
-				$new_status_option &&
-				$new_status_option->id !== $done_option_id &&
-				! isset( $field_values_array[ DefaultTaskFields::DONE_DATE ] )
-			) {
-				$field_values_array[ DefaultTaskFields::DONE_DATE ] = null;
+				// Auto-set "done_date" when moving into the option assigned to the "done" role.
+				$new_status_option = $this->get_field_option( (int) $new_status_value );
+				if (
+					$new_status_option &&
+					$new_status_option->id === $done_option_id &&
+					! isset( $field_values_array[ DefaultTaskFields::DONE_DATE ] )
+				) {
+					$field_values_array[ DefaultTaskFields::DONE_DATE ] = gmdate( 'Y-m-d H:i:s' );
+				} elseif (
+					$new_status_option &&
+					$new_status_option->id !== $done_option_id &&
+					! isset( $field_values_array[ DefaultTaskFields::DONE_DATE ] )
+				) {
+					$field_values_array[ DefaultTaskFields::DONE_DATE ] = null;
+				}
 			}
 
-			$this->task_field_value_repository->update_task_multiple_field_values( $task_id, $field_values_array );
+			$this->save_field_values( $task_id, $field_values_array );
 		}
 
 		$fields_and_values = $this->get_task_fields_and_values( $task_id );
@@ -1132,7 +1144,7 @@ final class TaskManagerService {
 			),
 		);
 
-		$this->task_field_value_repository->update_task_multiple_field_values( $task_id, $update_data );
+		$this->save_field_values( $task_id, $update_data );
 
 		/**
 		 * Fires after a task has been moved to a new position.
@@ -1146,6 +1158,31 @@ final class TaskManagerService {
 		do_action( 'wpo_otd_task_moved', $task_id, $target_status_id, $new_position, $updated_fields );
 
 		return $new_position;
+	}
+
+	/**
+	 * Save a task's field values, failing loudly when the database does not save them.
+	 *
+	 * A plain Exception, like a task that cannot be saved: the REST API reports it as a server error and logs it,
+	 * where a RuntimeException can be shown to the user as a conflict.
+	 *
+	 * @param int               $task_id
+	 * @param array<int, mixed> $field_values Field ID => value, as update_task_multiple_field_values() takes them.
+	 *
+	 * @return void
+	 * @throws Exception When the values could not be saved.
+	 * @throws \Throwable When the database throws.
+	 */
+	private function save_field_values( int $task_id, array $field_values ): void {
+		if ( false !== $this->task_field_value_repository->update_task_multiple_field_values( $task_id, $field_values ) ) {
+			return;
+		}
+
+		$db_error = $this->task_field_value_repository->get_last_db_error();
+
+		throw new Exception(
+			'Failed to save the task\'s field values.' . ( $db_error ? ' Database error: ' . esc_html( $db_error ) : '' )
+		);
 	}
 
 	/**

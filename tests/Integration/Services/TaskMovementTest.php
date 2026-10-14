@@ -292,6 +292,36 @@ class TaskMovementTest extends IntegrationTestCase {
 		$this->assertSame( 1, did_action( 'wpo_otd_task_marked_finished' ) );
 	}
 
+	public function test_a_move_whose_field_values_cannot_be_saved_fails_without_announcing_it(): void {
+		$id = $this->create_task( $this->todo );
+		$this->fail_queries( '/^INSERT INTO \S*task_field_values /' );
+
+		try {
+			$this->service->move_task( $id, $this->doing );
+			$this->fail( 'The move must fail.' );
+		} catch ( \Exception $e ) {
+			$this->assertNotInstanceOf( \RuntimeException::class, $e, 'A database failure is a server error, not a conflict to show.' );
+			$this->assertStringContainsString( "Failed to save the task's field values.", $e->getMessage() );
+		}
+
+		$this->assertSame( 0, did_action( 'wpo_otd_task_moved' ) );
+		$this->assertSame( (string) $this->todo, $this->field_value( $id, DefaultTaskFields::STATUS ) );
+	}
+
+	public function test_finishing_a_task_whose_field_values_cannot_be_saved_fails_without_announcing_it(): void {
+		$id = $this->create_task( $this->doing );
+		$this->fail_queries( '/^INSERT INTO \S*task_field_values /' );
+
+		try {
+			$this->service->mark_task_finished( $id );
+			$this->fail( 'Finishing must fail.' );
+		} catch ( \Exception $e ) {
+			$this->assertNotInstanceOf( \RuntimeException::class, $e, 'The REST API shows a RuntimeException to the user as a conflict.' );
+		}
+
+		$this->assertSame( 0, did_action( 'wpo_otd_task_marked_finished' ) );
+	}
+
 	public function test_finishing_a_missing_task_is_rejected(): void {
 		$this->expectException( \InvalidArgumentException::class );
 
