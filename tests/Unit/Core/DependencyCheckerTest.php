@@ -4,6 +4,7 @@ namespace WPO\OTD\Tests\Unit\Core;
 
 use Brain\Monkey\Actions;
 use Brain\Monkey\Functions;
+use WPO\OTD\Admin\Notices\MissingDependenciesNotice;
 use WPO\OTD\Core\DependencyChecker;
 use WPO\OTD\Tests\TestCase;
 
@@ -18,6 +19,7 @@ class DependencyCheckerTest extends TestCase {
 		$this->set_static_property( DependencyChecker::class, '_instance', null );
 
 		Functions\when( 'wp_kses_post' )->returnArg();
+		Functions\when( 'current_user_can' )->justReturn( true );
 	}
 
 	public function test_instance_is_a_singleton(): void {
@@ -35,22 +37,11 @@ class DependencyCheckerTest extends TestCase {
 
 		$this->assertFalse( DependencyChecker::instance()->check_dependencies() );
 
-		ob_start();
-		$notice();
-		$output = ob_get_clean();
+		$output = $this->show( $notice );
 
 		$this->assertStringContainsString( '<div class="notice notice-error">', $output );
 		$this->assertStringContainsString( '<li>WooCommerce must be activated.</li>', $output );
 		$this->assertStringNotContainsString( 'PHP 8.1+ is required.', $output );
-	}
-
-	public function test_admin_notice_lists_and_escapes_every_error(): void {
-		ob_start();
-		DependencyChecker::instance()->display_admin_notice( array( 'First <b>problem</b>', 'Second problem' ) );
-		$output = ob_get_clean();
-
-		$this->assertStringContainsString( 'Out the Door – Order Tasks &amp; Workflows for WooCommerce', $output );
-		$this->assertStringContainsString( '<ul><li>First &lt;b&gt;problem&lt;/b&gt;</li><li>Second problem</li></ul>', $output );
 	}
 
 	/**
@@ -70,9 +61,7 @@ class DependencyCheckerTest extends TestCase {
 
 		$this->assertFalse( DependencyChecker::instance()->check_dependencies() );
 
-		ob_start();
-		$notice();
-		$this->assertStringContainsString( '<li>WooCommerce 8.2+ is required.</li>', ob_get_clean() );
+		$this->assertStringContainsString( '<li>WooCommerce 8.2+ is required.</li>', $this->show( $notice ) );
 	}
 
 	/**
@@ -86,5 +75,22 @@ class DependencyCheckerTest extends TestCase {
 		Actions\expectAdded( 'admin_notices' )->never();
 
 		$this->assertTrue( DependencyChecker::instance()->check_dependencies() );
+	}
+
+	/**
+	 * What the notice queued on admin_notices prints.
+	 *
+	 * @param mixed $callback The queued callback.
+	 *
+	 * @return string
+	 */
+	private function show( $callback ): string {
+		$this->assertIsArray( $callback );
+		$this->assertInstanceOf( MissingDependenciesNotice::class, $callback[0] );
+
+		ob_start();
+		$callback();
+
+		return (string) ob_get_clean();
 	}
 }

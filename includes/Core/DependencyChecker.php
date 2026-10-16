@@ -2,6 +2,8 @@
 
 namespace WPO\OTD\Core;
 
+use WPO\OTD\Admin\Notices\MissingDependenciesNotice;
+
 defined( 'ABSPATH' ) || exit;
 
 final class DependencyChecker {
@@ -37,9 +39,7 @@ final class DependencyChecker {
 		$errors = $this->get_errors();
 
 		if ( ! empty( $errors ) ) {
-			add_action( 'admin_notices', function () use ( $errors ) {
-				$this->display_admin_notice( $errors );
-			} );
+			( new MissingDependenciesNotice( $errors ) )->register_hooks();
 
 			return false;
 		}
@@ -101,25 +101,5 @@ final class DependencyChecker {
 	 */
 	private function is_wc_version_compatible(): bool {
 		return defined( 'WC_VERSION' ) && version_compare( WC_VERSION, self::WC_MIN_VERSION, '>=' );
-	}
-
-	/**
-	 * Display an admin notice if the plugin is not compatible with the current environment.
-	 *
-	 * @param string[] $errors
-	 *
-	 * @return void
-	 */
-	public function display_admin_notice( array $errors ): void {
-		$title   = '<strong>' . esc_html__( 'Out the Door – Order Tasks & Workflows for WooCommerce', 'out-the-door-order-tasks-workflows-for-woocommerce' ) . '</strong>';
-		$content = esc_html__( 'can’t run because:', 'out-the-door-order-tasks-workflows-for-woocommerce' );
-		$list    = '<ul><li>' . implode( '</li><li>', array_map( 'esc_html', $errors ) ) . '</li></ul>';
-
-		printf(
-			'<div class="notice notice-error"><p>%1$s %2$s</p>%3$s</div>',
-			wp_kses_post( $title ),
-			esc_html( $content ),
-			wp_kses_post( $list )
-		);
 	}
 }
