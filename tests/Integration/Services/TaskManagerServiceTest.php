@@ -435,6 +435,37 @@ class TaskManagerServiceTest extends IntegrationTestCase {
 		);
 	}
 
+	public function test_a_field_sent_twice_is_not_reported_when_its_last_value_is_unchanged(): void {
+		$todo     = $this->status_option_id( 'not_started' );
+		$id       = $this->create_task( 'Twice', $todo );
+		$reported = $this->capture_updated_fields();
+
+		$this->service->update_task(
+			$id,
+			array(),
+			array(
+				$this->status( $this->status_option_id( 'done' ) ),
+				$this->status( $todo ),
+			)
+		);
+
+		$this->assertSame( array(), $reported() );
+		$this->assertSame( (string) $todo, $this->field_value( $id, DefaultTaskFields::STATUS ) );
+		$this->assertNull( $this->field_value( $id, DefaultTaskFields::DONE_DATE ) );
+	}
+
+	public function test_a_field_sent_twice_is_reported_once_against_the_stored_value(): void {
+		$todo     = $this->status_option_id( 'not_started' );
+		$done     = $this->status_option_id( 'done' );
+		$id       = $this->create_task( 'Twice', $todo );
+		$reported = $this->capture_updated_fields();
+
+		$this->service->update_task( $id, array(), array( $this->status( $todo ), $this->status( $done ) ) );
+
+		$this->assertSame( array( 'status' => array( 'old_value' => (string) $todo, 'new_value' => $done ) ), $reported() );
+		$this->assertSame( (string) $done, $this->field_value( $id, DefaultTaskFields::STATUS ) );
+	}
+
 	public function test_resending_an_unchanged_value_with_another_type_is_not_a_change(): void {
 		$id       = $this->create_task( 'Same priority', $this->status_option_id( 'not_started' ) );
 		$high     = $this->priority_option_id( 'high' );
@@ -942,6 +973,27 @@ class TaskManagerServiceTest extends IntegrationTestCase {
 		$wpdb->suppress_errors( false );
 
 		$this->assertFalse( $saved );
+	}
+
+	public function test_a_value_for_a_field_that_does_not_exist_is_not_saved_or_announced(): void {
+		global $wpdb;
+
+		$id = $this->create_task( 'Unknown field', $this->status_option_id( 'not_started' ) );
+		$this->service->set_field_value( $id, DefaultTaskFields::ORDER, 10 );
+		$updates = $this->record_updates();
+
+		// Without the foreign key, which only InnoDB enforces, an attempted insert would save the value.
+		$this->throw_on_queries( '/^INSERT INTO `?\w*task_field_values`? /', new \RuntimeException( 'Insert attempted' ) );
+
+		$this->assertFalse( $this->service->set_field_value( $id, 999999, 'lost' ) );
+		$this->assertFalse( $this->service->update_field_values( $id, array( DefaultTaskFields::ORDER => 11, 999999 => 'lost' ) ) );
+
+		$this->assertSame( '11', $this->field_value( $id, DefaultTaskFields::ORDER ), 'The value that saved stays saved.' );
+		$this->assertSame(
+			'0',
+			$wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . $this->table( 'task_field_values' ) . ' WHERE field_id = %d', 999999 ) )
+		);
+		$this->assertSame( array(), $updates() );
 	}
 
 	/** ================================

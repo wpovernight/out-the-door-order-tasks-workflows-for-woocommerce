@@ -288,7 +288,8 @@ final class TaskManagerService {
 	 * changed: the exception means the update was partly saved, and wpo_otd_task_updated does not fire.
 	 *
 	 * Each field value names its field by 'field_id'. A 'field_slug' sent with it is ignored: the change is reported
-	 * under the slug of the field it is saved to. A value for a field that does not exist is skipped.
+	 * under the slug of the field it is saved to. A value for a field that does not exist is skipped. A field sent
+	 * more than once saves its last value, and only that value is compared with the stored one.
 	 *
 	 * @param int $task_id
 	 * @param array<string, mixed> $task_data
@@ -398,6 +399,9 @@ final class TaskManagerService {
 						'old_value' => $current_value,
 						'new_value' => $value,
 					);
+				} else {
+					// An earlier entry for the same field may have reported a change this value undoes.
+					unset( $updated_fields[ $field_slug ] );
 				}
 
 				// Check if status field is being updated to handle position update later.
@@ -968,7 +972,7 @@ final class TaskManagerService {
 	 * @param int $field_id
 	 * @param mixed $value
 	 *
-	 * @return bool
+	 * @return bool False when the value is not saved, which includes a field that does not exist.
 	 */
 	public function set_field_value( int $task_id, int $field_id, $value ): bool {
 		$updated_fields = array();
@@ -986,12 +990,13 @@ final class TaskManagerService {
 	 * Update multiple field values for a specific task.
 	 *
 	 * Fires wpo_otd_task_updated once, listing every value that changed, when all of them are saved and at least one
-	 * differs from the stored one. When any of them fails, the others stay saved and nothing fires.
+	 * differs from the stored one. When any of them fails, the others stay saved and nothing fires. A value for a field
+	 * that does not exist counts as failed.
 	 *
 	 * @param int $task_id
 	 * @param array $field_data
 	 *
-	 * @return bool
+	 * @return bool False when any value is not saved.
 	 */
 	public function update_field_values( int $task_id, array $field_data ): bool {
 		$success        = true;
@@ -1016,17 +1021,22 @@ final class TaskManagerService {
 	 * Save one field value of a task, without announcing it.
 	 *
 	 * When the value is saved and differs from the stored one, the change is added to $updated_fields under the
-	 * field's slug, with 'old_value' and 'new_value'.
+	 * field's slug, with 'old_value' and 'new_value'. A value for a field that does not exist is not saved.
 	 *
 	 * @param int                  $task_id
 	 * @param int                  $field_id
 	 * @param mixed                $value
 	 * @param array<string, array> $updated_fields
 	 *
-	 * @return bool
+	 * @return bool False when the value is not saved.
 	 */
 	private function write_field_value( int $task_id, int $field_id, $value, array &$updated_fields ): bool {
-		$field_value  = $this->task_field_value_repository->find_by_task_and_field( $task_id, $field_id );
+		$field = $this->task_field_repository->find( $field_id );
+		if ( ! $field ) {
+			return false;
+		}
+
+		$field_value  =$this->task_field_value_repository->find_by_task_and_field( $task_id, $field_id );
 		$stored_value = $field_value ? $field_value->value : null;
 		$new_stored   = maybe_serialize( $value );
 		$new_stored   = null === $new_stored ? null : (string) $new_stored;
@@ -1060,10 +1070,7 @@ final class TaskManagerService {
 		}
 
 		if ( $stored_value !== $new_stored ) {
-			$field = $this->task_field_repository->find( $field_id );
-			$key   = $field ? $field->slug : (string) $field_id;
-
-			$updated_fields[ $key ] = array(
+			$updated_fields[ $field->slug ] = array(
 				'old_value' => maybe_unserialize( $stored_value ),
 				'new_value' => $value,
 			);
