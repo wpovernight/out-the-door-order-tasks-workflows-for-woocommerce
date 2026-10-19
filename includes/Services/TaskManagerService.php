@@ -943,11 +943,11 @@ final class TaskManagerService {
 	 *  ================================ */
 
 	/**
-	 * Get field values for a specific task, indexed by field ID.
+	 * Get field values for a specific task, grouped by field ID: each field holds the list of its stored values.
 	 *
 	 * @param int $task_id
 	 *
-	 * @return array<int, TaskFieldValue>
+	 * @return array<int, TaskFieldValue[]>
 	 */
 	public function get_field_values_for_task( int $task_id ): array {
 		$values  = $this->task_field_value_repository->find_all_by( 'task_id', $task_id );
