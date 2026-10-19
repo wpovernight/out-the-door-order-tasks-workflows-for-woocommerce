@@ -135,6 +135,31 @@ class TaskControllerTest extends RestTestCase {
 		$this->assertSame( (string) $this->status_option_id( 'done' ), $this->field_value( $id, DefaultTaskFields::STATUS ) );
 	}
 
+	public function test_a_status_update_is_announced_whatever_slug_is_sent_with_it(): void {
+		$todo     = $this->status_option_id( 'not_started' );
+		$done     = $this->status_option_id( 'done' );
+		$id       = $this->create_task( 'Before' );
+		$reported = null;
+		add_action(
+			'wpo_otd_task_updated',
+			static function ( $task_id, $task, $updated_fields ) use ( &$reported ) {
+				$reported = $updated_fields;
+			},
+			10,
+			3
+		);
+
+		$response = $this->request(
+			'PUT',
+			"/tasks/{$id}",
+			array( 'field_values' => array( array( 'field_id' => DefaultTaskFields::STATUS, 'field_slug' => 'priority', 'value' => $done ) ) )
+		);
+
+		$this->assertResponse( 200, $response );
+		$this->assertSame( array( 'status' => array( 'old_value' => (string) $todo, 'new_value' => $done ) ), $reported );
+		$this->assertNotNull( $this->field_value( $id, DefaultTaskFields::DONE_DATE ) );
+	}
+
 	public function test_updating_a_missing_or_invalid_task(): void {
 		$id = $this->create_task( 'Valid' );
 

@@ -287,9 +287,12 @@ final class TaskManagerService {
 	 * The task's own columns are saved before its field values. When the field values then fail, those columns stay
 	 * changed: the exception means the update was partly saved, and wpo_otd_task_updated does not fire.
 	 *
+	 * Each field value names its field by 'field_id'. A 'field_slug' sent with it is ignored: the change is reported
+	 * under the slug of the field it is saved to. A value for a field that does not exist is skipped.
+	 *
 	 * @param int $task_id
 	 * @param array<string, mixed> $task_data
-	 * @param array|null $field_values
+	 * @param array|null $field_values Entries of 'field_id' and 'value'.
 	 *
 	 * @return array|null
 	 * @throws InvalidArgumentException If the task does not exist.
@@ -342,17 +345,22 @@ final class TaskManagerService {
 
 		// Update field values if provided.
 		if ( ! empty( $field_values ) ) {
-			// Fetch all current field values at once to avoid N+1 queries.
+			// Fetch all current field values and fields at once to avoid N+1 queries.
 			$current_field_values = $this->get_field_values_for_task( $task_id );
+			$fields               = $this->get_all_fields( 'id' );
 
 			foreach ( $field_values as $field_value ) {
-				if ( ! isset( $field_value['field_id'], $field_value['value'], $field_value['field_slug'] ) ) {
+				if ( ! isset( $field_value['field_id'], $field_value['value'] ) ) {
 					continue;
 				}
 
-				$field_id                        = $field_value['field_id'];
+				$field_id = (int) $field_value['field_id'];
+				if ( ! isset( $fields[ $field_id ] ) ) {
+					continue;
+				}
+
 				$value                           = $field_value['value'];
-				$field_slug                      = $field_value['field_slug'];
+				$field_slug                      = $fields[ $field_id ]->slug;
 				$field_values_array[ $field_id ] = $value;
 
 				$current_value = null;
@@ -393,7 +401,7 @@ final class TaskManagerService {
 				}
 
 				// Check if status field is being updated to handle position update later.
-				if ( $field_slug === 'status' ) {
+				if ( DefaultTaskFields::STATUS === $field_id ) {
 					$current_status_value = $this
 						->task_field_value_repository
 						->find_by_task_and_field( $task_id, DefaultTaskFields::STATUS );

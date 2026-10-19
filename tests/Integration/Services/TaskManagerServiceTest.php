@@ -350,7 +350,9 @@ class TaskManagerServiceTest extends IntegrationTestCase {
 			array(
 				array( 'field_id' => DefaultTaskFields::PRIORITY, 'field_slug' => 'priority', 'value' => $high ),
 				array( 'field_id' => DefaultTaskFields::ORDER, 'field_slug' => 'order', 'value' => '5' ),
-				array( 'field_id' => DefaultTaskFields::DUE_DATE, 'value' => 'no slug, skipped' ),
+				array( 'field_id' => DefaultTaskFields::DUE_DATE, 'value' => '2030-01-01 00:00:00' ),
+				array( 'field_slug' => 'archived_date', 'value' => 'no field ID, skipped' ),
+				array( 'field_id' => DefaultTaskFields::CREATOR, 'field_slug' => 'creator' ),
 			)
 		);
 
@@ -359,10 +361,78 @@ class TaskManagerServiceTest extends IntegrationTestCase {
 				'description' => array( 'old_value' => '', 'new_value' => 'Added' ),
 				'priority'    => array( 'old_value' => (string) $low, 'new_value' => $high ),
 				'order'       => array( 'old_value' => null, 'new_value' => '5' ),
+				'due_date'    => array( 'old_value' => null, 'new_value' => '2030-01-01 00:00:00' ),
 			),
 			$reported()
 		);
-		$this->assertNull( $this->field_value( $id, DefaultTaskFields::DUE_DATE ) );
+		$this->assertSame( '2030-01-01 00:00:00', $this->field_value( $id, DefaultTaskFields::DUE_DATE ), 'A value needs no slug.' );
+		$this->assertNull( $this->field_value( $id, DefaultTaskFields::ARCHIVED_DATE ), 'An entry without a field ID is skipped.' );
+		$this->assertNull( $this->field_value( $id, DefaultTaskFields::CREATOR ), 'An entry without a value is skipped.' );
+	}
+
+	/**
+	 * @dataProvider slugs_that_do_not_name_the_status_provider
+	 */
+	public function test_a_status_change_is_recognized_by_its_field_id_whatever_the_slug( array $slug ): void {
+		$doing = $this->status_option_id( 'in_progress' );
+		$done  = $this->status_option_id( 'done' );
+		$this->create_task( 'Already done', $done );
+		$id       = $this->create_task( 'Finishing', $doing );
+		$reported = $this->capture_updated_fields();
+
+		$this->service->update_task( $id, array(), array( array( 'field_id' => (string) DefaultTaskFields::STATUS, 'value' => $done ) + $slug ) );
+
+		$this->assertSame( array( 'status' => array( 'old_value' => (string) $doing, 'new_value' => $done ) ), $reported() );
+		$this->assertSame( (string) $done, $this->field_value( $id, DefaultTaskFields::STATUS ) );
+		$this->assertSame( '2', $this->field_value( $id, DefaultTaskFields::POSITION ), 'It goes to the end of the done column.' );
+		$this->assertNotNull( $this->field_value( $id, DefaultTaskFields::DONE_DATE ) );
+	}
+
+	public function slugs_that_do_not_name_the_status_provider(): array {
+		return array(
+			'no slug'         => array( array() ),
+			'another slug'    => array( array( 'field_slug' => 'priority' ) ),
+			'an unknown slug' => array( array( 'field_slug' => 'not_a_field' ) ),
+			'an empty slug'   => array( array( 'field_slug' => '' ) ),
+		);
+	}
+
+	public function test_a_status_slug_on_another_field_does_not_make_it_the_status(): void {
+		$todo = $this->status_option_id( 'not_started' );
+		$high = $this->priority_option_id( 'high' );
+		$this->create_task( 'First', $todo );
+		$id       = $this->create_task( 'Second', $todo );
+		$reported = $this->capture_updated_fields();
+
+		$this->service->update_task( $id, array(), array( array( 'field_id' => DefaultTaskFields::PRIORITY, 'field_slug' => 'status', 'value' => $high ) ) );
+
+		$this->assertSame( array( 'priority' => array( 'old_value' => null, 'new_value' => $high ) ), $reported() );
+		$this->assertSame( (string) $high, $this->field_value( $id, DefaultTaskFields::PRIORITY ) );
+		$this->assertSame( (string) $todo, $this->field_value( $id, DefaultTaskFields::STATUS ) );
+		$this->assertSame( '2', $this->field_value( $id, DefaultTaskFields::POSITION ), 'The task stays where it was.' );
+	}
+
+	public function test_a_value_for_a_field_that_does_not_exist_is_skipped(): void {
+		global $wpdb;
+
+		$id       = $this->create_task( 'Unknown field', $this->status_option_id( 'not_started' ) );
+		$reported = $this->capture_updated_fields();
+
+		$this->service->update_task(
+			$id,
+			array(),
+			array(
+				array( 'field_id' => 999999, 'field_slug' => 'ghost', 'value' => 'lost' ),
+				array( 'field_id' => DefaultTaskFields::ORDER, 'field_slug' => 'order', 'value' => '5' ),
+			)
+		);
+
+		$this->assertSame( array( 'order' => array( 'old_value' => null, 'new_value' => '5' ) ), $reported() );
+		$this->assertSame( '5', $this->field_value( $id, DefaultTaskFields::ORDER ) );
+		$this->assertSame(
+			'0',
+			$wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . $this->table( 'task_field_values' ) . ' WHERE field_id = %d', 999999 ) )
+		);
 	}
 
 	public function test_resending_an_unchanged_value_with_another_type_is_not_a_change(): void {
