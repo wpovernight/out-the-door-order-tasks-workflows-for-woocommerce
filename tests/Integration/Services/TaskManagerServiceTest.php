@@ -874,6 +874,193 @@ class TaskManagerServiceTest extends IntegrationTestCase {
 		$this->assertFalse( $saved );
 	}
 
+	/** ================================
+	 *   wpo_otd_task_updated from field values
+	 *  ================================ */
+
+	public function test_set_field_value_announces_the_change_once(): void {
+		$id      = $this->create_task( 'Values', $this->status_option_id( 'not_started' ) );
+		$updates = $this->record_updates();
+
+		$this->service->set_field_value( $id, DefaultTaskFields::ORDER, 10 );
+
+		$this->assertCount( 1, $updates() );
+		list( $task_id, $task, $updated_fields ) = $updates()[0];
+		$this->assertSame( $id, $task_id );
+		$this->assertSame( $id, $task['id'] );
+		$this->assertSame( 10.0, array_column( $task['fields'], null, 'slug' )['order']['values'][0]['raw'], 'The task is read after the change.' );
+		$this->assertSame( array( 'order' => array( 'old_value' => null, 'new_value' => 10 ) ), $updated_fields );
+	}
+
+	public function test_set_field_value_reports_the_old_and_new_status(): void {
+		$todo    = $this->status_option_id( 'not_started' );
+		$doing   = $this->status_option_id( 'in_progress' );
+		$id      = $this->create_task( 'Values', $todo );
+		$updates = $this->record_updates();
+
+		$this->service->set_field_value( $id, DefaultTaskFields::STATUS, $doing );
+
+		$this->assertCount( 1, $updates() );
+		$this->assertSame(
+			array( 'status' => array( 'old_value' => (string) $todo, 'new_value' => $doing ) ),
+			$updates()[0][2],
+			'Keyed and shaped as update_task() reports a status change.'
+		);
+	}
+
+	public function test_set_field_value_announces_nothing_when_the_value_is_unchanged(): void {
+		$id = $this->create_task( 'Values', $this->status_option_id( 'not_started' ) );
+		$this->service->set_field_value( $id, DefaultTaskFields::ORDER, 10 );
+		$updates = $this->record_updates();
+
+		$this->assertTrue( $this->service->set_field_value( $id, DefaultTaskFields::ORDER, 10 ) );
+		$this->assertTrue( $this->service->set_field_value( $id, DefaultTaskFields::ORDER, '10' ) );
+
+		$this->assertSame( array(), $updates() );
+	}
+
+	public function test_a_failed_set_field_value_announces_nothing(): void {
+		global $wpdb;
+
+		$id = $this->create_task( 'Values', $this->status_option_id( 'not_started' ) );
+		$this->service->set_field_value( $id, DefaultTaskFields::ORDER, 10 );
+		$updates = $this->record_updates();
+
+		$wpdb->suppress_errors( true );
+		$inserted = $this->service->set_field_value( 999999, DefaultTaskFields::ORDER, 10 );
+		$wpdb->suppress_errors( false );
+		$this->fail_queries( '/^UPDATE `?\w*wpo_otd_task_field_values`? /' );
+		$updated = $this->service->set_field_value( $id, DefaultTaskFields::ORDER, 11 );
+
+		$this->assertFalse( $inserted );
+		$this->assertFalse( $updated );
+		$this->assertSame( array(), $updates() );
+	}
+
+	public function test_a_throwing_set_field_value_announces_nothing(): void {
+		$id      = $this->create_task( 'Values', $this->status_option_id( 'not_started' ) );
+		$updates = $this->record_updates();
+		$this->throw_on_queries( '/^INSERT INTO `?\w*task_field_values`? /', new \RuntimeException( 'Deadlock' ) );
+
+		$this->assert_throws(
+			\RuntimeException::class,
+			'Deadlock',
+			fn() => $this->service->set_field_value( $id, DefaultTaskFields::ORDER, 10 )
+		);
+		$this->assertSame( array(), $updates() );
+	}
+
+	public function test_update_field_values_announces_every_change_once(): void {
+		$todo  = $this->status_option_id( 'not_started' );
+		$doing = $this->status_option_id( 'in_progress' );
+		$id    = $this->create_task( 'Values', $todo );
+		$this->service->set_field_value( $id, DefaultTaskFields::ORDER, 10 );
+		$updates = $this->record_updates();
+
+		$this->assertTrue(
+			$this->service->update_field_values(
+				$id,
+				array(
+					DefaultTaskFields::ORDER    => 10,
+					DefaultTaskFields::DUE_DATE => '2030-01-01',
+					DefaultTaskFields::STATUS   => $doing,
+				)
+			)
+		);
+
+		$this->assertCount( 1, $updates() );
+		list( $task_id, $task, $updated_fields ) = $updates()[0];
+		$this->assertSame( $id, $task_id );
+		$this->assertSame( $doing, array_column( $task['fields'], null, 'slug' )['status']['values'][0]['raw'] );
+		$this->assertSame(
+			array(
+				'due_date' => array( 'old_value' => null, 'new_value' => '2030-01-01' ),
+				'status'   => array( 'old_value' => (string) $todo, 'new_value' => $doing ),
+			),
+			$updated_fields,
+			'The unchanged order is left out.'
+		);
+	}
+
+	public function test_update_field_values_announces_nothing_when_nothing_changed(): void {
+		$id = $this->create_task( 'Values', $this->status_option_id( 'not_started' ) );
+		$this->service->set_field_value( $id, DefaultTaskFields::ORDER, 10 );
+		$updates = $this->record_updates();
+
+		$this->assertTrue( $this->service->update_field_values( $id, array( DefaultTaskFields::ORDER => '10' ) ) );
+		$this->assertTrue( $this->service->update_field_values( $id, array() ) );
+
+		$this->assertSame( array(), $updates() );
+	}
+
+	public function test_update_field_values_announces_nothing_when_a_value_fails(): void {
+		$id = $this->create_task( 'Values', $this->status_option_id( 'not_started' ) );
+		$this->service->set_field_value( $id, DefaultTaskFields::ORDER, 10 );
+		$updates = $this->record_updates();
+		$this->fail_queries( '/^INSERT INTO `?\w*task_field_values`? /' );
+
+		$saved = $this->service->update_field_values(
+			$id,
+			array(
+				DefaultTaskFields::ORDER    => 11,
+				DefaultTaskFields::DUE_DATE => '2030-01-01',
+			)
+		);
+
+		$this->assertFalse( $saved );
+		$this->assertSame( '11', $this->field_value( $id, DefaultTaskFields::ORDER ), 'The value that saved stays saved.' );
+		$this->assertSame( array(), $updates() );
+	}
+
+	public function test_a_throwing_update_field_values_announces_nothing(): void {
+		$id = $this->create_task( 'Values', $this->status_option_id( 'not_started' ) );
+		$this->service->set_field_value( $id, DefaultTaskFields::ORDER, 10 );
+		$updates = $this->record_updates();
+		$this->throw_on_queries( '/^INSERT INTO `?\w*task_field_values`? /', new \RuntimeException( 'Deadlock' ) );
+
+		$this->assert_throws(
+			\RuntimeException::class,
+			'Deadlock',
+			fn() => $this->service->update_field_values(
+				$id,
+				array(
+					DefaultTaskFields::ORDER    => 11,
+					DefaultTaskFields::DUE_DATE => '2030-01-01',
+				)
+			)
+		);
+		$this->assertSame( array(), $updates() );
+	}
+
+	public function test_update_task_still_announces_once(): void {
+		$todo    = $this->status_option_id( 'not_started' );
+		$doing   = $this->status_option_id( 'in_progress' );
+		$id      = $this->create_task( 'Values', $todo );
+		$updates = $this->record_updates();
+
+		$this->service->update_task( $id, array( 'title' => 'Renamed' ), array( $this->status( $doing ) ) );
+
+		$this->assertCount( 1, $updates() );
+		$this->assertSame(
+			array(
+				'title'  => array( 'old_value' => 'Values', 'new_value' => 'Renamed' ),
+				'status' => array( 'old_value' => (string) $todo, 'new_value' => $doing ),
+			),
+			$updates()[0][2]
+		);
+	}
+
+	public function test_creating_moving_and_finishing_a_task_announce_no_update(): void {
+		$updates = $this->record_updates();
+
+		$id = $this->create_task( 'Values', $this->status_option_id( 'not_started' ) );
+		$this->service->move_task( $id, $this->status_option_id( 'in_progress' ) );
+		$this->service->move_task( $id, $this->status_option_id( 'not_started' ), null, 'last', array( DefaultTaskFields::ORDER => 10 ) );
+		$this->service->mark_task_finished( $id );
+
+		$this->assertSame( array(), $updates() );
+	}
+
 	/**
 	 * Create a task in a status and return its ID.
 	 *
@@ -920,6 +1107,28 @@ class TaskManagerServiceTest extends IntegrationTestCase {
 
 		return static function () use ( &$captured ) {
 			return $captured;
+		};
+	}
+
+	/**
+	 * Record every wpo_otd_task_updated action from now on.
+	 *
+	 * @return callable Returns the recorded actions, each as a list of task ID, task with fields and updated fields.
+	 */
+	private function record_updates(): callable {
+		$recorded = array();
+
+		add_action(
+			'wpo_otd_task_updated',
+			static function ( $task_id, $task, $updated_fields ) use ( &$recorded ) {
+				$recorded[] = array( $task_id, $task, $updated_fields );
+			},
+			10,
+			3
+		);
+
+		return static function () use ( &$recorded ) {
+			return $recorded;
 		};
 	}
 

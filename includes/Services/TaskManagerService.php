@@ -440,15 +440,7 @@ final class TaskManagerService {
 
 		$task_with_fields = array_merge( $task->to_array(), array( 'fields' => $fields_and_values ) );
 
-		/**
-		 * Fires after a task has been updated.
-		 *
-		 * @param int   $task_id          The ID of the updated task.
-		 * @param array $task_with_fields Complete updated task data with fields and values.
-		 * @param array $updated_fields   Associative array of field slugs that were changed,
-		 *                                with 'old_value' and 'new_value' for each.
-		 */
-		do_action( 'wpo_otd_task_updated', $task_id, $task_with_fields, $updated_fields );
+		$this->announce_task_update( $task_id, $task_with_fields, $updated_fields );
 
 		return $task_with_fields;
 	}
@@ -962,6 +954,8 @@ final class TaskManagerService {
 	/**
 	 * Set or update a field value for a specific task.
 	 *
+	 * Fires wpo_otd_task_updated when the value is saved and differs from the stored one.
+	 *
 	 * @param int $task_id
 	 * @param int $field_id
 	 * @param mixed $value
@@ -969,17 +963,75 @@ final class TaskManagerService {
 	 * @return bool
 	 */
 	public function set_field_value( int $task_id, int $field_id, $value ): bool {
-		$field_value = $this->task_field_value_repository->find_by_task_and_field( $task_id, $field_id );
+		$updated_fields = array();
+
+		$saved = $this->write_field_value( $task_id, $field_id, $value, $updated_fields );
+
+		if ( $saved ) {
+			$this->announce_field_value_changes( $task_id, $updated_fields );
+		}
+
+		return $saved;
+	}
+
+	/**
+	 * Update multiple field values for a specific task.
+	 *
+	 * Fires wpo_otd_task_updated once, listing every value that changed, when all of them are saved and at least one
+	 * differs from the stored one. When any of them fails, the others stay saved and nothing fires.
+	 *
+	 * @param int $task_id
+	 * @param array $field_data
+	 *
+	 * @return bool
+	 */
+	public function update_field_values( int $task_id, array $field_data ): bool {
+		$success        = true;
+		$updated_fields = array();
+
+		foreach ( $field_data as $field_id => $value ) {
+			$result = $this->write_field_value( $task_id, (int) $field_id, $value, $updated_fields );
+			if ( ! $result ) {
+				// write_field_value() already logs the DB-level reason.
+				$success = false;
+			}
+		}
+
+		if ( $success ) {
+			$this->announce_field_value_changes( $task_id, $updated_fields );
+		}
+
+		return $success;
+	}
+
+	/**
+	 * Save one field value of a task, without announcing it.
+	 *
+	 * When the value is saved and differs from the stored one, the change is added to $updated_fields under the
+	 * field's slug, with 'old_value' and 'new_value'.
+	 *
+	 * @param int                  $task_id
+	 * @param int                  $field_id
+	 * @param mixed                $value
+	 * @param array<string, array> $updated_fields
+	 *
+	 * @return bool
+	 */
+	private function write_field_value( int $task_id, int $field_id, $value, array &$updated_fields ): bool {
+		$field_value  = $this->task_field_value_repository->find_by_task_and_field( $task_id, $field_id );
+		$stored_value = $field_value ? $field_value->value : null;
+		$new_stored   = maybe_serialize( $value );
+		$new_stored   = null === $new_stored ? null : (string) $new_stored;
 
 		if ( $field_value ) {
-			$field_value->value = maybe_serialize( $value );
+			$field_value->value = $new_stored;
 
 			$saved = false !== $this->task_field_value_repository->save( $field_value );
 		} else {
 			$new_value = array(
 				'task_id'  => $task_id,
 				'field_id' => $field_id,
-				'value'    => maybe_serialize( $value ),
+				'value'    => $new_stored,
 			);
 
 			$saved = false !== $this->task_field_value_repository->insert( $new_value );
@@ -995,31 +1047,66 @@ final class TaskManagerService {
 					$db_error ? ' Database error: ' . $db_error : ''
 				)
 			);
+
+			return false;
 		}
 
-		return $saved;
+		if ( $stored_value !== $new_stored ) {
+			$field = $this->task_field_repository->find( $field_id );
+			$key   = $field ? $field->slug : (string) $field_id;
+
+			$updated_fields[ $key ] = array(
+				'old_value' => maybe_unserialize( $stored_value ),
+				'new_value' => $value,
+			);
+		}
+
+		return true;
 	}
 
 	/**
-	 * Update multiple field values for a specific task.
+	 * Announce field values saved outside update_task(), when any of them changed.
 	 *
-	 * @param int $task_id
-	 * @param array $field_data
+	 * @param int                  $task_id
+	 * @param array<string, array> $updated_fields
 	 *
-	 * @return bool
+	 * @return void
 	 */
-	public function update_field_values( int $task_id, array $field_data ): bool {
-		$success = true;
-
-		foreach ( $field_data as $field_id => $value ) {
-			$result = $this->set_field_value( $task_id, (int) $field_id, $value );
-			if ( ! $result ) {
-				// set_field_value() already logs the DB-level reason.
-				$success = false;
-			}
+	private function announce_field_value_changes( int $task_id, array $updated_fields ): void {
+		if ( empty( $updated_fields ) ) {
+			return;
 		}
 
-		return $success;
+		$task_with_fields = $this->get_task_with_fields( $task_id );
+
+		if ( null === $task_with_fields ) {
+			return;
+		}
+
+		$this->announce_task_update( $task_id, $task_with_fields, $updated_fields );
+	}
+
+	/**
+	 * Fire wpo_otd_task_updated.
+	 *
+	 * @param int                  $task_id
+	 * @param array<string, mixed> $task_with_fields
+	 * @param array<string, array> $updated_fields
+	 *
+	 * @return void
+	 */
+	private function announce_task_update( int $task_id, array $task_with_fields, array $updated_fields ): void {
+		/**
+		 * Fires after a task has been updated: by update_task(), even when nothing changed, and by
+		 * set_field_value() and update_field_values() when they saved a value that differs from the stored one.
+		 * Moving or creating a task does not fire it.
+		 *
+		 * @param int   $task_id          The ID of the updated task.
+		 * @param array $task_with_fields Complete updated task data with fields and values.
+		 * @param array $updated_fields   Associative array of field slugs that were changed,
+		 *                                with 'old_value' and 'new_value' for each.
+		 */
+		do_action( 'wpo_otd_task_updated', $task_id, $task_with_fields, $updated_fields );
 	}
 
 	/** ================================
