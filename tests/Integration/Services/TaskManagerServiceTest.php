@@ -96,11 +96,133 @@ class TaskManagerServiceTest extends IntegrationTestCase {
 		$this->assertSame( 0, $this->count_rows( 'tasks' ), 'Nothing is saved.' );
 	}
 
-	public function test_create_task_requires_a_title(): void {
-		$this->expectException( \Exception::class );
-		$this->expectExceptionMessage( 'Task title is required' );
+	/**
+	 * @dataProvider empty_title_provider
+	 *
+	 * @param string $title
+	 *
+	 * @return void
+	 */
+	public function test_create_task_requires_a_title_that_is_not_empty_once_sanitized( string $title ): void {
+		try {
+			$this->service->create_task( $title, 'No title' );
+			$this->fail( 'Creating the task must fail.' );
+		} catch ( \Exception $e ) {
+			$this->assertSame( 'Task title is required and must be a string.', $e->getMessage() );
+		}
 
-		$this->service->create_task( '', 'No title' );
+		$this->assertSame( 0, $this->count_rows( 'tasks' ), 'Nothing is saved.' );
+	}
+
+	public function test_a_title_of_zero_is_a_title(): void {
+		$task = $this->service->create_task( '0', '' );
+
+		$this->assertSame( '0', $task['title'] );
+		$this->assertSame( 1, $this->count_rows( 'tasks' ) );
+	}
+
+	public function test_a_title_and_description_longer_than_their_columns_are_cut_between_characters(): void {
+		$task = $this->service->create_task( str_repeat( 'é', 300 ), str_repeat( 'é', 40000 ) );
+
+		$this->assertSame( str_repeat( 'é', 255 ), $task['title'], 'The title column holds 255 characters.' );
+		$this->assertSame( str_repeat( 'é', 32767 ), $task['description'], 'The description column holds 65535 bytes.' );
+		$this->assertSame( str_repeat( 'é', 255 ), $this->service->get_task( (int) $task['id'] )->title );
+	}
+
+	public function test_a_title_sanitizing_lengthens_is_cut_once_sanitized(): void {
+		$task = $this->service->create_task( str_repeat( '<', 300 ), '' );
+
+		$this->assertSame( str_repeat( '&lt;', 63 ), $task['title'], 'Each "<" is stored as "&lt;", and the cut part of the 64th is dropped.' );
+	}
+
+	public function test_a_cut_does_not_leave_a_broken_entity_at_the_end(): void {
+		$task = $this->service->create_task( str_repeat( 'a', 253 ) . '<<', '' );
+
+		$this->assertSame( str_repeat( 'a', 253 ), $task['title'], 'The "&l" left of "&lt;" is dropped.' );
+	}
+
+	public function test_a_cut_does_not_leave_a_broken_hex_entity_written_with_a_capital_x(): void {
+		$task = $this->service->create_task( str_repeat( 'a', 250 ) . '&#X1F;', '' );
+
+		$this->assertSame( str_repeat( 'a', 250 ), $task['title'], 'The "&#X1F" left of "&#X1F;" is dropped.' );
+	}
+
+	public function test_a_long_run_of_letters_after_an_ampersand_is_not_taken_for_an_entity(): void {
+		$task = $this->service->create_task( 'ab&' . str_repeat( 'c', 300 ) . ';', '' );
+
+		$this->assertSame( 'ab&' . str_repeat( 'c', 252 ), $task['title'], 'No entity name is that long, so the cut text is kept.' );
+	}
+
+	public function test_an_entity_the_text_ends_with_is_kept_when_only_characters_were_removed(): void {
+		$this->store_only_three_byte_characters_in( 'title' );
+
+		$task = $this->service->create_task( 'R😀&D', '' );
+
+		$this->assertSame( 'R&D', $task['title'] );
+	}
+
+	/**
+	 * @dataProvider stripped_ampersand_provider
+	 *
+	 * @param string $title
+	 * @param string $stored
+	 *
+	 * @return void
+	 */
+	public function test_an_ampersand_left_at_the_end_by_removed_characters_is_kept( string $title, string $stored ): void {
+		$this->store_only_three_byte_characters_in( 'title' );
+
+		$this->assertSame( $stored, $this->service->create_task( $title, '' )['title'] );
+	}
+
+	/**
+	 * Titles whose last "&" is followed only by characters the column cannot store: nothing was cut, so nothing
+	 * after it is a broken entity.
+	 *
+	 * @return array<string, array{string, string}>
+	 */
+	public static function stripped_ampersand_provider(): array {
+		return array(
+			'a word'           => array( 'Q&A😀', 'Q&A' ),
+			'the "&" alone'    => array( '&😀', '&' ),
+			'an entity before' => array( 'Pack &lt;3😀', 'Pack &lt;3' ),
+		);
+	}
+
+	public function test_characters_the_column_cannot_store_are_removed(): void {
+		$this->store_only_three_byte_characters_in( 'title' );
+		$this->store_only_three_byte_characters_in( 'description' );
+
+		$task = $this->service->create_task( 'Pack 😀 now', 'Fast 😀' );
+
+		$this->assertSame( 'Pack  now', $task['title'] );
+		$this->assertSame( 'Fast ', $task['description'] );
+	}
+
+	public function test_a_title_of_characters_the_column_cannot_store_alone_is_refused(): void {
+		$this->store_only_three_byte_characters_in( 'title' );
+
+		try {
+			$this->service->create_task( '😀', '' );
+			$this->fail( 'Creating the task must fail.' );
+		} catch ( \Exception $e ) {
+			$this->assertSame( 'Task title is required and must be a string.', $e->getMessage() );
+		}
+
+		$this->assertSame( 0, $this->count_rows( 'tasks' ) );
+	}
+
+	/**
+	 * Titles with nothing left once sanitized.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public static function empty_title_provider(): array {
+		return array(
+			'none'         => array( '' ),
+			'whitespace'   => array( " \n\t " ),
+			'markup alone' => array( '<b></b>' ),
+		);
 	}
 
 	public function test_new_tasks_go_to_the_end_of_their_status(): void {
@@ -308,6 +430,44 @@ class TaskManagerServiceTest extends IntegrationTestCase {
 		$this->assertSame( 'New title', $task['title'] );
 		$this->assertSame( 'Plain', $task['description'] );
 		$this->assertSame( 'New title', $this->service->get_task( $id )->title );
+	}
+
+	public function test_update_task_cuts_a_title_and_description_longer_than_their_columns(): void {
+		$id = $this->create_task( 'Old', $this->status_option_id( 'not_started' ) );
+
+		$task = $this->service->update_task( $id, array( 'title' => str_repeat( 'é', 300 ), 'description' => str_repeat( 'é', 40000 ) ) );
+
+		$this->assertSame( str_repeat( 'é', 255 ), $task['title'] );
+		$this->assertSame( str_repeat( 'é', 32767 ), $task['description'] );
+		$this->assertSame( str_repeat( 'é', 255 ), $this->service->get_task( $id )->title );
+	}
+
+	/**
+	 * @dataProvider empty_title_provider
+	 *
+	 * @param string $title
+	 *
+	 * @return void
+	 */
+	public function test_update_task_refuses_a_title_that_is_empty_once_sanitized( string $title ): void {
+		$id = $this->create_task( 'Old', $this->status_option_id( 'not_started' ) );
+
+		try {
+			$this->service->update_task( $id, array( 'title' => $title, 'description' => 'New' ) );
+			$this->fail( 'Updating the task must fail.' );
+		} catch ( \Exception $e ) {
+			$this->assertSame( 'Task title is required and must be a string.', $e->getMessage() );
+		}
+
+		$this->assertSame( 'Old', $this->service->get_task( $id )->title );
+		$this->assertSame( '', $this->service->get_task( $id )->description, 'Nothing is saved.' );
+	}
+
+	public function test_update_task_takes_a_title_of_zero_and_keeps_the_title_when_none_is_sent(): void {
+		$id = $this->create_task( 'Old', $this->status_option_id( 'not_started' ) );
+
+		$this->assertSame( 'Old', $this->service->update_task( $id, array( 'description' => 'New' ) )['title'] );
+		$this->assertSame( '0', $this->service->update_task( $id, array( 'title' => '0' ) )['title'] );
 	}
 
 	public function test_update_task_only_takes_the_title_and_description(): void {
@@ -1285,5 +1445,23 @@ class TaskManagerServiceTest extends IntegrationTestCase {
 		}
 
 		$this->fail( "Expected {$exception_class} to be thrown." );
+	}
+
+	/**
+	 * Make $wpdb treat a column of the tasks table as utf8mb3, which cannot store four-byte characters such as emoji.
+	 *
+	 * @param string $column
+	 *
+	 * @return void
+	 */
+	private function store_only_three_byte_characters_in( string $column ): void {
+		$table = $this->table( 'tasks' );
+
+		add_filter(
+			'pre_get_col_charset',
+			static fn( $charset, string $checked_table, string $checked_column ) => $table === $checked_table && $column === $checked_column ? 'utf8mb3' : $charset,
+			10,
+			3
+		);
 	}
 }

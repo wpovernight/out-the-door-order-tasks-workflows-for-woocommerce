@@ -71,6 +71,13 @@ class TaskControllerTest extends RestTestCase {
 		$this->assertNotNull( $this->make( TaskManagerService::class )->get_task( $data['id'] ) );
 	}
 
+	public function test_creating_a_task_titled_zero(): void {
+		$response = $this->request( 'POST', '/tasks', array( 'title' => '0' ) );
+
+		$this->assertResponse( 200, $response );
+		$this->assertSame( '0', $this->json( $response )['data']['title'] );
+	}
+
 	/**
 	 * @dataProvider invalid_task_provider
 	 */
@@ -89,7 +96,10 @@ class TaskControllerTest extends RestTestCase {
 		return array(
 			'missing title'         => array( array( 'description' => 'x' ), 'rest_missing_callback_param', null ),
 			'title not a string'    => array( array( 'title' => array( 'x' ) ), 'rest_invalid_param', null ),
+			'empty title'           => array( array( 'title' => '' ), 'invalid_data', 'title' ),
 			'title too long'        => array( array( 'title' => str_repeat( 'a', 256 ) ), 'invalid_data', 'title' ),
+			'title of markup alone' => array( array( 'title' => '<b></b>' ), 'invalid_data', 'title' ),
+			'title of whitespace'   => array( array( 'title' => " \n\t " ), 'invalid_data', 'title' ),
 			'field values not list' => array( array( 'title' => 'x', 'field_values' => 'status' ), 'invalid_data', 'field_values' ),
 		);
 	}
@@ -165,6 +175,19 @@ class TaskControllerTest extends RestTestCase {
 
 		$this->assertResponse( 404, $this->request( 'PUT', '/tasks/999999', array( 'title' => 'Ghost' ) ), 'not_found' );
 		$this->assertResponse( 400, $this->request( 'PUT', "/tasks/{$id}", array( 'title' => str_repeat( 'a', 256 ) ) ), 'invalid_data' );
+	}
+
+	public function test_updating_a_task_with_a_title_empty_once_sanitized_is_refused(): void {
+		$id = $this->create_task( 'Valid' );
+
+		$response = $this->request( 'PUT', "/tasks/{$id}", array( 'title' => '<b> </b>' ) );
+
+		$this->assertResponse( 400, $response, 'invalid_data' );
+		$this->assertSame(
+			array( 'The title field is empty once its markup and whitespace are removed.' ),
+			$response->get_data()['data']['errors']['title']
+		);
+		$this->assertSame( 'Valid', $this->make( TaskManagerService::class )->get_task( $id )->title );
 	}
 
 	public function test_deleting_a_task(): void {

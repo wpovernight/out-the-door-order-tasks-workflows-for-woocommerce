@@ -200,4 +200,21 @@ class TaskRepository extends BaseRepository {
 			return false !== $affected_rows;
 		} );
 	}
+
+	/**
+	 * A text as a column of the tasks table holds it: the characters its charset cannot store removed, and cut to its
+	 * length, which $wpdb counts in characters or bytes as the column's type does. A cut never splits a character.
+	 *
+	 * $wpdb refuses to write a text the column would change, so a text that does not fit fails every save.
+	 *
+	 * @param string $column
+	 * @param string $text
+	 *
+	 * @return string The text as given when the column's charset cannot be read.
+	 */
+	public function fit_to_column( string $column, string $text ): string {
+		$fitted = $this->wpdb->strip_invalid_text_for_column( $this->get_table_full_name(), $column, $text );
+
+		return is_string( $fitted ) ? $fitted : $text;
+	}
 }

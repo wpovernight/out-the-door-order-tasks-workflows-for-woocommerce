@@ -327,10 +327,17 @@ class TaskController extends BaseRestController {
 		$data = $request->get_json_params();
 
 		$errors = $this->validate( $data, array(
-			'title'        => 'required|string|max:255',
+			'title'        => 'string|max:255',
 			'description'  => 'string',
 			'field_values' => 'array',
 		) );
+
+		// Not the "required" rule, which counts "0" as missing, and "0" is a title.
+		if ( ! isset( $data['title'] ) || '' === $data['title'] ) {
+			$errors['title'][] = 'The title field is required.';
+		}
+
+		$errors = $this->with_empty_title_error( $data, $errors );
 
 		if ( ! empty( $errors ) ) {
 			return new WP_Error( 'invalid_data', 'Invalid data provided', array(
@@ -419,11 +426,11 @@ class TaskController extends BaseRestController {
 
 		$data = $request->get_json_params();
 
-		$errors = $this->validate( $data, array(
+		$errors = $this->with_empty_title_error( $data, $this->validate( $data, array(
 			'title'       => 'string|max:255',
 			'description' => 'string',
 			'field_values' => 'array',
-		) );
+		) ) );
 
 		if ( ! empty( $errors ) ) {
 			return new WP_Error( 'invalid_data', 'Invalid data provided', array(
@@ -1039,5 +1046,22 @@ class TaskController extends BaseRestController {
 			Logger::error( 'Failed to update status roles: ' . $e->getMessage() );
 			return new WP_Error( 'update_failed', 'Failed to update status roles.', array( 'status' => 500 ) );
 		}
+	}
+
+	/**
+	 * Add an error for a title sent that is empty once sanitized, as the task service would refuse it: a title of
+	 * markup or whitespace alone.
+	 *
+	 * @param array $data   The request's JSON body.
+	 * @param array $errors The errors found so far, keyed by field.
+	 *
+	 * @return array
+	 */
+	private function with_empty_title_error( array $data, array $errors ): array {
+		if ( empty( $errors['title'] ) && isset( $data['title'] ) && is_string( $data['title'] ) && '' === sanitize_text_field( $data['title'] ) ) {
+			$errors['title'][] = 'The title field is empty once its markup and whitespace are removed.';
+		}
+
+		return $errors;
 	}
 }

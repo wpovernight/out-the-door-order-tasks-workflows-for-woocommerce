@@ -26,6 +26,21 @@ class TaskRepositoryTest extends IntegrationTestCase {
 	}
 
 	/** ================================
+	 *   fit_to_column()
+	 *  ================================ */
+
+	public function test_a_text_is_fitted_to_its_column(): void {
+		$this->assertSame( str_repeat( 'é', 255 ), $this->repository->fit_to_column( 'title', str_repeat( 'é', 300 ) ) );
+		$this->assertSame( 'Fits', $this->repository->fit_to_column( 'title', 'Fits' ) );
+	}
+
+	public function test_a_text_is_kept_as_given_when_the_columns_charset_cannot_be_read(): void {
+		add_filter( 'pre_get_col_charset', static fn() => new \WP_Error( 'wpdb_get_table_charset_failure', 'No charset.' ) );
+
+		$this->assertSame( str_repeat( 'é', 300 ), $this->repository->fit_to_column( 'title', str_repeat( 'é', 300 ) ) );
+	}
+
+	/** ================================
 	 *   get_last_task_position()
 	 *  ================================ */
 

@@ -168,6 +168,41 @@ final class TaskManagerService {
 	}
 
 	/**
+	 * A sanitized title or description as the tasks table holds it, so a long one is cut rather than failing the
+	 * save. When the cut splits an entity, such as leaving the "&l" of "&lt;", that part is dropped too, so the text
+	 * does not end in a broken one.
+	 *
+	 * @param string $column title | description.
+	 * @param string $text   Sanitized.
+	 *
+	 * @return string
+	 */
+	private function fit_to_column( string $column, string $text ): string {
+		$fitted = $this->task_repository->fit_to_column( $column, $text );
+
+		if ( $fitted === $text || ! preg_match( '/&[#a-zA-Z0-9]*$/', $fitted, $tail ) ) {
+			return $fitted;
+		}
+
+		// Fitting only removes characters other than "&", so the last "&" kept is the same one in the text given. The
+		// kept part ends inside an entity only when the text continues it there; otherwise, as for "Q&A" left of
+		// "Q&A😀", it is the text's own.
+		$offset = -1;
+		for ( $count = substr_count( $fitted, '&' ); $count > 0; $count-- ) {
+			$offset = strpos( $text, '&', $offset + 1 );
+		}
+
+		if (
+			preg_match( '/^&(?:[a-zA-Z][a-zA-Z0-9]{0,31}|#[0-9]+|#[xX][0-9a-fA-F]+);/', substr( $text, $offset ), $entity )
+			&& strlen( $entity[0] ) > strlen( $tail[0] )
+		) {
+			$fitted = substr( $fitted, 0, -strlen( $tail[0] ) );
+		}
+
+		return $fitted;
+	}
+
+	/**
 	 * Get a Task by ID.
 	 *
 	 * @param int $task_id
@@ -181,6 +216,8 @@ final class TaskManagerService {
 	/**
 	 * Create a new Task.
 	 *
+	 * The title and description are sanitized, then cut to what their columns hold.
+	 *
 	 * @param string $title
 	 * @param string $description
 	 * @param array|null $field_values
@@ -190,7 +227,11 @@ final class TaskManagerService {
 	 * @throws Exception|\Throwable
 	 */
 	public function create_task( string $title, string $description, ?array $field_values = array() ): ?array {
-		if ( empty( $title ) ) {
+		// Checked once sanitized and fitted, so a title of markup, whitespace or characters the table cannot store
+		// alone is not saved empty.
+		$title = $this->fit_to_column( 'title', sanitize_text_field( $title ) );
+
+		if ( '' === $title ) {
 			throw new Exception( 'Task title is required and must be a string.' );
 		}
 
@@ -220,8 +261,8 @@ final class TaskManagerService {
 		}
 
 		$task_data = array(
-			'title'       => sanitize_text_field( $title ),
-			'description' => sanitize_textarea_field( $description )
+			'title'       => $title,
+			'description' => $this->fit_to_column( 'description', sanitize_textarea_field( $description ) ),
 		);
 		$task      = new Task( $task_data );
 
@@ -291,6 +332,8 @@ final class TaskManagerService {
 	 * under the slug of the field it is saved to. A value for a field that does not exist is skipped. A field sent
 	 * more than once saves its last value, and only that value is compared with the stored one.
 	 *
+	 * A title or description sent is sanitized, then cut to what its column holds.
+	 *
 	 * @param int $task_id
 	 * @param array<string, mixed> $task_data
 	 * @param array|null $field_values Entries of 'field_id' and 'value'.
@@ -298,7 +341,8 @@ final class TaskManagerService {
 	 * @return array|null
 	 * @throws InvalidArgumentException If the task does not exist.
 	 * @throws RuntimeException If the persistence call fails.
-	 * @throws Exception|\Throwable
+	 * @throws Exception If a title is sent that is empty once sanitized, or saving fails.
+	 * @throws \Throwable
 	 */
 	public function update_task( int $task_id, array $task_data, ?array $field_values = array() ): ?array {
 		$task = $this->task_repository->find( $task_id );
@@ -312,10 +356,14 @@ final class TaskManagerService {
 
 		// Sanitize input before filling the model.
 		if ( array_key_exists( 'title', $task_data ) ) {
-			$task_data['title'] = sanitize_text_field( (string) $task_data['title'] );
+			$task_data['title'] = $this->fit_to_column( 'title', sanitize_text_field( (string) $task_data['title'] ) );
+
+			if ( '' === $task_data['title'] ) {
+				throw new Exception( 'Task title is required and must be a string.' );
+			}
 		}
 		if ( array_key_exists( 'description', $task_data ) ) {
-			$task_data['description'] = sanitize_textarea_field( (string) $task_data['description'] );
+			$task_data['description'] = $this->fit_to_column( 'description', sanitize_textarea_field( (string) $task_data['description'] ) );
 		}
 
 		// Track which fields were actually updated with old and new values.
