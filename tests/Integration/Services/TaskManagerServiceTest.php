@@ -7,6 +7,7 @@ use WPO\OTD\Enums\TaskStatusRoleSettingKeys;
 use WPO\OTD\Models\Task;
 use WPO\OTD\Models\TaskField;
 use WPO\OTD\Models\TaskFieldValue;
+use WPO\OTD\Repositories\TaskFieldRepository;
 use WPO\OTD\Services\TaskManagerService;
 use WPO\OTD\Services\TaskManagerSettingsService;
 use WPO\OTD\Tests\IntegrationTestCase;
@@ -1135,7 +1136,7 @@ class TaskManagerServiceTest extends IntegrationTestCase {
 		$this->assertFalse( $saved );
 	}
 
-	public function test_a_value_for_a_field_that_does_not_exist_is_not_saved_or_announced(): void {
+	public function test_a_value_for_a_field_that_does_not_exist_is_not_saved(): void {
 		global $wpdb;
 
 		$id = $this->create_task( 'Unknown field', $this->status_option_id( 'not_started' ) );
@@ -1146,6 +1147,7 @@ class TaskManagerServiceTest extends IntegrationTestCase {
 		$this->throw_on_queries( '/^INSERT INTO `?\w*task_field_values`? /', new \RuntimeException( 'Insert attempted' ) );
 
 		$this->assertFalse( $this->service->set_field_value( $id, 999999, 'lost' ) );
+		$this->assertSame( array(), $updates(), 'Nothing saved, so nothing is announced.' );
 		$this->assertFalse( $this->service->update_field_values( $id, array( DefaultTaskFields::ORDER => 11, 999999 => 'lost' ) ) );
 
 		$this->assertSame( '11', $this->field_value( $id, DefaultTaskFields::ORDER ), 'The value that saved stays saved.' );
@@ -1153,7 +1155,63 @@ class TaskManagerServiceTest extends IntegrationTestCase {
 			'0',
 			$wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . $this->table( 'task_field_values' ) . ' WHERE field_id = %d', 999999 ) )
 		);
-		$this->assertSame( array(), $updates() );
+		$this->assertCount( 1, $updates() );
+		$this->assertSame( array( 'order' => array( 'old_value' => '10', 'new_value' => 11 ) ), $updates()[0][2] );
+	}
+
+	public function test_update_field_values_loads_the_fields_in_one_query(): void {
+		$id      = $this->create_task( 'Values', $this->status_option_id( 'not_started' ) );
+		$queries = 0;
+		TaskFieldRepository::clear_cache();
+		add_filter(
+			'query',
+			static function ( $query ) use ( &$queries ) {
+				if ( preg_match( '/\bFROM\s+`?\w*task_fields\b`?\s+WHERE\b/', (string) $query ) ) {
+					++$queries;
+				}
+
+				return $query;
+			}
+		);
+
+		$this->assertTrue(
+			$this->service->update_field_values(
+				$id,
+				array(
+					DefaultTaskFields::ORDER     => 10,
+					DefaultTaskFields::DUE_DATE  => '2030-01-01',
+					DefaultTaskFields::DONE_DATE => '2030-01-02',
+				)
+			)
+		);
+
+		$this->assertSame( 1, $queries, 'Reading every field for the announcement is a separate, unfiltered query.' );
+		$this->assertSame( '2030-01-02', $this->field_value( $id, DefaultTaskFields::DONE_DATE ) );
+	}
+
+	public function test_a_stored_value_is_reported_as_stored_without_unserializing(): void {
+		global $wpdb;
+
+		$id     = $this->create_task( 'Raw', $this->status_option_id( 'not_started' ) );
+		$stored = 'O:8:"stdClass":1:{s:4:"evil";b:1;}';
+		foreach ( array( DefaultTaskFields::ORDER, DefaultTaskFields::DUE_DATE ) as $field_id ) {
+			$wpdb->insert(
+				$this->table( 'task_field_values' ),
+				array(
+					'task_id'  => $id,
+					'field_id' => $field_id,
+					'value'    => $stored,
+				)
+			);
+		}
+		$updates = $this->record_updates();
+
+		$this->service->set_field_value( $id, DefaultTaskFields::ORDER, 10 );
+		$this->service->update_field_values( $id, array( DefaultTaskFields::DUE_DATE => '2030-01-01' ) );
+
+		$this->assertCount( 2, $updates() );
+		$this->assertSame( array( 'order' => array( 'old_value' => $stored, 'new_value' => 10 ) ), $updates()[0][2] );
+		$this->assertSame( array( 'due_date' => array( 'old_value' => $stored, 'new_value' => '2030-01-01' ) ), $updates()[1][2] );
 	}
 
 	/** ================================
@@ -1275,7 +1333,7 @@ class TaskManagerServiceTest extends IntegrationTestCase {
 		$this->assertSame( array(), $updates() );
 	}
 
-	public function test_update_field_values_announces_nothing_when_a_value_fails(): void {
+	public function test_update_field_values_announces_the_values_that_saved_when_another_fails(): void {
 		$id = $this->create_task( 'Values', $this->status_option_id( 'not_started' ) );
 		$this->service->set_field_value( $id, DefaultTaskFields::ORDER, 10 );
 		$updates = $this->record_updates();
@@ -1291,6 +1349,52 @@ class TaskManagerServiceTest extends IntegrationTestCase {
 
 		$this->assertFalse( $saved );
 		$this->assertSame( '11', $this->field_value( $id, DefaultTaskFields::ORDER ), 'The value that saved stays saved.' );
+		$this->assertCount( 1, $updates() );
+		$this->assertSame( array( 'order' => array( 'old_value' => '10', 'new_value' => 11 ) ), $updates()[0][2] );
+	}
+
+	public function test_update_field_values_announces_a_saved_status_beside_a_field_that_does_not_exist(): void {
+		$todo    = $this->status_option_id( 'not_started' );
+		$doing   = $this->status_option_id( 'in_progress' );
+		$id      = $this->create_task( 'Values', $todo );
+		$updates = $this->record_updates();
+
+		$saved = $this->service->update_field_values(
+			$id,
+			array(
+				DefaultTaskFields::STATUS => $doing,
+				999999                    => 'lost',
+			)
+		);
+
+		$this->assertFalse( $saved );
+		$this->assertSame( (string) $doing, $this->field_value( $id, DefaultTaskFields::STATUS ) );
+		$this->assertCount( 1, $updates() );
+		list( $task_id, $task, $updated_fields ) = $updates()[0];
+		$this->assertSame( $id, $task_id );
+		$this->assertSame( $doing, array_column( $task['fields'], null, 'slug' )['status']['values'][0]['raw'] );
+		$this->assertSame( array( 'status' => array( 'old_value' => (string) $todo, 'new_value' => $doing ) ), $updated_fields );
+	}
+
+	public function test_update_field_values_announces_nothing_when_no_value_saved(): void {
+		$id = $this->create_task( 'Values', $this->status_option_id( 'not_started' ) );
+		$this->service->set_field_value( $id, DefaultTaskFields::ORDER, 10 );
+		$updates = $this->record_updates();
+
+		$this->assertFalse( $this->service->update_field_values( $id, array( 999999 => 'lost' ) ) );
+
+		$this->fail_queries( '/^(INSERT INTO|UPDATE) `?\w*task_field_values`? /' );
+		$this->assertFalse(
+			$this->service->update_field_values(
+				$id,
+				array(
+					DefaultTaskFields::ORDER    => 11,
+					DefaultTaskFields::DUE_DATE => '2030-01-01',
+				)
+			)
+		);
+
+		$this->assertSame( '10', $this->field_value( $id, DefaultTaskFields::ORDER ) );
 		$this->assertSame( array(), $updates() );
 	}
 
