@@ -21,6 +21,7 @@ import {
 	updateFieldOption as updateFieldOptionAPI,
 	deleteFieldOption as deleteFieldOptionAPI,
 	reorderFieldOptions as reorderFieldOptionsAPI,
+	ApiError,
 } from '@sdk/utils/api';
 import { updateTaskFields } from '@sdk/utils/fieldUtils';
 import { useStatusRoles } from '@sdk/context/StatusRoleContext';
@@ -109,10 +110,17 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 				return newTask;
 			} catch (error) {
 				console.error('Failed to create task:', error);
+				// The task was saved before a later step failed: show it, so it is not created again.
+				if (
+					error instanceof ApiError &&
+					error.code === 'task_created_with_error'
+				) {
+					loadTasks(true);
+				}
 				throw error;
 			}
 		},
-		[]
+		[loadTasks]
 	);
 
 	const updateTask = useCallback(

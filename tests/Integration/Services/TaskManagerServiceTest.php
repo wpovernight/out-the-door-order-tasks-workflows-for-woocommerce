@@ -4,6 +4,7 @@ namespace WPO\OTD\Tests\Integration\Services;
 
 use WPO\OTD\Enums\DefaultTaskFields;
 use WPO\OTD\Enums\TaskStatusRoleSettingKeys;
+use WPO\OTD\Exceptions\TaskCreatedWithErrorException;
 use WPO\OTD\Models\Task;
 use WPO\OTD\Models\TaskField;
 use WPO\OTD\Models\TaskFieldValue;
@@ -274,6 +275,39 @@ class TaskManagerServiceTest extends IntegrationTestCase {
 		$this->assertSame( $task['id'], $fired[0][0] );
 		$this->assertSame( $task, $fired[0][1] );
 		$this->assertSame( 1.0, $fired[0][2][ DefaultTaskFields::POSITION ] );
+	}
+
+	public function test_a_failure_reading_the_created_task_back_keeps_it_and_names_it(): void {
+		add_filter(
+			'wpo_otd_task_get_field_value',
+			static function () {
+				throw new \LogicException( 'Unreadable value' );
+			}
+		);
+
+		$exception = $this->catch_created_with_error(
+			fn() => $this->service->create_task( 'Kept', '', array( $this->status( $this->status_option_id( 'not_started' ) ) ) )
+		);
+
+		$this->assert_kept_task( $exception, 'Kept', 'Unreadable value' );
+	}
+
+	public function test_a_failing_task_created_listener_keeps_the_task_and_names_it(): void {
+		$announced = 0;
+		add_action(
+			'wpo_otd_task_created',
+			static function () use ( &$announced ) {
+				++$announced;
+				throw new \RuntimeException( 'Listener failed' );
+			}
+		);
+
+		$exception = $this->catch_created_with_error(
+			fn() => $this->service->create_task( 'Announced', '', array( $this->status( $this->status_option_id( 'not_started' ) ) ) )
+		);
+
+		$this->assertSame( 1, $announced );
+		$this->assert_kept_task( $exception, 'Announced', 'Listener failed' );
 	}
 
 	/** ================================
@@ -667,6 +701,34 @@ class TaskManagerServiceTest extends IntegrationTestCase {
 			fn() => $this->service->create_task( 'Unsaved', '', array( $this->status( $this->status_option_id( 'not_started' ) ) ) )
 		);
 		$this->assertSame( 0, $created, 'A task without its values is not announced.' );
+		$this->assertSame( $tasks, $this->count_rows( 'tasks' ), 'A task without a status column is not kept.' );
+	}
+
+	public function test_a_field_value_save_that_throws_removes_the_task_and_is_not_reported_as_created(): void {
+		$tasks = $this->count_rows( 'tasks' );
+		$this->throw_on_queries( '/^INSERT INTO \S*task_field_values /', new \LogicException( 'Database unavailable' ) );
+
+		try {
+			$this->service->create_task( 'Thrown', '', array( $this->status( $this->status_option_id( 'not_started' ) ) ) );
+			$this->fail( 'Expected the save to throw.' );
+		} catch ( \LogicException $e ) {
+			$this->assertSame( 'Database unavailable', $e->getMessage() );
+		}
+
+		$this->assertSame( $tasks, $this->count_rows( 'tasks' ), 'A task without a status column is not kept.' );
+	}
+
+	public function test_a_failure_placing_the_task_in_its_column_removes_it_and_is_not_reported_as_created(): void {
+		$tasks = $this->count_rows( 'tasks' );
+		$this->throw_on_queries( '/task_field_values`? AS status\b/', new \LogicException( 'Position unavailable' ) );
+
+		try {
+			$this->service->create_task( 'Unplaced', '', array( $this->status( $this->status_option_id( 'not_started' ) ) ) );
+			$this->fail( 'Expected the position lookup to throw.' );
+		} catch ( \LogicException $e ) {
+			$this->assertSame( 'Position unavailable', $e->getMessage() );
+		}
+
 		$this->assertSame( $tasks, $this->count_rows( 'tasks' ), 'A task without a status column is not kept.' );
 	}
 
@@ -1527,6 +1589,42 @@ class TaskManagerServiceTest extends IntegrationTestCase {
 	 */
 	private function slugs( array $options ): array {
 		return array_map( static fn( $option ) => $option->slug, $options );
+	}
+
+	/**
+	 * Run a task creation that is expected to fail after the task was saved.
+	 *
+	 * @param callable $callback
+	 *
+	 * @return TaskCreatedWithErrorException
+	 */
+	private function catch_created_with_error( callable $callback ): TaskCreatedWithErrorException {
+		try {
+			$callback();
+		} catch ( TaskCreatedWithErrorException $e ) {
+			return $e;
+		}
+
+		$this->fail( 'Expected TaskCreatedWithErrorException to be thrown.' );
+	}
+
+	/**
+	 * Assert the exception names a task that is still stored with its values, and keeps the original failure.
+	 *
+	 * @param TaskCreatedWithErrorException $exception
+	 * @param string                        $title    The title the task was created with.
+	 * @param string                        $original The message of the failure after the task was saved.
+	 *
+	 * @return void
+	 */
+	private function assert_kept_task( TaskCreatedWithErrorException $exception, string $title, string $original ): void {
+		$task = $this->service->get_task( $exception->get_task_id() );
+
+		$this->assertNotNull( $task );
+		$this->assertSame( $title, $task->title );
+		$this->assertSame( (string) $this->status_option_id( 'not_started' ), $this->field_value( $task->id, DefaultTaskFields::STATUS ) );
+		$this->assertSame( $original, $exception->getPrevious()->getMessage() );
+		$this->assertStringContainsString( $original, $exception->getMessage() );
 	}
 
 	/**

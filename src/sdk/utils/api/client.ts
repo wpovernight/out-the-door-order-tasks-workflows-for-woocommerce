@@ -31,37 +31,55 @@ export function getHeaders(): Record<string, string> {
 	};
 }
 
-async function extractErrorMessage(response: Response): Promise<string> {
+/**
+ * A failed API request. The code is the error code the endpoint answered with, when it sent one.
+ */
+export class ApiError extends Error {
+	readonly code?: string;
+	readonly status: number;
+
+	constructor(message: string, status: number, code?: string) {
+		super(message);
+		this.name = 'ApiError';
+		this.status = status;
+		this.code = code;
+	}
+}
+
+async function extractError(response: Response): Promise<ApiError> {
 	const fallback = `Request failed (${response.status}).`;
 
 	const raw = await response.text();
 	if (!raw) {
-		return fallback;
+		return new ApiError(fallback, response.status);
 	}
 
+	let body: any;
 	try {
-		const body = JSON.parse(raw);
-
-		const fieldErrors = body?.data?.errors;
-		if (fieldErrors && typeof fieldErrors === 'object') {
-			const first = Object.values(fieldErrors)[0];
-			if (Array.isArray(first) && first.length > 0) {
-				return String(first[0]);
-			}
-			if (typeof first === 'string') {
-				return first;
-			}
-		}
-
-		if (typeof body?.message === 'string' && body.message) {
-			return body.message;
-		}
+		body = JSON.parse(raw);
 	} catch {
 		// Non-JSON body — fall through to the raw text.
-		return raw;
+		return new ApiError(raw, response.status);
 	}
 
-	return fallback;
+	const code = typeof body?.code === 'string' ? body.code : undefined;
+
+	const fieldErrors = body?.data?.errors;
+	if (fieldErrors && typeof fieldErrors === 'object') {
+		const first = Object.values(fieldErrors)[0];
+		if (Array.isArray(first) && first.length > 0) {
+			return new ApiError(String(first[0]), response.status, code);
+		}
+		if (typeof first === 'string') {
+			return new ApiError(first, response.status, code);
+		}
+	}
+
+	if (typeof body?.message === 'string' && body.message) {
+		return new ApiError(body.message, response.status, code);
+	}
+
+	return new ApiError(fallback, response.status, code);
 }
 
 /**
@@ -71,11 +89,11 @@ async function extractErrorMessage(response: Response): Promise<string> {
  * @param  response
  *
  * @return {Promise<T>} The parsed JSON data.
- * @throws Will throw an error if the response is not ok.
+ * @throws Will throw an ApiError if the response is not ok.
  */
 export async function handleResponse<T>(response: Response): Promise<T> {
 	if (!response.ok) {
-		throw new Error(await extractErrorMessage(response));
+		throw await extractError(response);
 	}
 
 	if (response.status === 204) {

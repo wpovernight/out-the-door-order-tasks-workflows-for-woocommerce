@@ -71,6 +71,49 @@ class TaskControllerTest extends RestTestCase {
 		$this->assertNotNull( $this->make( TaskManagerService::class )->get_task( $data['id'] ) );
 	}
 
+	public function test_a_task_created_before_a_later_step_failed_is_reported_with_its_id(): void {
+		add_filter( 'wpo_otd_logging_enabled', '__return_false' );
+		add_action(
+			'wpo_otd_task_created',
+			static function () {
+				throw new \RuntimeException( 'Listener failed' );
+			}
+		);
+
+		$response = $this->request( 'POST', '/tasks', array( 'title' => 'Half done' ) );
+
+		$this->assertResponse( 500, $response, 'task_created_with_error' );
+		$error = $this->json( $response );
+		$this->assertSame( 'The task was created, but a step after its creation failed.', $error['message'] );
+		$this->assertSame( 'Half done', $this->make( TaskManagerService::class )->get_task( $error['data']['task_id'] )->title );
+	}
+
+	public function test_a_failing_response_filter_reports_the_created_task_with_its_id(): void {
+		add_filter( 'wpo_otd_logging_enabled', '__return_false' );
+		add_filter(
+			'wpo_otd_rest_prepare_task',
+			static function () {
+				throw new \RuntimeException( 'Filter failed' );
+			}
+		);
+
+		$response = $this->request( 'POST', '/tasks', array( 'title' => 'Filtered' ) );
+
+		$this->assertResponse( 500, $response, 'task_created_with_error' );
+		$this->assertSame( 'Filtered', $this->make( TaskManagerService::class )->get_task( $this->json( $response )['data']['task_id'] )->title );
+	}
+
+	public function test_a_task_that_could_not_be_created_is_reported_without_an_id(): void {
+		add_filter( 'wpo_otd_logging_enabled', '__return_false' );
+		$this->throw_on_queries( '/^INSERT INTO \S*task_field_values /', new \LogicException( 'Database unavailable' ) );
+
+		$response = $this->request( 'POST', '/tasks', array( 'title' => 'Never kept' ) );
+
+		$this->assertResponse( 500, $response, 'task_creation_failed' );
+		$this->assertArrayNotHasKey( 'task_id', $this->json( $response )['data'] );
+		$this->assertSame( array(), $this->make( TaskManagerService::class )->get_all_tasks() );
+	}
+
 	public function test_creating_a_task_titled_zero(): void {
 		$response = $this->request( 'POST', '/tasks', array( 'title' => '0' ) );
 

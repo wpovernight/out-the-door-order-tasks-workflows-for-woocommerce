@@ -7,6 +7,7 @@ use InvalidArgumentException;
 use RuntimeException;
 use WPO\OTD\Enums\DefaultTaskFields;
 use WPO\OTD\Enums\TaskFieldTypes;
+use WPO\OTD\Exceptions\TaskCreatedWithErrorException;
 use WPO\OTD\Models\Task;
 use WPO\OTD\Models\TaskField;
 use WPO\OTD\Models\TaskFieldOption;
@@ -218,13 +219,19 @@ final class TaskManagerService {
 	 *
 	 * The title and description are sanitized, then cut to what their columns hold.
 	 *
+	 * When the task's field values cannot be worked out or saved, the task is removed again and the failure is
+	 * rethrown. Once they are saved, the task is kept: a failure while reading it back or in a wpo_otd_task_created
+	 * listener is rethrown as TaskCreatedWithErrorException, which carries the task's ID, so a caller does not create
+	 * it a second time.
+	 *
 	 * @param string $title
 	 * @param string $description
 	 * @param array|null $field_values
 	 *
 	 * @return array<string, mixed>|null
 	 *
-	 * @throws Exception|\Throwable
+	 * @throws TaskCreatedWithErrorException When the task was created, but reading it back or announcing it failed.
+	 * @throws Exception|\Throwable When the task could not be created.
 	 */
 	public function create_task( string $title, string $description, ?array $field_values = array() ): ?array {
 		// Checked once sanitized and fitted, so a title of markup, whitespace or characters the table cannot store
@@ -277,26 +284,26 @@ final class TaskManagerService {
 
 		$task->id = $result;
 
-		// Set the position field manually to be last in the status column.
-		$last_position = $this->task_repository->get_last_task_position( null, $status_id );
-
-		$field_values_array[ DefaultTaskFields::POSITION ] = $last_position ? $last_position + 1.0 : 1.0;
-
-		$done_option_id = $this->task_status_role_service->get_done_field_option_id();
-
-		// Auto-set "done_date" if creating with the option assigned to the "done" role.
-		$status_option = $this->get_field_option( $status_id );
-		if (
-			$status_option &&
-			$status_option->id === $done_option_id &&
-			! isset( $field_values_array[ DefaultTaskFields::DONE_DATE ] )
-		) {
-			$field_values_array[ DefaultTaskFields::DONE_DATE ] = gmdate( 'Y-m-d H:i:s' );
-		}
-
-		// Set field values. A task without them has no status column to sit in, so it is not kept; nothing has
-		// announced it yet.
+		// Until its field values are saved, the task has no status column to sit in, so a failure removes it again;
+		// nothing has announced it yet.
 		try {
+			// Set the position field manually to be last in the status column.
+			$last_position = $this->task_repository->get_last_task_position( null, $status_id );
+
+			$field_values_array[ DefaultTaskFields::POSITION ] = $last_position ? $last_position + 1.0 : 1.0;
+
+			$done_option_id = $this->task_status_role_service->get_done_field_option_id();
+
+			// Auto-set "done_date" if creating with the option assigned to the "done" role.
+			$status_option = $this->get_field_option( $status_id );
+			if (
+				$status_option &&
+				$status_option->id === $done_option_id &&
+				! isset( $field_values_array[ DefaultTaskFields::DONE_DATE ] )
+			) {
+				$field_values_array[ DefaultTaskFields::DONE_DATE ] = gmdate( 'Y-m-d H:i:s' );
+			}
+
 			$this->save_field_values( $task->id, $field_values_array );
 		} catch ( \Throwable $exception ) {
 			if ( ! $this->task_repository->delete( $task->id ) ) {
@@ -306,18 +313,23 @@ final class TaskManagerService {
 			throw $exception;
 		}
 
-		$fields_and_values = $this->get_task_fields_and_values( $task->id );
+		// The task is fully saved from here on, so a failure while reading it back or announcing it keeps the task.
+		try {
+			$fields_and_values = $this->get_task_fields_and_values( $task->id );
 
-		$task_with_fields = array_merge( $task->to_array(), array( 'fields' => $fields_and_values ) );
+			$task_with_fields = array_merge( $task->to_array(), array( 'fields' => $fields_and_values ) );
 
-		/**
-		 * Fires after a task has been created.
-		 *
-		 * @param int   $task_id          The ID of the created task.
-		 * @param array $task_with_fields Complete task data with fields and values.
-		 * @param array $field_values     Field values that were set on creation.
-		 */
-		do_action( 'wpo_otd_task_created', $task->id, $task_with_fields, $field_values_array );
+			/**
+			 * Fires after a task has been created.
+			 *
+			 * @param int   $task_id          The ID of the created task.
+			 * @param array $task_with_fields Complete task data with fields and values.
+			 * @param array $field_values     Field values that were set on creation.
+			 */
+			do_action( 'wpo_otd_task_created', $task->id, $task_with_fields, $field_values_array );
+		} catch ( \Throwable $exception ) {
+			throw new TaskCreatedWithErrorException( $task->id, $exception );
+		}
 
 		return $task_with_fields;
 	}

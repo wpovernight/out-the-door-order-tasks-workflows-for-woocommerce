@@ -7,6 +7,7 @@ use WP_REST_Response;
 use WP_REST_Server;
 use WP_Error;
 use WPO\OTD\Core\Logger;
+use WPO\OTD\Exceptions\TaskCreatedWithErrorException;
 use WPO\OTD\Services\TaskManagerService;
 use WPO\OTD\Services\TaskStatusRoleService;
 
@@ -347,14 +348,21 @@ class TaskController extends BaseRestController {
 		}
 
 		try {
-			$task_manager_service = $this->task_manager_service;
-
-			$task = $task_manager_service->create_task(
+			$task = $this->task_manager_service->create_task(
 				$data['title'],
 				$data['description'] ?? '',
 				$data['field_values'] ?? array()
 			);
+		} catch ( TaskCreatedWithErrorException $e ) {
+			return $this->task_created_with_error( $e );
+		} catch ( \Throwable $e ) {
+			Logger::error( 'Task creation failed: ' . $e->getMessage() );
+			return new WP_Error( 'task_creation_failed', __( 'Failed to create task.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 500 ) );
+		}
 
+		$task_id = (int) $task['id'];
+
+		try {
 			/**
 			 * Allow modifying the created task response.
 			 *
@@ -365,9 +373,29 @@ class TaskController extends BaseRestController {
 
 			return $this->respond( $task );
 		} catch ( \Throwable $e ) {
-			Logger::error( 'Task creation failed: ' . $e->getMessage() );
-			return new WP_Error( 'task_creation_failed', __( 'Failed to create task.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 500 ) );
+			return $this->task_created_with_error( new TaskCreatedWithErrorException( $task_id, $e ) );
 		}
+	}
+
+	/**
+	 * The error for a task that was created, but whose response could not be completed. Its own code and the task's ID
+	 * tell the client the task exists, so it is not created again.
+	 *
+	 * @param TaskCreatedWithErrorException $exception
+	 *
+	 * @return WP_Error
+	 */
+	private function task_created_with_error( TaskCreatedWithErrorException $exception ): WP_Error {
+		Logger::error( $exception->getMessage() );
+
+		return new WP_Error(
+			'task_created_with_error',
+			__( 'The task was created, but a step after its creation failed.', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
+			array(
+				'status'  => 500,
+				'task_id' => $exception->get_task_id(),
+			)
+		);
 	}
 
 	/**
