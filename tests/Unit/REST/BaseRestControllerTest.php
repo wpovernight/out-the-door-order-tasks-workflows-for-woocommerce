@@ -99,6 +99,112 @@ class BaseRestControllerTest extends TestCase {
 		$this->assertArrayHasKey( 'field', $this->controller->validate( array( 'field' => '0' ), array( 'field' => 'required' ) ) );
 	}
 
+	/**
+	 * @dataProvider strict_rule_provider
+	 */
+	public function test_presence_blank_and_strict_integer_rules( string $rule, $value, bool $passes ): void {
+		$errors = $this->controller->validate( array( 'field' => $value ), array( 'field' => $rule ) );
+
+		$this->assertSame( $passes, array() === $errors, var_export( $errors, true ) );
+	}
+
+	public function strict_rule_provider(): array {
+		return array(
+			'present, zero'                  => array( 'present', 0, true ),
+			'present, string zero'           => array( 'present', '0', true ),
+			'present, empty string'          => array( 'present', '', true ),
+			'present, false'                 => array( 'present', false, true ),
+			'present, empty array'           => array( 'present', array(), true ),
+			'present, negative'              => array( 'present', -1, true ),
+			'present, null'                  => array( 'present', null, true ),
+			'not null, zero'                 => array( 'not_null', 0, true ),
+			'not null, string zero'          => array( 'not_null', '0', true ),
+			'not null, empty string'         => array( 'not_null', '', true ),
+			'not null, false'                => array( 'not_null', false, true ),
+			'not null, null'                 => array( 'not_null', null, false ),
+			'present strict integer, null'   => array( 'present|strict_integer', null, true ),
+			'all three, null'                => array( 'present|not_null|strict_integer', null, false ),
+			'all three, zero'                => array( 'present|not_null|strict_integer', 0, true ),
+			'all three, numeric string'      => array( 'present|not_null|strict_integer', '10', false ),
+			'not blank, string zero'         => array( 'not_blank', '0', true ),
+			'not blank, padded text'         => array( 'not_blank', ' a ', true ),
+			'not blank, empty string'        => array( 'not_blank', '', false ),
+			'not blank, whitespace'          => array( 'not_blank', " \t\n", false ),
+			'not blank, zero'                => array( 'not_blank', 0, true ),
+			'not blank, false'               => array( 'not_blank', false, true ),
+			'not blank, null'                => array( 'not_blank', null, true ),
+			'strict integer, ten'            => array( 'strict_integer', 10, true ),
+			'strict integer, zero'           => array( 'strict_integer', 0, true ),
+			'strict integer, negative'       => array( 'strict_integer', -1, true ),
+			'strict integer, null'           => array( 'strict_integer', null, true ),
+			'strict integer, numeric string' => array( 'strict_integer', '10', false ),
+			'strict integer, string zero'    => array( 'strict_integer', '0', false ),
+			'strict integer, empty string'   => array( 'strict_integer', '', false ),
+			'strict integer, true'           => array( 'strict_integer', true, false ),
+			'strict integer, false'          => array( 'strict_integer', false, false ),
+			'strict integer, whole float'    => array( 'strict_integer', 10.0, false ),
+			'strict integer, float'          => array( 'strict_integer', 1.5, false ),
+			'strict integer, array'          => array( 'strict_integer', array( 1 ), false ),
+			'integer, numeric string'        => array( 'integer', '10', true ),
+			'integer, padded string'         => array( 'integer', ' 10 ', true ),
+			'integer, true'                  => array( 'integer', true, true ),
+			'integer, whole float'           => array( 'integer', 10.0, true ),
+			'integer, negative'              => array( 'integer', -1, true ),
+			'required, zero'                 => array( 'required', 0, false ),
+			'required, false'                => array( 'required', false, false ),
+			'required, empty array'          => array( 'required', array(), false ),
+			'required, negative'             => array( 'required', -1, true ),
+		);
+	}
+
+	public function test_present_and_the_strict_rules_report_their_messages(): void {
+		$this->assertSame(
+			array(
+				'missing' => array( 'The missing field is required.' ),
+				'nulled'  => array( 'The nulled field may not be null.' ),
+				'blank'   => array( 'The blank field may not be blank.' ),
+				'count'   => array( 'The count field must be an integer.' ),
+			),
+			$this->controller->validate(
+				array( 'nulled' => null, 'blank' => ' ', 'count' => '10' ),
+				array(
+					'missing' => 'present|not_null|strict_integer',
+					'nulled'  => 'present|not_null|strict_integer',
+					'blank'   => 'present|string|not_blank',
+					'count'   => 'present|not_null|strict_integer',
+				)
+			)
+		);
+	}
+
+	public function test_present_fails_only_on_an_absent_key(): void {
+		$rules = array(
+			'priority'    => 'present|not_null|strict_integer',
+			'title'       => 'present|string|not_blank',
+			'enabled'     => 'present|boolean',
+			'description' => 'present',
+		);
+
+		$this->assertSame(
+			array(),
+			$this->controller->validate( array( 'priority' => 0, 'title' => '0', 'enabled' => false, 'description' => null ), $rules )
+		);
+		$this->assertSame(
+			array(
+				'priority'    => array( 'The priority field is required.' ),
+				'title'       => array( 'The title field is required.' ),
+				'enabled'     => array( 'The enabled field is required.' ),
+				'description' => array( 'The description field is required.' ),
+			),
+			$this->controller->validate( array(), $rules ),
+			'A missing key is reported once, not also as null.'
+		);
+	}
+
+	public function test_not_null_alone_lets_a_missing_key_through(): void {
+		$this->assertSame( array(), $this->controller->validate( array(), array( 'priority' => 'not_null|strict_integer' ) ) );
+	}
+
 	public function test_a_pipe_inside_a_regex_does_not_split_the_rule(): void {
 		$rules = array( 'key' => 'string|regex:/^(draft|live)$/i|max:5' );
 

@@ -151,6 +151,34 @@ abstract class BaseRestController {
 	/**
 	 * Validates data against specified rules.
 	 *
+	 * Rules are pipe-separated, e.g. 'present|not_null|strict_integer'. A missing
+	 * key is read as null, and every rule except "required" and "present" passes
+	 * a missing key, so a type rule alone means "optional, but this type when
+	 * given". The type rules also pass an explicit null, so 'present|strict_integer'
+	 * accepts null; add not_null to refuse it.
+	 *
+	 * - required:       fails on anything empty() treats as empty: a missing key,
+	 *                   null, '', '0', 0, 0.0, false and an empty array.
+	 * - present:        fails only on a missing key. null, 0, '0', '', false and
+	 *                   an empty array all pass.
+	 * - not_null:       fails on a key that is given as null. A missing key passes,
+	 *                   so 'not_null' alone means "optional, but never null" and
+	 *                   'present|not_null' reports a missing key only once.
+	 * - not_blank:      fails on a string that is empty or only whitespace. '0'
+	 *                   passes; non-string values are left to the type rules.
+	 * - string:         must be a string.
+	 * - integer:        lenient: anything FILTER_VALIDATE_INT accepts, so '10',
+	 *                   ' 10 ' and true pass.
+	 * - strict_integer: must be a PHP int, as a JSON integer decodes to. Numeric
+	 *                   strings, booleans and every float fail, 10.0 included,
+	 *                   since JSON decodes 10.0 to a float.
+	 * - boolean:        true, false, 0, 1, '0' or '1'.
+	 * - array:          must be an array.
+	 * - regex:/p/:      a string must match the pattern.
+	 * - max:n:          a string may hold at most n characters.
+	 *
+	 * Unknown rule names are ignored.
+	 *
 	 * @param array $data The data to validate
 	 * @param array $rules The validation rules
 	 *
@@ -170,12 +198,13 @@ abstract class BaseRestController {
 		foreach ( $rules as $field => $rule_string ) {
 			$rules_array = $this->parse_rules( $rule_string );
 			$value       = $data[ $field ] ?? null;
+			$is_present  = array_key_exists( $field, $data );
 
 			foreach ( $rules_array as $rule ) {
 				// Handle rules with parameters (e.g., regex:/pattern/)
 				[$rule_name, $rule_parameter] = explode( ':', $rule, 2 ) + array( null, null );
 
-				$error = $this->validate_rule( $field, $value, $rule_name, $rule_parameter );
+				$error = $this->validate_rule( $field, $value, $is_present, $rule_name, $rule_parameter );
 
 				if ( $error ) {
 					$errors[ $field ][] = $error;
@@ -191,16 +220,32 @@ abstract class BaseRestController {
 	 *
 	 * @param string $field The field name
 	 * @param mixed $value The value to validate
+	 * @param bool $is_present Whether the field's key is in the data
 	 * @param string $rule_name The validation rule
 	 * @param string|null $rule_parameter Optional parameter for the rule (e.g., regex pattern)
 	 *
 	 * @return string|null Error message or null if validation passes
 	 */
-	private function validate_rule( string $field, mixed $value, string $rule_name, ?string $rule_parameter ): ?string {
+	private function validate_rule( string $field, mixed $value, bool $is_present, string $rule_name, ?string $rule_parameter ): ?string {
 		switch ( $rule_name ) {
 			case 'required':
 				if ( empty( $value ) ) {
 					return $this->format_error_message( $field, 'is required' );
+				}
+				break;
+			case 'present':
+				if ( ! $is_present ) {
+					return $this->format_error_message( $field, 'is required' );
+				}
+				break;
+			case 'not_null':
+				if ( $is_present && is_null( $value ) ) {
+					return $this->format_error_message( $field, 'may not be null' );
+				}
+				break;
+			case 'not_blank':
+				if ( is_string( $value ) && '' === trim( $value ) ) {
+					return $this->format_error_message( $field, 'may not be blank' );
 				}
 				break;
 			case 'string':
@@ -210,6 +255,11 @@ abstract class BaseRestController {
 				break;
 			case 'integer':
 				if ( ! is_null( $value ) && false === filter_var( $value, FILTER_VALIDATE_INT ) ) {
+					return $this->format_error_message( $field, 'must be an integer' );
+				}
+				break;
+			case 'strict_integer':
+				if ( ! is_null( $value ) && ! is_int( $value ) ) {
 					return $this->format_error_message( $field, 'must be an integer' );
 				}
 				break;
