@@ -378,8 +378,8 @@ class TaskController extends BaseRestController {
 	}
 
 	/**
-	 * The error for a task that was created, but whose response could not be completed. Its own code and the task's ID
-	 * tell the client the task exists, so it is not created again.
+	 * The error for a task that was created, but a later step in the service or in building the response failed. Its
+	 * own code and the task's ID tell the client the task exists, so it is not created again.
 	 *
 	 * @param TaskCreatedWithErrorException $exception
 	 *

@@ -185,9 +185,9 @@ final class TaskManagerService {
 			return $fitted;
 		}
 
-		// Fitting only removes characters other than "&", so the last "&" kept is the same one in the text given. The
-		// kept part ends inside an entity only when the text continues it there; otherwise, as for "Q&A" left of
-		// "Q&A😀", it is the text's own.
+		// Fitting never drops an "&" it does not cut off, so the last one kept is the text's Nth "&", N being how many
+		// were kept. The kept part ends in a cut entity only when the text holds a longer whole entity from there;
+		// otherwise, as for "Q&A" kept from "Q&A😀", the tail is the text's own.
 		$offset = -1;
 		for ( $count = substr_count( $fitted, '&' ); $count > 0; $count-- ) {
 			$offset = strpos( $text, '&', $offset + 1 );
@@ -313,7 +313,6 @@ final class TaskManagerService {
 			throw $exception;
 		}
 
-		// The task is fully saved from here on, so a failure while reading it back or announcing it keeps the task.
 		try {
 			$fields_and_values = $this->get_task_fields_and_values( $task->id );
 
@@ -353,7 +352,7 @@ final class TaskManagerService {
 	 * @return array|null
 	 * @throws InvalidArgumentException If the task does not exist.
 	 * @throws RuntimeException If the persistence call fails.
-	 * @throws Exception If a title is sent that is empty once sanitized, or saving fails.
+	 * @throws Exception If a title is sent that is empty once sanitized and fitted, or the field values fail to save.
 	 * @throws \Throwable
 	 */
 	public function update_task( int $task_id, array $task_data, ?array $field_values = array() ): ?array {
@@ -1049,8 +1048,8 @@ final class TaskManagerService {
 	/**
 	 * Update multiple field values for a specific task.
 	 *
-	 * Fires wpo_otd_task_updated once, listing every saved value that differs from the stored one. When some values
-	 * fail, the others stay saved and are still listed. A value for a field that does not exist counts as failed.
+	 * When any saved value differs from the stored one, fires wpo_otd_task_updated once, listing each such value. When
+	 * some values fail, the others stay saved and are still listed. A value for a field that does not exist fails.
 	 *
 	 * @param int $task_id
 	 * @param array $field_data
@@ -1132,7 +1131,8 @@ final class TaskManagerService {
 		}
 
 		if ( $stored_value !== $new_stored ) {
-			// Stored values can be any string a client sent, so they are never unserialized.
+			// 'old_value' stays the stored string: create_task() and update_task() store a client's string as sent, so
+			// unserializing it could build any object the client named.
 			$updated_fields[ $field->slug ] = array(
 				'old_value' => $stored_value,
 				'new_value' => $value,

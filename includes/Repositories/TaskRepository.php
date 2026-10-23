@@ -203,7 +203,8 @@ class TaskRepository extends BaseRepository {
 
 	/**
 	 * A text as a column of the tasks table holds it: the characters its charset cannot store removed, and cut to its
-	 * length, which $wpdb counts in characters or bytes as the column's type does. A cut never splits a character.
+	 * length, which $wpdb counts in characters or bytes as the column's type does. In a utf8, utf8mb3 or utf8mb4 column, a cut
+	 * never leaves part of a character.
 	 *
 	 * $wpdb refuses to write a text the column would change, so a text that does not fit fails every save.
 	 *

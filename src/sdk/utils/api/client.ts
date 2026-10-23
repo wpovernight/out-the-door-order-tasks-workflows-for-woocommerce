@@ -58,7 +58,7 @@ async function extractError(response: Response): Promise<ApiError> {
 	try {
 		body = JSON.parse(raw);
 	} catch {
-		// Non-JSON body — fall through to the raw text.
+		// Non-JSON body: its text is the message.
 		return new ApiError(raw, response.status);
 	}
 
