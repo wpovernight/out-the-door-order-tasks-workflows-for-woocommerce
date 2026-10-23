@@ -2,6 +2,8 @@
 
 namespace WPO\OTD\Tests;
 
+use DateTimeImmutable;
+use DateTimeZone;
 use WP_UnitTestCase;
 use WPO\OTD\Core\Container\Container;
 use WPO\OTD\Enums\DefaultTaskFields;
@@ -313,6 +315,22 @@ abstract class IntegrationTestCase extends WP_UnitTestCase {
 		$values = $this->field_values( $task_id, $field_id );
 
 		return $values[0] ?? null;
+	}
+
+	/**
+	 * Assert that a task's stored done date is the current time, in UTC, in the format core stores it in.
+	 *
+	 * @param int $task_id
+	 *
+	 * @return void
+	 */
+	protected function assert_done_now( int $task_id ): void {
+		$stored = (string) $this->field_value( $task_id, DefaultTaskFields::DONE_DATE );
+		$date   = DateTimeImmutable::createFromFormat( '!' . DefaultTaskFields::DONE_DATE_FORMAT, $stored, new DateTimeZone( 'UTC' ) );
+
+		$this->assertNotFalse( $date, "The done date {$stored} is not in the stored format." );
+		$this->assertSame( $stored, $date->format( DefaultTaskFields::DONE_DATE_FORMAT ) );
+		$this->assertEqualsWithDelta( time(), $date->getTimestamp(), 5 );
 	}
 
 	/**

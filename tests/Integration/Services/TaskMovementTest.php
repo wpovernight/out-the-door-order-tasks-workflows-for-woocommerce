@@ -148,7 +148,7 @@ class TaskMovementTest extends IntegrationTestCase {
 		$id = $this->create_task( $this->doing );
 
 		$this->service->move_task( $id, $this->done );
-		$this->assertNotNull( $this->field_value( $id, DefaultTaskFields::DONE_DATE ) );
+		$this->assert_done_now( $id );
 
 		$this->service->move_task( $id, $this->todo );
 		$this->assertNull( $this->field_value( $id, DefaultTaskFields::DONE_DATE ) );

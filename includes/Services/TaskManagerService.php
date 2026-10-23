@@ -301,7 +301,7 @@ final class TaskManagerService {
 				$status_option->id === $done_option_id &&
 				! isset( $field_values_array[ DefaultTaskFields::DONE_DATE ] )
 			) {
-				$field_values_array[ DefaultTaskFields::DONE_DATE ] = gmdate( 'Y-m-d H:i:s' );
+				$field_values_array[ DefaultTaskFields::DONE_DATE ] = gmdate( DefaultTaskFields::DONE_DATE_FORMAT );
 			}
 
 			$this->save_field_values( $task->id, $field_values_array );
@@ -495,7 +495,7 @@ final class TaskManagerService {
 					$new_status_option->id === $done_option_id &&
 					! isset( $field_values_array[ DefaultTaskFields::DONE_DATE ] )
 				) {
-					$field_values_array[ DefaultTaskFields::DONE_DATE ] = gmdate( 'Y-m-d H:i:s' );
+					$field_values_array[ DefaultTaskFields::DONE_DATE ] = gmdate( DefaultTaskFields::DONE_DATE_FORMAT );
 				} elseif (
 					$new_status_option &&
 					$new_status_option->id !== $done_option_id &&
@@ -1280,7 +1280,7 @@ final class TaskManagerService {
 			$target_status_option_field->id === $done_option_id &&
 			! isset( $extra_field_values[ DefaultTaskFields::DONE_DATE ] )
 		) {
-			$extra_field_values[ DefaultTaskFields::DONE_DATE ] = gmdate( 'Y-m-d H:i:s' );
+			$extra_field_values[ DefaultTaskFields::DONE_DATE ] = gmdate( DefaultTaskFields::DONE_DATE_FORMAT );
 		}
 
 		// Clear "done_date" if moving out of the option assigned to the "done" role.

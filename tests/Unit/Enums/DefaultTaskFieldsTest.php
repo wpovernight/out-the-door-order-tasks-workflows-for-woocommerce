@@ -20,6 +20,10 @@ class DefaultTaskFieldsTest extends TestCase {
 		$this->assertSame( 8, DefaultTaskFields::PRIORITY );
 	}
 
+	public function test_the_done_date_format_is_stable(): void {
+		$this->assertSame( 'Y-m-d H:i:s', DefaultTaskFields::DONE_DATE_FORMAT );
+	}
+
 	public function test_all_lists_every_id_once(): void {
 		$this->assertSame( array( 1, 2, 3, 4, 5, 6, 7, 8 ), DefaultTaskFields::all() );
 	}

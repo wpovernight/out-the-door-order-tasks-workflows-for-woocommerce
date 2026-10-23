@@ -242,7 +242,7 @@ class TaskManagerServiceTest extends IntegrationTestCase {
 	public function test_a_task_created_as_done_gets_a_done_date(): void {
 		$id = $this->create_task( 'Already done', $this->status_option_id( 'done' ) );
 
-		$this->assertMatchesRegularExpression( '/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $this->field_value( $id, DefaultTaskFields::DONE_DATE ) );
+		$this->assert_done_now( $id );
 	}
 
 	public function test_a_given_done_date_is_kept(): void {
@@ -793,7 +793,7 @@ class TaskManagerServiceTest extends IntegrationTestCase {
 
 		$this->assertSame( 1, $writes, 'So they are saved together or not at all.' );
 		$this->assertSame( (string) $this->status_option_id( 'done' ), $this->field_value( $id, DefaultTaskFields::STATUS ) );
-		$this->assertNotNull( $this->field_value( $id, DefaultTaskFields::DONE_DATE ) );
+		$this->assert_done_now( $id );
 	}
 
 	public function test_a_status_change_that_cannot_be_saved_changes_nothing(): void {

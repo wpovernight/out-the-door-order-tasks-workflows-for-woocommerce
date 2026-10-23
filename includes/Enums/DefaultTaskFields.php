@@ -24,6 +24,11 @@ final class DefaultTaskFields {
 	public const PRIORITY = 8;
 
 	/**
+	 * The format the done date is stored in, in UTC.
+	 */
+	public const DONE_DATE_FORMAT = 'Y-m-d H:i:s';
+
+	/**
 	 * Get all default field IDs.
 	 *
 	 * @return array
