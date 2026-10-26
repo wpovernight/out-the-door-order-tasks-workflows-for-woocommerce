@@ -155,6 +155,50 @@ class BaseRepositoryTest extends IntegrationTestCase {
 		$this->assertSame( 'a', $this->repository->order_by( 'status_key' )->first()->status_key );
 	}
 
+	public function test_max_reads_the_highest_value_among_the_matching_rows(): void {
+		$this->insert_statuses( array( 'a' => '#111', 'b' => '#333', 'c' => null ) );
+
+		$this->assertSame( '#333', $this->repository->max( 'background' ) );
+		$this->assertSame( '#111', $this->repository->where( 'status_key', 'IN', array( 'a', 'c' ) )->order_by( 'id' )->limit( 1 )->max( 'background' ) );
+		$this->assertNull( $this->repository->where( 'status_key', 'c' )->max( 'background' ), 'NULL in every matching row.' );
+		$this->assertNull( $this->repository->where( 'status_key', 'missing' )->max( 'background' ), 'No row matches.' );
+		$this->assertSame( '', $this->repository->get_last_db_error() );
+		$this->assertSame( 3, $this->repository->count(), 'The query is reset after.' );
+	}
+
+	public function test_max_by_reads_each_groups_highest_value_leaving_out_a_group_with_none(): void {
+		$this->insert_statuses( array( 'a' => '#111', 'b' => '#333', 'c' => '#222', 'd' => null ) );
+		$this->repository->where( 'status_key', 'b' )->update( array( 'label' => 'B' ) );
+		$this->repository->where( 'status_key', 'c' )->update( array( 'label' => 'B' ) );
+
+		$max = $this->repository->max_by( 'label', 'background' );
+		ksort( $max );
+
+		$this->assertSame( array( 'A' => '#111', 'B' => '#333' ), $max, 'D is NULL in every row, so it is left out.' );
+		$this->assertSame(
+			array( 'B' => '#222' ),
+			$this->repository->where( 'status_key', 'IN', array( 'c', 'd' ) )->order_by( 'id' )->limit( 1 )->max_by( 'label', 'background' )
+		);
+		$this->assertSame( array(), $this->repository->where( 'status_key', 'missing' )->max_by( 'label', 'background' ) );
+		$this->assertSame( 4, $this->repository->count(), 'The query is reset after.' );
+	}
+
+	public function test_max_and_max_by_tell_a_database_failure_apart(): void {
+		$this->insert_statuses( array( 'a' => '#111' ) );
+		$this->fail_queries( '/MAX\(/' );
+
+		$this->assertNull( $this->repository->max( 'background' ) );
+		$this->assertNotSame( '', $this->repository->get_last_db_error() );
+		$this->assertNull( $this->repository->where( 'status_key', 'a' )->max_by( 'label', 'background' ) );
+		$this->assertSame( 1, $this->repository->count(), 'The failed query left nothing behind.' );
+	}
+
+	public function test_max_and_max_by_refuse_a_column_the_table_does_not_have(): void {
+		$this->assert_throws_invalid_argument( fn() => $this->repository->max( 'missing' ) );
+		$this->assert_throws_invalid_argument( fn() => $this->repository->max_by( 'label', 'missing' ) );
+		$this->assert_throws_invalid_argument( fn() => $this->repository->max_by( 'missing', 'label' ) );
+	}
+
 	public function test_select_returns_raw_rows_with_only_the_chosen_columns(): void {
 		$this->insert_statuses( array( 'alpha' => '#111' ) );
 

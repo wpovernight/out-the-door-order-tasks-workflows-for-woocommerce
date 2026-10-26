@@ -144,6 +144,74 @@ abstract class BaseRepository {
 	}
 
 	/**
+	 * The highest value of a column among the rows matching the current query (joins + where), ignoring ORDER BY /
+	 * LIMIT / OFFSET.
+	 *
+	 * @param string $column
+	 *
+	 * @return string|null As the database gives it. Null when no row matches, when the column is NULL in every one,
+	 *                     or when the database failed; get_last_db_error() tells them apart.
+	 * @throws InvalidArgumentException If the column is not one of the table's.
+	 */
+	public function max( string $column ): ?string {
+		$this->validate_columns( array( $column ) );
+
+		$query  = "SELECT MAX({$column}) FROM {$this->get_table_full_name( true )}";
+		$query .= $this->compile_joins();
+		$query .= $this->compile_where();
+		$query  = $this->append_bindings( $query );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Query is prepared inside append_bindings().
+		$max = $this->run_query( fn() => $this->wpdb->get_var( $query ) );
+
+		$this->reset_query();
+
+		return null === $max ? null : (string) $max;
+	}
+
+	/**
+	 * The highest value of a column for each value of another, among the rows matching the current query
+	 * (joins + where), ignoring ORDER BY / LIMIT / OFFSET.
+	 *
+	 * @param string $group_column The column to group by.
+	 * @param string $column       The column whose highest value is read.
+	 *
+	 * @return array<int|string, string>|null Each group's value => its highest value, as the database gives them,
+	 *                                        leaving out a group whose column is NULL in every row. Null when the
+	 *                                        database failed.
+	 * @throws InvalidArgumentException If either column is not one of the table's.
+	 */
+	public function max_by( string $group_column, string $column ): ?array {
+		$this->validate_columns( array( $group_column, $column ) );
+
+		$query  = "SELECT {$group_column} AS group_value, MAX({$column}) AS max_value FROM {$this->get_table_full_name( true )}";
+		$query .= $this->compile_joins();
+		$query .= $this->compile_where();
+		$query .= " GROUP BY {$group_column}";
+		$query  = $this->append_bindings( $query );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Query is prepared inside append_bindings().
+		$rows = $this->run_query( fn() => $this->wpdb->get_results( $query, ARRAY_A ) );
+
+		$this->reset_query();
+
+		// $wpdb gives an empty list for a failed query too, so only its error tells that apart from no rows.
+		if ( ! is_array( $rows ) || '' !== $this->get_last_db_error() ) {
+			return null;
+		}
+
+		$max = array();
+
+		foreach ( $rows as $row ) {
+			if ( null !== $row['max_value'] ) {
+				$max[ $row['group_value'] ] = (string) $row['max_value'];
+			}
+		}
+
+		return $max;
+	}
+
+	/**
 	 * Paginate the current query.
 	 *
 	 * @param int  $per_page Items per page.
