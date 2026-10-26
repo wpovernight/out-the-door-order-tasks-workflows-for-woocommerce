@@ -67,6 +67,15 @@ class CustomOrderStatusControllerTest extends RestTestCase {
 		$this->assertSame( 2, $page['meta']['last_page'] );
 	}
 
+	public function test_a_page_too_far_out_for_its_offset_to_fit_is_empty_with_the_real_total(): void {
+		$this->request( 'POST', '/custom-order-statuses', array( 'label' => 'A' ) );
+
+		$page = $this->json( $this->request( 'GET', '/custom-order-statuses', null, array( 'page' => (string) PHP_INT_MAX, 'per_page' => 2 ) ) );
+
+		$this->assertSame( array(), $page['data'] );
+		$this->assertSame( 1, $page['meta']['total'] );
+	}
+
 	public function test_updating_a_status(): void {
 		$id = $this->create_status( 'Packed' );
 

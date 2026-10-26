@@ -216,17 +216,58 @@ abstract class BaseRepository {
 	/**
 	 * Paginate the current query.
 	 *
+	 * A page so far out that its offset does not fit an integer is past every row: it is empty, with the real total.
+	 *
 	 * @param int  $per_page Items per page.
 	 * @param int  $page     Page number (1-based).
 	 * @param bool $raw      Whether the page items are raw rows instead of models. Default false.
 	 *
-	 * @return Paginator
+	 * @return Paginator Empty, with a total of 0, when the database failed; try_paginate() tells that apart.
 	 */
 	public function paginate( int $per_page, int $page = 1, bool $raw = false ): Paginator {
 		$per_page = max( 1, $per_page );
 		$page     = max( 1, $page );
 
+		return $this->page_of( $per_page, $page, $raw ) ?? new Paginator( array(), 0, $per_page, $page );
+	}
+
+	/**
+	 * Paginate the current query, as paginate() does, telling a database failure apart.
+	 *
+	 * @param int  $per_page Items per page.
+	 * @param int  $page     Page number (1-based).
+	 * @param bool $raw      Whether the page items are raw rows instead of models. Default false.
+	 *
+	 * @return Paginator|null Null when the database failed to count the rows or to read the page.
+	 */
+	public function try_paginate( int $per_page, int $page = 1, bool $raw = false ): ?Paginator {
+		return $this->page_of( max( 1, $per_page ), max( 1, $page ), $raw );
+	}
+
+	/**
+	 * Count the current query's rows and read one page of them. The query is reset after, whatever happens.
+	 *
+	 * @param int  $per_page From 1.
+	 * @param int  $page     From 1.
+	 * @param bool $raw
+	 *
+	 * @return Paginator|null Null when the database failed.
+	 */
+	private function page_of( int $per_page, int $page, bool $raw ): ?Paginator {
 		$total = $this->count( false );
+
+		if ( 0 === $total && '' !== $this->get_last_db_error() ) {
+			$this->reset_query();
+
+			return null;
+		}
+
+		// Checked before multiplying: an offset past PHP_INT_MAX would become a float, which offset() refuses.
+		if ( $page - 1 > intdiv( PHP_INT_MAX, $per_page ) ) {
+			$this->reset_query();
+
+			return new Paginator( array(), $total, $per_page, $page );
+		}
 
 		// LIMIT/OFFSET paging needs a deterministic ORDER BY, otherwise rows can
 		// repeat or be skipped across pages. Fall back to the primary key when the
@@ -238,6 +279,10 @@ abstract class BaseRepository {
 		$items = $this->limit( $per_page )
 			->offset( ( $page - 1 ) * $per_page )
 			->get( $raw );
+
+		if ( array() === $items && '' !== $this->get_last_db_error() ) {
+			return null;
+		}
 
 		return new Paginator( $items, $total, $per_page, $page );
 	}
@@ -1354,7 +1399,7 @@ abstract class BaseRepository {
 	 */
 	private function validate_bare_column_names( array $columns, string $use ): void {
 		foreach ( $columns as $column ) {
-			if ( ! is_string( $column ) || ! preg_match( '/^\w+$/', $column ) ) {
+			if ( ! is_string( $column ) || ! preg_match( '/^\w+$/D', $column ) ) {
 				throw $this->discard( new InvalidArgumentException( esc_html( "Column $column cannot be {$use}: only a bare column name can." ) ) );
 			}
 		}

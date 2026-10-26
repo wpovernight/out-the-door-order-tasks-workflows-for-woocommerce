@@ -111,6 +111,13 @@ class BaseRepositoryTest extends IntegrationTestCase {
 		$this->assertSame( array( 'Alpha', 'Beta' ), array_map( static fn( $status ) => $status->label, $this->repository->order_by( 'id' )->get() ) );
 	}
 
+	public function test_a_bare_column_name_ends_at_its_last_character_not_before_a_trailing_newline(): void {
+		$check = new \ReflectionMethod( $this->repository, 'validate_bare_column_names' );
+
+		$check->invoke( $this->repository, array( 'label' ), 'set' );
+		$this->assert_throws_invalid_argument( fn() => $check->invoke( $this->repository, array( "label\n" ), 'set' ) );
+	}
+
 	public function test_increment_changes_only_the_rows_its_conditions_still_match(): void {
 		$ids = $this->insert_statuses( array( 'alpha' => '#111', 'beta' => null ) );
 
@@ -222,9 +229,10 @@ class BaseRepositoryTest extends IntegrationTestCase {
 	 */
 	public static function not_bare_column_provider(): array {
 		return array(
-			'an alias'          => array( 'background AS b' ),
-			'a qualified name'  => array( 'statuses.background' ),
-			'a trailing clause' => array( 'background) FROM x WHERE (1' ),
+			'an alias'           => array( 'background AS b' ),
+			'a qualified name'   => array( 'statuses.background' ),
+			'a trailing clause'  => array( 'background) FROM x WHERE (1' ),
+			'a trailing newline' => array( "background\n" ),
 		);
 	}
 
@@ -251,6 +259,66 @@ class BaseRepositoryTest extends IntegrationTestCase {
 		$filtered = $this->repository->where( 'status_key', 'IN', array( 'b', 'd' ) )->paginate( 1, 2 );
 		$this->assertSame( array( 'd' ), $this->keys( $filtered->items() ) );
 		$this->assertSame( 2, $filtered->total() );
+	}
+
+	public function test_a_page_too_far_out_for_its_offset_to_fit_is_empty_with_the_real_total_and_resets_the_query(): void {
+		$this->insert_statuses( array( 'a' => null, 'b' => null, 'c' => null ) );
+
+		$page = $this->repository->where( 'status_key', 'IN', array( 'a', 'b' ) )->paginate( 2, PHP_INT_MAX );
+
+		$this->assertSame( array(), $page->items() );
+		$this->assertSame( 2, $page->total() );
+		$this->assertSame( PHP_INT_MAX, $page->current_page() );
+		$this->assertNull( $page->from() );
+		$this->assertSame( 3, $this->repository->count(), 'The condition was not left behind.' );
+
+		$last = $this->repository->paginate( 1, PHP_INT_MAX );
+		$this->assertSame( array(), $last->items(), 'The last page whose offset still fits is read as usual.' );
+		$this->assertSame( 3, $last->total() );
+	}
+
+	/**
+	 * @dataProvider failing_page_query_provider
+	 *
+	 * @param string $pattern The query to fail.
+	 *
+	 * @return void
+	 */
+	public function test_try_paginate_tells_a_failed_read_apart_and_resets_the_query( string $pattern ): void {
+		$this->insert_statuses( array( 'a' => null, 'b' => null ) );
+		$this->fail_queries( $pattern );
+
+		$this->assertNull( $this->repository->where( 'status_key', 'a' )->try_paginate( 1, 1 ) );
+
+		$page = $this->repository->where( 'status_key', 'a' )->paginate( 1, 1 );
+
+		$this->assertSame( array(), $page->items(), 'paginate() gives an empty page.' );
+		$this->assertSame( 0, $page->total() );
+
+		remove_all_filters( 'query' );
+
+		$this->assertSame( 2, $this->repository->count(), 'The condition was not left behind.' );
+	}
+
+	/**
+	 * Each query a page reads: the count, then the rows.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public static function failing_page_query_provider(): array {
+		return array(
+			'the count' => array( '/^SELECT COUNT\(\*\) FROM /' ),
+			'the rows'  => array( '/^SELECT \* FROM .* LIMIT /' ),
+		);
+	}
+
+	public function test_try_paginate_reads_a_page_as_paginate_does(): void {
+		$this->insert_statuses( array( 'a' => null, 'b' => null, 'c' => null ) );
+
+		$page = $this->repository->where( 'status_key', 'IN', array( 'b', 'c' ) )->try_paginate( 1, 2 );
+
+		$this->assertSame( array( 'c' ), $this->keys( $page->items() ) );
+		$this->assertSame( 2, $page->total() );
 	}
 
 	public function test_find_helpers(): void {
