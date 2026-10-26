@@ -151,9 +151,10 @@ abstract class BaseRepository {
 	 *
 	 * @return string|null As the database gives it. Null when no row matches, when the column is NULL in every one,
 	 *                     or when the database failed; get_last_db_error() tells them apart.
-	 * @throws InvalidArgumentException If the column is not one of the table's.
+	 * @throws InvalidArgumentException If the column is not a bare name of one of the table's columns.
 	 */
 	public function max( string $column ): ?string {
+		$this->validate_bare_column_names( array( $column ), 'read with max()' );
 		$this->validate_columns( array( $column ) );
 
 		$query  = "SELECT MAX({$column}) FROM {$this->get_table_full_name( true )}";
@@ -179,9 +180,10 @@ abstract class BaseRepository {
 	 * @return array<int|string, string>|null Each group's value => its highest value, as the database gives them,
 	 *                                        leaving out a group whose column is NULL in every row. Null when the
 	 *                                        database failed.
-	 * @throws InvalidArgumentException If either column is not one of the table's.
+	 * @throws InvalidArgumentException If either column is not a bare name of one of the table's columns.
 	 */
 	public function max_by( string $group_column, string $column ): ?array {
+		$this->validate_bare_column_names( array( $group_column, $column ), 'read with max_by()' );
 		$this->validate_columns( array( $group_column, $column ) );
 
 		$query  = "SELECT {$group_column} AS group_value, MAX({$column}) AS max_value FROM {$this->get_table_full_name( true )}";

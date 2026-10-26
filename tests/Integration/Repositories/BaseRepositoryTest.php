@@ -199,6 +199,35 @@ class BaseRepositoryTest extends IntegrationTestCase {
 		$this->assert_throws_invalid_argument( fn() => $this->repository->max_by( 'missing', 'label' ) );
 	}
 
+	/**
+	 * @dataProvider not_bare_column_provider
+	 *
+	 * @param string $column
+	 *
+	 * @return void
+	 */
+	public function test_max_and_max_by_refuse_a_column_that_is_not_a_bare_name_and_leave_nothing_behind( string $column ): void {
+		$this->insert_statuses( array( 'a' => '#111' ) );
+
+		$this->assert_throws_invalid_argument( fn() => $this->repository->where( 'status_key', 'missing' )->max( $column ) );
+		$this->assert_throws_invalid_argument( fn() => $this->repository->where( 'status_key', 'missing' )->max_by( $column, 'background' ) );
+		$this->assert_throws_invalid_argument( fn() => $this->repository->where( 'status_key', 'missing' )->max_by( 'label', $column ) );
+		$this->assertSame( 1, $this->repository->count(), 'The refused queries left no condition behind.' );
+	}
+
+	/**
+	 * Columns that name a real one but would put more than a bare name into the SQL.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public static function not_bare_column_provider(): array {
+		return array(
+			'an alias'          => array( 'background AS b' ),
+			'a qualified name'  => array( 'statuses.background' ),
+			'a trailing clause' => array( 'background) FROM x WHERE (1' ),
+		);
+	}
+
 	public function test_select_returns_raw_rows_with_only_the_chosen_columns(): void {
 		$this->insert_statuses( array( 'alpha' => '#111' ) );
 
