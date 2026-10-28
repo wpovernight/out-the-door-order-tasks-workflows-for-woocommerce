@@ -209,6 +209,9 @@ class CustomOrderStatusController extends BaseRestController {
 	/**
 	 * Handle DELETE requests to remove a custom order status by ID.
 	 *
+	 * A status no order has is deleted at once (200). One that orders still have stays until they are moved to
+	 * another status in the background, so the deletion is only scheduled (202).
+	 *
 	 * @param WP_REST_Request $request
 	 *
 	 * @return WP_REST_Response|WP_Error
@@ -223,10 +226,26 @@ class CustomOrderStatusController extends BaseRestController {
 		$custom_order_status_service = $this->custom_order_status_service;
 
 		try {
-			$custom_order_status_service->request_deletion( $id );
+			$outcome = $custom_order_status_service->begin_deletion( $id );
 		} catch ( \Exception $e ) {
 			Logger::error( 'Custom order status deletion failed: ' . $e->getMessage() );
 			return new WP_Error( 'deletion_failed', $e->getMessage(), array( 'status' => 500 ) );
+		}
+
+		if ( CustomOrderStatusService::DELETION_NOT_FOUND === $outcome ) {
+			return new WP_Error( 'not_found', __( 'Custom order status not found', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		if ( CustomOrderStatusService::DELETION_SCHEDULED === $outcome ) {
+			$response = $this->respond(
+				array(
+					'success' => true,
+					'message' => __( 'Custom order status deletion scheduled: it is deleted once its orders are moved to another status', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
+				)
+			);
+			$response->set_status( 202 );
+
+			return $response;
 		}
 
 		return $this->respond( array(

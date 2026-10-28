@@ -186,6 +186,21 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 
 	public function test_requesting_deletion_of_a_missing_status_fails(): void {
 		$this->assertFalse( $this->service->request_deletion( 999999 ) );
+		$this->assertSame( CustomOrderStatusService::DELETION_NOT_FOUND, $this->service->begin_deletion( 999999 ) );
+	}
+
+	public function test_begin_deletion_tells_a_status_deleted_at_once_from_one_left_for_its_orders(): void {
+		$empty = $this->create_registered_status( 'Empty' );
+		$this->assertSame( CustomOrderStatusService::DELETION_DONE, $this->service->begin_deletion( $empty->id ) );
+		$this->assertNull( $this->service->find( $empty->id ) );
+
+		$busy = $this->create_registered_status( 'Packed' );
+		$this->order_in( 'packed' );
+
+		$this->assertSame( CustomOrderStatusService::DELETION_SCHEDULED, $this->service->begin_deletion( $busy->id ) );
+		$this->assertTrue( $this->service->find( $busy->id )->is_deleting );
+		$this->assertSame( CustomOrderStatusService::DELETION_SCHEDULED, $this->service->begin_deletion( $busy->id ), 'A deletion under way is still scheduled.' );
+		$this->assertSame( CustomOrderStatusService::DELETION_NOT_FOUND, $this->service->begin_deletion( $empty->id ), 'A deleted status is gone.' );
 	}
 
 	public function test_a_status_without_orders_is_deleted_at_once(): void {

@@ -243,6 +243,31 @@ class TaskControllerTest extends RestTestCase {
 		$this->assertNull( $this->make( TaskManagerService::class )->get_task( $id ) );
 	}
 
+	public function test_deleting_a_missing_task_is_not_found(): void {
+		$deleted = array();
+		add_action(
+			'wpo_otd_task_deleted',
+			static function ( $task_id ) use ( &$deleted ) {
+				$deleted[] = $task_id;
+			}
+		);
+
+		$this->assertResponse( 404, $this->request( 'DELETE', '/tasks/999999' ), 'not_found' );
+		$this->assertSame( array(), $deleted );
+
+		$id = $this->create_task( 'Doomed' );
+		$this->assertResponse( 200, $this->request( 'DELETE', "/tasks/{$id}" ) );
+		$this->assertResponse( 404, $this->request( 'DELETE', "/tasks/{$id}" ), 'not_found' );
+	}
+
+	public function test_a_task_the_database_refuses_to_delete_is_a_server_error(): void {
+		$id = $this->create_task( 'Stays' );
+		$this->fail_queries( '/^DELETE FROM `\w+wpo_otd_tasks`/' );
+
+		$this->assertResponse( 500, $this->request( 'DELETE', "/tasks/{$id}" ), 'task_deletion_failed' );
+		$this->assertNotNull( $this->make( TaskManagerService::class )->get_task( $id ) );
+	}
+
 	/** ================================
 	 *   Moving, finishing, archiving
 	 *  ================================ */
@@ -405,6 +430,16 @@ class TaskControllerTest extends RestTestCase {
 
 		$this->assertResponse( 200, $this->request( 'DELETE', "/tasks/fields/1/options/{$option['id']}" ) );
 		$this->assertResponse( 404, $this->request( 'DELETE', '/tasks/fields/1/options/999999' ), 'not_found' );
+	}
+
+	public function test_an_option_the_database_refuses_to_delete_is_a_server_error(): void {
+		$option = $this->make( TaskManagerService::class )->add_field_option( DefaultTaskFields::STATUS, array( 'label' => 'Review' ) );
+		$this->fail_queries( '/^DELETE FROM `\w+wpo_otd_task_field_options`/' );
+
+		$response = $this->request( 'DELETE', "/tasks/fields/1/options/{$option['id']}" );
+
+		$this->assertResponse( 500, $response, 'deletion_failed' );
+		$this->assertSame( 'Failed to delete field option.', $response->get_data()['message'] );
 	}
 
 	public function test_deleting_an_option_in_use_is_a_conflict(): void {

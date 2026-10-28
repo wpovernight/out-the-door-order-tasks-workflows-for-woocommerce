@@ -2,6 +2,7 @@
 
 namespace WPO\OTD\Tests\Integration\REST;
 
+use WPO\OTD\Repositories\CustomOrderStatusRepository;
 use WPO\OTD\Services\CustomOrderStatusService;
 
 class CustomOrderStatusControllerTest extends RestTestCase {
@@ -97,8 +98,40 @@ class CustomOrderStatusControllerTest extends RestTestCase {
 		$response = $this->request( 'DELETE', "/custom-order-statuses/{$id}" );
 
 		$this->assertResponse( 200, $response );
-		$this->assertTrue( $this->json( $response )['data']['success'] );
+		$this->assertSame(
+			array(
+				'success' => true,
+				'message' => 'Custom order status deleted successfully',
+			),
+			$this->json( $response )['data']
+		);
 		$this->assertNull( $this->make( CustomOrderStatusService::class )->find( $id ) );
+	}
+
+	public function test_deleting_a_missing_status_is_not_found(): void {
+		$this->assertResponse( 404, $this->request( 'DELETE', '/custom-order-statuses/999999' ), 'not_found' );
+
+		$id = $this->create_status( 'Packed' );
+		$this->request( 'DELETE', "/custom-order-statuses/{$id}" );
+
+		$this->assertResponse( 404, $this->request( 'DELETE', "/custom-order-statuses/{$id}" ), 'not_found' );
+	}
+
+	public function test_deleting_a_status_whose_orders_are_still_being_moved_is_only_scheduled(): void {
+		$id = $this->create_status( 'Packed' );
+		( new CustomOrderStatusRepository() )->where( 'id', $id )->update( array( 'is_deleting' => 1 ) );
+
+		$response = $this->request( 'DELETE', "/custom-order-statuses/{$id}" );
+
+		$this->assertResponse( 202, $response );
+		$this->assertSame(
+			array(
+				'success' => true,
+				'message' => 'Custom order status deletion scheduled: it is deleted once its orders are moved to another status',
+			),
+			$this->json( $response )['data']
+		);
+		$this->assertNotNull( $this->make( CustomOrderStatusService::class )->find( $id ), 'The status stays until its orders are moved.' );
 	}
 
 	/**

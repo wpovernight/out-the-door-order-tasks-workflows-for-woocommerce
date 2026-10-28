@@ -729,7 +729,7 @@
                 "1"
               ]
             },
-            "description": "Deletes a task. No body.\n\nErrors: 400 invalid_id, 500 task_deletion_failed."
+            "description": "Deletes a task. No body.\n\nErrors: 400 invalid_id, 404 not_found, 500 task_deletion_failed."
           },
           "response": [
             {
@@ -1628,7 +1628,7 @@
                 "1"
               ]
             },
-            "description": "Deletes a custom order status. No body. While orders still have the status, it is marked is_deleting and its orders move to on-hold in the background before it goes.\n\nErrors: 400 invalid_id, 500 deletion_failed."
+            "description": "Deletes a custom order status. No body. While orders still have the status, it is marked is_deleting and its orders move to on-hold in the background before it goes: 202, also when its deletion was already under way. A status no order has is deleted at once: 200.\n\nErrors: 400 invalid_id, 404 not_found, 500 deletion_failed."
           },
           "response": [
             {
@@ -1658,6 +1658,34 @@
               ],
               "cookie": [],
               "body": "{\n    \"data\": {\n        \"success\": true,\n        \"message\": \"Custom order status deleted successfully\"\n    }\n}"
+            },
+            {
+              "name": "Delete status with orders (scheduled)",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/custom-order-statuses/1",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "custom-order-statuses",
+                    "1"
+                  ]
+                }
+              },
+              "status": "Accepted",
+              "code": 202,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=UTF-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"data\": {\n        \"success\": true,\n        \"message\": \"Custom order status deletion scheduled: it is deleted once its orders are moved to another status\"\n    }\n}"
             }
           ]
         },

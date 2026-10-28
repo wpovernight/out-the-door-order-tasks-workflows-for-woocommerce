@@ -506,10 +506,19 @@ class TaskController extends BaseRestController {
 		$task_manager_service = $this->task_manager_service;
 
 		try {
-			$task_manager_service->delete_task( $id );
+			$deleted = $task_manager_service->delete_task( $id );
 		} catch ( \Exception $e ) {
 			Logger::error( 'Task deletion failed: ' . $e->getMessage() );
 			return new WP_Error( 'task_deletion_failed', __( 'Failed to delete task.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 500 ) );
+		}
+
+		if ( false === $deleted ) {
+			Logger::error( "Task deletion failed: the database refused to delete task {$id}." );
+			return new WP_Error( 'task_deletion_failed', __( 'Failed to delete task.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 500 ) );
+		}
+
+		if ( 0 === $deleted ) {
+			return new WP_Error( 'not_found', 'Task not found', array( 'status' => 404 ) );
 		}
 
 		return $this->respond( array( 'message' => 'Task deleted successfully' ) );
@@ -777,7 +786,10 @@ class TaskController extends BaseRestController {
 
 		try {
 			$task_manager_service = $this->task_manager_service;
-			$task_manager_service->delete_field_option( $field_id, $option_id );
+			if ( ! $task_manager_service->delete_field_option( $field_id, $option_id ) ) {
+				Logger::error( "Failed to delete field option: the database refused to delete option {$option_id}." );
+				return new WP_Error( 'deletion_failed', 'Failed to delete field option.', array( 'status' => 500 ) );
+			}
 
 			return $this->respond( array( 'success' => true ) );
 		} catch ( \InvalidArgumentException $e ) {

@@ -13,6 +13,21 @@ use WPO\OTD\Utilities\Paginator;
 defined( 'ABSPATH' ) || exit;
 
 class CustomOrderStatusService {
+	/**
+	 * What begin_deletion() did: no status had the ID.
+	 */
+	public const DELETION_NOT_FOUND = 'not_found';
+
+	/**
+	 * What begin_deletion() did: the status had no orders and is deleted.
+	 */
+	public const DELETION_DONE = 'deleted';
+
+	/**
+	 * What begin_deletion() did: the status stays until its orders are moved to the fallback status in the
+	 * background, or was already waiting for that.
+	 */
+	public const DELETION_SCHEDULED = 'scheduled';
 
 	protected readonly CustomOrderStatusRepository $repository;
 
@@ -311,16 +326,32 @@ class CustomOrderStatusService {
 	 * @param int    $id              The custom status ID to delete.
 	 * @param string $fallback_status The status to assign to affected orders (default: 'on-hold').
 	 *
-	 * @return bool True if deletion was scheduled, false if the status was not found.
+	 * @return bool True if the status was deleted or its deletion scheduled, false if the status was not found.
 	 */
 	public function request_deletion( int $id, string $fallback_status = 'on-hold' ): bool {
+		return self::DELETION_NOT_FOUND !== $this->begin_deletion( $id, $fallback_status );
+	}
+
+	/**
+	 * Delete a custom order status at once, or schedule its deletion when orders still have it.
+	 *
+	 * Works as request_deletion() does, and tells which of the two happened.
+	 *
+	 * @param int    $id              The custom status ID to delete.
+	 * @param string $fallback_status The status to assign to affected orders (default: 'on-hold').
+	 *
+	 * @return string self::DELETION_DONE when the status is deleted, self::DELETION_SCHEDULED when it stays until
+	 *                its orders are moved (also when that was already under way), self::DELETION_NOT_FOUND when no
+	 *                status has the ID.
+	 */
+	public function begin_deletion( int $id, string $fallback_status = 'on-hold' ): string {
 		$status = $this->find( $id );
 		if ( ! $status ) {
-			return false;
+			return self::DELETION_NOT_FOUND;
 		}
 
 		if ( $status->is_deleting ) {
-			return true; // Deletion already in progress.
+			return self::DELETION_SCHEDULED;
 		}
 
 		$existing_orders = wc_get_orders(
@@ -335,7 +366,7 @@ class CustomOrderStatusService {
 		if ( 0 === count( $existing_orders ) ) {
 			$this->remove( $id, $status->status_key, $fallback_status );
 
-			return true;
+			return self::DELETION_DONE;
 		}
 
 		// Orders exist: mark as pending deletion and schedule the async drain.
@@ -352,7 +383,7 @@ class CustomOrderStatusService {
 			'wpo-otd'
 		);
 
-		return true;
+		return self::DELETION_SCHEDULED;
 	}
 
 	/**
