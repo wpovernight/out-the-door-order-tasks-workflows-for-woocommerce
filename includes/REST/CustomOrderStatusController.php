@@ -7,6 +7,7 @@ use WP_REST_Response;
 use WP_REST_Server;
 use WP_Error;
 use WPO\OTD\Core\Logger;
+use WPO\OTD\Exceptions\InvalidStatusKeyException;
 use WPO\OTD\Exceptions\StatusBeingDeletedException;
 use WPO\OTD\Exceptions\StatusKeyTakenException;
 use WPO\OTD\Models\CustomOrderStatus;
@@ -125,7 +126,7 @@ class CustomOrderStatusController extends BaseRestController {
 			'background' => 'string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
 			'foreground' => 'string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
 		) );
-		$errors = $this->with_unusable_key_error( $data, $errors, true );
+		$errors = $this->with_unusable_key_error( $data, $errors, null );
 
 		if ( ! empty( $errors ) ) {
 			return new WP_Error( 'invalid_data', __( 'Invalid data provided', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array(
@@ -138,6 +139,8 @@ class CustomOrderStatusController extends BaseRestController {
 
 		try {
 			$new_status = $custom_order_status_service->create( $data );
+		} catch ( InvalidStatusKeyException $e ) {
+			return $this->invalid_key( $e );
 		} catch ( \Throwable $e ) {
 			Logger::error( 'Custom order status creation failed: ' . $e->getMessage() );
 			return new WP_Error( 'creation_failed', __( 'Failed to create custom order status.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 500 ) );
@@ -151,15 +154,15 @@ class CustomOrderStatusController extends BaseRestController {
 	 *
 	 * A key sent is checked by the rules already, and again once sanitized as it is stored. A status created without
 	 * a key gets one made from its label, which a label without Latin letters or digits cannot give: such a status
-	 * needs a key sent.
+	 * needs a key sent. The service refuses the key of an order status of WooCommerce or of another plugin.
 	 *
 	 * @param array<string, mixed>    $data
-	 * @param array<string, string[]> $errors   The errors the rules found.
-	 * @param bool                    $creating Whether the status is being created.
+	 * @param array<string, string[]> $errors The errors the rules found.
+	 * @param int|null                $id     The status being updated, or null when one is created.
 	 *
 	 * @return array<string, string[]>
 	 */
-	private function with_unusable_key_error( array $data, array $errors, bool $creating ): array {
+	private function with_unusable_key_error( array $data, array $errors, ?int $id ): array {
 		if ( isset( $errors['status_key'] ) ) {
 			return $errors;
 		}
@@ -168,16 +171,34 @@ class CustomOrderStatusController extends BaseRestController {
 			if ( ! CustomOrderStatus::is_usable_key( sanitize_title( $data['status_key'] ) ) ) {
 				$errors['status_key'][] = 'The status_key field has no letter or digit to make a status key from.';
 			}
-		} elseif ( $creating && isset( $data['label'] ) && is_string( $data['label'] ) && ! isset( $errors['label'] ) ) {
+		} elseif ( null === $id && isset( $data['label'] ) && is_string( $data['label'] ) && ! isset( $errors['label'] ) ) {
 			if ( ! CustomOrderStatus::is_usable_key( CustomOrderStatus::key_from_label( $data['label'] ) ) ) {
 				$errors['status_key'][] = sprintf(
-					'The label makes no usable status key: send a status_key of up to %d letters, digits, - and _.',
+					'The label has no Latin letter or digit to make a status key from: send a status_key of up to %d letters, digits, - and _.',
 					CustomOrderStatus::MAX_KEY_LENGTH
 				);
 			}
 		}
 
 		return $errors;
+	}
+
+	/**
+	 * Answer a status key the service refused, as the validation answers it.
+	 *
+	 * @param InvalidStatusKeyException $exception
+	 *
+	 * @return WP_Error
+	 */
+	private function invalid_key( InvalidStatusKeyException $exception ): WP_Error {
+		return new WP_Error(
+			'invalid_data',
+			__( 'Invalid data provided', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
+			array(
+				'status' => 400,
+				'errors' => array( 'status_key' => array( $exception->getMessage() ) ),
+			)
+		);
 	}
 
 	/**
@@ -231,7 +252,7 @@ class CustomOrderStatusController extends BaseRestController {
 			'background' => 'not_null|string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
 			'foreground' => 'not_null|string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
 		) );
-		$errors = $this->with_unusable_key_error( $data, $errors, false );
+		$errors = $this->with_unusable_key_error( $data, $errors, $id );
 
 		if ( ! empty( $errors ) ) {
 			return new WP_Error( 'invalid_data', __( 'Invalid data provided', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array(
@@ -244,6 +265,8 @@ class CustomOrderStatusController extends BaseRestController {
 
 		try {
 			$updated_status = $custom_order_status_service->update( $id, $data );
+		} catch ( InvalidStatusKeyException $e ) {
+			return $this->invalid_key( $e );
 		} catch ( \InvalidArgumentException $e ) {
 			return new WP_Error( 'not_found', $e->getMessage(), array( 'status' => 404 ) );
 		} catch ( StatusKeyTakenException $e ) {

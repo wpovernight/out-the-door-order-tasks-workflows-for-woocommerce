@@ -77,17 +77,21 @@ class CustomOrderStatus extends BaseModel implements ArraySerializableModel {
 	}
 
 	/**
-	 * Make a status key from a label: sanitized, then cut to the longest key, without a trailing - or _.
+	 * Make a status key from a label's Latin letters, digits and separators, cut to the longest key.
 	 *
-	 * The key may still not be usable, see is_usable_key(): a label without Latin letters or digits makes a
-	 * percent-encoded key.
+	 * The label is sanitized as a slug, which percent-encodes every other character, such as an emoji or a non-Latin
+	 * letter: those are dropped, with the separators they leave doubled or at either end. A label without any Latin
+	 * letter or digit makes an empty key, which is_usable_key() refuses.
 	 *
 	 * @param string $label
 	 *
 	 * @return string
 	 */
 	public static function key_from_label( string $label ): string {
-		return self::shorten_key( sanitize_title( $label ), self::MAX_KEY_LENGTH );
+		$key = preg_replace( '/%[a-f0-9]{2}/i', '', sanitize_title( $label ) );
+		$key = preg_replace( '/-{2,}/', '-', (string) $key );
+
+		return self::shorten_key( trim( (string) $key, '-_' ), self::MAX_KEY_LENGTH );
 	}
 
 	/**

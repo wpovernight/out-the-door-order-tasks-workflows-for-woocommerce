@@ -5,6 +5,7 @@ namespace WPO\OTD\Services;
 use Exception;
 use InvalidArgumentException;
 use RuntimeException;
+use WPO\OTD\Exceptions\InvalidStatusKeyException;
 use WPO\OTD\Exceptions\StatusBeingDeletedException;
 use WPO\OTD\Exceptions\StatusKeyTakenException;
 use WPO\OTD\Models\CustomOrderStatus;
@@ -35,6 +36,11 @@ class CustomOrderStatusService {
 	 * Seconds a deletion request waits for another request deleting the same status.
 	 */
 	private const DELETION_LOCK_TIMEOUT = 3;
+
+	/**
+	 * WooCommerce's own order status keys, refused even before WooCommerce lists them.
+	 */
+	private const WOOCOMMERCE_STATUS_KEYS = array( 'pending', 'processing', 'on-hold', 'completed', 'cancelled', 'refunded', 'failed', 'checkout-draft' );
 
 	protected readonly CustomOrderStatusRepository $repository;
 
@@ -236,15 +242,77 @@ class CustomOrderStatusService {
 	}
 
 	/**
+	 * Why a custom order status cannot take a status key, or null when it can.
+	 *
+	 * A key must fit WooCommerce's status columns and hold a letter or digit, and must not be the key of an order
+	 * status of WooCommerce or of another plugin: the status would take that status's place, and deleting it would
+	 * move that status's orders.
+	 *
+	 * @param string $key The key as it is stored, sanitized.
+	 *
+	 * @return string|null A message for the user.
+	 */
+	public function key_problem( string $key ): ?string {
+		if ( ! CustomOrderStatus::is_usable_key( $key ) ) {
+			return sprintf(
+				/* translators: %d: the longest status key, in characters. */
+				__( 'A status key holds up to %d letters, digits, - and _, with at least one letter or digit.', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
+				CustomOrderStatus::MAX_KEY_LENGTH
+			);
+		}
+
+		if ( in_array( strtolower( $key ), $this->reserved_keys(), true ) ) {
+			return __( 'This status key belongs to an order status of WooCommerce or of another plugin. Choose another one.', 'out-the-door-order-tasks-workflows-for-woocommerce' );
+		}
+
+		return null;
+	}
+
+	/**
+	 * The keys of the order statuses this plugin does not own, without their "wc-" prefix.
+	 *
+	 * @return string[]
+	 */
+	private function reserved_keys(): array {
+		$keys = self::WOOCOMMERCE_STATUS_KEYS;
+
+		if ( function_exists( 'wc_get_order_statuses' ) ) {
+			foreach ( array_keys( wc_get_order_statuses() ) as $prefixed ) {
+				$keys[] = strtolower( str_starts_with( (string) $prefixed, 'wc-' ) ? substr( (string) $prefixed, 3 ) : (string) $prefixed );
+			}
+		}
+
+		$own = array_map( static fn( CustomOrderStatus $status ) => strtolower( $status->status_key ), $this->all() );
+
+		// WooCommerce's own keys stay reserved even when a status of this plugin took one of them before.
+		return array_values( array_unique( array_merge( self::WOOCOMMERCE_STATUS_KEYS, array_diff( $keys, $own ) ) ) );
+	}
+
+	/**
 	 * Create a new custom order status.
 	 *
 	 * @param array<string, mixed> $data
 	 *
 	 * @return CustomOrderStatus
+	 * @throws InvalidStatusKeyException If the status key, sent or made from the label, cannot be used.
 	 * @throws Exception
 	 */
 	public function create( array $data ): CustomOrderStatus {
 		$status = new CustomOrderStatus( $data );
+
+		$problem = $this->key_problem( $status->status_key );
+		if ( null !== $problem ) {
+			// A key made from the label is one the user never typed: name it.
+			if ( empty( $data['status_key'] ) && CustomOrderStatus::is_usable_key( $status->status_key ) ) {
+				$problem = sprintf(
+					/* translators: %s: the status key made from the label. */
+					__( 'The label makes the status key %s, which belongs to an order status of WooCommerce or of another plugin. Send a status_key.', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
+					$status->status_key
+				);
+			}
+
+			throw new InvalidStatusKeyException( esc_html( $problem ) );
+		}
 
 		// Ensure the status key is unique.
 		$existing = $this->repository->where( 'status_key', $status->status_key )->first();
@@ -291,6 +359,7 @@ class CustomOrderStatusService {
 	 *
 	 * @return CustomOrderStatus
 	 * @throws InvalidArgumentException If no status has the ID.
+	 * @throws InvalidStatusKeyException If the status key in $data cannot be used.
 	 * @throws StatusKeyTakenException If another status already uses the status key in $data.
 	 * @throws StatusBeingDeletedException If $data changes the status key of a status being deleted.
 	 * @throws RuntimeException If the database does not save the change.
@@ -308,6 +377,12 @@ class CustomOrderStatusService {
 			// The background job moving its orders finds them by the key it was given.
 			if ( $custom_status->is_deleting && $data['status_key'] !== $custom_status->status_key ) {
 				throw new StatusBeingDeletedException( esc_html__( 'This custom order status is being deleted, so its status key cannot change.', 'out-the-door-order-tasks-workflows-for-woocommerce' ) );
+			}
+
+			// A key it holds already stays, as stored.
+			$problem = $data['status_key'] === $custom_status->status_key ? null : $this->key_problem( $data['status_key'] );
+			if ( null !== $problem ) {
+				throw new InvalidStatusKeyException( esc_html( $problem ) );
 			}
 
 			$taken = $this->repository
@@ -411,6 +486,11 @@ class CustomOrderStatusService {
 			return self::DELETION_NOT_FOUND;
 		}
 
+		// Its orders would be moved to the status they have, again and again.
+		if ( $status->status_key === $fallback_status ) {
+			throw new RuntimeException( esc_html( "Custom order status {$id} cannot move its orders to its own key {$fallback_status}." ) );
+		}
+
 		if ( $status->is_deleting ) {
 			// A batch job that failed leaves the status flagged with nothing left to finish its deletion.
 			if ( ! $this->has_deletion_job( $id ) ) {
@@ -502,6 +582,13 @@ class CustomOrderStatusService {
 	 * @return void
 	 */
 	public function process_deletion_batch( string $from_status, string $to_status, int $status_id ): void {
+		// Moving orders to the status they have would leave them there and run this job forever.
+		if ( $from_status === $to_status ) {
+			Logger::error( "The deletion of custom order status {$status_id} stopped: its orders cannot move from {$from_status} to the same status." );
+
+			return;
+		}
+
 		/**
 		 * Filter the number of orders reassigned per batch when draining a deleted status.
 		 *

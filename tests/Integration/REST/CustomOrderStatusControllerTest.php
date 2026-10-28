@@ -107,7 +107,7 @@ class CustomOrderStatusControllerTest extends RestTestCase {
 
 		$this->assertResponse( 400, $response, 'invalid_data' );
 		$this->assertSame(
-			array( 'The label makes no usable status key: send a status_key of up to 17 letters, digits, - and _.' ),
+			array( 'The label has no Latin letter or digit to make a status key from: send a status_key of up to 17 letters, digits, - and _.' ),
 			$response->get_data()['data']['errors']['status_key']
 		);
 
@@ -118,10 +118,76 @@ class CustomOrderStatusControllerTest extends RestTestCase {
 
 	public function keyless_label_provider(): array {
 		return array(
-			'Persian'    => array( 'ارسال شده' ),
-			'an emoji'   => array( '✓ Done' ),
-			'only signs' => array( '***' ),
+			'Persian'       => array( 'ارسال شده' ),
+			'only an emoji' => array( '📦' ),
+			'only signs'    => array( '***' ),
 		);
+	}
+
+	/**
+	 * @dataProvider symbol_label_provider
+	 */
+	public function test_a_label_with_symbols_makes_a_key_of_its_latin_letters_and_digits( string $label, string $key ): void {
+		$response = $this->request( 'POST', '/custom-order-statuses', array( 'label' => $label ) );
+
+		$this->assertResponse( 200, $response );
+		$this->assertSame( $key, $this->json( $response )['data']['status_key'] );
+	}
+
+	public function symbol_label_provider(): array {
+		return array(
+			'a trailing check mark' => array( 'Done ✓', 'done' ),
+			'a leading check mark'  => array( '✓ Done', 'done' ),
+			'an emoji in between'   => array( 'Awaiting 📦 shipment', 'awaiting-shipment' ),
+			'mixed with Persian'    => array( 'Sent ارسال 2', 'sent-2' ),
+		);
+	}
+
+	/**
+	 * @dataProvider reserved_key_provider
+	 */
+	public function test_the_key_of_another_order_status_is_refused( string $key ): void {
+		$created = $this->request( 'POST', '/custom-order-statuses', array( 'label' => 'Mine', 'status_key' => $key ) );
+
+		$this->assertResponse( 400, $created, 'invalid_data' );
+		$this->assertSame(
+			array( 'This status key belongs to an order status of WooCommerce or of another plugin. Choose another one.' ),
+			$created->get_data()['data']['errors']['status_key']
+		);
+
+		$id      = $this->create_status( 'Mine' );
+		$updated = $this->request( 'PUT', "/custom-order-statuses/{$id}", array( 'status_key' => $key ) );
+
+		$this->assertResponse( 400, $updated, 'invalid_data' );
+		$this->assertSame( 'mine', $this->make( CustomOrderStatusService::class )->find( $id )->status_key );
+	}
+
+	public function reserved_key_provider(): array {
+		return array(
+			'processing'     => array( 'processing' ),
+			'on-hold'        => array( 'on-hold' ),
+			'another case'   => array( 'Completed' ),
+			'checkout-draft' => array( 'checkout-draft' ),
+			'refunded'       => array( 'refunded' ),
+		);
+	}
+
+	public function test_a_label_that_makes_the_key_of_another_order_status_is_refused(): void {
+		$response = $this->request( 'POST', '/custom-order-statuses', array( 'label' => 'Processing' ) );
+
+		$this->assertResponse( 400, $response, 'invalid_data' );
+		$this->assertSame(
+			array( 'The label makes the status key processing, which belongs to an order status of WooCommerce or of another plugin. Send a status_key.' ),
+			$response->get_data()['data']['errors']['status_key']
+		);
+		$this->assertResponse( 200, $this->request( 'POST', '/custom-order-statuses', array( 'label' => 'Processing', 'status_key' => 'in-the-works' ) ) );
+	}
+
+	public function test_the_key_of_another_plugins_order_status_is_refused(): void {
+		add_filter( 'wc_order_statuses', static fn( $statuses ) => $statuses + array( 'wc-awaiting-pickup' => 'Awaiting pickup' ) );
+
+		$this->assertResponse( 400, $this->request( 'POST', '/custom-order-statuses', array( 'label' => 'Awaiting pickup' ) ), 'invalid_data' );
+		$this->assertResponse( 400, $this->request( 'POST', '/custom-order-statuses', array( 'label' => 'Mine', 'status_key' => 'awaiting-pickup' ) ), 'invalid_data' );
 	}
 
 	public function test_a_long_label_makes_a_key_cut_to_17_characters(): void {

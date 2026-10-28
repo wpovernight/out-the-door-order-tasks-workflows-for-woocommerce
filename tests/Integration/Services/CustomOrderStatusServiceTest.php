@@ -40,6 +40,54 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		$this->assertEquals( $status, $this->service->find( $status->id ) );
 	}
 
+	/**
+	 * @dataProvider refused_create_provider
+	 */
+	public function test_create_refuses_a_key_it_cannot_use( array $data, string $message ): void {
+		try {
+			$this->service->create( $data );
+			$this->fail( 'The key must be refused.' );
+		} catch ( \WPO\OTD\Exceptions\InvalidStatusKeyException $e ) {
+			$this->assertInstanceOf( \InvalidArgumentException::class, $e );
+			$this->assertSame( $message, $e->getMessage() );
+		}
+
+		$this->assertSame( array(), $this->service->all() );
+	}
+
+	public function refused_create_provider(): array {
+		$unusable = 'A status key holds up to 17 letters, digits, - and _, with at least one letter or digit.';
+		$reserved = 'This status key belongs to an order status of WooCommerce or of another plugin. Choose another one.';
+
+		return array(
+			'a sent key too long'        => array( array( 'label' => 'Long', 'status_key' => str_repeat( 'a', 18 ) ), $unusable ),
+			'a label without Latin text' => array( array( 'label' => 'ارسال شده' ), $unusable ),
+			'a WooCommerce key sent'     => array( array( 'label' => 'Mine', 'status_key' => 'on-hold' ), $reserved ),
+			'a WooCommerce key derived'  => array( array( 'label' => 'Processing' ), 'The label makes the status key processing, which belongs to an order status of WooCommerce or of another plugin. Send a status_key.' ),
+		);
+	}
+
+	public function test_update_refuses_a_key_it_cannot_use_and_keeps_its_own(): void {
+		$status = $this->service->create( array( 'label' => 'Packed' ) );
+
+		foreach ( array( str_repeat( 'a', 18 ), 'on-hold', '-' ) as $key ) {
+			try {
+				$this->service->update( $status->id, array( 'status_key' => $key ) );
+				$this->fail( "The key {$key} must be refused." );
+			} catch ( \WPO\OTD\Exceptions\InvalidStatusKeyException $e ) {
+				$this->assertSame( 'packed', $this->service->find( $status->id )->status_key );
+			}
+		}
+
+		$this->assertSame( 'Boxed', $this->service->update( $status->id, array( 'status_key' => 'packed', 'label' => 'Boxed' ) )->label );
+	}
+
+	public function test_a_stored_status_keeps_a_key_that_is_now_refused(): void {
+		$id = ( new CustomOrderStatusRepository() )->insert( array( 'status_key' => 'refunded', 'label' => 'Old refund' ) );
+
+		$this->assertSame( 'Newer refund', $this->service->update( $id, array( 'status_key' => 'refunded', 'label' => 'Newer refund' ) )->label );
+	}
+
 	public function test_create_makes_the_key_unique(): void {
 		$this->service->create( array( 'label' => 'Packed' ) );
 
@@ -325,6 +373,46 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		$lock  = "custom_status_deletion_{$status->id}";
 		$this->assertTrue( $other->acquire_lock( $lock, 0 ), 'Another connection can take the lock at once.' );
 		$other->release_lock( $lock );
+	}
+
+	public function test_a_deletion_batch_that_would_move_orders_to_their_own_status_stops(): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$this->order_in( 'packed' );
+
+		$deleted = $this->capture_deletions();
+		$logged  = array();
+		add_filter(
+			'wpo_otd_logging_enabled',
+			static function ( $enabled, $level, $text ) use ( &$logged ) {
+				$logged[] = array( $level, $text );
+
+				return false;
+			},
+			10,
+			3
+		);
+
+		$this->service->process_deletion_batch( 'packed', 'packed', $status->id );
+
+		$this->assertFalse( as_has_scheduled_action( self::REASSIGN_HOOK ), 'No batch is scheduled again.' );
+		$this->assertSame( array(), $deleted() );
+		$this->assertNotNull( $this->service->find( $status->id ) );
+		$this->assertSame( 'error', $logged[0][0] );
+		$this->assertStringContainsString( "The deletion of custom order status {$status->id} stopped", $logged[0][1] );
+	}
+
+	public function test_a_deletion_to_the_statuss_own_key_is_refused(): void {
+		$status = $this->service->create( array( 'label' => 'Packed' ) );
+
+		try {
+			$this->service->begin_deletion( $status->id, 'packed' );
+			$this->fail( 'A status cannot move its orders to itself.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'cannot move its orders to its own key packed', $e->getMessage() );
+		}
+
+		$this->assertFalse( $this->service->find( $status->id )->is_deleting );
+		$this->assertFalse( as_has_scheduled_action( self::REASSIGN_HOOK ) );
 	}
 
 	public function test_a_status_gone_before_its_last_batch_is_not_announced_again(): void {
