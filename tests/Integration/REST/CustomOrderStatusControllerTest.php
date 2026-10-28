@@ -99,16 +99,66 @@ class CustomOrderStatusControllerTest extends RestTestCase {
 		$this->assertSame( '7', $this->json( $response )['data']['status_key'] );
 	}
 
-	public function test_a_label_that_makes_no_key_needs_one(): void {
-		$response = $this->request( 'POST', '/custom-order-statuses', array( 'label' => '***' ) );
+	/**
+	 * @dataProvider keyless_label_provider
+	 */
+	public function test_a_label_without_latin_letters_or_digits_needs_a_key( string $label ): void {
+		$response = $this->request( 'POST', '/custom-order-statuses', array( 'label' => $label ) );
 
 		$this->assertResponse( 400, $response, 'invalid_data' );
 		$this->assertSame(
-			array( 'The status_key field has no letter or digit to make a status key from.' ),
+			array( 'The label makes no usable status key: send a status_key of up to 17 letters, digits, - and _.' ),
 			$response->get_data()['data']['errors']['status_key']
 		);
 
-		$this->assertResponse( 200, $this->request( 'POST', '/custom-order-statuses', array( 'label' => '***', 'status_key' => 'starred' ) ) );
+		$created = $this->request( 'POST', '/custom-order-statuses', array( 'label' => $label, 'status_key' => 'shipped' ) );
+		$this->assertResponse( 200, $created );
+		$this->assertSame( $label, $this->json( $created )['data']['label'] );
+	}
+
+	public function keyless_label_provider(): array {
+		return array(
+			'Persian'    => array( 'ارسال شده' ),
+			'an emoji'   => array( '✓ Done' ),
+			'only signs' => array( '***' ),
+		);
+	}
+
+	public function test_a_long_label_makes_a_key_cut_to_17_characters(): void {
+		$response = $this->request( 'POST', '/custom-order-statuses', array( 'label' => 'Awaiting payment ok' ) );
+
+		$this->assertResponse( 200, $response );
+		$this->assertSame( 'awaiting-payment', $this->json( $response )['data']['status_key'], 'Cut to 17, without the trailing dash.' );
+
+		$response = $this->request( 'POST', '/custom-order-statuses', array( 'label' => 'Awaiting supplier stock' ) );
+		$this->assertSame( 'awaiting-supplier', $this->json( $response )['data']['status_key'] );
+	}
+
+	public function test_a_sent_key_may_hold_17_characters_and_no_more(): void {
+		$too_long = $this->request( 'POST', '/custom-order-statuses', array( 'label' => 'Long', 'status_key' => str_repeat( 'a', 18 ) ) );
+
+		$this->assertResponse( 400, $too_long, 'invalid_data' );
+		$this->assertSame( array( 'The status_key field may not be longer than 17 characters.' ), $too_long->get_data()['data']['errors']['status_key'] );
+
+		$this->assertResponse( 200, $this->request( 'POST', '/custom-order-statuses', array( 'label' => 'Long', 'status_key' => str_repeat( 'a', 17 ) ) ) );
+
+		$id = $this->create_status( 'Short' );
+		$this->assertResponse( 400, $this->request( 'PUT', "/custom-order-statuses/{$id}", array( 'status_key' => str_repeat( 'b', 18 ) ) ), 'invalid_data' );
+		$this->assertResponse( 200, $this->request( 'PUT', "/custom-order-statuses/{$id}", array( 'status_key' => str_repeat( 'b', 17 ) ) ) );
+	}
+
+	public function test_a_taken_key_at_the_limit_is_cut_to_fit_its_suffix(): void {
+		foreach ( array( 'awaiting-supplier', 'abcdefghijklmn-pq' ) as $key ) {
+			$this->request( 'POST', '/custom-order-statuses', array( 'label' => 'First', 'status_key' => $key ) );
+		}
+
+		$second = $this->json( $this->request( 'POST', '/custom-order-statuses', array( 'label' => 'Second', 'status_key' => 'awaiting-supplier' ) ) )['data'];
+		$third  = $this->json( $this->request( 'POST', '/custom-order-statuses', array( 'label' => 'Third', 'status_key' => 'awaiting-supplier' ) ) )['data'];
+		$cut    = $this->json( $this->request( 'POST', '/custom-order-statuses', array( 'label' => 'Cut', 'status_key' => 'abcdefghijklmn-pq' ) ) )['data'];
+
+		$this->assertSame( 'awaiting-suppli-2', $second['status_key'] );
+		$this->assertSame( 'awaiting-suppli-3', $third['status_key'] );
+		$this->assertSame( 'abcdefghijklmn-2', $cut['status_key'], 'A cut that ends on a dash drops it.' );
 	}
 
 	public function test_listing_statuses_in_full_or_by_page(): void {

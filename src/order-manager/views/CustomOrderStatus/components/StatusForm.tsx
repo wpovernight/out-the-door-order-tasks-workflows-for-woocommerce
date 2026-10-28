@@ -13,11 +13,19 @@ interface StatusFormProps {
 	isSaving: boolean;
 }
 
+/**
+ * The longest status key: WooCommerce stores it as "wc-<key>" in 20-character
+ * status columns.
+ */
+const MAX_KEY_LENGTH = 17;
+
 function slugify(text: string): string {
 	return text
 		.toLowerCase()
 		.replace(/[^a-z0-9]+/g, '-')
-		.replace(/^-+|-+$/g, '');
+		.replace(/^-+|-+$/g, '')
+		.slice(0, MAX_KEY_LENGTH)
+		.replace(/[-_]+$/, '');
 }
 
 function getForegroundColor(hexBg: string): string {
@@ -182,9 +190,10 @@ export const StatusForm = ({
 									setKeyManuallyEdited(true);
 									setStatusKey(e.target.value);
 								}}
-								pattern="^[a-z0-9_\-]+$"
+								pattern="^[a-z0-9_\-]*[a-z0-9][a-z0-9_\-]*$"
+								maxLength={MAX_KEY_LENGTH}
 								title={__(
-									'Only lowercase letters, numbers, hyphens, and underscores.',
+									'Up to 17 lowercase letters, numbers, hyphens and underscores, with at least one letter or number.',
 									'out-the-door-order-tasks-workflows-for-woocommerce'
 								)}
 								required

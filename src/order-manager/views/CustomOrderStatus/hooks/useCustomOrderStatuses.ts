@@ -142,7 +142,8 @@ export function useCustomOrderStatuses(): UseCustomOrderStatusesResult {
 			// schedules an order drain and flags the row is_deleting. Re-fetch so
 			// the UI reflects whichever happened — the row either disappears or
 			// returns in its "deleting" state, and the poll below drives it to
-			// completion. This only runs on success, so a failure leaves the row
+			// completion. This runs when the delete succeeded or the status was
+			// gone already; any other failure skips it and leaves the row
 			// untouched.
 			const fresh = await fetchCustomOrderStatuses();
 			setStatuses(fresh);

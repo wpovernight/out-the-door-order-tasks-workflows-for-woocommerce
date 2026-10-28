@@ -8,6 +8,7 @@ use WP_REST_Server;
 use WP_Error;
 use WPO\OTD\Core\Logger;
 use WPO\OTD\Exceptions\StatusKeyTakenException;
+use WPO\OTD\Models\CustomOrderStatus;
 use WPO\OTD\Services\CustomOrderStatusService;
 
 defined( 'ABSPATH' ) || exit;
@@ -119,11 +120,11 @@ class CustomOrderStatusController extends BaseRestController {
 
 		$errors = $this->validate( $data, array(
 			'label'      => 'required|string|max:255',
-			'status_key' => 'string|max:64|regex:/^[a-z0-9_-]*[a-z0-9][a-z0-9_-]*$/i',
+			'status_key' => 'string|max:' . CustomOrderStatus::MAX_KEY_LENGTH . '|regex:' . CustomOrderStatus::KEY_PATTERN,
 			'background' => 'string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
 			'foreground' => 'string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
 		) );
-		$errors = $this->with_empty_key_error( $data, $errors, true );
+		$errors = $this->with_unusable_key_error( $data, $errors, true );
 
 		if ( ! empty( $errors ) ) {
 			return new WP_Error( 'invalid_data', __( 'Invalid data provided', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array(
@@ -145,9 +146,11 @@ class CustomOrderStatusController extends BaseRestController {
 	}
 
 	/**
-	 * Add a status_key error when the key the status would get is empty once sanitized, which would store an empty key.
+	 * Add a status_key error when the key the status would get cannot be stored.
 	 *
-	 * The key is the one sent or, when a status is created without one, the one made from its label.
+	 * A key sent is checked by the rules already, and again once sanitized as it is stored. A status created without
+	 * a key gets one made from its label, which a label without Latin letters or digits cannot give: such a status
+	 * needs a key sent.
 	 *
 	 * @param array<string, mixed>    $data
 	 * @param array<string, string[]> $errors   The errors the rules found.
@@ -155,21 +158,22 @@ class CustomOrderStatusController extends BaseRestController {
 	 *
 	 * @return array<string, string[]>
 	 */
-	private function with_empty_key_error( array $data, array $errors, bool $creating ): array {
+	private function with_unusable_key_error( array $data, array $errors, bool $creating ): array {
 		if ( isset( $errors['status_key'] ) ) {
 			return $errors;
 		}
 
 		if ( isset( $data['status_key'] ) && is_string( $data['status_key'] ) && '' !== $data['status_key'] ) {
-			$source = $data['status_key'];
+			if ( ! CustomOrderStatus::is_usable_key( sanitize_title( $data['status_key'] ) ) ) {
+				$errors['status_key'][] = 'The status_key field has no letter or digit to make a status key from.';
+			}
 		} elseif ( $creating && isset( $data['label'] ) && is_string( $data['label'] ) && ! isset( $errors['label'] ) ) {
-			$source = $data['label'];
-		} else {
-			return $errors;
-		}
-
-		if ( '' === sanitize_title( $source ) ) {
-			$errors['status_key'][] = 'The status_key field has no letter or digit to make a status key from.';
+			if ( ! CustomOrderStatus::is_usable_key( CustomOrderStatus::key_from_label( $data['label'] ) ) ) {
+				$errors['status_key'][] = sprintf(
+					'The label makes no usable status key: send a status_key of up to %d letters, digits, - and _.',
+					CustomOrderStatus::MAX_KEY_LENGTH
+				);
+			}
 		}
 
 		return $errors;
@@ -222,11 +226,11 @@ class CustomOrderStatusController extends BaseRestController {
 		// Null is refused: a status keeps a label, a key and colors.
 		$errors = $this->validate( $data, array(
 			'label'      => 'not_null|string|max:255',
-			'status_key' => 'not_null|string|max:64|regex:/^[a-z0-9_-]*[a-z0-9][a-z0-9_-]*$/i',
+			'status_key' => 'not_null|string|max:' . CustomOrderStatus::MAX_KEY_LENGTH . '|regex:' . CustomOrderStatus::KEY_PATTERN,
 			'background' => 'not_null|string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
 			'foreground' => 'not_null|string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
 		) );
-		$errors = $this->with_empty_key_error( $data, $errors, false );
+		$errors = $this->with_unusable_key_error( $data, $errors, false );
 
 		if ( ! empty( $errors ) ) {
 			return new WP_Error( 'invalid_data', __( 'Invalid data provided', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array(

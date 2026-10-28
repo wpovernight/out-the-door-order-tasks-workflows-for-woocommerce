@@ -243,11 +243,12 @@ class CustomOrderStatusService {
 		// Ensure the status key is unique.
 		$existing = $this->repository->where( 'status_key', $status->status_key )->first();
 		if ( $existing ) {
-			// Append a number to make it unique.
+			// Append a number to make it unique, cutting the key so it still fits.
 			$base_key = $status->status_key;
 			$counter  = 2;
 			do {
-				$status->status_key = $base_key . '-' . $counter;
+				$suffix             = '-' . $counter;
+				$status->status_key = CustomOrderStatus::shorten_key( $base_key, CustomOrderStatus::MAX_KEY_LENGTH - strlen( $suffix ) ) . $suffix;
 				$existing           = $this->repository->where( 'status_key', $status->status_key )->first();
 				$counter++;
 			} while ( $existing );

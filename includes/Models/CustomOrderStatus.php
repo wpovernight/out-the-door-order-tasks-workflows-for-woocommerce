@@ -7,6 +7,17 @@ use WPO\OTD\Contracts\ArraySerializableModel;
 defined( 'ABSPATH' ) || exit;
 
 class CustomOrderStatus extends BaseModel implements ArraySerializableModel {
+	/**
+	 * The longest status key: WooCommerce stores it as "wc-<key>" in 20-character status columns, both in the posts
+	 * table and in the HPOS orders table.
+	 */
+	public const MAX_KEY_LENGTH = 17;
+
+	/**
+	 * What a status key may hold: letters, digits, - and _, with at least one letter or digit.
+	 */
+	public const KEY_PATTERN = '/^[a-z0-9_-]*[a-z0-9][a-z0-9_-]*$/i';
+
 	public int $id;
 	public string $status_key;
 	public string $label;
@@ -29,7 +40,7 @@ class CustomOrderStatus extends BaseModel implements ArraySerializableModel {
 		$this->label       = $data['label'] ?? '';
 		$this->status_key  = ! empty( $data['status_key'] )
 			? sanitize_title( $data['status_key'] )
-			: sanitize_title( $this->label );
+			: self::key_from_label( $this->label );
 		$this->background  = $data['background'] ?? '#ccc';
 		$this->foreground  = $data['foreground'] ?? $this->get_foreground_color( $this->background );
 		$this->is_deleting = ! empty( $data['is_deleting'] );
@@ -63,6 +74,43 @@ class CustomOrderStatus extends BaseModel implements ArraySerializableModel {
 			'background'  => $this->background,
 			'is_deleting' => (int) $this->is_deleting,
 		);
+	}
+
+	/**
+	 * Make a status key from a label: sanitized, then cut to the longest key, without a trailing - or _.
+	 *
+	 * The key may still not be usable, see is_usable_key(): a label without Latin letters or digits makes a
+	 * percent-encoded key.
+	 *
+	 * @param string $label
+	 *
+	 * @return string
+	 */
+	public static function key_from_label( string $label ): string {
+		return self::shorten_key( sanitize_title( $label ), self::MAX_KEY_LENGTH );
+	}
+
+	/**
+	 * Cut a status key to a length, without leaving a trailing - or _.
+	 *
+	 * @param string $key
+	 * @param int    $length
+	 *
+	 * @return string
+	 */
+	public static function shorten_key( string $key, int $length ): string {
+		return rtrim( substr( $key, 0, max( 0, $length ) ), '-_' );
+	}
+
+	/**
+	 * Whether a status key can be stored: it fits the status columns and matches KEY_PATTERN.
+	 *
+	 * @param string $key
+	 *
+	 * @return bool
+	 */
+	public static function is_usable_key( string $key ): bool {
+		return strlen( $key ) <= self::MAX_KEY_LENGTH && 1 === preg_match( self::KEY_PATTERN, $key );
 	}
 
 	/**
