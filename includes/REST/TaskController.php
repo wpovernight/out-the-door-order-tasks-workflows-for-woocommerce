@@ -334,7 +334,11 @@ class TaskController extends BaseRestController {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function create_item( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$data = $request->get_json_params();
+		$data = $this->json_object_body( $request );
+
+		if ( is_wp_error( $data ) ) {
+			return $data;
+		}
 
 		$errors = $this->validate( $data, array(
 			'title'        => 'string|max:255',
@@ -461,7 +465,11 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'invalid_id', 'Invalid task ID provided', array( 'status' => 400 ) );
 		}
 
-		$data = $request->get_json_params();
+		$data = $this->json_object_body( $request );
+
+		if ( is_wp_error( $data ) ) {
+			return $data;
+		}
 
 		$errors = $this->with_empty_title_error( $data, $this->validate( $data, array(
 			'title'       => 'string|max:255',
@@ -671,7 +679,11 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'invalid_field_id', 'Invalid field ID provided', array( 'status' => 400 ) );
 		}
 
-		$data = $request->get_json_params();
+		$data = $this->json_object_body( $request );
+
+		if ( is_wp_error( $data ) ) {
+			return $data;
+		}
 
 		$errors = $this->validate( $data, array(
 			'label'    => 'required|string|max:255',
@@ -735,7 +747,11 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'invalid_option_id', 'Invalid option ID provided', array( 'status' => 400 ) );
 		}
 
-		$data = $request->get_json_params();
+		$data = $this->json_object_body( $request );
+
+		if ( is_wp_error( $data ) ) {
+			return $data;
+		}
 
 		$errors = $this->validate( $data, array(
 			'label'    => 'string|max:255',
@@ -1055,7 +1071,11 @@ class TaskController extends BaseRestController {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function update_status_roles( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$data = $request->get_json_params();
+		$data = $this->json_object_body( $request );
+
+		if ( is_wp_error( $data ) ) {
+			return $data;
+		}
 
 		// An option ID must be a JSON integer: true, "5" or 5.0 would otherwise be cast to an ID. Null clears the role.
 		$errors = $this->validate( $data, array(

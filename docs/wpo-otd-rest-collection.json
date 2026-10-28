@@ -211,7 +211,7 @@
                 "tasks"
               ]
             },
-            "description": "Creates a task.\n\nBody: title (required string, at most 255 characters, not empty once markup and whitespace are stripped), description (optional string), field_values (optional array of {field_id, value}; a field_slug sent with them is ignored).\n\nErrors: 400 rest_missing_callback_param (no title), 400 rest_invalid_param (title or description not a string), 400 invalid_data (errors listed per field in data.errors), 500 task_creation_failed, 500 task_created_with_error (the task exists; data.task_id holds its ID, so do not create it again)."
+            "description": "Creates a task.\n\nBody: title (required string, at most 255 characters, not empty once markup and whitespace are stripped), description (optional string), field_values (optional array of {field_id, value}; a field_slug sent with them is ignored).\n\nErrors: 400 invalid_body (the body is missing or not a JSON object), 400 rest_missing_callback_param (no title), 400 rest_invalid_param (title or description not a string), 400 invalid_data (errors listed per field in data.errors), 500 task_creation_failed, 500 task_created_with_error (the task exists; data.task_id holds its ID, so do not create it again)."
           },
           "response": [
             {
@@ -656,7 +656,7 @@
                 "1"
               ]
             },
-            "description": "Updates a task. Every body key is optional; keys other than these are ignored.\n\nBody: title (string, at most 255 characters, not empty once markup and whitespace are stripped), description (string), field_values (array of {field_id, value}; a field_slug sent with them is ignored).\n\nErrors: 400 invalid_id, 400 rest_invalid_param, 400 invalid_data, 404 not_found, 500 task_update_failed."
+            "description": "Updates a task. Every body key is optional; keys other than these are ignored.\n\nBody: title (string, at most 255 characters, not empty once markup and whitespace are stripped), description (string), field_values (array of {field_id, value}; a field_slug sent with them is ignored).\n\nErrors: 400 invalid_body (the body is missing or not a JSON object), 400 invalid_id, 400 rest_invalid_param, 400 invalid_data, 404 not_found, 500 task_update_failed."
           },
           "response": [
             {
@@ -791,7 +791,7 @@
                 "status-roles"
               ]
             },
-            "description": "Sets which Status field options count as done and undone. Send only the roles to change; a role left out is untouched. Returns both roles.\n\nBody: done, undone (a Status option ID, or null to clear the role).\n\nErrors: 400 invalid_data (not an integer), 400 invalid_option (not a Status option), 500 update_failed."
+            "description": "Sets which Status field options count as done and undone. Send only the roles to change; a role left out is untouched. Returns both roles.\n\nBody: done, undone (a Status option ID, or null to clear the role).\n\nErrors: 400 invalid_body (the body is missing or not a JSON object), 400 invalid_data (not an integer), 400 invalid_option (not a Status option), 500 update_failed."
           },
           "response": [
             {
@@ -1026,7 +1026,7 @@
                 "options"
               ]
             },
-            "description": "Adds an option to a field.\n\nBody: label (required, at most 255 characters), slug (optional; letters, digits, - and _; at most 255; made from the label when left out), color (optional, #rgb or #rrggbb), position (optional integer).\n\nErrors: 400 invalid_field_id, 400 invalid_data, 400 rest_invalid_param (label or color not a string, or position not an integer), 500 creation_failed."
+            "description": "Adds an option to a field.\n\nBody: label (required, at most 255 characters), slug (optional; letters, digits, - and _; at most 255; made from the label when left out), color (optional, #rgb or #rrggbb), position (optional integer).\n\nErrors: 400 invalid_body (the body is missing or not a JSON object), 400 invalid_field_id, 400 invalid_data, 400 rest_invalid_param (label or color not a string, or position not an integer), 500 creation_failed."
           },
           "response": [
             {
@@ -1102,7 +1102,7 @@
                 "8"
               ]
             },
-            "description": "Updates an option. Every body key is optional, with the same rules as when creating one. The option stays on its field. position is stored as given and the other options do not shift; use Reorder field options to reorder.\n\nBody: label, slug, color, position.\n\nErrors: 400 invalid_field_id, 400 invalid_option_id, 400 invalid_data, 400 rest_invalid_param (label or color not a string, or position not an integer), 404 not_found (no such option on that field), 500 update_failed."
+            "description": "Updates an option. Every body key is optional, with the same rules as when creating one. The option stays on its field. position is stored as given and the other options do not shift; use Reorder field options to reorder.\n\nBody: label, slug, color, position.\n\nErrors: 400 invalid_body (the body is missing or not a JSON object), 400 invalid_field_id, 400 invalid_option_id, 400 invalid_data, 400 rest_invalid_param (label or color not a string, or position not an integer), 404 not_found (no such option on that field), 500 update_failed."
           },
           "response": [
             {
@@ -1717,7 +1717,7 @@
                 "custom-order-statuses"
               ]
             },
-            "description": "Creates a custom order status.\n\nBody: label (required, at most 255 characters), status_key (optional; letters, digits, - and _; at most 64; made from the label when left out), background and foreground (optional, #rgb or #rrggbb). foreground is not stored; it is worked out from background.\n\nErrors: 400 invalid_data, 500 creation_failed."
+            "description": "Creates a custom order status.\n\nBody: label (required, at most 255 characters), status_key (optional; letters, digits, - and _; at most 64; made from the label when left out), background and foreground (optional, #rgb or #rrggbb). foreground is not stored; it is worked out from background.\n\nErrors: 400 invalid_body (the body is missing or not a JSON object), 400 invalid_data, 500 creation_failed."
           },
           "response": [
             {
@@ -1787,7 +1787,7 @@
                 "1"
               ]
             },
-            "description": "Updates a custom order status. Every body key is optional, with the same rules as when creating one, and none may be null.\n\nBody: label, status_key, background, foreground. status_key is stored lowercase and must not be another status's key. foreground is not stored; it is worked out from background.\n\nErrors: 400 invalid_id, 400 invalid_data, 404 not_found, 409 status_key_taken, 500 update_failed."
+            "description": "Updates a custom order status. Every body key is optional, with the same rules as when creating one, and none may be null.\n\nBody: label, status_key, background, foreground. status_key is stored lowercase and must not be another status's key. foreground is not stored; it is worked out from background.\n\nErrors: 400 invalid_body (the body is missing or not a JSON object), 400 invalid_id, 400 invalid_data, 404 not_found, 409 status_key_taken, 500 update_failed."
           },
           "response": [
             {

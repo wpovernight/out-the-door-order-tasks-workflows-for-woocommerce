@@ -111,7 +111,11 @@ class CustomOrderStatusController extends BaseRestController {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function create_item( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$data = $request->get_json_params();
+		$data = $this->json_object_body( $request );
+
+		if ( is_wp_error( $data ) ) {
+			return $data;
+		}
 
 		$errors = $this->validate( $data, array(
 			'label'      => 'required|string|max:255',
@@ -177,7 +181,11 @@ class CustomOrderStatusController extends BaseRestController {
 			return new WP_Error( 'invalid_id', __( 'Invalid ID provided', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 400 ) );
 		}
 
-		$data = $request->get_json_params();
+		$data = $this->json_object_body( $request );
+
+		if ( is_wp_error( $data ) ) {
+			return $data;
+		}
 
 		// Null is refused: a status keeps a label, a key and colors.
 		$errors = $this->validate( $data, array(

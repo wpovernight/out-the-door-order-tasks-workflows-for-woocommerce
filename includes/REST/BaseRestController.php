@@ -2,6 +2,7 @@
 
 namespace WPO\OTD\REST;
 
+use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
 use WPO\OTD\Utilities\Paginator;
@@ -81,6 +82,30 @@ abstract class BaseRestController {
 		$params = $request->get_url_params();
 
 		return isset( $params[ $name ] ) ? (string) $params[ $name ] : null;
+	}
+
+	/**
+	 * Read the request's JSON body, which must be a JSON object.
+	 *
+	 * A missing or empty body, a body that is not sent as JSON, and a JSON scalar or non-empty list are refused, since
+	 * the handlers read named members from the body. Malformed JSON never gets here: WordPress refuses it first.
+	 *
+	 * @param WP_REST_Request $request
+	 *
+	 * @return array<string, mixed>|WP_Error The body's members, or a 400 invalid_body error.
+	 */
+	protected function json_object_body( WP_REST_Request $request ): array|WP_Error {
+		$data = $request->get_json_params();
+
+		if ( ! is_array( $data ) || ( array() !== $data && array_is_list( $data ) ) ) {
+			return new WP_Error(
+				'invalid_body',
+				__( 'The request body must be a JSON object.', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		return $data;
 	}
 
 	/**

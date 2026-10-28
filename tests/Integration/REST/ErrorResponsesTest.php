@@ -51,6 +51,71 @@ class ErrorResponsesTest extends RestTestCase {
 	}
 
 	/**
+	 * @dataProvider body_route_provider
+	 */
+	public function test_a_request_without_a_body_is_a_bad_request( string $method, string $route, string $code ): void {
+		$response = $this->raw_request( $method, $this->fill_route( $route ), null );
+
+		$this->assertResponse( 400, $response, $code );
+	}
+
+	/**
+	 * @dataProvider body_route_provider
+	 */
+	public function test_a_json_list_or_null_body_is_a_bad_request( string $method, string $route, string $code ): void {
+		$route = $this->fill_route( $route );
+
+		foreach ( array( '[1, 2]', '[{"label": "X", "title": "X"}]', 'null' ) as $body ) {
+			$this->assertResponse( 400, $this->raw_request( $method, $route, $body ), $code );
+		}
+	}
+
+	public function body_route_provider(): array {
+		return array(
+			// The title is a required route argument, which WordPress finds missing before the handler runs.
+			'create task'          => array( 'POST', '/tasks', 'rest_missing_callback_param' ),
+			'update task'          => array( 'PUT', '/tasks/{task}', 'invalid_body' ),
+			'create option'        => array( 'POST', '/tasks/fields/1/options', 'invalid_body' ),
+			'update option'        => array( 'PUT', '/tasks/fields/1/options/1', 'invalid_body' ),
+			'update status roles'  => array( 'PUT', '/tasks/status-roles', 'invalid_body' ),
+			'create custom status' => array( 'POST', '/custom-order-statuses', 'invalid_body' ),
+			'update custom status' => array( 'PUT', '/custom-order-statuses/{status}', 'invalid_body' ),
+		);
+	}
+
+	/**
+	 * Routes without route arguments: on the others, WordPress itself warns about a scalar body before the handler
+	 * runs.
+	 *
+	 * @dataProvider scalar_body_route_provider
+	 */
+	public function test_a_json_scalar_body_is_a_bad_request( string $method, string $route ): void {
+		$route = $this->fill_route( $route );
+
+		foreach ( array( '5', '"title"', 'true' ) as $body ) {
+			$response = $this->raw_request( $method, $route, $body );
+
+			$this->assertResponse( 400, $response, 'invalid_body' );
+			$this->assertSame( 'The request body must be a JSON object.', $response->get_data()['message'] );
+		}
+	}
+
+	public function scalar_body_route_provider(): array {
+		return array(
+			'update status roles'  => array( 'PUT', '/tasks/status-roles' ),
+			'create custom status' => array( 'POST', '/custom-order-statuses' ),
+			'update custom status' => array( 'PUT', '/custom-order-statuses/{status}' ),
+		);
+	}
+
+	public function test_an_empty_json_object_is_a_body(): void {
+		$response = $this->raw_request( 'PUT', '/tasks/status-roles', '{}' );
+
+		$this->assertResponse( 200, $response );
+		$this->assertSame( array( 'done', 'undone' ), array_keys( $this->json( $response )['data'] ) );
+	}
+
+	/**
 	 * @dataProvider failure_provider
 	 */
 	public function test_an_unexpected_failure_is_a_server_error( string $method, string $route, ?array $body, string $table, string $code ): void {
@@ -151,6 +216,45 @@ class ErrorResponsesTest extends RestTestCase {
 			$this->request( 'POST', "/tasks/{$id}/move", array( 'target_status_id' => $this->status_option_id( 'in_progress' ) ) ),
 			'task_move_failed'
 		);
+	}
+
+	/**
+	 * Send a request with a body exactly as written, as JSON.
+	 *
+	 * @param string      $method
+	 * @param string      $route Route below the plugin namespace.
+	 * @param string|null $body  Null sends no body.
+	 *
+	 * @return \WP_REST_Response
+	 */
+	private function raw_request( string $method, string $route, ?string $body ): \WP_REST_Response {
+		$request = new \WP_REST_Request( $method, self::NAMESPACE . $route );
+		$request->set_header( 'Content-Type', 'application/json' );
+
+		if ( null !== $body ) {
+			$request->set_body( $body );
+		}
+
+		return rest_do_request( $request );
+	}
+
+	/**
+	 * Put a real task and custom status in a route's {task} and {status}.
+	 *
+	 * @param string $route
+	 *
+	 * @return string
+	 */
+	private function fill_route( string $route ): string {
+		if ( str_contains( $route, '{task}' ) ) {
+			$route = str_replace( '{task}', (string) $this->create_task(), $route );
+		}
+
+		if ( str_contains( $route, '{status}' ) ) {
+			$route = str_replace( '{status}', (string) $this->make( CustomOrderStatusService::class )->create( array( 'label' => 'Packed' ) )->id, $route );
+		}
+
+		return $route;
 	}
 
 	/**
