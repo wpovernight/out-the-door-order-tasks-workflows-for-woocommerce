@@ -1057,9 +1057,10 @@ class TaskController extends BaseRestController {
 	public function update_status_roles( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$data = $request->get_json_params();
 
+		// An option ID must be a JSON integer: true, "5" or 5.0 would otherwise be cast to an ID. Null clears the role.
 		$errors = $this->validate( $data, array(
-			'done'   => 'integer',
-			'undone' => 'integer',
+			'done'   => 'strict_integer',
+			'undone' => 'strict_integer',
 		) );
 
 		if ( ! empty( $errors ) ) {
@@ -1072,17 +1073,12 @@ class TaskController extends BaseRestController {
 		$task_status_role_service = $this->task_status_role_service;
 
 		try {
-			// Cast non-null values to int; preserve null so callers can clear a role.
 			if ( array_key_exists( 'done', $data ) ) {
-				$task_status_role_service->set_done_field_option_id(
-					null === $data['done'] ? null : (int) $data['done']
-				);
+				$task_status_role_service->set_done_field_option_id( $data['done'] );
 			}
 
 			if ( array_key_exists( 'undone', $data ) ) {
-				$task_status_role_service->set_undone_field_option_id(
-					null === $data['undone'] ? null : (int) $data['undone']
-				);
+				$task_status_role_service->set_undone_field_option_id( $data['undone'] );
 			}
 
 			return $this->respond( array(

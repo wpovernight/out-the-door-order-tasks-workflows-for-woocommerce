@@ -518,6 +518,36 @@ class TaskControllerTest extends RestTestCase {
 	}
 
 	/**
+	 * @dataProvider loose_status_role_provider
+	 */
+	public function test_a_status_role_must_be_a_json_integer( string $role, string $json ): void {
+		$roles  = $this->make( TaskStatusRoleService::class );
+		$before = array( $roles->get_done_field_option_id(), $roles->get_undone_field_option_id() );
+
+		// Sent as written, since encoding a PHP float may drop its fraction.
+		$request = new \WP_REST_Request( 'PUT', self::NAMESPACE . '/tasks/status-roles' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body( "{\"{$role}\": {$json}}" );
+		$response = rest_do_request( $request );
+
+		$this->assertResponse( 400, $response, 'invalid_data' );
+		$this->assertSame( array( "The {$role} field must be an integer." ), $response->get_data()['data']['errors'][ $role ] );
+		$this->assertSame( $before, array( $roles->get_done_field_option_id(), $roles->get_undone_field_option_id() ), 'No role changes.' );
+	}
+
+	public function loose_status_role_provider(): array {
+		return array(
+			'done as true'               => array( 'done', 'true' ),
+			'undone as true'             => array( 'undone', 'true' ),
+			'done as false'              => array( 'done', 'false' ),
+			'done as a numeric string'   => array( 'done', '"5"' ),
+			'undone as a numeric string' => array( 'undone', '"1"' ),
+			'done as a float'            => array( 'done', '5.0' ),
+			'done as an array'           => array( 'done', '[5]' ),
+		);
+	}
+
+	/**
 	 * Create a task through the service and return its ID.
 	 *
 	 * @param string   $title
