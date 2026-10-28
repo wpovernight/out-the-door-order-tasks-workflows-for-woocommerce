@@ -121,6 +121,19 @@ class ErrorResponsesTest extends RestTestCase {
 		$this->assertStringContainsString( 'Table wp_wpo_otd_custom_statuses is corrupt', $logged[0][1] );
 	}
 
+	/**
+	 * @dataProvider custom_status_failure_provider
+	 */
+	public function test_a_custom_status_change_that_hits_an_error_is_a_server_error( string $method, string $route, ?array $body, string $code, string $message ): void {
+		$id = $this->make( CustomOrderStatusService::class )->create( array( 'label' => 'Packed' ) )->id;
+		$this->throw_on_queries( '/wpo_otd_custom_statuses\b/', new \TypeError( 'Cannot assign null to property' ) );
+
+		$response = $this->request( $method, str_replace( '{status}', (string) $id, $route ), $body );
+
+		$this->assertResponse( 500, $response, $code );
+		$this->assertSame( $message, $response->get_data()['message'] );
+	}
+
 	public function custom_status_failure_provider(): array {
 		return array(
 			'create' => array( 'POST', '/custom-order-statuses', array( 'label' => 'X' ), 'creation_failed', 'Failed to create custom order status.' ),

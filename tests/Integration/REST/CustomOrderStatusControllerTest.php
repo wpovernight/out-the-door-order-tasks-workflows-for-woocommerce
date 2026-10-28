@@ -101,6 +101,52 @@ class CustomOrderStatusControllerTest extends RestTestCase {
 		$this->assertResponse( 404, $this->request( 'PUT', '/custom-order-statuses/999999', array( 'label' => 'Ghost' ) ), 'not_found' );
 	}
 
+	/**
+	 * @dataProvider null_update_provider
+	 */
+	public function test_updating_a_status_to_null_is_refused( string $field ): void {
+		$id = $this->create_status( 'Packed' );
+
+		$response = $this->request( 'PUT', "/custom-order-statuses/{$id}", array( $field => null ) );
+
+		$this->assertResponse( 400, $response, 'invalid_data' );
+		$this->assertSame( array( "The {$field} field may not be null." ), $response->get_data()['data']['errors'][ $field ] );
+		$this->assertSame( 'Packed', $this->make( CustomOrderStatusService::class )->find( $id )->label );
+	}
+
+	public function null_update_provider(): array {
+		return array(
+			'label'      => array( 'label' ),
+			'status_key' => array( 'status_key' ),
+			'background' => array( 'background' ),
+			'foreground' => array( 'foreground' ),
+		);
+	}
+
+	public function test_updating_a_status_to_a_key_another_status_uses_is_a_conflict(): void {
+		$this->create_status( 'Packed' );
+		$id = $this->create_status( 'Boxed' );
+
+		foreach ( array( 'packed', 'PACKED' ) as $key ) {
+			$response = $this->request( 'PUT', "/custom-order-statuses/{$id}", array( 'status_key' => $key ) );
+
+			$this->assertResponse( 409, $response, 'status_key_taken' );
+			$this->assertSame( 'Another custom order status already uses this status key.', $response->get_data()['message'] );
+		}
+
+		$this->assertSame( 'boxed', $this->make( CustomOrderStatusService::class )->find( $id )->status_key );
+	}
+
+	public function test_a_status_may_keep_its_own_key_or_take_a_free_one(): void {
+		$id = $this->create_status( 'Boxed' );
+
+		$this->assertResponse( 200, $this->request( 'PUT', "/custom-order-statuses/{$id}", array( 'status_key' => 'boxed', 'label' => 'Boxed up' ) ) );
+		$response = $this->request( 'PUT', "/custom-order-statuses/{$id}", array( 'status_key' => 'Shipped_Out' ) );
+
+		$this->assertResponse( 200, $response );
+		$this->assertSame( 'shipped_out', $this->json( $response )['data']['status_key'], 'The key is stored as creating it stores it.' );
+	}
+
 	public function test_reading_a_missing_status(): void {
 		$this->assertResponse( 404, $this->request( 'GET', '/custom-order-statuses/999999' ), 'not_found' );
 	}
@@ -119,6 +165,26 @@ class CustomOrderStatusControllerTest extends RestTestCase {
 			$this->json( $response )['data']
 		);
 		$this->assertNull( $this->make( CustomOrderStatusService::class )->find( $id ) );
+	}
+
+	public function test_a_status_the_database_refuses_to_delete_is_a_server_error(): void {
+		$id      = $this->create_status( 'Packed' );
+		$deleted = array();
+		add_action(
+			'wpo_otd_custom_order_status_deleted',
+			static function ( $status_id ) use ( &$deleted ) {
+				$deleted[] = $status_id;
+			}
+		);
+		add_filter( 'wpo_otd_logging_enabled', '__return_false' );
+		$this->fail_queries( '/^DELETE FROM `\w+wpo_otd_custom_statuses`/' );
+
+		$response = $this->request( 'DELETE', "/custom-order-statuses/{$id}" );
+
+		$this->assertResponse( 500, $response, 'deletion_failed' );
+		$this->assertSame( 'Failed to delete custom order status.', $response->get_data()['message'] );
+		$this->assertSame( array(), $deleted );
+		$this->assertNotNull( $this->make( CustomOrderStatusService::class )->find( $id ) );
 	}
 
 	public function test_deleting_a_missing_status_is_not_found(): void {

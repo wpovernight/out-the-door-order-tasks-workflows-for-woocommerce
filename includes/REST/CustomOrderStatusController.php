@@ -7,6 +7,7 @@ use WP_REST_Response;
 use WP_REST_Server;
 use WP_Error;
 use WPO\OTD\Core\Logger;
+use WPO\OTD\Exceptions\StatusKeyTakenException;
 use WPO\OTD\Services\CustomOrderStatusService;
 
 defined( 'ABSPATH' ) || exit;
@@ -130,7 +131,7 @@ class CustomOrderStatusController extends BaseRestController {
 
 		try {
 			$new_status = $custom_order_status_service->create( $data );
-		} catch ( \Exception $e ) {
+		} catch ( \Throwable $e ) {
 			Logger::error( 'Custom order status creation failed: ' . $e->getMessage() );
 			return new WP_Error( 'creation_failed', __( 'Failed to create custom order status.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 500 ) );
 		}
@@ -178,11 +179,12 @@ class CustomOrderStatusController extends BaseRestController {
 
 		$data = $request->get_json_params();
 
+		// Null is refused: a status keeps a label, a key and colors.
 		$errors = $this->validate( $data, array(
-			'label'      => 'string|max:255',
-			'status_key' => 'string|max:64|regex:/^[a-z0-9_-]+$/i',
-			'background' => 'string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
-			'foreground' => 'string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
+			'label'      => 'not_null|string|max:255',
+			'status_key' => 'not_null|string|max:64|regex:/^[a-z0-9_-]+$/i',
+			'background' => 'not_null|string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
+			'foreground' => 'not_null|string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
 		) );
 
 		if ( ! empty( $errors ) ) {
@@ -198,7 +200,9 @@ class CustomOrderStatusController extends BaseRestController {
 			$updated_status = $custom_order_status_service->update( $id, $data );
 		} catch ( \InvalidArgumentException $e ) {
 			return new WP_Error( 'not_found', $e->getMessage(), array( 'status' => 404 ) );
-		} catch ( \Exception $e ) {
+		} catch ( StatusKeyTakenException $e ) {
+			return new WP_Error( 'status_key_taken', $e->getMessage(), array( 'status' => 409 ) );
+		} catch ( \Throwable $e ) {
 			Logger::error( 'Custom order status update failed: ' . $e->getMessage() );
 			return new WP_Error( 'update_failed', __( 'Failed to update custom order status.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 500 ) );
 		}
@@ -227,7 +231,7 @@ class CustomOrderStatusController extends BaseRestController {
 
 		try {
 			$outcome = $custom_order_status_service->begin_deletion( $id );
-		} catch ( \Exception $e ) {
+		} catch ( \Throwable $e ) {
 			Logger::error( 'Custom order status deletion failed: ' . $e->getMessage() );
 			return new WP_Error( 'deletion_failed', __( 'Failed to delete custom order status.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 500 ) );
 		}

@@ -1787,7 +1787,7 @@
                 "1"
               ]
             },
-            "description": "Updates a custom order status. Every body key is optional, with the same rules as when creating one.\n\nBody: label, status_key, background, foreground. foreground is not stored; it is worked out from background.\n\nErrors: 400 invalid_id, 400 invalid_data, 404 not_found, 500 update_failed."
+            "description": "Updates a custom order status. Every body key is optional, with the same rules as when creating one, and none may be null.\n\nBody: label, status_key, background, foreground. status_key is stored lowercase and must not be another status's key. foreground is not stored; it is worked out from background.\n\nErrors: 400 invalid_id, 400 invalid_data, 404 not_found, 409 status_key_taken, 500 update_failed."
           },
           "response": [
             {

@@ -85,7 +85,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 
 		$this->service->update( $status->id, array( 'is_deleting' => true, 'label' => 'Boxed' ) );
 
-		$this->assertFalse( $this->service->find( $status->id )->is_deleting, 'Only request_deletion() starts a deletion.' );
+		$this->assertFalse( $this->service->find( $status->id )->is_deleting, 'Only a deletion request flags a deletion.' );
 		$this->assertSame( 'Boxed', $this->service->find( $status->id )->label );
 	}
 
@@ -225,6 +225,38 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 
 		$this->assertTrue( $this->service->request_deletion( $status->id ), 'A second request is accepted.' );
 		$this->assertCount( 1, as_get_scheduled_actions( array( 'hook' => self::REASSIGN_HOOK, 'status' => 'pending' ), 'ids' ), '...without scheduling again.' );
+	}
+
+	public function test_a_status_the_database_refuses_to_flag_is_not_scheduled(): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$this->order_in( 'packed' );
+		$this->fail_queries( '/^UPDATE `\w+wpo_otd_custom_statuses`/' );
+
+		try {
+			$this->service->begin_deletion( $status->id );
+			$this->fail( 'A status that could not be flagged must not be reported as scheduled.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( "Custom order status {$status->id} could not be flagged for deletion", $e->getMessage() );
+		}
+
+		$this->assertFalse( $this->service->find( $status->id )->is_deleting );
+		$this->assertFalse( as_has_scheduled_action( self::REASSIGN_HOOK ) );
+	}
+
+	public function test_a_status_the_database_refuses_to_delete_is_not_announced_as_deleted(): void {
+		$status  = $this->service->create( array( 'label' => 'Packed' ) );
+		$deleted = $this->capture_deletions();
+		$this->fail_queries( '/^DELETE FROM `\w+wpo_otd_custom_statuses`/' );
+
+		try {
+			$this->service->begin_deletion( $status->id );
+			$this->fail( 'A status that could not be deleted must not be reported as deleted.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( "Custom order status {$status->id} could not be deleted", $e->getMessage() );
+		}
+
+		$this->assertSame( array(), $deleted() );
+		$this->assertNotNull( $this->service->find( $status->id ) );
 	}
 
 	public function test_the_last_batch_moves_the_orders_and_deletes_the_status(): void {
