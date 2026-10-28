@@ -211,7 +211,7 @@
                 "tasks"
               ]
             },
-            "description": "Creates a task.\n\nBody: title (required string, at most 255 characters, not empty once markup and whitespace are stripped), description (optional string), field_values (optional array of {field_id, value}; a field_slug sent with them is ignored).\n\nErrors: 400 invalid_body (the body is missing or not a JSON object), 400 rest_missing_callback_param (no title), 400 rest_invalid_param (title or description not a string), 400 invalid_data (errors listed per field in data.errors), 500 task_creation_failed, 500 task_created_with_error (the task exists; data.task_id holds its ID, so do not create it again)."
+            "description": "Creates a task.\n\nBody: title (required string, at most 255 characters, not empty once markup and whitespace are stripped), description (optional string), field_values (optional array of {field_id, value}; a field_slug sent with them is ignored).\n\nErrors: 400 invalid_body (the body is not a JSON object), 400 rest_missing_callback_param (no title), 400 rest_invalid_param (title or description not a string), 400 invalid_data (errors listed per field in data.errors), 500 task_creation_failed, 500 task_created_with_error (the task exists; data.task_id holds its ID, so do not create it again)."
           },
           "response": [
             {

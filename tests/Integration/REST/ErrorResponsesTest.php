@@ -108,6 +108,31 @@ class ErrorResponsesTest extends RestTestCase {
 		);
 	}
 
+	/**
+	 * @dataProvider form_body_provider
+	 */
+	public function test_a_form_encoded_body_is_a_bad_request( string $method, string $route, array $fields ): void {
+		$request = new \WP_REST_Request( $method, self::NAMESPACE . $this->fill_route( $route ) );
+		$request->set_header( 'Content-Type', 'application/x-www-form-urlencoded' );
+		$request->set_body( http_build_query( $fields ) );
+		$request->set_body_params( $fields );
+
+		$response = rest_do_request( $request );
+
+		$this->assertResponse( 400, $response, 'invalid_body' );
+		$this->assertSame( 'The request body must be a JSON object.', $response->get_data()['message'] );
+	}
+
+	public function form_body_provider(): array {
+		return array(
+			// The title satisfies the route's required argument, so the handler itself refuses the body.
+			'create task'          => array( 'POST', '/tasks', array( 'title' => 'X' ) ),
+			'update task'          => array( 'PUT', '/tasks/{task}', array( 'title' => 'X' ) ),
+			'update status roles'  => array( 'PUT', '/tasks/status-roles', array( 'done' => '1' ) ),
+			'create custom status' => array( 'POST', '/custom-order-statuses', array( 'label' => 'X' ) ),
+		);
+	}
+
 	public function test_an_empty_json_object_is_a_body(): void {
 		$response = $this->raw_request( 'PUT', '/tasks/status-roles', '{}' );
 
