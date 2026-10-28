@@ -92,7 +92,7 @@
                 }
               ]
             },
-            "description": "Returns one task with its fields.\n\nQuery: include_fields (optional, default true; send 0 to leave the fields out).\n\nErrors: 400 invalid_id, 404 not_found, 500 fetch_failed."
+            "description": "Returns one task with its fields.\n\nQuery: include_fields (optional boolean, default true; send false or 0 to leave the fields out).\n\nErrors: 400 invalid_id, 400 rest_invalid_param (include_fields is not true, false, 1 or 0), 404 not_found, 500 fetch_failed."
           },
           "response": [
             {

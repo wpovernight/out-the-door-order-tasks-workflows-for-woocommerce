@@ -97,7 +97,16 @@ class TaskController extends BaseRestController {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_item' ),
 					'permission_callback' => array( $this, 'check_permissions' ),
-					'args'                => rest_get_endpoint_args_for_schema( $this->get_task_schema(), WP_REST_Server::READABLE ),
+					'args'                => array_merge(
+						rest_get_endpoint_args_for_schema( $this->get_task_schema(), WP_REST_Server::READABLE ),
+						array(
+							'include_fields' => array(
+								'description' => __( 'Whether the task comes with its fields.', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
+								'type'        => 'boolean',
+								'default'     => true,
+							),
+						)
+					),
 					'schema'              => array( $this, 'get_task_schema' ),
 				),
 				array(
@@ -407,7 +416,7 @@ class TaskController extends BaseRestController {
 	 */
 	public function get_item( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$id             = (int) $this->url_param( $request, 'id' );
-		$include_fields = $request->get_param( 'include_fields' ) ?? true;
+		$include_fields = rest_sanitize_boolean( $request->get_param( 'include_fields' ) ?? true );
 
 		if ( $id <= 0 ) {
 			return new WP_Error( 'invalid_id', 'Invalid task ID provided', array( 'status' => 400 ) );

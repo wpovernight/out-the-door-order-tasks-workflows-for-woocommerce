@@ -158,13 +158,48 @@ class TaskControllerTest extends RestTestCase {
 		$this->assertTrue( $data['prepared'] );
 	}
 
-	public function test_reading_a_task_without_its_fields(): void {
+	/**
+	 * @dataProvider include_fields_provider
+	 */
+	public function test_include_fields_is_read_as_a_boolean( ?string $value, bool $included ): void {
 		$id = $this->create_task( 'Bare' );
 
-		$data = $this->json( $this->request( 'GET', "/tasks/{$id}", null, array( 'include_fields' => '0' ) ) )['data'];
+		$query    = null === $value ? array() : array( 'include_fields' => $value );
+		$response = $this->request( 'GET', "/tasks/{$id}", null, $query );
 
+		$this->assertResponse( 200, $response );
+		$data = $this->json( $response )['data'];
 		$this->assertSame( 'Bare', $data['title'] );
-		$this->assertArrayNotHasKey( 'fields', $data );
+		$this->assertSame( $included, array_key_exists( 'fields', $data ) );
+	}
+
+	public function include_fields_provider(): array {
+		return array(
+			'absent'  => array( null, true ),
+			'"true"'  => array( 'true', true ),
+			'"1"'     => array( '1', true ),
+			'"false"' => array( 'false', false ),
+			'"FALSE"' => array( 'FALSE', false ),
+			'"0"'     => array( '0', false ),
+		);
+	}
+
+	/**
+	 * @dataProvider invalid_include_fields_provider
+	 */
+	public function test_include_fields_that_is_not_a_boolean_is_refused( string $value ): void {
+		$id = $this->create_task( 'Bare' );
+
+		$this->assertResponse( 400, $this->request( 'GET', "/tasks/{$id}", null, array( 'include_fields' => $value ) ), 'rest_invalid_param' );
+	}
+
+	public function invalid_include_fields_provider(): array {
+		return array(
+			'a word'   => array( 'maybe' ),
+			'"2"'      => array( '2' ),
+			'"yes"'    => array( 'yes' ),
+			'an empty' => array( '' ),
+		);
 	}
 
 	public function test_reading_a_missing_task(): void {
