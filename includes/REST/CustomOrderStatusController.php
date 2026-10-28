@@ -117,12 +117,13 @@ class CustomOrderStatusController extends BaseRestController {
 			return $data;
 		}
 
-		$errors = $this->with_empty_key_error( $data, $this->validate( $data, array(
+		$errors = $this->validate( $data, array(
 			'label'      => 'required|string|max:255',
 			'status_key' => 'string|max:64|regex:/^[a-z0-9_-]*[a-z0-9][a-z0-9_-]*$/i',
 			'background' => 'string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
 			'foreground' => 'string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
-		) ), true );
+		) );
+		$errors = $this->with_empty_key_error( $data, $errors, true );
 
 		if ( ! empty( $errors ) ) {
 			return new WP_Error( 'invalid_data', __( 'Invalid data provided', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array(
@@ -219,12 +220,13 @@ class CustomOrderStatusController extends BaseRestController {
 		}
 
 		// Null is refused: a status keeps a label, a key and colors.
-		$errors = $this->with_empty_key_error( $data, $this->validate( $data, array(
+		$errors = $this->validate( $data, array(
 			'label'      => 'not_null|string|max:255',
 			'status_key' => 'not_null|string|max:64|regex:/^[a-z0-9_-]*[a-z0-9][a-z0-9_-]*$/i',
 			'background' => 'not_null|string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
 			'foreground' => 'not_null|string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
-		) ), false );
+		) );
+		$errors = $this->with_empty_key_error( $data, $errors, false );
 
 		if ( ! empty( $errors ) ) {
 			return new WP_Error( 'invalid_data', __( 'Invalid data provided', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array(
