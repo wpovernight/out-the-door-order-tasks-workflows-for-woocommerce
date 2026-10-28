@@ -1717,7 +1717,7 @@
                 "custom-order-statuses"
               ]
             },
-            "description": "Creates a custom order status.\n\nBody: label (required, at most 255 characters), status_key (optional; letters, digits, - and _; at most 64; made from the label when left out), background and foreground (optional, #rgb or #rrggbb). foreground is not stored; it is worked out from background.\n\nErrors: 400 invalid_body (the body is missing or not a JSON object), 400 invalid_data, 500 creation_failed."
+            "description": "Creates a custom order status.\n\nBody: label (required, at most 255 characters), status_key (optional; letters, digits, - and _, with at least one letter or digit; at most 64; made from the label when left out, which then needs a letter or digit), background and foreground (optional, #rgb or #rrggbb). foreground is not stored; it is worked out from background.\n\nErrors: 400 invalid_body (the body is missing or not a JSON object), 400 invalid_data, 500 creation_failed."
           },
           "response": [
             {

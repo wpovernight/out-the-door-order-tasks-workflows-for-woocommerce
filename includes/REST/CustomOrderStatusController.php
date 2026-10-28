@@ -117,12 +117,12 @@ class CustomOrderStatusController extends BaseRestController {
 			return $data;
 		}
 
-		$errors = $this->validate( $data, array(
+		$errors = $this->with_empty_key_error( $data, $this->validate( $data, array(
 			'label'      => 'required|string|max:255',
-			'status_key' => 'string|max:64|regex:/^[a-z0-9_-]+$/i',
+			'status_key' => 'string|max:64|regex:/^[a-z0-9_-]*[a-z0-9][a-z0-9_-]*$/i',
 			'background' => 'string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
 			'foreground' => 'string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
-		) );
+		) ), true );
 
 		if ( ! empty( $errors ) ) {
 			return new WP_Error( 'invalid_data', __( 'Invalid data provided', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array(
@@ -141,6 +141,37 @@ class CustomOrderStatusController extends BaseRestController {
 		}
 
 		return $this->respond( $new_status );
+	}
+
+	/**
+	 * Add a status_key error when the key the status would get is empty once sanitized, which would store an empty key.
+	 *
+	 * The key is the one sent or, when a status is created without one, the one made from its label.
+	 *
+	 * @param array<string, mixed>    $data
+	 * @param array<string, string[]> $errors   The errors the rules found.
+	 * @param bool                    $creating Whether the status is being created.
+	 *
+	 * @return array<string, string[]>
+	 */
+	private function with_empty_key_error( array $data, array $errors, bool $creating ): array {
+		if ( isset( $errors['status_key'] ) ) {
+			return $errors;
+		}
+
+		if ( isset( $data['status_key'] ) && is_string( $data['status_key'] ) && '' !== $data['status_key'] ) {
+			$source = $data['status_key'];
+		} elseif ( $creating && isset( $data['label'] ) && is_string( $data['label'] ) && ! isset( $errors['label'] ) ) {
+			$source = $data['label'];
+		} else {
+			return $errors;
+		}
+
+		if ( '' === sanitize_title( $source ) ) {
+			$errors['status_key'][] = 'The status_key field has no letter or digit to make a status key from.';
+		}
+
+		return $errors;
 	}
 
 	/**
@@ -188,12 +219,12 @@ class CustomOrderStatusController extends BaseRestController {
 		}
 
 		// Null is refused: a status keeps a label, a key and colors.
-		$errors = $this->validate( $data, array(
+		$errors = $this->with_empty_key_error( $data, $this->validate( $data, array(
 			'label'      => 'not_null|string|max:255',
-			'status_key' => 'not_null|string|max:64|regex:/^[a-z0-9_-]+$/i',
+			'status_key' => 'not_null|string|max:64|regex:/^[a-z0-9_-]*[a-z0-9][a-z0-9_-]*$/i',
 			'background' => 'not_null|string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
 			'foreground' => 'not_null|string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
-		) );
+		) ), false );
 
 		if ( ! empty( $errors ) ) {
 			return new WP_Error( 'invalid_data', __( 'Invalid data provided', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array(

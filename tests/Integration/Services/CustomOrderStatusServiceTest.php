@@ -243,6 +243,40 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		$this->assertFalse( as_has_scheduled_action( self::REASSIGN_HOOK ) );
 	}
 
+	public function test_a_deletion_whose_last_batch_failed_is_scheduled_again(): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$this->order_in( 'packed' );
+
+		$this->assertSame( CustomOrderStatusService::DELETION_SCHEDULED, $this->service->begin_deletion( $status->id ) );
+
+		// The job runs, moves the orders, then fails to delete the row; Action Scheduler marks it failed.
+		as_unschedule_all_actions( self::REASSIGN_HOOK );
+		$this->fail_queries( '/^DELETE FROM `\w+wpo_otd_custom_statuses`/' );
+		try {
+			$this->service->process_deletion_batch( 'packed', 'on-hold', $status->id );
+			$this->fail( 'The last batch must fail when the row cannot be deleted.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertTrue( $this->service->find( $status->id )->is_deleting, 'The status stays flagged.' );
+		}
+		$this->assertFalse( as_has_scheduled_action( self::REASSIGN_HOOK ) );
+
+		$this->assertSame( CustomOrderStatusService::DELETION_SCHEDULED, $this->service->begin_deletion( $status->id, 'processing' ) );
+		$this->assertTrue( as_has_scheduled_action( self::REASSIGN_HOOK, array( 'packed', 'processing', $status->id ), 'wpo-otd' ) );
+
+		$this->service->begin_deletion( $status->id );
+		$this->assertCount( 1, as_get_scheduled_actions( array( 'hook' => self::REASSIGN_HOOK, 'status' => 'pending' ), 'ids' ), 'A pending job is not doubled, whatever its fallback.' );
+	}
+
+	public function test_a_job_for_another_status_does_not_count_as_this_ones(): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $status->id );
+		as_schedule_single_action( time(), self::REASSIGN_HOOK, array( 'other', 'on-hold', $status->id + 1 ), 'wpo-otd' );
+
+		$this->service->begin_deletion( $status->id );
+
+		$this->assertTrue( as_has_scheduled_action( self::REASSIGN_HOOK, array( 'packed', 'on-hold', $status->id ), 'wpo-otd' ) );
+	}
+
 	public function test_a_status_the_database_refuses_to_delete_is_not_announced_as_deleted(): void {
 		$status  = $this->service->create( array( 'label' => 'Packed' ) );
 		$deleted = $this->capture_deletions();

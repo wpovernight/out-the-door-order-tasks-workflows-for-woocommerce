@@ -369,6 +369,16 @@ class CustomOrderStatusService {
 		}
 
 		if ( $status->is_deleting ) {
+			// A batch job that failed leaves the status flagged with nothing left to finish its deletion.
+			if ( ! $this->has_deletion_job( $status->status_key, $id ) ) {
+				as_schedule_single_action(
+					time(),
+					'wpo_otd_reassign_orders',
+					array( $status->status_key, $fallback_status, $id ),
+					'wpo-otd'
+				);
+			}
+
 			return self::DELETION_SCHEDULED;
 		}
 
@@ -404,6 +414,35 @@ class CustomOrderStatusService {
 		);
 
 		return self::DELETION_SCHEDULED;
+	}
+
+	/**
+	 * Whether a batch job for a status's deletion is pending or running, whatever fallback status it moves orders to.
+	 *
+	 * @param string $status_key
+	 * @param int    $id
+	 *
+	 * @return bool
+	 */
+	private function has_deletion_job( string $status_key, int $id ): bool {
+		$actions = as_get_scheduled_actions(
+			array(
+				'hook'     => 'wpo_otd_reassign_orders',
+				'group'    => 'wpo-otd',
+				'status'   => array( \ActionScheduler_Store::STATUS_PENDING, \ActionScheduler_Store::STATUS_RUNNING ),
+				'per_page' => -1,
+			)
+		);
+
+		foreach ( $actions as $action ) {
+			$args = $action->get_args();
+
+			if ( ( $args[0] ?? null ) === $status_key && (int) ( $args[2] ?? 0 ) === $id ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

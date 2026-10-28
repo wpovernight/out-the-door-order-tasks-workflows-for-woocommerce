@@ -66,6 +66,51 @@ class CustomOrderStatusControllerTest extends RestTestCase {
 		);
 	}
 
+	/**
+	 * @dataProvider keyless_key_provider
+	 */
+	public function test_a_key_without_a_letter_or_digit_is_refused( string $key ): void {
+		$created = $this->request( 'POST', '/custom-order-statuses', array( 'label' => 'Packed', 'status_key' => $key ) );
+
+		$this->assertResponse( 400, $created, 'invalid_data' );
+		$this->assertArrayHasKey( 'status_key', $created->get_data()['data']['errors'] );
+
+		$id      = $this->create_status( 'Boxed' );
+		$updated = $this->request( 'PUT', "/custom-order-statuses/{$id}", array( 'status_key' => $key ) );
+
+		$this->assertResponse( 400, $updated, 'invalid_data' );
+		$this->assertArrayHasKey( 'status_key', $updated->get_data()['data']['errors'] );
+		$this->assertSame( 'boxed', $this->make( CustomOrderStatusService::class )->find( $id )->status_key );
+	}
+
+	public function keyless_key_provider(): array {
+		return array(
+			'a dash'      => array( '-' ),
+			'two dashes'  => array( '--' ),
+			'underscores' => array( '__' ),
+			'mixed'       => array( '-_-' ),
+		);
+	}
+
+	public function test_a_key_with_a_letter_or_digit_among_dashes_is_accepted(): void {
+		$response = $this->request( 'POST', '/custom-order-statuses', array( 'label' => 'Packed', 'status_key' => '-7-' ) );
+
+		$this->assertResponse( 200, $response );
+		$this->assertSame( '7', $this->json( $response )['data']['status_key'] );
+	}
+
+	public function test_a_label_that_makes_no_key_needs_one(): void {
+		$response = $this->request( 'POST', '/custom-order-statuses', array( 'label' => '***' ) );
+
+		$this->assertResponse( 400, $response, 'invalid_data' );
+		$this->assertSame(
+			array( 'The status_key field has no letter or digit to make a status key from.' ),
+			$response->get_data()['data']['errors']['status_key']
+		);
+
+		$this->assertResponse( 200, $this->request( 'POST', '/custom-order-statuses', array( 'label' => '***', 'status_key' => 'starred' ) ) );
+	}
+
 	public function test_listing_statuses_in_full_or_by_page(): void {
 		foreach ( array( 'A', 'B', 'C' ) as $label ) {
 			$this->request( 'POST', '/custom-order-statuses', array( 'label' => $label ) );
