@@ -3,6 +3,7 @@
 namespace WPO\OTD\Tests\Integration\REST;
 
 use WPO\OTD\Enums\DefaultTaskFields;
+use WPO\OTD\Services\CustomOrderStatusService;
 use WPO\OTD\Services\TaskManagerService;
 
 /**
@@ -61,7 +62,10 @@ class ErrorResponsesTest extends RestTestCase {
 		// LogicException is neither the InvalidArgumentException nor the RuntimeException some endpoints map to 4xx.
 		$this->throw_on_queries( "/wpo_otd_{$table}\\b/", new \LogicException( 'Database unavailable' ) );
 
-		$this->assertResponse( 500, $this->request( $method, $route, $body ), $code );
+		$response = $this->request( $method, $route, $body );
+
+		$this->assertResponse( 500, $response, $code );
+		$this->assertStringNotContainsString( 'Database unavailable', $response->get_data()['message'], 'The cause is logged, not answered.' );
 	}
 
 	public function failure_provider(): array {
@@ -86,6 +90,42 @@ class ErrorResponsesTest extends RestTestCase {
 			'create custom status' => array( 'POST', '/custom-order-statuses', array( 'label' => 'X' ), 'custom_statuses', 'creation_failed' ),
 			'update custom status' => array( 'PUT', '/custom-order-statuses/1', array( 'label' => 'X' ), 'custom_statuses', 'update_failed' ),
 			'delete custom status' => array( 'DELETE', '/custom-order-statuses/1', null, 'custom_statuses', 'deletion_failed' ),
+		);
+	}
+
+	/**
+	 * @dataProvider custom_status_failure_provider
+	 */
+	public function test_a_failed_custom_status_change_answers_a_generic_message_and_logs_the_cause( string $method, string $route, ?array $body, string $code, string $message ): void {
+		$logged = array();
+		add_filter(
+			'wpo_otd_logging_enabled',
+			static function ( $enabled, $level, $text ) use ( &$logged ) {
+				$logged[] = array( $level, $text );
+
+				return false;
+			},
+			20,
+			3
+		);
+
+		$id = $this->make( CustomOrderStatusService::class )->create( array( 'label' => 'Packed' ) )->id;
+		$this->throw_on_queries( '/wpo_otd_custom_statuses\b/', new \RuntimeException( 'Table wp_wpo_otd_custom_statuses is corrupt' ) );
+
+		$response = $this->request( $method, str_replace( '{status}', (string) $id, $route ), $body );
+
+		$this->assertResponse( 500, $response, $code );
+		$this->assertSame( $message, $response->get_data()['message'] );
+		$this->assertCount( 1, $logged );
+		$this->assertSame( 'error', $logged[0][0] );
+		$this->assertStringContainsString( 'Table wp_wpo_otd_custom_statuses is corrupt', $logged[0][1] );
+	}
+
+	public function custom_status_failure_provider(): array {
+		return array(
+			'create' => array( 'POST', '/custom-order-statuses', array( 'label' => 'X' ), 'creation_failed', 'Failed to create custom order status.' ),
+			'update' => array( 'PUT', '/custom-order-statuses/{status}', array( 'label' => 'X' ), 'update_failed', 'Failed to update custom order status.' ),
+			'delete' => array( 'DELETE', '/custom-order-statuses/{status}', null, 'deletion_failed', 'Failed to delete custom order status.' ),
 		);
 	}
 

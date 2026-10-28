@@ -132,7 +132,7 @@ class CustomOrderStatusController extends BaseRestController {
 			$new_status = $custom_order_status_service->create( $data );
 		} catch ( \Exception $e ) {
 			Logger::error( 'Custom order status creation failed: ' . $e->getMessage() );
-			return new WP_Error( 'creation_failed', $e->getMessage(), array( 'status' => 500 ) );
+			return new WP_Error( 'creation_failed', __( 'Failed to create custom order status.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 500 ) );
 		}
 
 		return $this->respond( $new_status );
@@ -200,7 +200,7 @@ class CustomOrderStatusController extends BaseRestController {
 			return new WP_Error( 'not_found', $e->getMessage(), array( 'status' => 404 ) );
 		} catch ( \Exception $e ) {
 			Logger::error( 'Custom order status update failed: ' . $e->getMessage() );
-			return new WP_Error( 'update_failed', $e->getMessage(), array( 'status' => 500 ) );
+			return new WP_Error( 'update_failed', __( 'Failed to update custom order status.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 500 ) );
 		}
 
 		return $this->respond( $updated_status );
@@ -229,7 +229,7 @@ class CustomOrderStatusController extends BaseRestController {
 			$outcome = $custom_order_status_service->begin_deletion( $id );
 		} catch ( \Exception $e ) {
 			Logger::error( 'Custom order status deletion failed: ' . $e->getMessage() );
-			return new WP_Error( 'deletion_failed', $e->getMessage(), array( 'status' => 500 ) );
+			return new WP_Error( 'deletion_failed', __( 'Failed to delete custom order status.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 500 ) );
 		}
 
 		if ( CustomOrderStatusService::DELETION_NOT_FOUND === $outcome ) {
