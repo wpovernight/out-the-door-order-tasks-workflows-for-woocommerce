@@ -697,6 +697,8 @@ abstract class BaseRepository {
 	/**
 	 * Save the model (insert or update based on presence of ID).
 	 *
+	 * On a table with timestamps, a saved model takes the timestamps the write stamped, so it matches the row.
+	 *
 	 * @template TModel of BaseModel
 	 * @param TModel $model
 	 *
@@ -705,9 +707,39 @@ abstract class BaseRepository {
 	 * @throws RuntimeException
 	 */
 	public function save( BaseModel $model ): int|false {
-		return $model->id
-			? $this->where( 'id', $model->id )->update( $model->to_db_array() )
-			: $this->insert( $model->to_db_array() );
+		$inserting = ! $model->id;
+		$data      = $this->stamp( $model->to_db_array(), $inserting );
+
+		$result = $inserting
+			? $this->insert( $data )
+			: $this->where( 'id', $model->id )->update( $data );
+
+		if ( false !== $result && $this->timestamps ) {
+			foreach ( array( 'created_at', 'updated_at' ) as $column ) {
+				if ( isset( $data[ $column ] ) && property_exists( $model, $column ) ) {
+					$model->{$column} = new \DateTime( (string) $data[ $column ], new \DateTimeZone( 'UTC' ) );
+				}
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Stamp a row's updated_at with the current UTC time, for a change to it that is stored elsewhere.
+	 *
+	 * @param int $id
+	 *
+	 * @return int|false Number of rows stamped, 0 when no row has the ID or it was stamped this second already, or
+	 *                   false on error.
+	 * @throws \LogicException If the table has no timestamps.
+	 */
+	public function touch( int $id ): int|false {
+		if ( ! $this->timestamps ) {
+			throw $this->discard( new \LogicException( 'Only a table with timestamps can be touched.' ) );
+		}
+
+		return $this->where( $this->primary_key, $id )->update( array( 'updated_at' => gmdate( 'Y-m-d H:i:s' ) ) );
 	}
 
 	/**

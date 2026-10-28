@@ -303,6 +303,81 @@ class TaskControllerTest extends RestTestCase {
 		$this->assertNotNull( $this->make( TaskManagerService::class )->get_task( $id ) );
 	}
 
+	public function test_updating_a_task_answers_and_announces_its_new_updated_at(): void {
+		$id = $this->create_task( 'Before' );
+		$this->age_task( $id );
+
+		$announced = array();
+		add_action(
+			'wpo_otd_task_updated',
+			static function ( $task_id, $task ) use ( &$announced ) {
+				$announced[] = $task['updated_at'];
+			},
+			10,
+			2
+		);
+
+		$since    = time();
+		$response = $this->request( 'PUT', "/tasks/{$id}", array( 'title' => 'After' ) );
+
+		$this->assertResponse( 200, $response );
+		$data = $this->json( $response )['data'];
+		$this->assertSame( '2020-01-02T03:04:05+00:00', $data['created_at'] );
+		$this->assertGreaterThanOrEqual( $since, strtotime( $data['updated_at'] ) );
+		$this->assertSame( array( $data['updated_at'] ), $announced );
+		$this->assert_task_touched_since( $id, $since );
+	}
+
+	/**
+	 * @dataProvider status_change_provider
+	 */
+	public function test_a_status_change_stamps_updated_at( string $action ): void {
+		$id = $this->create_task( 'Changing' );
+
+		if ( 'unarchive' === $action ) {
+			$this->make( TaskManagerService::class )->archive_task( $id );
+		}
+
+		$this->age_task( $id );
+		$body  = 'move' === $action ? array( 'target_status_id' => $this->status_option_id( 'in_progress' ) ) : null;
+		$since = time();
+
+		$this->assertResponse( 200, $this->request( 'POST', "/tasks/{$id}/{$action}", $body ) );
+		$this->assert_task_touched_since( $id, $since );
+	}
+
+	public function status_change_provider(): array {
+		return array(
+			'move'      => array( 'move' ),
+			'finish'    => array( 'finish' ),
+			'archive'   => array( 'archive' ),
+			'unarchive' => array( 'unarchive' ),
+		);
+	}
+
+	public function test_a_move_still_succeeds_when_updated_at_cannot_be_stamped(): void {
+		$id     = $this->create_task( 'Moving' );
+		$logged = array();
+		add_filter(
+			'wpo_otd_logging_enabled',
+			static function ( $enabled, $level, $text ) use ( &$logged ) {
+				$logged[] = $text;
+
+				return false;
+			},
+			10,
+			3
+		);
+		$this->fail_queries( '/^UPDATE `\w+wpo_otd_tasks`/' );
+
+		$response = $this->request( 'POST', "/tasks/{$id}/move", array( 'target_status_id' => $this->status_option_id( 'in_progress' ) ) );
+
+		$this->assertResponse( 200, $response );
+		$this->assertSame( (string) $this->status_option_id( 'in_progress' ), $this->field_value( $id, DefaultTaskFields::STATUS ) );
+		$this->assertCount( 1, $logged );
+		$this->assertStringContainsString( "Task {$id} changed, but its updated_at could not be stamped", $logged[0] );
+	}
+
 	/** ================================
 	 *   Moving, finishing, archiving
 	 *  ================================ */

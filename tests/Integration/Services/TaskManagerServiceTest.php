@@ -1151,6 +1151,37 @@ class TaskManagerServiceTest extends IntegrationTestCase {
 		$this->assertSame( array( '11' ), $this->field_values( $id, DefaultTaskFields::ORDER ) );
 	}
 
+	public function test_a_changed_field_value_stamps_the_tasks_updated_at(): void {
+		$id = $this->create_task( 'Values', $this->status_option_id( 'not_started' ) );
+		$this->service->set_field_value( $id, DefaultTaskFields::ORDER, 10 );
+
+		$this->age_task( $id );
+		$since = time();
+		$this->assertTrue( $this->service->set_field_value( $id, DefaultTaskFields::ORDER, 11 ) );
+		$this->assert_task_touched_since( $id, $since );
+
+		$this->age_task( $id );
+		$since = time();
+		$this->assertTrue( $this->service->update_field_values( $id, array( DefaultTaskFields::ORDER => 12 ) ) );
+		$this->assert_task_touched_since( $id, $since );
+	}
+
+	public function test_a_field_value_saved_unchanged_leaves_updated_at_alone(): void {
+		global $wpdb;
+
+		$id = $this->create_task( 'Values', $this->status_option_id( 'not_started' ) );
+		$this->service->set_field_value( $id, DefaultTaskFields::ORDER, 10 );
+		$this->age_task( $id );
+
+		$this->assertTrue( $this->service->set_field_value( $id, DefaultTaskFields::ORDER, 10 ) );
+		$this->assertTrue( $this->service->update_field_values( $id, array( DefaultTaskFields::ORDER => 10 ) ) );
+
+		$this->assertSame(
+			self::AGED,
+			$wpdb->get_var( $wpdb->prepare( "SELECT updated_at FROM {$this->table( 'tasks' )} WHERE id = %d", $id ) ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		);
+	}
+
 	public function test_set_field_value_serializes_arrays(): void {
 		$id = $this->create_task( 'Values', $this->status_option_id( 'not_started' ) );
 

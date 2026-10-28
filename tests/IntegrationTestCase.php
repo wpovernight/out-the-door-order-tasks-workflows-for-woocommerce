@@ -31,6 +31,11 @@ abstract class IntegrationTestCase extends WP_UnitTestCase {
 	 *
 	 * CREATE / DROP TEMPORARY TABLE are fine: WordPress rewrites the tables a test creates into those.
 	 */
+	/**
+	 * The time age_task() dates a task's timestamps to.
+	 */
+	protected const AGED = '2020-01-02 03:04:05';
+
 	private const IMPLICIT_COMMIT = '/^(ALTER|CREATE(?! TEMPORARY)|DROP(?! TEMPORARY)|RENAME|TRUNCATE|LOCK TABLES?|UNLOCK TABLES?|SET (SESSION |@@)?AUTOCOMMIT|ANALYZE|OPTIMIZE|REPAIR|GRANT|REVOKE)\b/';
 
 	/**
@@ -331,6 +336,46 @@ abstract class IntegrationTestCase extends WP_UnitTestCase {
 		$this->assertNotFalse( $date, "The done date {$stored} is not in the stored format." );
 		$this->assertSame( $stored, $date->format( DefaultTaskFields::DONE_DATE_FORMAT ) );
 		$this->assertEqualsWithDelta( time(), $date->getTimestamp(), 5 );
+	}
+
+	/**
+	 * Date a task's timestamps back to 2020-01-02 03:04:05 UTC, so a later stamp shows.
+	 *
+	 * @param int $task_id
+	 *
+	 * @return void
+	 */
+	protected function age_task( int $task_id ): void {
+		global $wpdb;
+
+		$wpdb->update(
+			$this->table( 'tasks' ),
+			array(
+				'created_at' => self::AGED,
+				'updated_at' => self::AGED,
+			),
+			array( 'id' => $task_id )
+		);
+	}
+
+	/**
+	 * Assert a task's stored updated_at was stamped at or after a Unix time, while created_at stayed aged.
+	 *
+	 * @param int $task_id
+	 * @param int $since
+	 *
+	 * @return void
+	 */
+	protected function assert_task_touched_since( int $task_id, int $since ): void {
+		global $wpdb;
+
+		$row = $wpdb->get_row(
+			$wpdb->prepare( "SELECT created_at, updated_at FROM {$this->table( 'tasks' )} WHERE id = %d", $task_id ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			ARRAY_A
+		);
+
+		$this->assertSame( self::AGED, $row['created_at'] );
+		$this->assertGreaterThanOrEqual( $since, ( new DateTimeImmutable( $row['updated_at'], new DateTimeZone( 'UTC' ) ) )->getTimestamp(), 'updated_at is stamped.' );
 	}
 
 	/**

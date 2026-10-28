@@ -1155,6 +1155,8 @@ final class TaskManagerService {
 			return;
 		}
 
+		$this->touch_task( $task_id );
+
 		$task_with_fields = $this->get_task_with_fields( $task_id );
 
 		if ( null === $task_with_fields ) {
@@ -1310,6 +1312,7 @@ final class TaskManagerService {
 		);
 
 		$this->save_field_values( $task_id, $update_data );
+		$this->touch_task( $task_id );
 
 		/**
 		 * Fires after a task has been moved to a new position.
@@ -1323,6 +1326,21 @@ final class TaskManagerService {
 		do_action( 'wpo_otd_task_moved', $task_id, $target_status_id, $new_position, $updated_fields );
 
 		return $new_position;
+	}
+
+	/**
+	 * Stamp a task's updated_at for a change stored in its field values, which leaves the task's own row alone.
+	 *
+	 * A failure is logged, not thrown: the change itself is saved already.
+	 *
+	 * @param int $task_id
+	 *
+	 * @return void
+	 */
+	private function touch_task( int $task_id ): void {
+		if ( false === $this->task_repository->touch( $task_id ) ) {
+			Logger::error( "Task {$task_id} changed, but its updated_at could not be stamped: " . $this->task_repository->get_last_db_error() );
+		}
 	}
 
 	/**
@@ -1463,6 +1481,8 @@ final class TaskManagerService {
 			) );
 		}
 
+		$this->touch_task( $task_id );
+
 		/**
 		 * Fires after a task has been archived.
 		 *
@@ -1489,6 +1509,7 @@ final class TaskManagerService {
 		}
 
 		$this->task_field_value_repository->delete_by_task_and_field( $task_id, DefaultTaskFields::ARCHIVED_DATE );
+		$this->touch_task( $task_id );
 
 		/**
 		 * Fires after a task has been unarchived.

@@ -835,6 +835,73 @@ class BaseRepositoryTest extends TestCase {
 		$this->assertMatchesRegularExpression( '/^UPDATE ' . self::TABLE . ' SET price = price \+ %d, updated_at = %s WHERE id = %s -- \[1,"[\d: -]{19}","4"\]$/', $queries[1] );
 	}
 
+	public function test_a_saved_model_takes_the_timestamps_the_write_stamped(): void {
+		$written = array();
+		$this->wpdb->shouldReceive( 'insert' )->once()->andReturnUsing(
+			function ( $table, $data ) use ( &$written ) {
+				$written[]             = $data;
+				$this->wpdb->insert_id = 9;
+
+				return 1;
+			}
+		);
+		$this->wpdb->shouldReceive( 'update' )->once()->andReturnUsing(
+			function ( $table, $data ) use ( &$written ) {
+				$written[] = $data;
+
+				return 1;
+			}
+		);
+
+		$repository = new TimestampedGadgetRepository();
+		$model      = new StampedGadget( array( 'id' => 0, 'name' => 'New' ) );
+
+		$this->assertSame( 9, $repository->save( $model ) );
+		$this->assertSame( $written[0]['created_at'], $model->created_at->format( 'Y-m-d H:i:s' ) );
+		$this->assertSame( $written[0]['updated_at'], $model->updated_at->format( 'Y-m-d H:i:s' ) );
+		$this->assertSame( 'UTC', $model->updated_at->getTimezone()->getName() );
+
+		$model->id         = 9;
+		$model->updated_at = new DateTime( '2020-01-02 03:04:05' );
+		$this->assertSame( 1, $repository->save( $model ) );
+		$this->assertArrayNotHasKey( 'created_at', $written[1] );
+		$this->assertSame( $written[1]['updated_at'], $model->updated_at->format( 'Y-m-d H:i:s' ) );
+	}
+
+	public function test_a_model_that_fails_to_save_keeps_its_timestamps(): void {
+		$this->wpdb->shouldReceive( 'update' )->once()->andReturn( false );
+
+		$model             = new StampedGadget( array( 'id' => 4, 'name' => 'Old' ) );
+		$model->updated_at = new DateTime( '2020-01-02 03:04:05' );
+
+		$this->assertFalse( ( new TimestampedGadgetRepository() )->save( $model ) );
+		$this->assertSame( '2020-01-02 03:04:05', $model->updated_at->format( 'Y-m-d H:i:s' ) );
+	}
+
+	public function test_touch_stamps_only_updated_at_of_one_row(): void {
+		$written = null;
+		$this->wpdb->shouldReceive( 'update' )->once()->andReturnUsing(
+			function ( $table, $data, $where ) use ( &$written ) {
+				$written = $data;
+				$this->assertEquals( array( 'id' => 4 ), $where );
+
+				return 1;
+			}
+		);
+
+		$before = time();
+		$this->assertSame( 1, ( new TimestampedGadgetRepository() )->touch( 4 ) );
+		$this->assertSame( array( 'updated_at' ), array_keys( $written ) );
+		$this->assert_utc_now( $before, time(), $written['updated_at'] );
+	}
+
+	public function test_touch_refuses_a_table_without_timestamps(): void {
+		$this->wpdb->shouldNotReceive( 'update' );
+
+		$this->assert_throws( \LogicException::class, fn() => $this->repository->touch( 4 ) );
+		$this->assertSame( 'SELECT * FROM ' . self::TABLE, $this->repository->get_query() );
+	}
+
 	public function test_a_write_that_sets_a_timestamp_itself_is_not_stamped_again(): void {
 		$this->wpdb->shouldReceive( 'update' )
 			->once()
@@ -1431,6 +1498,11 @@ class GadgetRepository extends BaseRepository {
 	public function update_raw_public( string $set_clause, array $bindings ): int|false {
 		return $this->update_raw( $set_clause, $bindings );
 	}
+}
+
+class StampedGadget extends Gadget {
+	public DateTime $created_at;
+	public DateTime $updated_at;
 }
 
 class TimestampedGadgetRepository extends GadgetRepository {
