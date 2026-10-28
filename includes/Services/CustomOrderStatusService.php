@@ -361,10 +361,30 @@ class CustomOrderStatusService {
 	 * @throws InvalidArgumentException If no status has the ID.
 	 * @throws InvalidStatusKeyException If the status key in $data cannot be used.
 	 * @throws StatusKeyTakenException If another status already uses the status key in $data.
-	 * @throws StatusBeingDeletedException If $data changes the status key of a status being deleted.
+	 * @throws StatusBeingDeletedException If $data changes the status key of a status being deleted, or another
+	 *                                     request deleting or changing the status holds it too long.
 	 * @throws RuntimeException If the database does not save the change.
 	 */
 	public function update( int $id, array $data ): CustomOrderStatus {
+		return $this->with_status_lock(
+			$id,
+			fn() => $this->update_locked( $id, $data ),
+			static function (): never {
+				throw new StatusBeingDeletedException( esc_html__( 'Another request is changing or deleting this custom order status. Try again in a moment.', 'out-the-door-order-tasks-workflows-for-woocommerce' ) );
+			}
+		);
+	}
+
+	/**
+	 * The change update() makes, run while it holds the status's lock.
+	 *
+	 * @param int                  $id
+	 * @param array<string, mixed> $data
+	 *
+	 * @return CustomOrderStatus
+	 * @throws InvalidArgumentException|InvalidStatusKeyException|StatusKeyTakenException|StatusBeingDeletedException|RuntimeException As update() does.
+	 */
+	private function update_locked( int $id, array $data ): CustomOrderStatus {
 		$custom_status = $this->repository->find( $id );
 		if ( ! $custom_status ) {
 			throw new InvalidArgumentException( esc_html__( 'Custom order status not found', 'out-the-door-order-tasks-workflows-for-woocommerce' ) );
@@ -396,7 +416,10 @@ class CustomOrderStatusService {
 		}
 
 		$custom_status->fill( $data );
-		$result = $this->repository->save( $custom_status );
+
+		// is_deleting is written by a deletion alone: writing back the value read here could undo one.
+		$columns = array_intersect_key( $custom_status->to_db_array(), array_flip( array( 'status_key', 'label', 'background' ) ) );
+		$result  = $this->repository->where( 'id', $id )->update( $columns );
 
 		if ( false === $result ) {
 			$db_error = $this->repository->get_last_db_error();
@@ -449,23 +472,47 @@ class CustomOrderStatusService {
 	 *                its orders are moved (also when that was already under way), self::DELETION_NOT_FOUND when no
 	 *                status has the ID. While another request is deleting the same status, self::DELETION_SCHEDULED,
 	 *                since that request deletes it or schedules its deletion.
-	 * @throws RuntimeException If the database does not lock, delete or flag the status.
+	 * @throws RuntimeException If the database does not delete or flag the status.
 	 */
 	public function begin_deletion( int $id, string $fallback_status = 'on-hold' ): string {
 		// Two requests deleting the same status at once would both schedule a job.
+		return $this->with_status_lock(
+			$id,
+			fn() => $this->delete_or_schedule( $id, $fallback_status ),
+			static fn() => self::DELETION_SCHEDULED
+		);
+	}
+
+	/**
+	 * Run a change to a custom order status while holding the status's lock, so changes and deletions of it cannot
+	 * interleave.
+	 *
+	 * When the database refuses the lock outright, rather than waiting for it, the change runs without it, which is
+	 * logged: a server that refuses named locks would otherwise block every change.
+	 *
+	 * @template T
+	 * @param int           $id
+	 * @param callable(): T $callback  The change.
+	 * @param callable(): T $when_busy Run instead when another request still holds the lock after the timeout.
+	 *
+	 * @return T
+	 */
+	private function with_status_lock( int $id, callable $callback, callable $when_busy ): mixed {
 		$lock   = "custom_status_deletion_{$id}";
 		$locked = $this->repository->acquire_lock( $lock, self::DELETION_LOCK_TIMEOUT );
 
 		if ( null === $locked ) {
-			throw new RuntimeException( esc_html( "Custom order status {$id} could not be locked for deletion: " . $this->repository->get_last_db_error() ) );
+			Logger::warning( "Custom order status {$id} changes without its lock, which the database refused: " . $this->repository->get_last_db_error() );
+
+			return $callback();
 		}
 
 		if ( ! $locked ) {
-			return self::DELETION_SCHEDULED;
+			return $when_busy();
 		}
 
 		try {
-			return $this->delete_or_schedule( $id, $fallback_status );
+			return $callback();
 		} finally {
 			$this->repository->release_lock( $lock );
 		}

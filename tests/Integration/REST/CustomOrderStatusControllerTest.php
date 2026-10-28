@@ -311,6 +311,36 @@ class CustomOrderStatusControllerTest extends RestTestCase {
 		$this->assertResponse( 200, $this->request( 'PUT', "/custom-order-statuses/{$id}", array( 'status_key' => 'packed', 'label' => 'Packed up' ) ) );
 	}
 
+	public function test_a_put_cannot_clear_the_deletion_flag(): void {
+		$id = $this->create_status( 'Packed' );
+		( new CustomOrderStatusRepository() )->where( 'id', $id )->update( array( 'is_deleting' => 1 ) );
+
+		$response = $this->request( 'PUT', "/custom-order-statuses/{$id}", array( 'label' => 'Boxed', 'is_deleting' => false ) );
+
+		$this->assertResponse( 200, $response );
+		$this->assertTrue( $this->json( $response )['data']['is_deleting'] );
+		$this->assertTrue( $this->make( CustomOrderStatusService::class )->find( $id )->is_deleting );
+	}
+
+	public function test_a_put_while_another_request_holds_the_status_is_a_conflict(): void {
+		$id = $this->create_status( 'Packed' );
+
+		$connection = new \wpdb( DB_USER, DB_PASSWORD, DB_NAME, DB_HOST );
+		$connection->set_prefix( $GLOBALS['wpdb']->prefix );
+		$other = new CustomOrderStatusRepository();
+		( new \ReflectionProperty( $other, 'wpdb' ) )->setValue( $other, $connection );
+		$this->assertTrue( $other->acquire_lock( "custom_status_deletion_{$id}", 0 ) );
+
+		try {
+			$response = $this->request( 'PUT', "/custom-order-statuses/{$id}", array( 'label' => 'Boxed' ) );
+		} finally {
+			$other->release_lock( "custom_status_deletion_{$id}" );
+		}
+
+		$this->assertResponse( 409, $response, 'status_being_deleted' );
+		$this->assertSame( 'Packed', $this->make( CustomOrderStatusService::class )->find( $id )->label );
+	}
+
 	public function test_a_status_may_keep_its_own_key_or_take_a_free_one(): void {
 		$id = $this->create_status( 'Boxed' );
 

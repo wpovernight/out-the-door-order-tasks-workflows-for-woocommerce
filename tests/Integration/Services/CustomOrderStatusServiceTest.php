@@ -415,6 +415,76 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		$this->assertFalse( as_has_scheduled_action( self::REASSIGN_HOOK ) );
 	}
 
+	public function test_an_update_never_writes_the_deletion_flag(): void {
+		$status = $this->service->create( array( 'label' => 'Packed' ) );
+		$this->mark_deleting( $status->id );
+
+		$updates = array();
+		add_filter(
+			'query',
+			static function ( $query ) use ( &$updates ) {
+				if ( preg_match( '/^UPDATE `\w+wpo_otd_custom_statuses`/', (string) $query ) ) {
+					$updates[] = $query;
+				}
+
+				return $query;
+			}
+		);
+
+		$this->service->update( $status->id, array( 'label' => 'Boxed', 'is_deleting' => false ) );
+
+		$this->assertCount( 1, $updates );
+		$this->assertStringNotContainsString( 'is_deleting', $updates[0] );
+		$this->assertTrue( $this->service->find( $status->id )->is_deleting, 'The deletion stays under way.' );
+		$this->assertSame( 'Boxed', $this->service->find( $status->id )->label );
+	}
+
+	public function test_an_update_while_another_request_holds_the_status_is_refused(): void {
+		$status = $this->service->create( array( 'label' => 'Packed' ) );
+		$other  = $this->repository_on_another_connection();
+		$lock   = "custom_status_deletion_{$status->id}";
+		$this->assertTrue( $other->acquire_lock( $lock, 0 ) );
+
+		try {
+			$this->service->update( $status->id, array( 'label' => 'Boxed' ) );
+			$this->fail( 'The update must wait for the other request and then give up.' );
+		} catch ( \WPO\OTD\Exceptions\StatusBeingDeletedException $e ) {
+			$this->assertSame( 'Another request is changing or deleting this custom order status. Try again in a moment.', $e->getMessage() );
+		} finally {
+			$other->release_lock( $lock );
+		}
+
+		$this->assertSame( 'Packed', $this->service->find( $status->id )->label );
+		$this->assertSame( 'Boxed', $this->service->update( $status->id, array( 'label' => 'Boxed' ) )->label, 'Once released, the update goes ahead.' );
+	}
+
+	public function test_a_status_changes_without_the_lock_when_the_database_refuses_it(): void {
+		$status   = $this->service->create( array( 'label' => 'Packed' ) );
+		$doomed   = $this->service->create( array( 'label' => 'Doomed' ) );
+		$warnings = array();
+		add_filter(
+			'wpo_otd_logging_enabled',
+			static function ( $enabled, $level, $text ) use ( &$warnings ) {
+				if ( 'warning' === $level ) {
+					$warnings[] = $text;
+				}
+
+				return false;
+			},
+			10,
+			3
+		);
+		$this->fail_queries( '/GET_LOCK|RELEASE_LOCK/' );
+
+		$this->assertSame( 'Boxed', $this->service->update( $status->id, array( 'label' => 'Boxed' ) )->label );
+		$this->assertSame( CustomOrderStatusService::DELETION_DONE, $this->service->begin_deletion( $doomed->id ) );
+
+		$this->assertNull( $this->service->find( $doomed->id ) );
+		$this->assertCount( 2, $warnings );
+		$this->assertStringContainsString( "Custom order status {$status->id} changes without its lock", $warnings[0] );
+		$this->assertStringContainsString( "Custom order status {$doomed->id} changes without its lock", $warnings[1] );
+	}
+
 	public function test_a_status_gone_before_its_last_batch_is_not_announced_again(): void {
 		$deleted = $this->capture_deletions();
 
