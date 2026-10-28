@@ -89,7 +89,7 @@ abstract class BaseModel {
 			unset( $data['created_at'] );
 		}
 
-		// Let database auto-handle updated_at via ON UPDATE CURRENT_TIMESTAMP
+		// The repository stamps updated_at in UTC on every write
 		if ( isset( $data['updated_at'] ) ) {
 			unset( $data['updated_at'] );
 		}

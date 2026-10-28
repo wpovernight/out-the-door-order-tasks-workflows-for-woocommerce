@@ -57,6 +57,14 @@ abstract class BaseRepository {
 	 */
 	protected string $primary_key = 'id';
 
+	/**
+	 * Whether the table has created_at and updated_at columns, which every write then stamps with the current UTC time.
+	 * Override in child repositories whose table has them.
+	 *
+	 * @var bool
+	 */
+	protected bool $timestamps = false;
+
 	private static ?array $column_names = null;
 
 	/**
@@ -451,6 +459,8 @@ abstract class BaseRepository {
 			throw $this->discard( new InvalidArgumentException( 'Data must be a non-empty array.' ) );
 		}
 
+		$data = $this->stamp( $data, true );
+
 		$this->validate_set_columns( array_keys( $data ) );
 
 		// Convert DateTime objects to strings.
@@ -521,6 +531,8 @@ abstract class BaseRepository {
 			throw $this->discard( new RuntimeException( 'No WHERE clause specified for update.' ) );
 		}
 
+		$data = $this->stamp( $data, false );
+
 		$this->validate_set_columns( array_keys( $data ) );
 
 		$where = $this->equality_where_array( 'update' );
@@ -548,6 +560,8 @@ abstract class BaseRepository {
 			throw $this->discard( new InvalidArgumentException( 'Data must be a non-empty array.' ) );
 		}
 
+		$data = $this->stamp( $data, false );
+
 		$this->validate_set_columns( array_keys( $data ) );
 
 		[ $sets, $bindings ] = $this->compile_sets( $data );
@@ -569,6 +583,8 @@ abstract class BaseRepository {
 	 * @throws InvalidArgumentException If a column is not a bare name of this table's columns.
 	 */
 	public function increment( string $column, int $amount = 1, array $extra = array() ): int|false {
+		$extra = $this->stamp( $extra, false );
+
 		$this->validate_set_columns( array_merge( array( $column ), array_keys( $extra ) ) );
 
 		$column = strtolower( $column );
@@ -579,6 +595,35 @@ abstract class BaseRepository {
 			implode( ', ', array_merge( array( "{$column} = {$column} + %d" ), $sets ) ),
 			array_merge( array( $amount ), $bindings )
 		);
+	}
+
+	/**
+	 * Stamp the timestamp columns of a write with the current UTC time, when the table has them.
+	 *
+	 * The columns' own defaults would take the time in the database session's time zone, which is not always UTC,
+	 * while every reader takes them as UTC. A timestamp the data already holds is kept.
+	 *
+	 * @param array<string, mixed> $data      Columns to write, to their values.
+	 * @param bool                 $inserting Whether the write inserts a row, which also stamps created_at.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function stamp( array $data, bool $inserting ): array {
+		if ( ! $this->timestamps ) {
+			return $data;
+		}
+
+		$now = gmdate( 'Y-m-d H:i:s' );
+
+		if ( $inserting && ! array_key_exists( 'created_at', $data ) ) {
+			$data['created_at'] = $now;
+		}
+
+		if ( ! array_key_exists( 'updated_at', $data ) ) {
+			$data['updated_at'] = $now;
+		}
+
+		return $data;
 	}
 
 	/**

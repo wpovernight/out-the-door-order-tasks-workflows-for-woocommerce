@@ -41,7 +41,7 @@ class BaseRepositoryTest extends TestCase {
 
 		$this->wpdb->shouldReceive( 'get_col' )
 			->with( 'DESCRIBE ' . self::TABLE )
-			->andReturn( array( 'id', 'name', 'price', 'status', 'created_at' ) )
+			->andReturn( array( 'id', 'name', 'price', 'status', 'created_at', 'updated_at' ) )
 			->byDefault();
 
 		$this->wpdb->shouldReceive( 'prepare' )
@@ -755,6 +755,95 @@ class BaseRepositoryTest extends TestCase {
 		$this->assertSame( 0, $this->repository->save( new Gadget( array( 'id' => 3, 'name' => 'Old' ) ) ) );
 	}
 
+	public function test_insert_stamps_both_timestamps_in_utc_on_a_table_that_has_them(): void {
+		$written = null;
+		$this->wpdb->shouldReceive( 'insert' )
+			->once()
+			->andReturnUsing(
+				function ( $table, $data ) use ( &$written ) {
+					$written = $data;
+
+					return 1;
+				}
+			);
+
+		$before = time();
+		( new TimestampedGadgetRepository() )->insert( array( 'name' => 'Lamp' ) );
+		$after = time();
+
+		$this->assertSame( array( 'name', 'created_at', 'updated_at' ), array_keys( $written ) );
+		$this->assert_utc_now( $before, $after, $written['created_at'] );
+		$this->assertSame( $written['created_at'], $written['updated_at'] );
+	}
+
+	public function test_insert_keeps_a_timestamp_the_data_already_holds(): void {
+		$written = null;
+		$this->wpdb->shouldReceive( 'insert' )
+			->once()
+			->andReturnUsing(
+				function ( $table, $data ) use ( &$written ) {
+					$written = $data;
+
+					return 1;
+				}
+			);
+
+		( new TimestampedGadgetRepository() )->insert( array( 'name' => 'Lamp', 'created_at' => new DateTime( '2025-01-02 03:04:05' ) ) );
+
+		$this->assertSame( '2025-01-02 03:04:05', $written['created_at'] );
+		$this->assertMatchesRegularExpression( '/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $written['updated_at'] );
+	}
+
+	public function test_update_stamps_only_updated_at_in_utc(): void {
+		$written = null;
+		$this->wpdb->shouldReceive( 'update' )
+			->once()
+			->andReturnUsing(
+				function ( $table, $data, $where ) use ( &$written ) {
+					$written = $data;
+					$this->assertEquals( array( 'id' => 4 ), $where );
+
+					return 1;
+				}
+			);
+
+		$before = time();
+		( new TimestampedGadgetRepository() )->where( 'id', 4 )->update( array( 'name' => 'Desk lamp' ) );
+		$after = time();
+
+		$this->assertSame( array( 'name', 'updated_at' ), array_keys( $written ) );
+		$this->assert_utc_now( $before, $after, $written['updated_at'] );
+	}
+
+	public function test_update_matching_and_increment_stamp_updated_at(): void {
+		$queries = array();
+		$this->wpdb->shouldReceive( 'query' )
+			->twice()
+			->andReturnUsing(
+				function ( $query ) use ( &$queries ) {
+					$queries[] = $query;
+
+					return 1;
+				}
+			);
+
+		$repository = new TimestampedGadgetRepository();
+		$repository->where( 'id', 4 )->update_matching( array( 'name' => 'Desk lamp' ) );
+		$repository->where( 'id', 4 )->increment( 'price' );
+
+		$this->assertMatchesRegularExpression( '/^UPDATE ' . self::TABLE . ' SET name = %s, updated_at = %s WHERE id = %s -- \["Desk lamp","[\d: -]{19}","4"\]$/', $queries[0] );
+		$this->assertMatchesRegularExpression( '/^UPDATE ' . self::TABLE . ' SET price = price \+ %d, updated_at = %s WHERE id = %s -- \[1,"[\d: -]{19}","4"\]$/', $queries[1] );
+	}
+
+	public function test_a_write_that_sets_a_timestamp_itself_is_not_stamped_again(): void {
+		$this->wpdb->shouldReceive( 'update' )
+			->once()
+			->with( self::TABLE, array( 'updated_at' => '2025-01-02 03:04:05' ), array( 'id' => 4 ) )
+			->andReturn( 1 );
+
+		$this->assertSame( 1, ( new TimestampedGadgetRepository() )->where( 'id', 4 )->update( array( 'updated_at' => '2025-01-02 03:04:05' ) ) );
+	}
+
 	public function test_delete_by_id_or_by_equality_wheres(): void {
 		$this->wpdb->shouldReceive( 'delete' )->once()->with( self::TABLE, array( 'id' => 4 ) )->andReturn( 1 );
 		$this->wpdb->shouldReceive( 'delete' )->once()->with( self::TABLE, array( 'status' => 'trash' ) )->andReturn( 3 );
@@ -1264,6 +1353,23 @@ class BaseRepositoryTest extends TestCase {
 	}
 
 	/**
+	 * Assert a DATETIME value is the UTC time of a moment between two Unix times.
+	 *
+	 * @param int    $before
+	 * @param int    $after
+	 * @param string $value
+	 *
+	 * @return void
+	 */
+	private function assert_utc_now( int $before, int $after, string $value ): void {
+		$time = \DateTimeImmutable::createFromFormat( '!Y-m-d H:i:s', $value, new \DateTimeZone( 'UTC' ) );
+
+		$this->assertNotFalse( $time, "$value is not a DATETIME." );
+		$this->assertGreaterThanOrEqual( $before, $time->getTimestamp() );
+		$this->assertLessThanOrEqual( $after, $time->getTimestamp() );
+	}
+
+	/**
 	 * Assert that a callback throws the given exception class.
 	 *
 	 * @param string   $exception_class
@@ -1325,6 +1431,10 @@ class GadgetRepository extends BaseRepository {
 	public function update_raw_public( string $set_clause, array $bindings ): int|false {
 		return $this->update_raw( $set_clause, $bindings );
 	}
+}
+
+class TimestampedGadgetRepository extends GadgetRepository {
+	protected bool $timestamps = true;
 }
 
 class CachedGadgetRepository extends GadgetRepository {

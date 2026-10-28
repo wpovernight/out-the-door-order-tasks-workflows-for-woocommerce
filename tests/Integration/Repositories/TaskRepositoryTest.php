@@ -3,12 +3,13 @@
 namespace WPO\OTD\Tests\Integration\Repositories;
 
 use WPO\OTD\Enums\DefaultTaskFields;
+use WPO\OTD\Models\Task;
 use WPO\OTD\Repositories\TaskFieldValueRepository;
 use WPO\OTD\Repositories\TaskRepository;
 use WPO\OTD\Tests\IntegrationTestCase;
 
 /**
- * Position lookups and rebalancing within a status column.
+ * Position lookups and rebalancing within a status column, and the timestamps every write stamps.
  */
 class TaskRepositoryTest extends IntegrationTestCase {
 	private TaskRepository $repository;
@@ -166,6 +167,155 @@ class TaskRepositoryTest extends IntegrationTestCase {
 		$this->assertTrue( $this->repository->rebalance_positions( $this->todo ) );
 		$this->assertSame( array( 1.0, 2.0 ), $this->positions( $ids ) );
 		$this->assertTrue( $this->repository->rebalance_positions( $this->doing ) );
+	}
+
+	/** ================================
+	 *   Timestamps
+	 *  ================================ */
+
+	public function test_a_task_is_stamped_in_utc_when_the_database_session_is_in_another_time_zone(): void {
+		$this->in_session_time_zone(
+			'+05:00',
+			function () {
+				$before = time();
+				$id     = $this->repository->insert( array( 'title' => 'Pack' ) );
+				$saved  = $this->repository->save( new Task( array( 'title' => 'Ship' ) ) );
+				$after  = time();
+
+				foreach ( array( $id, $saved ) as $task_id ) {
+					$row = $this->timestamps( $task_id );
+					$this->assert_utc_between( $before, $after, $row['created_at'] );
+					$this->assert_utc_between( $before, $after, $row['updated_at'] );
+				}
+			}
+		);
+	}
+
+	public function test_an_update_stamps_updated_at_in_utc_and_leaves_created_at_alone(): void {
+		$id = $this->repository->insert(
+			array(
+				'title'      => 'Pack',
+				'created_at' => '2020-01-02 03:04:05',
+				'updated_at' => '2020-01-02 03:04:05',
+			)
+		);
+
+		$this->in_session_time_zone(
+			'-07:00',
+			function () use ( $id ) {
+				$before = time();
+				$this->repository->where( 'id', $id )->update( array( 'title' => 'Packed' ) );
+				$after = time();
+
+				$row = $this->timestamps( $id );
+				$this->assertSame( '2020-01-02 03:04:05', $row['created_at'] );
+				$this->assert_utc_between( $before, $after, $row['updated_at'] );
+			}
+		);
+	}
+
+	public function test_saving_an_unchanged_task_still_stamps_updated_at(): void {
+		$id = $this->repository->insert(
+			array(
+				'title'      => 'Pack',
+				'created_at' => '2020-01-02 03:04:05',
+				'updated_at' => '2020-01-02 03:04:05',
+			)
+		);
+
+		$this->in_session_time_zone(
+			'+05:00',
+			function () use ( $id ) {
+				$before = time();
+				$this->assertSame( 1, $this->repository->save( $this->repository->find( $id ) ) );
+				$after = time();
+
+				$row = $this->timestamps( $id );
+				$this->assertSame( '2020-01-02 03:04:05', $row['created_at'] );
+				$this->assert_utc_between( $before, $after, $row['updated_at'] );
+			}
+		);
+	}
+
+	public function test_update_matching_stamps_updated_at_in_utc(): void {
+		$id = $this->repository->insert(
+			array(
+				'title'      => 'Pack',
+				'created_at' => '2020-01-02 03:04:05',
+				'updated_at' => '2020-01-02 03:04:05',
+			)
+		);
+
+		$this->in_session_time_zone(
+			'+05:00',
+			function () use ( $id ) {
+				$before = time();
+				$this->assertSame( 1, $this->repository->where( 'id', $id )->where( 'title', 'Pack' )->update_matching( array( 'title' => 'Packed' ) ) );
+				$after = time();
+
+				$this->assert_utc_between( $before, $after, $this->timestamps( $id )['updated_at'] );
+			}
+		);
+	}
+
+	/**
+	 * Run a callback with the database session in a time zone, restoring the session's own afterwards.
+	 *
+	 * @param string   $offset Offset from UTC, such as "+05:00".
+	 * @param callable $callback
+	 *
+	 * @return void
+	 */
+	private function in_session_time_zone( string $offset, callable $callback ): void {
+		global $wpdb;
+
+		$previous = $wpdb->get_var( 'SELECT @@session.time_zone' );
+		$wpdb->query( $wpdb->prepare( 'SET time_zone = %s', $offset ) );
+
+		try {
+			$this->assertNotSame(
+				gmdate( 'Y-m-d H' ),
+				substr( (string) $wpdb->get_var( 'SELECT CURRENT_TIMESTAMP' ), 0, 13 ),
+				'The session must not be in UTC for the test to tell the time zones apart.'
+			);
+
+			$callback();
+		} finally {
+			$wpdb->query( $wpdb->prepare( 'SET time_zone = %s', $previous ) );
+		}
+	}
+
+	/**
+	 * Get a task's stored timestamps, as written.
+	 *
+	 * @param int $task_id
+	 *
+	 * @return array{created_at: string, updated_at: string}
+	 */
+	private function timestamps( int $task_id ): array {
+		global $wpdb;
+
+		return $wpdb->get_row(
+			$wpdb->prepare( "SELECT created_at, updated_at FROM {$this->table( 'tasks' )} WHERE id = %d", $task_id ), // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			ARRAY_A
+		);
+	}
+
+	/**
+	 * Assert a stored DATETIME is the UTC time of a moment between two Unix times.
+	 *
+	 * @param int    $before
+	 * @param int    $after
+	 * @param string $value
+	 *
+	 * @return void
+	 */
+	private function assert_utc_between( int $before, int $after, string $value ): void {
+		$time = \DateTimeImmutable::createFromFormat( '!Y-m-d H:i:s', $value, new \DateTimeZone( 'UTC' ) );
+
+		$this->assertNotFalse( $time, "$value is not a DATETIME." );
+		$this->assertGreaterThanOrEqual( $before, $time->getTimestamp(), "$value is not the current UTC time." );
+		$this->assertLessThanOrEqual( $after, $time->getTimestamp(), "$value is not the current UTC time." );
 	}
 
 	/**

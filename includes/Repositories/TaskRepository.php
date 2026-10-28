@@ -12,6 +12,8 @@ class TaskRepository extends BaseRepository {
 	private static string $table_name = 'tasks';
 	private static string $model_class = Task::class;
 
+	protected bool $timestamps = true;
+
 	private readonly TaskFieldValueRepository $task_field_value_repository;
 
 	/**
