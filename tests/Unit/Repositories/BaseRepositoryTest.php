@@ -721,6 +721,20 @@ class BaseRepositoryTest extends TestCase {
 		$this->repository->where( 'id', 4 )->update_matching( array( 'created_at' => new DateTime( '2025-01-01 22:04:05', new \DateTimeZone( 'America/New_York' ) ) ) );
 	}
 
+	public function test_update_and_increment_write_dates_in_utc(): void {
+		$this->wpdb->shouldReceive( 'update' )
+			->once()
+			->with( self::TABLE, array( 'created_at' => '2025-01-02 03:04:05' ), array( 'id' => 4 ) )
+			->andReturn( 1 );
+		$this->wpdb->shouldReceive( 'query' )
+			->once()
+			->with( 'UPDATE ' . self::TABLE . ' SET price = price + %d, created_at = %s WHERE id = %s -- [1,"2025-01-02 03:04:05","4"]' )
+			->andReturn( 1 );
+
+		$this->assertSame( 1, $this->repository->where( 'id', 4 )->update( array( 'created_at' => new \DateTimeImmutable( '2025-01-02 08:34:05', new \DateTimeZone( '+05:30' ) ) ) ) );
+		$this->assertSame( 1, $this->repository->where( 'id', 4 )->increment( 'price', 1, array( 'created_at' => new DateTime( '2025-01-01 22:04:05', new \DateTimeZone( 'America/New_York' ) ) ) ) );
+	}
+
 	public function test_insert_returns_false_when_the_database_refuses(): void {
 		$this->wpdb->shouldReceive( 'insert' )->once()->andReturn( false );
 
@@ -806,6 +820,25 @@ class BaseRepositoryTest extends TestCase {
 
 		$this->assertSame( '2025-01-02 03:04:05', $written['created_at'] );
 		$this->assertMatchesRegularExpression( '/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $written['updated_at'] );
+	}
+
+	public function test_a_null_timestamp_is_stamped(): void {
+		$written = null;
+		$this->wpdb->shouldReceive( 'insert' )
+			->once()
+			->andReturnUsing(
+				function ( $table, $data ) use ( &$written ) {
+					$written = $data;
+
+					return 1;
+				}
+			);
+
+		$before = time();
+		( new TimestampedGadgetRepository() )->insert( array( 'name' => 'Lamp', 'created_at' => null, 'updated_at' => null ) );
+
+		$this->assert_utc_now( $before, time(), $written['created_at'] );
+		$this->assert_utc_now( $before, time(), $written['updated_at'] );
 	}
 
 	public function test_update_stamps_only_updated_at_in_utc(): void {
@@ -897,6 +930,34 @@ class BaseRepositoryTest extends TestCase {
 		$this->assertInstanceOf( DateTime::class, $immutable->created_at, 'A property typed as the interface gets a DateTime.' );
 		$this->assertInstanceOf( \DateTimeImmutable::class, $immutable->updated_at );
 		$this->assertSame( 'UTC', $immutable->updated_at->getTimezone()->getName() );
+	}
+
+	public function test_a_saved_model_takes_date_subclasses_its_properties_declare(): void {
+		$this->wpdb->shouldReceive( 'insert' )->once()->andReturn( 1 );
+
+		$model = new SubclassStampedGadget( array( 'id' => 0, 'name' => 'Subclass' ) );
+		( new TimestampedGadgetRepository() )->save( $model );
+
+		$this->assertInstanceOf( StampDate::class, $model->created_at );
+		$this->assertInstanceOf( StampImmutable::class, $model->updated_at );
+		$this->assertSame( 'UTC', $model->created_at->getTimezone()->getName() );
+		$this->assertSame( $model->created_at->format( 'Y-m-d H:i:s' ), $model->updated_at->format( 'Y-m-d H:i:s' ) );
+	}
+
+	public function test_a_saved_model_leaves_timestamps_it_cannot_set_and_gives_untyped_ones_the_string(): void {
+		$this->wpdb->shouldReceive( 'insert' )->once()->andReturn( 1 );
+
+		$model = new GuardedStampedGadget( array( 'id' => 0, 'name' => 'Guarded' ) );
+		( new TimestampedGadgetRepository() )->save( $model );
+
+		$this->assertMatchesRegularExpression( '/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $model->created_at, 'An untyped property gets the string.' );
+		$this->assertSame( 'kept', $model->updated_at_value(), 'A protected property is left alone.' );
+
+		$abstract = new AbstractStampedGadget( array( 'id' => 0, 'name' => 'Abstract' ) );
+		$this->wpdb->shouldReceive( 'insert' )->once()->andReturn( 1 );
+		( new TimestampedGadgetRepository() )->save( $abstract );
+
+		$this->assertFalse( ( new \ReflectionProperty( $abstract, 'created_at' ) )->isInitialized( $abstract ), 'A date class that cannot be built is left alone.' );
 	}
 
 	public function test_a_model_that_fails_to_save_keeps_its_timestamps(): void {
@@ -1571,6 +1632,33 @@ class StringStampedGadget extends Gadget {
 class ImmutableStampedGadget extends Gadget {
 	public \DateTimeInterface $created_at;
 	public \DateTimeImmutable $updated_at;
+}
+
+class StampDate extends DateTime {
+}
+
+class StampImmutable extends \DateTimeImmutable {
+}
+
+abstract class AbstractStampDate extends DateTime {
+}
+
+class SubclassStampedGadget extends Gadget {
+	public StampDate $created_at;
+	public StampImmutable $updated_at;
+}
+
+class GuardedStampedGadget extends Gadget {
+	public $created_at;
+	protected string $updated_at = 'kept';
+
+	public function updated_at_value(): string {
+		return $this->updated_at;
+	}
+}
+
+class AbstractStampedGadget extends Gadget {
+	public AbstractStampDate $created_at;
 }
 
 class TimestampedGadgetRepository extends GadgetRepository {

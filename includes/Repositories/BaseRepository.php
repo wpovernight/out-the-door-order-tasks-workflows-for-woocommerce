@@ -539,6 +539,13 @@ abstract class BaseRepository {
 
 		$this->reset_query();
 
+		// Convert dates to DATETIME strings, in UTC as the columns hold them.
+		foreach ( $data as $key => $value ) {
+			if ( $value instanceof \DateTimeInterface ) {
+				$data[ $key ] = $this->to_utc_datetime( $value );
+			}
+		}
+
 		return $this->wpdb->update( $this->get_table_full_name(), $data, $where );
 	}
 
@@ -601,7 +608,7 @@ abstract class BaseRepository {
 	 * Stamp the timestamp columns of a write with the current UTC time, when the table has them.
 	 *
 	 * The columns' own defaults would take the time in the database session's time zone, which is not always UTC,
-	 * while every reader takes them as UTC. A timestamp the data already holds is kept.
+	 * while every reader takes them as UTC. A timestamp the data already holds is kept; a null one is stamped.
 	 *
 	 * @param array<string, mixed> $data      Columns to write, to their values.
 	 * @param bool                 $inserting Whether the write inserts a row, which also stamps created_at.
@@ -615,11 +622,11 @@ abstract class BaseRepository {
 
 		$now = gmdate( 'Y-m-d H:i:s' );
 
-		if ( $inserting && ! array_key_exists( 'created_at', $data ) ) {
+		if ( $inserting && ! isset( $data['created_at'] ) ) {
 			$data['created_at'] = $now;
 		}
 
-		if ( ! array_key_exists( 'updated_at', $data ) ) {
+		if ( ! isset( $data['updated_at'] ) ) {
 			$data['updated_at'] = $now;
 		}
 
@@ -728,8 +735,10 @@ abstract class BaseRepository {
 	/**
 	 * Give a model's timestamp property a stamped value, in the type the property declares.
 	 *
-	 * A property typed as a date class gets that class (DateTime for DateTimeInterface), in UTC; any other property
-	 * gets the DATETIME string. A property the model does not have, or does not make public, is left alone.
+	 * A property typed as a date class that can be built, DateTime, DateTimeImmutable or a subclass of either, gets
+	 * that class in UTC, and one typed as DateTimeInterface gets a DateTime. Any other property gets the DATETIME
+	 * string. A property the model does not have or does not make public, or typed as a date class that cannot be
+	 * built (an abstract class, another interface), is left alone.
 	 *
 	 * @param BaseModel $model
 	 * @param string    $column
@@ -748,11 +757,19 @@ abstract class BaseRepository {
 		}
 
 		$type  = $property->getType();
-		$class = $type instanceof \ReflectionNamedType ? $type->getName() : '';
+		$class = $type instanceof \ReflectionNamedType && ! $type->isBuiltin() ? $type->getName() : '';
 
 		if ( '' !== $class && is_a( $class, \DateTimeInterface::class, true ) ) {
-			$class = \DateTimeImmutable::class === $class ? \DateTimeImmutable::class : \DateTime::class;
-			$value = new $class( $value, new \DateTimeZone( 'UTC' ) );
+			$buildable = ( is_a( $class, \DateTime::class, true ) || is_a( $class, \DateTimeImmutable::class, true ) )
+				&& ( new \ReflectionClass( $class ) )->isInstantiable();
+
+			if ( $buildable ) {
+				$value = new $class( $value, new \DateTimeZone( 'UTC' ) );
+			} elseif ( \DateTimeInterface::class === $class ) {
+				$value = new \DateTime( $value, new \DateTimeZone( 'UTC' ) );
+			} else {
+				return;
+			}
 		}
 
 		$model->{$column} = $value;
