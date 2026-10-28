@@ -151,6 +151,11 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 			try {
 				await deleteTaskAPI(taskId);
 			} catch (error) {
+				// A task that is not found is gone already, as the delete wanted.
+				if (error instanceof ApiError && error.status === 404) {
+					return;
+				}
+
 				console.error('Failed to delete task:', error);
 				// Revert the update by reloading tasks
 				loadTasks(true);
