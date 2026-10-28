@@ -151,8 +151,13 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
 			try {
 				await deleteTaskAPI(taskId);
 			} catch (error) {
-				// A task that is not found is gone already, as the delete wanted.
-				if (error instanceof ApiError && error.status === 404) {
+				// A task that is not found is gone already, as the delete wanted. Any other 404, such as a
+				// missing route, is still a failure.
+				if (
+					error instanceof ApiError &&
+					error.status === 404 &&
+					error.code === 'not_found'
+				) {
 					return;
 				}
 

@@ -10,6 +10,7 @@ import {
 	AsyncLoaderStatus,
 	useToast,
 	ToastType,
+	ApiError,
 } from '@sdk';
 
 /** Fields editable through the create/edit form. */
@@ -27,6 +28,20 @@ export interface UseCustomOrderStatusesResult {
 	createStatus: (data: CustomOrderStatusInput) => Promise<void>;
 	updateStatus: (id: number, data: CustomOrderStatusInput) => Promise<void>;
 	deleteStatus: (id: number) => Promise<void>;
+}
+
+/**
+ * Whether a request failed only because its status is not found. Any other 404, such as a missing route, is a
+ * real failure.
+ *
+ * @param error
+ */
+function isStatusNotFound(error: unknown): boolean {
+	return (
+		error instanceof ApiError &&
+		error.status === 404 &&
+		error.code === 'not_found'
+	);
 }
 
 /**
@@ -112,7 +127,15 @@ export function useCustomOrderStatuses(): UseCustomOrderStatusesResult {
 		setPendingDeletionIds((prev) => new Set(prev).add(id));
 
 		try {
-			await deleteCustomOrderStatus(id);
+			try {
+				await deleteCustomOrderStatus(id);
+			} catch (error) {
+				// A status that is not found is gone already, as the delete
+				// wanted: the re-fetch below drops its row.
+				if (!isStatusNotFound(error)) {
+					throw error;
+				}
+			}
 
 			// Deletion resolves two ways server-side: immediately, when the
 			// status has no orders to reassign, or asynchronously, when it
