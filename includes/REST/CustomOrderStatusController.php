@@ -7,6 +7,7 @@ use WP_REST_Response;
 use WP_REST_Server;
 use WP_Error;
 use WPO\OTD\Core\Logger;
+use WPO\OTD\Exceptions\StatusBeingDeletedException;
 use WPO\OTD\Exceptions\StatusKeyTakenException;
 use WPO\OTD\Models\CustomOrderStatus;
 use WPO\OTD\Services\CustomOrderStatusService;
@@ -247,6 +248,8 @@ class CustomOrderStatusController extends BaseRestController {
 			return new WP_Error( 'not_found', $e->getMessage(), array( 'status' => 404 ) );
 		} catch ( StatusKeyTakenException $e ) {
 			return new WP_Error( 'status_key_taken', $e->getMessage(), array( 'status' => 409 ) );
+		} catch ( StatusBeingDeletedException $e ) {
+			return new WP_Error( 'status_being_deleted', $e->getMessage(), array( 'status' => 409 ) );
 		} catch ( \Throwable $e ) {
 			Logger::error( 'Custom order status update failed: ' . $e->getMessage() );
 			return new WP_Error( 'update_failed', __( 'Failed to update custom order status.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 500 ) );

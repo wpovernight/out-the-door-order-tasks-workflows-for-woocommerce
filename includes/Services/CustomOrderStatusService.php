@@ -5,6 +5,7 @@ namespace WPO\OTD\Services;
 use Exception;
 use InvalidArgumentException;
 use RuntimeException;
+use WPO\OTD\Exceptions\StatusBeingDeletedException;
 use WPO\OTD\Exceptions\StatusKeyTakenException;
 use WPO\OTD\Models\CustomOrderStatus;
 use WPO\OTD\Core\Logger;
@@ -29,6 +30,11 @@ class CustomOrderStatusService {
 	 * background, or was already waiting for that.
 	 */
 	public const DELETION_SCHEDULED = 'scheduled';
+
+	/**
+	 * Seconds a deletion request waits for another request deleting the same status.
+	 */
+	private const DELETION_LOCK_TIMEOUT = 3;
 
 	protected readonly CustomOrderStatusRepository $repository;
 
@@ -286,6 +292,7 @@ class CustomOrderStatusService {
 	 * @return CustomOrderStatus
 	 * @throws InvalidArgumentException If no status has the ID.
 	 * @throws StatusKeyTakenException If another status already uses the status key in $data.
+	 * @throws StatusBeingDeletedException If $data changes the status key of a status being deleted.
 	 * @throws RuntimeException If the database does not save the change.
 	 */
 	public function update( int $id, array $data ): CustomOrderStatus {
@@ -297,6 +304,11 @@ class CustomOrderStatusService {
 		// Keys are stored as create() stores them, so the uniqueness check compares like with like.
 		if ( isset( $data['status_key'] ) && is_string( $data['status_key'] ) ) {
 			$data['status_key'] = sanitize_title( $data['status_key'] );
+
+			// The background job moving its orders finds them by the key it was given.
+			if ( $custom_status->is_deleting && $data['status_key'] !== $custom_status->status_key ) {
+				throw new StatusBeingDeletedException( esc_html__( 'This custom order status is being deleted, so its status key cannot change.', 'out-the-door-order-tasks-workflows-for-woocommerce' ) );
+			}
 
 			$taken = $this->repository
 				->where( 'status_key', $data['status_key'] )
@@ -360,10 +372,40 @@ class CustomOrderStatusService {
 	 *
 	 * @return string self::DELETION_DONE when the status is deleted, self::DELETION_SCHEDULED when it stays until
 	 *                its orders are moved (also when that was already under way), self::DELETION_NOT_FOUND when no
-	 *                status has the ID.
-	 * @throws RuntimeException If the database does not delete or flag the status.
+	 *                status has the ID. While another request is deleting the same status, self::DELETION_SCHEDULED,
+	 *                since that request deletes it or schedules its deletion.
+	 * @throws RuntimeException If the database does not lock, delete or flag the status.
 	 */
 	public function begin_deletion( int $id, string $fallback_status = 'on-hold' ): string {
+		// Two requests deleting the same status at once would both schedule a job.
+		$lock   = "custom_status_deletion_{$id}";
+		$locked = $this->repository->acquire_lock( $lock, self::DELETION_LOCK_TIMEOUT );
+
+		if ( null === $locked ) {
+			throw new RuntimeException( esc_html( "Custom order status {$id} could not be locked for deletion: " . $this->repository->get_last_db_error() ) );
+		}
+
+		if ( ! $locked ) {
+			return self::DELETION_SCHEDULED;
+		}
+
+		try {
+			return $this->delete_or_schedule( $id, $fallback_status );
+		} finally {
+			$this->repository->release_lock( $lock );
+		}
+	}
+
+	/**
+	 * The deletion begin_deletion() starts, run while it holds the status's lock.
+	 *
+	 * @param int    $id
+	 * @param string $fallback_status
+	 *
+	 * @return string One of the DELETION_* outcomes.
+	 * @throws RuntimeException If the database does not delete or flag the status.
+	 */
+	private function delete_or_schedule( int $id, string $fallback_status ): string {
 		$status = $this->find( $id );
 		if ( ! $status ) {
 			return self::DELETION_NOT_FOUND;
@@ -371,7 +413,7 @@ class CustomOrderStatusService {
 
 		if ( $status->is_deleting ) {
 			// A batch job that failed leaves the status flagged with nothing left to finish its deletion.
-			if ( ! $this->has_deletion_job( $status->status_key, $id ) ) {
+			if ( ! $this->has_deletion_job( $id ) ) {
 				as_schedule_single_action(
 					time(),
 					'wpo_otd_reassign_orders',
@@ -418,14 +460,13 @@ class CustomOrderStatusService {
 	}
 
 	/**
-	 * Whether a batch job for a status's deletion is pending or running, whatever fallback status it moves orders to.
+	 * Whether a batch job for a status's deletion is pending or running, whatever key and fallback status it has.
 	 *
-	 * @param string $status_key
-	 * @param int    $id
+	 * @param int $id
 	 *
 	 * @return bool
 	 */
-	private function has_deletion_job( string $status_key, int $id ): bool {
+	private function has_deletion_job( int $id ): bool {
 		$actions = as_get_scheduled_actions(
 			array(
 				'hook'     => 'wpo_otd_reassign_orders',
@@ -438,7 +479,7 @@ class CustomOrderStatusService {
 		foreach ( $actions as $action ) {
 			$args = $action->get_args();
 
-			if ( ( $args[0] ?? null ) === $status_key && (int) ( $args[2] ?? 0 ) === $id ) {
+			if ( (int) ( $args[2] ?? 0 ) === $id ) {
 				return true;
 			}
 		}
@@ -552,10 +593,17 @@ class CustomOrderStatusService {
 	 * @throws RuntimeException If the database does not delete the row.
 	 */
 	private function remove( int $status_id, string $from_status, string $to_status ): void {
-		if ( false === $this->repository->where( 'id', $status_id )->delete() ) {
+		$deleted = $this->repository->where( 'id', $status_id )->delete();
+
+		if ( false === $deleted ) {
 			throw new RuntimeException( esc_html( "Custom order status {$status_id} could not be deleted: " . $this->repository->get_last_db_error() ) );
 		}
 		$this->cached_statuses = null;
+
+		// No row was deleted: the status was gone already, and whatever deleted it announced it.
+		if ( 0 === $deleted ) {
+			return;
+		}
 
 		/**
 		 * Action triggered after a custom order status is deleted.

@@ -232,6 +232,19 @@ class CustomOrderStatusControllerTest extends RestTestCase {
 		$this->assertSame( 'boxed', $this->make( CustomOrderStatusService::class )->find( $id )->status_key );
 	}
 
+	public function test_the_key_of_a_status_being_deleted_cannot_change(): void {
+		$id = $this->create_status( 'Packed' );
+		( new CustomOrderStatusRepository() )->where( 'id', $id )->update( array( 'is_deleting' => 1 ) );
+
+		$response = $this->request( 'PUT', "/custom-order-statuses/{$id}", array( 'status_key' => 'boxed' ) );
+
+		$this->assertResponse( 409, $response, 'status_being_deleted' );
+		$this->assertSame( 'This custom order status is being deleted, so its status key cannot change.', $response->get_data()['message'] );
+		$this->assertSame( 'packed', $this->make( CustomOrderStatusService::class )->find( $id )->status_key );
+
+		$this->assertResponse( 200, $this->request( 'PUT', "/custom-order-statuses/{$id}", array( 'status_key' => 'packed', 'label' => 'Packed up' ) ) );
+	}
+
 	public function test_a_status_may_keep_its_own_key_or_take_a_free_one(): void {
 		$id = $this->create_status( 'Boxed' );
 

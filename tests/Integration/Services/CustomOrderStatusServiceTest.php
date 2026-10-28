@@ -267,6 +267,74 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		$this->assertCount( 1, as_get_scheduled_actions( array( 'hook' => self::REASSIGN_HOOK, 'status' => 'pending' ), 'ids' ), 'A pending job is not doubled, whatever its fallback.' );
 	}
 
+	public function test_a_running_job_counts_as_the_deletion_under_way(): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$this->order_in( 'packed' );
+		$this->service->begin_deletion( $status->id );
+
+		$pending = as_get_scheduled_actions( array( 'hook' => self::REASSIGN_HOOK, 'status' => 'pending' ), 'ids' );
+		$this->assertCount( 1, $pending );
+		\ActionScheduler::store()->log_execution( (int) reset( $pending ) );
+
+		$this->assertSame( CustomOrderStatusService::DELETION_SCHEDULED, $this->service->begin_deletion( $status->id ) );
+		$this->assertCount( 0, as_get_scheduled_actions( array( 'hook' => self::REASSIGN_HOOK, 'status' => 'pending' ), 'ids' ), 'No second job while one runs.' );
+	}
+
+	public function test_a_job_for_the_status_counts_whatever_key_it_was_given(): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $status->id );
+		as_schedule_single_action( time(), self::REASSIGN_HOOK, array( 'old-key', 'processing', $status->id ), 'wpo-otd' );
+
+		$this->assertSame( CustomOrderStatusService::DELETION_SCHEDULED, $this->service->begin_deletion( $status->id ) );
+		$this->assertCount( 1, as_get_scheduled_actions( array( 'hook' => self::REASSIGN_HOOK, 'status' => 'pending' ), 'ids' ) );
+	}
+
+	public function test_a_deletion_another_request_holds_the_lock_for_schedules_nothing(): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$this->order_in( 'packed' );
+
+		$other = $this->repository_on_another_connection();
+		$lock  = "custom_status_deletion_{$status->id}";
+
+		$this->assertTrue( $other->acquire_lock( $lock, 0 ) );
+
+		try {
+			$this->assertSame( CustomOrderStatusService::DELETION_SCHEDULED, $this->service->begin_deletion( $status->id ) );
+			$this->assertFalse( $this->service->find( $status->id )->is_deleting, 'The other request flags it, not this one.' );
+			$this->assertFalse( as_has_scheduled_action( self::REASSIGN_HOOK ) );
+		} finally {
+			$other->release_lock( $lock );
+		}
+
+		$this->assertSame( CustomOrderStatusService::DELETION_SCHEDULED, $this->service->begin_deletion( $status->id ), 'Once released, the deletion goes ahead.' );
+		$this->assertTrue( as_has_scheduled_action( self::REASSIGN_HOOK, array( 'packed', 'on-hold', $status->id ), 'wpo-otd' ) );
+	}
+
+	public function test_the_deletion_lock_is_released_even_when_the_deletion_fails(): void {
+		$status = $this->service->create( array( 'label' => 'Packed' ) );
+		$this->fail_queries( '/^DELETE FROM `\w+wpo_otd_custom_statuses`/' );
+
+		try {
+			$this->service->begin_deletion( $status->id );
+			$this->fail( 'The deletion must fail.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'could not be deleted', $e->getMessage() );
+		}
+
+		$other = $this->repository_on_another_connection();
+		$lock  = "custom_status_deletion_{$status->id}";
+		$this->assertTrue( $other->acquire_lock( $lock, 0 ), 'Another connection can take the lock at once.' );
+		$other->release_lock( $lock );
+	}
+
+	public function test_a_status_gone_before_its_last_batch_is_not_announced_again(): void {
+		$deleted = $this->capture_deletions();
+
+		$this->service->process_deletion_batch( 'ghost', 'on-hold', 999999 );
+
+		$this->assertSame( array(), $deleted() );
+	}
+
 	public function test_a_job_for_another_status_does_not_count_as_this_ones(): void {
 		$status = $this->create_registered_status( 'Packed' );
 		$this->mark_deleting( $status->id );
@@ -388,6 +456,22 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		do_action( self::REASSIGN_HOOK, 'packed', 'on-hold', $status->id );
 
 		$this->assertNull( $this->service->find( $status->id ) );
+	}
+
+	/**
+	 * A status repository on a database connection of its own, as another request would have.
+	 *
+	 * @return CustomOrderStatusRepository
+	 */
+	private function repository_on_another_connection(): CustomOrderStatusRepository {
+		$connection = new \wpdb( DB_USER, DB_PASSWORD, DB_NAME, DB_HOST );
+		$connection->set_prefix( $GLOBALS['wpdb']->prefix );
+
+		$repository = new CustomOrderStatusRepository();
+		$property   = new \ReflectionProperty( $repository, 'wpdb' );
+		$property->setValue( $repository, $connection );
+
+		return $repository;
 	}
 
 	/**

@@ -787,6 +787,50 @@ abstract class BaseRepository {
 	}
 
 	/**
+	 * Take a named database lock, held until release_lock() or until the connection ends.
+	 *
+	 * MySQL lock names are shared by every database on the server, so the name is scoped to this site's database and
+	 * table prefix. A connection may take a lock it holds already.
+	 *
+	 * @param string $name
+	 * @param int    $timeout Seconds to wait while another connection holds the lock.
+	 *
+	 * @return bool|null True when taken, false when another connection still held it after the timeout, null when
+	 *                   the database could not take it.
+	 */
+	public function acquire_lock( string $name, int $timeout ): ?bool {
+		$query = $this->wpdb->prepare( 'SELECT GET_LOCK( %s, %d )', $this->lock_name( $name ), $timeout );
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $query is prepared on the line above.
+		$result = $this->wpdb->get_var( $query );
+
+		return null === $result ? null : '1' === (string) $result;
+	}
+
+	/**
+	 * Release a named database lock this connection took with acquire_lock().
+	 *
+	 * @param string $name
+	 *
+	 * @return void
+	 */
+	public function release_lock( string $name ): void {
+		$query = $this->wpdb->prepare( 'SELECT RELEASE_LOCK( %s )', $this->lock_name( $name ) );
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $query is prepared on the line above.
+		$this->wpdb->query( $query );
+	}
+
+	/**
+	 * The server-wide lock name for a lock of this site, short enough for MySQL's 64 characters.
+	 *
+	 * @param string $name
+	 *
+	 * @return string
+	 */
+	private function lock_name( string $name ): string {
+		return 'wpo_otd_' . md5( ( defined( 'DB_NAME' ) ? DB_NAME : '' ) . '|' . $this->wpdb->prefix . '|' . $name );
+	}
+
+	/**
 	 * The last MySQL error string from the underlying $wpdb, if any.
 	 *
 	 * @return string Empty string when there was no error.

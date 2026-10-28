@@ -933,6 +933,33 @@ class BaseRepositoryTest extends TestCase {
 		$this->assertSame( 'SELECT * FROM ' . self::TABLE, $this->repository->get_query() );
 	}
 
+	public function test_a_lock_tells_taken_held_elsewhere_and_failed_apart(): void {
+		$queries = array();
+		$this->wpdb->shouldReceive( 'get_var' )->times( 3 )->andReturnUsing(
+			function ( $query ) use ( &$queries ) {
+				$queries[] = $query;
+
+				return array( '1', '0', null )[ count( $queries ) - 1 ];
+			}
+		);
+		$this->wpdb->shouldReceive( 'query' )->once()->andReturnUsing(
+			function ( $query ) use ( &$queries ) {
+				$queries[] = $query;
+
+				return 1;
+			}
+		);
+
+		$this->assertTrue( $this->repository->acquire_lock( 'job', 3 ) );
+		$this->assertFalse( $this->repository->acquire_lock( 'job', 3 ) );
+		$this->assertNull( $this->repository->acquire_lock( 'job', 3 ) );
+		$this->repository->release_lock( 'job' );
+
+		$this->assertMatchesRegularExpression( '/^SELECT GET_LOCK\( %s, %d \) -- \["wpo_otd_[0-9a-f]{32}",3\]$/', $queries[0] );
+		$this->assertStringStartsWith( 'SELECT RELEASE_LOCK( %s ) -- ["wpo_otd_', $queries[3] );
+		$this->assertSame( json_decode( substr( $queries[0], strpos( $queries[0], '[' ) ) )[0], json_decode( substr( $queries[3], strpos( $queries[3], '[' ) ) )[0], 'Both name the same lock.' );
+	}
+
 	public function test_a_write_that_sets_a_timestamp_itself_is_not_stamped_again(): void {
 		$this->wpdb->shouldReceive( 'update' )
 			->once()
