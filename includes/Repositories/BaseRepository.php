@@ -463,10 +463,10 @@ abstract class BaseRepository {
 
 		$this->validate_set_columns( array_keys( $data ) );
 
-		// Convert DateTime objects to strings.
+		// Convert dates to DATETIME strings, in UTC as the columns hold them.
 		foreach ( $data as $key => $value ) {
-			if ( $value instanceof \DateTime ) {
-				$data[ $key ] = $value->format( 'Y-m-d H:i:s' );
+			if ( $value instanceof \DateTimeInterface ) {
+				$data[ $key ] = $this->to_utc_datetime( $value );
 			}
 		}
 
@@ -647,8 +647,8 @@ abstract class BaseRepository {
 				continue;
 			}
 
-			if ( $value instanceof \DateTime ) {
-				$value = $value->format( 'Y-m-d H:i:s' );
+			if ( $value instanceof \DateTimeInterface ) {
+				$value = $this->to_utc_datetime( $value );
 			}
 
 			$sets[]     = "{$name} = {$this->placeholder_for( $value )}";
@@ -716,13 +716,57 @@ abstract class BaseRepository {
 
 		if ( false !== $result && $this->timestamps ) {
 			foreach ( array( 'created_at', 'updated_at' ) as $column ) {
-				if ( isset( $data[ $column ] ) && property_exists( $model, $column ) ) {
-					$model->{$column} = new \DateTime( (string) $data[ $column ], new \DateTimeZone( 'UTC' ) );
+				if ( isset( $data[ $column ] ) ) {
+					$this->set_timestamp( $model, $column, (string) $data[ $column ] );
 				}
 			}
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Give a model's timestamp property a stamped value, in the type the property declares.
+	 *
+	 * A property typed as a date class gets that class (DateTime for DateTimeInterface), in UTC; any other property
+	 * gets the DATETIME string. A property the model does not have, or does not make public, is left alone.
+	 *
+	 * @param BaseModel $model
+	 * @param string    $column
+	 * @param string    $value  DATETIME in UTC.
+	 *
+	 * @return void
+	 */
+	private function set_timestamp( BaseModel $model, string $column, string $value ): void {
+		if ( ! property_exists( $model, $column ) ) {
+			return;
+		}
+
+		$property = new \ReflectionProperty( $model, $column );
+		if ( ! $property->isPublic() ) {
+			return;
+		}
+
+		$type  = $property->getType();
+		$class = $type instanceof \ReflectionNamedType ? $type->getName() : '';
+
+		if ( '' !== $class && is_a( $class, \DateTimeInterface::class, true ) ) {
+			$class = \DateTimeImmutable::class === $class ? \DateTimeImmutable::class : \DateTime::class;
+			$value = new $class( $value, new \DateTimeZone( 'UTC' ) );
+		}
+
+		$model->{$column} = $value;
+	}
+
+	/**
+	 * Format a date as a DATETIME string in UTC.
+	 *
+	 * @param \DateTimeInterface $date
+	 *
+	 * @return string
+	 */
+	private function to_utc_datetime( \DateTimeInterface $date ): string {
+		return \DateTimeImmutable::createFromInterface( $date )->setTimezone( new \DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
 	}
 
 	/**

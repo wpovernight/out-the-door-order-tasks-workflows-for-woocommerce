@@ -27,15 +27,15 @@ use WPO\OTD\Tests\Support\InstalledPlugins;
  */
 abstract class IntegrationTestCase extends WP_UnitTestCase {
 	/**
-	 * Statements that make MySQL commit the open transaction.
-	 *
-	 * CREATE / DROP TEMPORARY TABLE are fine: WordPress rewrites the tables a test creates into those.
-	 */
-	/**
 	 * The time age_task() dates a task's timestamps to.
 	 */
 	protected const AGED = '2020-01-02 03:04:05';
 
+	/**
+	 * Statements that make MySQL commit the open transaction.
+	 *
+	 * CREATE / DROP TEMPORARY TABLE are fine: WordPress rewrites the tables a test creates into those.
+	 */
 	private const IMPLICIT_COMMIT = '/^(ALTER|CREATE(?! TEMPORARY)|DROP(?! TEMPORARY)|RENAME|TRUNCATE|LOCK TABLES?|UNLOCK TABLES?|SET (SESSION |@@)?AUTOCOMMIT|ANALYZE|OPTIMIZE|REPAIR|GRANT|REVOKE)\b/';
 
 	/**

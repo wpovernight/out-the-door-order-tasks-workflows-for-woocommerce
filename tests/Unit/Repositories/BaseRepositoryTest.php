@@ -707,6 +707,20 @@ class BaseRepositoryTest extends TestCase {
 		$this->assertSame( 42, $this->repository->insert( array( 'name' => 'Lamp', 'created_at' => new DateTime( '2025-01-02 03:04:05' ) ) ) );
 	}
 
+	public function test_dates_are_written_in_utc_whatever_their_time_zone(): void {
+		$this->wpdb->shouldReceive( 'insert' )
+			->once()
+			->with( self::TABLE, array( 'name' => 'Lamp', 'created_at' => '2025-01-02 03:04:05' ) )
+			->andReturn( 1 );
+		$this->wpdb->shouldReceive( 'query' )
+			->once()
+			->with( 'UPDATE ' . self::TABLE . ' SET created_at = %s WHERE id = %s -- ["2025-01-02 03:04:05","4"]' )
+			->andReturn( 1 );
+
+		$this->repository->insert( array( 'name' => 'Lamp', 'created_at' => new \DateTimeImmutable( '2025-01-02 08:34:05', new \DateTimeZone( '+05:30' ) ) ) );
+		$this->repository->where( 'id', 4 )->update_matching( array( 'created_at' => new DateTime( '2025-01-01 22:04:05', new \DateTimeZone( 'America/New_York' ) ) ) );
+	}
+
 	public function test_insert_returns_false_when_the_database_refuses(): void {
 		$this->wpdb->shouldReceive( 'insert' )->once()->andReturn( false );
 
@@ -866,6 +880,23 @@ class BaseRepositoryTest extends TestCase {
 		$this->assertSame( 1, $repository->save( $model ) );
 		$this->assertArrayNotHasKey( 'created_at', $written[1] );
 		$this->assertSame( $written[1]['updated_at'], $model->updated_at->format( 'Y-m-d H:i:s' ) );
+	}
+
+	public function test_a_saved_model_takes_its_timestamps_in_the_type_its_properties_declare(): void {
+		$this->wpdb->shouldReceive( 'insert' )->twice()->andReturn( 1 );
+
+		$repository = new TimestampedGadgetRepository();
+		$strings    = new StringStampedGadget( array( 'id' => 0, 'name' => 'Strings' ) );
+		$immutable  = new ImmutableStampedGadget( array( 'id' => 0, 'name' => 'Immutable' ) );
+
+		$repository->save( $strings );
+		$repository->save( $immutable );
+
+		$this->assertMatchesRegularExpression( '/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $strings->created_at );
+		$this->assertSame( $strings->created_at, $strings->updated_at );
+		$this->assertInstanceOf( DateTime::class, $immutable->created_at, 'A property typed as the interface gets a DateTime.' );
+		$this->assertInstanceOf( \DateTimeImmutable::class, $immutable->updated_at );
+		$this->assertSame( 'UTC', $immutable->updated_at->getTimezone()->getName() );
 	}
 
 	public function test_a_model_that_fails_to_save_keeps_its_timestamps(): void {
@@ -1503,6 +1534,16 @@ class GadgetRepository extends BaseRepository {
 class StampedGadget extends Gadget {
 	public DateTime $created_at;
 	public DateTime $updated_at;
+}
+
+class StringStampedGadget extends Gadget {
+	public string $created_at;
+	public string $updated_at;
+}
+
+class ImmutableStampedGadget extends Gadget {
+	public \DateTimeInterface $created_at;
+	public \DateTimeImmutable $updated_at;
 }
 
 class TimestampedGadgetRepository extends GadgetRepository {

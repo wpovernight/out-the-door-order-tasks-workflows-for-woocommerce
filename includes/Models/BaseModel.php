@@ -94,10 +94,12 @@ abstract class BaseModel {
 			unset( $data['updated_at'] );
 		}
 
-		// Convert any remaining DateTime properties to MySQL DATETIME format
+		// Convert any remaining DateTime properties to MySQL DATETIME format, in UTC as the columns hold it.
 		foreach ( $data as $key => $value ) {
 			if ( $value instanceof \DateTimeInterface ) {
-				$data[ $key ] = $value->format( 'Y-m-d H:i:s' ); // MySQL DATETIME format
+				$data[ $key ] = \DateTimeImmutable::createFromInterface( $value )
+					->setTimezone( new \DateTimeZone( 'UTC' ) )
+					->format( 'Y-m-d H:i:s' );
 			}
 		}
 

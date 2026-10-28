@@ -35,6 +35,30 @@ class TaskTest extends TestCase {
 		$this->assertSame( '2025-01-03 03:04:05', $task->updated_at->format( 'Y-m-d H:i:s' ) );
 	}
 
+	public function test_dates_are_utc_whatever_phps_default_time_zone(): void {
+		$default = date_default_timezone_get();
+		date_default_timezone_set( 'Asia/Tehran' ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set -- The test runs under another default zone and restores it.
+
+		try {
+			$before = time();
+			$stored = new Task( array( 'title' => 'Stored', 'created_at' => '2025-01-02 03:04:05', 'updated_at' => '2025-01-03 03:04:05' ) );
+			$new    = new Task( array( 'title' => 'New' ) );
+			$after  = time();
+		} finally {
+			date_default_timezone_set( $default ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set -- The test runs under another default zone and restores it.
+		}
+
+		foreach ( array( $stored->created_at, $stored->updated_at, $new->created_at, $new->updated_at ) as $date ) {
+			$this->assertSame( 'UTC', $date->getTimezone()->getName() );
+		}
+
+		$this->assertSame( gmmktime( 3, 4, 5, 1, 2, 2025 ), $stored->created_at->getTimestamp() );
+		$this->assertSame( gmmktime( 3, 4, 5, 1, 3, 2025 ), $stored->updated_at->getTimestamp() );
+		$this->assertGreaterThanOrEqual( $before, $new->created_at->getTimestamp() );
+		$this->assertLessThanOrEqual( $after, $new->created_at->getTimestamp() );
+		$this->assertSame( gmdate( 'Y-m-d H:i:s', $new->created_at->getTimestamp() ), $new->to_db_array()['created_at'] );
+	}
+
 	public function test_defaults_for_a_new_task(): void {
 		$before = new DateTime( '-1 second' );
 		$task   = new Task( array( 'title' => 'New' ) );

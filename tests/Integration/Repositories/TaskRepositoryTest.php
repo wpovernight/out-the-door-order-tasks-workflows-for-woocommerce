@@ -191,6 +191,23 @@ class TaskRepositoryTest extends IntegrationTestCase {
 		);
 	}
 
+	public function test_a_task_is_stamped_in_utc_when_phps_default_time_zone_is_another(): void {
+		$default = date_default_timezone_get();
+		date_default_timezone_set( 'Asia/Tehran' ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set -- The test runs under another default zone and restores it.
+
+		try {
+			$before = time();
+			$id     = $this->repository->save( new Task( array( 'title' => 'Pack' ) ) );
+			$after  = time();
+		} finally {
+			date_default_timezone_set( $default ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.timezone_change_date_default_timezone_set -- The test runs under another default zone and restores it.
+		}
+
+		$row = $this->timestamps( $id );
+		$this->assert_utc_between( $before, $after, $row['created_at'] );
+		$this->assert_utc_between( $before, $after, $row['updated_at'] );
+	}
+
 	public function test_an_update_stamps_updated_at_in_utc_and_leaves_created_at_alone(): void {
 		$id = $this->repository->insert(
 			array(

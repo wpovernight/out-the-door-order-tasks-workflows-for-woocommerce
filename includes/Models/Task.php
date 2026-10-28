@@ -3,6 +3,7 @@
 namespace WPO\OTD\Models;
 
 use DateTime;
+use DateTimeZone;
 use Exception;
 
 defined( 'ABSPATH' ) || exit;
@@ -24,8 +25,9 @@ class Task extends BaseModel {
 		$this->id          = isset( $data['id'] ) && $data['id'] > 0 ? (int) $data['id'] : 0;
 		$this->title       = $data['title'];
 		$this->description = $data['description'] ?? '';
-		$this->created_at  = new DateTime( $data['created_at'] ?? 'now' );
-		$this->updated_at  = new DateTime( $data['updated_at'] ?? 'now' );
+		// The columns hold UTC, whatever PHP's default time zone is.
+		$this->created_at = new DateTime( $data['created_at'] ?? 'now', new DateTimeZone( 'UTC' ) );
+		$this->updated_at = new DateTime( $data['updated_at'] ?? 'now', new DateTimeZone( 'UTC' ) );
 	}
 
 	/**

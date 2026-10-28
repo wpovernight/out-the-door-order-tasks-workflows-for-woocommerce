@@ -85,10 +85,22 @@ class BaseModelTest extends TestCase {
 
 		$this->assertArrayNotHasKey( 'id', $data );
 		$this->assertArrayNotHasKey( 'scratch', $data );
-		$this->assertArrayNotHasKey( 'updated_at', $data, 'The database maintains updated_at.' );
+		$this->assertArrayNotHasKey( 'updated_at', $data, 'The repository stamps updated_at.' );
 		$this->assertArrayNotHasKey( 'guarded', $data );
 		$this->assertArrayNotHasKey( 'non_db_properties', $data );
 		$this->assertSame( 'Widget', $data['name'] );
+	}
+
+	public function test_to_db_array_writes_dates_in_utc_whatever_their_time_zone(): void {
+		$model             = new Widget( array( 'id' => 0, 'name' => 'New' ) );
+		$model->created_at = new DateTime( '2025-01-02 08:34:05', new \DateTimeZone( '+05:30' ) );
+		$model->published  = new DateTime( '2025-01-01 22:04:05', new \DateTimeZone( 'America/New_York' ) );
+
+		$data = $model->to_db_array();
+
+		$this->assertSame( '2025-01-02 03:04:05', $data['created_at'] );
+		$this->assertSame( '2025-01-02 03:04:05', $data['published'] );
+		$this->assertSame( '+05:30', $model->created_at->getTimezone()->getName(), 'The model keeps its own date.' );
 	}
 
 	public function test_to_db_array_keeps_created_at_only_for_new_rows(): void {
