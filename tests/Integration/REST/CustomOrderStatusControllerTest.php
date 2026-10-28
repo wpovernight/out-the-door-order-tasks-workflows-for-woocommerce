@@ -6,6 +6,19 @@ use WPO\OTD\Repositories\CustomOrderStatusRepository;
 use WPO\OTD\Services\CustomOrderStatusService;
 
 class CustomOrderStatusControllerTest extends RestTestCase {
+	public function test_the_routes_live_under_the_woocommerce_namespace(): void {
+		$routes = rest_get_server()->get_routes( 'wc/v3/wpo/otd' );
+
+		$this->assertSame(
+			array( 'GET', 'POST' ),
+			$this->methods( $routes['/wc/v3/wpo/otd/custom-order-statuses'] )
+		);
+		$this->assertSame(
+			array( 'DELETE', 'GET', 'PATCH', 'POST', 'PUT' ),
+			$this->methods( $routes['/wc/v3/wpo/otd/custom-order-statuses/(?P<id>\d+)'] )
+		);
+	}
+
 	public function test_guests_are_turned_away(): void {
 		wp_set_current_user( 0 );
 
@@ -132,6 +145,25 @@ class CustomOrderStatusControllerTest extends RestTestCase {
 			$this->json( $response )['data']
 		);
 		$this->assertNotNull( $this->make( CustomOrderStatusService::class )->find( $id ), 'The status stays until its orders are moved.' );
+	}
+
+	/**
+	 * The HTTP methods a route's handlers answer, sorted.
+	 *
+	 * @param array $handlers
+	 *
+	 * @return string[]
+	 */
+	private function methods( array $handlers ): array {
+		$methods = array();
+
+		foreach ( $handlers as $handler ) {
+			$methods = array_merge( $methods, array_keys( array_filter( $handler['methods'] ) ) );
+		}
+
+		sort( $methods );
+
+		return array_values( array_unique( $methods ) );
 	}
 
 	/**
