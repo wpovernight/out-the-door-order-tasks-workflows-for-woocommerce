@@ -322,6 +322,38 @@ class TaskManagerServiceTest extends IntegrationTestCase {
 		$this->assertSame( array( 'Read me' ), array_map( static fn( $task ) => $task->title, $this->service->get_all_tasks() ) );
 	}
 
+	public function test_get_tasks_reads_many_tasks_in_one_query_keyed_by_id(): void {
+		global $wpdb;
+
+		$first  = $this->create_task( 'First', $this->status_option_id( 'not_started' ) );
+		$second = $this->create_task( 'Second', $this->status_option_id( 'not_started' ) );
+		$before = $wpdb->num_queries;
+		$tasks  = $this->service->get_tasks( array( $second, $first, $second, $first + 1000, 0, -3 ) );
+
+		$this->assertSame( 1, $wpdb->num_queries - $before );
+		$this->assertEqualsCanonicalizing( array( $first, $second ), array_keys( $tasks ), 'Each found once, a missing or invalid id left out.' );
+		$this->assertSame( 'First', $tasks[ $first ]->title );
+		$this->assertSame( 'Second', $tasks[ $second ]->title );
+	}
+
+	public function test_get_tasks_of_no_ids_runs_no_query(): void {
+		global $wpdb;
+
+		$before = $wpdb->num_queries;
+
+		$this->assertSame( array(), $this->service->get_tasks( array() ) );
+		$this->assertSame( array(), $this->service->get_tasks( array( 0 ) ) );
+		$this->assertSame( $before, $wpdb->num_queries );
+	}
+
+	public function test_get_tasks_the_database_fails_is_null_not_none_found(): void {
+		$id = $this->create_task( 'Read me', $this->status_option_id( 'not_started' ) );
+
+		$this->fail_queries( '/^SELECT \* FROM `?\w+wpo_otd_tasks`?/' );
+
+		$this->assertNull( $this->service->get_tasks( array( $id ) ) );
+	}
+
 	public function test_get_task_with_fields_lists_every_field_and_resolves_values(): void {
 		$creator = self::factory()->user->create( array( 'display_name' => 'Jane Packer' ) );
 		$order   = $this->create_order();

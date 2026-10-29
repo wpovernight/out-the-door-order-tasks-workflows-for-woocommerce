@@ -215,6 +215,18 @@ final class TaskManagerService {
 	}
 
 	/**
+	 * Get several Tasks by ID, in one query.
+	 *
+	 * @param int[] $task_ids
+	 *
+	 * @return array<int, Task>|null The tasks found, keyed by ID; one that does not exist is left out. Null when the
+	 *                               database failed.
+	 */
+	public function get_tasks( array $task_ids ): ?array {
+		return $this->task_repository->find_by_ids( $task_ids );
+	}
+
+	/**
 	 * Create a new Task.
 	 *
 	 * The title and description are sanitized, then cut to what their columns hold.

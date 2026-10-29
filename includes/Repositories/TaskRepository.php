@@ -220,4 +220,36 @@ class TaskRepository extends BaseRepository {
 
 		return is_string( $fitted ) ? $fitted : $text;
 	}
+
+	/**
+	 * Read the tasks with these IDs in one query, whatever is cached.
+	 *
+	 * Unlike find_many(), a failed query is told apart from finding none.
+	 *
+	 * @param int[] $ids
+	 *
+	 * @return array<int, Task>|null The tasks found, keyed by ID; one that does not exist is left out. Null when the
+	 *                               database failed.
+	 */
+	public function find_by_ids( array $ids ): ?array {
+		$ids = array_values( array_unique( array_filter( array_map( 'intval', $ids ), static fn( int $id ): bool => $id > 0 ) ) );
+
+		if ( empty( $ids ) ) {
+			return array();
+		}
+
+		$tasks = $this->where( 'id', 'IN', $ids )->get();
+
+		if ( empty( $tasks ) && '' !== $this->get_last_db_error() ) {
+			return null;
+		}
+
+		$found = array();
+
+		foreach ( $tasks as $task ) {
+			$found[ (int) $task->id ] = $task;
+		}
+
+		return $found;
+	}
 }
