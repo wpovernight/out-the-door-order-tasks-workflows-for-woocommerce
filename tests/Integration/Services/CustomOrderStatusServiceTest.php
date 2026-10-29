@@ -88,6 +88,38 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		$this->assertSame( 'Newer refund', $this->service->update( $id, array( 'status_key' => 'refunded', 'label' => 'Newer refund' ) )->label );
 	}
 
+	/**
+	 * @dataProvider non_string_key_provider
+	 */
+	public function test_update_refuses_a_status_key_that_is_not_a_string( $key ): void {
+		$status = $this->service->create( array( 'label' => 'Packed' ) );
+
+		try {
+			$this->service->update( $status->id, array( 'status_key' => $key, 'label' => 'Boxed' ) );
+			$this->fail( 'A status key that is not a string must be refused.' );
+		} catch ( \WPO\OTD\Exceptions\InvalidStatusKeyException $e ) {
+			$this->assertSame( 'A status key must be a string.', $e->getMessage() );
+		}
+
+		$this->assertSame( 'packed', $this->service->find( $status->id )->status_key );
+		$this->assertSame( 'Packed', $this->service->find( $status->id )->label );
+	}
+
+	public function non_string_key_provider(): array {
+		return array(
+			'an int'   => array( 5 ),
+			'null'     => array( null ),
+			'an array' => array( array( 'packed' ) ),
+		);
+	}
+
+	public function test_the_unique_suffix_skips_keys_other_order_statuses_use(): void {
+		add_filter( 'wc_order_statuses', static fn( $statuses ) => $statuses + array( 'wc-shipped-2' => 'Shipped elsewhere' ) );
+
+		$this->assertSame( 'shipped', $this->service->create( array( 'label' => 'Shipped' ) )->status_key );
+		$this->assertSame( 'shipped-3', $this->service->create( array( 'label' => 'Shipped' ) )->status_key );
+	}
+
 	public function test_create_makes_the_key_unique(): void {
 		$this->service->create( array( 'label' => 'Packed' ) );
 
@@ -450,18 +482,71 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		$this->assertStringContainsString( "The deletion of custom order status {$status->id} stopped", $logged[0][1] );
 	}
 
-	public function test_a_deletion_to_the_statuss_own_key_is_refused(): void {
+	/**
+	 * @dataProvider own_key_fallback_provider
+	 */
+	public function test_a_deletion_to_the_statuss_own_key_is_refused( string $fallback ): void {
 		$status = $this->service->create( array( 'label' => 'Packed' ) );
 
 		try {
-			$this->service->begin_deletion( $status->id, 'packed' );
+			$this->service->begin_deletion( $status->id, $fallback );
 			$this->fail( 'A status cannot move its orders to itself.' );
 		} catch ( \RuntimeException $e ) {
-			$this->assertStringContainsString( 'cannot move its orders to its own key packed', $e->getMessage() );
+			$this->assertStringContainsString( "cannot move its orders to its own key {$fallback}", $e->getMessage() );
 		}
 
 		$this->assertFalse( $this->service->find( $status->id )->is_deleting );
 		$this->assertFalse( as_has_scheduled_action( self::REASSIGN_HOOK ) );
+	}
+
+	public function own_key_fallback_provider(): array {
+		return array(
+			'the key'                 => array( 'packed' ),
+			'the prefixed key'        => array( 'wc-packed' ),
+			'the key in another case' => array( 'WC-Packed' ),
+		);
+	}
+
+	public function test_a_deletion_batch_to_the_prefixed_own_key_stops(): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$order  = $this->order_in( 'packed' );
+		$logs   = $this->capture_logs();
+
+		$this->service->process_deletion_batch( 'packed', 'wc-packed', $status->id );
+
+		$this->assertFalse( as_has_scheduled_action( self::REASSIGN_HOOK ) );
+		$this->assertSame( 'packed', wc_get_order( $order )->get_status() );
+		$this->assertNotNull( $this->service->find( $status->id ) );
+		$this->assertStringContainsString( 'stopped', $logs()[0][1] );
+	}
+
+	public function test_orders_the_filter_sends_back_to_their_own_status_are_skipped_without_looping(): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$stuck  = $this->order_in( 'packed' );
+		$moving = $this->order_in( 'packed' );
+		$logs   = $this->capture_logs();
+		add_filter(
+			'wpo_otd_reassign_orders_to_status',
+			static fn( $to_status, $order ) => $order->get_id() === $stuck ? 'wc-packed' : $to_status,
+			10,
+			2
+		);
+
+		$this->service->process_deletion_batch( 'packed', 'on-hold', $status->id );
+
+		$this->assertSame( 'on-hold', wc_get_order( $moving )->get_status() );
+		$this->assertSame( 'packed', wc_get_order( $stuck )->get_status() );
+		$this->assertTrue( as_has_scheduled_action( self::REASSIGN_HOOK ), 'An order was moved, so the next batch runs.' );
+
+		as_unschedule_all_actions( self::REASSIGN_HOOK );
+		$this->service->process_deletion_batch( 'packed', 'on-hold', $status->id );
+
+		$this->assertFalse( as_has_scheduled_action( self::REASSIGN_HOOK ), 'A batch that moves nothing does not run again.' );
+		$this->assertNotNull( $this->service->find( $status->id ), 'The status stays while it has an order.' );
+
+		$messages = array_column( $logs(), 1 );
+		$this->assertStringContainsString( "Order {$stuck} stays in status \"packed\"", $messages[0] );
+		$this->assertStringContainsString( 'none of its orders could be moved', end( $messages ) );
 	}
 
 	public function test_an_update_never_writes_the_deletion_flag(): void {
@@ -601,8 +686,19 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		$status = $this->create_registered_status( 'Packed' );
 		$this->order_in( 'packed' );
 
-		// An order that is not moved stands in for one that arrived while the batch ran.
-		add_filter( 'wpo_otd_reassign_orders_to_status', static fn( $to, $order ) => 'packed', 10, 2 );
+		// An order placed in the status while the batch runs.
+		$arrived = false;
+		add_filter(
+			'wpo_otd_reassign_orders_to_status',
+			function ( $to ) use ( &$arrived ) {
+				if ( ! $arrived ) {
+					$arrived = true;
+					$this->order_in( 'packed' );
+				}
+
+				return $to;
+			}
+		);
 
 		$this->service->process_deletion_batch( 'packed', 'on-hold', $status->id );
 
@@ -628,7 +724,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		$this->assertSame( 'on-hold', wc_get_order( $second )->get_status() );
 	}
 
-	public function test_an_order_that_cannot_be_reassigned_is_logged_and_retried(): void {
+	public function test_a_batch_whose_every_order_fails_to_move_is_logged_and_stops(): void {
 		$status = $this->create_registered_status( 'Packed' );
 		$order  = $this->order_in( 'packed' );
 		$logs   = array();
@@ -652,9 +748,15 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		$this->service->process_deletion_batch( 'packed', 'processing', $status->id );
 
 		$this->assertSame( 'packed', wc_get_order( $order )->get_status() );
-		$this->assertSame( array( "warning: Failed to reassign order {$order} from status \"packed\" to \"processing\": Order is locked" ), $logs );
+		$this->assertSame(
+			array(
+				"warning: Failed to reassign order {$order} from status \"packed\" to \"processing\": Order is locked",
+				"error: The deletion of custom order status {$status->id} stopped: none of its orders could be moved from packed.",
+			),
+			$logs
+		);
 		$this->assertNotNull( $this->service->find( $status->id ), 'The status stays while orders remain.' );
-		$this->assertTrue( as_has_scheduled_action( self::REASSIGN_HOOK, array( 'packed', 'processing', $status->id ), 'wpo-otd' ) );
+		$this->assertFalse( as_has_scheduled_action( self::REASSIGN_HOOK ), 'The same failing batch is not run again; deleting the status again restarts it.' );
 	}
 
 	public function test_the_scheduled_hook_runs_a_batch(): void {
@@ -663,6 +765,30 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		do_action( self::REASSIGN_HOOK, 'packed', 'on-hold', $status->id );
 
 		$this->assertNull( $this->service->find( $status->id ) );
+	}
+
+	/**
+	 * Record what the plugin logs, keeping it out of WooCommerce's log files.
+	 *
+	 * @return callable Returns the recorded level and message pairs.
+	 */
+	private function capture_logs(): callable {
+		$logs = array();
+
+		add_filter(
+			'wpo_otd_logging_enabled',
+			static function ( $enabled, $level, $text ) use ( &$logs ) {
+				$logs[] = array( $level, $text );
+
+				return false;
+			},
+			10,
+			3
+		);
+
+		return static function () use ( &$logs ) {
+			return $logs;
+		};
 	}
 
 	/**

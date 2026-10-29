@@ -330,7 +330,7 @@ class CustomOrderStatusService {
 				$status->status_key = CustomOrderStatus::shorten_key( $base_key, CustomOrderStatus::MAX_KEY_LENGTH - strlen( $suffix ) ) . $suffix;
 				$existing           = $this->repository->where( 'status_key', $status->status_key )->first();
 				$counter++;
-			} while ( $existing );
+			} while ( $existing || null !== $this->key_problem( $status->status_key ) );
 		}
 
 		$result = $this->repository->save( $status );
@@ -408,7 +408,11 @@ class CustomOrderStatusService {
 		}
 
 		// Keys are stored as create() stores them, so the uniqueness check compares like with like.
-		if ( isset( $data['status_key'] ) && is_string( $data['status_key'] ) ) {
+		if ( array_key_exists( 'status_key', $data ) ) {
+			if ( ! is_string( $data['status_key'] ) ) {
+				throw new InvalidStatusKeyException( esc_html__( 'A status key must be a string.', 'out-the-door-order-tasks-workflows-for-woocommerce' ) );
+			}
+
 			$data['status_key'] = sanitize_title( $data['status_key'] );
 
 			// The background job moving its orders finds them by the key it was given.
@@ -564,7 +568,7 @@ class CustomOrderStatusService {
 		}
 
 		// Its orders would be moved to the status they have, again and again.
-		if ( $status->status_key === $fallback_status ) {
+		if ( self::same_status( $status->status_key, $fallback_status ) ) {
 			throw new RuntimeException( esc_html( "Custom order status {$id} cannot move its orders to its own key {$fallback_status}." ) );
 		}
 
@@ -660,7 +664,7 @@ class CustomOrderStatusService {
 	 */
 	public function process_deletion_batch( string $from_status, string $to_status, int $status_id ): void {
 		// Moving orders to the status they have would leave them there and run this job forever.
-		if ( $from_status === $to_status ) {
+		if ( self::same_status( $from_status, $to_status ) ) {
 			Logger::error( "The deletion of custom order status {$status_id} stopped: its orders cannot move from {$from_status} to the same status." );
 
 			return;
@@ -679,6 +683,8 @@ class CustomOrderStatusService {
 			)
 		);
 
+		$moved = 0;
+
 		foreach ( $orders as $order ) {
 			try {
 				/**
@@ -689,11 +695,23 @@ class CustomOrderStatusService {
 				 */
 				$resolved_to_status = apply_filters( 'wpo_otd_reassign_orders_to_status', $to_status, $order );
 
+				if ( self::same_status( $from_status, (string) $resolved_to_status ) ) {
+					Logger::warning(
+						sprintf(
+							'Order %d stays in status "%s": the status to move it to is the same one.',
+							$order->get_id(),
+							$from_status
+						)
+					);
+					continue;
+				}
+
 				if ( is_callable( array( $order, 'update_status' ) ) ) {
 					$order->update_status(
 						$resolved_to_status,
 						'Out the Door: ' . __( 'Status changed due to custom order status deletion.', 'out-the-door-order-tasks-workflows-for-woocommerce' )
 					);
+					++$moved;
 				}
 			} catch ( \Throwable $e ) {
 				Logger::warning( sprintf(
@@ -704,6 +722,13 @@ class CustomOrderStatusService {
 					$e->getMessage()
 				) );
 			}
+		}
+
+		// A batch that moved no order would find the same orders again, batch after batch.
+		if ( 0 !== count( $orders ) && 0 === $moved ) {
+			Logger::error( "The deletion of custom order status {$status_id} stopped: none of its orders could be moved from {$from_status}." );
+
+			return;
 		}
 
 		// Schedule next batch if there might be more orders.
@@ -741,6 +766,25 @@ class CustomOrderStatusService {
 
 		// Final batch done — now it's safe to remove the status.
 		$this->remove( $status_id, $from_status, $to_status );
+	}
+
+	/**
+	 * Whether two order statuses are the same once their optional "wc-" prefix and case are set aside, as WooCommerce
+	 * compares them.
+	 *
+	 * @param string $first
+	 * @param string $second
+	 *
+	 * @return bool
+	 */
+	private static function same_status( string $first, string $second ): bool {
+		$normalize = static function ( string $status ): string {
+			$status = strtolower( $status );
+
+			return str_starts_with( $status, 'wc-' ) ? substr( $status, 3 ) : $status;
+		};
+
+		return $normalize( $first ) === $normalize( $second );
 	}
 
 	/**
