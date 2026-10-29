@@ -562,7 +562,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		$this->assertNotNull( $this->service->find( $status->id ) );
 
 		$messages = array_column( $logs(), 1 );
-		$this->assertContains( "Order {$order} could not be moved from status \"packed\" to \"on-hold\"; it stays.", $messages );
+		$this->assertContains( "Order {$order} could not be moved from status \"packed\"; it stays.", $messages );
 		$this->assertSame( "The deletion of custom order status {$status->id} stopped: orders {$order} could not be moved from packed.", end( $messages ) );
 	}
 
@@ -583,15 +583,15 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 			2
 		);
 
-		// The newest page holds only the stuck orders: they are carried to the next batch.
+		// The newest page holds only the stuck orders: they are kept and left out of the next batch.
 		$this->service->process_deletion_batch( 'packed', 'on-hold', $status->id );
 
 		$this->assertSame( 'packed', wc_get_order( $older )->get_status() );
 		$next = as_get_scheduled_actions( array( 'hook' => self::REASSIGN_HOOK, 'status' => 'pending' ) );
 		$this->assertCount( 1, $next );
 		$args = reset( $next )->get_args();
-		$this->assertSame( array( 'packed', 'on-hold', $status->id ), array_slice( $args, 0, 3 ) );
-		$this->assertEqualsCanonicalizing( array( $first, $second ), $args[3] );
+		$this->assertSame( array( 'packed', 'on-hold', $status->id ), $args );
+		$this->assertEqualsCanonicalizing( array( $first, $second ), get_option( "wpo_otd_status_deletion_stuck_{$status->id}" ) );
 
 		as_unschedule_all_actions( self::REASSIGN_HOOK );
 		do_action( self::REASSIGN_HOOK, ...$args );
@@ -605,13 +605,161 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		);
 	}
 
-	public function test_a_job_scheduled_with_three_arguments_still_runs(): void {
+	public function test_a_job_that_carries_stuck_orders_as_an_argument_still_runs_and_keeps_them(): void {
+		$status  = $this->create_registered_status( 'Packed' );
+		$stuck   = $this->order_in( 'packed' );
+		$movable = $this->order_in( 'packed' );
+		$this->capture_logs();
+		$seen = array();
+		add_filter(
+			'wpo_otd_reassign_orders_to_status',
+			static function ( $to_status, $order ) use ( $stuck, &$seen ) {
+				$seen[] = $order->get_id();
+
+				return $order->get_id() === $stuck ? 'packed' : $to_status;
+			},
+			10,
+			2
+		);
+
+		do_action( self::REASSIGN_HOOK, 'packed', 'on-hold', $status->id, array( $stuck ) );
+
+		$this->assertSame( 'on-hold', wc_get_order( $movable )->get_status() );
+		$this->assertSame( array( $movable ), $seen, 'The batch leaves the carried order out.' );
+		$this->assertSame( array( $stuck ), get_option( "wpo_otd_status_deletion_stuck_{$status->id}" ), 'The carried order is kept in the option.' );
+		$this->assertFalse( as_has_scheduled_action( self::REASSIGN_HOOK ) );
+	}
+
+	public function test_a_stuck_order_that_leaves_the_status_lets_the_deletion_finish(): void {
 		$status = $this->create_registered_status( 'Packed' );
 		$order  = $this->order_in( 'packed' );
+		$this->capture_logs();
+		$keep = static fn() => 'packed';
+		add_filter( 'wpo_otd_reassign_orders_to_status', $keep );
 
-		do_action( self::REASSIGN_HOOK, 'packed', 'on-hold', $status->id );
+		$this->service->process_deletion_batch( 'packed', 'on-hold', $status->id );
+		$this->assertNotNull( $this->service->find( $status->id ), 'The stuck order stops the deletion.' );
 
-		$this->assertSame( 'on-hold', wc_get_order( $order )->get_status() );
+		// The order is completed elsewhere.
+		remove_filter( 'wpo_otd_reassign_orders_to_status', $keep );
+		wc_get_order( $order )->update_status( 'completed' );
+
+		$this->service->process_deletion_batch( 'packed', 'on-hold', $status->id );
+
+		$this->assertNull( $this->service->find( $status->id ), 'Nothing is left in the status, so it is deleted.' );
+		$this->assertFalse( get_option( "wpo_otd_status_deletion_stuck_{$status->id}" ), 'The stuck orders are forgotten.' );
+	}
+
+	public function test_a_stuck_order_that_leaves_the_status_during_the_last_batch_lets_the_deletion_finish(): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$stuck  = $this->order_in( 'packed' );
+		$this->capture_logs();
+		add_filter( 'wpo_otd_reassign_orders_to_status', static fn() => 'packed' );
+		$this->service->process_deletion_batch( 'packed', 'on-hold', $status->id );
+		remove_all_filters( 'wpo_otd_reassign_orders_to_status' );
+
+		// Another order arrives; while it is moved, the stuck order is completed elsewhere.
+		$other = $this->order_in( 'packed' );
+		add_filter(
+			'wpo_otd_reassign_orders_to_status',
+			static function ( $to_status ) use ( $stuck ) {
+				wc_get_order( $stuck )->update_status( 'completed' );
+
+				return $to_status;
+			}
+		);
+
+		$this->service->process_deletion_batch( 'packed', 'on-hold', $status->id );
+
+		$this->assertSame( 'on-hold', wc_get_order( $other )->get_status() );
+		$this->assertNull( $this->service->find( $status->id ) );
+	}
+
+	public function test_an_order_deleted_during_the_batch_does_not_stop_the_deletion(): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$order  = $this->order_in( 'packed' );
+		$this->capture_logs();
+		add_filter(
+			'wpo_otd_reassign_orders_to_status',
+			static function ( $to_status, $batch_order ) {
+				wc_get_order( $batch_order->get_id() )->delete( true );
+
+				return 'packed';
+			},
+			10,
+			2
+		);
+
+		$this->service->process_deletion_batch( 'packed', 'on-hold', $status->id );
+
+		$this->assertFalse( wc_get_order( $order ) );
+		$this->assertNull( $this->service->find( $status->id ), 'The deleted order is not stuck in the status.' );
+	}
+
+	public function test_a_deletion_with_more_stuck_orders_than_allowed_stops(): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$this->order_in( 'packed' );
+		$this->order_in( 'packed' );
+		$logs = $this->capture_logs();
+		add_filter( 'wpo_otd_reassign_orders_to_status', static fn() => 'packed' );
+		add_filter( 'wpo_otd_status_deletion_max_stuck_orders', static fn() => 1 );
+
+		$this->service->process_deletion_batch( 'packed', 'on-hold', $status->id );
+
+		$this->assertFalse( as_has_scheduled_action( self::REASSIGN_HOOK ) );
+		$this->assertSame( "The deletion of custom order status {$status->id} stopped: more than 1 of its orders could not be moved from packed.", array_column( $logs(), 1 )[ count( $logs() ) - 1 ] );
+	}
+
+	/**
+	 * @dataProvider invalid_max_stuck_provider
+	 */
+	public function test_an_invalid_stuck_order_limit_falls_back_to_the_default( $max ): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$this->order_in( 'packed' );
+		$logs = $this->capture_logs();
+		add_filter( 'wpo_otd_reassign_orders_to_status', static fn() => 'packed' );
+		add_filter( 'wpo_otd_status_deletion_max_stuck_orders', static fn() => $max );
+
+		$this->service->process_deletion_batch( 'packed', 'on-hold', $status->id );
+
+		$this->assertStringContainsString( 'could not be moved from packed', array_column( $logs(), 1 )[ count( $logs() ) - 1 ] );
+		$this->assertStringNotContainsString( 'more than', array_column( $logs(), 1 )[ count( $logs() ) - 1 ] );
+	}
+
+	public function invalid_max_stuck_provider(): array {
+		return array(
+			'zero'     => array( 0 ),
+			'negative' => array( -5 ),
+			'a string' => array( '1' ),
+			'a float'  => array( 1.0 ),
+		);
+	}
+
+	public function test_a_restart_walks_past_more_stuck_orders_than_one_batch(): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$older  = $this->order_in( 'packed' );
+		$this->date_order( $older, '-2 days' );
+		$stuck = array( $this->order_in( 'packed' ), $this->order_in( 'packed' ), $this->order_in( 'packed' ) );
+		$logs  = $this->capture_logs();
+		add_filter( 'wpo_otd_reassign_orders_batch_size', static fn() => 2 );
+		add_filter( 'wpo_otd_reassign_orders_to_status', static fn( $to_status, $order ) => in_array( $order->get_id(), $stuck, true ) ? 'packed' : $to_status, 10, 2 );
+
+		$this->assertSame( CustomOrderStatusService::DELETION_SCHEDULED, $this->service->begin_deletion( $status->id ) );
+		$this->run_reassign_jobs();
+
+		$this->assertSame( 'on-hold', wc_get_order( $older )->get_status(), 'The older order is reached past the stuck ones.' );
+		$this->assertEqualsCanonicalizing( $stuck, get_option( "wpo_otd_status_deletion_stuck_{$status->id}" ) );
+		$this->assertStringContainsString( 'stopped: orders', array_column( $logs(), 1 )[ count( $logs() ) - 1 ] );
+
+		// Deleting again retries the stuck orders: what kept them may have been fixed.
+		remove_all_filters( 'wpo_otd_reassign_orders_to_status' );
+		$this->assertSame( CustomOrderStatusService::DELETION_SCHEDULED, $this->service->begin_deletion( $status->id ) );
+		$this->assertFalse( get_option( "wpo_otd_status_deletion_stuck_{$status->id}" ) );
+		$this->run_reassign_jobs();
+
+		foreach ( $stuck as $order_id ) {
+			$this->assertSame( 'on-hold', wc_get_order( $order_id )->get_status() );
+		}
 		$this->assertNull( $this->service->find( $status->id ) );
 	}
 
@@ -831,6 +979,27 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		do_action( self::REASSIGN_HOOK, 'packed', 'on-hold', $status->id );
 
 		$this->assertNull( $this->service->find( $status->id ) );
+	}
+
+	/**
+	 * Run the pending reassign jobs, and the ones they schedule, until none is left.
+	 *
+	 * @return void
+	 */
+	private function run_reassign_jobs(): void {
+		for ( $runs = 0; $runs < 20; $runs++ ) {
+			$pending = as_get_scheduled_actions( array( 'hook' => self::REASSIGN_HOOK, 'status' => 'pending' ) );
+			if ( array() === $pending ) {
+				return;
+			}
+
+			foreach ( $pending as $action_id => $action ) {
+				\ActionScheduler::store()->mark_complete( $action_id );
+				do_action( self::REASSIGN_HOOK, ...$action->get_args() );
+			}
+		}
+
+		$this->fail( 'The reassign jobs did not stop.' );
 	}
 
 	/**

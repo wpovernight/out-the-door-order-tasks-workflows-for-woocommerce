@@ -43,9 +43,9 @@ class CustomOrderStatusService {
 	private const DELETION_LOCK_TIMEOUT = 3;
 
 	/**
-	 * The most orders a status deletion carries as stuck before it stops.
+	 * The most orders a status deletion may find it cannot move before it stops, unless filtered.
 	 */
-	private const MAX_STUCK_ORDERS = 500;
+	private const DEFAULT_MAX_STUCK_ORDERS = 5000;
 
 	/**
 	 * WooCommerce's own order status keys, refused even before WooCommerce lists them.
@@ -579,8 +579,10 @@ class CustomOrderStatusService {
 		}
 
 		if ( $status->is_deleting ) {
-			// A batch job that failed leaves the status flagged with nothing left to finish its deletion.
+			// A batch job that failed or stopped leaves the status flagged with nothing left to finish its deletion.
+			// Deleting it again retries the orders that were stuck, since what kept them may have been fixed.
 			if ( ! $this->has_deletion_job( $id ) ) {
+				$this->save_stuck_orders( $id, array() );
 				as_schedule_single_action(
 					time(),
 					'wpo_otd_reassign_orders',
@@ -616,6 +618,7 @@ class CustomOrderStatusService {
 		}
 		$this->cached_statuses = null;
 
+		$this->save_stuck_orders( $id, array() );
 		as_schedule_single_action(
 			time(),
 			'wpo_otd_reassign_orders',
@@ -658,23 +661,22 @@ class CustomOrderStatusService {
 	 * Process one batch of an in-progress status deletion.
 	 *
 	 * Reassigns up to a (filterable) batch of orders from the deleted status to the fallback, then either reschedules
-	 * itself for the next batch or, once no order is left to move, deletes the custom status row and fires the
+	 * itself for the next batch or, once no order is left in the status, deletes the custom status row and fires the
 	 * deleted action. Runs via the 'wpo_otd_reassign_orders' scheduled action.
 	 *
 	 * An order that stays in the status, because the fallback filtered for it is the same status or because it cannot
-	 * be saved, is carried to the next batches as stuck and left out of them, so they reach the orders after it. When
-	 * only stuck orders are left, the deletion stops and logs them: the status stays, flagged, and deleting it again
-	 * starts over.
+	 * be saved, is stuck: it is kept in an option and left out of the next batches, so they reach the orders after
+	 * it. A stuck order that has left the status since is dropped from the list. When only stuck orders are left in
+	 * the status, the deletion stops and logs them: the status stays, flagged, and deleting it again starts over.
 	 *
 	 * @param string $from_status The status key to reassign from (without 'wc-' prefix).
 	 * @param string $to_status   The status key to reassign to (without 'wc-' prefix).
 	 * @param int    $status_id   The ID of the custom status being deleted.
-	 * @param int[]  $stuck       IDs of the orders earlier batches could not move. Absent from jobs scheduled before
-	 *                            batches carried them.
+	 * @param int[]  $carried     Stuck order IDs that jobs scheduled before the option held them carry along.
 	 *
 	 * @return void
 	 */
-	public function process_deletion_batch( string $from_status, string $to_status, int $status_id, array $stuck = array() ): void {
+	public function process_deletion_batch( string $from_status, string $to_status, int $status_id, array $carried = array() ): void {
 		// Moving orders to the status they have would leave them there and run this job forever.
 		if ( self::same_status( $from_status, $to_status ) ) {
 			Logger::error( "The deletion of custom order status {$status_id} stopped: its orders cannot move from {$from_status} to the same status." );
@@ -682,7 +684,7 @@ class CustomOrderStatusService {
 			return;
 		}
 
-		$stuck = array_values( array_unique( array_filter( array_map( 'absint', $stuck ) ) ) );
+		$stuck = $this->still_in_status( $from_status, array_merge( $this->stuck_orders( $status_id ), $carried ) );
 
 		/**
 		 * Filter the number of orders reassigned per batch when draining a deleted status.
@@ -700,15 +702,28 @@ class CustomOrderStatusService {
 			)
 		);
 
+		$attempted = array();
 		foreach ( $orders as $order ) {
-			if ( ! $this->move_order( $order, $from_status, $to_status ) ) {
+			if ( $this->move_order( $order, $from_status, $to_status ) ) {
+				$attempted[] = (int) $order->get_id();
+			} else {
 				$stuck[] = (int) $order->get_id();
 			}
 		}
 
-		// Each batch either moves orders or adds them to the stuck ones, so a list this long means it is not moving.
-		if ( count( $stuck ) > self::MAX_STUCK_ORDERS ) {
-			Logger::error( sprintf( 'The deletion of custom order status %d stopped: more than %d of its orders could not be moved from %s.', $status_id, self::MAX_STUCK_ORDERS, $from_status ) );
+		// update_status() and save() catch a failed save themselves, so an order may look moved while its stored
+		// status is still the old one: the stored statuses of the batch are read back, in one query.
+		foreach ( $this->still_in_status( $from_status, $attempted ) as $order_id ) {
+			Logger::warning( sprintf( 'Order %d could not be moved from status "%s"; it stays.', $order_id, $from_status ) );
+			$stuck[] = $order_id;
+		}
+
+		$stuck = array_values( array_unique( $stuck ) );
+		$this->save_stuck_orders( $status_id, $stuck );
+
+		$max = $this->max_stuck_orders();
+		if ( count( $stuck ) > $max ) {
+			Logger::error( sprintf( 'The deletion of custom order status %d stopped: more than %d of its orders could not be moved from %s.', $status_id, $max, $from_status ) );
 
 			return;
 		}
@@ -728,17 +743,13 @@ class CustomOrderStatusService {
 		);
 
 		if ( $more ) {
-			as_schedule_single_action(
-				time(),
-				'wpo_otd_reassign_orders',
-				array_merge( array( $from_status, $to_status, $status_id ), $stuck ? array( $stuck ) : array() ),
-				'wpo-otd'
-			);
+			as_schedule_single_action( time(), 'wpo_otd_reassign_orders', array( $from_status, $to_status, $status_id ), 'wpo-otd' );
 
 			return;
 		}
 
-		if ( $stuck ) {
+		// The stuck orders stop the deletion only while they are still in the status.
+		if ( array() !== $this->still_in_status( $from_status, $stuck ) ) {
 			Logger::error( sprintf( 'The deletion of custom order status %d stopped: orders %s could not be moved from %s.', $status_id, implode( ', ', $stuck ), $from_status ) );
 
 			return;
@@ -749,13 +760,16 @@ class CustomOrderStatusService {
 	}
 
 	/**
-	 * Move one order of a status being deleted to its fallback status.
+	 * Ask WooCommerce to move one order of a status being deleted to its fallback status.
+	 *
+	 * Whether the order really left the status is read back for the whole batch afterwards.
 	 *
 	 * @param \WC_Order $order
 	 * @param string    $from_status
 	 * @param string    $to_status
 	 *
-	 * @return bool Whether the order left the status. A failure is logged.
+	 * @return bool False when the order is known to stay: the fallback filtered for it is the same status, or the move
+	 *              failed. A failure is logged.
 	 */
 	private function move_order( $order, string $from_status, string $to_status ): bool {
 		try {
@@ -773,21 +787,16 @@ class CustomOrderStatusService {
 				return false;
 			}
 
-			// update_status() and save() catch a failed save themselves: update_status() may answer false, and the
-			// order object may show the new status while the stored one is still the old, so that one is read back.
 			$updated = is_callable( array( $order, 'update_status' ) ) && true === $order->update_status(
 				$resolved_to_status,
 				'Out the Door: ' . __( 'Status changed due to custom order status deletion.', 'out-the-door-order-tasks-workflows-for-woocommerce' )
 			);
-			$stored  = $updated ? wc_get_order( $order->get_id() ) : null;
 
-			if ( ! $stored || self::same_status( $from_status, (string) $stored->get_status() ) ) {
+			if ( ! $updated ) {
 				Logger::warning( sprintf( 'Order %d could not be moved from status "%s" to "%s"; it stays.', $order->get_id(), $from_status, $resolved_to_status ) );
-
-				return false;
 			}
 
-			return true;
+			return $updated;
 		} catch ( \Throwable $e ) {
 			Logger::warning(
 				sprintf(
@@ -804,6 +813,35 @@ class CustomOrderStatusService {
 	}
 
 	/**
+	 * The orders of a list that are still in a status.
+	 *
+	 * @param string $status
+	 * @param int[]  $order_ids
+	 *
+	 * @return int[]
+	 */
+	private function still_in_status( string $status, array $order_ids ): array {
+		$order_ids = array_values( array_unique( array_filter( array_map( 'absint', $order_ids ) ) ) );
+
+		// An empty post__in would match every order.
+		if ( array() === $order_ids ) {
+			return array();
+		}
+
+		return array_map(
+			'intval',
+			wc_get_orders(
+				array(
+					'status'   => $status,
+					'post__in' => $order_ids,
+					'limit'    => -1,
+					'return'   => 'ids',
+				)
+			)
+		);
+	}
+
+	/**
 	 * Leave the stuck orders out of an order query.
 	 *
 	 * @param array<string, mixed> $query
@@ -813,6 +851,65 @@ class CustomOrderStatusService {
 	 */
 	private function stuck_excluded( array $query, array $stuck ): array {
 		return $stuck ? $query + array( 'exclude' => $stuck ) : $query;
+	}
+
+	/**
+	 * The option that keeps the orders a status deletion could not move.
+	 *
+	 * @param int $status_id
+	 *
+	 * @return string
+	 */
+	private function stuck_option( int $status_id ): string {
+		return "wpo_otd_status_deletion_stuck_{$status_id}";
+	}
+
+	/**
+	 * The orders a status deletion could not move so far.
+	 *
+	 * @param int $status_id
+	 *
+	 * @return int[]
+	 */
+	private function stuck_orders( int $status_id ): array {
+		$ids = get_option( $this->stuck_option( $status_id ), array() );
+
+		return is_array( $ids ) ? array_map( 'absint', $ids ) : array();
+	}
+
+	/**
+	 * Keep the orders a status deletion could not move, or forget them when there are none.
+	 *
+	 * @param int   $status_id
+	 * @param int[] $order_ids
+	 *
+	 * @return void
+	 */
+	private function save_stuck_orders( int $status_id, array $order_ids ): void {
+		if ( array() === $order_ids ) {
+			delete_option( $this->stuck_option( $status_id ) );
+
+			return;
+		}
+
+		update_option( $this->stuck_option( $status_id ), array_values( $order_ids ), false );
+	}
+
+	/**
+	 * How many orders a status deletion may find it cannot move before it stops.
+	 *
+	 * @return int
+	 */
+	private function max_stuck_orders(): int {
+		/**
+		 * Filters how many orders a custom order status deletion may find it cannot move before it stops. A value that
+		 * is not a whole number of at least 1 is ignored.
+		 *
+		 * @param int $max The most stuck orders. Default 5000.
+		 */
+		$max = apply_filters( 'wpo_otd_status_deletion_max_stuck_orders', self::DEFAULT_MAX_STUCK_ORDERS );
+
+		return is_int( $max ) && $max >= 1 ? $max : self::DEFAULT_MAX_STUCK_ORDERS;
 	}
 
 	/**
@@ -854,6 +951,7 @@ class CustomOrderStatusService {
 			throw new RuntimeException( esc_html( "Custom order status {$status_id} could not be deleted: " . $this->repository->get_last_db_error() ) );
 		}
 		$this->cached_statuses = null;
+		$this->save_stuck_orders( $status_id, array() );
 
 		// No row was deleted: the status was gone already, and whatever deleted it announced it.
 		if ( 0 === $deleted ) {
