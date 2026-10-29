@@ -380,6 +380,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 
 		try {
 			$this->assertSame( CustomOrderStatusService::DELETION_BUSY, $this->service->begin_deletion( $status->id ) );
+			$this->assertFalse( $this->service->request_deletion( $status->id ), 'Nothing was deleted or scheduled.' );
 			$this->assertFalse( $this->service->find( $status->id )->is_deleting, 'Nothing is flagged.' );
 			$this->assertFalse( as_has_scheduled_action( self::REASSIGN_HOOK ) );
 		} finally {
@@ -536,17 +537,82 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 
 		$this->assertSame( 'on-hold', wc_get_order( $moving )->get_status() );
 		$this->assertSame( 'packed', wc_get_order( $stuck )->get_status() );
-		$this->assertTrue( as_has_scheduled_action( self::REASSIGN_HOOK ), 'An order was moved, so the next batch runs.' );
-
-		as_unschedule_all_actions( self::REASSIGN_HOOK );
-		$this->service->process_deletion_batch( 'packed', 'on-hold', $status->id );
-
-		$this->assertFalse( as_has_scheduled_action( self::REASSIGN_HOOK ), 'A batch that moves nothing does not run again.' );
+		$this->assertFalse( as_has_scheduled_action( self::REASSIGN_HOOK ), 'Only the stuck order is left, so the job stops.' );
 		$this->assertNotNull( $this->service->find( $status->id ), 'The status stays while it has an order.' );
 
 		$messages = array_column( $logs(), 1 );
 		$this->assertStringContainsString( "Order {$stuck} stays in status \"packed\"", $messages[0] );
-		$this->assertStringContainsString( 'none of its orders could be moved', end( $messages ) );
+		$this->assertSame( "The deletion of custom order status {$status->id} stopped: orders {$stuck} could not be moved from packed.", end( $messages ) );
+	}
+
+	public function test_an_order_whose_save_fails_stays_and_the_job_stops(): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$order  = $this->order_in( 'packed' );
+		$logs   = $this->capture_logs();
+		$refuse = static function () {
+			throw new \Exception( 'Saving is refused' );
+		};
+		add_action( 'woocommerce_before_order_object_save', $refuse );
+
+		$this->service->process_deletion_batch( 'packed', 'on-hold', $status->id );
+
+		remove_action( 'woocommerce_before_order_object_save', $refuse );
+		$this->assertSame( 'packed', wc_get_order( $order )->get_status() );
+		$this->assertFalse( as_has_scheduled_action( self::REASSIGN_HOOK ), 'No batch is scheduled again.' );
+		$this->assertNotNull( $this->service->find( $status->id ) );
+
+		$messages = array_column( $logs(), 1 );
+		$this->assertContains( "Order {$order} could not be moved from status \"packed\" to \"on-hold\"; it stays.", $messages );
+		$this->assertSame( "The deletion of custom order status {$status->id} stopped: orders {$order} could not be moved from packed.", end( $messages ) );
+	}
+
+	public function test_stuck_orders_are_left_out_of_later_batches_so_older_orders_still_move(): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$older  = $this->order_in( 'packed' );
+		$first  = $this->order_in( 'packed' );
+		$second = $this->order_in( 'packed' );
+		$this->date_order( $older, '-2 days' );
+		$this->date_order( $first, '-1 hour' );
+
+		$logs = $this->capture_logs();
+		add_filter( 'wpo_otd_reassign_orders_batch_size', static fn() => 2 );
+		add_filter(
+			'wpo_otd_reassign_orders_to_status',
+			static fn( $to_status, $order ) => in_array( $order->get_id(), array( $first, $second ), true ) ? 'packed' : $to_status,
+			10,
+			2
+		);
+
+		// The newest page holds only the stuck orders: they are carried to the next batch.
+		$this->service->process_deletion_batch( 'packed', 'on-hold', $status->id );
+
+		$this->assertSame( 'packed', wc_get_order( $older )->get_status() );
+		$next = as_get_scheduled_actions( array( 'hook' => self::REASSIGN_HOOK, 'status' => 'pending' ) );
+		$this->assertCount( 1, $next );
+		$args = reset( $next )->get_args();
+		$this->assertSame( array( 'packed', 'on-hold', $status->id ), array_slice( $args, 0, 3 ) );
+		$this->assertEqualsCanonicalizing( array( $first, $second ), $args[3] );
+
+		as_unschedule_all_actions( self::REASSIGN_HOOK );
+		do_action( self::REASSIGN_HOOK, ...$args );
+
+		$this->assertSame( 'on-hold', wc_get_order( $older )->get_status(), 'The older order is reached and moved.' );
+		$this->assertFalse( as_has_scheduled_action( self::REASSIGN_HOOK ), 'Only stuck orders are left, so the job stops.' );
+		$this->assertNotNull( $this->service->find( $status->id ) );
+		$this->assertMatchesRegularExpression(
+			"/^The deletion of custom order status {$status->id} stopped: orders ({$first}, {$second}|{$second}, {$first}) could not be moved from packed\.$/",
+			array_column( $logs(), 1 )[ count( $logs() ) - 1 ]
+		);
+	}
+
+	public function test_a_job_scheduled_with_three_arguments_still_runs(): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$order  = $this->order_in( 'packed' );
+
+		do_action( self::REASSIGN_HOOK, 'packed', 'on-hold', $status->id );
+
+		$this->assertSame( 'on-hold', wc_get_order( $order )->get_status() );
+		$this->assertNull( $this->service->find( $status->id ) );
 	}
 
 	public function test_an_update_never_writes_the_deletion_flag(): void {
@@ -751,7 +817,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		$this->assertSame(
 			array(
 				"warning: Failed to reassign order {$order} from status \"packed\" to \"processing\": Order is locked",
-				"error: The deletion of custom order status {$status->id} stopped: none of its orders could be moved from packed.",
+				"error: The deletion of custom order status {$status->id} stopped: orders {$order} could not be moved from packed.",
 			),
 			$logs
 		);
@@ -765,6 +831,20 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		do_action( self::REASSIGN_HOOK, 'packed', 'on-hold', $status->id );
 
 		$this->assertNull( $this->service->find( $status->id ) );
+	}
+
+	/**
+	 * Date an order's creation, which orders the batches newest first.
+	 *
+	 * @param int    $order_id
+	 * @param string $when     Relative time, such as "-1 hour".
+	 *
+	 * @return void
+	 */
+	private function date_order( int $order_id, string $when ): void {
+		$order = wc_get_order( $order_id );
+		$order->set_date_created( strtotime( $when ) );
+		$order->save();
 	}
 
 	/**

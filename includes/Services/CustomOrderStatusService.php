@@ -43,6 +43,11 @@ class CustomOrderStatusService {
 	private const DELETION_LOCK_TIMEOUT = 3;
 
 	/**
+	 * The most orders a status deletion carries as stuck before it stops.
+	 */
+	private const MAX_STUCK_ORDERS = 500;
+
+	/**
 	 * WooCommerce's own order status keys, refused even before WooCommerce lists them.
 	 */
 	private const WOOCOMMERCE_STATUS_KEYS = array( 'pending', 'processing', 'on-hold', 'completed', 'cancelled', 'refunded', 'failed', 'checkout-draft' );
@@ -81,7 +86,7 @@ class CustomOrderStatusService {
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_dynamic_style' ), 99 );
 
 		// Drain & finalize a custom status deletion, one batch per scheduled run.
-		add_action( 'wpo_otd_reassign_orders', array( $this, 'process_deletion_batch' ), 10, 3 );
+		add_action( 'wpo_otd_reassign_orders', array( $this, 'process_deletion_batch' ), 10, 4 );
 	}
 
 	/** ================================
@@ -466,11 +471,12 @@ class CustomOrderStatusService {
 	 * @param int    $id              The custom status ID to delete.
 	 * @param string $fallback_status The status to assign to affected orders (default: 'on-hold').
 	 *
-	 * @return bool True if the status was deleted or its deletion scheduled, false if the status was not found.
+	 * @return bool True if the status was deleted or its deletion scheduled, false if no status has the ID or another
+	 *              request was changing it, so nothing was deleted.
 	 * @throws RuntimeException If the database does not delete or flag the status.
 	 */
 	public function request_deletion( int $id, string $fallback_status = 'on-hold' ): bool {
-		return self::DELETION_NOT_FOUND !== $this->begin_deletion( $id, $fallback_status );
+		return in_array( $this->begin_deletion( $id, $fallback_status ), array( self::DELETION_DONE, self::DELETION_SCHEDULED ), true );
 	}
 
 	/**
@@ -651,24 +657,32 @@ class CustomOrderStatusService {
 	/**
 	 * Process one batch of an in-progress status deletion.
 	 *
-	 * Reassigns up to a (filterable) batch of orders from the deleted status to
-	 * the fallback, then either reschedules itself for the next batch or — once
-	 * no orders remain — deletes the custom status row and fires the deleted
-	 * action. Runs via the 'wpo_otd_reassign_orders' scheduled action.
+	 * Reassigns up to a (filterable) batch of orders from the deleted status to the fallback, then either reschedules
+	 * itself for the next batch or, once no order is left to move, deletes the custom status row and fires the
+	 * deleted action. Runs via the 'wpo_otd_reassign_orders' scheduled action.
+	 *
+	 * An order that stays in the status, because the fallback filtered for it is the same status or because it cannot
+	 * be saved, is carried to the next batches as stuck and left out of them, so they reach the orders after it. When
+	 * only stuck orders are left, the deletion stops and logs them: the status stays, flagged, and deleting it again
+	 * starts over.
 	 *
 	 * @param string $from_status The status key to reassign from (without 'wc-' prefix).
 	 * @param string $to_status   The status key to reassign to (without 'wc-' prefix).
 	 * @param int    $status_id   The ID of the custom status being deleted.
+	 * @param int[]  $stuck       IDs of the orders earlier batches could not move. Absent from jobs scheduled before
+	 *                            batches carried them.
 	 *
 	 * @return void
 	 */
-	public function process_deletion_batch( string $from_status, string $to_status, int $status_id ): void {
+	public function process_deletion_batch( string $from_status, string $to_status, int $status_id, array $stuck = array() ): void {
 		// Moving orders to the status they have would leave them there and run this job forever.
 		if ( self::same_status( $from_status, $to_status ) ) {
 			Logger::error( "The deletion of custom order status {$status_id} stopped: its orders cannot move from {$from_status} to the same status." );
 
 			return;
 		}
+
+		$stuck = array_values( array_unique( array_filter( array_map( 'absint', $stuck ) ) ) );
 
 		/**
 		 * Filter the number of orders reassigned per batch when draining a deleted status.
@@ -677,95 +691,128 @@ class CustomOrderStatusService {
 		 */
 		$limit  = apply_filters( 'wpo_otd_reassign_orders_batch_size', 50 );
 		$orders = wc_get_orders(
-			array(
-				'status' => $from_status,
-				'limit'  => $limit,
+			$this->stuck_excluded(
+				array(
+					'status' => $from_status,
+					'limit'  => $limit,
+				),
+				$stuck
 			)
 		);
 
-		$moved = 0;
-
 		foreach ( $orders as $order ) {
-			try {
-				/**
-				 * Filter the fallback status assigned to an order during reassignment.
-				 *
-				 * @param string $to_status The fallback status key (without 'wc-' prefix).
-				 * @param mixed  $order     The order being reassigned.
-				 */
-				$resolved_to_status = apply_filters( 'wpo_otd_reassign_orders_to_status', $to_status, $order );
-
-				if ( self::same_status( $from_status, (string) $resolved_to_status ) ) {
-					Logger::warning(
-						sprintf(
-							'Order %d stays in status "%s": the status to move it to is the same one.',
-							$order->get_id(),
-							$from_status
-						)
-					);
-					continue;
-				}
-
-				if ( is_callable( array( $order, 'update_status' ) ) ) {
-					$order->update_status(
-						$resolved_to_status,
-						'Out the Door: ' . __( 'Status changed due to custom order status deletion.', 'out-the-door-order-tasks-workflows-for-woocommerce' )
-					);
-					++$moved;
-				}
-			} catch ( \Throwable $e ) {
-				Logger::warning( sprintf(
-					'Failed to reassign order %d from status "%s" to "%s": %s',
-					$order->get_id(),
-					$from_status,
-					$to_status,
-					$e->getMessage()
-				) );
+			if ( ! $this->move_order( $order, $from_status, $to_status ) ) {
+				$stuck[] = (int) $order->get_id();
 			}
 		}
 
-		// A batch that moved no order would find the same orders again, batch after batch.
-		if ( 0 !== count( $orders ) && 0 === $moved ) {
-			Logger::error( "The deletion of custom order status {$status_id} stopped: none of its orders could be moved from {$from_status}." );
+		// Each batch either moves orders or adds them to the stuck ones, so a list this long means it is not moving.
+		if ( count( $stuck ) > self::MAX_STUCK_ORDERS ) {
+			Logger::error( sprintf( 'The deletion of custom order status %d stopped: more than %d of its orders could not be moved from %s.', $status_id, self::MAX_STUCK_ORDERS, $from_status ) );
 
 			return;
 		}
 
-		// Schedule next batch if there might be more orders.
-		if ( count( $orders ) === $limit ) {
-			as_schedule_single_action(
-				time(),
-				'wpo_otd_reassign_orders',
-				array( $from_status, $to_status, $status_id ),
-				'wpo-otd'
-			);
-
-			return;
-		}
-
-		// Double-check if any orders remain with the deleted status,
-		// in case some were added since the last batch, to prevent race condition.
-		$remaining_orders = wc_get_orders(
-			array(
-				'status' => $from_status,
-				'limit'  => 1,
-				'return' => 'ids',
+		// A full batch may have more orders after it; otherwise check for orders placed in the status while it ran.
+		$more = count( $orders ) === $limit || 0 !== count(
+			wc_get_orders(
+				$this->stuck_excluded(
+					array(
+						'status' => $from_status,
+						'limit'  => 1,
+						'return' => 'ids',
+					),
+					$stuck
+				)
 			)
 		);
 
-		if ( 0 !== count( $remaining_orders ) ) {
+		if ( $more ) {
 			as_schedule_single_action(
 				time(),
 				'wpo_otd_reassign_orders',
-				array( $from_status, $to_status, $status_id ),
+				array_merge( array( $from_status, $to_status, $status_id ), $stuck ? array( $stuck ) : array() ),
 				'wpo-otd'
 			);
+
+			return;
+		}
+
+		if ( $stuck ) {
+			Logger::error( sprintf( 'The deletion of custom order status %d stopped: orders %s could not be moved from %s.', $status_id, implode( ', ', $stuck ), $from_status ) );
 
 			return;
 		}
 
 		// Final batch done — now it's safe to remove the status.
 		$this->remove( $status_id, $from_status, $to_status );
+	}
+
+	/**
+	 * Move one order of a status being deleted to its fallback status.
+	 *
+	 * @param \WC_Order $order
+	 * @param string    $from_status
+	 * @param string    $to_status
+	 *
+	 * @return bool Whether the order left the status. A failure is logged.
+	 */
+	private function move_order( $order, string $from_status, string $to_status ): bool {
+		try {
+			/**
+			 * Filter the fallback status assigned to an order during reassignment.
+			 *
+			 * @param string $to_status The fallback status key (without 'wc-' prefix).
+			 * @param mixed  $order     The order being reassigned.
+			 */
+			$resolved_to_status = apply_filters( 'wpo_otd_reassign_orders_to_status', $to_status, $order );
+
+			if ( self::same_status( $from_status, (string) $resolved_to_status ) ) {
+				Logger::warning( sprintf( 'Order %d stays in status "%s": the status to move it to is the same one.', $order->get_id(), $from_status ) );
+
+				return false;
+			}
+
+			// update_status() and save() catch a failed save themselves: update_status() may answer false, and the
+			// order object may show the new status while the stored one is still the old, so that one is read back.
+			$updated = is_callable( array( $order, 'update_status' ) ) && true === $order->update_status(
+				$resolved_to_status,
+				'Out the Door: ' . __( 'Status changed due to custom order status deletion.', 'out-the-door-order-tasks-workflows-for-woocommerce' )
+			);
+			$stored  = $updated ? wc_get_order( $order->get_id() ) : null;
+
+			if ( ! $stored || self::same_status( $from_status, (string) $stored->get_status() ) ) {
+				Logger::warning( sprintf( 'Order %d could not be moved from status "%s" to "%s"; it stays.', $order->get_id(), $from_status, $resolved_to_status ) );
+
+				return false;
+			}
+
+			return true;
+		} catch ( \Throwable $e ) {
+			Logger::warning(
+				sprintf(
+					'Failed to reassign order %d from status "%s" to "%s": %s',
+					$order->get_id(),
+					$from_status,
+					$to_status,
+					$e->getMessage()
+				)
+			);
+
+			return false;
+		}
+	}
+
+	/**
+	 * Leave the stuck orders out of an order query.
+	 *
+	 * @param array<string, mixed> $query
+	 * @param int[]                $stuck
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function stuck_excluded( array $query, array $stuck ): array {
+		return $stuck ? $query + array( 'exclude' => $stuck ) : $query;
 	}
 
 	/**
