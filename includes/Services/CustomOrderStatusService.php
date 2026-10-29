@@ -33,7 +33,12 @@ class CustomOrderStatusService {
 	public const DELETION_SCHEDULED = 'scheduled';
 
 	/**
-	 * Seconds a deletion request waits for another request deleting the same status.
+	 * What begin_deletion() did: nothing, since another request was changing the status, which is not being deleted.
+	 */
+	public const DELETION_BUSY = 'busy';
+
+	/**
+	 * Seconds a change or deletion of a status waits while another request changes or deletes it.
 	 */
 	private const DELETION_LOCK_TIMEOUT = 3;
 
@@ -366,13 +371,25 @@ class CustomOrderStatusService {
 	 * @throws RuntimeException If the database does not save the change.
 	 */
 	public function update( int $id, array $data ): CustomOrderStatus {
-		return $this->with_status_lock(
+		[ $custom_status, $data ] = $this->with_status_lock(
 			$id,
 			fn() => $this->update_locked( $id, $data ),
 			static function (): never {
 				throw new StatusBeingDeletedException( esc_html__( 'Another request is changing or deleting this custom order status. Try again in a moment.', 'out-the-door-order-tasks-workflows-for-woocommerce' ) );
 			}
 		);
+
+		// Announced once the lock is released, so a listener that changes or deletes the status is not kept waiting.
+
+		/**
+		 * Action triggered after a custom order status is updated.
+		 *
+		 * @param CustomOrderStatus $custom_status  The updated custom order status.
+		 * @param array             $data           The data used for the update.
+		 */
+		do_action( 'wpo_otd_custom_order_status_updated', $custom_status, $data );
+
+		return $custom_status;
 	}
 
 	/**
@@ -381,10 +398,10 @@ class CustomOrderStatusService {
 	 * @param int                  $id
 	 * @param array<string, mixed> $data
 	 *
-	 * @return CustomOrderStatus
+	 * @return array{0: CustomOrderStatus, 1: array<string, mixed>} The updated status, and the data as applied.
 	 * @throws InvalidArgumentException|InvalidStatusKeyException|StatusKeyTakenException|StatusBeingDeletedException|RuntimeException As update() does.
 	 */
-	private function update_locked( int $id, array $data ): CustomOrderStatus {
+	private function update_locked( int $id, array $data ): array {
 		$custom_status = $this->repository->find( $id );
 		if ( ! $custom_status ) {
 			throw new InvalidArgumentException( esc_html__( 'Custom order status not found', 'out-the-door-order-tasks-workflows-for-woocommerce' ) );
@@ -418,7 +435,7 @@ class CustomOrderStatusService {
 		$custom_status->fill( $data );
 
 		// is_deleting is written by a deletion alone: writing back the value read here could undo one.
-		$columns = array_intersect_key( $custom_status->to_db_array(), array_flip( array( 'status_key', 'label', 'background' ) ) );
+		$columns = array_diff_key( $custom_status->to_db_array(), array( 'is_deleting' => true ) );
 		$result  = $this->repository->where( 'id', $id )->update( $columns );
 
 		if ( false === $result ) {
@@ -431,15 +448,7 @@ class CustomOrderStatusService {
 
 		$this->cached_statuses = null;
 
-		/**
-		 * Action triggered after a custom order status is updated.
-		 *
-		 * @param CustomOrderStatus $custom_status  The updated custom order status.
-		 * @param array             $data           The data used for the update.
-		 */
-		do_action( 'wpo_otd_custom_order_status_updated', $custom_status, $data );
-
-		return $custom_status;
+		return array( $custom_status, $data );
 	}
 
 	/**
@@ -470,8 +479,9 @@ class CustomOrderStatusService {
 	 *
 	 * @return string self::DELETION_DONE when the status is deleted, self::DELETION_SCHEDULED when it stays until
 	 *                its orders are moved (also when that was already under way), self::DELETION_NOT_FOUND when no
-	 *                status has the ID. While another request is deleting the same status, self::DELETION_SCHEDULED,
-	 *                since that request deletes it or schedules its deletion.
+	 *                status has the ID. While another request holds the status too long, as it read then: deleted
+	 *                or scheduled when the status is gone or being deleted, or self::DELETION_BUSY when another
+	 *                request is only changing it, and nothing is deleted.
 	 * @throws RuntimeException If the database does not delete or flag the status.
 	 */
 	public function begin_deletion( int $id, string $fallback_status = 'on-hold' ): string {
@@ -479,8 +489,28 @@ class CustomOrderStatusService {
 		return $this->with_status_lock(
 			$id,
 			fn() => $this->delete_or_schedule( $id, $fallback_status ),
-			static fn() => self::DELETION_SCHEDULED
+			fn() => $this->deletion_outcome_while_busy( $id )
 		);
+	}
+
+	/**
+	 * What a deletion that could not take the status's lock tells, from the status as it reads now.
+	 *
+	 * The request holding the lock may be deleting the status, which makes this deletion's work done or scheduled, or
+	 * only changing it, which leaves it to be deleted again.
+	 *
+	 * @param int $id
+	 *
+	 * @return string One of the DELETION_* outcomes.
+	 */
+	private function deletion_outcome_while_busy( int $id ): string {
+		$status = $this->find( $id );
+
+		if ( ! $status ) {
+			return self::DELETION_NOT_FOUND;
+		}
+
+		return $status->is_deleting ? self::DELETION_SCHEDULED : self::DELETION_BUSY;
 	}
 
 	/**

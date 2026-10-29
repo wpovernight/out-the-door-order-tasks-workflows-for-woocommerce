@@ -311,15 +311,55 @@ class CustomOrderStatusControllerTest extends RestTestCase {
 		$this->assertResponse( 200, $this->request( 'PUT', "/custom-order-statuses/{$id}", array( 'status_key' => 'packed', 'label' => 'Packed up' ) ) );
 	}
 
-	public function test_a_put_cannot_clear_the_deletion_flag(): void {
-		$id = $this->create_status( 'Packed' );
-		( new CustomOrderStatusRepository() )->where( 'id', $id )->update( array( 'is_deleting' => 1 ) );
+	public function test_a_put_cannot_clear_a_deletion_that_starts_while_it_runs(): void {
+		global $wpdb;
+
+		$id      = $this->create_status( 'Packed' );
+		$flagged = false;
+
+		// The deletion flags the row between the update's read and its write.
+		add_filter(
+			'query',
+			static function ( $query ) use ( $id, &$flagged, $wpdb ) {
+				if ( ! $flagged && preg_match( '/^UPDATE `\w+wpo_otd_custom_statuses`/', (string) $query ) ) {
+					$flagged = true;
+					$wpdb->query( $wpdb->prepare( "UPDATE `{$wpdb->prefix}wpo_otd_custom_statuses` SET is_deleting = 1 WHERE id = %d", $id ) );
+				}
+
+				return $query;
+			}
+		);
 
 		$response = $this->request( 'PUT', "/custom-order-statuses/{$id}", array( 'label' => 'Boxed', 'is_deleting' => false ) );
 
 		$this->assertResponse( 200, $response );
-		$this->assertTrue( $this->json( $response )['data']['is_deleting'] );
+		$this->assertTrue( $flagged );
 		$this->assertTrue( $this->make( CustomOrderStatusService::class )->find( $id )->is_deleting );
+		$this->assertSame( 'Boxed', $this->make( CustomOrderStatusService::class )->find( $id )->label );
+	}
+
+	public function test_a_delete_while_another_request_changes_the_status_is_a_conflict(): void {
+		$id = $this->create_status( 'Packed' );
+
+		$connection = new \wpdb( DB_USER, DB_PASSWORD, DB_NAME, DB_HOST );
+		$connection->set_prefix( $GLOBALS['wpdb']->prefix );
+		$other = new CustomOrderStatusRepository();
+		( new \ReflectionProperty( $other, 'wpdb' ) )->setValue( $other, $connection );
+		$this->assertTrue( $other->acquire_lock( "custom_status_deletion_{$id}", 0 ) );
+
+		try {
+			$busy = $this->request( 'DELETE', "/custom-order-statuses/{$id}" );
+
+			( new CustomOrderStatusRepository() )->where( 'id', $id )->update( array( 'is_deleting' => 1 ) );
+			$deleting = $this->request( 'DELETE', "/custom-order-statuses/{$id}" );
+		} finally {
+			$other->release_lock( "custom_status_deletion_{$id}" );
+		}
+
+		$this->assertResponse( 409, $busy, 'status_busy' );
+		$this->assertSame( 'Another request is changing this custom order status, so it was not deleted. Try again in a moment.', $busy->get_data()['message'] );
+		$this->assertResponse( 202, $deleting );
+		$this->assertNotNull( $this->make( CustomOrderStatusService::class )->find( $id ) );
 	}
 
 	public function test_a_put_while_another_request_holds_the_status_is_a_conflict(): void {

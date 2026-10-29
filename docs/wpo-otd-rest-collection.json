@@ -1628,7 +1628,7 @@
                 "1"
               ]
             },
-            "description": "Deletes a custom order status. No body. While orders still have the status, it is marked is_deleting and its orders move to on-hold in the background before it goes: 202, also when its deletion was already under way. A status no order has is deleted at once: 200.\n\nErrors: 400 invalid_id, 404 not_found, 500 deletion_failed."
+            "description": "Deletes a custom order status. No body. While orders still have the status, it is marked is_deleting and its orders move to on-hold in the background before it goes: 202, also when its deletion was already under way. A status no order has is deleted at once: 200.\n\nErrors: 400 invalid_id, 404 not_found, 409 status_busy (another request is changing the status; nothing was deleted), 500 deletion_failed."
           },
           "response": [
             {

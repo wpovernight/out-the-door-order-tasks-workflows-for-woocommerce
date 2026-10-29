@@ -311,6 +311,14 @@ class CustomOrderStatusController extends BaseRestController {
 			return new WP_Error( 'not_found', __( 'Custom order status not found', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 404 ) );
 		}
 
+		if ( CustomOrderStatusService::DELETION_BUSY === $outcome ) {
+			return new WP_Error(
+				'status_busy',
+				__( 'Another request is changing this custom order status, so it was not deleted. Try again in a moment.', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
+				array( 'status' => 409 )
+			);
+		}
+
 		if ( CustomOrderStatusService::DELETION_SCHEDULED === $outcome ) {
 			$response = $this->respond(
 				array(

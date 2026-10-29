@@ -337,7 +337,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		$this->assertCount( 1, as_get_scheduled_actions( array( 'hook' => self::REASSIGN_HOOK, 'status' => 'pending' ), 'ids' ) );
 	}
 
-	public function test_a_deletion_another_request_holds_the_lock_for_schedules_nothing(): void {
+	public function test_a_deletion_while_another_request_only_changes_the_status_is_busy(): void {
 		$status = $this->create_registered_status( 'Packed' );
 		$this->order_in( 'packed' );
 
@@ -347,8 +347,8 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		$this->assertTrue( $other->acquire_lock( $lock, 0 ) );
 
 		try {
-			$this->assertSame( CustomOrderStatusService::DELETION_SCHEDULED, $this->service->begin_deletion( $status->id ) );
-			$this->assertFalse( $this->service->find( $status->id )->is_deleting, 'The other request flags it, not this one.' );
+			$this->assertSame( CustomOrderStatusService::DELETION_BUSY, $this->service->begin_deletion( $status->id ) );
+			$this->assertFalse( $this->service->find( $status->id )->is_deleting, 'Nothing is flagged.' );
 			$this->assertFalse( as_has_scheduled_action( self::REASSIGN_HOOK ) );
 		} finally {
 			$other->release_lock( $lock );
@@ -356,6 +356,55 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 
 		$this->assertSame( CustomOrderStatusService::DELETION_SCHEDULED, $this->service->begin_deletion( $status->id ), 'Once released, the deletion goes ahead.' );
 		$this->assertTrue( as_has_scheduled_action( self::REASSIGN_HOOK, array( 'packed', 'on-hold', $status->id ), 'wpo-otd' ) );
+	}
+
+	public function test_a_deletion_while_another_request_deletes_the_status_is_scheduled_or_done(): void {
+		$status = $this->service->create( array( 'label' => 'Packed' ) );
+		$gone   = $this->service->create( array( 'label' => 'Gone' ) );
+		$this->mark_deleting( $status->id );
+
+		$other = $this->repository_on_another_connection();
+		$this->assertTrue( $other->acquire_lock( "custom_status_deletion_{$status->id}", 0 ) );
+		$this->assertTrue( $other->acquire_lock( "custom_status_deletion_{$gone->id}", 0 ) );
+		( new CustomOrderStatusRepository() )->delete( $gone->id );
+
+		try {
+			$this->assertSame( CustomOrderStatusService::DELETION_SCHEDULED, $this->service->begin_deletion( $status->id ) );
+			$this->assertSame( CustomOrderStatusService::DELETION_NOT_FOUND, $this->service->begin_deletion( $gone->id ) );
+		} finally {
+			$other->release_lock( "custom_status_deletion_{$status->id}" );
+			$other->release_lock( "custom_status_deletion_{$gone->id}" );
+		}
+
+		$this->assertFalse( as_has_scheduled_action( self::REASSIGN_HOOK ), 'The request holding the lock schedules the job, not this one.' );
+	}
+
+	public function test_an_update_announces_itself_once_the_lock_is_released(): void {
+		$status = $this->service->create( array( 'label' => 'Packed' ) );
+		$other  = $this->repository_on_another_connection();
+		$lock   = "custom_status_deletion_{$status->id}";
+		$free   = null;
+		add_action(
+			'wpo_otd_custom_order_status_updated',
+			static function () use ( $other, $lock, &$free ) {
+				$free = $other->acquire_lock( $lock, 0 );
+				$other->release_lock( $lock );
+			}
+		);
+
+		$this->service->update( $status->id, array( 'label' => 'Boxed' ) );
+
+		$this->assertTrue( $free, 'Another connection can take the lock while listeners run.' );
+	}
+
+	public function test_a_deletion_that_starts_while_an_update_runs_stays_under_way(): void {
+		$status = $this->service->create( array( 'label' => 'Packed' ) );
+		$this->flag_deleting_before_its_next_update( $status->id );
+
+		$this->service->update( $status->id, array( 'label' => 'Boxed' ) );
+
+		$this->assertTrue( $this->service->find( $status->id )->is_deleting, 'The update did not write back the flag it read.' );
+		$this->assertSame( 'Boxed', $this->service->find( $status->id )->label );
 	}
 
 	public function test_the_deletion_lock_is_released_even_when_the_deletion_fails(): void {
@@ -614,6 +663,32 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		do_action( self::REASSIGN_HOOK, 'packed', 'on-hold', $status->id );
 
 		$this->assertNull( $this->service->find( $status->id ) );
+	}
+
+	/**
+	 * Flag a status as being deleted just before the next write to it runs, as a deletion starting in another request
+	 * between an update's read and its write would.
+	 *
+	 * @param int $id
+	 *
+	 * @return void
+	 */
+	private function flag_deleting_before_its_next_update( int $id ): void {
+		$done = false;
+
+		add_filter(
+			'query',
+			static function ( $query ) use ( $id, &$done ) {
+				global $wpdb;
+
+				if ( ! $done && preg_match( '/^UPDATE `\w+wpo_otd_custom_statuses`/', (string) $query ) ) {
+					$done = true;
+					$wpdb->query( $wpdb->prepare( "UPDATE `{$wpdb->prefix}wpo_otd_custom_statuses` SET is_deleting = 1 WHERE id = %d", $id ) );
+				}
+
+				return $query;
+			}
+		);
 	}
 
 	/**
