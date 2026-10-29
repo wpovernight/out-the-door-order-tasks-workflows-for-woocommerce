@@ -950,6 +950,32 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		$this->assertTrue( as_has_scheduled_action( self::REASSIGN_HOOK, array( 'packed', 'on-hold', $status->id ), 'wpo-otd' ) );
 	}
 
+	/**
+	 * @dataProvider invalid_batch_size_provider
+	 */
+	public function test_an_invalid_batch_size_falls_back_to_the_default( $limit ): void {
+		add_filter( 'wpo_otd_reassign_orders_batch_size', static fn() => $limit );
+		$status = $this->create_registered_status( 'Packed' );
+		$first  = $this->order_in( 'packed' );
+		$second = $this->order_in( 'packed' );
+
+		$this->service->process_deletion_batch( 'packed', 'on-hold', $status->id );
+
+		$this->assertSame( 'on-hold', wc_get_order( $first )->get_status() );
+		$this->assertSame( 'on-hold', wc_get_order( $second )->get_status() );
+		$this->assertNull( $this->service->find( $status->id ) );
+		$this->assertFalse( as_has_scheduled_action( self::REASSIGN_HOOK ) );
+	}
+
+	public function invalid_batch_size_provider(): array {
+		return array(
+			'zero'     => array( 0 ),
+			'negative' => array( -1 ),
+			'a string' => array( '1' ),
+			'a float'  => array( 1.0 ),
+		);
+	}
+
 	public function test_orders_still_in_the_status_after_a_batch_schedule_another(): void {
 		$status = $this->create_registered_status( 'Packed' );
 		$this->order_in( 'packed' );

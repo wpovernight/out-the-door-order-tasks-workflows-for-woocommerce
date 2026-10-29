@@ -43,6 +43,11 @@ class CustomOrderStatusService {
 	private const DELETION_LOCK_TIMEOUT = 3;
 
 	/**
+	 * The most orders one batch of a status deletion moves, unless filtered.
+	 */
+	private const DEFAULT_DELETION_BATCH_SIZE = 50;
+
+	/**
 	 * The most orders a status deletion may find it cannot move before it stops, unless filtered.
 	 */
 	private const DEFAULT_MAX_STUCK_ORDERS = 5000;
@@ -683,14 +688,8 @@ class CustomOrderStatusService {
 			return;
 		}
 
-		$stuck = $this->still_in_status( $from_status, $this->stuck_orders( $status_id ) );
-
-		/**
-		 * Filter the number of orders reassigned per batch when draining a deleted status.
-		 *
-		 * @param int $limit Maximum orders processed per batch. Default 50.
-		 */
-		$limit  = apply_filters( 'wpo_otd_reassign_orders_batch_size', 50 );
+		$stuck  = $this->still_in_status( $from_status, $this->stuck_orders( $status_id ) );
+		$limit  = $this->deletion_batch_size();
 		$orders = wc_get_orders(
 			$this->stuck_excluded(
 				array(
@@ -701,7 +700,54 @@ class CustomOrderStatusService {
 			)
 		);
 
+		$stuck = array_values( array_unique( array_merge( $stuck, $this->move_batch( $orders, $from_status, $to_status ) ) ) );
+		$this->save_stuck_orders( $status_id, $stuck );
+
+		$max = $this->max_stuck_orders();
+		if ( count( $stuck ) > $max ) {
+			Logger::error( sprintf( 'The deletion of custom order status %d stopped: more than %d of its orders could not be moved from %s.', $status_id, $max, $from_status ) );
+
+			return;
+		}
+
+		if ( $this->has_more_orders( $from_status, count( $orders ), $limit, $stuck ) ) {
+			as_schedule_single_action( time(), 'wpo_otd_reassign_orders', array( $from_status, $to_status, $status_id ), 'wpo-otd' );
+
+			return;
+		}
+
+		// The stuck orders stop the deletion only while they are still in the status.
+		$left = $this->still_in_status( $from_status, $stuck );
+		if ( array() !== $left ) {
+			Logger::error(
+				sprintf(
+					'The deletion of custom order status %d stopped: %d of its orders could not be moved from %s: %s.',
+					$status_id,
+					count( $left ),
+					$from_status,
+					$this->describe_order_ids( $left )
+				)
+			);
+
+			return;
+		}
+
+		// Final batch done — now it's safe to remove the status.
+		$this->remove( $status_id, $from_status, $to_status );
+	}
+
+	/**
+	 * Move a batch of orders of a status being deleted to its fallback status.
+	 *
+	 * @param \WC_Order[] $orders
+	 * @param string      $from_status
+	 * @param string      $to_status
+	 *
+	 * @return int[] The orders that stay in the status.
+	 */
+	private function move_batch( array $orders, string $from_status, string $to_status ): array {
 		$attempted = array();
+		$stuck     = array();
 		foreach ( $orders as $order ) {
 			if ( $this->move_order( $order, $from_status, $to_status ) ) {
 				$attempted[] = (int) $order->get_id();
@@ -717,54 +763,48 @@ class CustomOrderStatusService {
 			$stuck[] = $order_id;
 		}
 
-		$stuck = array_values( array_unique( $stuck ) );
-		$this->save_stuck_orders( $status_id, $stuck );
+		return $stuck;
+	}
 
-		$max = $this->max_stuck_orders();
-		if ( count( $stuck ) > $max ) {
-			Logger::error( sprintf( 'The deletion of custom order status %d stopped: more than %d of its orders could not be moved from %s.', $status_id, $max, $from_status ) );
-
-			return;
+	/**
+	 * Whether a status being deleted has orders left for another batch, besides the stuck ones.
+	 *
+	 * @param string $status
+	 * @param int    $fetched How many orders this batch fetched.
+	 * @param int    $limit   How many orders a batch fetches at most.
+	 * @param int[]  $stuck
+	 *
+	 * @return bool
+	 */
+	private function has_more_orders( string $status, int $fetched, int $limit, array $stuck ): bool {
+		// A full batch may have more orders after it.
+		if ( $fetched === $limit ) {
+			return true;
 		}
 
-		// A full batch may have more orders after it; otherwise check for orders placed in the status while it ran.
-		$more = count( $orders ) === $limit || 0 !== count(
-			wc_get_orders(
-				$this->stuck_excluded(
-					array(
-						'status' => $from_status,
-						'limit'  => 1,
-						'return' => 'ids',
-					),
-					$stuck
-				)
-			)
+		// Otherwise, orders may have been placed in the status while the batch ran.
+		$query = array(
+			'status' => $status,
+			'limit'  => 1,
+			'return' => 'ids',
 		);
 
-		if ( $more ) {
-			as_schedule_single_action( time(), 'wpo_otd_reassign_orders', array( $from_status, $to_status, $status_id ), 'wpo-otd' );
+		return array() !== wc_get_orders( $this->stuck_excluded( $query, $stuck ) );
+	}
 
-			return;
-		}
+	/**
+	 * A list of order IDs for a log message, cut short after the first few.
+	 *
+	 * @param int[] $order_ids
+	 * @param int   $shown     How many IDs to list before the rest are only counted.
+	 *
+	 * @return string
+	 */
+	private function describe_order_ids( array $order_ids, int $shown = 50 ): string {
+		$listed = implode( ', ', array_slice( $order_ids, 0, $shown ) );
+		$rest   = count( $order_ids ) - $shown;
 
-		// The stuck orders stop the deletion only while they are still in the status.
-		$left = $this->still_in_status( $from_status, $stuck );
-		if ( array() !== $left ) {
-			Logger::error(
-				sprintf(
-					'The deletion of custom order status %d stopped: %d of its orders could not be moved from %s: %s.',
-					$status_id,
-					count( $left ),
-					$from_status,
-					implode( ', ', array_slice( $left, 0, 50 ) ) . ( count( $left ) > 50 ? sprintf( ' and %d more', count( $left ) - 50 ) : '' )
-				)
-			);
-
-			return;
-		}
-
-		// Final batch done — now it's safe to remove the status.
-		$this->remove( $status_id, $from_status, $to_status );
+		return $rest > 0 ? sprintf( '%s and %d more', $listed, $rest ) : $listed;
 	}
 
 	/**
@@ -904,6 +944,23 @@ class CustomOrderStatusService {
 		}
 
 		update_option( $this->stuck_option( $status_id ), array_values( $order_ids ), false );
+	}
+
+	/**
+	 * How many orders one batch of a status deletion moves at most.
+	 *
+	 * @return int
+	 */
+	private function deletion_batch_size(): int {
+		/**
+		 * Filter the number of orders reassigned per batch when draining a deleted status. A value that is not a whole
+		 * number of at least 1 is ignored.
+		 *
+		 * @param int $limit Maximum orders processed per batch. Default 50.
+		 */
+		$limit = apply_filters( 'wpo_otd_reassign_orders_batch_size', self::DEFAULT_DELETION_BATCH_SIZE );
+
+		return is_int( $limit ) && $limit >= 1 ? $limit : self::DEFAULT_DELETION_BATCH_SIZE;
 	}
 
 	/**
