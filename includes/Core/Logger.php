@@ -15,6 +15,13 @@ final class Logger {
 	private static array $context = array( 'source' => 'wpo-otd' );
 
 	/**
+	 * The keys once() logged in this request, so a mark that could not be stored still holds until the request ends.
+	 *
+	 * @var array<string, true>
+	 */
+	private static array $logged_once = array();
+
+	/**
 	 * Get the WC_Logger instance, initializing it on first use.
 	 *
 	 * @return \WC_Logger_Interface
@@ -58,14 +65,16 @@ final class Logger {
 	}
 
 	/**
-	 * Log a message at most once a day, for something that recurs on every request until it is fixed, such as a
+	 * Log a message about once a day, for something that recurs on every request until it is fixed, such as a
 	 * connector that fails each time it is read.
 	 *
 	 * A transient named by the key marks the message as logged for a day, and is set even while logging is turned off
-	 * by "wpo_otd_logging_enabled". A message that would never be logged, empty or at a level that is not allowed,
-	 * is not marked.
+	 * by "wpo_otd_logging_enabled". Requests that arrive together may each find no mark and log it, so it is about
+	 * once a day, never exactly. Within a request it is logged once at most, even when the transient cannot be stored.
+	 * A message that would never be logged, empty or at a level that is not allowed, is not marked.
 	 *
-	 * @param string $key     The transient's name: prefixed with the plugin's own, and at most 172 characters. A
+	 * @param string $key     The transient's name, used as it is: callers start it with the plugin's prefix
+	 *                        ("wpo_otd_"), so a mark keeps the name it was stored under; at most 172 characters. A
 	 *                        message that is the same thing logged again must have the same key; never put a value
 	 *                        that must stay secret in it, a hash of it at most.
 	 * @param string $level   As for log().
@@ -74,9 +83,11 @@ final class Logger {
 	 * @return void
 	 */
 	public static function once( string $key, string $level, string $message ): void {
-		if ( empty( $message ) || ! in_array( $level, self::LEVELS, true ) || false !== get_transient( $key ) ) {
+		if ( empty( $message ) || ! in_array( $level, self::LEVELS, true ) || isset( self::$logged_once[ $key ] ) || false !== get_transient( $key ) ) {
 			return;
 		}
+
+		self::$logged_once[ $key ] = true;
 
 		set_transient( $key, 1, DAY_IN_SECONDS );
 

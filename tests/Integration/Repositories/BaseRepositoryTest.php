@@ -451,10 +451,54 @@ class BaseRepositoryTest extends IntegrationTestCase {
 	}
 
 	public function test_a_quiet_query_refused_before_it_ran_gives_the_cause_alone(): void {
-		$repository = new QuietStatusRepository();
+		global $wpdb;
 
+		$repository  = new QuietStatusRepository();
+		$suppressing = $wpdb->suppress_errors( true );
+
+		// An earlier statement leaves its error number on the connection.
+		$wpdb->query( 'SELECT * FROM `wpo_otd_no_such_table`' );
+		$wpdb->suppress_errors( $suppressing );
+
+		$this->assertSame( 1146, $repository->get_last_db_error_number() );
 		$this->assertFalse( $repository->run_quietly( static fn(): bool => false, 'the database refused the write' ) );
-		$this->assertSame( 'the database refused the write', $repository->get_last_db_error(), 'No number of an earlier statement.' );
+		$this->assertSame( 'the database refused the write', $repository->get_last_db_error(), 'No number of the earlier statement.' );
+	}
+
+	public function test_a_quiet_query_that_fails_inside_a_callback_that_goes_on_is_cleaned_up_all_the_same(): void {
+		global $wpdb;
+
+		$repository = new QuietStatusRepository();
+		$repository->insert( array( 'status_key' => 'packed', 'label' => 'Packed' ) );
+
+		$debug_errors = count( $GLOBALS['EZSQL_ERROR'] ?? array() );
+
+		$result = $repository->run_quietly(
+			static function () use ( $repository ): int {
+				$repository->insert( array( 'status_key' => 'packed', 'label' => 'whsec-quiet-0007' ) );
+
+				return 1;
+			},
+			'the database refused the write'
+		);
+
+		$this->assertSame( 1, $result, 'What the callback returned.' );
+		$this->assertSame( 'the database refused the write (MySQL error 1062)', $repository->get_last_db_error(), 'The error the query left, replaced.' );
+		$this->assertCount( $debug_errors, $GLOBALS['EZSQL_ERROR'] ?? array(), 'The errors kept for debugging tools lose the one it added.' );
+		$this->assertNull( $wpdb->last_query );
+		$this->assertSame( '', (string) $wpdb->func_call, 'Its last call, which quotes the query, is gone too.' );
+	}
+
+	public function test_an_error_left_before_a_quiet_callback_that_runs_no_query_is_left_alone(): void {
+		global $wpdb;
+
+		$repository = new QuietStatusRepository();
+		$wpdb->last_error = 'an earlier error';
+
+		$this->assertSame( 2, $repository->run_quietly( static fn(): int => 2, 'the database refused the write' ) );
+		$this->assertSame( 'an earlier error', $repository->get_last_db_error() );
+
+		$wpdb->last_error = '';
 	}
 
 	public function test_the_queries_saved_for_debugging_tools_during_a_quiet_query_keep_their_place_but_not_their_text(): void {

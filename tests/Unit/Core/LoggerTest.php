@@ -17,8 +17,9 @@ class LoggerTest extends TestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		// The WooCommerce logger is memoized in a static property.
+		// The WooCommerce logger is memoized in a static property, and so is what once() logged in the request.
 		$this->set_static_property( Logger::class, 'wc_logger', null );
+		$this->set_static_property( Logger::class, 'logged_once', array() );
 
 		$this->wc_logger = Mockery::mock( 'WC_Logger_Interface' );
 		Functions\when( 'wc_get_logger' )->justReturn( $this->wc_logger );
@@ -115,6 +116,24 @@ class LoggerTest extends TestCase {
 		$this->wc_logger->shouldNotReceive( 'log' );
 
 		Logger::once( 'wpo_otd_example_mark', 'notice', 'Muted' );
+	}
+
+	public function test_a_message_whose_mark_cannot_be_stored_is_still_logged_once_in_a_request(): void {
+		Functions\expect( 'get_transient' )->once()->andReturn( false );
+		Functions\expect( 'set_transient' )->once()->andReturn( false );
+		$this->wc_logger->shouldReceive( 'log' )->once();
+
+		Logger::once( 'wpo_otd_example_mark', 'warning', 'Something happened' );
+		Logger::once( 'wpo_otd_example_mark', 'warning', 'Something happened' );
+	}
+
+	public function test_another_key_is_logged_in_the_same_request(): void {
+		Functions\when( 'get_transient' )->justReturn( false );
+		Functions\when( 'set_transient' )->justReturn( true );
+		$this->wc_logger->shouldReceive( 'log' )->twice();
+
+		Logger::once( 'wpo_otd_example_mark', 'warning', 'Something happened' );
+		Logger::once( 'wpo_otd_other_mark', 'warning', 'Something else happened' );
 	}
 
 	public function test_a_message_that_would_not_be_logged_at_all_is_not_marked(): void {

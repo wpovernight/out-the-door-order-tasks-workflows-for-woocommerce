@@ -918,11 +918,13 @@ abstract class BaseRepository {
 	 * Run queries that hold values which must stay secret, leaving none of their text in $wpdb.
 	 *
 	 * $wpdb puts a failing query in its error, and MySQL quotes the value it refused. So while the callback runs, $wpdb
-	 * neither prints nor logs an error, and after it $wpdb's last query is empty and the queries it saved for debugging
-	 * tools (SAVEQUERIES) during the callback keep their place, which those tools count, but not their text. When the
-	 * callback fails, by returning false or by throwing, get_last_db_error() gives the cause passed in, followed by
-	 * MySQL's error number or the class of what was thrown, and the errors $wpdb keeps for debugging tools
-	 * ($EZSQL_ERROR) lose those the callback added. $wpdb's error setting is restored after.
+	 * neither prints nor logs an error. After it, whatever it returned: $wpdb's last query and last call are empty, the
+	 * queries it saved for debugging tools (SAVEQUERIES) during the callback keep their place, which those tools
+	 * count, but not their text, and the errors it keeps for debugging tools ($EZSQL_ERROR) lose those the callback
+	 * added. When the callback fails, by returning false or by throwing, or a query it ran left an error,
+	 * get_last_db_error() gives the cause passed in, followed by MySQL's error number or the class of what was thrown.
+	 * An error left by a statement before the callback, when it ran none, is left alone. $wpdb's error setting is
+	 * restored after.
 	 *
 	 * @param callable(): mixed $queries
 	 * @param string            $cause   What a failure says in place of the database's error, such as "the database
@@ -932,51 +934,40 @@ abstract class BaseRepository {
 	 * @throws \Throwable What the callback throws, as it is: its message may quote a query, so it is never to be logged.
 	 */
 	protected function quietly( callable $queries, string $cause ): mixed {
-		$ran           = $this->wpdb->num_queries;
+		$run_before    = $this->wpdb->num_queries;
 		$saved_queries = is_array( $this->wpdb->queries ) ? count( $this->wpdb->queries ) : 0;
 		$debug_errors  = self::debug_error_count();
 		$previous      = $this->wpdb->suppress_errors( true );
 
 		try {
 			$result = $queries();
+			$ran    = $this->wpdb->num_queries > $run_before;
 
-			if ( false === $result ) {
+			if ( false === $result || ( $ran && '' !== (string) $this->wpdb->last_error ) ) {
 				// $wpdb gives the error's text, which can quote the value, but not its number. Without a query run (a value
 				// $wpdb refused to send), the connection's number belongs to an earlier statement.
-				$errno = $this->wpdb->num_queries > $ran ? $this->get_last_db_error_number() : 0;
+				$errno = $ran ? $this->get_last_db_error_number() : 0;
 
-				$this->forget_failure( $cause . ( $errno > 0 ? " (MySQL error {$errno})" : '' ), $debug_errors );
+				$this->wpdb->last_error = $cause . ( $errno > 0 ? " (MySQL error {$errno})" : '' );
 			}
 
 			return $result;
 		} catch ( \Throwable $exception ) {
-			$this->forget_failure( $cause . ' (' . get_class( $exception ) . ')', $debug_errors );
+			$this->wpdb->last_error = $cause . ' (' . get_class( $exception ) . ')';
 
 			throw $exception;
 		} finally {
+			// The errors kept for debugging tools hold the query's text.
+			if ( isset( $GLOBALS['EZSQL_ERROR'] ) && is_array( $GLOBALS['EZSQL_ERROR'] ) ) {
+				array_splice( $GLOBALS['EZSQL_ERROR'], $debug_errors );
+			}
+
 			$this->wpdb->last_query = null;
+			$this->wpdb->func_call  = '';
 
 			$this->hide_saved_queries( $saved_queries );
 
 			$this->wpdb->suppress_errors( $previous );
-		}
-	}
-
-	/**
-	 * Leave nothing of a failed quiet query in $wpdb: anything that later reads its last error, such as a rollback that
-	 * keeps it, gets the cause instead, and the errors $wpdb keeps for debugging tools lose those the query added, which
-	 * hold its text.
-	 *
-	 * @param string $cause        What the failure says.
-	 * @param int    $debug_errors How many errors $wpdb kept for debugging tools before the query.
-	 *
-	 * @return void
-	 */
-	private function forget_failure( string $cause, int $debug_errors ): void {
-		$this->wpdb->last_error = $cause;
-
-		if ( isset( $GLOBALS['EZSQL_ERROR'] ) && is_array( $GLOBALS['EZSQL_ERROR'] ) ) {
-			array_splice( $GLOBALS['EZSQL_ERROR'], $debug_errors );
 		}
 	}
 
