@@ -392,8 +392,8 @@ abstract class BaseRestController {
 		$errors = array();
 
 		foreach ( $lists as $field => $rules_array ) {
-			$value       = $data[ $field ] ?? null;
-			$is_present  = array_key_exists( $field, $data );
+			$value      = $data[ $field ] ?? null;
+			$is_present = array_key_exists( $field, $data );
 
 			foreach ( $rules_array as $rule ) {
 				// Handle rules with parameters (e.g., regex:/pattern/)
