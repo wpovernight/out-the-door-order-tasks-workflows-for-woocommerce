@@ -356,19 +356,31 @@ abstract class BaseRestController {
 	 *
 	 * Unknown rule names are ignored.
 	 *
-	 * @param array $data The data to validate
-	 * @param array $rules The validation rules
+	 * The rules pass through the "wpo_otd_rest_validation_rules" filter. A route whose handler relies on its rules,
+	 * reading a value as the type they check it has, keeps them: then a filter can add rules but never take one away,
+	 * and each rule of a field the filter left out is applied after those it left.
+	 *
+	 * @param array $data       The data to validate
+	 * @param array $rules      The validation rules
+	 * @param bool  $keep_rules Whether every rule given is applied whatever the filter does. Default false.
 	 *
 	 * @return array Validation errors, if any
 	 */
-	protected function validate( array $data, array $rules ): array {
+	protected function validate( array $data, array $rules, bool $keep_rules = false ): array {
+		$own = $rules;
+
 		/**
-		 * Filter validation rules before they are applied.
+		 * Filter validation rules before they are applied. On a route that keeps its rules, a rule taken away is
+		 * applied all the same, after the rules left, and a value that is not an array of rule strings is ignored.
 		 *
 		 * @param array $rules The validation rules.
 		 * @param array $data  The data being validated.
 		 */
 		$rules = apply_filters( 'wpo_otd_rest_validation_rules', $rules, $data );
+
+		if ( $keep_rules ) {
+			$rules = $this->with_rules_kept( is_array( $rules ) ? $rules : array(), $own );
+		}
 
 		$errors = array();
 
@@ -390,6 +402,24 @@ abstract class BaseRestController {
 		}
 
 		return $errors;
+	}
+
+	/**
+	 * Put back each rule a filter took away from the rules given.
+	 *
+	 * @param array                $filtered The rules as filtered.
+	 * @param array<string,string> $own      The rules as given.
+	 *
+	 * @return array<string,string> Each field's rules as filtered, then each of its own the filter left out, in order.
+	 */
+	private function with_rules_kept( array $filtered, array $own ): array {
+		foreach ( $own as $field => $rule_string ) {
+			$left = is_string( $filtered[ $field ] ?? null ) ? $this->parse_rules( $filtered[ $field ] ) : array();
+
+			$filtered[ $field ] = implode( '|', array_merge( $left, array_values( array_diff( $this->parse_rules( $rule_string ), $left ) ) ) );
+		}
+
+		return $filtered;
 	}
 
 	/**

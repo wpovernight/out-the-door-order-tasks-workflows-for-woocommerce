@@ -251,6 +251,68 @@ class BaseRestControllerTest extends TestCase {
 		);
 	}
 
+	public function test_a_route_that_keeps_its_rules_applies_each_one_a_filter_takes_away(): void {
+		Filters\expectApplied( 'wpo_otd_rest_validation_rules' )->once()->andReturn( array() );
+
+		$this->assertSame(
+			array(
+				'count' => array( 'The count field must be an integer.' ),
+				'title' => array( 'The title field is required.' ),
+			),
+			$this->controller->validate(
+				array( 'count' => '10' ),
+				array(
+					'count' => 'present|not_null|strict_integer',
+					'title' => 'present|not_null|string',
+				),
+				true
+			)
+		);
+	}
+
+	public function test_a_filter_can_add_rules_to_a_route_that_keeps_its_own(): void {
+		Filters\expectApplied( 'wpo_otd_rest_validation_rules' )->once()->andReturn( array( 'title' => 'string|max:3' ) );
+
+		$this->assertSame(
+			array( 'title' => array( 'The title field may not be longer than 3 characters.' ) ),
+			$this->controller->validate( array( 'title' => 'Packed' ), array( 'title' => 'present|string' ), true )
+		);
+	}
+
+	public function test_a_rule_a_filter_changes_on_a_route_that_keeps_its_rules_is_applied_after_those_left(): void {
+		Filters\expectApplied( 'wpo_otd_rest_validation_rules' )->once()->andReturn( array( 'count' => 'integer' ) );
+
+		$this->assertSame(
+			array( 'count' => array( 'The count field must be an integer.' ) ),
+			$this->controller->validate( array( 'count' => '10' ), array( 'count' => 'present|not_null|strict_integer' ), true ),
+			'The lenient integer the filter left passes "10"; the strict one it took away does not.'
+		);
+	}
+
+	public function test_a_route_that_keeps_its_rules_ignores_a_filter_that_gives_no_rules_at_all(): void {
+		Filters\expectApplied( 'wpo_otd_rest_validation_rules' )->once()->andReturn( 'none' );
+
+		$this->assertSame(
+			array( 'title' => array( 'The title field is required.' ) ),
+			$this->controller->validate( array(), array( 'title' => 'present' ), true )
+		);
+	}
+
+	public function test_a_pipe_inside_a_regex_survives_a_rule_put_back(): void {
+		Filters\expectApplied( 'wpo_otd_rest_validation_rules' )->once()->andReturn( array( 'key' => 'string' ) );
+
+		$this->assertSame(
+			array( 'key' => array( 'The key field is invalid.' ) ),
+			$this->controller->validate( array( 'key' => 'other' ), array( 'key' => 'string|regex:/^(draft|live)$/' ), true )
+		);
+	}
+
+	public function test_a_route_that_does_not_keep_its_rules_lets_a_filter_take_them_away(): void {
+		Filters\expectApplied( 'wpo_otd_rest_validation_rules' )->once()->andReturn( array() );
+
+		$this->assertSame( array(), $this->controller->validate( array( 'count' => '10' ), array( 'count' => 'present|not_null|strict_integer' ) ) );
+	}
+
 	/** ================================
 	 *   Pagination and responses
 	 *  ================================ */
@@ -419,8 +481,8 @@ class ExposedRestController extends BaseRestController {
 	public function register_routes(): void {
 	}
 
-	public function validate( array $data, array $rules ): array {
-		return parent::validate( $data, $rules );
+	public function validate( array $data, array $rules, bool $keep_rules = false ): array {
+		return parent::validate( $data, $rules, $keep_rules );
 	}
 
 	public function pagination_params( WP_REST_Request $request, int $default_per_page = 10, bool $always = false ): ?array {
