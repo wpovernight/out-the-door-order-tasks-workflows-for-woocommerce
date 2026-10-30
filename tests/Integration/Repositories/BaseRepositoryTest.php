@@ -331,6 +331,155 @@ class BaseRepositoryTest extends IntegrationTestCase {
 		$this->assertNull( $this->repository->find( max( $ids ) + 100 ) );
 	}
 
+	public function test_try_get_reads_rows_as_get_does_and_none_as_an_empty_list(): void {
+		$this->insert_statuses( array( 'a' => '#111', 'b' => '#222' ) );
+
+		$this->assertSame( array( 'b' ), $this->keys( $this->repository->where( 'background', '#222' )->try_get() ) );
+		$this->assertSame( array( array( 'status_key' => 'a' ) ), $this->repository->select( array( 'status_key' ) )->where( 'background', '#111' )->try_get( true ) );
+		$this->assertSame( array(), $this->repository->where( 'status_key', 'missing' )->try_get() );
+	}
+
+	public function test_try_get_tells_a_failed_read_apart_and_resets_the_query(): void {
+		$this->insert_statuses( array( 'a' => '#111', 'b' => '#222' ) );
+		$this->fail_queries( '/^SELECT \* FROM /' );
+
+		$this->assertNull( $this->repository->where( 'status_key', 'a' )->try_get() );
+		$this->assertSame( array(), $this->repository->where( 'status_key', 'a' )->get(), 'get() gives an empty list.' );
+
+		remove_all_filters( 'query' );
+
+		$this->assertSame( 2, $this->repository->count(), 'The condition was not left behind.' );
+	}
+
+	public function test_try_count_counts_as_count_does_and_tells_a_failed_count_apart(): void {
+		$this->insert_statuses( array( 'a' => '#111', 'b' => '#111', 'c' => '#222' ) );
+
+		$this->assertSame( 2, $this->repository->where( 'background', '#111' )->try_count() );
+		$this->assertSame( 0, $this->repository->where( 'status_key', 'missing' )->try_count() );
+
+		$this->fail_queries( '/^SELECT COUNT\(\*\) FROM /' );
+
+		$this->assertNull( $this->repository->where( 'background', '#111' )->try_count() );
+		$this->assertSame( 0, $this->repository->count(), 'count() gives 0.' );
+
+		remove_all_filters( 'query' );
+
+		$this->assertSame( 3, $this->repository->count(), 'The condition was not left behind.' );
+	}
+
+	public function test_try_find_tells_no_record_apart_from_a_failed_read(): void {
+		$ids = $this->insert_statuses( array( 'a' => '#111' ) );
+
+		$this->assertSame( 'a', $this->repository->try_find( $ids['a'] )->status_key );
+		$this->assertNull( $this->repository->try_find( $ids['a'] + 100 ) );
+
+		$this->fail_queries( '/^SELECT \* FROM /' );
+
+		$this->assertFalse( $this->repository->try_find( $ids['a'] ) );
+		$this->assertNull( $this->repository->find( $ids['a'] ), 'find() gives null.' );
+	}
+
+	public function test_a_failed_quiet_query_leaves_neither_its_text_nor_its_error_in_wpdb(): void {
+		global $wpdb;
+
+		$repository = new QuietStatusRepository();
+		$repository->insert( array( 'status_key' => 'packed', 'label' => 'Packed' ) );
+
+		$debug_errors = count( $GLOBALS['EZSQL_ERROR'] ?? array() );
+		$suppressing  = $wpdb->suppress_errors( false );
+
+		try {
+			$result = $repository->run_quietly( fn() => $repository->insert( array( 'status_key' => 'packed', 'label' => 'whsec-quiet-0001' ) ), 'the database refused the write' );
+
+			$this->assertFalse( $wpdb->suppress_errors( false ), 'Errors are shown again after, as they were before.' );
+		} finally {
+			$wpdb->suppress_errors( $suppressing );
+		}
+
+		$this->assertFalse( $result );
+		$this->assertSame( 'the database refused the write (MySQL error 1062)', $repository->get_last_db_error() );
+		$this->assertNull( $wpdb->last_query );
+		$this->assertCount( $debug_errors, $GLOBALS['EZSQL_ERROR'] ?? array(), 'The errors kept for debugging tools lose the one it added.' );
+	}
+
+	public function test_a_quiet_query_that_succeeds_gives_its_result_and_leaves_no_text_behind(): void {
+		global $wpdb;
+
+		$repository = new QuietStatusRepository();
+
+		$id = $repository->run_quietly( fn() => $repository->insert( array( 'status_key' => 'packed', 'label' => 'whsec-quiet-0002' ) ), 'the database refused the write' );
+
+		$this->assertIsInt( $id );
+		$this->assertSame( 'whsec-quiet-0002', $repository->find( $id )->label );
+
+		$repository->run_quietly( fn() => $repository->insert( array( 'status_key' => 'boxed', 'label' => 'whsec-quiet-0003' ) ), 'the database refused the write' );
+
+		$this->assertSame( '', $repository->get_last_db_error() );
+		$this->assertNull( $wpdb->last_query );
+	}
+
+	public function test_a_quiet_query_that_throws_is_thrown_on_as_it_is_with_only_its_class_in_wpdb(): void {
+		$repository = new QuietStatusRepository();
+		$thrown     = new \RuntimeException( 'Lock wait timeout near whsec-quiet-0004' );
+
+		try {
+			$repository->run_quietly(
+				static function () use ( $thrown ): never {
+					throw $thrown;
+				},
+				'the database refused the write'
+			);
+			$this->fail( 'The exception must propagate.' );
+		} catch ( \RuntimeException $exception ) {
+			$this->assertSame( $thrown, $exception );
+		}
+
+		$this->assertSame( 'the database refused the write (RuntimeException)', $repository->get_last_db_error() );
+	}
+
+	public function test_a_quiet_query_refused_before_it_ran_gives_the_cause_alone(): void {
+		$repository = new QuietStatusRepository();
+
+		$this->assertFalse( $repository->run_quietly( static fn(): bool => false, 'the database refused the write' ) );
+		$this->assertSame( 'the database refused the write', $repository->get_last_db_error(), 'No number of an earlier statement.' );
+	}
+
+	public function test_the_queries_saved_for_debugging_tools_during_a_quiet_query_keep_their_place_but_not_their_text(): void {
+		global $wpdb;
+
+		$saved        = $wpdb->queries;
+		$wpdb->queries = array( array( 'SELECT 1', 0.1, 'earlier' ) );
+
+		try {
+			( new QuietStatusRepository() )->run_quietly(
+				static function () use ( $wpdb ): int {
+					$wpdb->queries[] = array( "INSERT 'whsec-quiet-0005'", 0.2, 'caller' );
+					$wpdb->queries[] = array(
+						'query'   => "INSERT 'whsec-quiet-0006'",
+						'elapsed' => 0.3,
+					);
+
+					return 1;
+				},
+				'the database refused the write'
+			);
+
+			$this->assertSame(
+				array(
+					array( 'SELECT 1', 0.1, 'earlier' ),
+					array( '[a query holding a secret]', 0.2, 'caller' ),
+					array(
+						'query'   => '[a query holding a secret]',
+						'elapsed' => 0.3,
+					),
+				),
+				$wpdb->queries
+			);
+		} finally {
+			$wpdb->queries = $saved;
+		}
+	}
+
 	public function test_where_on_a_joined_tables_column(): void {
 		$fields = ( new TaskFieldRepository() )->get_table_full_name();
 
@@ -504,5 +653,14 @@ class BaseRepositoryTest extends IntegrationTestCase {
 	 */
 	private function keys( array $statuses ): array {
 		return array_map( static fn( $status ) => $status->status_key, array_values( $statuses ) );
+	}
+}
+
+/**
+ * Makes quietly() callable.
+ */
+class QuietStatusRepository extends CustomOrderStatusRepository {
+	public function run_quietly( callable $queries, string $cause ): mixed {
+		return $this->quietly( $queries, $cause );
 	}
 }

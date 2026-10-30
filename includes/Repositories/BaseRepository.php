@@ -152,6 +152,35 @@ abstract class BaseRepository {
 	}
 
 	/**
+	 * Get records, as get() does, telling a database failure apart from no records.
+	 *
+	 * @template TModel of BaseModel
+	 * @param bool $raw Whether to return raw database results instead of model instances. Default false.
+	 * @param bool $reset Whether to reset the query after execution. Default true.
+	 *
+	 * @return array<int, TModel>|null Null when the database failed.
+	 */
+	public function try_get( bool $raw = false, bool $reset = true ): ?array {
+		$records = $this->get( $raw, $reset );
+
+		// $wpdb gives an empty list for a failed query too, so only its error tells that apart from no records.
+		return array() === $records && '' !== $this->get_last_db_error() ? null : $records;
+	}
+
+	/**
+	 * Count rows matching the current query, as count() does, telling a database failure apart from none.
+	 *
+	 * @param bool $reset
+	 *
+	 * @return int|null Null when the database failed.
+	 */
+	public function try_count( bool $reset = true ): ?int {
+		$total = $this->count( $reset );
+
+		return 0 === $total && '' !== $this->get_last_db_error() ? null : $total;
+	}
+
+	/**
 	 * The highest value of a column among the rows matching the current query (joins + where), ignoring ORDER BY /
 	 * LIMIT / OFFSET.
 	 *
@@ -341,6 +370,24 @@ abstract class BaseRepository {
 	 */
 	public function find( int $id ): ?BaseModel {
 		return $this->find_by( 'id', absint( $id ) );
+	}
+
+	/**
+	 * Find a record by ID, as find() does, telling a database failure apart from no such record.
+	 *
+	 * @template TModel of BaseModel
+	 * @param int $id Record ID.
+	 *
+	 * @return TModel|false|null Null when there is no such record, false when the database failed.
+	 */
+	public function try_find( int $id ): BaseModel|false|null {
+		$model = $this->find( $id );
+
+		if ( null !== $model ) {
+			return $model;
+		}
+
+		return '' === $this->get_last_db_error() ? null : false;
 	}
 
 	/**
@@ -854,6 +901,103 @@ abstract class BaseRepository {
 	 */
 	public function get_last_db_error(): string {
 		return (string) $this->wpdb->last_error;
+	}
+
+	/**
+	 * Run queries that hold values which must stay secret, leaving none of their text in $wpdb.
+	 *
+	 * $wpdb puts a failing query in its error, and MySQL quotes the value it refused. So while the callback runs, $wpdb
+	 * neither prints nor logs an error, and after it $wpdb's last query is empty and the queries it saved for debugging
+	 * tools (SAVEQUERIES) during the callback keep their place, which those tools count, but not their text. When the
+	 * callback fails, by returning false or by throwing, get_last_db_error() gives the cause passed in, followed by
+	 * MySQL's error number or the class of what was thrown, and the errors $wpdb keeps for debugging tools
+	 * ($EZSQL_ERROR) lose those the callback added. $wpdb's error setting is restored after.
+	 *
+	 * @param callable(): mixed $queries
+	 * @param string            $cause   What a failure says in place of the database's error, such as "the database
+	 *                                   refused the write".
+	 *
+	 * @return mixed What the callback returned.
+	 * @throws \Throwable What the callback throws, as it is: its message may quote a query, so it is never to be logged.
+	 */
+	protected function quietly( callable $queries, string $cause ): mixed {
+		$ran           = $this->wpdb->num_queries;
+		$saved_queries = is_array( $this->wpdb->queries ) ? count( $this->wpdb->queries ) : 0;
+		$debug_errors  = self::debug_error_count();
+		$previous      = $this->wpdb->suppress_errors( true );
+
+		try {
+			$result = $queries();
+
+			if ( false === $result ) {
+				// $wpdb gives the error's text, which can quote the value, but not its number. Without a query run (a value
+				// $wpdb refused to send), the connection's number belongs to an earlier statement.
+				$errno = $this->wpdb->num_queries > $ran && $this->wpdb->dbh instanceof \mysqli ? mysqli_errno( $this->wpdb->dbh ) : 0; // phpcs:ignore WordPress.DB.RestrictedFunctions.mysql_mysqli_errno -- Read only, on $wpdb's own connection.
+
+				$this->forget_failure( $cause . ( $errno > 0 ? " (MySQL error {$errno})" : '' ), $debug_errors );
+			}
+
+			return $result;
+		} catch ( \Throwable $exception ) {
+			$this->forget_failure( $cause . ' (' . get_class( $exception ) . ')', $debug_errors );
+
+			throw $exception;
+		} finally {
+			$this->wpdb->last_query = null;
+
+			$this->hide_saved_queries( $saved_queries );
+
+			$this->wpdb->suppress_errors( $previous );
+		}
+	}
+
+	/**
+	 * Leave nothing of a failed quiet query in $wpdb: anything that later reads its last error, such as a rollback that
+	 * keeps it, gets the cause instead, and the errors $wpdb keeps for debugging tools lose those the query added, which
+	 * hold its text.
+	 *
+	 * @param string $cause        What the failure says.
+	 * @param int    $debug_errors How many errors $wpdb kept for debugging tools before the query.
+	 *
+	 * @return void
+	 */
+	private function forget_failure( string $cause, int $debug_errors ): void {
+		$this->wpdb->last_error = $cause;
+
+		if ( isset( $GLOBALS['EZSQL_ERROR'] ) && is_array( $GLOBALS['EZSQL_ERROR'] ) ) {
+			array_splice( $GLOBALS['EZSQL_ERROR'], $debug_errors );
+		}
+	}
+
+	/**
+	 * Replace the text of the queries $wpdb saved for debugging tools (SAVEQUERIES) during a quiet query, in place.
+	 *
+	 * @param int $from How many it had saved before the query.
+	 *
+	 * @return void
+	 */
+	private function hide_saved_queries( int $from ): void {
+		if ( ! is_array( $this->wpdb->queries ) ) {
+			return;
+		}
+
+		for ( $index = $from, $saved = count( $this->wpdb->queries ); $index < $saved; $index++ ) {
+			// WordPress keeps the text first; some database drop-ins keep it under "query".
+			foreach ( array( 0, 'query' ) as $key ) {
+				if ( isset( $this->wpdb->queries[ $index ][ $key ] ) ) {
+					$this->wpdb->queries[ $index ][ $key ] = '[a query holding a secret]';
+				}
+			}
+		}
+	}
+
+	/**
+	 * How many errors $wpdb keeps for debugging tools.
+	 *
+	 * @return int
+	 */
+	private static function debug_error_count(): int {
+		return isset( $GLOBALS['EZSQL_ERROR'] ) && is_array( $GLOBALS['EZSQL_ERROR'] ) ? count( $GLOBALS['EZSQL_ERROR'] ) : 0;
 	}
 
 	/**
