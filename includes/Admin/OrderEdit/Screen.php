@@ -173,7 +173,7 @@ final class Screen {
 				'apiNamespace'             => 'wpo/otd',
 				'nonce'                    => wp_create_nonce( 'wp_rest' ),
 				'isWooFulfillmentsEnabled' => wc_string_to_bool( get_option( 'woocommerce_feature_fulfillments_enabled', 'no' ) ),
-				'archivePageUrl'           => esc_url( admin_url( 'admin.php?page=' . OrderManagerScreen::PAGE_SLUG . '#/task-manager/archive' ) ),
+				'archivePageUrl'           => esc_url_raw( OrderManagerScreen::task_archive_url() ),
 				'statusRoles'              => array(
 					'done'   => $this->task_status_role_service->get_done_field_option_id(),
 					'undone' => $this->task_status_role_service->get_undone_field_option_id(),

@@ -173,6 +173,15 @@ final class Screen {
 	}
 
 	/**
+	 * The admin URL of the task archive: the page's archive view.
+	 *
+	 * @return string
+	 */
+	public static function task_archive_url(): string {
+		return admin_url( 'admin.php?page=' . self::PAGE_SLUG . '#/task-manager/archive' );
+	}
+
+	/**
 	 * Render the page content.
 	 *
 	 * @return void
