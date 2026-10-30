@@ -453,12 +453,18 @@ class BaseRepositoryTest extends IntegrationTestCase {
 	public function test_a_quiet_query_refused_before_it_ran_gives_the_cause_alone(): void {
 		global $wpdb;
 
-		$repository  = new QuietStatusRepository();
-		$suppressing = $wpdb->suppress_errors( true );
+		$repository   = new QuietStatusRepository();
+		$debug_errors = count( $GLOBALS['EZSQL_ERROR'] ?? array() );
+		$suppressing  = $wpdb->suppress_errors( true );
 
-		// An earlier statement leaves its error number on the connection.
+		// An earlier statement leaves its error number on the connection. The error it keeps for debugging tools is
+		// taken back, so no later test finds it.
 		$wpdb->query( 'SELECT * FROM `wpo_otd_no_such_table`' );
 		$wpdb->suppress_errors( $suppressing );
+
+		if ( isset( $GLOBALS['EZSQL_ERROR'] ) && is_array( $GLOBALS['EZSQL_ERROR'] ) ) {
+			array_splice( $GLOBALS['EZSQL_ERROR'], $debug_errors );
+		}
 
 		$this->assertSame( 1146, $repository->get_last_db_error_number() );
 		$this->assertFalse( $repository->run_quietly( static fn(): bool => false, 'the database refused the write' ) );
@@ -492,13 +498,46 @@ class BaseRepositoryTest extends IntegrationTestCase {
 	public function test_an_error_left_before_a_quiet_callback_that_runs_no_query_is_left_alone(): void {
 		global $wpdb;
 
-		$repository = new QuietStatusRepository();
+		$repository       = new QuietStatusRepository();
 		$wpdb->last_error = 'an earlier error';
 
-		$this->assertSame( 2, $repository->run_quietly( static fn(): int => 2, 'the database refused the write' ) );
-		$this->assertSame( 'an earlier error', $repository->get_last_db_error() );
+		try {
+			$this->assertSame( 2, $repository->run_quietly( static fn(): int => 2, 'the database refused the write' ) );
+			$this->assertSame( 'an earlier error', $repository->get_last_db_error() );
+		} finally {
+			$wpdb->last_error = '';
+		}
+	}
 
-		$wpdb->last_error = '';
+	public function test_a_quiet_query_inside_another_keeps_its_own_cause_when_it_failed_last(): void {
+		$repository = new QuietStatusRepository();
+		$repository->insert( array( 'status_key' => 'packed', 'label' => 'Packed' ) );
+
+		$result = $repository->run_quietly(
+			static fn(): int|false => $repository->run_quietly(
+				static fn(): int|false => $repository->insert( array( 'status_key' => 'packed', 'label' => 'whsec-quiet-0008' ) ),
+				'the status was refused'
+			),
+			'the save was refused'
+		);
+
+		$this->assertFalse( $result );
+		$this->assertSame( 'the status was refused (MySQL error 1062)', $repository->get_last_db_error(), 'The inner, more specific cause.' );
+
+		$this->assertSame(
+			1,
+			$repository->run_quietly(
+				static function () use ( $repository ): int {
+					$repository->run_quietly( static fn(): int|false => $repository->insert( array( 'status_key' => 'packed', 'label' => 'whsec-quiet-0009' ) ), 'the status was refused' );
+					$repository->count();
+
+					return 1;
+				},
+				'the save was refused'
+			),
+			'A query after the inner one succeeded: nothing to replace.'
+		);
+		$this->assertSame( '', $repository->get_last_db_error() );
 	}
 
 	public function test_the_queries_saved_for_debugging_tools_during_a_quiet_query_keep_their_place_but_not_their_text(): void {

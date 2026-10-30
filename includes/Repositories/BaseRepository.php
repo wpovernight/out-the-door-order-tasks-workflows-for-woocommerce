@@ -915,6 +915,13 @@ abstract class BaseRepository {
 	}
 
 	/**
+	 * The cause the last quiet query that failed gave $wpdb, so a quiet query around it keeps it.
+	 *
+	 * @var string|null
+	 */
+	private static ?string $quiet_cause = null;
+
+	/**
 	 * Run queries that hold values which must stay secret, leaving none of their text in $wpdb.
 	 *
 	 * $wpdb puts a failing query in its error, and MySQL quotes the value it refused. So while the callback runs, $wpdb
@@ -923,8 +930,8 @@ abstract class BaseRepository {
 	 * count, but not their text, and the errors it keeps for debugging tools ($EZSQL_ERROR) lose those the callback
 	 * added. When the callback fails, by returning false or by throwing, or a query it ran left an error,
 	 * get_last_db_error() gives the cause passed in, followed by MySQL's error number or the class of what was thrown.
-	 * An error left by a statement before the callback, when it ran none, is left alone. $wpdb's error setting is
-	 * restored after.
+	 * An error left by a statement before the callback, when it ran none, is left alone, and so is the cause a quiet
+	 * query run inside the callback gave last, which says more. $wpdb's error setting is restored after.
 	 *
 	 * @param callable(): mixed $queries
 	 * @param string            $cause   What a failure says in place of the database's error, such as "the database
@@ -943,17 +950,21 @@ abstract class BaseRepository {
 			$result = $queries();
 			$ran    = $this->wpdb->num_queries > $run_before;
 
-			if ( false === $result || ( $ran && '' !== (string) $this->wpdb->last_error ) ) {
+			if ( ( false === $result || ( $ran && '' !== (string) $this->wpdb->last_error ) ) && ! $this->holds_inner_cause( $ran ) ) {
 				// $wpdb gives the error's text, which can quote the value, but not its number. Without a query run (a value
 				// $wpdb refused to send), the connection's number belongs to an earlier statement.
 				$errno = $ran ? $this->get_last_db_error_number() : 0;
 
 				$this->wpdb->last_error = $cause . ( $errno > 0 ? " (MySQL error {$errno})" : '' );
+				self::$quiet_cause      = $this->wpdb->last_error;
 			}
 
 			return $result;
 		} catch ( \Throwable $exception ) {
-			$this->wpdb->last_error = $cause . ' (' . get_class( $exception ) . ')';
+			if ( ! $this->holds_inner_cause( $this->wpdb->num_queries > $run_before ) ) {
+				$this->wpdb->last_error = $cause . ' (' . get_class( $exception ) . ')';
+				self::$quiet_cause      = $this->wpdb->last_error;
+			}
 
 			throw $exception;
 		} finally {
@@ -969,6 +980,18 @@ abstract class BaseRepository {
 
 			$this->wpdb->suppress_errors( $previous );
 		}
+	}
+
+	/**
+	 * Check whether $wpdb's last error is the cause a quiet query run inside this one gave: no query ran since, as
+	 * each one starts by clearing it.
+	 *
+	 * @param bool $ran Whether the callback ran a query.
+	 *
+	 * @return bool
+	 */
+	private function holds_inner_cause( bool $ran ): bool {
+		return $ran && null !== self::$quiet_cause && self::$quiet_cause === (string) $this->wpdb->last_error;
 	}
 
 	/**

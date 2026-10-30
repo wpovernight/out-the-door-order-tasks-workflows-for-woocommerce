@@ -337,6 +337,20 @@ class BaseRestControllerTest extends TestCase {
 		);
 	}
 
+	public function test_a_rule_entry_a_filter_gives_that_is_not_a_string_is_ignored_on_any_route(): void {
+		Filters\expectApplied( 'wpo_otd_rest_validation_rules' )->once()->andReturn(
+			array(
+				'title' => 'present|string',
+				'extra' => array( 'string' ),
+			)
+		);
+
+		$this->assertSame(
+			array( 'title' => array( 'The title field must be a string.' ) ),
+			$this->controller->validate( array( 'title' => 3, 'extra' => 7 ), array( 'title' => 'present|string' ) )
+		);
+	}
+
 	public function test_a_route_that_does_not_keep_its_rules_lets_a_filter_take_them_away(): void {
 		Filters\expectApplied( 'wpo_otd_rest_validation_rules' )->once()->andReturn( array() );
 

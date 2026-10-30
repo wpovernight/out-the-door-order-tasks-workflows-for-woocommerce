@@ -384,8 +384,11 @@ abstract class BaseRestController {
 		} else {
 			$lists = array();
 
-			foreach ( $rules as $field => $rule_string ) {
-				$lists[ $field ] = $this->parse_rules( $rule_string );
+			// A field whose rules a filter gave as anything but a string has none.
+			foreach ( is_array( $rules ) ? $rules : array() as $field => $rule_string ) {
+				if ( is_string( $rule_string ) ) {
+					$lists[ $field ] = $this->parse_rules( $rule_string );
+				}
 			}
 		}
 

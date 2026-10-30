@@ -73,10 +73,11 @@ final class Logger {
 	 * once a day, never exactly. Within a request it is logged once at most, even when the transient cannot be stored.
 	 * A message that would never be logged, empty or at a level that is not allowed, is not marked.
 	 *
-	 * @param string $key     The transient's name, used as it is: callers start it with the plugin's prefix
-	 *                        ("wpo_otd_"), so a mark keeps the name it was stored under; at most 172 characters. A
-	 *                        message that is the same thing logged again must have the same key; never put a value
-	 *                        that must stay secret in it, a hash of it at most.
+	 * @param string $key     The transient's whole name, prefix included: callers pass the full "wpo_otd_" key. No
+	 *                        prefix is added here, because the transients existing callers mark their messages with
+	 *                        must keep their names. At most 172 characters. A message that is the same thing logged
+	 *                        again must have the same key; never put a value that must stay secret in it, a hash of
+	 *                        it at most.
 	 * @param string $level   As for log().
 	 * @param string $message
 	 *

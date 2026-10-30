@@ -120,7 +120,7 @@ class BaseRestControllerTest extends IntegrationTestCase {
 	/**
 	 * @dataProvider form_body_provider
 	 */
-	public function test_a_form_body_is_refused_by_its_keys_whatever_the_method( string $method, ?string $content_type ): void {
+	public function test_a_form_body_is_refused_by_its_keys_whatever_the_method( string $method, ?string $content_type, array $keys ): void {
 		$request = new WP_REST_Request( $method, '/x' );
 
 		if ( null !== $content_type ) {
@@ -130,15 +130,17 @@ class BaseRestControllerTest extends IntegrationTestCase {
 		$request->set_body( 'title=Packed&count=2' );
 
 		if ( 'POST' === $method ) {
-			// As WordPress parses a form body of a POST before the route runs.
-			$request->set_body_params( array( 'title' => 'Packed', 'count' => '2' ) );
+			// As WordPress parses a form body of a POST before the route runs: told apart from the raw body by its keys.
+			$request->set_body_params(
+				array(
+					'label' => 'Packed',
+					'size'  => '2',
+				)
+			);
 		}
 
 		$this->assert_invalid_data(
-			array(
-				'title' => array( 'This route takes no body.' ),
-				'count' => array( 'This route takes no body.' ),
-			),
+			array_fill_keys( $keys, array( 'This route takes no body.' ) ),
 			'This route takes no body.',
 			$this->controller->refuse_body( $request )
 		);
@@ -146,9 +148,9 @@ class BaseRestControllerTest extends IntegrationTestCase {
 
 	public function form_body_provider(): array {
 		return array(
-			'DELETE, form-encoded'     => array( 'DELETE', 'application/x-www-form-urlencoded' ),
-			'GET, with no type'        => array( 'GET', null ),
-			'POST, already parsed too' => array( 'POST', 'application/x-www-form-urlencoded' ),
+			'DELETE, form-encoded'           => array( 'DELETE', 'application/x-www-form-urlencoded', array( 'title', 'count' ) ),
+			'GET, with no type'              => array( 'GET', null, array( 'title', 'count' ) ),
+			'POST, its parsed params read'   => array( 'POST', 'application/x-www-form-urlencoded', array( 'label', 'size' ) ),
 		);
 	}
 
