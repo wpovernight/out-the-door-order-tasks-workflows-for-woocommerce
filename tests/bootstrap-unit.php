@@ -15,3 +15,6 @@ defined( 'WPO_OTD_VERSION' ) || define( 'WPO_OTD_VERSION', \WPO\OTD\OutTheDoor::
 
 // wpdb output type the repositories pass to get_results().
 defined( 'ARRAY_A' ) || define( 'ARRAY_A', 'ARRAY_A' );
+
+// How long Logger::once() marks a message as logged.
+defined( 'DAY_IN_SECONDS' ) || define( 'DAY_IN_SECONDS', 86400 );

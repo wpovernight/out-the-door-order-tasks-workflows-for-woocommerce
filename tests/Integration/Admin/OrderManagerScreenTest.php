@@ -42,6 +42,11 @@ class OrderManagerScreenTest extends IntegrationTestCase {
 		$this->assertContains( 'wpo_otd_order_manager', array_column( $submenu['woocommerce'] ?? array(), 2 ) );
 	}
 
+	public function test_the_task_board_is_the_kanban_view_of_its_page(): void {
+		$this->assertSame( 'wpo_otd_order_manager', Screen::PAGE_SLUG );
+		$this->assertSame( admin_url( 'admin.php?page=wpo_otd_order_manager#/task-manager/kanban' ), Screen::task_board_url() );
+	}
+
 	public function test_renders_the_app_root_for_managers_only(): void {
 		$this->act_as( 'subscriber' );
 		ob_start();

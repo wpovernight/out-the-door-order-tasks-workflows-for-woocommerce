@@ -8,6 +8,11 @@ use WPO\OTD\Services\TaskStatusRoleService;
 defined( 'ABSPATH' ) || exit;
 
 final class Screen {
+	/**
+	 * The admin page's slug, under WooCommerce's menu.
+	 */
+	public const PAGE_SLUG = 'wpo_otd_order_manager';
+
 	private readonly TaskStatusRoleService $task_status_role_service;
 
 	/**
@@ -41,7 +46,7 @@ final class Screen {
 		$screen = get_current_screen();
 		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
-		if ( ! $screen || 'woocommerce_page_wpo_otd_order_manager' !== $screen->id ) {
+		if ( ! $screen || 'woocommerce_page_' . self::PAGE_SLUG !== $screen->id ) {
 			return;
 		}
 
@@ -153,9 +158,18 @@ final class Screen {
 			esc_html__( 'Out the Door', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
 			esc_html__( 'Out the Door', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
 			'manage_woocommerce',
-			'wpo_otd_order_manager',
+			self::PAGE_SLUG,
 			array( $this, 'render_page' )
 		);
+	}
+
+	/**
+	 * The admin URL of the task board: the page's kanban view.
+	 *
+	 * @return string
+	 */
+	public static function task_board_url(): string {
+		return admin_url( 'admin.php?page=' . self::PAGE_SLUG . '#/task-manager/kanban' );
 	}
 
 	/**

@@ -83,6 +83,49 @@ class LoggerTest extends TestCase {
 		Logger::log( 'verbose', 'Not a PSR-3 level' );
 	}
 
+	public function test_a_message_logged_once_a_day_is_logged_the_first_time_and_marked_for_a_day(): void {
+		$marked = array();
+		Functions\expect( 'get_transient' )->once()->with( 'wpo_otd_example_mark' )->andReturn( false );
+		Functions\expect( 'set_transient' )->once()->andReturnUsing(
+			static function ( string $name, $value, int $expiration ) use ( &$marked ): bool {
+				$marked[ $name ] = $expiration;
+
+				return true;
+			}
+		);
+		$this->wc_logger->shouldReceive( 'log' )->once()->with( 'warning', 'Something happened', array( 'source' => 'wpo-otd' ) );
+
+		Logger::once( 'wpo_otd_example_mark', 'warning', 'Something happened' );
+
+		$this->assertSame( array( 'wpo_otd_example_mark' => DAY_IN_SECONDS ), $marked );
+	}
+
+	public function test_a_message_already_logged_today_is_not_logged_again(): void {
+		Functions\expect( 'get_transient' )->once()->with( 'wpo_otd_example_mark' )->andReturn( 1 );
+		Functions\expect( 'set_transient' )->never();
+		$this->wc_logger->shouldNotReceive( 'log' );
+
+		Logger::once( 'wpo_otd_example_mark', 'error', 'Something happened' );
+	}
+
+	public function test_a_message_logged_once_a_day_is_marked_even_while_logging_is_off(): void {
+		Functions\expect( 'get_transient' )->once()->andReturn( false );
+		Functions\expect( 'set_transient' )->once()->andReturn( true );
+		Filters\expectApplied( 'wpo_otd_logging_enabled' )->once()->andReturn( false );
+		$this->wc_logger->shouldNotReceive( 'log' );
+
+		Logger::once( 'wpo_otd_example_mark', 'notice', 'Muted' );
+	}
+
+	public function test_a_message_that_would_not_be_logged_at_all_is_not_marked(): void {
+		Functions\expect( 'get_transient' )->never();
+		Functions\expect( 'set_transient' )->never();
+		$this->wc_logger->shouldNotReceive( 'log' );
+
+		Logger::once( 'wpo_otd_example_mark', 'verbose', 'Not a PSR-3 level' );
+		Logger::once( 'wpo_otd_example_mark', 'error', '' );
+	}
+
 	public function test_the_woocommerce_logger_is_fetched_once(): void {
 		$fetches = 0;
 		Functions\when( 'wc_get_logger' )->alias(

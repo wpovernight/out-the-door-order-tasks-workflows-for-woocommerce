@@ -5,6 +5,11 @@ namespace WPO\OTD\Core;
 defined( 'ABSPATH' ) || exit;
 
 final class Logger {
+	/**
+	 * The levels a message can be logged at.
+	 */
+	private const LEVELS = array( 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency' );
+
 	private static ?\WC_Logger_Interface $wc_logger = null;
 
 	private static array $context = array( 'source' => 'wpo-otd' );
@@ -34,8 +39,7 @@ final class Logger {
 		}
 
 		// Validate level
-		$allowed_levels = array( 'debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency' );
-		if ( ! in_array( $level, $allowed_levels, true ) ) {
+		if ( ! in_array( $level, self::LEVELS, true ) ) {
 			return;
 		}
 
@@ -51,6 +55,32 @@ final class Logger {
 		}
 
 		self::get_logger()->log( $level, $message, self::$context );
+	}
+
+	/**
+	 * Log a message at most once a day, for something that recurs on every request until it is fixed, such as a
+	 * connector that fails each time it is read.
+	 *
+	 * A transient named by the key marks the message as logged for a day, and is set even while logging is turned off
+	 * by "wpo_otd_logging_enabled". A message that would never be logged, empty or at a level that is not allowed,
+	 * is not marked.
+	 *
+	 * @param string $key     The transient's name: prefixed with the plugin's own, and at most 172 characters. A
+	 *                        message that is the same thing logged again must have the same key; never put a value
+	 *                        that must stay secret in it, a hash of it at most.
+	 * @param string $level   As for log().
+	 * @param string $message
+	 *
+	 * @return void
+	 */
+	public static function once( string $key, string $level, string $message ): void {
+		if ( empty( $message ) || ! in_array( $level, self::LEVELS, true ) || false !== get_transient( $key ) ) {
+			return;
+		}
+
+		set_transient( $key, 1, DAY_IN_SECONDS );
+
+		self::log( $level, $message );
 	}
 
 	/**
