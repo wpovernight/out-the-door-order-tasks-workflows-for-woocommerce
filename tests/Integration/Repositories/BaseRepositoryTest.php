@@ -379,6 +379,19 @@ class BaseRepositoryTest extends IntegrationTestCase {
 		$this->assertNull( $this->repository->find( $ids['a'] ), 'find() gives null.' );
 	}
 
+	public function test_the_last_error_number_names_a_failed_query_without_its_text_until_the_next_one(): void {
+		$this->insert_statuses( array( 'a' => '#111' ) );
+		$this->fail_queries( '/^SELECT \* FROM /' );
+
+		$this->assertNull( $this->repository->where( 'status_key', 'a' )->try_get() );
+		$this->assertSame( 1146, $this->repository->get_last_db_error_number(), 'The forced failure reads a table that does not exist.' );
+
+		remove_all_filters( 'query' );
+
+		$this->assertSame( 1, $this->repository->count() );
+		$this->assertSame( 0, $this->repository->get_last_db_error_number(), 'A statement that succeeds has no error.' );
+	}
+
 	public function test_a_failed_quiet_query_leaves_neither_its_text_nor_its_error_in_wpdb(): void {
 		global $wpdb;
 

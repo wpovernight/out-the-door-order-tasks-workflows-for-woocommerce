@@ -904,6 +904,17 @@ abstract class BaseRepository {
 	}
 
 	/**
+	 * The number MySQL gave the error of the connection's last statement. Unlike get_last_db_error()'s text, it never
+	 * quotes the query or a value in it, so it can be logged. Read it straight after the query: the next statement,
+	 * whatever its kind, replaces it.
+	 *
+	 * @return int 0 when the last statement did not fail, or $wpdb has no MySQL connection.
+	 */
+	public function get_last_db_error_number(): int {
+		return $this->wpdb->dbh instanceof \mysqli ? mysqli_errno( $this->wpdb->dbh ) : 0; // phpcs:ignore WordPress.DB.RestrictedFunctions.mysql_mysqli_errno -- Read only, on $wpdb's own connection.
+	}
+
+	/**
 	 * Run queries that hold values which must stay secret, leaving none of their text in $wpdb.
 	 *
 	 * $wpdb puts a failing query in its error, and MySQL quotes the value it refused. So while the callback runs, $wpdb
@@ -932,7 +943,7 @@ abstract class BaseRepository {
 			if ( false === $result ) {
 				// $wpdb gives the error's text, which can quote the value, but not its number. Without a query run (a value
 				// $wpdb refused to send), the connection's number belongs to an earlier statement.
-				$errno = $this->wpdb->num_queries > $ran && $this->wpdb->dbh instanceof \mysqli ? mysqli_errno( $this->wpdb->dbh ) : 0; // phpcs:ignore WordPress.DB.RestrictedFunctions.mysql_mysqli_errno -- Read only, on $wpdb's own connection.
+				$errno = $this->wpdb->num_queries > $ran ? $this->get_last_db_error_number() : 0;
 
 				$this->forget_failure( $cause . ( $errno > 0 ? " (MySQL error {$errno})" : '' ), $debug_errors );
 			}
