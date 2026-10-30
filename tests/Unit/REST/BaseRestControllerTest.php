@@ -5,6 +5,7 @@ namespace WPO\OTD\Tests\Unit\REST;
 use Brain\Monkey\Filters;
 use Brain\Monkey\Functions;
 use Mockery;
+use stdClass;
 use WP_REST_Request;
 use WP_REST_Response;
 use WPO\OTD\REST\BaseRestController;
@@ -290,6 +291,51 @@ class BaseRestControllerTest extends TestCase {
 		$this->assertSame( array( 'page' => 1, 'per_page' => 25 ), $this->controller->pagination_params( $this->request( 1, null ), 25 ) );
 	}
 
+	public function test_a_route_that_is_always_paginated_reads_no_params_as_the_first_page(): void {
+		$this->assertSame( array( 'page' => 1, 'per_page' => 20 ), $this->controller->pagination_params( $this->request( null, null ), 20, true ) );
+		$this->assertSame( array( 'page' => 1, 'per_page' => 10 ), $this->controller->pagination_params( $this->request( null, null ), 10, true ) );
+	}
+
+	public function test_a_route_that_is_always_paginated_reads_its_params_as_any_other(): void {
+		$this->assertSame( array( 'page' => 3, 'per_page' => 20 ), $this->controller->pagination_params( $this->request( 3, null ), 20, true ) );
+		$this->assertSame( array( 'page' => 1, 'per_page' => BaseRestController::MAX_PER_PAGE ), $this->controller->pagination_params( $this->request( null, 500 ), 20, true ) );
+	}
+
+	public function test_a_page_holds_at_most_100_items(): void {
+		$this->assertSame( 100, BaseRestController::MAX_PER_PAGE );
+		$this->assertSame( array( 'page' => 1, 'per_page' => 100 ), $this->controller->pagination_params( $this->request( 1, 101 ) ) );
+	}
+
+	/** ================================
+	 *   Values as they are sent
+	 *  ================================ */
+
+	public function test_an_empty_map_is_sent_as_an_object_and_any_other_as_it_is(): void {
+		$this->assertInstanceOf( stdClass::class, ExposedRestController::map( array() ) );
+		$this->assertSame( '{}', json_encode( ExposedRestController::map( array() ) ) );
+		$this->assertSame( array( 'a' => 1 ), ExposedRestController::map( array( 'a' => 1 ) ) );
+		$this->assertSame( array( 1, 2 ), ExposedRestController::map( array( 1, 2 ) ) );
+	}
+
+	/**
+	 * @dataProvider utc_provider
+	 */
+	public function test_a_stored_utc_time_is_sent_in_iso_8601_with_a_z( ?string $stored, ?string $sent ): void {
+		$this->assertSame( $sent, ExposedRestController::utc( $stored ) );
+	}
+
+	public function utc_provider(): array {
+		return array(
+			'a stored time'    => array( '2026-10-29 07:05:09', '2026-10-29T07:05:09Z' ),
+			'midnight'         => array( '2026-01-01 00:00:00', '2026-01-01T00:00:00Z' ),
+			'none'             => array( null, null ),
+			'a date alone'     => array( '2026-10-29', null ),
+			'ISO 8601 already' => array( '2026-10-29T07:05:09Z', null ),
+			'not a time'       => array( 'soon', null ),
+			'empty'            => array( '', null ),
+		);
+	}
+
 	public function test_pagination_args_only_accept_positive_integers(): void {
 		$args = $this->controller->pagination_args();
 
@@ -377,8 +423,16 @@ class ExposedRestController extends BaseRestController {
 		return parent::validate( $data, $rules );
 	}
 
-	public function pagination_params( WP_REST_Request $request, int $default_per_page = 10 ): ?array {
-		return parent::pagination_params( $request, $default_per_page );
+	public function pagination_params( WP_REST_Request $request, int $default_per_page = 10, bool $always = false ): ?array {
+		return parent::pagination_params( $request, $default_per_page, $always );
+	}
+
+	public static function map( array $map ): array|stdClass {
+		return parent::map( $map );
+	}
+
+	public static function utc( ?string $datetime ): ?string {
+		return parent::utc( $datetime );
 	}
 
 	public function pagination_args(): array {

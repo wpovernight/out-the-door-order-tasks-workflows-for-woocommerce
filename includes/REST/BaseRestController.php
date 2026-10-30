@@ -2,14 +2,24 @@
 
 namespace WPO\OTD\REST;
 
+use stdClass;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
+use WPO\OTD\Core\Logger;
+use WPO\OTD\Traits\FormatsRestValues;
 use WPO\OTD\Utilities\Paginator;
 
 defined( 'ABSPATH' ) || exit;
 
 abstract class BaseRestController {
+	use FormatsRestValues;
+
+	/**
+	 * The most items a page holds: a larger per_page is read as this.
+	 */
+	public const MAX_PER_PAGE = 100;
+
 	protected string $namespace = 'wc/v3/wpo/otd';
 
 	abstract public function register_routes(): void;
@@ -109,24 +119,166 @@ abstract class BaseRestController {
 	}
 
 	/**
+	 * Read the request's JSON body strictly: no body at all is an object with no members, and anything else must be a
+	 * JSON object sent as JSON.
+	 *
+	 * Unlike json_object_body(), an empty list ([]) and a body not sent as JSON (form-encoded, say) are refused, so
+	 * the body is read the same way whatever its Content-Type, and never from the query string. Malformed JSON never
+	 * gets here: WordPress refuses it first.
+	 *
+	 * @param WP_REST_Request $request
+	 * @param string          $message What the refusal says about the request as a whole.
+	 *
+	 * @return array<string, mixed>|WP_Error The body's members, or invalid_data() with the problem under "".
+	 */
+	protected function strict_json_object_body( WP_REST_Request $request, string $message ): array|WP_Error {
+		$json = $this->json_object( $request );
+
+		if ( false === $json ) {
+			return $this->invalid_data( array( '' => array( 'The body must be a JSON object.' ) ), $message );
+		}
+
+		if ( null === $json && ( '' !== trim( (string) $request->get_body() ) || array() !== $request->get_body_params() ) ) {
+			return $this->invalid_data( array( '' => array( 'Send the body as JSON.' ) ), $message );
+		}
+
+		return $json ?? array();
+	}
+
+	/**
+	 * Refuse any body on a route that takes none: each key, JSON or form-encoded, under its own path, and a body with
+	 * no keys to name under "". An empty JSON object passes; the query string is never a body.
+	 *
+	 * @param WP_REST_Request $request
+	 *
+	 * @return WP_Error|null invalid_data(); null when there is no body.
+	 */
+	protected function refuse_body( WP_REST_Request $request ): ?WP_Error {
+		$json = $this->json_object( $request );
+		$form = $request->get_body_params();
+
+		// WordPress parses a form body of a method other than POST only once a parameter is read, which nothing may have
+		// done yet on a route with no args, so it is parsed here as WordPress would: form-encoded, or with no
+		// Content-Type at all.
+		if ( null === $json && array() === $form && self::may_be_form( $request ) ) {
+			parse_str( (string) $request->get_body(), $form );
+		}
+
+		$keys = array_merge( is_array( $json ) ? array_keys( $json ) : array(), array_keys( $form ) );
+
+		if ( array() === $keys && ( false === $json || ( null === $json && '' !== trim( (string) $request->get_body() ) ) ) ) {
+			$keys = array( '' );
+		}
+
+		if ( array() === $keys ) {
+			return null;
+		}
+
+		$errors = array();
+
+		foreach ( $keys as $key ) {
+			$errors[ (string) $key ] = array( 'This route takes no body.' );
+		}
+
+		return $this->invalid_data( $errors, __( 'This route takes no body.', 'out-the-door-order-tasks-workflows-for-woocommerce' ) );
+	}
+
+	/**
+	 * An input error: the key paths and what is wrong at each.
+	 *
+	 * @param array<string, string[]> $errors
+	 * @param string                  $message What the error says about the request as a whole.
+	 *
+	 * @return WP_Error invalid_data, 400.
+	 */
+	protected function invalid_data( array $errors, string $message ): WP_Error {
+		return new WP_Error(
+			'invalid_data',
+			$message,
+			array(
+				'status' => 400,
+				// An object, so a key PHP reads as a number, such as "0", is still sent as a key.
+				'errors' => (object) $errors,
+			)
+		);
+	}
+
+	/**
+	 * A server error: a generic message, the cause logged and never sent.
+	 *
+	 * @param string $code
+	 * @param string $message
+	 * @param string $cause   What went wrong, for the log. Never a request or response body, or a query's text.
+	 *
+	 * @return WP_Error 500.
+	 */
+	protected function server_error( string $code, string $message, string $cause ): WP_Error {
+		Logger::error( $cause );
+
+		return new WP_Error( $code, $message, array( 'status' => 500 ) );
+	}
+
+	/**
+	 * Check whether WordPress would read a request's body as form-encoded.
+	 *
+	 * @param WP_REST_Request $request
+	 *
+	 * @return bool True when it is sent form-encoded or with no Content-Type.
+	 */
+	private static function may_be_form( WP_REST_Request $request ): bool {
+		$content_type = $request->get_content_type();
+
+		return null === $content_type || 'application/x-www-form-urlencoded' === $content_type['value'];
+	}
+
+	/**
+	 * The JSON body, if the request has one.
+	 *
+	 * WordPress has already refused JSON that does not decode, before the route runs.
+	 *
+	 * @param WP_REST_Request $request
+	 *
+	 * @return array|false|null The object's keys and values; false for JSON that is not an object (a list, a scalar
+	 *                          or null); null when the body is not sent as JSON, or is empty.
+	 */
+	private function json_object( WP_REST_Request $request ): array|false|null {
+		$body = (string) $request->get_body();
+
+		if ( ! $request->is_json_content_type() || '' === trim( $body ) ) {
+			return null;
+		}
+
+		// Decoded as objects too: decoded to arrays, {} and [] would look the same.
+		if ( ! json_decode( $body ) instanceof stdClass ) {
+			return false;
+		}
+
+		$json = $request->get_json_params();
+
+		return is_array( $json ) ? $json : false;
+	}
+
+	/**
 	 * Read pagination params from the request.
 	 *
 	 * @param WP_REST_Request $request
 	 * @param int             $default_per_page
+	 * @param bool            $always           Whether the route always sends a page, so a request with neither
+	 *                                          param is the first page at the default size, not the full list.
 	 *
-	 * @return array{page:int,per_page:int}|null
+	 * @return array{page:int,per_page:int}|null Null for the full list, never when $always.
 	 */
-	protected function pagination_params( WP_REST_Request $request, int $default_per_page = 10 ): ?array {
+	protected function pagination_params( WP_REST_Request $request, int $default_per_page = 10, bool $always = false ): ?array {
 		$page     = $request->get_param( 'page' );
 		$per_page = $request->get_param( 'per_page' );
 
-		if ( null === $page && null === $per_page ) {
+		if ( null === $page && null === $per_page && ! $always ) {
 			return null;
 		}
 
 		return array(
 			'page'     => max( 1, (int) $page ),
-			'per_page' => min( 100, max( 1, (int) $per_page ?: $default_per_page ) ),
+			'per_page' => min( self::MAX_PER_PAGE, max( 1, (int) $per_page ?: $default_per_page ) ),
 		);
 	}
 
