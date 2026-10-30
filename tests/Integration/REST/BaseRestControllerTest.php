@@ -129,6 +129,11 @@ class BaseRestControllerTest extends IntegrationTestCase {
 
 		$request->set_body( 'title=Packed&count=2' );
 
+		if ( 'POST' === $method ) {
+			// As WordPress parses a form body of a POST before the route runs.
+			$request->set_body_params( array( 'title' => 'Packed', 'count' => '2' ) );
+		}
+
 		$this->assert_invalid_data(
 			array(
 				'title' => array( 'This route takes no body.' ),
@@ -145,6 +150,25 @@ class BaseRestControllerTest extends IntegrationTestCase {
 			'GET, with no type'        => array( 'GET', null ),
 			'POST, already parsed too' => array( 'POST', 'application/x-www-form-urlencoded' ),
 		);
+	}
+
+	public function test_a_request_that_carries_only_files_has_a_body(): void {
+		$request = new WP_REST_Request( 'POST', '/x' );
+		$request->set_header( 'Content-Type', 'multipart/form-data; boundary=x' );
+		$request->set_file_params(
+			array(
+				'upload' => array(
+					'name'     => 'rule.json',
+					'type'     => 'application/json',
+					'tmp_name' => '/tmp/php1234',
+					'error'    => 0,
+					'size'     => 2,
+				),
+			)
+		);
+
+		$this->assert_invalid_data( array( 'upload' => array( 'This route takes no body.' ) ), 'This route takes no body.', $this->controller->refuse_body( $request ) );
+		$this->assert_invalid_data( array( '' => array( 'Send the body as JSON.' ) ), self::REFUSED, $this->controller->strict_json_object_body( $request, self::REFUSED ) );
 	}
 
 	public function test_a_body_of_another_type_is_refused_as_a_whole(): void {

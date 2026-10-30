@@ -122,9 +122,9 @@ abstract class BaseRestController {
 	 * Read the request's JSON body strictly: no body at all is an object with no members, and anything else must be a
 	 * JSON object sent as JSON.
 	 *
-	 * Unlike json_object_body(), an empty list ([]) and a body not sent as JSON (form-encoded, say) are refused, so
-	 * the body is read the same way whatever its Content-Type, and never from the query string. Malformed JSON never
-	 * gets here: WordPress refuses it first.
+	 * Unlike json_object_body(), an empty list ([]) and a body not sent as JSON (form-encoded or with files, say) are
+	 * refused, so the body is read the same way whatever its Content-Type, and never from the query string. Malformed
+	 * JSON never gets here: WordPress refuses it first.
 	 *
 	 * @param WP_REST_Request $request
 	 * @param string          $message What the refusal says about the request as a whole.
@@ -138,7 +138,7 @@ abstract class BaseRestController {
 			return $this->invalid_data( array( '' => array( 'The body must be a JSON object.' ) ), $message );
 		}
 
-		if ( null === $json && ( '' !== trim( (string) $request->get_body() ) || array() !== $request->get_body_params() ) ) {
+		if ( null === $json && ( '' !== trim( (string) $request->get_body() ) || array() !== $request->get_body_params() || array() !== $request->get_file_params() ) ) {
 			return $this->invalid_data( array( '' => array( 'Send the body as JSON.' ) ), $message );
 		}
 
@@ -146,8 +146,8 @@ abstract class BaseRestController {
 	}
 
 	/**
-	 * Refuse any body on a route that takes none: each key, JSON or form-encoded, under its own path, and a body with
-	 * no keys to name under "". An empty JSON object passes; the query string is never a body.
+	 * Refuse any body on a route that takes none: each key, JSON, form-encoded or a file's, under its own path, and a
+	 * body with no keys to name under "". An empty JSON object passes; the query string is never a body.
 	 *
 	 * @param WP_REST_Request $request
 	 *
@@ -164,7 +164,8 @@ abstract class BaseRestController {
 			parse_str( (string) $request->get_body(), $form );
 		}
 
-		$keys = array_merge( is_array( $json ) ? array_keys( $json ) : array(), array_keys( $form ) );
+		// Files are sent in a body too, as a multipart one.
+		$keys = array_merge( is_array( $json ) ? array_keys( $json ) : array(), array_keys( $form ), array_keys( $request->get_file_params() ) );
 
 		if ( array() === $keys && ( false === $json || ( null === $json && '' !== trim( (string) $request->get_body() ) ) ) ) {
 			$keys = array( '' );
@@ -300,7 +301,7 @@ abstract class BaseRestController {
 				'type'              => 'integer',
 				'sanitize_callback' => 'absint',
 				// Only enforce the lower bound here; the upper bound is clamped
-				// to 100 in pagination_params() rather than rejected.
+				// to MAX_PER_PAGE in pagination_params() rather than rejected.
 				'validate_callback' => static fn( $value ) => (int) $value >= 1,
 			),
 		);
@@ -379,13 +380,18 @@ abstract class BaseRestController {
 		$rules = apply_filters( 'wpo_otd_rest_validation_rules', $rules, $data );
 
 		if ( $keep_rules ) {
-			$rules = $this->with_rules_kept( is_array( $rules ) ? $rules : array(), $own );
+			$lists = $this->with_rules_kept( is_array( $rules ) ? $rules : array(), $own );
+		} else {
+			$lists = array();
+
+			foreach ( $rules as $field => $rule_string ) {
+				$lists[ $field ] = $this->parse_rules( $rule_string );
+			}
 		}
 
 		$errors = array();
 
-		foreach ( $rules as $field => $rule_string ) {
-			$rules_array = $this->parse_rules( $rule_string );
+		foreach ( $lists as $field => $rules_array ) {
 			$value       = $data[ $field ] ?? null;
 			$is_present  = array_key_exists( $field, $data );
 
@@ -407,19 +413,30 @@ abstract class BaseRestController {
 	/**
 	 * Put back each rule a filter took away from the rules given.
 	 *
-	 * @param array                $filtered The rules as filtered.
+	 * Each field's rules are kept as a list, never joined and split again: a rule a filter wrote in a form the
+	 * splitting does not know, such as a regex not delimited by "/", could otherwise swallow the route's own rules.
+	 *
+	 * @param array                $filtered The rules as filtered. A field whose rules are not a string is left out.
 	 * @param array<string,string> $own      The rules as given.
 	 *
-	 * @return array<string,string> Each field's rules as filtered, then each of its own the filter left out, in order.
+	 * @return array<string,string[]> Each field's rules as filtered, then each of its own the filter left out, in order.
 	 */
 	private function with_rules_kept( array $filtered, array $own ): array {
-		foreach ( $own as $field => $rule_string ) {
-			$left = is_string( $filtered[ $field ] ?? null ) ? $this->parse_rules( $filtered[ $field ] ) : array();
+		$lists = array();
 
-			$filtered[ $field ] = implode( '|', array_merge( $left, array_values( array_diff( $this->parse_rules( $rule_string ), $left ) ) ) );
+		foreach ( $filtered as $field => $rule_string ) {
+			if ( is_string( $rule_string ) ) {
+				$lists[ $field ] = $this->parse_rules( $rule_string );
+			}
 		}
 
-		return $filtered;
+		foreach ( $own as $field => $rule_string ) {
+			$left = $lists[ $field ] ?? array();
+
+			$lists[ $field ] = array_merge( $left, array_values( array_diff( $this->parse_rules( $rule_string ), $left ) ) );
+		}
+
+		return $lists;
 	}
 
 	/**

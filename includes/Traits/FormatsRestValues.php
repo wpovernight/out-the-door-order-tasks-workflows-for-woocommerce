@@ -28,7 +28,8 @@ trait FormatsRestValues {
 	 *
 	 * @param string|null $datetime "Y-m-d H:i:s", in UTC.
 	 *
-	 * @return string|null Null for none, or for one that is not in that format.
+	 * @return string|null Null for none, for one that is not in that format, and for a date or time that cannot be,
+	 *                     such as 0000-00-00 00:00:00 or 2026-02-30 25:61:61, which PHP would roll over to another.
 	 */
 	protected static function utc( ?string $datetime ): ?string {
 		if ( null === $datetime ) {
@@ -37,6 +38,7 @@ trait FormatsRestValues {
 
 		$time = DateTimeImmutable::createFromFormat( 'Y-m-d H:i:s', $datetime, new DateTimeZone( 'UTC' ) );
 
-		return false === $time ? null : $time->format( 'Y-m-d\TH:i:s\Z' );
+		// Read back in the same format, a time PHP rolled over no longer matches.
+		return false === $time || $time->format( 'Y-m-d H:i:s' ) !== $datetime ? null : $time->format( 'Y-m-d\TH:i:s\Z' );
 	}
 }

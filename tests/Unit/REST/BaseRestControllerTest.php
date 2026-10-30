@@ -280,12 +280,42 @@ class BaseRestControllerTest extends TestCase {
 	}
 
 	public function test_a_rule_a_filter_changes_on_a_route_that_keeps_its_rules_is_applied_after_those_left(): void {
-		Filters\expectApplied( 'wpo_otd_rest_validation_rules' )->once()->andReturn( array( 'count' => 'integer' ) );
+		Filters\expectApplied( 'wpo_otd_rest_validation_rules' )->once()->andReturn( array( 'count' => 'integer|max:1' ) );
 
 		$this->assertSame(
-			array( 'count' => array( 'The count field must be an integer.' ) ),
+			array(
+				'count' => array(
+					'The count field may not be longer than 1 characters.',
+					'The count field must be an integer.',
+				),
+			),
 			$this->controller->validate( array( 'count' => '10' ), array( 'count' => 'present|not_null|strict_integer' ), true ),
-			'The lenient integer the filter left passes "10"; the strict one it took away does not.'
+			'The rules the filter left first; then the strict integer it took away, which "10" fails.'
+		);
+	}
+
+	public function test_a_regex_a_filter_adds_in_another_delimiter_keeps_the_routes_rules(): void {
+		Filters\expectApplied( 'wpo_otd_rest_validation_rules' )->twice()->andReturn( array( 'revision' => 'regex:#^[0-9|]+$#' ) );
+
+		$this->assertSame(
+			array( 'revision' => array( 'The revision field is required.' ) ),
+			$this->controller->validate( array(), array( 'revision' => 'present|not_null|strict_integer' ), true ),
+			'The filter\'s regex does not swallow the route\'s rules after it.'
+		);
+		$this->assertSame( array(), $this->controller->validate( array( 'revision' => 4 ), array( 'revision' => 'present|not_null|strict_integer' ), true ) );
+	}
+
+	public function test_a_rule_entry_a_filter_adds_that_is_not_a_string_is_ignored(): void {
+		Filters\expectApplied( 'wpo_otd_rest_validation_rules' )->once()->andReturnUsing(
+			static fn( array $rules ): array => $rules + array(
+				'extra' => array( 'string' ),
+				'count' => 5,
+			)
+		);
+
+		$this->assertSame(
+			array( 'title' => array( 'The title field must be a string.' ) ),
+			$this->controller->validate( array( 'title' => 3, 'extra' => 7 ), array( 'title' => 'present|string' ), true )
 		);
 	}
 
@@ -395,6 +425,10 @@ class BaseRestControllerTest extends TestCase {
 			'ISO 8601 already' => array( '2026-10-29T07:05:09Z', null ),
 			'not a time'       => array( 'soon', null ),
 			'empty'            => array( '', null ),
+			'a zero date'      => array( '0000-00-00 00:00:00', null ),
+			'a day past month' => array( '2026-02-30 12:00:00', null ),
+			'a time past day'  => array( '2026-02-28 25:61:61', null ),
+			'a leap day'       => array( '2024-02-29 23:59:59', '2024-02-29T23:59:59Z' ),
 		);
 	}
 
