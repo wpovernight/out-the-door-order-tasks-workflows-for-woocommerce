@@ -18,11 +18,7 @@ final class ArchitectureTest extends TestCase {
 		'do_action_ref_array',
 	);
 
-	private const HOOK_FUNCTIONS = array(
-		'apply_filters',
-		'apply_filters_ref_array',
-		'do_action',
-		'do_action_ref_array',
+	private const LISTENING_FUNCTIONS = array(
 		'add_action',
 		'add_filter',
 		'remove_action',
@@ -39,14 +35,36 @@ final class ArchitectureTest extends TestCase {
 	public function test_only_repositories_and_core_use_wpdb(): void {
 		$this->assertSame(
 			array(),
-			$this->files_matching( '/\$wpdb\b/', array( 'Repositories/', 'Core/' ) ),
-			'Only repositories and Core may use $wpdb; elsewhere, go through a repository.'
+			$this->files_matching(
+				'/\$wpdb\b|\$GLOBALS\s*\[\s*[\'"]wpdb[\'"]\s*\]/',
+				array(
+					'Repositories/',
+					// Create, check and drop the plugin's tables and their foreign keys.
+					'Core/ForeignKeys.php',
+					'Core/Installer.php',
+					'Core/Schema.php',
+				)
+			),
+			'Only repositories and the installer may use $wpdb; elsewhere, go through a repository.'
 		);
 	}
 
 	public function test_constructors_have_no_side_effects(): void {
-		$side_effect = '/' . self::call_of( 'add_action', 'add_filter', 'apply_filters', 'do_action', 'get_option' )
-			. '|wpdb->/';
+		$side_effect = '/' . self::call_of(
+			'add_action',
+			'add_filter',
+			'apply_filters',
+			'apply_filters_ref_array',
+			'do_action',
+			'do_action_ref_array',
+			'get_option',
+			'update_option',
+			'add_option',
+			'delete_option',
+			'register_post_status',
+			'register_post_type',
+			'as_\w+'
+		) . '|wpdb->/';
 		$violations  = array();
 
 		foreach ( $this->files() as $path => $file ) {
@@ -113,13 +131,16 @@ final class ArchitectureTest extends TestCase {
 	}
 
 	public function test_hook_names_are_literals_or_scheduled_action_constants(): void {
+		$literal  = '\'[^\']*\'\s*[,)]';
+		$fired    = self::call_of( ...self::FIRING_FUNCTIONS ) . '\s*+(?!' . $literal . ')';
+		$listened = self::call_of( ...self::LISTENING_FUNCTIONS )
+			. '\s*+(?!' . $literal . '|[\w\\\\]+::(\w+_)?HOOK\s*[,)])';
+
 		$this->assertSame(
 			array(),
-			$this->files_matching(
-				'/' . self::call_of( ...self::HOOK_FUNCTIONS ) . '\s*+(?!\'|[\w\\\\]+::(\w+_)?HOOK\b)/'
-			),
-			'Name a hook with a string literal at the call, so its name can be searched for; only our own Action'
-				. ' Scheduler hooks are constants named HOOK or ..._HOOK.'
+			$this->files_matching( '/' . $fired . '|' . $listened . '/' ),
+			'Name a hook with one whole string literal at the call, so its name can be searched for; only where we'
+				. ' listen to our own Action Scheduler hooks may the name be a constant named HOOK or ..._HOOK.'
 		);
 	}
 
@@ -186,7 +207,8 @@ final class ArchitectureTest extends TestCase {
 	}
 
 	public function test_scheduled_action_hooks_and_groups_are_prefixed(): void {
-		// Queued on sites before this rule: renamed, has_scheduled and unschedule calls would miss those actions.
+		// Groups the released 1.0.0 already queues actions under: renamed, has_scheduled and unschedule calls would
+		// miss those actions.
 		$released_groups = array( 'wpo_otd', 'wpo-otd' );
 		$violations      = array();
 
@@ -280,7 +302,8 @@ final class ArchitectureTest extends TestCase {
 	}
 
 	/**
-	 * Whether a docblock sits between the start of the statement holding the token at $at and the token.
+	 * Whether a docblock with a summary or an @param, not only tags such as @var, sits between the start of the
+	 * statement holding the token at $at and the token.
 	 *
 	 * @param array $tokens
 	 * @param int   $at
@@ -290,7 +313,7 @@ final class ArchitectureTest extends TestCase {
 	private static function has_docblock( array $tokens, int $at ): bool {
 		for ( $before = $at - 1; $before >= 0; $before-- ) {
 			if ( is_array( $tokens[ $before ] ) && T_DOC_COMMENT === $tokens[ $before ][0] ) {
-				return true;
+				return 1 === preg_match( '/^[ \t\/*]*+(?!@)[^\s*\/]|@param\b/m', $tokens[ $before ][1] );
 			}
 
 			if ( in_array( $tokens[ $before ], array( ';', '{', '}' ), true ) ) {
