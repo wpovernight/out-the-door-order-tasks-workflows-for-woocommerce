@@ -51,9 +51,12 @@ trait TaskEmailRecipients {
 		$recipients = array_unique( array_filter( $recipients, 'is_email' ) );
 
 		/**
-		 * Filter the email recipients for a task notification.
+		 * Filter the email recipients for a task notification. The addresses returned are not checked again, and a
+		 * value that is not an array throws a TypeError.
 		 *
-		 * @param array $recipients        List of email addresses.
+		 * @param array $recipients        List of email addresses. Default the configured recipients and, when
+		 *                                 enabled, the task's creator and every shop manager and administrator, each
+		 *                                 valid address once.
 		 * @param array $task_with_fields  Complete task data.
 		 * @param self  $email             The email instance.
 		 */

@@ -1000,10 +1000,12 @@ class CustomOrderStatusService {
 	private function move_order( $order, string $from_status, string $to_status ): bool {
 		try {
 			/**
-			 * Filter the fallback status assigned to an order during reassignment.
+			 * Filter the fallback status assigned to an order during reassignment: a status key, with or without the
+			 * 'wc-' prefix. WooCommerce moves the order to pending for a status it does not list, and the status being
+			 * deleted leaves the order in it, with a warning logged.
 			 *
-			 * @param string $to_status The fallback status key (without 'wc-' prefix).
-			 * @param mixed  $order     The order being reassigned.
+			 * @param string    $to_status The fallback status key (without 'wc-' prefix). Default the deletion's fallback.
+			 * @param \WC_Order $order     The order being reassigned.
 			 */
 			$resolved_to_status = apply_filters( 'wpo_otd_reassign_orders_to_status', $to_status, $order );
 

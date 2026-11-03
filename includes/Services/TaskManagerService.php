@@ -1415,11 +1415,10 @@ final class TaskManagerService {
 		$position = ( $previous_position + $next_position ) / 2;
 
 		/**
-		 * Filters the precision threshold for task position calculations.
+		 * Filters how small the gap between the positions around a moved task may get before the status's positions
+		 * are rebalanced. The value is not checked: 0 or less never schedules a rebalance.
 		 *
-		 * @param float $precision_threshold The precision threshold.
-		 *
-		 * @return float The precision threshold.
+		 * @param float $precision_threshold The smallest gap. Default 0.0001.
 		 */
 		$precision_threshold = apply_filters( 'wpo_otd_task_position_precision_threshold', 0.0001 );
 
@@ -1684,11 +1683,10 @@ final class TaskManagerService {
 		}
 
 		/**
-		 * Filters the scheduled time for the rebalance task positions action.
+		 * Filters when the rebalance of a status's task positions runs, as a Unix timestamp. The value is not checked:
+		 * it is passed to Action Scheduler as given.
 		 *
-		 * @param int $timestamp The scheduled timestamp.
-		 *
-		 * @return int The modified timestamp.
+		 * @param int $timestamp When the rebalance runs. Default a minute from now.
 		 */
 		$timestamp = apply_filters(
 			'wpo_otd_rebalance_task_positions_scheduled_time',
