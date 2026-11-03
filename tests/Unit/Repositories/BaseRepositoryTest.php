@@ -32,6 +32,7 @@ class BaseRepositoryTest extends TestCase {
 		parent::setUp();
 
 		$this->set_static_property( BaseRepository::class, 'column_names', null );
+		$this->set_static_property( BaseRepository::class, 'not_null_columns', array() );
 		$this->set_static_property( BaseRepository::class, 'cache', array() );
 
 		$this->wpdb             = Mockery::mock( 'wpdb' );
@@ -43,6 +44,8 @@ class BaseRepositoryTest extends TestCase {
 			->with( 'DESCRIBE ' . self::TABLE )
 			->andReturn( array( 'id', 'name', 'price', 'status', 'created_at', 'updated_at' ) )
 			->byDefault();
+		$this->wpdb->shouldReceive( 'get_col' )->with( null, 2 )->andReturn( array() )->byDefault();
+		$this->wpdb->shouldReceive( 'get_col' )->with( null, 5 )->andReturn( array() )->byDefault();
 
 		$this->wpdb->shouldReceive( 'prepare' )
 			->andReturnUsing( static fn( $query, ...$args ) => $query . ' -- ' . wp_json_encode_stub( $args ) )
@@ -56,6 +59,7 @@ class BaseRepositoryTest extends TestCase {
 	protected function tearDown(): void {
 		unset( $GLOBALS['wpdb'] );
 		$this->set_static_property( BaseRepository::class, 'column_names', null );
+		$this->set_static_property( BaseRepository::class, 'not_null_columns', array() );
 		$this->set_static_property( BaseRepository::class, 'cache', array() );
 
 		parent::tearDown();
@@ -840,9 +844,28 @@ class BaseRepositoryTest extends TestCase {
 		);
 	}
 
+	public function test_insert_many_sends_nothing_when_a_column_that_cannot_hold_a_null_is_given_one(): void {
+		$this->wpdb->shouldReceive( 'get_col' )->with( null, 2 )->andReturn( array( 'NO', 'NO', 'YES', 'NO', 'NO', 'NO' ) );
+		$this->wpdb->shouldReceive( 'get_col' )->with( null, 5 )->andReturn( array( 'auto_increment', '', '', '', '', '' ) );
+		$this->wpdb->shouldReceive( 'strip_invalid_text_for_column' )->andReturnUsing( static fn( $table, $column, $value ) => $value );
+		$this->wpdb->shouldNotReceive( 'query' );
+
+		$this->assertFalse( $this->repository->insert_many( array( array( 'name' => 'Lamp', 'Status' => 'ok' ), array( 'name' => 'Desk', 'Status' => null ) ) ) );
+		$this->assertSame( "Column 'Status' cannot be null", $this->repository->get_last_db_error() );
+	}
+
+	public function test_insert_many_writes_a_null_to_a_column_that_can_hold_one_or_numbers_itself(): void {
+		$this->wpdb->shouldReceive( 'get_col' )->with( null, 2 )->andReturn( array( 'NO', 'NO', 'YES', 'NO', 'NO', 'NO' ) );
+		$this->wpdb->shouldReceive( 'get_col' )->with( null, 5 )->andReturn( array( 'auto_increment', '', '', '', '', '' ) );
+		$this->wpdb->shouldReceive( 'query' )->once()->with( 'INSERT INTO `' . self::TABLE . '` (`id`, `price`) VALUES (NULL, NULL)' )->andReturn( 1 );
+
+		$this->assertSame( 1, $this->repository->insert_many( array( array( 'id' => null, 'price' => null ) ) ) );
+	}
+
 	public function test_insert_many_validates_its_rows_and_leaves_no_query_behind(): void {
 		$this->assert_throws( InvalidArgumentException::class, fn() => $this->repository->insert_many( array() ) );
 		$this->assert_throws( InvalidArgumentException::class, fn() => $this->repository->insert_many( array( array() ) ) );
+		$this->assert_throws( InvalidArgumentException::class, fn() => ( new TimestampedGadgetRepository() )->insert_many( array( array( 'name' => 'Lamp' ), array() ) ) );
 		$this->assert_throws( InvalidArgumentException::class, fn() => $this->repository->where( 'id', 4 )->insert_many( array( array( 'colour' => 'red' ) ) ) );
 		$this->assert_throws( InvalidArgumentException::class, fn() => $this->repository->insert_many( array( array( 'name' => 'Lamp' ), array( 'price' => 3 ) ) ) );
 		$this->assert_throws( InvalidArgumentException::class, fn() => $this->repository->insert_many( array( array( 'name' => 'Lamp' ), array( 'name' => 'Desk', 'price' => 3 ) ) ) );

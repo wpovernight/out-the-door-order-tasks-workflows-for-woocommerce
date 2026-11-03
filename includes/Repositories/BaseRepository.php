@@ -68,6 +68,14 @@ abstract class BaseRepository {
 	private static ?array $column_names = null;
 
 	/**
+	 * The columns of each table described so far that cannot hold a null, lowercased: those NOT NULL, but for an
+	 * AUTO_INCREMENT one, to which a null gives the next number.
+	 *
+	 * @var array<string, string[]>
+	 */
+	private static array $not_null_columns = array();
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string $table_name
@@ -527,9 +535,11 @@ abstract class BaseRepository {
 	/**
 	 * Insert records in one statement, all or none.
 	 *
-	 * Values are written as insert() writes them: each bound as a string, null as NULL, a date in UTC. A value too long
-	 * for its column, or holding characters the column cannot store, refuses every row before anything is sent, as
-	 * $wpdb->insert() refuses its row, instead of being cut short by the database.
+	 * Each value is sent as text, as $wpdb->insert() sends it; null is written as NULL and a date in UTC. What a
+	 * single-row insert refuses refuses every row here, before anything is sent: a value too long for its column or
+	 * holding characters the column cannot store, as $wpdb->insert() refuses it, and a null in a column that cannot
+	 * hold one, which the database refuses. A statement of several rows would otherwise store a shortened value or the
+	 * column's default in their place.
 	 *
 	 * @param array<int, array<string, mixed>> $rows Each row's columns to their values; every row names the same
 	 *                                               columns.
@@ -543,12 +553,14 @@ abstract class BaseRepository {
 			throw $this->discard( new InvalidArgumentException( 'Rows must be a non-empty array.' ) );
 		}
 
+		foreach ( $rows as $row ) {
+			if ( empty( $row ) ) {
+				throw $this->discard( new InvalidArgumentException( 'Each row must be a non-empty array.' ) );
+			}
+		}
+
 		$rows    = array_map( fn( array $row ): array => $this->stamp( $row, true ), array_values( $rows ) );
 		$columns = array_keys( $rows[0] );
-
-		if ( array() === $columns ) {
-			throw $this->discard( new InvalidArgumentException( 'Each row must be a non-empty array.' ) );
-		}
 
 		$this->validate_set_columns( $columns );
 
@@ -558,7 +570,11 @@ abstract class BaseRepository {
 			}
 		}
 
-		$table    = $this->get_table_full_name();
+		$table = $this->get_table_full_name();
+
+		$this->get_column_names( $table );
+
+		$not_null = self::$not_null_columns[ $table ] ?? array();
 		$tuples   = array();
 		$bindings = array();
 
@@ -567,6 +583,10 @@ abstract class BaseRepository {
 
 			foreach ( $columns as $column ) {
 				$value = $row[ $column ];
+
+				if ( null === $value && in_array( strtolower( $column ), $not_null, true ) ) {
+					return $this->refuse_insert( "Column '{$column}' cannot be null" );
+				}
 
 				if ( null === $value ) {
 					$values[] = 'NULL';
@@ -577,13 +597,23 @@ abstract class BaseRepository {
 					$value = $this->to_utc_datetime( $value );
 				}
 
-				if ( is_string( $value ) && $this->wpdb->strip_invalid_text_for_column( $table, $column, $value ) !== $value ) {
-					$this->reset_query();
-
-					// The error $wpdb->insert() gives such a value.
-					$this->wpdb->last_error = "WordPress database error: Processing the value for the following field failed: {$column}. The supplied value may be too long or contains invalid data.";
-
-					return false;
+				if (
+					is_string( $value )
+					&& $this->wpdb->strip_invalid_text_for_column( $table, $column, $value ) !== $value
+				) {
+					// WordPress's own string, so the error reads as $wpdb->insert() gives it, translated alike.
+					// phpcs:disable WordPress.WP.I18n.MissingArgDomain, WordPress.WP.I18n.NonSingularStringLiteralText
+					return $this->refuse_insert(
+						sprintf(
+							/* translators: %s: Database field where the error occurred. */
+							__(
+								'WordPress database error: Processing the value for the following field failed: %s. '
+									. 'The supplied value may be too long or contains invalid data.'
+							),
+							$column
+						)
+					);
+					// phpcs:enable
 				}
 
 				$values[]   = '%s';
@@ -597,16 +627,31 @@ abstract class BaseRepository {
 		$query = "INSERT INTO `{$table}` ({$names}) VALUES " . implode( ', ', $tuples );
 
 		if ( array() !== $bindings ) {
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- A placeholder per bound value, built above; the table and columns are validated names.
-			$query = $this->wpdb->prepare( $query, ...$bindings );
+			// A placeholder per bound value, built above; the table and columns are validated names.
+			$query = $this->wpdb->prepare( $query, ...$bindings ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		}
 
 		$this->reset_query();
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Prepared above.
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$result = $this->run_query( fn() => $this->wpdb->query( $query ) );
 
 		return false === $result ? false : (int) $result;
+	}
+
+	/**
+	 * Refuse an insert before it is sent, leaving why as the last database error.
+	 *
+	 * @param string $error
+	 *
+	 * @return false
+	 */
+	private function refuse_insert( string $error ): bool {
+		$this->reset_query();
+
+		$this->wpdb->last_error = $error;
+
+		return false;
 	}
 
 	/**
@@ -1283,7 +1328,7 @@ abstract class BaseRepository {
 
 	/**
 	 * Get column names from a table.
-	 * This caches the column names to avoid repeated queries.
+	 * This caches the column names to avoid repeated queries, and which of them cannot hold a null.
 	 *
 	 * @param string|null $table Full table name. Defaults to this repository's table.
 	 *
@@ -1300,7 +1345,19 @@ abstract class BaseRepository {
 		$columns = (array) $this->run_query( fn() => $this->wpdb->get_col( "DESCRIBE {$table}" ) );
 		$columns = array_map( 'strtolower', $columns );
 
-		self::$column_names[ $table ] = $columns;
+		// Without a query, get_col() reads another column of the result just fetched: "Null", then "Extra".
+		$nullable = (array) $this->wpdb->get_col( null, 2 );
+		$extra    = (array) $this->wpdb->get_col( null, 5 );
+
+		self::$column_names[ $table ]     = $columns;
+		self::$not_null_columns[ $table ] = array_values(
+			array_filter(
+				$columns,
+				static fn( string $column, int $index ): bool => 'NO' === ( $nullable[ $index ] ?? null )
+					&& ! str_contains( strtolower( (string) ( $extra[ $index ] ?? '' ) ), 'auto_increment' ),
+				ARRAY_FILTER_USE_BOTH
+			)
+		);
 
 		return $columns;
 	}

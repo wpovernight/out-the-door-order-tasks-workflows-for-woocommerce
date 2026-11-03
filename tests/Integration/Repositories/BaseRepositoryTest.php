@@ -106,6 +106,29 @@ class BaseRepositoryTest extends IntegrationTestCase {
 		$this->assertSame( 0, $this->repository->count() );
 	}
 
+	public function test_insert_many_refuses_every_row_when_a_column_that_cannot_hold_a_null_is_given_one(): void {
+		global $wpdb;
+
+		$rows = array(
+			array( 'id' => null, 'status_key' => 'packed', 'label' => 'Packed', 'background' => null ),
+			array( 'id' => null, 'status_key' => 'boxed', 'label' => null, 'background' => null ),
+		);
+
+		$wpdb->suppress_errors( true );
+		$this->assertFalse( $this->repository->insert( $rows[1] ), 'insert() refuses it.' );
+		$wpdb->suppress_errors( false );
+		$insert_error = $this->repository->get_last_db_error();
+
+		$queries = $wpdb->num_queries;
+
+		$this->assertFalse( $this->repository->insert_many( $rows ) );
+		$this->assertSame( $queries, $wpdb->num_queries, 'Refused before anything is sent.' );
+		$this->assertSame( $insert_error, $this->repository->get_last_db_error() );
+		$this->assertSame( 0, $this->repository->count() );
+
+		$this->assertSame( 1, $this->repository->insert_many( array( $rows[0] ) ), 'A null numbers itself or is stored.' );
+	}
+
 	public function test_insert_many_refuses_every_row_when_one_value_holds_text_its_column_cannot_store(): void {
 		$this->assertFalse(
 			$this->repository->insert_many(
