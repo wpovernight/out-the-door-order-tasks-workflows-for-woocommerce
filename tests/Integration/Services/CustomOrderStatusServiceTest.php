@@ -1061,6 +1061,64 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		$this->assertNull( $this->service->find( $status->id ) );
 	}
 
+	public function test_a_status_is_being_deleted_while_its_orders_are_moved_and_not_after(): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$this->create_registered_status( 'Boxed' );
+		$this->order_in( 'packed' );
+
+		$this->assertFalse( $this->service->is_being_deleted( 'packed' ), 'Not before the deletion.' );
+
+		$this->service->request_deletion( $status->id );
+
+		foreach ( array( 'packed', 'wc-packed', 'WC-Packed' ) as $key ) {
+			$this->assertTrue( $this->service->is_being_deleted( $key ), $key );
+		}
+
+		foreach ( array( 'boxed', 'on-hold', 'pack', 'wc-wc-packed', '' ) as $key ) {
+			$this->assertFalse( $this->service->is_being_deleted( $key ), $key );
+		}
+
+		$this->run_reassign_jobs();
+
+		$this->assertNull( $this->service->find( $status->id ) );
+		$this->assertFalse( $this->service->is_being_deleted( 'packed' ), 'Not once the deletion finished.' );
+	}
+
+	public function test_a_status_whose_deletion_stopped_is_still_being_deleted(): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$this->order_in( 'packed' );
+		$this->capture_logs();
+		add_filter( 'wpo_otd_reassign_orders_to_status', static fn() => 'packed' );
+
+		$this->service->request_deletion( $status->id );
+		$this->run_reassign_jobs();
+
+		$this->assertNotNull( $this->service->find( $status->id ), 'The deletion stopped on the order it could not move.' );
+		$this->assertTrue( $this->service->is_being_deleted( 'packed' ) );
+	}
+
+	public function test_whether_a_status_is_being_deleted_costs_no_query_once_the_statuses_are_read(): void {
+		global $wpdb;
+
+		$status = $this->service->create( array( 'label' => 'Packed' ) );
+		$this->mark_deleting( $status->id );
+		$this->service->all();
+		$before = $wpdb->num_queries;
+
+		$this->assertTrue( $this->service->is_being_deleted( 'packed' ) );
+		$this->assertFalse( $this->service->is_being_deleted( 'boxed' ) );
+		$this->assertSame( $before, $wpdb->num_queries );
+	}
+
+	public function test_a_status_is_not_being_deleted_when_the_statuses_cannot_be_read(): void {
+		$status = $this->service->create( array( 'label' => 'Packed' ) );
+		$this->mark_deleting( $status->id );
+		$this->assertTrue( ( new CustomOrderStatusService() )->is_being_deleted( 'packed' ), 'The status is flagged.' );
+		$this->fail_queries( '/^SELECT .* FROM \w+wpo_otd_custom_statuses\b/' );
+
+		$this->assertFalse( ( new CustomOrderStatusService() )->is_being_deleted( 'packed' ) );
+	}
+
 	/**
 	 * Run a batch, then the reassign jobs it schedules, until none is left.
 	 *

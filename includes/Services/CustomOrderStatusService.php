@@ -257,6 +257,29 @@ class CustomOrderStatusService {
 	}
 
 	/**
+	 * Whether the custom order status with this key is being deleted: flagged while its orders are moved to the
+	 * fallback status, and still flagged after a deletion that stopped on orders it could not move, until a deletion
+	 * of it finishes.
+	 *
+	 * Answered from the statuses all() keeps, so it costs no query once they are read, which registering them with
+	 * WooCommerce on init does. A deletion another request begins or finishes after they were read is seen from the
+	 * next request on.
+	 *
+	 * @param string $status_key With or without the "wc-" prefix, in any case, as WooCommerce compares statuses.
+	 *
+	 * @return bool False also when no custom status has the key, or the statuses cannot be read.
+	 */
+	public function is_being_deleted( string $status_key ): bool {
+		foreach ( $this->all() as $status ) {
+			if ( $status->is_deleting && self::same_status( $status->status_key, $status_key ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Why a custom order status cannot take a status key, or null when it can.
 	 *
 	 * A key must fit WooCommerce's status columns and hold a letter or digit, and must not be the key of an order
