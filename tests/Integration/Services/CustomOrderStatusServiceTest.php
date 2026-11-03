@@ -325,6 +325,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 
 	public function test_a_deletion_whose_last_batch_failed_is_scheduled_again(): void {
 		$status = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $status->id );
 		$this->order_in( 'packed' );
 
 		$this->assertSame( CustomOrderStatusService::DELETION_SCHEDULED, $this->service->begin_deletion( $status->id ) );
@@ -459,6 +460,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 
 	public function test_a_deletion_batch_that_would_move_orders_to_their_own_status_stops(): void {
 		$status = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $status->id );
 		$this->order_in( 'packed' );
 
 		$deleted = $this->capture_deletions();
@@ -510,6 +512,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 
 	public function test_a_deletion_batch_to_the_prefixed_own_key_stops(): void {
 		$status = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $status->id );
 		$order  = $this->order_in( 'packed' );
 		$logs   = $this->capture_logs();
 
@@ -523,6 +526,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 
 	public function test_orders_the_filter_sends_back_to_their_own_status_are_skipped_without_looping(): void {
 		$status = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $status->id );
 		$stuck  = $this->order_in( 'packed' );
 		$moving = $this->order_in( 'packed' );
 		$logs   = $this->capture_logs();
@@ -547,6 +551,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 
 	public function test_an_order_whose_save_fails_stays_and_the_job_stops(): void {
 		$status = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $status->id );
 		$order  = $this->order_in( 'packed' );
 		$logs   = $this->capture_logs();
 		$refuse = static function () {
@@ -568,6 +573,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 
 	public function test_stuck_orders_are_left_out_of_later_batches_so_older_orders_still_move(): void {
 		$status = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $status->id );
 		$older  = $this->order_in( 'packed' );
 		$first  = $this->order_in( 'packed' );
 		$second = $this->order_in( 'packed' );
@@ -607,6 +613,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 
 	public function test_a_stuck_order_that_left_the_status_is_moved_when_it_comes_back(): void {
 		$status = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $status->id );
 		$older  = $this->order_in( 'packed' );
 		$this->date_order( $older, '-2 days' );
 		$order = $this->order_in( 'packed' );
@@ -637,6 +644,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 
 	public function test_a_stuck_order_that_left_the_status_no_longer_counts_toward_the_limit(): void {
 		$status = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $status->id );
 		$first  = $this->order_in( 'packed' );
 		$this->capture_logs();
 		add_filter( 'wpo_otd_reassign_orders_to_status', static fn() => 'packed' );
@@ -658,6 +666,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 
 	public function test_a_batch_behind_the_one_that_deleted_the_status_keeps_no_stuck_orders(): void {
 		$status = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $status->id );
 		$this->order_in( 'packed' );
 		$this->capture_logs();
 		add_filter( 'wpo_otd_reassign_orders_to_status', static fn() => 'packed' );
@@ -670,6 +679,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 
 	public function test_the_stop_log_names_at_most_50_orders(): void {
 		$status = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $status->id );
 		$orders = array();
 		for ( $i = 0; $i < 52; $i++ ) {
 			$orders[] = $this->order_in( 'packed' );
@@ -686,6 +696,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 
 	public function test_a_stuck_order_that_leaves_the_status_lets_the_deletion_finish(): void {
 		$status = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $status->id );
 		$order  = $this->order_in( 'packed' );
 		$this->capture_logs();
 		$keep = static fn() => 'packed';
@@ -706,6 +717,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 
 	public function test_a_stuck_order_that_leaves_the_status_during_the_last_batch_lets_the_deletion_finish(): void {
 		$status = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $status->id );
 		$stuck  = $this->order_in( 'packed' );
 		$this->capture_logs();
 		add_filter( 'wpo_otd_reassign_orders_to_status', static fn() => 'packed' );
@@ -731,6 +743,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 
 	public function test_an_order_deleted_during_the_batch_does_not_stop_the_deletion(): void {
 		$status = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $status->id );
 		$order  = $this->order_in( 'packed' );
 		$this->capture_logs();
 		add_filter(
@@ -752,6 +765,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 
 	public function test_a_deletion_with_more_stuck_orders_than_allowed_stops(): void {
 		$status = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $status->id );
 		$this->order_in( 'packed' );
 		$this->order_in( 'packed' );
 		$logs = $this->capture_logs();
@@ -769,6 +783,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 	 */
 	public function test_an_invalid_stuck_order_limit_falls_back_to_the_default( $max ): void {
 		$status = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $status->id );
 		$this->order_in( 'packed' );
 		$logs = $this->capture_logs();
 		add_filter( 'wpo_otd_reassign_orders_to_status', static fn() => 'packed' );
@@ -923,6 +938,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 
 	public function test_the_last_batch_moves_the_orders_and_deletes_the_status(): void {
 		$status  = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $status->id );
 		$orders  = array( $this->order_in( 'packed' ), $this->order_in( 'packed' ) );
 		$deleted = $this->capture_deletions();
 
@@ -940,6 +956,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 	public function test_a_full_batch_schedules_the_next_one(): void {
 		add_filter( 'wpo_otd_reassign_orders_batch_size', static fn() => 1 );
 		$status = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $status->id );
 		$this->order_in( 'packed' );
 		$this->order_in( 'packed' );
 
@@ -956,6 +973,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 	public function test_an_invalid_batch_size_falls_back_to_the_default( $limit ): void {
 		add_filter( 'wpo_otd_reassign_orders_batch_size', static fn() => $limit );
 		$status = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $status->id );
 		$first  = $this->order_in( 'packed' );
 		$second = $this->order_in( 'packed' );
 
@@ -978,6 +996,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 
 	public function test_orders_still_in_the_status_after_a_batch_schedule_another(): void {
 		$status = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $status->id );
 		$this->order_in( 'packed' );
 
 		// An order placed in the status while the batch runs.
@@ -1002,6 +1021,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 
 	public function test_the_fallback_status_can_be_filtered_per_order(): void {
 		$status = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $status->id );
 		$first  = $this->order_in( 'packed' );
 		$second = $this->order_in( 'packed' );
 
@@ -1020,6 +1040,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 
 	public function test_a_batch_whose_every_order_fails_to_move_is_logged_and_stops(): void {
 		$status = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $status->id );
 		$order  = $this->order_in( 'packed' );
 		$logs   = array();
 		add_filter(
@@ -1055,10 +1076,74 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 
 	public function test_the_scheduled_hook_runs_a_batch(): void {
 		$status = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $status->id );
 
 		do_action( self::REASSIGN_HOOK, 'packed', 'on-hold', $status->id );
 
 		$this->assertNull( $this->service->find( $status->id ) );
+	}
+
+	/**
+	 * @dataProvider unreadable_status_provider
+	 */
+	public function test_a_batch_that_cannot_read_the_statuses_moves_no_order_and_is_tried_again( string $query, string $reason ): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $status->id );
+		$packed = $this->order_in( 'packed' );
+		$other  = $this->order_in( 'processing' );
+		$logs   = $this->capture_logs();
+		$this->fail_queries( $query );
+
+		$this->service->process_deletion_batch( 'packed', 'on-hold', $status->id );
+
+		$this->assertSame( 'packed', wc_get_order( $packed )->get_status() );
+		$this->assertSame( 'processing', wc_get_order( $other )->get_status() );
+		$this->assertGreaterThan( time() + 30, as_next_scheduled_action( self::REASSIGN_HOOK, array( 'packed', 'on-hold', $status->id ), 'wpo-otd' ) );
+		$this->assertStringStartsWith( "A batch of the deletion of custom order status {$status->id} moved no order, since {$reason}", $logs()[0][1] );
+	}
+
+	public function unreadable_status_provider(): array {
+		return array(
+			'its own row'      => array( '/^SELECT .* FROM \w+wpo_otd_custom_statuses\b.*\bWHERE\b/', 'it could not be read: ' ),
+			'the list of them' => array( '/^SELECT .* FROM \w+wpo_otd_custom_statuses\b(?!.*\bWHERE\b)/', 'WooCommerce does not list it as an order status' ),
+		);
+	}
+
+	public function test_a_batch_registers_a_status_this_process_has_not_as_a_post_status_and_moves_only_its_orders(): void {
+		foreach ( array( 'wc_order_statuses', 'woocommerce_register_shop_order_post_statuses', self::REASSIGN_HOOK ) as $hook ) {
+			$this->remove_plugin_callbacks( $hook );
+		}
+		$this->service->register_hooks();
+		$status = $this->service->create( array( 'label' => 'Late Arrival' ) );
+		$this->mark_deleting( $status->id );
+		$this->assertNull( get_post_status_object( 'wc-late-arrival' ), 'Created after this process registered the post statuses.' );
+		$others = array( $this->order_in( 'processing' ), $this->order_in( 'completed' ) );
+
+		// Saved by a request that registered the status, which stores it with its prefix; this process would not.
+		global $wpdb;
+		$late = $this->create_order()->get_id();
+		$wpdb->update( $wpdb->posts, array( 'post_status' => 'wc-late-arrival' ), array( 'ID' => $late ) );
+		clean_post_cache( $late );
+		$this->assertSame( 'late-arrival', wc_get_order( $late )->get_status() );
+
+		$this->service->process_deletion_batch( 'late-arrival', 'on-hold', $status->id );
+
+		$this->assertSame( 'on-hold', wc_get_order( $late )->get_status() );
+		$this->assertSame( array( 'processing', 'completed' ), array_map( static fn( int $id ): string => wc_get_order( $id )->get_status(), $others ) );
+		$this->assertNull( $this->service->find( $status->id ) );
+	}
+
+	public function test_a_batch_for_a_status_not_being_deleted_moves_no_order(): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$order  = $this->order_in( 'packed' );
+		$logs   = $this->capture_logs();
+
+		$this->service->process_deletion_batch( 'packed', 'on-hold', $status->id );
+
+		$this->assertSame( 'packed', wc_get_order( $order )->get_status() );
+		$this->assertNotNull( $this->service->find( $status->id ) );
+		$this->assertFalse( as_has_scheduled_action( self::REASSIGN_HOOK ) );
+		$this->assertSame( array( array( 'error', "The deletion of custom order status {$status->id} stopped: the status is not being deleted under the key packed." ) ), $logs() );
 	}
 
 	public function test_a_status_is_being_deleted_while_its_orders_are_moved_and_not_after(): void {
@@ -1121,6 +1206,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 	public function test_a_deletion_batch_reads_the_statuses_again(): void {
 		add_filter( 'wpo_otd_reassign_orders_batch_size', static fn() => 1 );
 		$packed = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $packed->id );
 		$boxed  = $this->create_registered_status( 'Boxed' );
 		$this->order_in( 'packed' );
 		$this->order_in( 'packed' );

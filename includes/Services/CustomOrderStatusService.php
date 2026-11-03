@@ -93,8 +93,8 @@ class CustomOrderStatusService {
 		// Drain & finalize a custom status deletion, one batch per scheduled run.
 		add_action( 'wpo_otd_reassign_orders', array( $this, 'process_deletion_batch' ), 10, 3 );
 
-		// A queue runner such as "wp action-scheduler run" processes batches for as long as it runs, so what other
-		// requests changed meanwhile is read again before each one.
+		// Action Scheduler fires this once per queue run, and before each batch under "wp action-scheduler run", which
+		// processes batches for as long as it runs; so what other requests changed meanwhile is read again.
 		add_action( 'action_scheduler_before_process_queue', array( $this, 'forget_statuses' ) );
 	}
 
@@ -275,8 +275,9 @@ class CustomOrderStatusService {
 	 * of it finishes.
 	 *
 	 * Answered from the statuses all() keeps, so it costs no query once they are read, which registering them with
-	 * WooCommerce on init does. They are read again before each Action Scheduler queue batch and each deletion batch,
-	 * so a deletion another request begins or finishes is seen from the next one on.
+	 * WooCommerce on init does. They are read again at the start of each Action Scheduler queue run (of each batch
+	 * under "wp action-scheduler run") and of each deletion batch, so a deletion another request begins or finishes is
+	 * seen from the next one on.
 	 *
 	 * @param string $status_key With or without a lowercase "wc-" prefix, compared exactly otherwise: a key in another
 	 *                           case names no status for WooCommerce, which an order cannot be moved into.
@@ -713,6 +714,11 @@ class CustomOrderStatusService {
 	 * it. A stuck order that has left the status since is dropped from the list. When only stuck orders are left in
 	 * the status, the deletion stops and logs them: the status stays, flagged, and deleting it again starts over.
 	 *
+	 * No order is queried until the status is known to be flagged under this key and to be one WooCommerce lists:
+	 * on the posts table, an order query for a status WooCommerce does not know, or that is not registered as a post
+	 * status, drops the status condition and matches orders in every status. When the status cannot be read, or
+	 * WooCommerce does not list it (the statuses could not be read), the batch is tried again a minute later.
+	 *
 	 * @param string $from_status The status key to reassign from (without 'wc-' prefix).
 	 * @param string $to_status   The status key to reassign to (without 'wc-' prefix).
 	 * @param int    $status_id   The ID of the custom status being deleted.
@@ -726,6 +732,31 @@ class CustomOrderStatusService {
 		// Moving orders to the status they have would leave them there and run this job forever.
 		if ( self::same_status( $from_status, $to_status ) ) {
 			Logger::error( "The deletion of custom order status {$status_id} stopped: its orders cannot move from {$from_status} to the same status." );
+
+			return;
+		}
+
+		$status = $this->repository->try_find( $status_id );
+
+		if ( false === $status ) {
+			$this->retry_deletion_batch( $from_status, $to_status, $status_id, 'it could not be read: ' . $this->repository->get_last_db_error() );
+
+			return;
+		}
+
+		// A batch running behind the one that deleted the status has nothing left to do.
+		if ( null === $status ) {
+			return;
+		}
+
+		if ( ! $status->is_deleting || $status->status_key !== $from_status ) {
+			Logger::error( "The deletion of custom order status {$status_id} stopped: the status is not being deleted under the key {$from_status}." );
+
+			return;
+		}
+
+		if ( ! $this->can_query_orders_in( $from_status ) ) {
+			$this->retry_deletion_batch( $from_status, $to_status, $status_id, 'WooCommerce does not list it as an order status' );
 
 			return;
 		}
@@ -776,6 +807,52 @@ class CustomOrderStatusService {
 
 		// Final batch done — now it's safe to remove the status.
 		$this->remove( $status_id, $from_status, $to_status );
+	}
+
+	/**
+	 * Schedule a deletion batch again a minute from now, logging why it did not run.
+	 *
+	 * @param string $from_status
+	 * @param string $to_status
+	 * @param int    $status_id
+	 * @param string $reason      Why, for the log.
+	 *
+	 * @return void
+	 */
+	private function retry_deletion_batch( string $from_status, string $to_status, int $status_id, string $reason ): void {
+		Logger::warning( "A batch of the deletion of custom order status {$status_id} moved no order, since {$reason}; it is tried again in a minute." );
+		as_schedule_single_action( time() + MINUTE_IN_SECONDS, 'wpo_otd_reassign_orders', array( $from_status, $to_status, $status_id ), 'wpo-otd' );
+	}
+
+	/**
+	 * Whether an order query for a custom status matches only the orders in it.
+	 *
+	 * On the posts table, WooCommerce queries a status it does not list without its "wc-" prefix, and WordPress drops
+	 * a post status that is not registered, so either would let the query match orders in every status. A status
+	 * created after this process registered the post statuses is registered here, as WooCommerce registers them.
+	 *
+	 * @param string $status Without the "wc-" prefix.
+	 *
+	 * @return bool False when WooCommerce does not list the status, or it cannot be registered as a post status.
+	 */
+	private function can_query_orders_in( string $status ): bool {
+		$prefixed = 'wc-' . $status;
+
+		if ( ! wc_is_order_status( $prefixed ) ) {
+			return false;
+		}
+
+		if ( null === get_post_status_object( $prefixed ) ) {
+			$args = $this->register_order_statuses( array() )[ $prefixed ] ?? null;
+
+			if ( null === $args ) {
+				return false;
+			}
+
+			register_post_status( $prefixed, $args );
+		}
+
+		return true;
 	}
 
 	/**
@@ -908,7 +985,7 @@ class CustomOrderStatusService {
 	 * @param string $status
 	 * @param int[]  $order_ids
 	 *
-	 * @return int[]
+	 * @return int[] Every order of the list when the status cannot be queried, so none counts as moved.
 	 */
 	private function still_in_status( string $status, array $order_ids ): array {
 		$order_ids = array_values( array_unique( array_filter( array_map( 'absint', $order_ids ) ) ) );
@@ -916,6 +993,10 @@ class CustomOrderStatusService {
 		// An empty post__in would match every order.
 		if ( array() === $order_ids ) {
 			return array();
+		}
+
+		if ( ! $this->can_query_orders_in( $status ) ) {
+			return $order_ids;
 		}
 
 		return array_map(
