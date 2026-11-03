@@ -314,7 +314,8 @@ final class FulfillmentService {
 	 */
 	private function build_status_query_args( string $status, array $args ): array {
 		/**
-		 * Filter the number of days to look back when querying orders by fulfillment status.
+		 * Filter the number of days to look back when querying orders by fulfillment status. The value is cast to a
+		 * whole number, and 0 or less sets no limit.
 		 *
 		 * @param int $days Number of days. Default 0 (no date limit).
 		 */

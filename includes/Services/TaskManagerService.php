@@ -1279,14 +1279,13 @@ final class TaskManagerService {
 		}
 
 		/**
-		 * Filters the calculated new position for a moved task.
+		 * Filters the calculated new position for a moved task. The value is not checked: one that is not a number
+		 * makes move_task() throw a TypeError when it returns.
 		 *
-		 * @param float    $new_position     The calculated new position.
+		 * @param float    $new_position     The calculated new position, to five decimals.
 		 * @param int      $task_id          The ID of the task being moved.
 		 * @param int|null $previous_task_id The ID of the previous task, if any.
 		 * @param int      $target_status_id The ID of the target status.
-		 *
-		 * @return float The new position.
 		 */
 		$new_position = apply_filters(
 			'wpo_otd_task_calculated_new_position',

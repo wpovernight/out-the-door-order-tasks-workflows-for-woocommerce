@@ -119,7 +119,7 @@ final class EmailService {
 	public function format_by_field_type( string $field_slug, $field_value, array $field_object ): ?string {
 		/**
 		 * Filter the map of field types to the field slugs handled by each formatter. The value is not checked: each
-		 * of the four types must stay, holding a list of slugs, or a TypeError is thrown.
+		 * of the four types must stay, holding a list of slugs, and a lookup of a missing type raises a TypeError.
 		 *
 		 * @param array $field_types Map of field type => list of field slugs. Default select: status, priority;
 		 *                           date: due_date, done_date, archived_date; user: creator; number: order.
