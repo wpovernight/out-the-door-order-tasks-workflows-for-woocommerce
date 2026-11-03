@@ -538,8 +538,8 @@ abstract class BaseRepository {
 	 * Each value is sent as text, as $wpdb->insert() sends it; null is written as NULL and a date in UTC. What a
 	 * single-row insert refuses refuses every row here, before anything is sent: a value too long for its column or
 	 * holding characters the column cannot store, as $wpdb->insert() refuses it, and a null in a column that cannot
-	 * hold one, which the database refuses. A statement of several rows would otherwise store a shortened value or the
-	 * column's default in their place.
+	 * hold one, which the database refuses. A statement of several rows would otherwise store a shortened value, or an
+	 * empty or zero one, in their place.
 	 *
 	 * @param array<int, array<string, mixed>> $rows Each row's columns to their values; every row names the same
 	 *                                               columns.
