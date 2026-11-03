@@ -61,6 +61,83 @@ class BaseRepositoryTest extends IntegrationTestCase {
 		$this->assertStringContainsString( 'Duplicate entry', $this->repository->get_last_db_error() );
 	}
 
+	public function test_insert_many_writes_every_row_in_one_query(): void {
+		global $wpdb;
+
+		$queries = $wpdb->num_queries;
+
+		$this->assertSame(
+			3,
+			$this->repository->insert_many(
+				array(
+					array( 'status_key' => 'packed', 'label' => 'Packed', 'background' => '#fff' ),
+					array( 'status_key' => 'boxed', 'label' => 'Boxed', 'background' => null ),
+					array( 'status_key' => 'held', 'label' => 'Held 💤', 'background' => '#000' ),
+				)
+			)
+		);
+		$this->assertSame( 1, $wpdb->num_queries - $queries );
+		$this->assertSame(
+			array(
+				array( 'packed', 'Packed', '#fff' ),
+				array( 'boxed', 'Boxed', null ),
+				array( 'held', 'Held 💤', '#000' ),
+			),
+			$wpdb->get_results( "SELECT status_key, label, background FROM {$this->repository->get_table_full_name()} ORDER BY id", ARRAY_N )
+		);
+	}
+
+	public function test_insert_many_refuses_every_row_when_one_value_is_too_long_as_insert_refuses_it(): void {
+		global $wpdb;
+
+		$rows = array(
+			array( 'status_key' => 'packed', 'label' => 'Packed' ),
+			array( 'status_key' => str_repeat( 'k', 65 ), 'label' => 'Too long' ),
+		);
+
+		$this->assertFalse( $this->repository->insert( $rows[1] ), 'insert() refuses the value.' );
+		$insert_error = $this->repository->get_last_db_error();
+
+		$queries = $wpdb->num_queries;
+
+		$this->assertFalse( $this->repository->insert_many( $rows ) );
+		$this->assertSame( $queries, $wpdb->num_queries, 'Refused before anything is sent.' );
+		$this->assertSame( $insert_error, $this->repository->get_last_db_error() );
+		$this->assertSame( 0, $this->repository->count() );
+	}
+
+	public function test_insert_many_refuses_every_row_when_one_value_holds_text_its_column_cannot_store(): void {
+		$this->assertFalse(
+			$this->repository->insert_many(
+				array(
+					array( 'status_key' => 'packed', 'label' => 'Packed' ),
+					array( 'status_key' => 'boxed', 'label' => "Boxed \xC3\x28" ),
+				)
+			)
+		);
+		$this->assertStringContainsString( 'following field failed: label.', $this->repository->get_last_db_error() );
+		$this->assertSame( 0, $this->repository->count() );
+	}
+
+	public function test_insert_many_writes_no_row_when_the_database_refuses_one(): void {
+		global $wpdb;
+
+		$this->repository->insert( array( 'status_key' => 'boxed', 'label' => 'Boxed' ) );
+
+		$wpdb->suppress_errors( true );
+		$result = $this->repository->insert_many(
+			array(
+				array( 'status_key' => 'packed', 'label' => 'Packed' ),
+				array( 'status_key' => 'boxed', 'label' => 'Duplicate' ),
+			)
+		);
+		$wpdb->suppress_errors( false );
+
+		$this->assertFalse( $result );
+		$this->assertStringContainsString( 'Duplicate entry', $this->repository->get_last_db_error() );
+		$this->assertSame( array( 'boxed' ), $this->keys( $this->repository->get() ) );
+	}
+
 	public function test_where_operators_against_real_rows(): void {
 		$this->insert_statuses( array( 'alpha' => '#111', 'beta' => null, 'gamma' => '#333', 'delta' => '#444' ) );
 

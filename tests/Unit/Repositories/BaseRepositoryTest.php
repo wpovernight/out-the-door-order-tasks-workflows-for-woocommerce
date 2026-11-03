@@ -753,6 +753,104 @@ class BaseRepositoryTest extends TestCase {
 		$this->repository->insert( array( 'colour' => 'red' ) );
 	}
 
+	public function test_insert_many_writes_every_row_in_one_statement_as_insert_writes_one(): void {
+		$this->wpdb->shouldReceive( 'strip_invalid_text_for_column' )->andReturnUsing( static fn( $table, $column, $value ) => $value );
+		$this->wpdb->shouldReceive( 'query' )
+			->once()
+			->with( 'INSERT INTO `' . self::TABLE . '` (`name`, `price`, `created_at`) VALUES (%s, %s, %s), (%s, NULL, %s) -- ["Lamp",12,"2025-01-02 03:04:05","Desk","2025-01-02 03:04:05"]' )
+			->andReturn( 2 );
+
+		$this->assertSame(
+			2,
+			$this->repository->insert_many(
+				array(
+					array( 'name' => 'Lamp', 'price' => 12, 'created_at' => new \DateTimeImmutable( '2025-01-02 08:34:05', new \DateTimeZone( '+05:30' ) ) ),
+					array( 'created_at' => '2025-01-02 03:04:05', 'price' => null, 'name' => 'Desk' ),
+				)
+			)
+		);
+	}
+
+	public function test_insert_many_checks_only_string_values_against_their_columns(): void {
+		$checked = array();
+		$this->wpdb->shouldReceive( 'strip_invalid_text_for_column' )->andReturnUsing(
+			static function ( $table, $column, $value ) use ( &$checked ) {
+				$checked[] = array( $table, $column, $value );
+
+				return $value;
+			}
+		);
+		$this->wpdb->shouldReceive( 'query' )->once()->andReturn( 1 );
+
+		$this->repository->insert_many( array( array( 'name' => 'Lamp', 'price' => 12, 'status' => null ) ) );
+
+		$this->assertSame( array( array( self::TABLE, 'name', 'Lamp' ) ), $checked );
+	}
+
+	public function test_insert_many_sends_nothing_when_a_value_does_not_fit_its_column(): void {
+		$this->wpdb->shouldReceive( 'strip_invalid_text_for_column' )->andReturnUsing(
+			static fn( $table, $column, $value ) => 'status' === $column ? substr( $value, 0, 3 ) : $value
+		);
+		$this->wpdb->shouldNotReceive( 'query' );
+
+		$this->assertFalse( $this->repository->insert_many( array( array( 'name' => 'Lamp', 'status' => 'ok' ), array( 'name' => 'Desk', 'status' => 'archived' ) ) ) );
+		$this->assertSame(
+			'WordPress database error: Processing the value for the following field failed: status. The supplied value may be too long or contains invalid data.',
+			$this->repository->get_last_db_error()
+		);
+	}
+
+	public function test_insert_many_sends_nothing_when_a_column_cannot_be_checked(): void {
+		$this->wpdb->shouldReceive( 'strip_invalid_text_for_column' )->andReturn( new \stdClass() );
+		$this->wpdb->shouldNotReceive( 'query' );
+
+		$this->assertFalse( $this->repository->insert_many( array( array( 'name' => 'Lamp' ) ) ) );
+	}
+
+	public function test_insert_many_returns_false_when_the_database_refuses(): void {
+		$this->wpdb->shouldReceive( 'strip_invalid_text_for_column' )->andReturnUsing( static fn( $table, $column, $value ) => $value );
+		$this->wpdb->shouldReceive( 'query' )->once()->andReturn( false );
+
+		$this->assertFalse( $this->repository->insert_many( array( array( 'name' => 'Lamp' ) ) ) );
+	}
+
+	public function test_insert_many_of_null_values_alone_binds_nothing(): void {
+		$this->wpdb->shouldNotReceive( 'prepare' );
+		$this->wpdb->shouldReceive( 'query' )->once()->with( 'INSERT INTO `' . self::TABLE . '` (`price`) VALUES (NULL), (NULL)' )->andReturn( 2 );
+
+		$this->assertSame( 2, $this->repository->insert_many( array( array( 'price' => null ), array( 'price' => null ) ) ) );
+	}
+
+	public function test_insert_many_stamps_each_row_on_a_table_with_timestamps(): void {
+		$written = null;
+		$this->wpdb->shouldReceive( 'strip_invalid_text_for_column' )->andReturnUsing( static fn( $table, $column, $value ) => $value );
+		$this->wpdb->shouldReceive( 'query' )->once()->andReturnUsing(
+			static function ( $query ) use ( &$written ) {
+				$written = $query;
+
+				return 1;
+			}
+		);
+
+		( new TimestampedGadgetRepository() )->insert_many( array( array( 'name' => 'Lamp', 'created_at' => '2025-01-02 03:04:05' ) ) );
+
+		$this->assertMatchesRegularExpression(
+			'/^INSERT INTO `' . self::TABLE . '` \(`name`, `created_at`, `updated_at`\) VALUES \(%s, %s, %s\) -- \["Lamp","2025-01-02 03:04:05","\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}"\]$/',
+			$written
+		);
+	}
+
+	public function test_insert_many_validates_its_rows_and_leaves_no_query_behind(): void {
+		$this->assert_throws( InvalidArgumentException::class, fn() => $this->repository->insert_many( array() ) );
+		$this->assert_throws( InvalidArgumentException::class, fn() => $this->repository->insert_many( array( array() ) ) );
+		$this->assert_throws( InvalidArgumentException::class, fn() => $this->repository->where( 'id', 4 )->insert_many( array( array( 'colour' => 'red' ) ) ) );
+		$this->assert_throws( InvalidArgumentException::class, fn() => $this->repository->insert_many( array( array( 'name' => 'Lamp' ), array( 'price' => 3 ) ) ) );
+		$this->assert_throws( InvalidArgumentException::class, fn() => $this->repository->insert_many( array( array( 'name' => 'Lamp' ), array( 'name' => 'Desk', 'price' => 3 ) ) ) );
+		$this->assert_throws( InvalidArgumentException::class, fn() => $this->repository->insert_many( array( array( 'name' => 'Lamp', 'price' => 3 ), array( 'name' => 'Desk' ) ) ) );
+
+		$this->assertSame( 'SELECT * FROM ' . self::TABLE, $this->repository->get_query() );
+	}
+
 	public function test_update_turns_equality_wheres_into_the_where_array(): void {
 		$this->wpdb->shouldReceive( 'update' )
 			->once()

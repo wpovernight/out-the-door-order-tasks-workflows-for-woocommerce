@@ -525,6 +525,91 @@ abstract class BaseRepository {
 	}
 
 	/**
+	 * Insert records in one statement, all or none.
+	 *
+	 * Values are written as insert() writes them: each bound as a string, null as NULL, a date in UTC. A value too long
+	 * for its column, or holding characters the column cannot store, refuses every row before anything is sent, as
+	 * $wpdb->insert() refuses its row, instead of being cut short by the database.
+	 *
+	 * @param array<int, array<string, mixed>> $rows Each row's columns to their values; every row names the same
+	 *                                               columns.
+	 *
+	 * @return int|false How many rows were inserted, or false when they were refused; get_last_db_error() says why.
+	 * @throws InvalidArgumentException If there is no row, a row is empty or names other columns than the first, or a
+	 *                                  key is not a bare name of this table's columns.
+	 */
+	public function insert_many( array $rows ): int|false {
+		if ( array() === $rows ) {
+			throw $this->discard( new InvalidArgumentException( 'Rows must be a non-empty array.' ) );
+		}
+
+		$rows    = array_map( fn( array $row ): array => $this->stamp( $row, true ), array_values( $rows ) );
+		$columns = array_keys( $rows[0] );
+
+		if ( array() === $columns ) {
+			throw $this->discard( new InvalidArgumentException( 'Each row must be a non-empty array.' ) );
+		}
+
+		$this->validate_set_columns( $columns );
+
+		foreach ( $rows as $row ) {
+			if ( count( $row ) !== count( $columns ) || array() !== array_diff_key( $row, $rows[0] ) ) {
+				throw $this->discard( new InvalidArgumentException( 'Every row must name the same columns.' ) );
+			}
+		}
+
+		$table    = $this->get_table_full_name();
+		$tuples   = array();
+		$bindings = array();
+
+		foreach ( $rows as $row ) {
+			$values = array();
+
+			foreach ( $columns as $column ) {
+				$value = $row[ $column ];
+
+				if ( null === $value ) {
+					$values[] = 'NULL';
+					continue;
+				}
+
+				if ( $value instanceof \DateTimeInterface ) {
+					$value = $this->to_utc_datetime( $value );
+				}
+
+				if ( is_string( $value ) && $this->wpdb->strip_invalid_text_for_column( $table, $column, $value ) !== $value ) {
+					$this->reset_query();
+
+					// The error $wpdb->insert() gives such a value.
+					$this->wpdb->last_error = "WordPress database error: Processing the value for the following field failed: {$column}. The supplied value may be too long or contains invalid data.";
+
+					return false;
+				}
+
+				$values[]   = '%s';
+				$bindings[] = $value;
+			}
+
+			$tuples[] = '(' . implode( ', ', $values ) . ')';
+		}
+
+		$names = implode( ', ', array_map( static fn( string $column ): string => "`{$column}`", $columns ) );
+		$query = "INSERT INTO `{$table}` ({$names}) VALUES " . implode( ', ', $tuples );
+
+		if ( array() !== $bindings ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- A placeholder per bound value, built above; the table and columns are validated names.
+			$query = $this->wpdb->prepare( $query, ...$bindings );
+		}
+
+		$this->reset_query();
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Prepared above.
+		$result = $this->run_query( fn() => $this->wpdb->query( $query ) );
+
+		return false === $result ? false : (int) $result;
+	}
+
+	/**
 	 * Insert multiple records with raw columns and prepared values.
 	 *
 	 * @param string $columns Comma-separated column names.
