@@ -133,7 +133,7 @@ class DatabaseFailureTest extends IntegrationTestCase {
 	}
 
 	public function test_rejected_custom_status_writes_report_the_database_error(): void {
-		$service = new CustomOrderStatusService();
+		$service = $this->make( CustomOrderStatusService::class );
 		$status  = $service->create( array( 'label' => 'Packed' ) );
 		$this->fail_queries( '/^(INSERT INTO|UPDATE) `\w+wpo_otd_custom_statuses`/' );
 

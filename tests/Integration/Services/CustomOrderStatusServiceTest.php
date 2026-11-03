@@ -17,7 +17,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 	public function set_up() {
 		parent::set_up();
 
-		$this->service = new CustomOrderStatusService();
+		$this->service = $this->make( CustomOrderStatusService::class );
 
 		// WooCommerce must list the statuses the service under test knows, as on a real request.
 		$this->hook_status_service( $this->service );
@@ -1359,10 +1359,10 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 	public function test_a_status_is_not_being_deleted_when_the_statuses_cannot_be_read(): void {
 		$status = $this->service->create( array( 'label' => 'Packed' ) );
 		$this->mark_deleting( $status->id );
-		$this->assertTrue( ( new CustomOrderStatusService() )->is_being_deleted( 'packed' ), 'The status is flagged.' );
+		$this->assertTrue( ( new CustomOrderStatusService( new CustomOrderStatusRepository() ) )->is_being_deleted( 'packed' ), 'The status is flagged.' );
 		$this->fail_queries( '/^SELECT .* FROM \w+wpo_otd_custom_statuses\b/' );
 
-		$this->assertFalse( ( new CustomOrderStatusService() )->is_being_deleted( 'packed' ) );
+		$this->assertFalse( ( new CustomOrderStatusService( new CustomOrderStatusRepository() ) )->is_being_deleted( 'packed' ) );
 	}
 
 	/**

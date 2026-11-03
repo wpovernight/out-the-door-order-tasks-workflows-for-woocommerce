@@ -62,7 +62,7 @@ class CustomOrderStatusService {
 	 */
 	private const WOOCOMMERCE_STATUS_KEYS = array( 'pending', 'processing', 'on-hold', 'completed', 'cancelled', 'refunded', 'failed', 'checkout-draft' );
 
-	protected readonly CustomOrderStatusRepository $repository;
+	private readonly CustomOrderStatusRepository $repository;
 
 	/**
 	 * @var CustomOrderStatus[]|null
@@ -71,9 +71,11 @@ class CustomOrderStatusService {
 
 	/**
 	 * Constructor.
+	 *
+	 * @param CustomOrderStatusRepository $repository
 	 */
-	public function __construct() {
-		$this->repository = new CustomOrderStatusRepository();
+	public function __construct( CustomOrderStatusRepository $repository ) {
+		$this->repository = $repository;
 	}
 
 	/**
