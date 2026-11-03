@@ -1279,8 +1279,10 @@ final class TaskManagerService {
 		}
 
 		/**
-		 * Filters the calculated new position for a moved task. The value is not checked: one that is not a number
-		 * makes move_task() throw a TypeError when it returns.
+		 * Filters the calculated new position for a moved task. The value is not checked: it is saved as the task's
+		 * position and passed to "wpo_otd_task_moved" as given. move_task() then returns a numeric string or a bool
+		 * converted to a float, since this file does not declare strict types, and throws a TypeError for anything
+		 * else.
 		 *
 		 * @param float    $new_position     The calculated new position, to five decimals.
 		 * @param int      $task_id          The ID of the task being moved.
