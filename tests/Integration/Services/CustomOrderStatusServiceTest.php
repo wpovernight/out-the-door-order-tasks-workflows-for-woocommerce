@@ -2,6 +2,7 @@
 
 namespace WPO\OTD\Tests\Integration\Services;
 
+use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WPO\OTD\Models\CustomOrderStatus;
 use WPO\OTD\Repositories\CustomOrderStatusRepository;
@@ -1112,13 +1113,47 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		$logs = $this->capture_logs();
 		$this->fail_queries( '/^SELECT .* FROM \w+wpo_otd_custom_statuses\b(?!.*\bWHERE\b)/' );
 
-		foreach ( array( 1 => 2 * MINUTE_IN_SECONDS, 5 => 32 * MINUTE_IN_SECONDS, 6 => HOUR_IN_SECONDS, 40 => HOUR_IN_SECONDS, 2000 => HOUR_IN_SECONDS ) as $retries => $delay ) {
+		$this->service->process_deletion_batch( 'packed', 'on-hold', $status->id );
+
+		// Each scheduled retry runs as Action Scheduler runs it, with the retry count it carries.
+		foreach ( array( 1 => 2 * MINUTE_IN_SECONDS, 2 => 4 * MINUTE_IN_SECONDS ) as $retries => $delay ) {
+			$this->run_reassign_jobs_once();
+
+			$this->assertEqualsWithDelta( time() + $delay, as_next_scheduled_action( self::REASSIGN_HOOK, array( 'packed', 'on-hold', $status->id, $retries + 1 ), 'wpo-otd' ), 5, "After {$retries} retries." );
+		}
+
+		foreach ( array( 5 => 32 * MINUTE_IN_SECONDS, 6 => HOUR_IN_SECONDS, 40 => HOUR_IN_SECONDS, 2000 => HOUR_IN_SECONDS ) as $retries => $delay ) {
 			$this->service->process_deletion_batch( 'packed', 'on-hold', $status->id, $retries );
 
 			$this->assertEqualsWithDelta( time() + $delay, as_next_scheduled_action( self::REASSIGN_HOOK, array( 'packed', 'on-hold', $status->id, $retries + 1 ), 'wpo-otd' ), 5, "After {$retries} retries." );
 		}
 
 		$this->assertCount( 1, $logs(), 'Logged once for the deletion.' );
+	}
+
+	public function test_a_batch_that_can_query_its_status_again_drops_its_retry_count(): void {
+		add_filter( 'wpo_otd_reassign_orders_batch_size', static fn() => 1 );
+		$status = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $status->id );
+		$this->order_in( 'packed' );
+		$this->order_in( 'packed' );
+
+		$this->service->process_deletion_batch( 'packed', 'on-hold', $status->id, 3 );
+
+		$this->assertEqualsWithDelta( time(), as_next_scheduled_action( self::REASSIGN_HOOK, array( 'packed', 'on-hold', $status->id ), 'wpo-otd' ), 5 );
+		$this->assertFalse( as_next_scheduled_action( self::REASSIGN_HOOK, array( 'packed', 'on-hold', $status->id, 4 ), 'wpo-otd' ) );
+	}
+
+	public function test_deleting_again_runs_a_batch_waiting_to_try_again_at_once(): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $status->id );
+		as_schedule_single_action( time() + HOUR_IN_SECONDS, self::REASSIGN_HOOK, array( 'packed', 'on-hold', $status->id, 7 ), 'wpo-otd' );
+
+		$this->assertSame( CustomOrderStatusService::DELETION_SCHEDULED, $this->service->begin_deletion( $status->id ) );
+
+		$this->assertFalse( as_next_scheduled_action( self::REASSIGN_HOOK, array( 'packed', 'on-hold', $status->id, 7 ), 'wpo-otd' ) );
+		$this->assertEqualsWithDelta( time(), as_next_scheduled_action( self::REASSIGN_HOOK, array( 'packed', 'on-hold', $status->id ), 'wpo-otd' ), 5 );
+		$this->assertCount( 1, as_get_scheduled_actions( array( 'hook' => self::REASSIGN_HOOK, 'status' => 'pending' ), 'ids' ) );
 	}
 
 	public function test_a_batch_for_another_key_than_its_status_has_moves_no_order(): void {
@@ -1132,6 +1167,16 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		$this->assertSame( 'packed', wc_get_order( $order )->get_status() );
 		$this->assertFalse( as_has_scheduled_action( self::REASSIGN_HOOK ) );
 		$this->assertSame( array( array( 'error', "The deletion of custom order status {$status->id} stopped: the status is not being deleted under the key boxed." ) ), $logs() );
+	}
+
+	public function test_a_status_without_orders_that_cannot_be_queried_is_not_deleted_at_once(): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$this->capture_logs();
+		$this->fail_queries( '/^SELECT .* FROM \w+wpo_otd_custom_statuses\b(?!.*\bWHERE\b)/' );
+
+		$this->assertSame( CustomOrderStatusService::DELETION_SCHEDULED, $this->service->begin_deletion( $status->id ), 'Its orders could not be counted.' );
+
+		$this->assertTrue( $this->service->find( $status->id )->is_deleting );
 	}
 
 	public function test_a_status_whose_orders_cannot_be_queried_is_not_deleted_at_once(): void {
@@ -1155,20 +1200,24 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 	}
 
 	public function test_a_batch_registers_a_status_this_process_has_not_as_a_post_status_and_moves_only_its_orders(): void {
-		$status_id = ( new CustomOrderStatusRepository() )->insert( array( 'status_key' => 'late-arrival', 'label' => 'Late Arrival', 'is_deleting' => 1 ) );
-		$this->assertNull( get_post_status_object( 'wc-late-arrival' ), 'Created by another request after this process registered the post statuses.' );
-		$others = array( $this->order_in( 'processing' ), $this->order_in( 'completed' ) );
+		global $wpdb;
 
+		$this->service->all();
+		$status_id = ( new CustomOrderStatusRepository() )->insert( array( 'status_key' => 'late-arrival', 'label' => 'Late Arrival', 'is_deleting' => 1 ) );
+		$others    = array( $this->order_in( 'processing' ), $this->order_in( 'completed' ) );
+
+		// Saved by a request that knew the status, which stores it with its prefix.
+		$late = $this->create_order()->get_id();
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$late = $this->order_in( 'late-arrival' );
+			$wpdb->update( "{$wpdb->prefix}wc_orders", array( 'status' => 'wc-late-arrival' ), array( 'id' => $late ) );
+			wc_get_container()->get( OrderCache::class )->remove( $late );
 		} else {
-			// Saved by a request that registered the status, which stores it with its prefix.
-			global $wpdb;
-			$late = $this->create_order()->get_id();
 			$wpdb->update( $wpdb->posts, array( 'post_status' => 'wc-late-arrival' ), array( 'ID' => $late ) );
 			clean_post_cache( $late );
-			$this->assertSame( 'late-arrival', wc_get_order( $late )->get_status() );
 		}
+
+		$this->assertSame( 'late-arrival', wc_get_order( $late )->get_status() );
+		$this->assertNull( get_post_status_object( 'wc-late-arrival' ), 'Created by another request after this process read the statuses.' );
 
 		$this->service->process_deletion_batch( 'late-arrival', 'on-hold', $status_id );
 
@@ -1329,21 +1378,29 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 	}
 
 	/**
+	 * Run the pending reassign jobs once, as Action Scheduler runs them, but not the ones they schedule.
+	 *
+	 * @return void
+	 */
+	private function run_reassign_jobs_once(): void {
+		foreach ( as_get_scheduled_actions( array( 'hook' => self::REASSIGN_HOOK, 'status' => 'pending' ) ) as $action_id => $action ) {
+			\ActionScheduler::store()->mark_complete( $action_id );
+			do_action( self::REASSIGN_HOOK, ...$action->get_args() );
+		}
+	}
+
+	/**
 	 * Run the pending reassign jobs, and the ones they schedule, until none is left.
 	 *
 	 * @return void
 	 */
 	private function run_reassign_jobs(): void {
 		for ( $runs = 0; $runs < 20; $runs++ ) {
-			$pending = as_get_scheduled_actions( array( 'hook' => self::REASSIGN_HOOK, 'status' => 'pending' ) );
-			if ( array() === $pending ) {
+			if ( ! as_has_scheduled_action( self::REASSIGN_HOOK ) ) {
 				return;
 			}
 
-			foreach ( $pending as $action_id => $action ) {
-				\ActionScheduler::store()->mark_complete( $action_id );
-				do_action( self::REASSIGN_HOOK, ...$action->get_args() );
-			}
+			$this->run_reassign_jobs_once();
 		}
 
 		$this->fail( 'The reassign jobs did not stop.' );
@@ -1459,7 +1516,6 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 
 		$this->assertSame( array( $order ), array_map( 'intval', wc_get_orders( array( 'status' => $key, 'return' => 'ids', 'post__in' => array( $order, $other ) ) ) ) );
 	}
-
 
 	/**
 	 * Create an order in the given status.

@@ -38,6 +38,11 @@ class CustomOrderStatusService {
 	public const DELETION_BUSY = 'busy';
 
 	/**
+	 * The Action Scheduler hook that runs one batch of a status deletion (process_deletion_batch()).
+	 */
+	public const HOOK = 'wpo_otd_reassign_orders';
+
+	/**
 	 * Seconds a change or deletion of a status waits while another request changes or deletes it.
 	 */
 	private const DELETION_LOCK_TIMEOUT = 3;
@@ -91,7 +96,7 @@ class CustomOrderStatusService {
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_dynamic_style' ), 99 );
 
 		// Drain & finalize a custom status deletion, one batch per scheduled run.
-		add_action( 'wpo_otd_reassign_orders', array( $this, 'process_deletion_batch' ), 10, 4 );
+		add_action( self::HOOK, array( $this, 'process_deletion_batch' ), 10, 4 );
 
 		// Action Scheduler fires this once per queue run, and before each batch under "wp action-scheduler run", which
 		// processes batches for as long as it runs; so what other requests changed meanwhile is read again.
@@ -661,17 +666,7 @@ class CustomOrderStatusService {
 		}
 
 		if ( $status->is_deleting ) {
-			// A batch job that failed or stopped leaves the status flagged with nothing left to finish its deletion.
-			// Deleting it again retries the orders that were stuck, since what kept them may have been fixed.
-			if ( ! $this->has_deletion_job( $id ) ) {
-				$this->save_stuck_orders( $id, array() );
-				as_schedule_single_action(
-					time(),
-					'wpo_otd_reassign_orders',
-					array( $status->status_key, $fallback_status, $id ),
-					'wpo-otd'
-				);
-			}
+			$this->restart_deletion( $status, $fallback_status );
 
 			return self::DELETION_SCHEDULED;
 		}
@@ -703,42 +698,67 @@ class CustomOrderStatusService {
 		$this->cached_statuses = null;
 
 		$this->save_stuck_orders( $id, array() );
-		as_schedule_single_action(
-			time(),
-			'wpo_otd_reassign_orders',
-			array( $status->status_key, $fallback_status, $id ),
-			'wpo-otd'
-		);
+		as_schedule_single_action( time(), self::HOOK, array( $status->status_key, $fallback_status, $id ), 'wpo-otd' );
 
 		return self::DELETION_SCHEDULED;
 	}
 
 	/**
-	 * Whether a batch job for a status's deletion is pending or running, whatever key and fallback status it has.
+	 * Delete again a status that is being deleted. With no batch left, as after one that failed or stopped, the batches
+	 * start over, retrying the orders that were stuck; a batch waiting to try again, after it could not read or query
+	 * the status, runs at once. Either way, deleting again suggests that what kept them may have been fixed.
 	 *
-	 * @param int $id
+	 * @param CustomOrderStatus $status
+	 * @param string            $fallback_status
 	 *
-	 * @return bool
+	 * @return void
 	 */
-	private function has_deletion_job( int $id ): bool {
+	private function restart_deletion( CustomOrderStatus $status, string $fallback_status ): void {
+		$pending = $this->deletion_jobs( $status->id, \ActionScheduler_Store::STATUS_PENDING );
+
+		foreach ( $pending as $args ) {
+			// Only a batch that could not read or query the status carries its retry count.
+			if ( isset( $args[3] ) ) {
+				as_unschedule_action( self::HOOK, $args, 'wpo-otd' );
+				as_schedule_single_action( time(), self::HOOK, array_slice( $args, 0, 3 ), 'wpo-otd' );
+			}
+		}
+
+		if ( array() === $pending && array() === $this->deletion_jobs( $status->id, \ActionScheduler_Store::STATUS_RUNNING ) ) {
+			$this->save_stuck_orders( $status->id, array() );
+			as_schedule_single_action( time(), self::HOOK, array( $status->status_key, $fallback_status, $status->id ), 'wpo-otd' );
+		}
+	}
+
+	/**
+	 * The arguments of a status deletion's batch jobs in an Action Scheduler state, whatever key and fallback status
+	 * they have.
+	 *
+	 * @param int    $id
+	 * @param string $state An ActionScheduler_Store::STATUS_* value.
+	 *
+	 * @return array<int, array>
+	 */
+	private function deletion_jobs( int $id, string $state ): array {
 		$actions = as_get_scheduled_actions(
 			array(
-				'hook'     => 'wpo_otd_reassign_orders',
+				'hook'     => self::HOOK,
 				'group'    => 'wpo-otd',
-				'status'   => array( \ActionScheduler_Store::STATUS_PENDING, \ActionScheduler_Store::STATUS_RUNNING ),
+				'status'   => $state,
 				'per_page' => -1,
 			)
 		);
+		$jobs    = array();
 
 		foreach ( $actions as $action ) {
 			$args = $action->get_args();
 
 			if ( (int) ( $args[2] ?? 0 ) === $id ) {
-				return true;
+				$jobs[] = $args;
 			}
 		}
 
-		return false;
+		return $jobs;
 	}
 
 	/**
@@ -746,7 +766,7 @@ class CustomOrderStatusService {
 	 *
 	 * Reassigns up to a (filterable) batch of orders from the deleted status to the fallback, then either reschedules
 	 * itself for the next batch or, once no order is left in the status, deletes the custom status row and fires the
-	 * deleted action. Runs via the 'wpo_otd_reassign_orders' scheduled action.
+	 * deleted action. Runs via the self::HOOK scheduled action.
 	 *
 	 * An order that stays in the status, because the fallback filtered for it is the same status or because it cannot
 	 * be saved, is stuck: it is kept in an option and left out of the next batches, so they reach the orders after
@@ -823,7 +843,7 @@ class CustomOrderStatusService {
 		}
 
 		if ( $this->has_more_orders( $from_status, count( $orders ), $limit, $stuck ) ) {
-			as_schedule_single_action( time(), 'wpo_otd_reassign_orders', array( $from_status, $to_status, $status_id ), 'wpo-otd' );
+			as_schedule_single_action( time(), self::HOOK, array( $from_status, $to_status, $status_id ), 'wpo-otd' );
 
 			return;
 		}
@@ -868,12 +888,12 @@ class CustomOrderStatusService {
 			'warning',
 			"A batch of the deletion of custom order status {$status_id} moved no order, since {$reason}; it is tried again later, waiting longer each time, up to an hour."
 		);
-		as_schedule_single_action( time() + $delay, 'wpo_otd_reassign_orders', array( $from_status, $to_status, $status_id, $retries + 1 ), 'wpo-otd' );
+		as_schedule_single_action( time() + $delay, self::HOOK, array( $from_status, $to_status, $status_id, $retries + 1 ), 'wpo-otd' );
 	}
 
 	/**
 	 * Whether an order query for a custom status matches only the orders in it: WooCommerce lists it and it is
-	 * registered as a post status (all() says why both matter).
+	 * registered as a post status (all() says why both matter, and registers a status it reads fresh).
 	 *
 	 * @param string $status Without the "wc-" prefix.
 	 *
@@ -881,6 +901,8 @@ class CustomOrderStatusService {
 	 */
 	private function can_query_orders_in( string $status ): bool {
 		$prefixed = 'wc-' . $status;
+
+		$this->all();
 
 		return wc_is_order_status( $prefixed ) && null !== get_post_status_object( $prefixed );
 	}
