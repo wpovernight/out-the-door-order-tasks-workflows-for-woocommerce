@@ -95,7 +95,7 @@ class CustomOrderStatusService {
 
 		// Action Scheduler fires this once per queue run, and before each batch under "wp action-scheduler run", which
 		// processes batches for as long as it runs; so what other requests changed meanwhile is read again.
-		add_action( 'action_scheduler_before_process_queue', array( $this, 'forget_statuses' ) );
+		add_action( 'action_scheduler_before_process_queue', array( $this, 'reread_statuses' ) );
 	}
 
 	/** ================================
@@ -135,25 +135,74 @@ class CustomOrderStatusService {
 		$statuses = $this->all();
 
 		foreach ( $statuses as $status ) {
-			$label = esc_html( $status->label );
-
-			$order_statuses[ $status->get_prefixed_status_key() ] = array(
-				'label'                     => $label,
-				'public'                    => true,
-				'exclude_from_search'       => false,
-				'show_in_admin_all_list'    => true,
-				'show_in_admin_status_list' => true,
-				/* translators: %s: number of orders */
-				'label_count' => array(
-					'singular' => $label . ' <span class="count">(%s)</span>',
-					'plural'   => $label . ' <span class="count">(%s)</span>',
-					'context'  => null,
-					'domain'   => null,
-				),
-			);
+			$order_statuses[ $status->get_prefixed_status_key() ] = $this->post_status_args( $status );
 		}
 
 		return $order_statuses;
+	}
+
+	/**
+	 * Read the statuses again, and register as a post status any not registered yet in this process.
+	 *
+	 * @return void
+	 */
+	public function reread_statuses(): void {
+		$this->forget_statuses();
+		$this->register_missing_post_statuses();
+	}
+
+	/**
+	 * Register as a post status each custom status not registered yet in this process.
+	 *
+	 * @return void
+	 */
+	private function register_missing_post_statuses(): void {
+		foreach ( $this->all() as $status ) {
+			$this->register_post_status( $status );
+		}
+	}
+
+	/**
+	 * Register a custom status as a post status, as WooCommerce does on init, unless it is registered already.
+	 *
+	 * WooCommerce registers the statuses it lists once, on init, so one created later, by this request or by another
+	 * while a queue runner keeps going, is missing. On the posts table, an order saved into a status that is not
+	 * registered is stored without its "wc-" prefix, and order queries for the status no longer find it.
+	 *
+	 * @param CustomOrderStatus $status
+	 *
+	 * @return void
+	 */
+	private function register_post_status( CustomOrderStatus $status ): void {
+		if ( null === get_post_status_object( $status->get_prefixed_status_key() ) ) {
+			register_post_status( $status->get_prefixed_status_key(), $this->post_status_args( $status ) );
+		}
+	}
+
+	/**
+	 * The arguments a custom status is registered as a post status with.
+	 *
+	 * @param CustomOrderStatus $status
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function post_status_args( CustomOrderStatus $status ): array {
+		$label = esc_html( $status->label );
+
+		return array(
+			'label'                     => $label,
+			'public'                    => true,
+			'exclude_from_search'       => false,
+			'show_in_admin_all_list'    => true,
+			'show_in_admin_status_list' => true,
+			/* translators: %s: number of orders */
+			'label_count'               => array(
+				'singular' => $label . ' <span class="count">(%s)</span>',
+				'plural'   => $label . ' <span class="count">(%s)</span>',
+				'context'  => null,
+				'domain'   => null,
+			),
+		);
 	}
 
 	/**
@@ -395,6 +444,7 @@ class CustomOrderStatusService {
 
 		$status->id            = $result;
 		$this->cached_statuses = null;
+		$this->register_post_status( $status );
 
 		/**
 		 * Action triggered after a custom order status is created.
@@ -501,6 +551,7 @@ class CustomOrderStatusService {
 		}
 
 		$this->cached_statuses = null;
+		$this->register_post_status( $custom_status );
 
 		return array( $custom_status, $data );
 	}
@@ -829,7 +880,7 @@ class CustomOrderStatusService {
 	 *
 	 * On the posts table, WooCommerce queries a status it does not list without its "wc-" prefix, and WordPress drops
 	 * a post status that is not registered, so either would let the query match orders in every status. A status
-	 * created after this process registered the post statuses is registered here, as WooCommerce registers them.
+	 * missing as a post status is registered here.
 	 *
 	 * @param string $status Without the "wc-" prefix.
 	 *
@@ -842,17 +893,9 @@ class CustomOrderStatusService {
 			return false;
 		}
 
-		if ( null === get_post_status_object( $prefixed ) ) {
-			$args = $this->register_order_statuses( array() )[ $prefixed ] ?? null;
+		$this->register_missing_post_statuses();
 
-			if ( null === $args ) {
-				return false;
-			}
-
-			register_post_status( $prefixed, $args );
-		}
-
-		return true;
+		return null !== get_post_status_object( $prefixed );
 	}
 
 	/**
