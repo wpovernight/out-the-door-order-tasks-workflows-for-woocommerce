@@ -8,7 +8,8 @@ use WPO\OTD\Tests\TestCase;
 
 /**
  * Where database access, hooks and the container may appear, and how hooks are named. Each allow-list entry says why
- * it is allowed.
+ * it is allowed. A failure lists each place as "path:line", the path from includes/ or, for a template, from the
+ * plugin's folder.
  */
 final class ArchitectureTest extends TestCase {
 	private const FIRING_FUNCTIONS = array(
@@ -27,6 +28,8 @@ final class ArchitectureTest extends TestCase {
 		'has_filter',
 	);
 
+	private const WPDB = '\$wpdb\b|\$GLOBALS\s*\[\s*[\'"]wpdb[\'"]\s*\]';
+
 	/**
 	 * The bootstrap wires what must happen at file load, before the kernel that boots the providers exists.
 	 */
@@ -36,7 +39,7 @@ final class ArchitectureTest extends TestCase {
 		$this->assertSame(
 			array(),
 			$this->files_matching(
-				'/\$wpdb\b|\$GLOBALS\s*\[\s*[\'"]wpdb[\'"]\s*\]/',
+				'/' . self::WPDB . '/',
 				array(
 					'Repositories/',
 					// Create, check and drop the plugin's tables and their foreign keys.
@@ -51,20 +54,21 @@ final class ArchitectureTest extends TestCase {
 
 	public function test_constructors_have_no_side_effects(): void {
 		$side_effect = '/' . self::call_of(
-			'add_action',
-			'add_filter',
-			'apply_filters',
-			'apply_filters_ref_array',
-			'do_action',
-			'do_action_ref_array',
-			'get_option',
-			'update_option',
-			'add_option',
-			'delete_option',
-			'register_post_status',
-			'register_post_type',
-			'as_\w+'
-		) . '|wpdb->/';
+			...self::FIRING_FUNCTIONS,
+			...self::LISTENING_FUNCTIONS,
+			...array(
+				'get_option',
+				'update_option',
+				'add_option',
+				'delete_option',
+				'\w+_transient',
+				'register_\w+',
+				'as_\w+',
+				'wp_schedule_\w+',
+				'wp_unschedule_\w+',
+				'wp_clear_scheduled_hook',
+			)
+		) . '|(' . self::WPDB . '|\bwpdb)\s*->/';
 		$violations  = array();
 
 		foreach ( $this->files() as $path => $file ) {
@@ -72,16 +76,17 @@ final class ArchitectureTest extends TestCase {
 				continue;
 			}
 
-			if ( preg_match( $side_effect, $this->split( $file, array( '__construct' ) )[1] ) ) {
-				$violations[] = $path;
-			}
+			array_push(
+				$violations,
+				...self::places( $side_effect, $this->split( $file, array( '__construct' ) )[1], $path )
+			);
 		}
 
 		$this->assertSame(
 			array(),
 			$violations,
-			'A constructor only stores its dependencies: no hooks, options or queries, since the container builds'
-				. ' classes whenever they are first needed.'
+			'A constructor only stores its dependencies: no hooks, options, transients, schedules or queries, since the'
+				. ' container builds classes whenever they are first needed.'
 		);
 	}
 
@@ -118,9 +123,7 @@ final class ArchitectureTest extends TestCase {
 				$this->is_email( $file ) ? array( '__construct' ) : array()
 			);
 
-			if ( preg_match( $add, $this->split( $file, $functions )[0] ) ) {
-				$violations[] = $path;
-			}
+			array_push( $violations, ...self::places( $add, $this->split( $file, $functions )[0], $path ) );
 		}
 
 		$this->assertSame(
@@ -138,7 +141,7 @@ final class ArchitectureTest extends TestCase {
 
 		$this->assertSame(
 			array(),
-			$this->files_matching( '/' . $fired . '|' . $listened . '/' ),
+			$this->files_matching( '/' . $fired . '|' . $listened . '/', array(), $this->files() + $this->templates() ),
 			'Name a hook with one whole string literal at the call, so its name can be searched for; only where we'
 				. ' listen to our own Action Scheduler hooks may the name be a constant named HOOK or ..._HOOK.'
 		);
@@ -147,10 +150,8 @@ final class ArchitectureTest extends TestCase {
 	public function test_dynamic_hook_names_are_never_waved_through(): void {
 		$violations = array();
 
-		foreach ( $this->files() as $path => $file ) {
-			if ( str_contains( file_get_contents( $file ), 'DynamicHooknameFound' ) ) {
-				$violations[] = $path;
-			}
+		foreach ( $this->files() + $this->templates() as $path => $file ) {
+			array_push( $violations, ...self::places( '/DynamicHooknameFound/', file_get_contents( $file ), $path ) );
 		}
 
 		$this->assertSame(
@@ -161,36 +162,38 @@ final class ArchitectureTest extends TestCase {
 	}
 
 	public function test_fired_hooks_are_prefixed(): void {
-		$names = array();
+		$violations = array();
 
-		foreach ( $this->files() as $file ) {
+		foreach ( $this->files() + $this->templates() as $path => $file ) {
+			$code = $this->code( $file );
+
 			preg_match_all(
 				'/' . self::call_of( ...self::FIRING_FUNCTIONS ) . '\s*\'(?!wpo_otd_)([^\']*)\'/',
-				$this->code( $file ),
-				$matches
+				$code,
+				$found,
+				PREG_SET_ORDER | PREG_OFFSET_CAPTURE
 			);
-			$names = array_merge( $names, $matches[1] );
+
+			foreach ( $found as $match ) {
+				if ( ! self::is_foreign_hook( $match[1][0], $path ) ) {
+					$violations[] = self::line_of( $code, $match[0][1], $path ) . ' ' . $match[1][0];
+				}
+			}
 		}
 
-		$this->assertSame(
-			array(),
-			// WordPress's own filter, applied as WordPress applies it.
-			array_values( array_diff( $names, array( 'plugin_locale' ) ) ),
-			'Hooks we fire start with "wpo_otd_".'
-		);
+		$this->assertSame( array(), $violations, 'Hooks we fire start with "wpo_otd_".' );
 	}
 
 	public function test_every_fired_hook_has_a_docblock(): void {
 		$violations = array();
 
-		foreach ( $this->files() as $path => $file ) {
+		foreach ( $this->files() + $this->templates() as $path => $file ) {
 			$tokens = token_get_all( file_get_contents( $file ) );
 
 			foreach ( $tokens as $at => $token ) {
 				if (
 					self::is_call( $tokens, $at, self::FIRING_FUNCTIONS )
-					// WordPress documents its own filter, which the bootstrap applies as WordPress does.
-					&& "'plugin_locale'" !== self::first_argument( $tokens, $at )
+					&& ! self::is_foreign_hook( trim( self::first_argument( $tokens, $at ), '\'' ), $path )
 					&& ! self::has_docblock( $tokens, $at )
 				) {
 					$violations[] = $path . ':' . $token[2];
@@ -201,8 +204,8 @@ final class ArchitectureTest extends TestCase {
 		$this->assertSame(
 			array(),
 			$violations,
-			'Put a docblock right above each apply_filters() and do_action(): what it changes, the valid range, what'
-				. ' happens to an invalid value, and an @param with the default.'
+			'Put a docblock right above each apply_filters() and do_action(), one for each: what it changes, the valid'
+				. ' range, what happens to an invalid value, and an @param with the default.'
 		);
 	}
 
@@ -213,18 +216,21 @@ final class ArchitectureTest extends TestCase {
 		$violations      = array();
 
 		foreach ( $this->files() as $path => $file ) {
+			$code = $this->code( $file );
+
 			preg_match_all(
 				'/const\s+((\w+_)?(HOOK|GROUPS?))\s*=\s*([^;]+);/',
-				$this->code( $file ),
-				$constants
+				$code,
+				$constants,
+				PREG_SET_ORDER | PREG_OFFSET_CAPTURE
 			);
 
-			foreach ( $constants[4] as $value ) {
-				preg_match_all( '/\'([^\']*)\'/', $value, $names );
+			foreach ( $constants as $constant ) {
+				preg_match_all( '/\'([^\']*)\'/', $constant[4][0], $names );
 
 				foreach ( $names[1] as $name ) {
 					if ( ! str_starts_with( $name, 'wpo_otd_' ) && ! in_array( $name, $released_groups, true ) ) {
-						$violations[] = $path . ': ' . $name;
+						$violations[] = self::line_of( $code, $constant[0][1], $path ) . ' ' . $name;
 					}
 				}
 			}
@@ -238,6 +244,24 @@ final class ArchitectureTest extends TestCase {
 	}
 
 	/**
+	 * Whether a hook we fire belongs to WordPress or WooCommerce, which document it themselves.
+	 *
+	 * @param string $name
+	 * @param string $path Where it is fired.
+	 *
+	 * @return bool
+	 */
+	private static function is_foreign_hook( string $name, string $path ): bool {
+		// The bootstrap applies WordPress's filter as WordPress does.
+		if ( 'plugin_locale' === $name ) {
+			return true;
+		}
+
+		// The email templates fire WooCommerce's email hooks, as WooCommerce's own templates do.
+		return str_starts_with( $path, 'templates/' ) && str_starts_with( $name, 'woocommerce_email_' );
+	}
+
+	/**
 	 * A pattern, without delimiters, for a call to one of these functions: not a method of the same name, nor its
 	 * declaration.
 	 *
@@ -246,7 +270,7 @@ final class ArchitectureTest extends TestCase {
 	 * @return string
 	 */
 	private static function call_of( string ...$functions ): string {
-		return '(?<![\w$>:])(?<!function )(?:' . implode( '|', $functions ) . ')\s*\(';
+		return '(?<![\w$])(?<!->)(?<!::)(?<!function )(?:' . implode( '|', $functions ) . ')\s*\(';
 	}
 
 	/**
@@ -302,8 +326,8 @@ final class ArchitectureTest extends TestCase {
 	}
 
 	/**
-	 * Whether a docblock with a summary or an @param, not only tags such as @var, sits between the start of the
-	 * statement holding the token at $at and the token.
+	 * Whether a docblock with a summary or an @param, not only tags such as @var, sits between the token at $at and
+	 * the start of its statement, with no other hook fired in between: each hook needs its own.
 	 *
 	 * @param array $tokens
 	 * @param int   $at
@@ -312,11 +336,17 @@ final class ArchitectureTest extends TestCase {
 	 */
 	private static function has_docblock( array $tokens, int $at ): bool {
 		for ( $before = $at - 1; $before >= 0; $before-- ) {
-			if ( is_array( $tokens[ $before ] ) && T_DOC_COMMENT === $tokens[ $before ][0] ) {
-				return 1 === preg_match( '/^[ \t\/*]*+(?!@)[^\s*\/]|@param\b/m', $tokens[ $before ][1] );
+			$token = $tokens[ $before ];
+
+			if ( is_array( $token ) && T_DOC_COMMENT === $token[0] ) {
+				return 1 === preg_match( '/^[ \t\/*]*+(?!@)[^\s*\/]|@param\b/m', $token[1] );
 			}
 
-			if ( in_array( $tokens[ $before ], array( ';', '{', '}' ), true ) ) {
+			if (
+				in_array( $token, array( ';', '{', '}' ), true )
+				|| ( is_array( $token ) && in_array( $token[0], array( T_OPEN_TAG, T_CLOSE_TAG ), true ) )
+				|| self::is_call( $tokens, $before, self::FIRING_FUNCTIONS )
+			) {
 				return false;
 			}
 		}
@@ -362,26 +392,56 @@ final class ArchitectureTest extends TestCase {
 	}
 
 	/**
-	 * The files under includes/ whose code, comments left out, matches a pattern.
+	 * Where a pattern matches in a file's code.
 	 *
-	 * @param string   $pattern
-	 * @param string[] $allowed Paths from includes/, a folder ending in a slash, left out.
+	 * @param string $pattern
+	 * @param string $code    With its lines where they are in the file.
+	 * @param string $path
 	 *
-	 * @return string[] Their paths from includes/.
+	 * @return string[] "path:line" for each match.
 	 */
-	private function files_matching( string $pattern, array $allowed = array() ): array {
+	private static function places( string $pattern, string $code, string $path ): array {
+		preg_match_all( $pattern, $code, $found, PREG_OFFSET_CAPTURE );
+
+		return array_map(
+			static fn( array $hit ): string => self::line_of( $code, $hit[1], $path ),
+			$found[0]
+		);
+	}
+
+	/**
+	 * "path:line" for an offset in a file's code.
+	 *
+	 * @param string $code   With its lines where they are in the file.
+	 * @param int    $offset
+	 * @param string $path
+	 *
+	 * @return string
+	 */
+	private static function line_of( string $code, int $offset, string $path ): string {
+		return $path . ':' . ( substr_count( substr( $code, 0, $offset ), "\n" ) + 1 );
+	}
+
+	/**
+	 * Where the code of the files, comments left out, matches a pattern.
+	 *
+	 * @param string                     $pattern
+	 * @param string[]                   $allowed Paths left out, a folder ending in a slash.
+	 * @param array<string, string>|null $files   Path => full path. Default the files under includes/.
+	 *
+	 * @return string[] "path:line" for each match.
+	 */
+	private function files_matching( string $pattern, array $allowed = array(), ?array $files = null ): array {
 		$matching = array();
 
-		foreach ( $this->files() as $path => $file ) {
+		foreach ( $files ?? $this->files() as $path => $file ) {
 			foreach ( $allowed as $prefix ) {
 				if ( $path === $prefix || ( str_ends_with( $prefix, '/' ) && str_starts_with( $path, $prefix ) ) ) {
 					continue 2;
 				}
 			}
 
-			if ( preg_match( $pattern, $this->code( $file ) ) ) {
-				$matching[] = $path;
-			}
+			array_push( $matching, ...self::places( $pattern, $this->code( $file ), $path ) );
 		}
 
 		return $matching;
@@ -393,18 +453,39 @@ final class ArchitectureTest extends TestCase {
 	 * @return array<string, string> Path from includes/, with forward slashes => full path.
 	 */
 	private function files(): array {
-		$includes = str_replace( '\\', '/', dirname( __DIR__, 2 ) ) . '/includes/';
-		$files    = array();
+		return self::php_files( 'includes/', '' );
+	}
+
+	/**
+	 * The email templates.
+	 *
+	 * @return array<string, string> Path from the plugin's folder, with forward slashes => full path.
+	 */
+	private function templates(): array {
+		return self::php_files( 'templates/', 'templates/' );
+	}
+
+	/**
+	 * The PHP files in a folder of the plugin, recursively.
+	 *
+	 * @param string $folder From the plugin's folder, ending in a slash.
+	 * @param string $prefix Put before each path from the folder.
+	 *
+	 * @return array<string, string> Path => full path.
+	 */
+	private static function php_files( string $folder, string $prefix ): array {
+		$root  = str_replace( '\\', '/', dirname( __DIR__, 2 ) ) . '/' . $folder;
+		$files = array();
 
 		foreach (
 			new RecursiveIteratorIterator(
-				new RecursiveDirectoryIterator( $includes, RecursiveDirectoryIterator::SKIP_DOTS )
+				new RecursiveDirectoryIterator( $root, RecursiveDirectoryIterator::SKIP_DOTS )
 			) as $file
 		) {
 			if ( 'php' === $file->getExtension() ) {
 				$path = $file->getPathname();
 
-				$files[ substr( str_replace( '\\', '/', $path ), strlen( $includes ) ) ] = $path;
+				$files[ $prefix . substr( str_replace( '\\', '/', $path ), strlen( $root ) ) ] = $path;
 			}
 		}
 
@@ -418,7 +499,7 @@ final class ArchitectureTest extends TestCase {
 	 *
 	 * @param string $file
 	 *
-	 * @return string
+	 * @return string With its lines where they are in the file.
 	 */
 	private function code( string $file ): string {
 		return $this->split( $file, array() )[0];
@@ -426,7 +507,7 @@ final class ArchitectureTest extends TestCase {
 
 	/**
 	 * A file's code, comments left out, split into the bodies of the functions named and the rest. A closure is part
-	 * of the function around it.
+	 * of the function around it. Each part keeps the other's line breaks, so its lines are where they are in the file.
 	 *
 	 * @param string   $file
 	 * @param string[] $functions
@@ -440,11 +521,11 @@ final class ArchitectureTest extends TestCase {
 		$depth   = 0;
 
 		foreach ( $tokens as $at => $token ) {
-			if ( is_array( $token ) && in_array( $token[0], array( T_COMMENT, T_DOC_COMMENT ), true ) ) {
-				continue;
-			}
+			$text = is_array( $token ) ? $token[1] : $token;
 
-			if ( 0 === $depth && is_array( $token ) && T_FUNCTION === $token[0] ) {
+			if ( is_array( $token ) && in_array( $token[0], array( T_COMMENT, T_DOC_COMMENT ), true ) ) {
+				$text = self::blank( $text );
+			} elseif ( 0 === $depth && is_array( $token ) && T_FUNCTION === $token[0] ) {
 				$name    = self::neighbour( $tokens, $at, 1 );
 				$pending = is_array( $name ) && in_array( $name[1], $functions, true );
 			} elseif ( 0 === $depth && ';' === $token ) {
@@ -458,10 +539,24 @@ final class ArchitectureTest extends TestCase {
 				$depth += self::brace( $token );
 			}
 
-			$parts[ $depth > 0 ? 1 : 0 ] .= is_array( $token ) ? $token[1] : $token;
+			$inside = $depth > 0 ? 1 : 0;
+
+			$parts[ $inside ]     .= $text;
+			$parts[ 1 - $inside ] .= self::blank( $text );
 		}
 
 		return $parts;
+	}
+
+	/**
+	 * Source with everything but its line breaks blanked out.
+	 *
+	 * @param string $text
+	 *
+	 * @return string
+	 */
+	private static function blank( string $text ): string {
+		return (string) preg_replace( '/[^\n]+/', ' ', $text );
 	}
 
 	/**
