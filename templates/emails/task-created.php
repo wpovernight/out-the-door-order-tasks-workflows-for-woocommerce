@@ -25,7 +25,14 @@ do_action( 'woocommerce_email_header', $email_heading, $email );
 
 <?php
 /**
+ * Fires where the email shows the task's details.
+ *
  * @hooked EmailService::email_task_details() Shows the task details.
+ *
+ * @param array     $task_data     The task with its fields.
+ * @param bool      $sent_to_admin Whether the email goes to the store's admin.
+ * @param bool      $plain_text    Whether the email is plain text.
+ * @param \WC_Email $email         The email.
  */
 do_action( 'wpo_otd_email_task_details', $task_data, $sent_to_admin, $plain_text, $email );
 ?>

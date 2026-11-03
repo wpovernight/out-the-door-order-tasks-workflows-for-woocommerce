@@ -21,7 +21,14 @@ echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 echo esc_html__( 'A new task has been created:', 'out-the-door-order-tasks-workflows-for-woocommerce' ) . "\n\n";
 
 /**
- * @hooked WPO_OTD_Emails::email_task_details() Shows the task details.
+ * Fires where the email shows the task's details.
+ *
+ * @hooked EmailService::email_task_details() Shows the task details.
+ *
+ * @param array     $task_data     The task with its fields.
+ * @param bool      $sent_to_admin Whether the email goes to the store's admin.
+ * @param bool      $plain_text    Whether the email is plain text.
+ * @param \WC_Email $email         The email.
  */
 do_action( 'wpo_otd_email_task_details', $task_data, $sent_to_admin, $plain_text, $email );
 
