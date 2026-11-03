@@ -84,6 +84,58 @@ class LoggerTest extends TestCase {
 		Logger::log( 'verbose', 'Not a PSR-3 level' );
 	}
 
+	public function test_a_quiet_log_logs_as_log_does(): void {
+		$this->wc_logger->shouldReceive( 'log' )->once()->with( 'warning', 'Something happened', array( 'source' => 'wpo-otd' ) );
+
+		Logger::log_quietly( 'warning', 'Something happened' );
+	}
+
+	public function test_a_quiet_log_is_turned_off_by_the_filter_as_log_is(): void {
+		Filters\expectApplied( 'wpo_otd_logging_enabled' )->once()->andReturn( false );
+		$this->wc_logger->shouldNotReceive( 'log' );
+
+		Logger::log_quietly( 'error', 'Muted' );
+	}
+
+	public function test_a_quiet_log_never_throws_when_the_woocommerce_logger_does(): void {
+		$this->wc_logger->shouldReceive( 'log' )->once()->andThrow( new \RuntimeException( 'The log file is not writable.' ) );
+
+		Logger::log_quietly( 'error', 'Something happened' );
+
+		$this->addToAssertionCount( 1 );
+	}
+
+	public function test_a_quiet_log_never_throws_when_woocommerce_is_not_loaded(): void {
+		Functions\when( 'wc_get_logger' )->alias(
+			static function (): void {
+				throw new \Error( 'Call to undefined function wc_get_logger()' );
+			}
+		);
+
+		Logger::log_quietly( 'error', 'Something happened' );
+
+		$this->addToAssertionCount( 1 );
+	}
+
+	public function test_a_quiet_log_never_throws_when_the_filter_does(): void {
+		Filters\expectApplied( 'wpo_otd_logging_enabled' )->once()->andReturnUsing(
+			static function (): bool {
+				throw new \RuntimeException( 'A filter failed.' );
+			}
+		);
+		$this->wc_logger->shouldNotReceive( 'log' );
+
+		Logger::log_quietly( 'error', 'Something happened' );
+	}
+
+	public function test_log_itself_still_throws_what_the_woocommerce_logger_throws(): void {
+		$this->wc_logger->shouldReceive( 'log' )->once()->andThrow( new \RuntimeException( 'The log file is not writable.' ) );
+
+		$this->expectException( \RuntimeException::class );
+
+		Logger::error( 'Something happened' );
+	}
+
 	public function test_a_message_logged_once_a_day_is_logged_the_first_time_and_marked_for_a_day(): void {
 		$marked = array();
 		Functions\expect( 'get_transient' )->once()->with( 'wpo_otd_example_mark' )->andReturn( false );

@@ -65,6 +65,22 @@ final class Logger {
 	}
 
 	/**
+	 * Log a message as log() does, never throwing, for code that must not fail because its log did: what goes wrong
+	 * while logging, such as WooCommerce not being loaded or a filter that throws, is dropped.
+	 *
+	 * @param string $level As for log().
+	 * @param string $message
+	 *
+	 * @return void
+	 */
+	public static function log_quietly( string $level, string $message ): void {
+		try {
+			self::log( $level, $message );
+		} catch ( \Throwable ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch -- Nothing is left to report it to.
+		}
+	}
+
+	/**
 	 * Log a message about once a day, for something that recurs on every request until it is fixed, such as a
 	 * connector that fails each time it is read.
 	 *

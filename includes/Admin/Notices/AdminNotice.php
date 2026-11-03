@@ -126,9 +126,6 @@ abstract class AdminNotice {
 	private function log_failure( Throwable $exception ): void {
 		$error = '' !== $exception->getMessage() ? $exception->getMessage() : $exception::class;
 
-		try {
-			Logger::error( sprintf( 'Out the Door could not show the %1$s admin notice (%2$s).', static::class, $error ) );
-		} catch ( Throwable ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch -- Nothing is left to report it to.
-		}
+		Logger::log_quietly( 'error', sprintf( 'Out the Door could not show the %1$s admin notice (%2$s).', static::class, $error ) );
 	}
 }
