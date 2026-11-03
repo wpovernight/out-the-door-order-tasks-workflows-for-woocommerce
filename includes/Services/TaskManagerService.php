@@ -21,6 +21,16 @@ use WPO\OTD\Repositories\TaskRepository;
 defined( 'ABSPATH' ) || exit;
 
 final class TaskManagerService {
+	/**
+	 * The Action Scheduler hook that rebalances the task positions of one status (rebalance_task_positions()).
+	 */
+	public const HOOK = 'wpo_otd_rebalance_task_positions';
+
+	/**
+	 * The Action Scheduler group the rebalance runs in.
+	 */
+	public const GROUP = 'wpo_otd';
+
 	protected readonly TaskRepository $task_repository;
 	protected readonly TaskFieldRepository $task_field_repository;
 	protected readonly TaskFieldOptionRepository $task_field_option_repository;
@@ -50,8 +60,7 @@ final class TaskManagerService {
 	 * @return void
 	 */
 	public function register_hooks(): void {
-		// Rebalance task positions hook.
-		add_action( 'wpo_otd_rebalance_task_positions', array( $this, 'rebalance_task_positions' ) );
+		add_action( self::HOOK, array( $this, 'rebalance_task_positions' ) );
 	}
 
 	/** ================================
@@ -1664,13 +1673,11 @@ final class TaskManagerService {
 			return;
 		}
 
-		$hook_key = 'wpo_otd_rebalance_task_positions';
-
 		if (
 			\as_has_scheduled_action(
-				$hook_key,
+				self::HOOK,
 				array( 'status_id' => $status_id ),
-				'wpo_otd'
+				self::GROUP
 			)
 		) {
 			return;
@@ -1690,9 +1697,9 @@ final class TaskManagerService {
 
 		\as_schedule_single_action(
 			$timestamp,
-			$hook_key,
+			self::HOOK,
 			array( 'status_id' => $status_id ),
-			'wpo_otd'
+			self::GROUP
 		);
 	}
 

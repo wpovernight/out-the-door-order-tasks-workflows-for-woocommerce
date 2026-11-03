@@ -43,6 +43,11 @@ class CustomOrderStatusService {
 	public const HOOK = 'wpo_otd_reassign_orders';
 
 	/**
+	 * The Action Scheduler group the deletion batches run in.
+	 */
+	public const GROUP = 'wpo-otd';
+
+	/**
 	 * Seconds a change or deletion of a status waits while another request changes or deletes it.
 	 */
 	private const DELETION_LOCK_TIMEOUT = 3;
@@ -700,7 +705,7 @@ class CustomOrderStatusService {
 		$this->cached_statuses = null;
 
 		$this->save_stuck_orders( $id, array() );
-		as_schedule_single_action( time(), self::HOOK, array( $status->status_key, $fallback_status, $id ), 'wpo-otd' );
+		as_schedule_single_action( time(), self::HOOK, array( $status->status_key, $fallback_status, $id ), self::GROUP );
 
 		return self::DELETION_SCHEDULED;
 	}
@@ -721,14 +726,14 @@ class CustomOrderStatusService {
 		foreach ( $pending as $args ) {
 			// Only a batch that could not read or query the status carries its retry count.
 			if ( isset( $args[3] ) ) {
-				as_unschedule_action( self::HOOK, $args, 'wpo-otd' );
-				as_schedule_single_action( time(), self::HOOK, array_slice( $args, 0, 3 ), 'wpo-otd' );
+				as_unschedule_action( self::HOOK, $args, self::GROUP );
+				as_schedule_single_action( time(), self::HOOK, array_slice( $args, 0, 3 ), self::GROUP );
 			}
 		}
 
 		if ( array() === $pending && array() === $this->deletion_jobs( $status->id, \ActionScheduler_Store::STATUS_RUNNING ) ) {
 			$this->save_stuck_orders( $status->id, array() );
-			as_schedule_single_action( time(), self::HOOK, array( $status->status_key, $fallback_status, $status->id ), 'wpo-otd' );
+			as_schedule_single_action( time(), self::HOOK, array( $status->status_key, $fallback_status, $status->id ), self::GROUP );
 		}
 	}
 
@@ -745,7 +750,7 @@ class CustomOrderStatusService {
 		$actions = as_get_scheduled_actions(
 			array(
 				'hook'     => self::HOOK,
-				'group'    => 'wpo-otd',
+				'group'    => self::GROUP,
 				'status'   => $state,
 				'per_page' => -1,
 			)
@@ -845,7 +850,7 @@ class CustomOrderStatusService {
 		}
 
 		if ( $this->has_more_orders( $from_status, count( $orders ), $limit, $stuck ) ) {
-			as_schedule_single_action( time(), self::HOOK, array( $from_status, $to_status, $status_id ), 'wpo-otd' );
+			as_schedule_single_action( time(), self::HOOK, array( $from_status, $to_status, $status_id ), self::GROUP );
 
 			return;
 		}
@@ -890,7 +895,7 @@ class CustomOrderStatusService {
 			'warning',
 			"A batch of the deletion of custom order status {$status_id} moved no order, since {$reason}; it is tried again later, waiting longer each time, up to an hour."
 		);
-		as_schedule_single_action( time() + $delay, self::HOOK, array( $from_status, $to_status, $status_id, $retries + 1 ), 'wpo-otd' );
+		as_schedule_single_action( time() + $delay, self::HOOK, array( $from_status, $to_status, $status_id, $retries + 1 ), self::GROUP );
 	}
 
 	/**
