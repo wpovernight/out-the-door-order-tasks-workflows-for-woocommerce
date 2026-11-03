@@ -502,6 +502,45 @@ abstract class BaseRepository {
 	}
 
 	/**
+	 * Run a SELECT written in full, for a query the builder cannot express, and give its rows as models. The builder's
+	 * own conditions are neither used nor reset.
+	 *
+	 * @template TModel of BaseModel
+	 * @param string            $query    With a placeholder for each binding; in_placeholders() writes an IN () list's.
+	 * @param array<int, mixed> $bindings
+	 *
+	 * @return array<int, TModel>|null Null when the database failed.
+	 */
+	protected function select_raw( string $query, array $bindings = array() ): ?array {
+		if ( ! empty( $bindings ) ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $query is prepared on this line; placeholders are caller-supplied.
+			$query = $this->wpdb->prepare( $query, ...array_values( $bindings ) );
+		}
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Query is prepared above.
+		$rows = $this->run_query( fn() => $this->wpdb->get_results( $query, ARRAY_A ) );
+
+		// $wpdb gives an empty list for a failed query too, so only its error tells that apart from no rows.
+		if ( ! is_array( $rows ) || ( array() === $rows && '' !== $this->get_last_db_error() ) ) {
+			return null;
+		}
+
+		return array_map( array( $this, 'map_to_model' ), $rows );
+	}
+
+	/**
+	 * One placeholder for each value, for an IN () list that $wpdb->prepare() fills with the values.
+	 *
+	 * @param array  $values      Not empty: "IN ()" is not valid SQL.
+	 * @param string $placeholder Such as "%d" for integers. Default "%s".
+	 *
+	 * @return string Such as "%s,%s,%s".
+	 */
+	protected static function in_placeholders( array $values, string $placeholder = '%s' ): string {
+		return implode( ',', array_fill( 0, count( $values ), $placeholder ) );
+	}
+
+	/**
 	 * Insert a record.
 	 *
 	 * @param array<string, mixed> $data
@@ -1726,8 +1765,7 @@ abstract class BaseRepository {
 			}
 
 			if ( is_array( $value ) && in_array( $operator, array( 'IN', 'NOT IN' ), true ) ) {
-				$placeholders = implode( ',', array_fill( 0, count( $value ), '%s' ) );
-				$parts[]      = "{$prefix}{$column} {$operator} ({$placeholders})";
+				$parts[] = "{$prefix}{$column} {$operator} (" . self::in_placeholders( $value ) . ')';
 			} else {
 				// Choose a placeholder based on scalar type.
 				$placeholder = $this->placeholder_for( $value );

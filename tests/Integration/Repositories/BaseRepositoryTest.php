@@ -731,6 +731,45 @@ class BaseRepositoryTest extends IntegrationTestCase {
 		$this->assertSame( array( 'Renamed' ), array_column( $this->repository->get( true ), 'label' ) );
 	}
 
+	public function test_select_raw_reads_rows_as_models_with_an_in_list_and_none_as_an_empty_list(): void {
+		$this->insert_statuses( array( 'a' => '#111', 'b' => '#222', 'c' => '#111' ) );
+		$repository = new RawStatusRepository();
+
+		$this->assertSame( array( 'a', 'c' ), $this->keys( $repository->select_in( array( 'a', 'b', 'c' ), '#111' ) ) );
+		$this->assertContainsOnlyInstancesOf( CustomOrderStatus::class, $repository->select_in( array( 'a' ), '#111' ) );
+		$this->assertSame( array(), $repository->select_in( array( 'missing' ), '#111' ) );
+		$this->assertCount( 3, $repository->select_all( 'a', 'b', 'c' ) );
+	}
+
+	public function test_select_raw_leaves_the_builders_conditions_alone(): void {
+		$this->insert_statuses( array( 'a' => '#111', 'b' => '#222' ) );
+		$repository = new RawStatusRepository();
+
+		$repository->where( 'status_key', 'b' );
+
+		$this->assertSame( array( 'a' ), $this->keys( $repository->select_in( array( 'a' ), '#111' ) ) );
+		$this->assertSame( array( 'b' ), $this->keys( $repository->get() ), 'The condition still applies to the next query.' );
+	}
+
+	public function test_select_raw_tells_a_failed_read_apart(): void {
+		$this->insert_statuses( array( 'a' => '#111' ) );
+		$repository = new RawStatusRepository();
+		$this->fail_queries( '/ORDER BY status_key/' );
+
+		$this->assertNull( $repository->select_in( array( 'a' ), '#111' ) );
+		$this->assertNotSame( '', $repository->get_last_db_error() );
+		$this->assertNull( $repository->select_all( 'a' ) );
+
+		remove_all_filters( 'query' );
+
+		$this->assertCount( 1, $repository->select_in( array( 'a' ), '#111' ) );
+	}
+
+	public function test_in_placeholders_writes_one_placeholder_for_each_value(): void {
+		$this->assertSame( '%s', RawStatusRepository::placeholders_for( array( 'a' ) ) );
+		$this->assertSame( '%d,%d,%d', RawStatusRepository::placeholders_for( array( 1, 2, 3 ), '%d' ) );
+	}
+
 	public function test_a_transaction_commits_its_writes(): void {
 		$id = $this->repository->transaction( fn( $repository ) => $repository->insert( array( 'status_key' => 'kept', 'label' => 'Kept' ) ) );
 
@@ -858,5 +897,27 @@ class BaseRepositoryTest extends IntegrationTestCase {
 class QuietStatusRepository extends CustomOrderStatusRepository {
 	public function run_quietly( callable $queries, string $cause ): mixed {
 		return $this->quietly( $queries, $cause );
+	}
+}
+
+/**
+ * Makes select_raw() and in_placeholders() callable.
+ */
+class RawStatusRepository extends CustomOrderStatusRepository {
+	public function select_in( array $keys, string $background ): ?array {
+		return $this->select_raw(
+			"SELECT * FROM {$this->get_table_full_name()} WHERE status_key IN (" . self::in_placeholders( $keys ) . ') AND background = %s ORDER BY status_key',
+			array_merge( $keys, array( $background ) )
+		);
+	}
+
+	public function select_all( string ...$keys ): ?array {
+		$quoted = implode( ',', array_map( static fn( string $key ): string => "'" . esc_sql( $key ) . "'", $keys ) );
+
+		return $this->select_raw( "SELECT * FROM {$this->get_table_full_name()} WHERE status_key IN ({$quoted}) ORDER BY status_key" );
+	}
+
+	public static function placeholders_for( array $values, string $placeholder = '%s' ): string {
+		return self::in_placeholders( $values, $placeholder );
 	}
 }

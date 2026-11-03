@@ -61,8 +61,7 @@ class TaskFieldOptionRepository extends BaseRepository {
 			$bindings[] = absint( $option_id );
 		}
 
-		// Build placeholders for IN clause.
-		$placeholders = implode( ',', array_fill( 0, count( $ordered_option_ids ), '%d' ) );
+		$placeholders = self::in_placeholders( $ordered_option_ids, '%d' );
 
 		$query = "UPDATE {$this->get_table_full_name()}
 				  SET position = CASE {$case_statement} END
