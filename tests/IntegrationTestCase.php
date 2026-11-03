@@ -9,6 +9,7 @@ use WPO\OTD\Core\Container\Container;
 use WPO\OTD\Enums\DefaultTaskFields;
 use WPO\OTD\Repositories\TaskFieldOptionRepository;
 use WPO\OTD\Repositories\TaskFieldRepository;
+use WPO\OTD\Services\CustomOrderStatusService;
 use WPO\OTD\Tests\Support\InstalledPlugins;
 
 /**
@@ -227,6 +228,30 @@ abstract class IntegrationTestCase extends WP_UnitTestCase {
 		$this->container ??= new Container();
 
 		return $this->container->get( $id );
+	}
+
+	/**
+	 * Hook a custom status service in place of the plugin's own, which keeps the statuses it read earlier in the run,
+	 * so WooCommerce lists the statuses this one knows, as on a request where both are the same instance.
+	 *
+	 * @param CustomOrderStatusService $service
+	 *
+	 * @return void
+	 */
+	protected function hook_status_service( CustomOrderStatusService $service ): void {
+		global $wp_filter;
+
+		foreach ( $wp_filter as $hook => $callbacks_by_priority ) {
+			foreach ( $callbacks_by_priority->callbacks as $priority => $callbacks ) {
+				foreach ( $callbacks as $callback ) {
+					if ( is_array( $callback['function'] ) && $callback['function'][0] instanceof CustomOrderStatusService ) {
+						remove_filter( $hook, $callback['function'], $priority );
+					}
+				}
+			}
+		}
+
+		$service->register_hooks();
 	}
 
 	/**

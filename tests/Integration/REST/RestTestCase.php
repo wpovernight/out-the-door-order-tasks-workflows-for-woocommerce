@@ -9,6 +9,7 @@ use WPO\OTD\Core\Providers\CoreServiceProvider;
 use WPO\OTD\REST\CustomOrderStatusController;
 use WPO\OTD\REST\FulfillmentController;
 use WPO\OTD\REST\TaskController;
+use WPO\OTD\Services\CustomOrderStatusService;
 use WPO\OTD\Tests\IntegrationTestCase;
 
 /**
@@ -27,6 +28,7 @@ abstract class RestTestCase extends IntegrationTestCase {
 		parent::set_up();
 
 		$this->remove_boot_routes();
+		$this->hook_status_service( $this->make( CustomOrderStatusService::class ) );
 
 		add_action(
 			'rest_api_init',

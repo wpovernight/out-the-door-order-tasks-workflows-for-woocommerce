@@ -91,11 +91,11 @@ class CustomOrderStatusService {
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_dynamic_style' ), 99 );
 
 		// Drain & finalize a custom status deletion, one batch per scheduled run.
-		add_action( 'wpo_otd_reassign_orders', array( $this, 'process_deletion_batch' ), 10, 3 );
+		add_action( 'wpo_otd_reassign_orders', array( $this, 'process_deletion_batch' ), 10, 4 );
 
 		// Action Scheduler fires this once per queue run, and before each batch under "wp action-scheduler run", which
 		// processes batches for as long as it runs; so what other requests changed meanwhile is read again.
-		add_action( 'action_scheduler_before_process_queue', array( $this, 'reread_statuses' ) );
+		add_action( 'action_scheduler_before_process_queue', array( $this, 'forget_statuses' ) );
 	}
 
 	/** ================================
@@ -142,32 +142,7 @@ class CustomOrderStatusService {
 	}
 
 	/**
-	 * Read the statuses again, and register as a post status any not registered yet in this process.
-	 *
-	 * @return void
-	 */
-	public function reread_statuses(): void {
-		$this->forget_statuses();
-		$this->register_missing_post_statuses();
-	}
-
-	/**
-	 * Register as a post status each custom status not registered yet in this process.
-	 *
-	 * @return void
-	 */
-	private function register_missing_post_statuses(): void {
-		foreach ( $this->all() as $status ) {
-			$this->register_post_status( $status );
-		}
-	}
-
-	/**
 	 * Register a custom status as a post status, as WooCommerce does on init, unless it is registered already.
-	 *
-	 * WooCommerce registers the statuses it lists once, on init, so one created later, by this request or by another
-	 * while a queue runner keeps going, is missing. On the posts table, an order saved into a status that is not
-	 * registered is stored without its "wc-" prefix, and order queries for the status no longer find it.
 	 *
 	 * @param CustomOrderStatus $status
 	 *
@@ -271,11 +246,23 @@ class CustomOrderStatusService {
 	/**
 	 * Return all statuses.
 	 *
+	 * Each fresh read after init registers as a post status any status not registered yet: WooCommerce registers the
+	 * statuses it lists once, on init, so one created later, by this request or by another while a queue runner keeps
+	 * going, would be missing. On the posts table, an order saved into a status that is not registered is stored
+	 * without its "wc-" prefix, and an order query for a status that is not registered, or that WooCommerce does not
+	 * list, drops the status condition and matches orders in every status.
+	 *
 	 * @return CustomOrderStatus[]
 	 */
 	public function all(): array {
 		if ( null === $this->cached_statuses ) {
 			$this->cached_statuses = $this->repository->get();
+
+			if ( did_action( 'init' ) ) {
+				foreach ( $this->cached_statuses as $status ) {
+					$this->register_post_status( $status );
+				}
+			}
 		}
 
 		return $this->cached_statuses;
@@ -444,7 +431,6 @@ class CustomOrderStatusService {
 
 		$status->id            = $result;
 		$this->cached_statuses = null;
-		$this->register_post_status( $status );
 
 		/**
 		 * Action triggered after a custom order status is created.
@@ -551,7 +537,6 @@ class CustomOrderStatusService {
 		}
 
 		$this->cached_statuses = null;
-		$this->register_post_status( $custom_status );
 
 		return array( $custom_status, $data );
 	}
@@ -559,10 +544,11 @@ class CustomOrderStatusService {
 	/**
 	 * Request deletion of a custom order status.
 	 *
-	 * A status no order has is deleted at once. One that orders still have is flagged is_deleting and its orders are
-	 * moved to the fallback status by a background batch job; the row is deleted once the final batch completes (see
-	 * process_deletion_batch()). Until then the status stays registered, so wc_get_orders() can keep matching its
-	 * orders. begin_deletion() does the same and tells which of the two happened.
+	 * A status no order has is deleted at once. One that orders still have, or whose orders cannot be queried (see
+	 * can_query_orders_in()), is flagged is_deleting and its orders are moved to the fallback status by a background
+	 * batch job; the row is deleted once the final batch completes (see process_deletion_batch()). Until then the
+	 * status stays registered, so wc_get_orders() can keep matching its orders. begin_deletion() does the same and
+	 * tells which of the two happened.
 	 *
 	 * @param int    $id              The custom status ID to delete.
 	 * @param string $fallback_status The status to assign to affected orders (default: 'on-hold').
@@ -690,22 +676,24 @@ class CustomOrderStatusService {
 			return self::DELETION_SCHEDULED;
 		}
 
-		$existing_orders = wc_get_orders(
+		// Read again, so a status another request created is listed and registered. One that still cannot be queried,
+		// as when the statuses cannot be read, could hide its orders and be deleted while they still have it, so it is
+		// left to the background batches, which wait until it can be.
+		$this->forget_statuses();
+
+		if ( $this->can_query_orders_in( $status->status_key ) && array() === wc_get_orders(
 			array(
 				'status' => $status->status_key,
 				'limit'  => 1,
 				'return' => 'ids',
 			)
-		);
-
-		// Nothing to drain — delete the status immediately.
-		if ( 0 === count( $existing_orders ) ) {
+		) ) {
 			$this->remove( $id, $status->status_key, $fallback_status );
 
 			return self::DELETION_DONE;
 		}
 
-		// Orders exist: mark as pending deletion and schedule the async drain.
+		// Orders exist, or may: mark as pending deletion and schedule the async drain.
 		// Do NOT delete the row yet — it must stay registered so wc_get_orders()
 		// can still match its orders.
 		$status->is_deleting = true;
@@ -765,18 +753,18 @@ class CustomOrderStatusService {
 	 * it. A stuck order that has left the status since is dropped from the list. When only stuck orders are left in
 	 * the status, the deletion stops and logs them: the status stays, flagged, and deleting it again starts over.
 	 *
-	 * No order is queried until the status is known to be flagged under this key and to be one WooCommerce lists:
-	 * on the posts table, an order query for a status WooCommerce does not know, or that is not registered as a post
-	 * status, drops the status condition and matches orders in every status. When the status cannot be read, or
-	 * WooCommerce does not list it (the statuses could not be read), the batch is tried again a minute later.
+	 * No order is queried until the status is known to be flagged under this key and can be queried
+	 * (can_query_orders_in()). When the status cannot be read, or cannot be queried, the batch is tried again later,
+	 * a minute after the first such attempt and twice as long after each next one, up to an hour.
 	 *
 	 * @param string $from_status The status key to reassign from (without 'wc-' prefix).
 	 * @param string $to_status   The status key to reassign to (without 'wc-' prefix).
 	 * @param int    $status_id   The ID of the custom status being deleted.
+	 * @param int    $retries     How many batches in a row before this one could not read or query the status.
 	 *
 	 * @return void
 	 */
-	public function process_deletion_batch( string $from_status, string $to_status, int $status_id ): void {
+	public function process_deletion_batch( string $from_status, string $to_status, int $status_id, int $retries = 0 ): void {
 		// The batch may run in a process that read the statuses before this deletion began.
 		$this->forget_statuses();
 
@@ -790,7 +778,7 @@ class CustomOrderStatusService {
 		$status = $this->repository->try_find( $status_id );
 
 		if ( false === $status ) {
-			$this->retry_deletion_batch( $from_status, $to_status, $status_id, 'it could not be read: ' . $this->repository->get_last_db_error() );
+			$this->retry_deletion_batch( $from_status, $to_status, $status_id, $retries, 'it could not be read: ' . $this->repository->get_last_db_error() );
 
 			return;
 		}
@@ -807,7 +795,7 @@ class CustomOrderStatusService {
 		}
 
 		if ( ! $this->can_query_orders_in( $from_status ) ) {
-			$this->retry_deletion_batch( $from_status, $to_status, $status_id, 'WooCommerce does not list it as an order status' );
+			$this->retry_deletion_batch( $from_status, $to_status, $status_id, $retries, 'WooCommerce does not list it as an order status' );
 
 			return;
 		}
@@ -861,41 +849,40 @@ class CustomOrderStatusService {
 	}
 
 	/**
-	 * Schedule a deletion batch again a minute from now, logging why it did not run.
+	 * Schedule a deletion batch that could not read or query its status again, backing off, and log why about once a
+	 * day for the status, since the cause, such as a filter taking the status off WooCommerce's list, may last.
 	 *
 	 * @param string $from_status
 	 * @param string $to_status
 	 * @param int    $status_id
+	 * @param int    $retries     How many batches in a row before this one could not.
 	 * @param string $reason      Why, for the log.
 	 *
 	 * @return void
 	 */
-	private function retry_deletion_batch( string $from_status, string $to_status, int $status_id, string $reason ): void {
-		Logger::warning( "A batch of the deletion of custom order status {$status_id} moved no order, since {$reason}; it is tried again in a minute." );
-		as_schedule_single_action( time() + MINUTE_IN_SECONDS, 'wpo_otd_reassign_orders', array( $from_status, $to_status, $status_id ), 'wpo-otd' );
+	private function retry_deletion_batch( string $from_status, string $to_status, int $status_id, int $retries, string $reason ): void {
+		$delay = (int) min( HOUR_IN_SECONDS, MINUTE_IN_SECONDS * 2 ** max( 0, $retries ) );
+
+		Logger::once(
+			"wpo_otd_status_deletion_retry_{$status_id}",
+			'warning',
+			"A batch of the deletion of custom order status {$status_id} moved no order, since {$reason}; it is tried again later, waiting longer each time, up to an hour."
+		);
+		as_schedule_single_action( time() + $delay, 'wpo_otd_reassign_orders', array( $from_status, $to_status, $status_id, $retries + 1 ), 'wpo-otd' );
 	}
 
 	/**
-	 * Whether an order query for a custom status matches only the orders in it.
-	 *
-	 * On the posts table, WooCommerce queries a status it does not list without its "wc-" prefix, and WordPress drops
-	 * a post status that is not registered, so either would let the query match orders in every status. A status
-	 * missing as a post status is registered here.
+	 * Whether an order query for a custom status matches only the orders in it: WooCommerce lists it and it is
+	 * registered as a post status (all() says why both matter).
 	 *
 	 * @param string $status Without the "wc-" prefix.
 	 *
-	 * @return bool False when WooCommerce does not list the status, or it cannot be registered as a post status.
+	 * @return bool
 	 */
 	private function can_query_orders_in( string $status ): bool {
 		$prefixed = 'wc-' . $status;
 
-		if ( ! wc_is_order_status( $prefixed ) ) {
-			return false;
-		}
-
-		$this->register_missing_post_statuses();
-
-		return null !== get_post_status_object( $prefixed );
+		return wc_is_order_status( $prefixed ) && null !== get_post_status_object( $prefixed );
 	}
 
 	/**
@@ -1028,7 +1015,7 @@ class CustomOrderStatusService {
 	 * @param string $status
 	 * @param int[]  $order_ids
 	 *
-	 * @return int[] Every order of the list when the status cannot be queried, so none counts as moved.
+	 * @return int[]
 	 */
 	private function still_in_status( string $status, array $order_ids ): array {
 		$order_ids = array_values( array_unique( array_filter( array_map( 'absint', $order_ids ) ) ) );
@@ -1036,10 +1023,6 @@ class CustomOrderStatusService {
 		// An empty post__in would match every order.
 		if ( array() === $order_ids ) {
 			return array();
-		}
-
-		if ( ! $this->can_query_orders_in( $status ) ) {
-			return $order_ids;
 		}
 
 		return array_map(

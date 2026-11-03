@@ -2,6 +2,7 @@
 
 namespace WPO\OTD\Tests\Integration\Services;
 
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use WPO\OTD\Models\CustomOrderStatus;
 use WPO\OTD\Repositories\CustomOrderStatusRepository;
 use WPO\OTD\Services\CustomOrderStatusService;
@@ -16,6 +17,9 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		parent::set_up();
 
 		$this->service = new CustomOrderStatusService();
+
+		// WooCommerce must list the statuses the service under test knows, as on a real request.
+		$this->hook_status_service( $this->service );
 	}
 
 	/** ================================
@@ -1098,8 +1102,49 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 
 		$this->assertSame( 'packed', wc_get_order( $packed )->get_status() );
 		$this->assertSame( 'processing', wc_get_order( $other )->get_status() );
-		$this->assertGreaterThan( time() + 30, as_next_scheduled_action( self::REASSIGN_HOOK, array( 'packed', 'on-hold', $status->id ), 'wpo-otd' ) );
+		$this->assertEqualsWithDelta( time() + MINUTE_IN_SECONDS, as_next_scheduled_action( self::REASSIGN_HOOK, array( 'packed', 'on-hold', $status->id, 1 ), 'wpo-otd' ), 5 );
 		$this->assertStringStartsWith( "A batch of the deletion of custom order status {$status->id} moved no order, since {$reason}", $logs()[0][1] );
+	}
+
+	public function test_a_batch_tried_again_waits_twice_as_long_each_time_up_to_an_hour_and_logs_once(): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $status->id );
+		$logs = $this->capture_logs();
+		$this->fail_queries( '/^SELECT .* FROM \w+wpo_otd_custom_statuses\b(?!.*\bWHERE\b)/' );
+
+		foreach ( array( 1 => 2 * MINUTE_IN_SECONDS, 5 => 32 * MINUTE_IN_SECONDS, 6 => HOUR_IN_SECONDS, 40 => HOUR_IN_SECONDS, 2000 => HOUR_IN_SECONDS ) as $retries => $delay ) {
+			$this->service->process_deletion_batch( 'packed', 'on-hold', $status->id, $retries );
+
+			$this->assertEqualsWithDelta( time() + $delay, as_next_scheduled_action( self::REASSIGN_HOOK, array( 'packed', 'on-hold', $status->id, $retries + 1 ), 'wpo-otd' ), 5, "After {$retries} retries." );
+		}
+
+		$this->assertCount( 1, $logs(), 'Logged once for the deletion.' );
+	}
+
+	public function test_a_batch_for_another_key_than_its_status_has_moves_no_order(): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $status->id );
+		$order = $this->order_in( 'packed' );
+		$logs  = $this->capture_logs();
+
+		$this->service->process_deletion_batch( 'boxed', 'on-hold', $status->id );
+
+		$this->assertSame( 'packed', wc_get_order( $order )->get_status() );
+		$this->assertFalse( as_has_scheduled_action( self::REASSIGN_HOOK ) );
+		$this->assertSame( array( array( 'error', "The deletion of custom order status {$status->id} stopped: the status is not being deleted under the key boxed." ) ), $logs() );
+	}
+
+	public function test_a_status_whose_orders_cannot_be_queried_is_not_deleted_at_once(): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$order  = $this->order_in( 'packed' );
+		$this->capture_logs();
+		$this->fail_queries( '/^SELECT .* FROM \w+wpo_otd_custom_statuses\b(?!.*\bWHERE\b)/' );
+
+		$this->assertSame( CustomOrderStatusService::DELETION_SCHEDULED, $this->service->begin_deletion( $status->id ) );
+
+		$this->assertTrue( $this->service->find( $status->id )->is_deleting );
+		$this->assertTrue( as_has_scheduled_action( self::REASSIGN_HOOK, array( 'packed', 'on-hold', $status->id ), 'wpo-otd' ) );
+		$this->assertSame( 'packed', wc_get_order( $order )->get_status() );
 	}
 
 	public function unreadable_status_provider(): array {
@@ -1110,17 +1155,20 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 	}
 
 	public function test_a_batch_registers_a_status_this_process_has_not_as_a_post_status_and_moves_only_its_orders(): void {
-		$this->use_this_service();
 		$status_id = ( new CustomOrderStatusRepository() )->insert( array( 'status_key' => 'late-arrival', 'label' => 'Late Arrival', 'is_deleting' => 1 ) );
 		$this->assertNull( get_post_status_object( 'wc-late-arrival' ), 'Created by another request after this process registered the post statuses.' );
 		$others = array( $this->order_in( 'processing' ), $this->order_in( 'completed' ) );
 
-		// Saved by a request that registered the status, which stores it with its prefix; this process would not.
-		global $wpdb;
-		$late = $this->create_order()->get_id();
-		$wpdb->update( $wpdb->posts, array( 'post_status' => 'wc-late-arrival' ), array( 'ID' => $late ) );
-		clean_post_cache( $late );
-		$this->assertSame( 'late-arrival', wc_get_order( $late )->get_status() );
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$late = $this->order_in( 'late-arrival' );
+		} else {
+			// Saved by a request that registered the status, which stores it with its prefix.
+			global $wpdb;
+			$late = $this->create_order()->get_id();
+			$wpdb->update( $wpdb->posts, array( 'post_status' => 'wc-late-arrival' ), array( 'ID' => $late ) );
+			clean_post_cache( $late );
+			$this->assertSame( 'late-arrival', wc_get_order( $late )->get_status() );
+		}
 
 		$this->service->process_deletion_batch( 'late-arrival', 'on-hold', $status_id );
 
@@ -1130,7 +1178,6 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 	}
 
 	public function test_a_status_created_after_init_holds_orders_order_queries_find(): void {
-		$this->use_this_service();
 		$this->assertNull( get_post_status_object( 'wc-fresh-arrival' ), 'Not registered before it exists.' );
 
 		$this->service->create( array( 'label' => 'Fresh Arrival' ) );
@@ -1139,7 +1186,6 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 	}
 
 	public function test_a_status_key_changed_after_init_holds_orders_order_queries_find(): void {
-		$this->use_this_service();
 		$status = $this->service->create( array( 'label' => 'Renamed' ) );
 		$this->assertNull( get_post_status_object( 'wc-renamed-later' ), 'Not registered before the key is taken.' );
 
@@ -1149,7 +1195,6 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 	}
 
 	public function test_a_status_another_request_created_is_registered_at_the_next_queue_run(): void {
-		$this->use_this_service();
 		$this->service->all();
 		( new CustomOrderStatusRepository() )->insert( array( 'status_key' => 'other-arrival', 'label' => 'Other Arrival' ) );
 		$this->assertNull( get_post_status_object( 'wc-other-arrival' ) );
@@ -1385,34 +1430,19 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 	}
 
 	/**
-	 * Create a status through the service under test, which WooCommerce and WordPress then recognize.
+	 * Create a status through the service under test, which set_up() hooked, so WooCommerce and WordPress recognize it.
 	 *
 	 * @param string $label
 	 *
 	 * @return CustomOrderStatus
 	 */
 	private function create_registered_status( string $label ): CustomOrderStatus {
-		$this->use_this_service();
-
 		return $this->service->create( array( 'label' => $label ) );
 	}
 
 	/**
-	 * Hook the service under test in place of the plugin's own, which keeps the statuses it read earlier in the run.
-	 *
-	 * @return void
-	 */
-	private function use_this_service(): void {
-		foreach ( array( 'wc_order_statuses', 'woocommerce_register_shop_order_post_statuses', self::REASSIGN_HOOK, 'action_scheduler_before_process_queue' ) as $hook ) {
-			$this->remove_plugin_callbacks( $hook );
-		}
-
-		$this->service->register_hooks();
-	}
-
-	/**
-	 * Assert that an order saved into a status on the posts table is stored with the status's prefix and found by an
-	 * order query for the status, which finds no order in another status.
+	 * Assert that an order saved into a status is found by an order query for the status, which finds no order in
+	 * another status; on the posts table, that it is stored with the status's prefix too.
 	 *
 	 * @param string $key
 	 *
@@ -1422,32 +1452,14 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		$order = $this->order_in( $key );
 		$other = $this->order_in( 'processing' );
 
-		$this->assertSame( "wc-{$key}", get_post_field( 'post_status', $order ) );
+		// The orders table stores the status itself, and keeps only a placeholder post.
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->assertSame( "wc-{$key}", get_post_field( 'post_status', $order ) );
+		}
+
 		$this->assertSame( array( $order ), array_map( 'intval', wc_get_orders( array( 'status' => $key, 'return' => 'ids', 'post__in' => array( $order, $other ) ) ) ) );
 	}
 
-	/**
-	 * Remove the CustomOrderStatusService callbacks the plugin hooked at boot.
-	 *
-	 * @param string $hook
-	 *
-	 * @return void
-	 */
-	private function remove_plugin_callbacks( string $hook ): void {
-		global $wp_filter;
-
-		if ( ! isset( $wp_filter[ $hook ] ) ) {
-			return;
-		}
-
-		foreach ( $wp_filter[ $hook ]->callbacks as $priority => $callbacks ) {
-			foreach ( $callbacks as $callback ) {
-				if ( is_array( $callback['function'] ) && $callback['function'][0] instanceof CustomOrderStatusService ) {
-					remove_filter( $hook, $callback['function'], $priority );
-				}
-			}
-		}
-	}
 
 	/**
 	 * Create an order in the given status.
