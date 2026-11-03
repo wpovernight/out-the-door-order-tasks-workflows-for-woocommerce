@@ -1070,11 +1070,12 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 
 		$this->service->request_deletion( $status->id );
 
-		foreach ( array( 'packed', 'wc-packed', 'WC-Packed' ) as $key ) {
+		foreach ( array( 'packed', 'wc-packed' ) as $key ) {
 			$this->assertTrue( $this->service->is_being_deleted( $key ), $key );
 		}
 
-		foreach ( array( 'boxed', 'on-hold', 'pack', 'wc-wc-packed', '' ) as $key ) {
+		// Keys in another case name no status for WooCommerce.
+		foreach ( array( 'boxed', 'on-hold', 'pack', 'wc-wc-packed', '', 'Packed', 'WC-packed', 'wc-Packed' ) as $key ) {
 			$this->assertFalse( $this->service->is_being_deleted( $key ), $key );
 		}
 
@@ -1095,6 +1096,43 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 
 		$this->assertNotNull( $this->service->find( $status->id ), 'The deletion stopped on the order it could not move.' );
 		$this->assertTrue( $this->service->is_being_deleted( 'packed' ) );
+	}
+
+	public function test_the_statuses_are_read_again_before_each_queue_batch(): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$this->service->all();
+
+		$this->mark_deleting( $status->id );
+		$this->assertFalse( $this->service->is_being_deleted( 'packed' ), 'Still as read before the other request flagged it.' );
+
+		do_action( 'action_scheduler_before_process_queue' );
+		$this->assertTrue( $this->service->is_being_deleted( 'packed' ) );
+
+		// Deleted and made again with the same key by another request.
+		$repository = new CustomOrderStatusRepository();
+		$repository->where( 'id', $status->id )->delete();
+		$repository->insert( array( 'status_key' => 'packed', 'label' => 'Packed again' ) );
+		$this->assertTrue( $this->service->is_being_deleted( 'packed' ), 'Still as read before the other request.' );
+
+		do_action( 'action_scheduler_before_process_queue' );
+		$this->assertFalse( $this->service->is_being_deleted( 'packed' ) );
+	}
+
+	public function test_a_deletion_batch_reads_the_statuses_again(): void {
+		add_filter( 'wpo_otd_reassign_orders_batch_size', static fn() => 1 );
+		$packed = $this->create_registered_status( 'Packed' );
+		$boxed  = $this->create_registered_status( 'Boxed' );
+		$this->order_in( 'packed' );
+		$this->order_in( 'packed' );
+		$this->service->all();
+
+		$this->mark_deleting( $boxed->id );
+		$this->assertFalse( $this->service->is_being_deleted( 'boxed' ), 'Still as read before the other request flagged it.' );
+
+		$this->service->process_deletion_batch( 'packed', 'on-hold', $packed->id );
+
+		$this->assertNotNull( $this->service->find( $packed->id ), 'The batch did not finish the deletion, which reads them again too.' );
+		$this->assertTrue( $this->service->is_being_deleted( 'boxed' ) );
 	}
 
 	public function test_whether_a_status_is_being_deleted_costs_no_query_once_the_statuses_are_read(): void {

@@ -92,6 +92,10 @@ class CustomOrderStatusService {
 
 		// Drain & finalize a custom status deletion, one batch per scheduled run.
 		add_action( 'wpo_otd_reassign_orders', array( $this, 'process_deletion_batch' ), 10, 3 );
+
+		// A queue runner such as "wp action-scheduler run" processes batches for as long as it runs, so what other
+		// requests changed meanwhile is read again before each one.
+		add_action( 'action_scheduler_before_process_queue', array( $this, 'forget_statuses' ) );
 	}
 
 	/** ================================
@@ -229,6 +233,15 @@ class CustomOrderStatusService {
 	}
 
 	/**
+	 * Forget the statuses all() keeps, so the next call reads them again.
+	 *
+	 * @return void
+	 */
+	public function forget_statuses(): void {
+		$this->cached_statuses = null;
+	}
+
+	/**
 	 * List statuses, optionally paginated.
 	 *
 	 * @param int|null $page     Page number (1-based), or null for the full list.
@@ -262,16 +275,19 @@ class CustomOrderStatusService {
 	 * of it finishes.
 	 *
 	 * Answered from the statuses all() keeps, so it costs no query once they are read, which registering them with
-	 * WooCommerce on init does. A deletion another request begins or finishes after they were read is seen from the
-	 * next request on.
+	 * WooCommerce on init does. They are read again before each Action Scheduler queue batch and each deletion batch,
+	 * so a deletion another request begins or finishes is seen from the next one on.
 	 *
-	 * @param string $status_key With or without the "wc-" prefix, in any case, as WooCommerce compares statuses.
+	 * @param string $status_key With or without a lowercase "wc-" prefix, compared exactly otherwise: a key in another
+	 *                           case names no status for WooCommerce, which an order cannot be moved into.
 	 *
 	 * @return bool False also when no custom status has the key, or the statuses cannot be read.
 	 */
 	public function is_being_deleted( string $status_key ): bool {
+		$key = str_starts_with( $status_key, 'wc-' ) ? substr( $status_key, 3 ) : $status_key;
+
 		foreach ( $this->all() as $status ) {
-			if ( $status->is_deleting && self::same_status( $status->status_key, $status_key ) ) {
+			if ( $status->is_deleting && $status->status_key === $key ) {
 				return true;
 			}
 		}
@@ -704,6 +720,9 @@ class CustomOrderStatusService {
 	 * @return void
 	 */
 	public function process_deletion_batch( string $from_status, string $to_status, int $status_id ): void {
+		// The batch may run in a process that read the statuses before this deletion began.
+		$this->forget_statuses();
+
 		// Moving orders to the status they have would leave them there and run this job forever.
 		if ( self::same_status( $from_status, $to_status ) ) {
 			Logger::error( "The deletion of custom order status {$status_id} stopped: its orders cannot move from {$from_status} to the same status." );
