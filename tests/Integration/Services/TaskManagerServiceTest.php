@@ -1105,10 +1105,17 @@ class TaskManagerServiceTest extends IntegrationTestCase {
 		);
 	}
 
-	public function test_update_field_option_suffixes_a_slug_that_differs_from_its_own_only_in_case(): void {
+	public function test_update_field_option_keeps_a_slug_that_differs_from_its_own_only_in_case(): void {
 		$review = $this->service->add_field_option( DefaultTaskFields::STATUS, array( 'label' => 'Review' ) );
 
-		$this->assertSame( 'Review-2', $this->service->update_field_option( DefaultTaskFields::STATUS, $review['id'], array( 'slug' => 'Review' ) )['slug'] );
+		$this->assertSame( 'Review', $this->service->update_field_option( DefaultTaskFields::STATUS, $review['id'], array( 'slug' => 'Review' ) )['slug'] );
+		$this->assertSame( 'Review', $this->service->get_field_option( $review['id'] )->slug );
+	}
+
+	public function test_update_field_option_suffixes_a_slug_another_option_holds_in_any_case(): void {
+		$review = $this->service->add_field_option( DefaultTaskFields::STATUS, array( 'label' => 'Review' ) );
+
+		$this->assertSame( 'Done-2', $this->service->update_field_option( DefaultTaskFields::STATUS, $review['id'], array( 'slug' => 'Done' ) )['slug'] );
 	}
 
 	public function test_update_field_option_rejects_unknown_or_foreign_options(): void {

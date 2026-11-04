@@ -1442,11 +1442,10 @@ final class TaskManagerService {
 	}
 
 	/**
-	 * The slug, or the first of slug-2, slug-3, ... that no option of the field holds.
+	 * The slug, or the first of slug-2, slug-3, ... that no other option of the field holds.
 	 *
-	 * Only the suffixed candidates leave out the option being renamed: the slug itself counts the option's own row,
-	 * so one that differs from its current slug only in case, which the database compares as the same, still gets
-	 * a suffix.
+	 * The option being renamed never counts, so a slug that differs from its current one only in case, which the
+	 * database compares as the same, is kept as typed.
 	 *
 	 * @param int      $field_id
 	 * @param string   $slug
@@ -1455,24 +1454,24 @@ final class TaskManagerService {
 	 * @return string
 	 */
 	private function unique_option_slug( int $field_id, string $slug, ?int $option_id = null ): string {
-		$taken = function ( string $candidate, ?int $exclude_id ) use ( $field_id ): bool {
+		$taken = function ( string $candidate ) use ( $field_id, $option_id ): bool {
 			$query = $this->task_field_option_repository
 				->where( 'field_id', $field_id )
 				->where( 'slug', $candidate );
 
-			if ( null !== $exclude_id ) {
-				$query->where( 'id', '!=', $exclude_id );
+			if ( null !== $option_id ) {
+				$query->where( 'id', '!=', $option_id );
 			}
 
 			return null !== $query->first();
 		};
 
-		if ( ! $taken( $slug, null ) ) {
+		if ( ! $taken( $slug ) ) {
 			return $slug;
 		}
 
 		$suffix = 2;
-		while ( $taken( $slug . '-' . $suffix, $option_id ) ) {
+		while ( $taken( $slug . '-' . $suffix ) ) {
 			++$suffix;
 		}
 
