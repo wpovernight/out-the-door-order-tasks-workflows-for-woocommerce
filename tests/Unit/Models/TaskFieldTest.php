@@ -6,10 +6,6 @@ use Brain\Monkey\Functions;
 use Mockery;
 use WPO\OTD\Core\Logger;
 use WPO\OTD\Models\TaskField;
-use WPO\OTD\Models\TaskFieldOption;
-use WPO\OTD\Models\TaskFieldValue;
-use WPO\OTD\Repositories\BaseRepository;
-use WPO\OTD\Repositories\RepositoryRegistry;
 use WPO\OTD\Tests\TestCase;
 
 class TaskFieldTest extends TestCase {
@@ -28,7 +24,6 @@ class TaskFieldTest extends TestCase {
 
 	protected function tearDown(): void {
 		$this->set_static_property( Logger::class, 'wc_logger', null );
-		$this->set_static_property( RepositoryRegistry::class, 'map', array() );
 
 		parent::tearDown();
 	}
@@ -94,19 +89,5 @@ class TaskFieldTest extends TestCase {
 		$this->assertSame( 'notes', $field->slug );
 		$this->assertSame( 'Remarks', $field->label );
 		$this->assertTrue( $field->is_required );
-	}
-
-	public function test_relations_are_loaded_by_field_id(): void {
-		$values  = Mockery::mock( BaseRepository::class );
-		$options = Mockery::mock( BaseRepository::class );
-		$values->shouldReceive( 'find_all_by' )->once()->with( 'field_id', 9 )->andReturn( array( 'value' ) );
-		$options->shouldReceive( 'find_all_by' )->once()->with( 'field_id', 9 )->andReturn( array( 'option' ) );
-		RepositoryRegistry::register( TaskFieldValue::class, static fn() => $values );
-		RepositoryRegistry::register( TaskFieldOption::class, static fn() => $options );
-
-		$field = new TaskField( array( 'id' => 9, 'label' => 'Notes', 'type' => 'text' ) );
-
-		$this->assertSame( array( 'value' ), $field->field_values() );
-		$this->assertSame( array( 'option' ), $field->field_options() );
 	}
 }

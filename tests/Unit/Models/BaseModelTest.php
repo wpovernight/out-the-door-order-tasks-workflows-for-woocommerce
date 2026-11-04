@@ -3,25 +3,10 @@
 namespace WPO\OTD\Tests\Unit\Models;
 
 use DateTime;
-use Mockery;
 use WPO\OTD\Models\BaseModel;
-use WPO\OTD\Repositories\BaseRepository;
-use WPO\OTD\Repositories\RepositoryRegistry;
 use WPO\OTD\Tests\TestCase;
 
 class BaseModelTest extends TestCase {
-	protected function setUp(): void {
-		parent::setUp();
-
-		$this->set_static_property( RepositoryRegistry::class, 'map', array() );
-	}
-
-	protected function tearDown(): void {
-		$this->set_static_property( RepositoryRegistry::class, 'map', array() );
-
-		parent::tearDown();
-	}
-
 	public function test_fill_sets_known_properties_only(): void {
 		$model = new Widget( array( 'id' => 3, 'name' => 'Old' ) );
 
@@ -117,48 +102,6 @@ class BaseModelTest extends TestCase {
 
 		$this->assertSame( '2025-06-07 08:09:10', $model->to_db_array()['published'] );
 	}
-
-	public function test_has_many_queries_the_related_repository_by_the_local_key(): void {
-		$parts      = array( new Widget( array( 'id' => 1, 'name' => 'Part' ) ) );
-		$repository = Mockery::mock( BaseRepository::class );
-		$repository->shouldReceive( 'find_all_by' )->once()->with( 'widget_id', 5 )->andReturn( $parts );
-		RepositoryRegistry::register( Widget::class, static fn() => $repository );
-
-		$this->assertSame( $parts, ( new Widget( array( 'id' => 5, 'name' => 'Parent' ) ) )->parts() );
-	}
-
-	public function test_has_one_queries_the_related_repository_by_the_local_key(): void {
-		$related    = new Widget( array( 'id' => 9, 'name' => 'Related' ) );
-		$repository = Mockery::mock( BaseRepository::class );
-		$repository->shouldReceive( 'find_by' )->once()->with( 'widget_id', 5 )->andReturn( $related );
-		RepositoryRegistry::register( Widget::class, static fn() => $repository );
-
-		$this->assertSame( $related, ( new Widget( array( 'id' => 5, 'name' => 'Parent' ) ) )->manual() );
-	}
-
-	public function test_belongs_to_one_queries_the_owner_by_the_foreign_key(): void {
-		$owner      = new Widget( array( 'id' => 2, 'name' => 'Owner' ) );
-		$repository = Mockery::mock( BaseRepository::class );
-		$repository->shouldReceive( 'find_by' )->once()->with( 'id', 2 )->andReturn( $owner );
-		RepositoryRegistry::register( Widget::class, static fn() => $repository );
-
-		$model            = new Widget( array( 'id' => 5, 'name' => 'Child' ) );
-		$model->parent_id = 2;
-
-		$this->assertSame( $owner, $model->parent() );
-	}
-
-	public function test_relationships_without_a_key_skip_the_query(): void {
-		$repository = Mockery::mock( BaseRepository::class );
-		$repository->shouldNotReceive( 'find_by', 'find_all_by' );
-		RepositoryRegistry::register( Widget::class, static fn() => $repository );
-
-		$unsaved = new Widget( array( 'id' => 0, 'name' => 'Unsaved' ) );
-
-		$this->assertSame( array(), $unsaved->parts() );
-		$this->assertNull( $unsaved->manual() );
-		$this->assertNull( $unsaved->parent(), 'parent_id is null.' );
-	}
 }
 
 /**
@@ -167,7 +110,6 @@ class BaseModelTest extends TestCase {
 class Widget extends BaseModel {
 	public int $id;
 	public string $name;
-	public ?int $parent_id = null;
 	public ?DateTime $published = null;
 	public string $scratch = 'scratch';
 	public DateTime $created_at;
@@ -186,17 +128,5 @@ class Widget extends BaseModel {
 
 	public function secret_value(): string {
 		return $this->secret;
-	}
-
-	public function parts(): array {
-		return $this->has_many( self::class, 'widget_id' );
-	}
-
-	public function manual(): ?BaseModel {
-		return $this->has_one( self::class, 'widget_id' );
-	}
-
-	public function parent(): ?BaseModel {
-		return $this->belongs_to_one( self::class, 'parent_id' );
 	}
 }

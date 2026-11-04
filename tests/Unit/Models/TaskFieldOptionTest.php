@@ -2,20 +2,10 @@
 
 namespace WPO\OTD\Tests\Unit\Models;
 
-use Mockery;
-use WPO\OTD\Models\TaskField;
 use WPO\OTD\Models\TaskFieldOption;
-use WPO\OTD\Repositories\BaseRepository;
-use WPO\OTD\Repositories\RepositoryRegistry;
 use WPO\OTD\Tests\TestCase;
 
 class TaskFieldOptionTest extends TestCase {
-	protected function tearDown(): void {
-		$this->set_static_property( RepositoryRegistry::class, 'map', array() );
-
-		parent::tearDown();
-	}
-
 	public function test_hydrates_from_a_database_row(): void {
 		$option = new TaskFieldOption(
 			array(
@@ -83,16 +73,5 @@ class TaskFieldOptionTest extends TestCase {
 		$this->assertSame( 1, $option->field_id );
 		$this->assertSame( 'Finished', $option->label );
 		$this->assertSame( 4, $option->position );
-	}
-
-	public function test_field_is_loaded_by_field_id(): void {
-		$field      = new TaskField( array( 'id' => 1, 'label' => 'Status', 'type' => 'select' ) );
-		$repository = Mockery::mock( BaseRepository::class );
-		$repository->shouldReceive( 'find_by' )->once()->with( 'id', 1 )->andReturn( $field );
-		RepositoryRegistry::register( TaskField::class, static fn() => $repository );
-
-		$option = new TaskFieldOption( array( 'field_id' => 1, 'slug' => 'done', 'label' => 'Done' ) );
-
-		$this->assertSame( $field, $option->field() );
 	}
 }

@@ -3,20 +3,10 @@
 namespace WPO\OTD\Tests\Unit\Models;
 
 use DateTime;
-use Mockery;
 use WPO\OTD\Models\Task;
-use WPO\OTD\Models\TaskFieldValue;
-use WPO\OTD\Repositories\BaseRepository;
-use WPO\OTD\Repositories\RepositoryRegistry;
 use WPO\OTD\Tests\TestCase;
 
 class TaskTest extends TestCase {
-	protected function tearDown(): void {
-		$this->set_static_property( RepositoryRegistry::class, 'map', array() );
-
-		parent::tearDown();
-	}
-
 	public function test_hydrates_from_a_database_row(): void {
 		$task = new Task(
 			array(
@@ -99,14 +89,5 @@ class TaskTest extends TestCase {
 		$existing = new Task( array( 'id' => 4, 'title' => 'T', 'description' => 'D' ) );
 
 		$this->assertSame( array( 'title' => 'T', 'description' => 'D' ), $existing->to_db_array() );
-	}
-
-	public function test_field_values_are_loaded_by_task_id(): void {
-		$values     = array( new TaskFieldValue( array( 'task_id' => 4, 'field_id' => 1, 'value' => '1' ) ) );
-		$repository = Mockery::mock( BaseRepository::class );
-		$repository->shouldReceive( 'find_all_by' )->once()->with( 'task_id', 4 )->andReturn( $values );
-		RepositoryRegistry::register( TaskFieldValue::class, static fn() => $repository );
-
-		$this->assertSame( $values, ( new Task( array( 'id' => 4, 'title' => 'T' ) ) )->field_values() );
 	}
 }

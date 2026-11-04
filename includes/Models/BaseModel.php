@@ -2,9 +2,6 @@
 
 namespace WPO\OTD\Models;
 
-use WPO\OTD\Repositories\BaseRepository;
-use WPO\OTD\Repositories\RepositoryRegistry;
-
 defined( 'ABSPATH' ) || exit;
 
 abstract class BaseModel {
@@ -106,72 +103,4 @@ abstract class BaseModel {
 		return $data;
 	}
 
-	/**
-	 * Get the repository for a given model class.
-	 *
-	 * @template TModel of BaseModel
-	 * @param class-string<TModel> $model_class
-	 *
-	 * @return BaseRepository<TModel>
-	 */
-	protected function repository( string $model_class ): BaseRepository {
-		return RepositoryRegistry::get( $model_class );
-	}
-
-	/**
-	 * Fetch a related model that this model owns.
-	 *
-	 * @template TModel of BaseModel
-	 * @param string $related_class The related model class.
-	 * @param string $foreign_key The foreign key on the related model.
-	 * @param string $local_key The local key on this model.
-	 *
-	 * @return TModel|null
-	 */
-	protected function has_one( string $related_class, string $foreign_key, string $local_key = 'id' ): ?BaseModel {
-		$local_id = $this->{$local_key} ?? null;
-		if ( ! $local_id ) {
-			return null;
-		}
-
-		return $this->repository( $related_class )->find_by( $foreign_key, $local_id );
-	}
-
-	/**
-	 * Fetch a related model that owns this model.
-	 *
-	 * @template TModel of BaseModel
-	 * @param string $related_class The related model class.
-	 * @param string $foreign_key The foreign key on this model.
-	 * @param string $owner_key The owner key on the related model.
-	 *
-	 * @return TModel|null
-	 */
-	protected function belongs_to_one( string $related_class, string $foreign_key, string $owner_key = 'id' ): ?BaseModel {
-		$owner_id = $this->{$foreign_key} ?? null;
-		if ( ! $owner_id ) {
-			return null;
-		}
-
-		return $this->repository( $related_class )->find_by( $owner_key, $owner_id );
-	}
-
-	/**
-	 * Fetch related models that this model owns.
-	 *
-	 * @template TModel of BaseModel
-	 * @param string $related_class The related model class.
-	 * @param string $foreign_key The foreign key on the related model.
-	 * @param string $local_key The local key on this model.
-	 *
-	 * @return array<TModel>
-	 */
-	protected function has_many( string $related_class, string $foreign_key, string $local_key = 'id' ): array {
-		$local_id = $this->{$local_key} ?? null;
-		if ( ! $local_id ) {
-			return array();
-		}
-
-		return $this->repository( $related_class )->find_all_by( $foreign_key, $local_id );
-	}
 }

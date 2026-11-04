@@ -2,21 +2,10 @@
 
 namespace WPO\OTD\Tests\Unit\Models;
 
-use Mockery;
-use WPO\OTD\Models\Task;
-use WPO\OTD\Models\TaskField;
 use WPO\OTD\Models\TaskFieldValue;
-use WPO\OTD\Repositories\BaseRepository;
-use WPO\OTD\Repositories\RepositoryRegistry;
 use WPO\OTD\Tests\TestCase;
 
 class TaskFieldValueTest extends TestCase {
-	protected function tearDown(): void {
-		$this->set_static_property( RepositoryRegistry::class, 'map', array() );
-
-		parent::tearDown();
-	}
-
 	public function test_hydrates_from_a_database_row(): void {
 		$value = new TaskFieldValue( array( 'id' => '10', 'task_id' => '4', 'field_id' => '2', 'value' => '1.5' ) );
 
@@ -42,21 +31,5 @@ class TaskFieldValueTest extends TestCase {
 		$this->assertSame( 0, $value->id );
 		$this->assertSame( 4, $value->task_id );
 		$this->assertSame( 2, $value->field_id );
-	}
-
-	public function test_task_and_field_are_loaded_by_their_foreign_keys(): void {
-		$task       = new Task( array( 'id' => 4, 'title' => 'T' ) );
-		$field      = new TaskField( array( 'id' => 2, 'label' => 'Position', 'type' => 'number' ) );
-		$tasks      = Mockery::mock( BaseRepository::class );
-		$fields     = Mockery::mock( BaseRepository::class );
-		$tasks->shouldReceive( 'find_by' )->once()->with( 'id', 4 )->andReturn( $task );
-		$fields->shouldReceive( 'find_by' )->once()->with( 'id', 2 )->andReturn( $field );
-		RepositoryRegistry::register( Task::class, static fn() => $tasks );
-		RepositoryRegistry::register( TaskField::class, static fn() => $fields );
-
-		$value = new TaskFieldValue( array( 'task_id' => 4, 'field_id' => 2, 'value' => '1' ) );
-
-		$this->assertSame( $task, $value->task() );
-		$this->assertSame( $field, $value->field() );
 	}
 }

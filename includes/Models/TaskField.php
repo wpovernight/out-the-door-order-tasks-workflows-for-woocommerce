@@ -52,22 +52,4 @@ class TaskField extends BaseModel {
 
 		return str_replace( '-', '_', $sanitized );
 	}
-
-	/**
-	 * Get related field values.
-	 *
-	 * @return TaskFieldValue[]
-	 */
-	public function field_values(): array {
-		return $this->has_many( TaskFieldValue::class, 'field_id' );
-	}
-
-	/**
-	 * Get related field options.
-	 *
-	 * @return TaskFieldOption[]
-	 */
-	public function field_options(): array {
-		return $this->has_many( TaskFieldOption::class, 'field_id' );
-	}
 }

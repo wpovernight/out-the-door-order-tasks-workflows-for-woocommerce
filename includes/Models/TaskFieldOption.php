@@ -28,13 +28,4 @@ class TaskFieldOption extends BaseModel {
 		$this->color    = $data['color'] ?? '#000000';
 		$this->position = absint( $data['position'] ?? 0 );
 	}
-
-	/**
-	 * Get the associated TaskField.
-	 *
-	 * @return TaskField|null
-	 */
-	public function field(): ?TaskField {
-		return $this->belongs_to_one( TaskField::class, 'field_id' );
-	}
 }
