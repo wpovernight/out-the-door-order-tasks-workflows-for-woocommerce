@@ -7,9 +7,9 @@ use RecursiveIteratorIterator;
 use WPO\OTD\Tests\TestCase;
 
 /**
- * Where database access, hooks and the container may appear, and how hooks are named. Each allow-list entry says why
- * it is allowed. A failure lists each place as "path:line", the path from includes/ or, for a template, from the
- * plugin's folder.
+ * Where database access, hooks and the container may appear, how hooks are named, and what models, providers, REST
+ * controllers and enums may hold. Each allow-list entry says why it is allowed. A failure lists each place as
+ * "path:line", the path from includes/ or, for a template, from the plugin's folder.
  */
 final class ArchitectureTest extends TestCase {
 	private const FIRING_FUNCTIONS = array(
@@ -241,6 +241,270 @@ final class ArchitectureTest extends TestCase {
 			$violations,
 			'Our Action Scheduler hooks and groups start with "wpo_otd_".'
 		);
+	}
+
+	public function test_models_are_plain_data(): void {
+		$this->assertSame(
+			array(),
+			$this->files_matching(
+				'/\w*(Repositor(y|ies)|Services?)\b|\b(Container|Kernel)\b|->get\s*\(/',
+				array(),
+				self::php_files( 'includes/Models/', 'Models/' )
+			),
+			'A model is plain data and never reaches a repository, a service or the container: related rows load'
+				. ' through a repository method, many in one query.'
+		);
+	}
+
+	public function test_register_hooks_only_registers_hooks(): void {
+		$work       = '/' . self::call_of(
+			'get_option',
+			'update_option',
+			'add_option',
+			'delete_option',
+			'\w+_transient',
+			'as_\w+',
+			'wp_schedule_\w+',
+			'wp_unschedule_\w+',
+			'wp_clear_scheduled_hook',
+			'add_role',
+			'remove_role',
+			'get_role'
+		) . '|(' . self::WPDB . '|\bwpdb)\s*->|->(add|remove)_cap\s*\(/';
+		$violations = array();
+
+		foreach ( $this->files() as $path => $file ) {
+			$body = self::without_closures( $this->split( $file, array( 'register_hooks', 'register_routes' ) )[1] );
+
+			array_push( $violations, ...self::places( $work, $body, $path ) );
+		}
+
+		$this->assertSame(
+			array(),
+			$violations,
+			'register_hooks() and register_routes() only add hooks and routes: install work belongs to the installer,'
+				. ' reads to the method that needs them.'
+		);
+	}
+
+	public function test_providers_bind_in_register_and_wire_in_boot(): void {
+		$violations = array();
+
+		foreach ( $this->service_providers() as $path => $file ) {
+			array_push(
+				$violations,
+				...self::places(
+					'/->(get|register_hooks|register_routes)\s*\(/',
+					self::without_closures( $this->split( $file, array( 'register' ) )[1] ),
+					$path
+				),
+				...self::places( '/->(bind|singleton)\s*\(/', $this->split( $file, array( 'boot' ) )[1], $path )
+			);
+		}
+
+		$this->assertSame(
+			array(),
+			$violations,
+			'A provider\'s register() only binds and its boot() only wires: resolving in register() or binding in'
+				. ' boot() makes resolution depend on the order the providers run in.'
+		);
+	}
+
+	public function test_providers_never_wire_what_runs_before_they_boot(): void {
+		$this->assertSame(
+			array(),
+			$this->files_matching(
+				'/\'(before_woocommerce_init|muplugins_loaded)\''
+					. '|\b(register_activation_hook|declare_compatibility)\s*\(/',
+				array(),
+				$this->service_providers()
+			),
+			'Providers boot on plugins_loaded, too late for activation and before_woocommerce_init: the plugin\'s file'
+				. ' and the bootstrap wire those when they load.'
+		);
+	}
+
+	public function test_only_the_main_plugin_file_and_the_bootstrap_build_a_container(): void {
+		$this->assertSame(
+			array(),
+			$this->files_matching( '/\bnew\s+(?:[\w\\\\]*\\\\)?(Container|Kernel)\s*\(/', array( self::BOOTSTRAP ) ),
+			'Only the main plugin file, for activation, and the bootstrap build a container or a kernel, so a stateful'
+				. ' service never gets a second, stale copy.'
+		);
+	}
+
+	public function test_every_rest_controller_extends_the_base_controller(): void {
+		$violations = array();
+
+		foreach ( self::php_files( 'includes/REST/', 'REST/' ) as $path => $file ) {
+			$code = $this->code( $file );
+
+			if (
+				'REST/BaseRestController.php' !== $path
+				&& ! preg_match( '/\bclass\s+\w+\s+extends\s+BaseRestController\b/', $code )
+			) {
+				$violations[] = self::places( '/\bclass\s/', $code, $path )[0] ?? $path . ':1';
+			}
+		}
+
+		$this->assertSame(
+			array(),
+			$violations,
+			'A REST controller extends BaseRestController, which holds the namespace and the permission check.'
+		);
+	}
+
+	public function test_every_endpoint_checks_permissions(): void {
+		$violations = array();
+
+		foreach ( $this->files() as $path => $file ) {
+			$tokens = token_get_all( file_get_contents( $file ) );
+
+			foreach ( $tokens as $at => $token ) {
+				if ( ! self::is_call( $tokens, $at, array( 'register_rest_route' ) ) ) {
+					continue;
+				}
+
+				$route     = self::arguments( $tokens, $at );
+				$endpoints = substr_count( $route, "'callback'" );
+				$checked   = preg_match_all(
+					'/\'permission_callback\'\s*=>\s*array\(\s*\$this,\s*\'check_permissions\'\s*\)/',
+					$route
+				);
+
+				if (
+					0 === $endpoints
+					|| $endpoints !== $checked
+					|| substr_count( $route, "'permission_callback'" ) !== $checked
+				) {
+					$violations[] = $path . ':' . $token[2];
+				}
+			}
+		}
+
+		$this->assertSame(
+			array(),
+			$violations,
+			'Each endpoint takes \'permission_callback\' => array( $this, \'check_permissions\' ).'
+		);
+	}
+
+	public function test_only_repositories_extend_the_base_repository(): void {
+		$this->assertSame(
+			array(),
+			$this->files_matching( '/\bextends\s+[\w\\\\]*BaseRepository\b/', array( 'Repositories/' ) ),
+			'A class that extends BaseRepository lives in the Repositories folder.'
+		);
+	}
+
+	public function test_enums_are_backed_and_live_in_the_enums_folder(): void {
+		$this->assertSame(
+			array(),
+			$this->files_matching( '/^[ \t]*enum\s++\w++\s*+(?!:\s*(string|int)\b)/m' ),
+			'An enum is backed, so its cases can be stored and sent.'
+		);
+		$this->assertSame(
+			array(),
+			$this->files_matching( '/^[ \t]*enum\s+\w+/m', array( 'Enums/' ) ),
+			'An enum lives in the Enums folder.'
+		);
+	}
+
+	/**
+	 * The service providers.
+	 *
+	 * @return array<string, string> Path from includes/ => full path.
+	 */
+	private function service_providers(): array {
+		return array_filter(
+			$this->files(),
+			static fn( string $path ): bool => str_ends_with( $path, 'ServiceProvider.php' ),
+			ARRAY_FILTER_USE_KEY
+		);
+	}
+
+	/**
+	 * The source of the arguments of the call that starts at $at, parentheses included and comments left out.
+	 *
+	 * @param array $tokens
+	 * @param int   $at
+	 *
+	 * @return string
+	 */
+	private static function arguments( array $tokens, int $at ): string {
+		$source = '';
+		$depth  = 0;
+
+		for ( $near = self::neighbour_at( $tokens, $at, 1 ); isset( $tokens[ $near ] ); $near++ ) {
+			$token = $tokens[ $near ];
+
+			if ( is_array( $token ) && in_array( $token[0], array( T_COMMENT, T_DOC_COMMENT ), true ) ) {
+				continue;
+			}
+
+			$source .= is_array( $token ) ? $token[1] : $token;
+			$depth  += array(
+				'(' => 1,
+				')' => -1,
+			)[ is_array( $token ) ? '' : $token ] ?? 0;
+
+			if ( 0 === $depth ) {
+				break;
+			}
+		}
+
+		return $source;
+	}
+
+	/**
+	 * Code with the bodies of its closures and arrow functions blanked out, since they run when called, not where
+	 * they are written. Line breaks are kept.
+	 *
+	 * @param string $code
+	 *
+	 * @return string
+	 */
+	private static function without_closures( string $code ): string {
+		$opens  = array( '(', '[', '{', T_CURLY_OPEN, T_DOLLAR_OPEN_CURLY_BRACES );
+		$closes = array( ')', ']', '}' );
+		$result = '';
+		$state  = '';
+		$depth  = 0;
+
+		foreach ( array_slice( token_get_all( '<?php ' . $code ), 1 ) as $token ) {
+			$text = is_array( $token ) ? $token[1] : $token;
+			$id   = is_array( $token ) ? $token[0] : $token;
+
+			if ( '' === $state ) {
+				$state = array(
+					T_FUNCTION => 'function',
+					T_FN       => 'fn',
+				)[ $id ] ?? '';
+			} elseif ( 'function' === $state && '{' === $id ) {
+				$state = 'body';
+				$depth = 1;
+				$text  = self::blank( $text );
+			} elseif ( 'fn' === $state && T_DOUBLE_ARROW === $id ) {
+				$state = 'arrow';
+				$depth = 0;
+			} elseif ( 'body' === $state ) {
+				$depth += self::brace( $token );
+				$state  = 0 === $depth ? '' : $state;
+				$text   = self::blank( $text );
+			} elseif ( 'arrow' === $state ) {
+				if ( 0 === $depth && ( ',' === $id || ';' === $id || in_array( $id, $closes, true ) ) ) {
+					$state = '';
+				} else {
+					$depth += in_array( $id, $opens, true ) ? 1 : 0;
+					$depth -= in_array( $id, $closes, true ) ? 1 : 0;
+					$text   = self::blank( $text );
+				}
+			}
+
+			$result .= $text;
+		}
+
+		return $result;
 	}
 
 	/**
