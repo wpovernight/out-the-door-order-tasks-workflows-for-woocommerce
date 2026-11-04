@@ -9,6 +9,7 @@ use WPO\OTD\Models\Task;
 use WPO\OTD\Models\TaskField;
 use WPO\OTD\Models\TaskFieldValue;
 use WPO\OTD\Repositories\TaskFieldRepository;
+use WPO\OTD\Repositories\TaskFieldValueRepository;
 use WPO\OTD\Services\TaskManagerService;
 use WPO\OTD\Services\TaskManagerSettingsService;
 use WPO\OTD\Tests\IntegrationTestCase;
@@ -870,6 +871,43 @@ class TaskManagerServiceTest extends IntegrationTestCase {
 		$this->assertSame( '2', $this->field_value( $id, DefaultTaskFields::POSITION ) );
 	}
 
+	public function test_setting_a_status_on_a_task_without_one_keeps_its_position_and_done_date(): void {
+		$todo = $this->status_option_id( 'not_started' );
+		$done = $this->status_option_id( 'done' );
+
+		$this->create_task( 'Already done', $done );
+		$this->create_task( 'Also done', $done );
+		$this->create_task( 'First', $todo );
+		$id = $this->create_task( 'Second', $todo );
+		$this->make( TaskFieldValueRepository::class )->delete_by_task_and_field( $id, DefaultTaskFields::STATUS );
+
+		$this->service->update_task( $id, array(), array( $this->status( $done ) ) );
+
+		$this->assertSame( (string) $done, $this->field_value( $id, DefaultTaskFields::STATUS ) );
+		$this->assertSame( '2', $this->field_value( $id, DefaultTaskFields::POSITION ) );
+		$this->assertNull( $this->field_value( $id, DefaultTaskFields::DONE_DATE ) );
+	}
+
+	public function test_a_status_change_reads_the_stored_status_from_the_values_already_read(): void {
+		$id      = $this->create_task( 'Moving', $this->status_option_id( 'not_started' ) );
+		$lookups = 0;
+		add_filter(
+			'query',
+			static function ( $query ) use ( &$lookups ) {
+				if ( preg_match( '/^SELECT \* FROM \S*task_field_values\b.*\bfield_id\b.*LIMIT 1/s', (string) $query ) ) {
+					++$lookups;
+				}
+
+				return $query;
+			}
+		);
+
+		$this->service->update_task( $id, array(), array( $this->status( $this->status_option_id( 'in_progress' ) ) ) );
+
+		$this->assertSame( 0, $lookups );
+		$this->assertSame( '1', $this->field_value( $id, DefaultTaskFields::POSITION ) );
+	}
+
 	public function test_moving_into_and_out_of_done_sets_and_clears_the_done_date(): void {
 		$id = $this->create_task( 'Ship it', $this->status_option_id( 'in_progress' ) );
 
@@ -1065,6 +1103,12 @@ class TaskManagerServiceTest extends IntegrationTestCase {
 			$this->service->update_field_option( DefaultTaskFields::STATUS, $review['id'], array( 'slug' => 'done' ) )['slug'],
 			'The option\'s own current slug does not count as a collision.'
 		);
+	}
+
+	public function test_update_field_option_suffixes_a_slug_that_differs_from_its_own_only_in_case(): void {
+		$review = $this->service->add_field_option( DefaultTaskFields::STATUS, array( 'label' => 'Review' ) );
+
+		$this->assertSame( 'Review-2', $this->service->update_field_option( DefaultTaskFields::STATUS, $review['id'], array( 'slug' => 'Review' ) )['slug'] );
 	}
 
 	public function test_update_field_option_rejects_unknown_or_foreign_options(): void {

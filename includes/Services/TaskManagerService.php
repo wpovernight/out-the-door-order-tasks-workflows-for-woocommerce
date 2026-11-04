@@ -31,27 +31,13 @@ final class TaskManagerService {
 	 */
 	public const GROUP = 'wpo_otd';
 
-	protected readonly TaskRepository $task_repository;
-	protected readonly TaskFieldRepository $task_field_repository;
-	protected readonly TaskFieldOptionRepository $task_field_option_repository;
-	protected readonly TaskFieldValueRepository $task_field_value_repository;
-	protected readonly TaskStatusRoleService $task_status_role_service;
-
-	/**
-	 * Constructor.
-	 */
 	public function __construct(
-		TaskRepository $task_repository,
-		TaskFieldRepository $task_field_repository,
-		TaskFieldOptionRepository $task_field_option_repository,
-		TaskFieldValueRepository $task_field_value_repository,
-		TaskStatusRoleService $task_status_role_service
+		private readonly TaskRepository $task_repository,
+		private readonly TaskFieldRepository $task_field_repository,
+		private readonly TaskFieldOptionRepository $task_field_option_repository,
+		private readonly TaskFieldValueRepository $task_field_value_repository,
+		private readonly TaskStatusRoleService $task_status_role_service
 	) {
-		$this->task_repository              = $task_repository;
-		$this->task_field_repository        = $task_field_repository;
-		$this->task_field_option_repository = $task_field_option_repository;
-		$this->task_field_value_repository  = $task_field_value_repository;
-		$this->task_status_role_service     = $task_status_role_service;
 	}
 
 	/**
@@ -87,20 +73,14 @@ final class TaskManagerService {
 			return array();
 		}
 
-		// Fetch all fields and values.
 		$all_fields = $this->get_all_fields();
 		$all_values = $this->task_field_value_repository->get();
 
-		// Group values and options for easy lookup.
 		$values_by_task_and_field = array();
 		foreach ( $all_values as $value ) {
-			if ( ! isset( $values_by_task_and_field[ $value->task_id ][ $value->field_id ] ) ) {
-				$values_by_task_and_field[ $value->task_id ][ $value->field_id ] = array();
-			}
 			$values_by_task_and_field[ $value->task_id ][ $value->field_id ][] = $value;
 		}
 
-		// Construct the result set.
 		$result = array();
 		foreach ( $tasks as $task ) {
 			$task_fields = array();
@@ -108,14 +88,10 @@ final class TaskManagerService {
 			foreach ( $all_fields as $field ) {
 				$field_value = array();
 
-				if ( isset( $values_by_task_and_field[ $task->id ][ $field->id ] ) ) {
-					// If multiple values exist for the same field, get all values.
-					if ( is_array( $values_by_task_and_field[ $task->id ][ $field->id ] ) ) {
-						foreach ( $values_by_task_and_field[ $task->id ][ $field->id ] as $single_value ) {
-							$field_value[] = $this->get_field_value( $single_value, $field );
-						}
-					}
+				foreach ( $values_by_task_and_field[ $task->id ][ $field->id ] ?? array() as $single_value ) {
+					$field_value[] = $this->get_field_value( $single_value, $field );
 				}
+
 				$task_fields[] = array_merge( $field->to_array(), array( 'values' => $field_value ?: null ) );
 			}
 
@@ -155,7 +131,6 @@ final class TaskManagerService {
 		$values      = $this->get_field_values_for_task( $task_id );
 		$task_fields = array();
 
-		// Map field values to their respective fields.
 		foreach ( $fields as $field ) {
 			if ( ! isset( $values[ $field->id ] ) ) {
 				$task_fields[] = array_merge( $field->to_array(), array( 'values' => null ) );
@@ -163,12 +138,8 @@ final class TaskManagerService {
 			}
 
 			$task_field_values = array();
-			if ( is_array( $values[ $field->id ] ) ) {
-				foreach ( $values[ $field->id ] as $single_value ) {
-					$task_field_values[] = $this->get_field_value( $single_value, $field );
-				}
-			} else {
-				$task_field_values[] = $this->get_field_value( $values[ $field->id ], $field );
+			foreach ( $values[ $field->id ] as $single_value ) {
+				$task_field_values[] = $this->get_field_value( $single_value, $field );
 			}
 
 			$task_fields[] = array_merge( $field->to_array(), array( 'values' => $task_field_values ) );
@@ -308,10 +279,7 @@ final class TaskManagerService {
 		// Until its field values are saved, the task has no status column to sit in, so a failure removes it again;
 		// nothing has announced it yet.
 		try {
-			// Set the position field manually to be last in the status column.
-			$last_position = $this->task_repository->get_last_task_position( null, $status_id );
-
-			$field_values_array[ DefaultTaskFields::POSITION ] = $last_position ? $last_position + 1.0 : 1.0;
+			$field_values_array[ DefaultTaskFields::POSITION ] = $this->position_after_last( null, $status_id );
 
 			$done_option_id = $this->task_status_role_service->get_done_field_option_id();
 
@@ -386,7 +354,6 @@ final class TaskManagerService {
 		// whole payload, which must not reach other properties (the ID, the timestamps).
 		$task_data = array_intersect_key( $task_data, array_flip( array( 'title', 'description' ) ) );
 
-		// Sanitize input before filling the model.
 		if ( array_key_exists( 'title', $task_data ) ) {
 			$task_data['title'] = $this->fit_to_column( 'title', sanitize_text_field( (string) $task_data['title'] ) );
 
@@ -398,11 +365,9 @@ final class TaskManagerService {
 			$task_data['description'] = $this->fit_to_column( 'description', sanitize_textarea_field( (string) $task_data['description'] ) );
 		}
 
-		// Track which fields were actually updated with old and new values.
 		$updated_fields     = array();
 		$field_values_array = array();
 
-		// Check for task data changes (title, description).
 		$original_task_data = $task->to_array();
 		foreach ( $task_data as $key => $new_value ) {
 			if ( isset( $original_task_data[ $key ] ) && $original_task_data[ $key ] !== $new_value ) {
@@ -424,9 +389,8 @@ final class TaskManagerService {
 			);
 		}
 
-		// Update field values if provided.
 		if ( ! empty( $field_values ) ) {
-			// Fetch all current field values and fields at once to avoid N+1 queries.
+			// Read once for every entry, rather than a query per field.
 			$current_field_values = $this->get_field_values_for_task( $task_id );
 			$fields               = $this->get_all_fields( 'id' );
 
@@ -446,35 +410,25 @@ final class TaskManagerService {
 
 				$current_value = null;
 				if ( isset( $current_field_values[ $field_id ] ) ) {
-					$current_values_objects = $current_field_values[ $field_id ];
-					// Extract the actual values from TaskFieldValue objects.
-					if ( is_array( $current_values_objects ) ) {
-						$current_value = array_map(
-							function ( $obj ) {
-								return $obj->value;
-							},
-							$current_values_objects
-						);
+					$current_value = array_map(
+						static fn( $stored ) => $stored->value,
+						$current_field_values[ $field_id ]
+					);
 
-						if ( count( $current_value ) === 1 ) {
-							$current_value = $current_value[0];
-						}
+					if ( count( $current_value ) === 1 ) {
+						$current_value = $current_value[0];
 					}
 				}
 
-				// Normalize both values to arrays of strings for consistent comparison: stored values
-				// come back from the database as strings, so 6 and "6" are the same value.
+				// Compared as sorted lists of strings: stored values come back from the database as strings, so 6 and
+				// "6" are the same value, and a list's order does not count.
 				$current_normalized = array_map( array( $this, 'normalize_for_comparison' ), (array) $current_value );
 				$new_normalized     = array_map( array( $this, 'normalize_for_comparison' ), (array) $value );
 
-				// Sort arrays to handle order differences.
 				sort( $current_normalized, SORT_STRING );
 				sort( $new_normalized, SORT_STRING );
 
-				// Check if the field value actually changed.
-				$has_changed = $current_normalized !== $new_normalized;
-
-				if ( $has_changed ) {
+				if ( $current_normalized !== $new_normalized ) {
 					$updated_fields[ $field_slug ] = array(
 						'old_value' => $current_value,
 						'new_value' => $value,
@@ -484,27 +438,21 @@ final class TaskManagerService {
 					unset( $updated_fields[ $field_slug ] );
 				}
 
-				// Check if status field is being updated to handle position update later.
 				if ( DefaultTaskFields::STATUS === $field_id ) {
-					$current_status_value = $this
-						->task_field_value_repository
-						->find_by_task_and_field( $task_id, DefaultTaskFields::STATUS );
-					$new_status_value = $value;
+					$current_status_value = $current_field_values[ DefaultTaskFields::STATUS ][0] ?? null;
+					$new_status_value     = $value;
 				}
 			}
 
 			// Update position and done_date if the status has been changed. Worked out before the write, so they
 			// are saved with the status in one write, or not at all. The task's own position is left out of the
-			// column it moves to, so reading it before the status is saved gives the same result.
-			// Note: $field_values_array[STATUS] is guaranteed to exist here because $current_status_value
-			// is only set when the status field is present in $field_values (above loop).
+			// column it moves to, so reading it before the status is saved gives the same result. A task without a
+			// stored status keeps its position.
 			if ( isset( $current_status_value ) && (string) $current_status_value->value !== (string) $new_status_value ) {
-				$last_position = $this->task_repository->get_last_task_position(
+				$field_values_array[ DefaultTaskFields::POSITION ] = $this->position_after_last(
 					$task_id,
-					(int) $field_values_array[ DefaultTaskFields::STATUS ],
+					(int) $field_values_array[ DefaultTaskFields::STATUS ]
 				);
-
-				$field_values_array[ DefaultTaskFields::POSITION ] = $last_position ? $last_position + 1.0 : 1.0;
 
 				$done_option_id = $this->task_status_role_service->get_done_field_option_id();
 
@@ -543,8 +491,7 @@ final class TaskManagerService {
 	 * @param int $task_id
 	 *
 	 * @return int|false
-	 * @throws RuntimeException
-	 * @throws InvalidArgumentException
+	 * @throws RuntimeException For a task ID of 0, which names no row to delete.
 	 */
 	public function delete_task( int $task_id ): int|false {
 		$result = $this->task_repository->delete( $task_id );
@@ -729,43 +676,18 @@ final class TaskManagerService {
 	 * @param array $option_data
 	 *
 	 * @return array
+	 * @throws RuntimeException When the option is not saved.
 	 * @throws \Throwable Propagated from the transactional shift+insert if the DB layer fails.
 	 */
 	public function add_field_option( int $field_id, array $option_data ): array {
 		$option_data['field_id'] = $field_id;
 
-		// Auto-generate slug from label if not provided.
 		if ( empty( $option_data['slug'] ) ) {
 			$option_data['slug'] = sanitize_title( $option_data['label'] );
 		}
 
-		// Enforce slug uniqueness within the field.
-		$slug_exist = $this
-			->task_field_option_repository
-			->where( 'field_id', $field_id )
-			->where( 'slug', $option_data['slug'] )
-			->first();
+		$option_data['slug'] = $this->unique_option_slug( $field_id, $option_data['slug'] );
 
-		if ( null !== $slug_exist ) {
-			// Slug collided: append -2, -3, ... until free.
-			$base_slug = $option_data['slug'];
-			$suffix    = 2;
-
-			do {
-				$candidate = $base_slug . '-' . $suffix;
-				++$suffix;
-			} while (
-				null !== $this
-					->task_field_option_repository
-					->where( 'field_id', $field_id )
-					->where( 'slug', $candidate )
-					->first()
-			);
-
-			$option_data['slug'] = $candidate;
-		}
-
-		// Auto-assign a random color if not provided.
 		if ( empty( $option_data['color'] ) ) {
 			$option_data['color'] = sprintf(
 				'#%06X',
@@ -805,7 +727,6 @@ final class TaskManagerService {
 			);
 		}
 
-		// Drop any cached reads.
 		$this->task_field_option_repository::clear_cache();
 
 		$option_data['id'] = (int) $option_id;
@@ -843,33 +764,8 @@ final class TaskManagerService {
 			throw new InvalidArgumentException( 'Field option does not belong to the given field.' );
 		}
 
-		// Enforce slug uniqueness within the field, skipping when the slug isn't changing.
 		if ( ! empty( $option_data['slug'] ) && $option_data['slug'] !== $option->slug ) {
-			$slug_exist = $this
-				->task_field_option_repository
-				->where( 'field_id', $option->field_id )
-				->where( 'slug', $option_data['slug'] )
-				->first();
-
-			if ( null !== $slug_exist ) {
-				// Slug collided: append -2, -3, ... until free. The `id != $option_id` guard
-				// protects against a candidate (e.g. "foo-2") matching the row's own current slug.
-				$base_slug = $option_data['slug'];
-				$suffix    = 2;
-
-				do {
-					$candidate = $base_slug . '-' . $suffix;
-					++$suffix;
-				} while (
-					null !== $this->task_field_option_repository
-						->where( 'field_id', $option->field_id )
-						->where( 'slug', $candidate )
-						->where( 'id', '!=', $option_id )
-						->first()
-				);
-
-				$option_data['slug'] = $candidate;
-			}
+			$option_data['slug'] = $this->unique_option_slug( $option->field_id, $option_data['slug'], $option_id );
 		}
 
 		$option->fill( $option_data );
@@ -962,19 +858,16 @@ final class TaskManagerService {
 	 * @throws InvalidArgumentException If field doesn't exist or option IDs are invalid.
 	 */
 	public function update_field_option_positions( int $field_id, array $ordered_option_ids ): void {
-		// Validate that the field exists.
 		$field = $this->task_field_repository->find( $field_id );
 		if ( ! $field ) {
 			throw new InvalidArgumentException( esc_html( "Field with ID $field_id does not exist." ) );
 		}
 
-		// Get all existing options for this field.
 		$existing_options = $this->task_field_option_repository->get_by_field_id_ordered( $field_id );
 		if ( empty( $existing_options ) ) {
 			throw new InvalidArgumentException( esc_html( "Field $field_id has no options to reorder." ) );
 		}
 
-		// Extract valid option IDs for this field.
 		$valid_option_ids = array_map(
 			function ( $option ) {
 				return $option->id;
@@ -982,14 +875,12 @@ final class TaskManagerService {
 			$existing_options
 		);
 
-		// Validate that all provided option IDs belong to this field.
 		foreach ( $ordered_option_ids as $option_id ) {
 			if ( ! in_array( $option_id, $valid_option_ids, true ) ) {
 				throw new InvalidArgumentException( esc_html( "Option ID $option_id does not belong to field $field_id." ) );
 			}
 		}
 
-		// Validate no duplicates in the provided list.
 		$unique_ids = array_unique( $ordered_option_ids );
 		if ( count( $unique_ids ) !== count( $ordered_option_ids ) ) {
 			throw new InvalidArgumentException(
@@ -997,7 +888,6 @@ final class TaskManagerService {
 			);
 		}
 
-		// Validate completeness: All option IDs must be provided.
 		if ( count( $ordered_option_ids ) !== count( $existing_options ) ) {
 			throw new InvalidArgumentException(
 				sprintf(
@@ -1016,10 +906,8 @@ final class TaskManagerService {
 		 */
 		$ordered_option_ids = apply_filters( 'wpo_otd_field_ordered_option_ids', $ordered_option_ids, $field_id );
 
-		// Update positions in the database.
 		$this->task_field_option_repository->update_positions( $field_id, $ordered_option_ids );
 
-		// Clear repository cache to ensure fresh data on next fetch.
 		$this->task_field_option_repository::clear_cache();
 	}
 
@@ -1241,7 +1129,6 @@ final class TaskManagerService {
 		string $fallback_placement = 'first',
 		array $extra_field_values = array()
 	): float {
-		// Validate fallback placement.
 		if ( ! in_array( $fallback_placement, array( 'first', 'last' ), true ) ) {
 			throw new InvalidArgumentException( 'Invalid default position. Must be "first" or "last".' );
 		}
@@ -1250,13 +1137,11 @@ final class TaskManagerService {
 			throw new InvalidArgumentException( 'Task not found.' );
 		}
 
-		// Check if the new status ID is valid.
 		$target_status_option_field = $this->get_field_option( $target_status_id );
 		if ( ! $target_status_option_field || $target_status_option_field->field_id !== DefaultTaskFields::STATUS ) {
 			throw new InvalidArgumentException( 'Invalid target status ID.' );
 		}
 
-		// Determine new position based on previous task ID or default position.
 		if ( ! empty( $previous_task_id ) || 'first' === $fallback_placement ) {
 			// Get the position of the previous task, or start at 0.0 if placing first.
 			$previous_position = 0.0;
@@ -1278,9 +1163,7 @@ final class TaskManagerService {
 				? $this->calculate_fractional_position( $previous_position, $next_position_value, $target_status_id )
 				: $previous_position + 1.0;
 		} else {
-			// Place at the end.
-			$last_position = $this->task_repository->get_last_task_position( $task_id, $target_status_id );
-			$new_position  = $last_position ? $last_position + 1.0 : 1.0;
+			$new_position = $this->position_after_last( $task_id, $target_status_id );
 		}
 
 		/**
@@ -1428,9 +1311,7 @@ final class TaskManagerService {
 		 */
 		$precision_threshold = apply_filters( 'wpo_otd_task_position_precision_threshold', 0.0001 );
 
-		// Check for precision.
 		if ( abs( $next_position - $previous_position ) < $precision_threshold ) {
-			// Schedule a rebalance task positions job.
 			$this->schedule_rebalance_task_job( $status_id );
 		}
 
@@ -1487,7 +1368,6 @@ final class TaskManagerService {
 	 *
 	 * @return bool
 	 * @throws InvalidArgumentException If the task does not exist.
-	 * @throws Exception
 	 */
 	public function archive_task( int $task_id ): bool {
 		$task = $this->task_repository->find( $task_id );
@@ -1526,7 +1406,6 @@ final class TaskManagerService {
 	 *
 	 * @return bool
 	 * @throws InvalidArgumentException If the task does not exist.
-	 * @throws Exception
 	 */
 	public function unarchive_task( int $task_id ): bool {
 		$task = $this->task_repository->find( $task_id );
@@ -1552,10 +1431,62 @@ final class TaskManagerService {
 	 *  ================================ */
 
 	/**
+	 * The position just after the last task in a status column, or 1.0 when the column holds no other task.
+	 *
+	 * @param int|null $task_id   A task to leave out, such as the one being placed.
+	 * @param int      $status_id
+	 *
+	 * @return float
+	 */
+	private function position_after_last( ?int $task_id, int $status_id ): float {
+		$last_position = $this->task_repository->get_last_task_position( $task_id, $status_id );
+
+		return $last_position ? $last_position + 1.0 : 1.0;
+	}
+
+	/**
+	 * The slug, or the first of slug-2, slug-3, ... that no option of the field holds.
+	 *
+	 * Only the suffixed candidates leave out the option being renamed: the slug itself counts the option's own row,
+	 * so one that differs from its current slug only in case, which the database compares as the same, still gets
+	 * a suffix.
+	 *
+	 * @param int      $field_id
+	 * @param string   $slug
+	 * @param int|null $option_id The option being renamed, if any.
+	 *
+	 * @return string
+	 */
+	private function unique_option_slug( int $field_id, string $slug, ?int $option_id = null ): string {
+		$taken = function ( string $candidate, ?int $exclude_id ) use ( $field_id ): bool {
+			$query = $this->task_field_option_repository
+				->where( 'field_id', $field_id )
+				->where( 'slug', $candidate );
+
+			if ( null !== $exclude_id ) {
+				$query->where( 'id', '!=', $exclude_id );
+			}
+
+			return null !== $query->first();
+		};
+
+		if ( ! $taken( $slug, null ) ) {
+			return $slug;
+		}
+
+		$suffix = 2;
+		while ( $taken( $slug . '-' . $suffix, $option_id ) ) {
+			++$suffix;
+		}
+
+		return $slug . '-' . $suffix;
+	}
+
+	/**
 	 * Get parsed field value based on type and slug.
 	 *
 	 * @param TaskFieldValue $field_value Raw field value from the DB.
-	 * @param TaskField $field Type of the field (e.g., 'number', 'text', etc.).
+	 * @param TaskField $field The field the value belongs to.
 	 *
 	 * @return mixed Parsed field value.
 	 */
@@ -1585,7 +1516,6 @@ final class TaskManagerService {
 			case TaskFieldTypes::NUMBER:
 				$raw = is_numeric( $raw ) ? (float) $raw : null;
 
-				// Handle special cases based on slug.
 				switch ( $field->slug ) {
 					case 'creator':
 						$user = get_userdata( (int) $raw );
@@ -1601,7 +1531,6 @@ final class TaskManagerService {
 						}
 						break;
 
-					// Handle special case for 'order' field type (for the Associated Order field).
 					case 'order':
 						$order = wc_get_order( (int) $raw );
 						if ( $order ) {
@@ -1713,7 +1642,6 @@ final class TaskManagerService {
 	 * @param int $status_id
 	 *
 	 * @return void
-	 * @throws \Throwable
 	 */
 	public function rebalance_task_positions( int $status_id ): void {
 		try {
