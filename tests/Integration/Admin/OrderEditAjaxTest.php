@@ -138,6 +138,8 @@ class OrderEditAjaxTest extends WP_Ajax_UnitTestCase {
 			'without the cap'   => array( array(), 'customer', 'You do not have permission to perform this action.' ),
 			'missing item'      => array( array( 'item_id' => null ), null, 'Invalid item ID.' ),
 			'unknown item'      => array( array( 'item_id' => 999999 ), null, 'Order item not found.' ),
+			'no order'          => array( array( 'order_id' => null ), null, 'Order item not found.' ),
+			'another order'     => array( array( 'order_id' => 999999 ), null, 'Order item not found.' ),
 			'too many'          => array( array( 'quantity' => 4 ), null, 'Fulfillment quantity cannot exceed 3.' ),
 		);
 	}
@@ -158,6 +160,7 @@ class OrderEditAjaxTest extends WP_Ajax_UnitTestCase {
 			array_merge(
 				array(
 					'nonce'    => wp_create_nonce( 'wpo_otd_order_edit' ),
+					'order_id' => $this->order->get_id(),
 					'item_id'  => $this->item->get_id(),
 					'quantity' => 1,
 				),

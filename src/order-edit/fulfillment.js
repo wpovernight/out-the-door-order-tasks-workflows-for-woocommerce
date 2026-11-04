@@ -78,6 +78,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		const formData = new FormData();
 		formData.append('action', 'wpo_otd_save_fulfillment');
 		formData.append('nonce', WPO_OTD_OrderEdit.nonce);
+		formData.append('order_id', saveButton.getAttribute('data-order-id'));
 		formData.append('item_id', itemId);
 		formData.append('fulfillment_id', fulfillmentId);
 		formData.append('quantity', quantity);
@@ -118,6 +119,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
 						quantityInput.setAttribute('data-fulfillment-id', newId);
 						quantityInput.name = 'wpo-otd-fulfillment-quantity[' + itemId + '][' + newId + ']';
+					}
+
+					// The order update skips a field still holding what the page rendered, so record the saved value
+					// as rendered: an untouched field then never puts it back over a later change by someone else.
+					const renderedInput = fulfillmentCell.querySelector('.wpo-otd-fulfillment-rendered');
+					if (renderedInput) {
+						renderedInput.value = quantity;
+						if (savedFulfillmentId) {
+							renderedInput.name = 'wpo-otd-fulfillment-rendered[' + itemId + '][' + String(savedFulfillmentId) + ']';
+						}
 					}
 
 					// Toggle back to view mode

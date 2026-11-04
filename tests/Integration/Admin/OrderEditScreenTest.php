@@ -94,6 +94,8 @@ class OrderEditScreenTest extends IntegrationTestCase {
 
 		$this->assertStringContainsString( '<span class="wpo-otd-tag partially-fulfilled">2 / 3 fulfilled</span>', $html );
 		$this->assertStringContainsString( 'name="wpo-otd-fulfillment-quantity[' . $item->get_id() . '][1]"', $html );
+		$this->assertStringContainsString( 'name="wpo-otd-fulfillment-rendered[' . $item->get_id() . '][1]" class="wpo-otd-fulfillment-rendered" value="2"', $html );
+		$this->assertStringContainsString( 'data-order-id="' . $order->get_id() . '"', $html );
 		$this->assertStringContainsString( 'max="3"', $html );
 		$this->assertStringContainsString( 'value="2"', $html );
 	}
@@ -280,6 +282,58 @@ class OrderEditScreenTest extends IntegrationTestCase {
 		$this->assertSame( 5, $this->fulfillments->get_fulfilled_quantity( $item->get_id() ) );
 	}
 
+	public function test_an_untouched_stale_field_leaves_a_newer_value(): void {
+		$order = $this->create_order( array( 3 ) );
+		$item  = $this->first_item( $order );
+		// The page showed the line without an entry; someone else then fulfilled 2 over AJAX.
+		$this->fulfillments->save_order_item_fulfillment_quantity( $item->get_id(), 2, null );
+
+		$this->post_quantities( $order, array( $item->get_id() => array( 0 => '0' ) ), array(), array( $item->get_id() => array( 0 => '0' ) ) );
+
+		$this->assertSame( 2, $this->fulfillments->get_fulfilled_quantity( $item->get_id() ) );
+	}
+
+	public function test_a_changed_field_is_saved(): void {
+		$order = $this->create_order( array( 3 ) );
+		$item  = $this->first_item( $order );
+		$this->fulfillments->save_order_item_fulfillment_quantity( $item->get_id(), 1, null );
+
+		$this->post_quantities( $order, array( $item->get_id() => array( 1 => '3' ) ), array(), array( $item->get_id() => array( 1 => '1' ) ) );
+
+		$this->assertEquals(
+			array( new Fulfillment( array( 'id' => 1, 'quantity' => 3 ) ) ),
+			$this->fulfillments->get_order_item_fulfillment_data( $item->get_id() )
+		);
+	}
+
+	public function test_a_plain_update_adds_no_empty_entry(): void {
+		$order = $this->create_order( array( 3, 2 ) );
+		$items = array_values( $order->get_items() );
+
+		$this->post_quantities(
+			$order,
+			array(
+				$items[0]->get_id() => array( 0 => '0' ),
+				$items[1]->get_id() => array( 0 => '0' ),
+			),
+			array(),
+			array( $items[0]->get_id() => array( 0 => '0' ) )
+		);
+
+		$this->assertNull( $this->fulfillments->get_order_item_fulfillment_data( $items[0]->get_id() ), 'Unchanged.' );
+		$this->assertNull( $this->fulfillments->get_order_item_fulfillment_data( $items[1]->get_id() ), 'No rendered value, but 0 for a line without entries.' );
+	}
+
+	public function test_a_line_of_another_order_is_not_saved(): void {
+		$order = $this->create_order( array( 3 ) );
+		$other = $this->create_order( array( 3 ) );
+		$item  = $this->first_item( $other );
+
+		$this->post_quantities( $order, array( $item->get_id() => array( 0 => '2' ) ) );
+
+		$this->assertNull( $this->fulfillments->get_order_item_fulfillment_data( $item->get_id() ) );
+	}
+
 	public function test_nothing_is_saved_without_posted_quantities(): void {
 		$this->screen->save_posted_fulfillment_quantities( 1, array( 'order_item_id' => array( 1 ) ) );
 
@@ -441,14 +495,19 @@ class OrderEditScreenTest extends IntegrationTestCase {
 	 * @param \WC_Abstract_Order $order
 	 * @param array<int, array>  $quantities      Per line, the posted entry ID and quantity.
 	 * @param array<int, string> $line_quantities Per line, the line quantity posted with them.
+	 * @param array<int, array>  $rendered        Per line, the posted entry ID and the quantity the page rendered.
 	 *
 	 * @return void
 	 */
-	private function post_quantities( \WC_Abstract_Order $order, array $quantities, array $line_quantities = array() ): void {
+	private function post_quantities( \WC_Abstract_Order $order, array $quantities, array $line_quantities = array(), array $rendered = array() ): void {
 		$posted = array( 'wpo-otd-fulfillment-quantity' => $quantities );
 
 		if ( $line_quantities ) {
 			$posted['order_item_qty'] = $line_quantities;
+		}
+
+		if ( $rendered ) {
+			$posted['wpo-otd-fulfillment-rendered'] = $rendered;
 		}
 
 		$this->screen->save_posted_fulfillment_quantities( $order->get_id(), $posted );

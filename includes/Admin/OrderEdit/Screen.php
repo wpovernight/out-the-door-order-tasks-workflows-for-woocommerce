@@ -302,6 +302,7 @@ final class Screen {
 					value="%3$d"
 					data-fulfillment-id="%4$s"
 				/>
+				<input type="hidden" name="wpo-otd-fulfillment-rendered[%1$d][%4$s]" class="wpo-otd-fulfillment-rendered" value="%3$d" />
 				<span class="screen-reader-text">%5$s</span>
 			</label>',
 			esc_attr( $item_id ),
@@ -318,6 +319,7 @@ final class Screen {
 							class="wpo-button wpo-button-icon wpo-otd-save-fulfillment"
 							data-item-id="%1$d"
 							data-fulfillment-id="%2$s"
+							data-order-id="%5$d"
 							title="%3$s"
 						>
 							<span class="screen-reader-text">%3$s</span>
@@ -338,7 +340,8 @@ final class Screen {
 			esc_attr( $item_id ),
 			esc_attr( $fulfillment ? $fulfillment->id : '' ),
 			esc_html__( 'Save fulfillment quantity', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
-			esc_html__( 'Cancel fulfillment edit', 'out-the-door-order-tasks-workflows-for-woocommerce' )
+			esc_html__( 'Cancel fulfillment edit', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
+			esc_attr( $item->get_order_id() )
 		);
 		$edit_html        = sprintf(
 			'<div class="edit" style="display:none;">%s%s</div>',
@@ -441,6 +444,10 @@ final class Screen {
 			return;
 		}
 
+		$rendered = isset( $items['wpo-otd-fulfillment-rendered'] ) && is_array( $items['wpo-otd-fulfillment-rendered'] )
+			? $items['wpo-otd-fulfillment-rendered']
+			: array();
+
 		foreach ( $items['wpo-otd-fulfillment-quantity'] as $item_id => $fulfillment_data ) {
 			$item_id = absint( $item_id );
 			if ( ! $item_id || ! is_array( $fulfillment_data ) || empty( $fulfillment_data ) ) {
@@ -448,7 +455,7 @@ final class Screen {
 			}
 
 			$item = \WC_Order_Factory::get_order_item( $item_id );
-			if ( ! $item ) {
+			if ( ! $item || $item->get_order_id() !== $order_id ) {
 				continue;
 			}
 
@@ -456,7 +463,18 @@ final class Screen {
 			$fulfillment_quantity = isset( $fulfillment_data[ $posted_id ] )
 				? absint( $fulfillment_data[ $posted_id ] )
 				: 0;
-			$fulfillment_id       = $this->entry_to_edit( $item_id, $posted_id );
+
+			// Every line's field is posted with each order update. One left as the page rendered it is skipped: another
+			// user may have changed the entry since, and the page would put back what it showed.
+			if ( isset( $rendered[ $item_id ][ $posted_id ] ) && absint( $rendered[ $item_id ][ $posted_id ] ) === $fulfillment_quantity ) {
+				continue;
+			}
+
+			$fulfillment_id = $this->entry_to_edit( $item_id, $posted_id );
+
+			if ( null === $fulfillment_id && 0 === $fulfillment_quantity ) {
+				continue;
+			}
 
 			// The same save may change the line's quantity, which WooCommerce stores after this hook.
 			$quantity = isset( $items['order_item_qty'][ $item_id ] ) ? (int) wc_stock_amount( $items['order_item_qty'][ $item_id ] ) : null;
@@ -530,6 +548,7 @@ final class Screen {
 		}
 
 		// Get and validate parameters.
+		$order_id       = isset( $_POST['order_id'] ) ? absint( $_POST['order_id'] ) : 0;
 		$item_id        = isset( $_POST['item_id'] ) ? absint( $_POST['item_id'] ) : 0;
 		$fulfillment_id = isset( $_POST['fulfillment_id'] ) ? absint( $_POST['fulfillment_id'] ) : null;
 		$quantity       = isset( $_POST['quantity'] ) ? absint( $_POST['quantity'] ) : 0;
@@ -544,7 +563,7 @@ final class Screen {
 
 		// Get the order item to validate and get total quantity.
 		$order_item = \WC_Order_Factory::get_order_item( $item_id );
-		if ( ! $order_item ) {
+		if ( ! $order_item || $order_item->get_order_id() !== $order_id ) {
 			wp_send_json_error(
 				array(
 					'message' => esc_html__( 'Order item not found.', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
