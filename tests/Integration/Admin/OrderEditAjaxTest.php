@@ -47,6 +47,7 @@ class OrderEditAjaxTest extends WP_Ajax_UnitTestCase {
 
 		$this->assertTrue( $response['success'] );
 		$this->assertSame( 1, $response['data']['fulfillment_id'] );
+		$this->assertSame( 2, $response['data']['quantity'] );
 		$this->assertSame( '<span class="wpo-otd-tag partially-fulfilled">2 / 3 fulfilled</span>', $response['data']['html'] );
 		$this->assertSame( 2, $this->fulfillments->get_order_item_fulfillment_data( $this->item->get_id() )[0]->quantity );
 		$this->assertSame(
@@ -54,6 +55,13 @@ class OrderEditAjaxTest extends WP_Ajax_UnitTestCase {
 			wc_get_order( $this->order->get_id() )->get_meta( FulfillmentService::ORDER_FULFILLMENT_STATUS_META_KEY )
 		);
 		$this->assertStringContainsString( 'Fulfillment updated for &quot;Lamp&quot;: 2 of 3 fulfilled.', $this->latest_note() );
+	}
+
+	public function test_the_response_gives_the_quantity_as_saved(): void {
+		$response = $this->save( array( 'quantity' => '2.5' ) );
+
+		$this->assertSame( 2, $response['data']['quantity'] );
+		$this->assertSame( 2, $this->fulfillments->get_fulfilled_quantity( $this->item->get_id() ) );
 	}
 
 	public function test_updates_an_existing_fulfillment(): void {
@@ -124,6 +132,10 @@ class OrderEditAjaxTest extends WP_Ajax_UnitTestCase {
 			wp_set_current_user( self::factory()->user->create( array( 'role' => $role ) ) );
 		}
 
+		if ( 'another order' === ( $overrides['order_id'] ?? null ) ) {
+			$overrides['order_id'] = wc_create_order()->get_id();
+		}
+
 		$response = $this->save( $overrides );
 
 		$this->assertFalse( $response['success'] );
@@ -139,7 +151,7 @@ class OrderEditAjaxTest extends WP_Ajax_UnitTestCase {
 			'missing item'      => array( array( 'item_id' => null ), null, 'Invalid item ID.' ),
 			'unknown item'      => array( array( 'item_id' => 999999 ), null, 'Order item not found.' ),
 			'no order'          => array( array( 'order_id' => null ), null, 'Order item not found.' ),
-			'another order'     => array( array( 'order_id' => 999999 ), null, 'Order item not found.' ),
+			'another order'     => array( array( 'order_id' => 'another order' ), null, 'Order item not found.' ),
 			'too many'          => array( array( 'quantity' => 4 ), null, 'Fulfillment quantity cannot exceed 3.' ),
 		);
 	}

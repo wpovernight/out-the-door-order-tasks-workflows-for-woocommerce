@@ -466,7 +466,7 @@ final class Screen {
 
 			// Every line's field is posted with each order update. One left as the page rendered it is skipped: another
 			// user may have changed the entry since, and the page would put back what it showed.
-			if ( isset( $rendered[ $item_id ][ $posted_id ] ) && absint( $rendered[ $item_id ][ $posted_id ] ) === $fulfillment_quantity ) {
+			if ( is_array( $rendered[ $item_id ] ?? null ) && isset( $rendered[ $item_id ][ $posted_id ] ) && absint( $rendered[ $item_id ][ $posted_id ] ) === $fulfillment_quantity ) {
 				continue;
 			}
 
@@ -627,6 +627,7 @@ final class Screen {
 				'message'        => esc_html__( 'Fulfillment quantity saved successfully.', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
 				'html'           => $this->get_fulfillment_status_html( $fulfillment_status, $fulfilled_quantity, $total_quantity ),
 				'fulfillment_id' => $saved_fulfillment_id,
+				'quantity'       => $quantity,
 			)
 		);
 	}

@@ -293,6 +293,15 @@ class OrderEditScreenTest extends IntegrationTestCase {
 		$this->assertSame( 2, $this->fulfillments->get_fulfilled_quantity( $item->get_id() ) );
 	}
 
+	public function test_a_rendered_value_that_is_not_a_list_is_ignored(): void {
+		$order = $this->create_order( array( 3 ) );
+		$item  = $this->first_item( $order );
+
+		$this->post_quantities( $order, array( $item->get_id() => array( 0 => '2' ) ), array(), array( $item->get_id() => '2' ) );
+
+		$this->assertSame( 2, $this->fulfillments->get_fulfilled_quantity( $item->get_id() ) );
+	}
+
 	public function test_a_changed_field_is_saved(): void {
 		$order = $this->create_order( array( 3 ) );
 		$item  = $this->first_item( $order );

@@ -52,6 +52,14 @@ document.addEventListener('DOMContentLoaded', function () {
 		const cancelButton = event.target.closest('.wpo-otd-cancel-fulfillment');
 		if (cancelButton) {
 			const fulfillmentCell = cancelButton.closest('.wpo-otd-fulfillment');
+
+			// The field is posted with every order update, so a discarded value must not stay in it.
+			const quantityInput = fulfillmentCell.querySelector('.wpo-otd-fulfillment-quantity');
+			const renderedInput = fulfillmentCell.querySelector('.wpo-otd-fulfillment-rendered');
+			if (quantityInput && renderedInput) {
+				quantityInput.value = renderedInput.value;
+			}
+
 			toggleFulfillmentMode(fulfillmentCell, 'view');
 		}
 	});
@@ -123,9 +131,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
 					// The order update skips a field still holding what the page rendered, so record the saved value
 					// as rendered: an untouched field then never puts it back over a later change by someone else.
+					// The server stores a whole number; a typed "2.5" left in either field would block the order update.
+					const savedQuantity = String(data.data.quantity);
 					const renderedInput = fulfillmentCell.querySelector('.wpo-otd-fulfillment-rendered');
 					if (renderedInput) {
-						renderedInput.value = quantity;
+						renderedInput.value = savedQuantity;
 						if (savedFulfillmentId) {
 							renderedInput.name = 'wpo-otd-fulfillment-rendered[' + itemId + '][' + String(savedFulfillmentId) + ']';
 						}
@@ -134,8 +144,7 @@ document.addEventListener('DOMContentLoaded', function () {
 					// Toggle back to view mode
 					toggleFulfillmentMode(fulfillmentCell, 'view');
 
-					// Update quantity input value
-					quantityInput.value = quantity;
+					quantityInput.value = savedQuantity;
 				} else {
 					alert(data.data.message || 'Error saving fulfillment');
 				}
