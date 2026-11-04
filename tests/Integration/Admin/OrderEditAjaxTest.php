@@ -66,6 +66,16 @@ class OrderEditAjaxTest extends WP_Ajax_UnitTestCase {
 		$this->assertCount( 1, $this->fulfillments->get_order_item_fulfillment_data( $this->item->get_id() ) );
 	}
 
+	public function test_the_new_tag_counts_every_entry(): void {
+		$this->fulfillments->save_order_item_fulfillment_quantity( $this->item->get_id(), 1, null );
+
+		$response = $this->save( array( 'quantity' => 2 ) );
+
+		$this->assertSame( 2, $response['data']['fulfillment_id'] );
+		$this->assertSame( '<span class="wpo-otd-tag fully-fulfilled">3 / 3 fulfilled</span>', $response['data']['html'] );
+		$this->assertStringContainsString( 'Fulfillment updated for &quot;Lamp&quot;: 3 of 3 fulfilled.', $this->latest_note() );
+	}
+
 	/**
 	 * @dataProvider rejected_request_provider
 	 */

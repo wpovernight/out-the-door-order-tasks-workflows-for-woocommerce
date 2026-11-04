@@ -142,16 +142,9 @@ class FulfillmentController extends BaseRestController {
 	 */
 	private function format_order_item( \WC_Order_Item_Product $item, FulfillmentService $fulfillment_service ): array {
 		$quantity           = (int) $item->get_quantity();
-		$fulfillment_data   = $fulfillment_service->get_order_item_fulfillment_data( $item );
-		$fulfilled_quantity = 0;
+		$fulfilled_quantity = $fulfillment_service->get_fulfilled_quantity( $item );
 
-		if ( ! empty( $fulfillment_data ) ) {
-			foreach ( $fulfillment_data as $fulfillment ) {
-				$fulfilled_quantity += (int) $fulfillment->quantity;
-			}
-		}
-
-		$product    = $item->get_product();
+		$product   = $item->get_product();
 		$image_url  = '';
 		$attributes = array();
 
@@ -166,14 +159,6 @@ class FulfillmentController extends BaseRestController {
 			}
 		}
 
-		if ( $fulfilled_quantity >= $quantity ) {
-			$item_status = FulfillmentStatuses::FULFILLED;
-		} elseif ( $fulfilled_quantity > 0 ) {
-			$item_status = FulfillmentStatuses::PARTIALLY_FULFILLED;
-		} else {
-			$item_status = FulfillmentStatuses::NOT_FULFILLED;
-		}
-
 		return array(
 			'item_id'            => $item->get_id(),
 			'name'               => $item->get_name(),
@@ -181,7 +166,7 @@ class FulfillmentController extends BaseRestController {
 			'attributes'         => $attributes,
 			'quantity'           => $quantity,
 			'fulfilled_quantity' => $fulfilled_quantity,
-			'fulfillment_status' => $item_status,
+			'fulfillment_status' => $fulfillment_service->get_item_fulfillment_status( $fulfilled_quantity, $quantity ),
 		);
 	}
 

@@ -116,24 +116,22 @@ class FulfillmentServiceTest extends IntegrationTestCase {
 	 */
 	public function test_order_status_compares_shipped_and_ordered_quantities( array $ordered, array $shipped, string $expected ): void {
 		$order = $this->create_order( $ordered );
-
-		foreach ( array_values( $order->get_items() ) as $index => $item ) {
-			if ( isset( $shipped[ $index ] ) ) {
-				$this->service->save_order_item_fulfillment_quantity( $item->get_id(), $shipped[ $index ], null );
-			}
-		}
+		$this->ship( $order, $shipped );
 
 		$this->assertSame( $expected, $this->service->get_order_fulfillment_status( wc_get_order( $order->get_id() ) ) );
 	}
 
 	public function order_status_provider(): array {
 		return array(
-			'nothing shipped'      => array( array( 2, 1 ), array(), FulfillmentStatuses::NOT_FULFILLED ),
-			'zero shipped'         => array( array( 2 ), array( 0 ), FulfillmentStatuses::NOT_FULFILLED ),
-			'some shipped'         => array( array( 2, 1 ), array( 1 ), FulfillmentStatuses::PARTIALLY_FULFILLED ),
-			'one line complete'    => array( array( 2, 1 ), array( 2 ), FulfillmentStatuses::PARTIALLY_FULFILLED ),
-			'everything shipped'   => array( array( 2, 1 ), array( 2, 1 ), FulfillmentStatuses::FULFILLED ),
-			'more than ordered'    => array( array( 1 ), array( 3 ), FulfillmentStatuses::FULFILLED ),
+			'nothing shipped'               => array( array( 2, 1 ), array(), FulfillmentStatuses::NOT_FULFILLED ),
+			'zero shipped'                  => array( array( 2 ), array( 0 ), FulfillmentStatuses::NOT_FULFILLED ),
+			'some shipped'                  => array( array( 2, 1 ), array( 1 ), FulfillmentStatuses::PARTIALLY_FULFILLED ),
+			'one line complete'             => array( array( 2, 1 ), array( 2 ), FulfillmentStatuses::PARTIALLY_FULFILLED ),
+			'everything shipped'            => array( array( 2, 1 ), array( 2, 1 ), FulfillmentStatuses::FULFILLED ),
+			'more than ordered'             => array( array( 1 ), array( 3 ), FulfillmentStatuses::FULFILLED ),
+			'entries add up'                => array( array( 3 ), array( array( 1, 2 ) ), FulfillmentStatuses::FULFILLED ),
+			'entries add up past the order' => array( array( 2, 1 ), array( array( 2, 1 ), 1 ), FulfillmentStatuses::FULFILLED ),
+			'a surplus never covers a line' => array( array( 1, 1 ), array( 2 ), FulfillmentStatuses::PARTIALLY_FULFILLED ),
 		);
 	}
 
@@ -141,12 +139,55 @@ class FulfillmentServiceTest extends IntegrationTestCase {
 		$this->assertSame( FulfillmentStatuses::NOT_FULFILLED, $this->service->get_order_fulfillment_status( wc_create_order() ) );
 	}
 
-	public function test_item_status(): void {
-		$item = $this->first_item( $this->create_order( array( 3 ) ) );
+	public function test_shipping_more_than_ordered_is_logged(): void {
+		$order = $this->create_order( array( 2, 1 ) );
+		$this->ship( $order, array( array( 2, 1 ), 1 ) );
+		$items = array_values( $order->get_items() );
+		$logs  = array();
+		add_filter(
+			'wpo_otd_logging_enabled',
+			static function ( $enabled, $level, $text ) use ( &$logs ) {
+				$logs[] = array( $level, $text );
 
-		$this->assertSame( FulfillmentStatuses::NOT_FULFILLED, $this->service->get_order_item_fulfillment_status( $item, new Fulfillment( array( 'quantity' => 0 ) ) ) );
-		$this->assertSame( FulfillmentStatuses::PARTIALLY_FULFILLED, $this->service->get_order_item_fulfillment_status( $item, new Fulfillment( array( 'quantity' => 2 ) ) ) );
-		$this->assertSame( FulfillmentStatuses::FULFILLED, $this->service->get_order_item_fulfillment_status( $item, new Fulfillment( array( 'quantity' => 3 ) ) ) );
+				return false;
+			},
+			10,
+			3
+		);
+
+		$this->service->get_order_fulfillment_status( wc_get_order( $order->get_id() ) );
+
+		$this->assertSame(
+			array( array( 'warning', "Fulfillment quantity (3) exceeds the ordered quantity (2) of item #{$items[0]->get_id()} in order #{$order->get_id()}." ) ),
+			$logs
+		);
+	}
+
+	public function test_the_fulfilled_quantity_adds_up_every_entry(): void {
+		$order = $this->create_order( array( 5, 1 ) );
+		$this->ship( $order, array( array( 1, 3 ) ) );
+		$items = array_values( wc_get_order( $order->get_id() )->get_items() );
+
+		$this->assertSame( 4, $this->service->get_fulfilled_quantity( $items[0] ) );
+		$this->assertSame( 4, $this->service->get_fulfilled_quantity( $items[0]->get_id() ) );
+		$this->assertSame( 0, $this->service->get_fulfilled_quantity( $items[1] ), 'No entries.' );
+	}
+
+	/**
+	 * @dataProvider item_status_provider
+	 */
+	public function test_item_status( int $fulfilled, int $quantity, string $expected ): void {
+		$this->assertSame( $expected, $this->service->get_item_fulfillment_status( $fulfilled, $quantity ) );
+	}
+
+	public function item_status_provider(): array {
+		return array(
+			'nothing'           => array( 0, 3, FulfillmentStatuses::NOT_FULFILLED ),
+			'some'              => array( 2, 3, FulfillmentStatuses::PARTIALLY_FULFILLED ),
+			'all'               => array( 3, 3, FulfillmentStatuses::FULFILLED ),
+			'more than ordered' => array( 4, 3, FulfillmentStatuses::FULFILLED ),
+			'nothing to fulfil' => array( 0, 0, FulfillmentStatuses::FULFILLED ),
+		);
 	}
 
 	public function test_updating_the_status_meta_stores_it_and_reports_changes(): void {
@@ -264,15 +305,26 @@ class FulfillmentServiceTest extends IntegrationTestCase {
 			$order->save();
 		}
 
-		foreach ( array_values( $order->get_items() ) as $index => $item ) {
-			if ( isset( $shipped[ $index ] ) ) {
-				$this->service->save_order_item_fulfillment_quantity( $item->get_id(), $shipped[ $index ], null );
-			}
-		}
-
+		$this->ship( $order, $shipped );
 		$this->service->update_order_fulfillment_status_meta( $order->get_id() );
 
 		return $order->get_id();
+	}
+
+	/**
+	 * Save fulfillment entries per line, in line order.
+	 *
+	 * @param \WC_Abstract_Order $order
+	 * @param array<int|int[]>   $shipped One quantity, or a list of quantities saved as separate entries, per line.
+	 *
+	 * @return void
+	 */
+	private function ship( \WC_Abstract_Order $order, array $shipped ): void {
+		foreach ( array_values( $order->get_items() ) as $index => $item ) {
+			foreach ( (array) ( $shipped[ $index ] ?? array() ) as $quantity ) {
+				$this->service->save_order_item_fulfillment_quantity( $item->get_id(), $quantity, null );
+			}
+		}
 	}
 
 	/**

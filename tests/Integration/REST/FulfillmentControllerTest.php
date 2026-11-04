@@ -68,6 +68,30 @@ class FulfillmentControllerTest extends RestTestCase {
 		$this->assertSame( array(), $formatted['items'][0]['attributes'] );
 	}
 
+	public function test_an_item_counts_every_entry_and_a_surplus_never_covers_another_item(): void {
+		$order = $this->create_order( array( 2, 1, 1 ) );
+		$items = array_values( $order->get_items() );
+		$this->fulfillments->save_order_item_fulfillment_quantity( $items[0]->get_id(), 1, null );
+		$this->fulfillments->save_order_item_fulfillment_quantity( $items[0]->get_id(), 1, null );
+		$this->fulfillments->save_order_item_fulfillment_quantity( $items[1]->get_id(), 3, null );
+		$this->fulfillments->update_order_fulfillment_status_meta( $order->get_id() );
+
+		$formatted = $this->json( $this->request( 'GET', '/fulfillments/orders' ) )['data'][0];
+
+		$this->assertSame( FulfillmentStatuses::PARTIALLY_FULFILLED, $formatted['fulfillment_status'] );
+		$this->assertSame(
+			array(
+				array( 'quantity' => 2, 'fulfilled_quantity' => 2, 'fulfillment_status' => FulfillmentStatuses::FULFILLED ),
+				array( 'quantity' => 1, 'fulfilled_quantity' => 3, 'fulfillment_status' => FulfillmentStatuses::FULFILLED ),
+				array( 'quantity' => 1, 'fulfilled_quantity' => 0, 'fulfillment_status' => FulfillmentStatuses::NOT_FULFILLED ),
+			),
+			array_map(
+				static fn( $item ) => array_intersect_key( $item, array_flip( array( 'quantity', 'fulfilled_quantity', 'fulfillment_status' ) ) ),
+				$formatted['items']
+			)
+		);
+	}
+
 	public function test_state_names_are_resolved_when_the_country_has_them(): void {
 		$order = $this->create_order();
 		$order->set_shipping_country( 'US' );

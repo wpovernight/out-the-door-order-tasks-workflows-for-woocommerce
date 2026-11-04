@@ -41,77 +41,78 @@ final class FulfillmentService {
 	}
 
 	/**
-	 * Get fulfillment status for an order.
+	 * Get fulfillment status for an order: fulfilled when every item is, not fulfilled when no item is fulfilled at
+	 * all, partially fulfilled otherwise. Each item is measured against its ordered quantity, refunds left out.
 	 *
 	 * @param \WC_Abstract_Order $order
 	 *
 	 * @return string
 	 */
 	public function get_order_fulfillment_status( \WC_Abstract_Order $order ): string {
-		$shipped_quantity = 0;
-		$total_quantity   = 0;
+		$statuses = array();
 
 		foreach ( $order->get_items() as $item ) {
-			$item_quantity  = (int) $item->get_quantity();
-			$total_quantity += $item_quantity;
+			$quantity  = (int) $item->get_quantity();
+			$fulfilled = $this->get_fulfilled_quantity( $item );
 
-			$item_fulfillment_data = $this->get_order_item_fulfillment_data( $item );
-
-			if ( empty( $item_fulfillment_data ) ) {
-				continue;
+			if ( $fulfilled > $quantity ) {
+				Logger::warning(
+					sprintf(
+						'Fulfillment quantity (%d) exceeds the ordered quantity (%d) of item #%d in order #%d.',
+						$fulfilled,
+						$quantity,
+						$item->get_id(),
+						$order->get_id()
+					)
+				);
 			}
 
-			// For now, only the first fulfillment entry per item is authoritative.
-			$shipped_quantity += (int) $item_fulfillment_data[0]->quantity;
+			$statuses[ $this->get_item_fulfillment_status( $fulfilled, $quantity ) ] = true;
 		}
 
-		if ( $shipped_quantity > $total_quantity ) {
-			Logger::warning(
-				sprintf(
-					'Fulfillment quantity (%d) exceeds order total quantity (%d) for order #%d.',
-					$shipped_quantity,
-					$total_quantity,
-					$order->get_id()
-				)
-			);
+		$statuses = array_keys( $statuses );
 
-			return FulfillmentStatuses::FULFILLED;
-		}
-
-		if ( 0 === $shipped_quantity ) {
+		if ( array() === $statuses || array( FulfillmentStatuses::NOT_FULFILLED ) === $statuses ) {
 			return FulfillmentStatuses::NOT_FULFILLED;
 		}
 
-		if ( $shipped_quantity === $total_quantity ) {
-			return FulfillmentStatuses::FULFILLED;
-		}
-
-		return FulfillmentStatuses::PARTIALLY_FULFILLED;
+		return array( FulfillmentStatuses::FULFILLED ) === $statuses
+			? FulfillmentStatuses::FULFILLED
+			: FulfillmentStatuses::PARTIALLY_FULFILLED;
 	}
 
 	/**
-	 * Get fulfillment status for an order item based on a given fulfillment.
+	 * Get how many units of an order item are fulfilled, summed across all its fulfillment entries.
 	 *
-	 * For now, each item displays one fulfillment entry at a time, so we don't need to sum across multiple fulfillments.
-	 * In the future, if we support multiple simultaneous fulfillments per item, this logic may need to be updated.
+	 * @param int|\WC_Order_Item $item Order item or its ID.
 	 *
-	 * @param \WC_Order_Item $item
-	 * @param Fulfillment $fulfillment
+	 * @return int
+	 */
+	public function get_fulfilled_quantity( int|\WC_Order_Item $item ): int {
+		$fulfilled = 0;
+
+		foreach ( $this->get_order_item_fulfillment_data( $item ) ?? array() as $fulfillment ) {
+			$fulfilled += (int) $fulfillment->quantity;
+		}
+
+		return $fulfilled;
+	}
+
+	/**
+	 * Get the fulfillment status of an order item: fulfilled once the fulfilled quantity reaches the item's quantity,
+	 * going past it included.
+	 *
+	 * @param int $fulfilled_quantity Units fulfilled, summed across the item's entries.
+	 * @param int $quantity           Units to fulfil.
 	 *
 	 * @return string
 	 */
-	public function get_order_item_fulfillment_status( \WC_Order_Item $item, Fulfillment $fulfillment ): string {
-		$shipped_quantity = (int) $fulfillment->quantity;
-		if ( 0 === $shipped_quantity ) {
-			return FulfillmentStatuses::NOT_FULFILLED;
+	public function get_item_fulfillment_status( int $fulfilled_quantity, int $quantity ): string {
+		if ( $fulfilled_quantity >= $quantity ) {
+			return FulfillmentStatuses::FULFILLED;
 		}
 
-		$item_quantity = (int) $item->get_quantity();
-		if ( $shipped_quantity === $item_quantity ) {
-			return FulfillmentStatuses::FULFILLED;
-		} else {
-			return FulfillmentStatuses::PARTIALLY_FULFILLED;
-		}
+		return $fulfilled_quantity > 0 ? FulfillmentStatuses::PARTIALLY_FULFILLED : FulfillmentStatuses::NOT_FULFILLED;
 	}
 
 	/**

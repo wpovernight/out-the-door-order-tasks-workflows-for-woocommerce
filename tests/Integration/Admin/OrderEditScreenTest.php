@@ -126,6 +126,41 @@ class OrderEditScreenTest extends IntegrationTestCase {
 		$this->assertStringContainsString( '0 / 2 fulfilled', ob_get_clean() );
 	}
 
+	public function test_a_line_whose_unrefunded_units_are_all_fulfilled_is_fulfilled(): void {
+		$order = $this->create_order( array( 3 ) );
+		$item  = $this->first_item( $order );
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 10,
+				'line_items' => array( $item->get_id() => array( 'qty' => 1, 'refund_total' => 10 ) ),
+			)
+		);
+		$this->fulfillments->save_order_item_fulfillment_quantity( $item->get_id(), 2, null );
+		$item = \WC_Order_Factory::get_order_item( $item->get_id() );
+
+		ob_start();
+		$this->screen->order_items_values( $item->get_product(), $item, $item->get_id() );
+
+		$this->assertStringContainsString( '<span class="wpo-otd-tag fully-fulfilled">2 / 2 fulfilled</span>', ob_get_clean() );
+	}
+
+	public function test_the_progress_counts_every_entry_and_the_editor_the_first(): void {
+		$order = $this->create_order( array( 3 ) );
+		$item  = $this->first_item( $order );
+		$this->fulfillments->save_order_item_fulfillment_quantity( $item->get_id(), 1, null );
+		$this->fulfillments->save_order_item_fulfillment_quantity( $item->get_id(), 3, null );
+		$item = \WC_Order_Factory::get_order_item( $item->get_id() );
+
+		ob_start();
+		$this->screen->order_items_values( $item->get_product(), $item, $item->get_id() );
+		$html = ob_get_clean();
+
+		$this->assertStringContainsString( '<span class="wpo-otd-tag fully-fulfilled">4 / 3 fulfilled</span>', $html );
+		$this->assertStringContainsString( 'name="wpo-otd-fulfillment-quantity[' . $item->get_id() . '][1]"', $html );
+		$this->assertStringContainsString( 'value="1"', $html );
+	}
+
 	public function test_other_lines_get_no_column_content(): void {
 		$order = $this->create_order();
 		$fee   = new \WC_Order_Item_Fee();

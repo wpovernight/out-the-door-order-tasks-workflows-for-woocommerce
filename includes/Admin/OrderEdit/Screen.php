@@ -7,7 +7,6 @@ defined( 'ABSPATH' ) || exit;
 use WPO\OTD\Admin\Assets;
 use WPO\OTD\Admin\OrderManager\Screen as OrderManagerScreen;
 use WPO\OTD\Enums\FulfillmentStatuses;
-use WPO\OTD\Models\Fulfillment;
 use WPO\OTD\Services\FulfillmentService;
 use WPO\OTD\Services\TaskStatusRoleService;
 
@@ -272,23 +271,15 @@ final class Screen {
 
 		$fulfillment_data = $this->fulfillment_service->get_order_item_fulfillment_data( $item );
 
-		// For MVP, we only store one fulfillment entry per item.
-		$fulfillment = $fulfillment_data[0] ?? null;
-
-		$fulfillment_status = $fulfillment ?
-			$this->fulfillment_service->get_order_item_fulfillment_status( $item, $fulfillment )
-			: FulfillmentStatuses::NOT_FULFILLED;
-
-		$fulfillment_quantity    = $fulfillment ? (int) $fulfillment->quantity : 0;
-		$total_quantity          = (int) $item->get_quantity();
-		// Remove partial refunded items from total quantity.
-		$order = $item->get_order();
-		if ( $order instanceof \WC_Abstract_Order ) {
-			$total_quantity += (int) $order->get_qty_refunded_for_item( $item_id );
-		}
+		// The editor changes the item's first fulfillment entry; the progress counts every entry.
+		$fulfillment          = $fulfillment_data[0] ?? null;
+		$fulfillment_quantity = $fulfillment ? (int) $fulfillment->quantity : 0;
+		$fulfilled_quantity   = $this->fulfillment_service->get_fulfilled_quantity( $item );
+		$total_quantity       = $this->quantity_to_fulfil( $item );
+		$fulfillment_status   = $this->fulfillment_service->get_item_fulfillment_status( $fulfilled_quantity, $total_quantity );
 
 		// View mode
-		$fulfillment_status_html = $this->get_fulfillment_status_html( $fulfillment_status, $fulfillment_quantity, $total_quantity );
+		$fulfillment_status_html = $this->get_fulfillment_status_html( $fulfillment_status, $fulfilled_quantity, $total_quantity );
 		$edit_button_html        = sprintf(
 			'<button type="button" class="wpo-button wpo-button-icon wpo-otd-edit-fulfillment" data-item-id="%1$d" title="%2$s">
 				<span class="screen-reader-text">%2$s</span>
@@ -392,6 +383,25 @@ final class Screen {
 			esc_attr( $class ),
 			$label // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		);
+	}
+
+	/**
+	 * Get how many units of an order item are left to fulfil: its quantity less the refunded units.
+	 *
+	 * @param \WC_Order_Item $item
+	 *
+	 * @return int
+	 */
+	private function quantity_to_fulfil( \WC_Order_Item $item ): int {
+		$quantity = (int) $item->get_quantity();
+		$order    = $item->get_order();
+
+		// WooCommerce reports refunded units as a negative number.
+		if ( $order instanceof \WC_Abstract_Order ) {
+			$quantity += (int) $order->get_qty_refunded_for_item( $item->get_id() );
+		}
+
+		return $quantity;
 	}
 
 	/**
@@ -541,17 +551,8 @@ final class Screen {
 		// Update the order-level fulfillment status cache.
 		$this->fulfillment_service->update_order_fulfillment_status_meta( $order_item->get_order_id() );
 
-		// Temporarily create a fulfillment object to be able to call `get_order_item_fulfillment_status()`,
-		// and get the updated status for the response.
-		$fulfillment = new Fulfillment(
-			array(
-				'id'       => $saved_fulfillment_id,
-				'quantity' => $quantity,
-			)
-		);
-
-		$fulfillment_status = $this->fulfillment_service->get_order_item_fulfillment_status( $order_item, $fulfillment );
-
+		$fulfilled_quantity = $this->fulfillment_service->get_fulfilled_quantity( $item_id );
+		$fulfillment_status = $this->fulfillment_service->get_item_fulfillment_status( $fulfilled_quantity, $total_quantity );
 
 		// Register an order note to record the fulfillment quantity change.
 		$order = $order_item->get_order();
@@ -561,7 +562,7 @@ final class Screen {
 					/* translators: 1: product name, 2: fulfilled quantity, 3: total quantity */
 					esc_html__( 'Fulfillment updated for "%1$s": %2$d of %3$d fulfilled.', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
 					$order_item->get_name(),
-					$quantity,
+					$fulfilled_quantity,
 					$total_quantity
 				)
 			);
@@ -571,7 +572,7 @@ final class Screen {
 		wp_send_json_success(
 			array(
 				'message'        => esc_html__( 'Fulfillment quantity saved successfully.', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
-				'html'           => $this->get_fulfillment_status_html( $fulfillment_status, $quantity, $total_quantity ),
+				'html'           => $this->get_fulfillment_status_html( $fulfillment_status, $fulfilled_quantity, $total_quantity ),
 				'fulfillment_id' => $saved_fulfillment_id,
 			)
 		);
