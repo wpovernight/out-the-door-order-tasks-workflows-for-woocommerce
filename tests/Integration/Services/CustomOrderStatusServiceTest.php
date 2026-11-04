@@ -141,7 +141,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		$this->service->update( $status->id, array( 'label' => 'Boxed' ) );
 		$this->assertSame( array( 'Boxed' ), $this->labels( $this->service->all() ) );
 
-		$this->service->request_deletion( $status->id );
+		$this->service->begin_deletion( $status->id );
 		$this->assertSame( array(), $this->service->all() );
 	}
 
@@ -270,7 +270,6 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 	 *  ================================ */
 
 	public function test_requesting_deletion_of_a_missing_status_fails(): void {
-		$this->assertFalse( $this->service->request_deletion( 999999 ) );
 		$this->assertSame( CustomOrderStatusService::DELETION_NOT_FOUND, $this->service->begin_deletion( 999999 ) );
 	}
 
@@ -292,7 +291,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		$status  = $this->service->create( array( 'label' => 'Packed' ) );
 		$deleted = $this->capture_deletions();
 
-		$this->assertTrue( $this->service->request_deletion( $status->id, 'processing' ) );
+		$this->assertSame( CustomOrderStatusService::DELETION_DONE, $this->service->begin_deletion( $status->id, 'processing' ) );
 
 		$this->assertNull( $this->service->find( $status->id ) );
 		$this->assertSame( array( array( $status->id, 'packed', 'processing' ) ), $deleted() );
@@ -303,12 +302,12 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		$status = $this->create_registered_status( 'Packed' );
 		$this->order_in( 'packed' );
 
-		$this->assertTrue( $this->service->request_deletion( $status->id ) );
+		$this->assertSame( CustomOrderStatusService::DELETION_SCHEDULED, $this->service->begin_deletion( $status->id ) );
 
 		$this->assertTrue( $this->service->find( $status->id )->is_deleting );
 		$this->assertTrue( as_has_scheduled_action( self::REASSIGN_HOOK, array( 'packed', 'on-hold', $status->id ), 'wpo-otd' ) );
 
-		$this->assertTrue( $this->service->request_deletion( $status->id ), 'A second request is accepted.' );
+		$this->assertSame( CustomOrderStatusService::DELETION_SCHEDULED, $this->service->begin_deletion( $status->id ), 'A second request is accepted.' );
 		$this->assertCount( 1, as_get_scheduled_actions( array( 'hook' => self::REASSIGN_HOOK, 'status' => 'pending' ), 'ids' ), '...without scheduling again.' );
 	}
 
@@ -386,7 +385,6 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 
 		try {
 			$this->assertSame( CustomOrderStatusService::DELETION_BUSY, $this->service->begin_deletion( $status->id ) );
-			$this->assertFalse( $this->service->request_deletion( $status->id ), 'Nothing was deleted or scheduled.' );
 			$this->assertFalse( $this->service->find( $status->id )->is_deleting, 'Nothing is flagged.' );
 			$this->assertFalse( as_has_scheduled_action( self::REASSIGN_HOOK ) );
 		} finally {
@@ -1297,7 +1295,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 
 		$this->assertFalse( $this->service->is_being_deleted( 'packed' ), 'Not before the deletion.' );
 
-		$this->service->request_deletion( $status->id );
+		$this->service->begin_deletion( $status->id );
 
 		foreach ( array( 'packed', 'wc-packed' ) as $key ) {
 			$this->assertTrue( $this->service->is_being_deleted( $key ), $key );
@@ -1320,7 +1318,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		$this->capture_logs();
 		add_filter( 'wpo_otd_reassign_orders_to_status', static fn() => 'packed' );
 
-		$this->service->request_deletion( $status->id );
+		$this->service->begin_deletion( $status->id );
 		$this->run_reassign_jobs();
 
 		$this->assertNotNull( $this->service->find( $status->id ), 'The deletion stopped on the order it could not move.' );
@@ -1557,7 +1555,7 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 	}
 
 	/**
-	 * Flag a status as being deleted, as request_deletion() does while orders are drained.
+	 * Flag a status as being deleted, as begin_deletion() does while orders are drained.
 	 *
 	 * @param int $id
 	 *

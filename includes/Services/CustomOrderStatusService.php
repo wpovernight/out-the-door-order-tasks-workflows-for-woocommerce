@@ -333,7 +333,7 @@ class CustomOrderStatusService {
 	 * @return bool False also when no custom status has the key, or the statuses cannot be read.
 	 */
 	public function is_being_deleted( string $status_key ): bool {
-		$key = str_starts_with( $status_key, 'wc-' ) ? substr( $status_key, 3 ) : $status_key;
+		$key = self::without_prefix( $status_key );
 
 		foreach ( $this->all() as $status ) {
 			if ( $status->is_deleting && $status->status_key === $key ) {
@@ -381,7 +381,7 @@ class CustomOrderStatusService {
 
 		if ( function_exists( 'wc_get_order_statuses' ) ) {
 			foreach ( array_keys( wc_get_order_statuses() ) as $prefixed ) {
-				$keys[] = strtolower( str_starts_with( (string) $prefixed, 'wc-' ) ? substr( (string) $prefixed, 3 ) : (string) $prefixed );
+				$keys[] = strtolower( self::without_prefix( (string) $prefixed ) );
 			}
 		}
 
@@ -442,7 +442,7 @@ class CustomOrderStatusService {
 		}
 
 		$status->id            = $result;
-		$this->cached_statuses = null;
+		$this->forget_statuses();
 
 		/**
 		 * Action triggered after a custom order status is created.
@@ -548,35 +548,18 @@ class CustomOrderStatusService {
 			);
 		}
 
-		$this->cached_statuses = null;
+		$this->forget_statuses();
 
 		return array( $custom_status, $data );
 	}
 
 	/**
-	 * Request deletion of a custom order status.
+	 * Delete a custom order status at once, or schedule its deletion when orders still have it.
 	 *
 	 * A status no order has is deleted at once. One that orders still have, or whose orders cannot be queried (see
 	 * can_query_orders_in()), is flagged is_deleting and its orders are moved to the fallback status by a background
 	 * batch job; the row is deleted once the final batch completes (see process_deletion_batch()). Until then the
-	 * status stays registered, so wc_get_orders() can keep matching its orders. begin_deletion() does the same and
-	 * tells which of the two happened.
-	 *
-	 * @param int    $id              The custom status ID to delete.
-	 * @param string $fallback_status The status to assign to affected orders (default: 'on-hold').
-	 *
-	 * @return bool True if the status was deleted or its deletion scheduled, false if no status has the ID or another
-	 *              request was changing it, so nothing was deleted.
-	 * @throws RuntimeException If the database does not delete or flag the status.
-	 */
-	public function request_deletion( int $id, string $fallback_status = 'on-hold' ): bool {
-		return in_array( $this->begin_deletion( $id, $fallback_status ), array( self::DELETION_DONE, self::DELETION_SCHEDULED ), true );
-	}
-
-	/**
-	 * Delete a custom order status at once, or schedule its deletion when orders still have it.
-	 *
-	 * Works as request_deletion() does, and tells which of the two happened.
+	 * status stays registered, so wc_get_orders() can keep matching its orders.
 	 *
 	 * @param int    $id              The custom status ID to delete.
 	 * @param string $fallback_status The status to assign to affected orders (default: 'on-hold').
@@ -702,7 +685,7 @@ class CustomOrderStatusService {
 		if ( false === $this->repository->save( $status ) ) {
 			throw new RuntimeException( esc_html( "Custom order status {$id} could not be flagged for deletion: " . $this->repository->get_last_db_error() ) );
 		}
-		$this->cached_statuses = null;
+		$this->forget_statuses();
 
 		$this->save_stuck_orders( $id, array() );
 		as_schedule_single_action( time(), self::HOOK, array( $status->status_key, $fallback_status, $id ), self::GROUP );
@@ -1172,13 +1155,18 @@ class CustomOrderStatusService {
 	 * @return bool
 	 */
 	private static function same_status( string $first, string $second ): bool {
-		$normalize = static function ( string $status ): string {
-			$status = strtolower( $status );
+		return self::without_prefix( strtolower( $first ) ) === self::without_prefix( strtolower( $second ) );
+	}
 
-			return str_starts_with( $status, 'wc-' ) ? substr( $status, 3 ) : $status;
-		};
-
-		return $normalize( $first ) === $normalize( $second );
+	/**
+	 * An order status without its "wc-" prefix, the prefix matched in lowercase only.
+	 *
+	 * @param string $status
+	 *
+	 * @return string
+	 */
+	private static function without_prefix( string $status ): string {
+		return str_starts_with( $status, 'wc-' ) ? substr( $status, 3 ) : $status;
 	}
 
 	/**
@@ -1200,7 +1188,7 @@ class CustomOrderStatusService {
 		if ( false === $deleted ) {
 			throw new RuntimeException( esc_html( "Custom order status {$status_id} could not be deleted: " . $this->repository->get_last_db_error() ) );
 		}
-		$this->cached_statuses = null;
+		$this->forget_statuses();
 		$this->save_stuck_orders( $status_id, array() );
 
 		// No row was deleted: the status was gone already, and whatever deleted it announced it.
