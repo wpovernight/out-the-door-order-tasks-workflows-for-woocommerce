@@ -48,35 +48,23 @@ class TaskRepository extends BaseRepository {
 			throw new InvalidArgumentException( 'Either given_task_id or given_task_position must be provided.' );
 		}
 
-		$task_field_value_repository = $this->task_field_value_repository;
-		$task_field_value_table_name = $task_field_value_repository->get_table_full_name();
-
 		if ( $given_task_id && empty( $given_task_position ) ) {
-			$given_task_field_value = $task_field_value_repository
+			$given_task_field_value = $this->task_field_value_repository
 				->find_by_task_and_field( $given_task_id, DefaultTaskFields::POSITION );
 			$given_task_position    = $given_task_field_value ? (float) $given_task_field_value->value : 0.0;
 		}
 
-		// Ensure the given task position is a finite number, defaulting to 0 if not.
 		if ( ! is_finite( $given_task_position ) ) {
 			$given_task_position = 0.0;
 		}
 
-		$query = $task_field_value_repository
-			->select( array( 'position.*' ) )
-			->alias( 'position' )
-			->join( "{$task_field_value_table_name} AS status", 'position.task_id', '=', 'status.task_id' )
-			->where( 'status.field_id', DefaultTaskFields::STATUS )
-			->where( 'status.value', $target_status_id )
-			->where( 'position.field_id', DefaultTaskFields::POSITION );
+		$query = $this->positions_in_status( $target_status_id );
 
-		// Exclude the given task ID if provided.
 		if ( ! empty( $given_task_id ) ) {
 			$query->where( 'position.task_id', '!=', $given_task_id );
 		}
 
-		// Filter for positions greater than the given task position.
-		// Positions always start at 1.0 or higher. So using `empty()` is fine.
+		// Positions start at 1.0, so an empty one means none was given.
 		if ( ! empty( $given_task_position ) ) {
 			$query->where_raw(
 				$this->wpdb->prepare(
@@ -86,12 +74,10 @@ class TaskRepository extends BaseRepository {
 			);
 		}
 
-		// Exclude the moving task ID if provided.
 		if ( $moving_task_id ) {
 			$query->where( 'position.task_id', '!=', $moving_task_id );
 		}
 
-		// Order by position ascending to get the next task.
 		$next_task_value_field = $query
 			->order_by_raw( 'CAST(position.value AS DECIMAL(10,5)) ASC' )
 			->first();
@@ -111,16 +97,7 @@ class TaskRepository extends BaseRepository {
 		?int $given_task_id,
 		int $target_status_id
 	): ?float {
-		$task_field_value_repository = $this->task_field_value_repository;
-		$task_field_value_table_name = $task_field_value_repository->get_table_full_name();
-
-		$last_task_value_field = $task_field_value_repository
-			->select( array( 'position.*' ) )
-			->alias( 'position' )
-			->join( "{$task_field_value_table_name} AS status", 'position.task_id', '=', 'status.task_id' )
-			->where( 'status.field_id', DefaultTaskFields::STATUS )
-			->where( 'status.value', $target_status_id )
-			->where( 'position.field_id', DefaultTaskFields::POSITION )
+		$last_task_value_field = $this->positions_in_status( $target_status_id )
 			->where( 'position.task_id', '!=', $given_task_id ?? 0 )
 			->order_by_raw( 'CAST(position.value AS DECIMAL(10,5)) DESC' )
 			->first();
@@ -129,7 +106,26 @@ class TaskRepository extends BaseRepository {
 	}
 
 	/**
-	 * Rebalance positions of tasks, optionally within a specific status.
+	 * Start a query for the position values of the tasks in a status column, aliased "position".
+	 *
+	 * @param int $status_id
+	 *
+	 * @return TaskFieldValueRepository The value repository, holding the query.
+	 */
+	private function positions_in_status( int $status_id ): TaskFieldValueRepository {
+		$table = $this->task_field_value_repository->get_table_full_name();
+
+		return $this->task_field_value_repository
+			->select( array( 'position.*' ) )
+			->alias( 'position' )
+			->join( "{$table} AS status", 'position.task_id', '=', 'status.task_id' )
+			->where( 'status.field_id', DefaultTaskFields::STATUS )
+			->where( 'status.value', $status_id )
+			->where( 'position.field_id', DefaultTaskFields::POSITION );
+	}
+
+	/**
+	 * Renumber the task positions of one status column 1, 2, 3, ... in their current order.
 	 *
 	 * @param int $status_id
 	 *
