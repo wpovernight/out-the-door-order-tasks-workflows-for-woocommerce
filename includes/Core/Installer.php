@@ -2,6 +2,7 @@
 
 namespace WPO\OTD\Core;
 
+use WPO\OTD\Enums\DefaultTaskFields;
 use WPO\OTD\OutTheDoor;
 use WPO\OTD\Repositories\BaseRepository;
 use WPO\OTD\Repositories\TaskFieldOptionRepository;
@@ -70,7 +71,6 @@ final class Installer {
 	 */
 	public function install(): void {
 		if ( get_option( self::OPTION_VERSION ) ) {
-			// Already installed.
 			return;
 		}
 
@@ -78,7 +78,6 @@ final class Installer {
 		$this->insert_default_data();
 		$this->seed_initial_state();
 
-		// Record the installed plugin version and the current schema version.
 		update_option( self::OPTION_VERSION, OutTheDoor::VERSION, true );
 		update_option( self::OPTION_DB_VERSION, self::DB_VERSION, true );
 	}
@@ -211,26 +210,12 @@ final class Installer {
 	private function insert_default_data(): void {
 		global $wpdb;
 
-		/**
-		 * Note: When adding new default fields, ensure that the ID is unique and does
-		 * not conflict with existing fields. Also, update the DefaultTaskFields enum
-		 * class accordingly to maintain a single source of truth for default field IDs.
-		 *
-		 * Default fields to be inserted on plugin activation.
-		 * The IDs are hardcoded to ensure consistency across installations and to allow
-		 * referencing in code. Protected fields (is_protected = true) cannot be deleted
-		 * by users and are essential for the plugin's core functionality. Editable fields
-		 * (is_editable = true) can be modified by users, but protected fields cannot be
-		 * deleted to ensure the integrity. The 'options' key is only applicable for 'select'
-		 * type fields and defines the available options for that field.
-		 */
+		// Each field keeps the same ID on every site, so code can name it. Users can edit an editable field, but never
+		// delete a protected one. 'options' lists a select field's choices.
 		$default_fields = array(
-			/*
-			 * Default fields: Non-editable and protected fields.
-			 */
-			// Status(column in Kanban view) field.
+			// The task's column on the Kanban board.
 			array(
-				'id'           => 1,
+				'id'           => DefaultTaskFields::STATUS,
 				'label'        => 'Status',
 				'type'         => 'select',
 				'slug'         => 'status',
@@ -258,9 +243,9 @@ final class Installer {
 					),
 				),
 			),
-			// Position within status - used for ordering tasks within a status column in Kanban view
+			// The task's order within its column.
 			array(
-				'id'           => 2,
+				'id'           => DefaultTaskFields::POSITION,
 				'label'        => 'Position',
 				'type'         => 'number',
 				'slug'         => 'position',
@@ -268,9 +253,9 @@ final class Installer {
 				'is_editable'  => false,
 				'is_protected' => true,
 			),
-			// User ID of the creator - used to store which user created the task.
+			// The ID of the user who created the task.
 			array(
-				'id'           => 3,
+				'id'           => DefaultTaskFields::CREATOR,
 				'label'        => 'Creator',
 				'type'         => 'number',
 				'slug'         => 'creator',
@@ -278,9 +263,9 @@ final class Installer {
 				'is_editable'  => false,
 				'is_protected' => true,
 			),
-			// Order ID - used to associate the task with a specific order.
+			// The ID of the order the task belongs to.
 			array(
-				'id'           => 4,
+				'id'           => DefaultTaskFields::ORDER,
 				'label'        => 'Order',
 				'type'         => 'number',
 				'slug'         => 'order',
@@ -288,9 +273,8 @@ final class Installer {
 				'is_editable'  => false,
 				'is_protected' => true,
 			),
-			// Due date - used to store the deadline for the task.
 			array(
-				'id'           => 5,
+				'id'           => DefaultTaskFields::DUE_DATE,
 				'label'        => 'Due Date',
 				'type'         => 'date',
 				'slug'         => 'due_date',
@@ -298,9 +282,9 @@ final class Installer {
 				'is_editable'  => false,
 				'is_protected' => true,
 			),
-			// Done date - used to store the date when a task is marked as done (status changed to "Done")
+			// When the task reached the status assigned to the "done" role.
 			array(
-				'id'           => 6,
+				'id'           => DefaultTaskFields::DONE_DATE,
 				'label'        => 'Done Date',
 				'type'         => 'date',
 				'slug'         => 'done_date',
@@ -308,9 +292,9 @@ final class Installer {
 				'is_editable'  => false,
 				'is_protected' => true,
 			),
-			// Archived date - used to store the date when a task is archived (status changed to "Archived")
+			// When the task was archived. Archiving keeps the task's status.
 			array(
-				'id'           => 7,
+				'id'           => DefaultTaskFields::ARCHIVED_DATE,
 				'label'        => 'Archived Date',
 				'type'         => 'date',
 				'slug'         => 'archived_date',
@@ -318,11 +302,8 @@ final class Installer {
 				'is_editable'  => false,
 				'is_protected' => true,
 			),
-			/*
-			 * Editable and non-protected fields.
-			 */
 			array(
-				'id'           => 8,
+				'id'           => DefaultTaskFields::PRIORITY,
 				'label'        => 'Priority',
 				'type'         => 'select',
 				'slug'         => 'priority',
@@ -358,32 +339,26 @@ final class Installer {
 			),
 		);
 
-		$task_field_repository        = $this->task_field_repository;
-		$task_field_option_repository = $this->task_field_option_repository;
+		$table_name = $this->task_field_repository->get_table_full_name();
 
 		foreach ( $default_fields as $field_data ) {
 			$field_id = $field_data['id'];
 
-			// Check if field with this specific ID already exists.
-			$existing_field = $task_field_repository->find( $field_id );
-			if ( $existing_field ) {
+			if ( $this->task_field_repository->find( $field_id ) ) {
 				continue;
 			}
 
 			$field_options = $field_data['options'] ?? array();
 			unset( $field_data['options'] );
 
-			// Use raw INSERT to ensure the exact ID is used.
-			$table_name = $wpdb->prefix . 'wpo_otd_task_fields';
+			// A raw INSERT, so the field gets exactly its ID.
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Install-time seeding; preserves the exact field ID.
-			$result     = $wpdb->insert( $table_name, $field_data );
+			$result = $wpdb->insert( $table_name, $field_data );
 
 			if ( $result ) {
 				$inserted_id = (int) $wpdb->insert_id;
 
-				// Verify the ID matches what we expected.
 				if ( $inserted_id !== $field_id ) {
-					// Log error or throw exception - ID mismatch is critical.
 					Logger::critical(
 						sprintf(
 							'Failed to insert field with ID %d. Got ID %d instead.',
@@ -394,24 +369,21 @@ final class Installer {
 					continue;
 				}
 
-				// Insert options if it's a select field.
-				if ( ! empty( $field_options ) ) {
-					foreach ( $field_options as $option ) {
-						$task_field_option_repository
-							->insert( array_merge( $option, array( 'field_id' => $inserted_id ) ) );
-					}
+				foreach ( $field_options as $option ) {
+					$this->task_field_option_repository
+						->insert( array_merge( $option, array( 'field_id' => $inserted_id ) ) );
 				}
 			} else {
 				Logger::critical( sprintf( 'Failed to insert default field "%s". DB error: %s', $field_data['slug'], $wpdb->last_error ) );
 			}
 		}
 
-		// Reset auto-increment to prevent gaps if needed.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Install-time check; cache would be stale immediately after seeding.
-		$max_id = $wpdb->get_var( "SELECT MAX(id) FROM {$wpdb->prefix}wpo_otd_task_fields" );
+		// The next field created gets the ID after the highest one.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Install-time check; cache would be stale immediately after seeding. The table name is the repository's own.
+		$max_id = $wpdb->get_var( "SELECT MAX(id) FROM {$table_name}" );
 		if ( $max_id ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Install-time AUTO_INCREMENT reset; schema change is intentional.
-			$wpdb->query( $wpdb->prepare( "ALTER TABLE {$wpdb->prefix}wpo_otd_task_fields AUTO_INCREMENT = %d", $max_id + 1 ) );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Install-time AUTO_INCREMENT reset; schema change is intentional. The table name is the repository's own.
+			$wpdb->query( $wpdb->prepare( "ALTER TABLE {$table_name} AUTO_INCREMENT = %d", $max_id + 1 ) );
 		}
 	}
 
@@ -425,21 +397,15 @@ final class Installer {
 	}
 
 	/**
-	 * Acquire a lock for the upgrade process.
+	 * Take the upgrade lock for 2 minutes, so concurrent requests do not run the migrations twice.
 	 *
-	 * This prevents concurrent requests from running migrations multiple times.
-	 *
-	 * @return bool
+	 * @return bool False when another request holds it.
 	 */
 	private function acquire_upgrade_lock(): bool {
-		// Try to acquire a short-lived lock (prevents concurrent requests running migrations twice).
-		$locked_until = (int) get_option( self::OPTION_UPGRADE_LOCK, 0 );
-
-		if ( $locked_until > time() ) {
-			return false; // Another process is migrating.
+		if ( (int) get_option( self::OPTION_UPGRADE_LOCK, 0 ) > time() ) {
+			return false;
 		}
 
-		// Lock the upgrade process for 2 minutes to prevent concurrent migrations.
 		update_option( self::OPTION_UPGRADE_LOCK, time() + 120, false );
 
 		return true;

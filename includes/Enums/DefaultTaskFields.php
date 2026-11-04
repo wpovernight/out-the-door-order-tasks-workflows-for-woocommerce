@@ -7,7 +7,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Default task field IDs.
  *
- * These IDs match the hardcoded values in Install.php.
+ * The IDs the installer seeds the default fields with.
  * Protected fields cannot be deleted by users.
  */
 final class DefaultTaskFields {
