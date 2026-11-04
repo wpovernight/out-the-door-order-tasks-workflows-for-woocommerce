@@ -312,7 +312,6 @@ class TaskController extends BaseRestController {
 		try {
 			$tasks = $this->task_manager_service->get_all_tasks_with_fields();
 
-
 			/**
 			 * Allow modifying the tasks response before it's returned.
 			 *
