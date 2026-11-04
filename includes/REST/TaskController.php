@@ -321,8 +321,7 @@ class TaskController extends BaseRestController {
 
 			return $this->respond( $tasks );
 		} catch ( \Throwable $e ) {
-			Logger::error( 'Failed to fetch tasks: ' . $e->getMessage() );
-			return new WP_Error( 'fetch_failed', 'Failed to fetch tasks.', array( 'status' => 500 ) );
+			return $this->server_error( 'fetch_failed', 'Failed to fetch tasks.', 'Failed to fetch tasks: ' . $e->getMessage() );
 		}
 	}
 
@@ -354,10 +353,7 @@ class TaskController extends BaseRestController {
 		$errors = $this->with_empty_title_error( $data, $errors );
 
 		if ( ! empty( $errors ) ) {
-			return new WP_Error( 'invalid_data', 'Invalid data provided', array(
-				'status' => 400,
-				'errors' => $errors
-			) );
+			return $this->invalid_data( $errors, 'Invalid data provided' );
 		}
 
 		try {
@@ -369,8 +365,7 @@ class TaskController extends BaseRestController {
 		} catch ( TaskCreatedWithErrorException $e ) {
 			return $this->task_created_with_error( $e );
 		} catch ( \Throwable $e ) {
-			Logger::error( 'Task creation failed: ' . $e->getMessage() );
-			return new WP_Error( 'task_creation_failed', __( 'Failed to create task.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 500 ) );
+			return $this->server_error( 'task_creation_failed', __( 'Failed to create task.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), 'Task creation failed: ' . $e->getMessage() );
 		}
 
 		$task_id = (int) $task['id'];
@@ -446,8 +441,7 @@ class TaskController extends BaseRestController {
 
 			return $this->respond( $task );
 		} catch ( \Throwable $e ) {
-			Logger::error( 'Failed to fetch task: ' . $e->getMessage() );
-			return new WP_Error( 'fetch_failed', 'Failed to fetch task.', array( 'status' => 500 ) );
+			return $this->server_error( 'fetch_failed', 'Failed to fetch task.', 'Failed to fetch task: ' . $e->getMessage() );
 		}
 	}
 
@@ -478,10 +472,7 @@ class TaskController extends BaseRestController {
 		) ) );
 
 		if ( ! empty( $errors ) ) {
-			return new WP_Error( 'invalid_data', 'Invalid data provided', array(
-				'status' => 400,
-				'errors' => $errors
-			) );
+			return $this->invalid_data( $errors, 'Invalid data provided' );
 		}
 
 		try {
@@ -501,8 +492,7 @@ class TaskController extends BaseRestController {
 		} catch ( \InvalidArgumentException $e ) {
 			return new WP_Error( 'not_found', $e->getMessage(), array( 'status' => 404 ) );
 		} catch ( \Throwable $e ) {
-			Logger::error( 'Task update failed: ' . $e->getMessage() );
-			return new WP_Error( 'task_update_failed', __( 'Failed to update task.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 500 ) );
+			return $this->server_error( 'task_update_failed', __( 'Failed to update task.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), 'Task update failed: ' . $e->getMessage() );
 		}
 	}
 
@@ -525,13 +515,11 @@ class TaskController extends BaseRestController {
 		try {
 			$deleted = $task_manager_service->delete_task( $id );
 		} catch ( \Exception $e ) {
-			Logger::error( 'Task deletion failed: ' . $e->getMessage() );
-			return new WP_Error( 'task_deletion_failed', __( 'Failed to delete task.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 500 ) );
+			return $this->server_error( 'task_deletion_failed', __( 'Failed to delete task.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), 'Task deletion failed: ' . $e->getMessage() );
 		}
 
 		if ( false === $deleted ) {
-			Logger::error( "Task deletion failed: the database refused to delete task {$id}." );
-			return new WP_Error( 'task_deletion_failed', __( 'Failed to delete task.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 500 ) );
+			return $this->server_error( 'task_deletion_failed', __( 'Failed to delete task.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), "Task deletion failed: the database refused to delete task {$id}." );
 		}
 
 		if ( 0 === $deleted ) {
@@ -601,8 +589,7 @@ class TaskController extends BaseRestController {
 
 			return $this->respond( $fields );
 		} catch ( \Throwable $e ) {
-			Logger::error( 'Failed to fetch task fields: ' . $e->getMessage() );
-			return new WP_Error( 'fetch_failed', 'Failed to fetch task fields.', array( 'status' => 500 ) );
+			return $this->server_error( 'fetch_failed', 'Failed to fetch task fields.', 'Failed to fetch task fields: ' . $e->getMessage() );
 		}
 	}
 
@@ -630,8 +617,7 @@ class TaskController extends BaseRestController {
 
 			return $this->respond( $options );
 		} catch ( \Throwable $e ) {
-			Logger::error( 'Failed to fetch field options: ' . $e->getMessage() );
-			return new WP_Error( 'fetch_failed', 'Failed to fetch field options.', array( 'status' => 500 ) );
+			return $this->server_error( 'fetch_failed', 'Failed to fetch field options.', 'Failed to fetch field options: ' . $e->getMessage() );
 		}
 	}
 
@@ -659,8 +645,7 @@ class TaskController extends BaseRestController {
 
 			return $this->respond( $options );
 		} catch ( \Throwable $e ) {
-			Logger::error( 'Failed to fetch field options: ' . $e->getMessage() );
-			return new WP_Error( 'fetch_failed', 'Failed to fetch field options.', array( 'status' => 500 ) );
+			return $this->server_error( 'fetch_failed', 'Failed to fetch field options.', 'Failed to fetch field options: ' . $e->getMessage() );
 		}
 	}
 
@@ -693,10 +678,7 @@ class TaskController extends BaseRestController {
 		) );
 
 		if ( ! empty( $errors ) ) {
-			return new WP_Error( 'invalid_data', 'Invalid data provided', array(
-				'status' => 400,
-				'errors' => $errors
-			) );
+			return $this->invalid_data( $errors, 'Invalid data provided' );
 		}
 
 		try {
@@ -722,8 +704,7 @@ class TaskController extends BaseRestController {
 
 			return $this->respond( $option );
 		} catch ( \Throwable $e ) {
-			Logger::error( 'Failed to create field option: ' . $e->getMessage() );
-			return new WP_Error( 'creation_failed', 'Failed to create field option.', array( 'status' => 500 ) );
+			return $this->server_error( 'creation_failed', 'Failed to create field option.', 'Failed to create field option: ' . $e->getMessage() );
 		}
 	}
 
@@ -761,10 +742,7 @@ class TaskController extends BaseRestController {
 		) );
 
 		if ( ! empty( $errors ) ) {
-			return new WP_Error( 'invalid_data', 'Invalid data provided', array(
-				'status' => 400,
-				'errors' => $errors
-			) );
+			return $this->invalid_data( $errors, 'Invalid data provided' );
 		}
 
 		try {
@@ -784,8 +762,7 @@ class TaskController extends BaseRestController {
 		} catch ( \InvalidArgumentException $e ) {
 			return new WP_Error( 'not_found', $e->getMessage(), array( 'status' => 404 ) );
 		} catch ( \Throwable $e ) {
-			Logger::error( 'Failed to update field option: ' . $e->getMessage() );
-			return new WP_Error( 'update_failed', 'Failed to update field option.', array( 'status' => 500 ) );
+			return $this->server_error( 'update_failed', 'Failed to update field option.', 'Failed to update field option: ' . $e->getMessage() );
 		}
 	}
 
@@ -812,8 +789,7 @@ class TaskController extends BaseRestController {
 		try {
 			$task_manager_service = $this->task_manager_service;
 			if ( ! $task_manager_service->delete_field_option( $field_id, $option_id ) ) {
-				Logger::error( "Failed to delete field option: the database refused to delete option {$option_id}." );
-				return new WP_Error( 'deletion_failed', 'Failed to delete field option.', array( 'status' => 500 ) );
+				return $this->server_error( 'deletion_failed', 'Failed to delete field option.', "Failed to delete field option: the database refused to delete option {$option_id}." );
 			}
 
 			return $this->respond( array( 'success' => true ) );
@@ -822,8 +798,7 @@ class TaskController extends BaseRestController {
 		} catch ( \RuntimeException $e ) {
 			return new WP_Error( 'delete_failed', $e->getMessage(), array( 'status' => 409 ) );
 		} catch ( \Throwable $e ) {
-			Logger::error( 'Failed to delete field option: ' . $e->getMessage() );
-			return new WP_Error( 'deletion_failed', 'Failed to delete field option.', array( 'status' => 500 ) );
+			return $this->server_error( 'deletion_failed', 'Failed to delete field option.', 'Failed to delete field option: ' . $e->getMessage() );
 		}
 	}
 
@@ -867,14 +842,7 @@ class TaskController extends BaseRestController {
 				array( 'status' => 400 )
 			);
 		} catch ( \Exception $e ) {
-			// Unexpected errors (database issues, etc.).
-			Logger::error( 'Failed to reorder field options: ' . $e->getMessage() );
-
-			return new WP_Error(
-				'update_failed',
-				'Failed to update field option positions',
-				array( 'status' => 500 )
-			);
+			return $this->server_error( 'update_failed', 'Failed to update field option positions', 'Failed to reorder field options: ' . $e->getMessage() );
 		}
 	}
 
@@ -952,8 +920,7 @@ class TaskController extends BaseRestController {
 		} catch ( \InvalidArgumentException $e ) {
 			return new WP_Error( 'invalid_params', $e->getMessage(), array( 'status' => 400 ) );
 		} catch ( \Exception $e ) {
-			Logger::error( 'Task move failed: ' . $e->getMessage() );
-			return new WP_Error( 'task_move_failed', __( 'Failed to move task.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 500 ) );
+			return $this->server_error( 'task_move_failed', __( 'Failed to move task.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), 'Task move failed: ' . $e->getMessage() );
 		}
 
 		if ( ! $new_position ) {
@@ -992,8 +959,7 @@ class TaskController extends BaseRestController {
 		} catch ( \RuntimeException $e ) {
 			return new WP_Error( 'task_finish_failed', $e->getMessage(), array( 'status' => 409 ) );
 		} catch ( \Exception $e ) {
-			Logger::error( 'Task finish failed: ' . $e->getMessage() );
-			return new WP_Error( 'task_finish_failed', __( 'Failed to finish task.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 500 ) );
+			return $this->server_error( 'task_finish_failed', __( 'Failed to finish task.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), 'Task finish failed: ' . $e->getMessage() );
 		}
 	}
 
@@ -1019,8 +985,7 @@ class TaskController extends BaseRestController {
 		} catch ( \InvalidArgumentException $e ) {
 			return new WP_Error( 'not_found', $e->getMessage(), array( 'status' => 404 ) );
 		} catch ( \Exception $e ) {
-			Logger::error( 'Task archive failed: ' . $e->getMessage() );
-			return new WP_Error( 'task_archive_failed', __( 'Failed to archive task.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 500 ) );
+			return $this->server_error( 'task_archive_failed', __( 'Failed to archive task.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), 'Task archive failed: ' . $e->getMessage() );
 		}
 
 		return $this->respond( array(
@@ -1050,8 +1015,7 @@ class TaskController extends BaseRestController {
 		} catch ( \InvalidArgumentException $e ) {
 			return new WP_Error( 'not_found', $e->getMessage(), array( 'status' => 404 ) );
 		} catch ( \Exception $e ) {
-			Logger::error( 'Task unarchive failed: ' . $e->getMessage() );
-			return new WP_Error( 'task_unarchive_failed', __( 'Failed to unarchive task.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 500 ) );
+			return $this->server_error( 'task_unarchive_failed', __( 'Failed to unarchive task.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), 'Task unarchive failed: ' . $e->getMessage() );
 		}
 
 		return $this->respond( array(
@@ -1084,10 +1048,7 @@ class TaskController extends BaseRestController {
 		) );
 
 		if ( ! empty( $errors ) ) {
-			return new WP_Error( 'invalid_data', 'Invalid data provided', array(
-				'status' => 400,
-				'errors' => $errors,
-			) );
+			return $this->invalid_data( $errors, 'Invalid data provided' );
 		}
 
 		$task_status_role_service = $this->task_status_role_service;
@@ -1108,8 +1069,7 @@ class TaskController extends BaseRestController {
 		} catch ( \InvalidArgumentException $e ) {
 			return new WP_Error( 'invalid_option', $e->getMessage(), array( 'status' => 400 ) );
 		} catch ( \Throwable $e ) {
-			Logger::error( 'Failed to update status roles: ' . $e->getMessage() );
-			return new WP_Error( 'update_failed', 'Failed to update status roles.', array( 'status' => 500 ) );
+			return $this->server_error( 'update_failed', 'Failed to update status roles.', 'Failed to update status roles: ' . $e->getMessage() );
 		}
 	}
 

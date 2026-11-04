@@ -52,7 +52,7 @@ class CustomOrderStatusControllerTest extends RestTestCase {
 		$response = $this->request( 'POST', '/custom-order-statuses', $body );
 
 		$this->assertResponse( 400, $response, 'invalid_data' );
-		$this->assertArrayHasKey( $field, $response->get_data()['data']['errors'] );
+		$this->assertArrayHasKey( $field, $this->json( $response )['data']['errors'] );
 	}
 
 	public function invalid_status_provider(): array {
@@ -73,13 +73,13 @@ class CustomOrderStatusControllerTest extends RestTestCase {
 		$created = $this->request( 'POST', '/custom-order-statuses', array( 'label' => 'Packed', 'status_key' => $key ) );
 
 		$this->assertResponse( 400, $created, 'invalid_data' );
-		$this->assertArrayHasKey( 'status_key', $created->get_data()['data']['errors'] );
+		$this->assertArrayHasKey( 'status_key', $this->json( $created )['data']['errors'] );
 
 		$id      = $this->create_status( 'Boxed' );
 		$updated = $this->request( 'PUT', "/custom-order-statuses/{$id}", array( 'status_key' => $key ) );
 
 		$this->assertResponse( 400, $updated, 'invalid_data' );
-		$this->assertArrayHasKey( 'status_key', $updated->get_data()['data']['errors'] );
+		$this->assertArrayHasKey( 'status_key', $this->json( $updated )['data']['errors'] );
 		$this->assertSame( 'boxed', $this->make( CustomOrderStatusService::class )->find( $id )->status_key );
 	}
 
@@ -108,7 +108,7 @@ class CustomOrderStatusControllerTest extends RestTestCase {
 		$this->assertResponse( 400, $response, 'invalid_data' );
 		$this->assertSame(
 			array( 'The label has no Latin letter or digit to make a status key from: send a status_key of up to 17 letters, digits, - and _.' ),
-			$response->get_data()['data']['errors']['status_key']
+			$this->json( $response )['data']['errors']['status_key']
 		);
 
 		$created = $this->request( 'POST', '/custom-order-statuses', array( 'label' => $label, 'status_key' => 'shipped' ) );
@@ -152,7 +152,7 @@ class CustomOrderStatusControllerTest extends RestTestCase {
 		$this->assertResponse( 400, $created, 'invalid_data' );
 		$this->assertSame(
 			array( 'This status key belongs to an order status of WooCommerce or of another plugin. Choose another one.' ),
-			$created->get_data()['data']['errors']['status_key']
+			$this->json( $created )['data']['errors']['status_key']
 		);
 
 		$id      = $this->create_status( 'Mine' );
@@ -178,7 +178,7 @@ class CustomOrderStatusControllerTest extends RestTestCase {
 		$this->assertResponse( 400, $response, 'invalid_data' );
 		$this->assertSame(
 			array( 'The label makes the status key processing, which belongs to an order status of WooCommerce or of another plugin. Send a status_key.' ),
-			$response->get_data()['data']['errors']['status_key']
+			$this->json( $response )['data']['errors']['status_key']
 		);
 		$this->assertResponse( 200, $this->request( 'POST', '/custom-order-statuses', array( 'label' => 'Processing', 'status_key' => 'in-the-works' ) ) );
 	}
@@ -204,7 +204,7 @@ class CustomOrderStatusControllerTest extends RestTestCase {
 		$too_long = $this->request( 'POST', '/custom-order-statuses', array( 'label' => 'Long', 'status_key' => str_repeat( 'a', 18 ) ) );
 
 		$this->assertResponse( 400, $too_long, 'invalid_data' );
-		$this->assertSame( array( 'The status_key field may not be longer than 17 characters.' ), $too_long->get_data()['data']['errors']['status_key'] );
+		$this->assertSame( array( 'The status_key field may not be longer than 17 characters.' ), $this->json( $too_long )['data']['errors']['status_key'] );
 
 		$this->assertResponse( 200, $this->request( 'POST', '/custom-order-statuses', array( 'label' => 'Long', 'status_key' => str_repeat( 'a', 17 ) ) ) );
 
@@ -271,7 +271,7 @@ class CustomOrderStatusControllerTest extends RestTestCase {
 		$response = $this->request( 'PUT', "/custom-order-statuses/{$id}", array( $field => null ) );
 
 		$this->assertResponse( 400, $response, 'invalid_data' );
-		$this->assertSame( array( "The {$field} field may not be null." ), $response->get_data()['data']['errors'][ $field ] );
+		$this->assertSame( array( "The {$field} field may not be null." ), $this->json( $response )['data']['errors'][ $field ] );
 		$this->assertSame( 'Packed', $this->make( CustomOrderStatusService::class )->find( $id )->label );
 	}
 

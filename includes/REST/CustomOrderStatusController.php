@@ -6,7 +6,6 @@ use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
 use WP_Error;
-use WPO\OTD\Core\Logger;
 use WPO\OTD\Exceptions\InvalidStatusKeyException;
 use WPO\OTD\Exceptions\StatusBeingDeletedException;
 use WPO\OTD\Exceptions\StatusKeyTakenException;
@@ -129,10 +128,7 @@ class CustomOrderStatusController extends BaseRestController {
 		$errors = $this->with_unusable_key_error( $data, $errors, null );
 
 		if ( ! empty( $errors ) ) {
-			return new WP_Error( 'invalid_data', __( 'Invalid data provided', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array(
-				'status' => 400,
-				'errors' => $errors
-			) );
+			return $this->invalid_data( $errors, __( 'Invalid data provided', 'out-the-door-order-tasks-workflows-for-woocommerce' ) );
 		}
 
 		$custom_order_status_service = $this->custom_order_status_service;
@@ -142,8 +138,7 @@ class CustomOrderStatusController extends BaseRestController {
 		} catch ( InvalidStatusKeyException $e ) {
 			return $this->invalid_key( $e );
 		} catch ( \Throwable $e ) {
-			Logger::error( 'Custom order status creation failed: ' . $e->getMessage() );
-			return new WP_Error( 'creation_failed', __( 'Failed to create custom order status.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 500 ) );
+			return $this->server_error( 'creation_failed', __( 'Failed to create custom order status.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), 'Custom order status creation failed: ' . $e->getMessage() );
 		}
 
 		return $this->respond( $new_status );
@@ -191,13 +186,9 @@ class CustomOrderStatusController extends BaseRestController {
 	 * @return WP_Error
 	 */
 	private function invalid_key( InvalidStatusKeyException $exception ): WP_Error {
-		return new WP_Error(
-			'invalid_data',
-			__( 'Invalid data provided', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
-			array(
-				'status' => 400,
-				'errors' => array( 'status_key' => array( $exception->getMessage() ) ),
-			)
+		return $this->invalid_data(
+			array( 'status_key' => array( $exception->getMessage() ) ),
+			__( 'Invalid data provided', 'out-the-door-order-tasks-workflows-for-woocommerce' )
 		);
 	}
 
@@ -255,10 +246,7 @@ class CustomOrderStatusController extends BaseRestController {
 		$errors = $this->with_unusable_key_error( $data, $errors, $id );
 
 		if ( ! empty( $errors ) ) {
-			return new WP_Error( 'invalid_data', __( 'Invalid data provided', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array(
-				'status' => 400,
-				'errors' => $errors
-			) );
+			return $this->invalid_data( $errors, __( 'Invalid data provided', 'out-the-door-order-tasks-workflows-for-woocommerce' ) );
 		}
 
 		$custom_order_status_service = $this->custom_order_status_service;
@@ -274,8 +262,7 @@ class CustomOrderStatusController extends BaseRestController {
 		} catch ( StatusBeingDeletedException $e ) {
 			return new WP_Error( 'status_being_deleted', $e->getMessage(), array( 'status' => 409 ) );
 		} catch ( \Throwable $e ) {
-			Logger::error( 'Custom order status update failed: ' . $e->getMessage() );
-			return new WP_Error( 'update_failed', __( 'Failed to update custom order status.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 500 ) );
+			return $this->server_error( 'update_failed', __( 'Failed to update custom order status.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), 'Custom order status update failed: ' . $e->getMessage() );
 		}
 
 		return $this->respond( $updated_status );
@@ -303,8 +290,7 @@ class CustomOrderStatusController extends BaseRestController {
 		try {
 			$outcome = $custom_order_status_service->begin_deletion( $id );
 		} catch ( \Throwable $e ) {
-			Logger::error( 'Custom order status deletion failed: ' . $e->getMessage() );
-			return new WP_Error( 'deletion_failed', __( 'Failed to delete custom order status.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 500 ) );
+			return $this->server_error( 'deletion_failed', __( 'Failed to delete custom order status.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), 'Custom order status deletion failed: ' . $e->getMessage() );
 		}
 
 		if ( CustomOrderStatusService::DELETION_NOT_FOUND === $outcome ) {

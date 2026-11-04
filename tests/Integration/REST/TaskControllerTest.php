@@ -130,7 +130,7 @@ class TaskControllerTest extends RestTestCase {
 		$this->assertResponse( 400, $response, $code );
 
 		if ( $error_field ) {
-			$this->assertArrayHasKey( $error_field, $response->get_data()['data']['errors'] );
+			$this->assertArrayHasKey( $error_field, $this->json( $response )['data']['errors'] );
 		}
 		$this->assertSame( array(), $this->make( TaskManagerService::class )->get_all_tasks() );
 	}
@@ -263,7 +263,7 @@ class TaskControllerTest extends RestTestCase {
 		$this->assertResponse( 400, $response, 'invalid_data' );
 		$this->assertSame(
 			array( 'The title field is empty once its markup and whitespace are removed.' ),
-			$response->get_data()['data']['errors']['title']
+			$this->json( $response )['data']['errors']['title']
 		);
 		$this->assertSame( 'Valid', $this->make( TaskManagerService::class )->get_task( $id )->title );
 	}
@@ -606,7 +606,7 @@ class TaskControllerTest extends RestTestCase {
 		$response = rest_do_request( $request );
 
 		$this->assertResponse( 400, $response, 'invalid_data' );
-		$this->assertSame( array( "The {$role} field must be an integer." ), $response->get_data()['data']['errors'][ $role ] );
+		$this->assertSame( array( "The {$role} field must be an integer." ), $this->json( $response )['data']['errors'][ $role ] );
 		$this->assertSame( $before, array( $roles->get_done_field_option_id(), $roles->get_undone_field_option_id() ), 'No role changes.' );
 	}
 
