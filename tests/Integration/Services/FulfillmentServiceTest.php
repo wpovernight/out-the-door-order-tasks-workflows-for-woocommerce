@@ -210,6 +210,39 @@ class FulfillmentServiceTest extends IntegrationTestCase {
 		$this->assertSame( '', $this->cached_status( $untracked->get_id() ), 'An order nobody fulfils stays out of the lists.' );
 	}
 
+	public function test_an_order_with_a_cached_status_but_no_entries_is_refreshed(): void {
+		$order = $this->create_order( array( 3 ) );
+		$order->update_meta_data( FulfillmentService::ORDER_FULFILLMENT_STATUS_META_KEY, FulfillmentStatuses::FULFILLED );
+		$order->save();
+		$this->service->register_hooks();
+
+		$this->refund( $order, $this->first_item( $order ), 1 );
+
+		$this->assertSame( FulfillmentStatuses::NOT_FULFILLED, $this->cached_status( $order->get_id() ) );
+	}
+
+	public function test_a_refund_deleted_through_the_rest_api_refreshes_the_cached_status(): void {
+		$order = $this->create_order( array( 3 ) );
+		$this->ship( $order, array( 2 ) );
+		$this->service->update_order_fulfillment_status_meta( $order->get_id() );
+		$this->service->register_hooks();
+		$refund = $this->refund( $order, $this->first_item( $order ), 1 );
+		$this->assertSame( FulfillmentStatuses::FULFILLED, $this->cached_status( $order->get_id() ) );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$GLOBALS['wp_rest_server'] = null;
+
+		try {
+			$request = new \WP_REST_Request( 'DELETE', "/wc/v3/orders/{$order->get_id()}/refunds/{$refund->get_id()}" );
+			$request->set_param( 'force', true );
+			$response = rest_do_request( $request );
+		} finally {
+			$GLOBALS['wp_rest_server'] = null;
+		}
+
+		$this->assertSame( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertSame( FulfillmentStatuses::PARTIALLY_FULFILLED, $this->cached_status( $order->get_id() ) );
+	}
+
 	public function test_shipping_more_than_ordered_is_logged(): void {
 		$order = $this->create_order( array( 2, 1 ) );
 		$this->ship( $order, array( array( 2, 1 ), 1 ) );

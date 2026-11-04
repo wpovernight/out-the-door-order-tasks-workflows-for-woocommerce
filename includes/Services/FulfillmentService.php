@@ -22,6 +22,8 @@ final class FulfillmentService {
 		// Refunded units need no fulfilment, so a refund can change an order's status.
 		add_action( 'woocommerce_order_refunded', array( $this, 'refresh_after_refund' ) );
 		add_action( 'woocommerce_refund_deleted', array( $this, 'refresh_after_refund_deleted' ), 10, 2 );
+		// Deleting a refund through the REST API does not fire woocommerce_refund_deleted.
+		add_action( 'woocommerce_rest_delete_shop_order_refund_object', array( $this, 'refresh_after_rest_refund_deletion' ) );
 	}
 
 	/**
@@ -45,6 +47,19 @@ final class FulfillmentService {
 	 */
 	public function refresh_after_refund_deleted( int $refund_id, int $order_id ): void {
 		$this->refresh_tracked_order( $order_id );
+	}
+
+	/**
+	 * Recalculate the cached status of a tracked order after the REST API deleted one of its refunds.
+	 *
+	 * @param mixed $refund The deleted refund, which still knows its order.
+	 *
+	 * @return void
+	 */
+	public function refresh_after_rest_refund_deletion( mixed $refund ): void {
+		if ( $refund instanceof \WC_Order_Refund ) {
+			$this->refresh_tracked_order( $refund->get_parent_id() );
+		}
 	}
 
 	/**
