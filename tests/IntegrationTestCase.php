@@ -464,9 +464,9 @@ abstract class IntegrationTestCase extends WP_UnitTestCase {
 	 * @param \WC_Order_Item     $item
 	 * @param int                $quantity
 	 *
-	 * @return void
+	 * @return \WC_Order_Refund
 	 */
-	protected function refund( \WC_Abstract_Order $order, \WC_Order_Item $item, int $quantity ): void {
+	protected function refund( \WC_Abstract_Order $order, \WC_Order_Item $item, int $quantity ): \WC_Order_Refund {
 		$refund = wc_create_refund(
 			array(
 				'order_id'   => $order->get_id(),
@@ -476,6 +476,8 @@ abstract class IntegrationTestCase extends WP_UnitTestCase {
 		);
 
 		$this->assertNotWPError( $refund );
+
+		return $refund;
 	}
 
 	/**

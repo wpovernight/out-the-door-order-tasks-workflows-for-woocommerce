@@ -14,6 +14,40 @@ final class FulfillmentService {
 	public const ORDER_FULFILLMENT_STATUS_META_KEY   = '_wpo_otd_fulfillment_status';
 
 	/**
+	 * Register hooks.
+	 *
+	 * @return void
+	 */
+	public function register_hooks(): void {
+		// Refunded units need no fulfilment, so a refund can change an order's status.
+		add_action( 'woocommerce_order_refunded', array( $this, 'refresh_after_refund' ) );
+		add_action( 'woocommerce_refund_deleted', array( $this, 'refresh_after_refund_deleted' ), 10, 2 );
+	}
+
+	/**
+	 * Recalculate the cached status of a tracked order after a refund.
+	 *
+	 * @param int $order_id
+	 *
+	 * @return void
+	 */
+	public function refresh_after_refund( int $order_id ): void {
+		$this->refresh_tracked_order( $order_id );
+	}
+
+	/**
+	 * Recalculate the cached status of a tracked order after one of its refunds was deleted.
+	 *
+	 * @param int $refund_id
+	 * @param int $order_id
+	 *
+	 * @return void
+	 */
+	public function refresh_after_refund_deleted( int $refund_id, int $order_id ): void {
+		$this->refresh_tracked_order( $order_id );
+	}
+
+	/**
 	 * Get fulfillment data for an order item.
 	 *
 	 * @param int|\WC_Order_Item|\WC_Order_Item_Product $item
@@ -259,6 +293,45 @@ final class FulfillmentService {
 		}
 
 		return $status;
+	}
+
+	/**
+	 * Recalculate an order's cached status, when it has one or any of its items has fulfillment entries. Other orders
+	 * stay out of the fulfillment lists.
+	 *
+	 * @param int $order_id
+	 *
+	 * @return void
+	 */
+	private function refresh_tracked_order( int $order_id ): void {
+		$order = wc_get_order( $order_id );
+
+		if ( ! $order instanceof \WC_Abstract_Order ) {
+			return;
+		}
+
+		if ( '' === $order->get_meta( self::ORDER_FULFILLMENT_STATUS_META_KEY ) && ! $this->has_fulfillment_entries( $order ) ) {
+			return;
+		}
+
+		$this->update_order_fulfillment_status_meta( $order );
+	}
+
+	/**
+	 * Whether any item of an order has fulfillment entries.
+	 *
+	 * @param \WC_Abstract_Order $order
+	 *
+	 * @return bool
+	 */
+	private function has_fulfillment_entries( \WC_Abstract_Order $order ): bool {
+		foreach ( $order->get_items() as $item ) {
+			if ( null !== $this->get_order_item_fulfillment_data( $item ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

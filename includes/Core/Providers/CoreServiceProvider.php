@@ -7,6 +7,7 @@ use WPO\OTD\Core\Container\ServiceProvider;
 use WPO\OTD\Core\Installer;
 use WPO\OTD\Services\EmailService;
 use WPO\OTD\Services\CustomOrderStatusService;
+use WPO\OTD\Services\FulfillmentService;
 use WPO\OTD\Services\TaskManagerService;
 use WPO\OTD\REST\TaskController;
 use WPO\OTD\REST\FulfillmentController;
@@ -59,5 +60,6 @@ final class CoreServiceProvider implements ServiceProvider {
 		$container->get( TaskManagerService::class )->register_hooks();
 		$container->get( EmailService::class )->register_hooks();
 		$container->get( CustomOrderStatusService::class )->register_hooks();
+		$container->get( FulfillmentService::class )->register_hooks();
 	}
 }

@@ -4,6 +4,7 @@ namespace WPO\OTD\Tests\Integration\Core;
 
 use WPO\OTD\Core\Container\Container;
 use WPO\OTD\Core\Providers\CoreServiceProvider;
+use WPO\OTD\Services\FulfillmentService;
 use WPO\OTD\Tests\IntegrationTestCase;
 
 class CoreServiceProviderTest extends IntegrationTestCase {
@@ -36,5 +37,14 @@ class CoreServiceProviderTest extends IntegrationTestCase {
 		$this->assertNotFalse( has_action( 'add_meta_boxes' ) );
 		$this->assertNotFalse( has_action( 'woocommerce_admin_order_item_headers' ) );
 		$this->assertNotFalse( has_action( 'wp_ajax_wpo_otd_save_fulfillment' ) );
+	}
+
+	public function test_refunds_refresh_the_fulfillment_status(): void {
+		$container = new Container();
+		( new CoreServiceProvider() )->boot( $container );
+		$service = $container->get( FulfillmentService::class );
+
+		$this->assertSame( 10, has_action( 'woocommerce_order_refunded', array( $service, 'refresh_after_refund' ) ) );
+		$this->assertSame( 10, has_action( 'woocommerce_refund_deleted', array( $service, 'refresh_after_refund_deleted' ) ) );
 	}
 }

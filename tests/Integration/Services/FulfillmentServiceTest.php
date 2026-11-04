@@ -179,6 +179,37 @@ class FulfillmentServiceTest extends IntegrationTestCase {
 		$this->assertSame( 0, $this->service->get_quantity_to_fulfil( $item, 0 ), 'Never below 0.' );
 	}
 
+	public function test_a_refund_and_its_deletion_refresh_the_cached_status(): void {
+		$order = $this->create_order( array( 3 ) );
+		$item  = $this->first_item( $order );
+		$this->ship( $order, array( 2 ) );
+		$this->service->update_order_fulfillment_status_meta( $order->get_id() );
+		$this->service->register_hooks();
+
+		$refund = $this->refund( $order, $item, 1 );
+
+		$this->assertSame( FulfillmentStatuses::FULFILLED, $this->cached_status( $order->get_id() ) );
+
+		$refund_id = $refund->get_id();
+		$refund->delete( true );
+		do_action( 'woocommerce_refund_deleted', $refund_id, $order->get_id() );
+
+		$this->assertSame( FulfillmentStatuses::PARTIALLY_FULFILLED, $this->cached_status( $order->get_id() ) );
+	}
+
+	public function test_a_refund_starts_tracking_an_order_with_entries_only(): void {
+		$tracked   = $this->create_order( array( 3 ) );
+		$untracked = $this->create_order( array( 3 ) );
+		$this->ship( $tracked, array( 1 ) );
+		$this->service->register_hooks();
+
+		$this->refund( $tracked, $this->first_item( $tracked ), 1 );
+		$this->refund( $untracked, $this->first_item( $untracked ), 1 );
+
+		$this->assertSame( FulfillmentStatuses::PARTIALLY_FULFILLED, $this->cached_status( $tracked->get_id() ) );
+		$this->assertSame( '', $this->cached_status( $untracked->get_id() ), 'An order nobody fulfils stays out of the lists.' );
+	}
+
 	public function test_shipping_more_than_ordered_is_logged(): void {
 		$order = $this->create_order( array( 2, 1 ) );
 		$this->ship( $order, array( array( 2, 1 ), 1 ) );
@@ -365,6 +396,17 @@ class FulfillmentServiceTest extends IntegrationTestCase {
 				$this->service->save_order_item_fulfillment_quantity( $item->get_id(), $quantity, null );
 			}
 		}
+	}
+
+	/**
+	 * Get the fulfillment status cached on an order, read fresh.
+	 *
+	 * @param int $order_id
+	 *
+	 * @return string Empty when none is cached.
+	 */
+	private function cached_status( int $order_id ): string {
+		return (string) wc_get_order( $order_id )->get_meta( FulfillmentService::ORDER_FULFILLMENT_STATUS_META_KEY );
 	}
 
 	/**
