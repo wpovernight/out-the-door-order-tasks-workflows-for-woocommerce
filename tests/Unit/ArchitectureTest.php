@@ -72,13 +72,17 @@ final class ArchitectureTest extends TestCase {
 		$violations = array();
 
 		foreach ( $this->files() as $path => $file ) {
+			$allowed = array();
+
 			if ( self::BOOTSTRAP === $path ) {
-				continue;
+				// The bootstrap is built once, at file load, and hooks what must run before the kernel exists.
+				$allowed = array( 'add_action' );
+			} elseif ( $this->is_email( $file ) ) {
+				// WooCommerce builds its emails itself, and an email hooks its trigger and reads its settings in its
+				// constructor, as WooCommerce's own emails do.
+				$allowed = array( 'add_action', 'add_filter', 'get_option' );
 			}
 
-			// WooCommerce builds its emails itself, and an email hooks its trigger and reads its settings in its
-			// constructor, as WooCommerce's own emails do.
-			$allowed     = $this->is_email( $file ) ? array( 'add_action', 'add_filter', 'get_option' ) : array();
 			$side_effect = '/' . self::call_of( ...array_diff( $calls, $allowed ) )
 				. '|(' . self::WPDB . '|\bwpdb)\s*->/';
 
@@ -255,11 +259,27 @@ final class ArchitectureTest extends TestCase {
 			array_map( static fn( string $path ): string => basename( $path, '.php' ), array_keys( $models ) ),
 			array( 'BaseModel' )
 		);
-		$reaching   = '/(repositor(y|ies)|services?|logger)\b|\b(container|kernel)\b|->get\s*\(/i';
+		$reaching   = '/(?<![\w$])(?:[A-Z]\w*)?(Repositor(y|ies)|Services?|Logger)\b'
+			. '|\b(Container|Kernel)\b|\$container\b|'
+			. self::call_of(
+				'error_log',
+				'wc_get_\w+',
+				'WC',
+				'get_(site_)?option',
+				'\w+_transient',
+				'get_\w+_meta',
+				'get_metadata',
+				'get_posts?',
+				'get_user_by',
+				'get_userdata',
+				'wp_remote_\w+',
+				'apply_filters',
+				'do_action'
+			) . '|' . self::WPDB . '|->get\s*\(/';
 		$violations = array();
 
 		foreach ( $models as $path => $file ) {
-			$code   = $this->code( $file );
+			$code   = self::bare_code( $file );
 			$others = array_diff( $names, array( basename( $path, '.php' ) ) );
 
 			array_push(
@@ -272,12 +292,13 @@ final class ArchitectureTest extends TestCase {
 		$this->assertSame(
 			array(),
 			$violations,
-			'A model is plain data and never reaches a repository, a service, the logger, the container or another'
-				. ' model: related rows load through a repository method, many in one query.'
+			'A model is plain data: it never names a repository, a service, the logger, the container or another'
+				. ' model, and never reads options, meta, posts, orders, filters or the database, nor logs. Related'
+				. ' rows load through a repository method, many in one query.'
 		);
 	}
 
-	public function test_register_hooks_calls_no_storage_scheduling_or_role_functions(): void {
+	public function test_register_hooks_calls_no_storage_scheduling_role_or_repository_functions(): void {
 		$work       = '/' . self::call_of(
 			'(get|update|add|delete)_(site_)?option',
 			'\w+_transient',
@@ -290,11 +311,14 @@ final class ArchitectureTest extends TestCase {
 			'add_role',
 			'remove_role',
 			'get_role'
-		) . '|(' . self::WPDB . '|\bwpdb)\s*->|->((add|remove)_cap|queue)\s*\(/';
+		) . '|(' . self::WPDB . '|\bwpdb)\s*->|->((add|remove)_cap|queue)\s*\(|(?i:\$?\w*repository\w*)\s*->/';
 		$violations = array();
 
 		foreach ( $this->files() as $path => $file ) {
-			$body = self::without_closures( $this->split( $file, array( 'register_hooks', 'register_routes' ) )[1] );
+			$body = self::without_callbacks(
+				$this->split( $file, array( 'register_hooks', 'register_routes' ) )[1],
+				array( 'add_action', 'add_filter', 'register_rest_route' )
+			);
 
 			array_push( $violations, ...self::places( $work, $body, $path ) );
 		}
@@ -302,8 +326,9 @@ final class ArchitectureTest extends TestCase {
 		$this->assertSame(
 			array(),
 			$violations,
-			'register_hooks() and register_routes() only add hooks and routes: no options, meta, transients, queries,'
-				. ' schedules, rewrite flushes or roles, which belong to the installer or the method that needs them.'
+			'register_hooks() and register_routes() call none of these, outside the callbacks they hook: options, meta,'
+				. ' transients, $wpdb, a repository, Action Scheduler or WP-Cron, rewrite flushes, roles or'
+				. ' capabilities.'
 		);
 	}
 
@@ -315,7 +340,10 @@ final class ArchitectureTest extends TestCase {
 				$violations,
 				...self::places(
 					'/->(get|register_hooks|register_routes)\s*\(|\bnew\s|::instance\s*\(/',
-					self::without_closures( $this->split( $file, array( 'register' ) )[1] ),
+					self::without_callbacks(
+						$this->split( $file, array( 'register' ) )[1],
+						array( '->bind', '->singleton' )
+					),
 					$path
 				),
 				...self::places( '/->(bind|singleton)\s*\(/', $this->split( $file, array( 'boot' ) )[1], $path )
@@ -346,24 +374,36 @@ final class ArchitectureTest extends TestCase {
 	}
 
 	public function test_only_the_main_plugin_file_and_the_bootstrap_build_a_container(): void {
+		$built      = array( 'WPO\OTD\Core\Container\Container', 'WPO\OTD\Core\Kernel' );
+		$violations = array();
+
+		foreach ( $this->files() as $path => $file ) {
+			foreach ( self::declarations( $file )['news'] as $new ) {
+				if ( self::BOOTSTRAP !== $path && in_array( $new['name'], $built, true ) ) {
+					$violations[] = $path . ':' . $new['line'];
+				}
+			}
+		}
+
 		$this->assertSame(
 			array(),
-			$this->files_matching( '/\bnew\s+(?:[\w\\\\]*\\\\)?(Container|Kernel)\b/', array( self::BOOTSTRAP ) ),
+			$violations,
 			'Only the main plugin file, for activation, and the bootstrap build a container or a kernel, so a stateful'
 				. ' service never gets a second, stale copy.'
 		);
 	}
 
 	public function test_every_rest_controller_extends_the_base_controller(): void {
-		$classes    = $this->classes();
-		$parents    = array_column( $classes, 'parent', 'name' );
+		$base       = 'WPO\OTD\REST\BaseRestController';
+		$classes    = self::classes( $this->files() );
+		$parents    = self::parents( $classes );
 		$violations = array();
 
 		foreach ( $classes as $class ) {
 			if (
-				( str_starts_with( $class['path'], 'REST/' ) || $this->registers_routes( $class['file'] ) )
-				&& 'BaseRestController' !== $class['name']
-				&& ! self::reaches( $class['parent'], 'BaseRestController', $parents )
+				( preg_match( '#(^|/)REST/#', $class['path'] ) || $this->registers_routes( $class['file'] ) )
+				&& $base !== $class['name']
+				&& ! self::reaches( $class['parent'], $base, $parents )
 			) {
 				$violations[] = $class['place'];
 			}
@@ -413,14 +453,14 @@ final class ArchitectureTest extends TestCase {
 	}
 
 	public function test_only_repositories_extend_the_base_repository(): void {
-		$classes    = $this->classes();
-		$parents    = array_column( $classes, 'parent', 'name' );
+		$classes    = self::classes( $this->files() );
+		$parents    = self::parents( $classes );
 		$violations = array();
 
 		foreach ( $classes as $class ) {
 			if (
 				! preg_match( '#(^|/)Repositories/#', $class['path'] )
-				&& self::reaches( $class['parent'], 'BaseRepository', $parents )
+				&& self::reaches( $class['parent'], 'WPO\OTD\Repositories\BaseRepository', $parents )
 			) {
 				$violations[] = $class['place'];
 			}
@@ -434,20 +474,24 @@ final class ArchitectureTest extends TestCase {
 	}
 
 	public function test_enums_are_backed_and_live_in_an_enums_folder(): void {
-		$this->assertSame(
-			array(),
-			$this->files_matching( '/^[ \t]*enum\s++\w++\s*+(?!:\s*(string|int)\b)/m' ),
-			'An enum is backed, so its cases can be stored and sent.'
-		);
-		$this->assertSame(
-			array(),
-			$this->files_matching(
-				'/^[ \t]*enum\s+\w+/m',
-				array(),
-				array_diff_key( $this->files(), $this->files_in( 'Enums' ) )
-			),
-			'An enum lives in an Enums folder.'
-		);
+		$in_enums = $this->files_in( 'Enums' );
+		$unbacked = array();
+		$outside  = array();
+
+		foreach ( $this->files() as $path => $file ) {
+			foreach ( self::declarations( $file )['enums'] as $enum ) {
+				if ( ! $enum['backed'] ) {
+					$unbacked[] = $path . ':' . $enum['line'];
+				}
+
+				if ( ! isset( $in_enums[ $path ] ) ) {
+					$outside[] = $path . ':' . $enum['line'];
+				}
+			}
+		}
+
+		$this->assertSame( array(), $unbacked, 'An enum is backed, so its cases can be stored and sent.' );
+		$this->assertSame( array(), $outside, 'An enum lives in an Enums folder.' );
 	}
 
 	/**
@@ -490,49 +534,22 @@ final class ArchitectureTest extends TestCase {
 	}
 
 	/**
-	 * Every class declared under includes/, anonymous ones left out.
+	 * The classes declared in these files, anonymous ones included.
 	 *
-	 * @return array<int, array{name: string, parent: string|null, path: string, file: string, place: string}> The
-	 *         parent is the short name of the class it extends, a use alias resolved.
+	 * @param array<string, string> $files Path => full path.
+	 *
+	 * @return array<int, array<string, mixed>> Each with its name and parent, fully qualified (an anonymous class
+	 *         has no name, a class that extends none no parent), line, path, file and place.
 	 */
-	private function classes(): array {
+	private static function classes( array $files ): array {
 		$classes = array();
 
-		foreach ( $this->files() as $path => $file ) {
-			$tokens  = token_get_all( file_get_contents( $file ) );
-			$aliases = self::aliases( $tokens );
-
-			foreach ( $tokens as $at => $token ) {
-				if ( ! is_array( $token ) || T_CLASS !== $token[0] ) {
-					continue;
-				}
-
-				$before = self::neighbour( $tokens, $at, -1 );
-				$name   = self::neighbour_at( $tokens, $at, 1 );
-
-				if (
-					( is_array( $before ) && in_array( $before[0], array( T_DOUBLE_COLON, T_NEW ), true ) )
-					|| null === $name
-					|| ! is_array( $tokens[ $name ] )
-					|| T_STRING !== $tokens[ $name ][0]
-				) {
-					continue;
-				}
-
-				$extends = self::neighbour_at( $tokens, $name, 1 );
-				$parent  = null;
-
-				if ( is_array( $tokens[ $extends ] ) && T_EXTENDS === $tokens[ $extends ][0] ) {
-					$parent = self::neighbour( $tokens, $extends, 1 )[1];
-					$parent = self::short_name( $aliases[ strtolower( $parent ) ] ?? $parent );
-				}
-
-				$classes[] = array(
-					'name'   => $tokens[ $name ][1],
-					'parent' => $parent,
-					'path'   => $path,
-					'file'   => $file,
-					'place'  => $path . ':' . $token[2],
+		foreach ( $files as $path => $file ) {
+			foreach ( self::declarations( $file )['classes'] as $class ) {
+				$classes[] = $class + array(
+					'path'  => $path,
+					'file'  => $file,
+					'place' => $path . ':' . $class['line'],
 				);
 			}
 		}
@@ -541,57 +558,191 @@ final class ArchitectureTest extends TestCase {
 	}
 
 	/**
-	 * The names a file's top-level use statements import.
+	 * What each named class extends.
 	 *
-	 * @param array $tokens
+	 * @param array $classes As classes() lists them.
 	 *
-	 * @return array<string, string> Lowercase alias, or last part of the name => the name.
+	 * @return array<string, string|null> Fully qualified name => fully qualified name of the class it extends.
 	 */
-	private static function aliases( array $tokens ): array {
-		$names   = array( T_STRING, T_NAME_QUALIFIED, T_NAME_FULLY_QUALIFIED, T_NS_SEPARATOR );
-		$aliases = array();
-		$depth   = 0;
+	private static function parents( array $classes ): array {
+		return array_column(
+			array_filter( $classes, static fn( array $declared ): bool => null !== $declared['name'] ),
+			'parent',
+			'name'
+		);
+	}
+
+	/**
+	 * A file's classes, enums and new expressions, each class name resolved against the namespace and the use
+	 * statements around it.
+	 *
+	 * @param string $file
+	 *
+	 * @return array{classes: array, news: array, enums: array} Each entry holds its line; a class its name (null when
+	 *         anonymous) and parent (null when none); a new expression the name of the class it builds; an enum
+	 *         whether it is backed.
+	 */
+	private static function declarations( string $file ): array {
+		$tokens    = token_get_all( file_get_contents( $file ) );
+		$names     = array( T_STRING, T_NAME_QUALIFIED, T_NAME_FULLY_QUALIFIED, T_NAME_RELATIVE );
+		$found     = array(
+			'classes' => array(),
+			'news'    => array(),
+			'enums'   => array(),
+		);
+		$namespace = '';
+		$aliases   = array();
+		$depth     = 0;
+		$top       = 0;
 
 		foreach ( $tokens as $at => $token ) {
 			$depth += self::brace( $token );
+			$id     = self::token_id( $token );
+			$next   = self::neighbour_at( $tokens, $at, 1 );
 
-			if ( 0 !== $depth || ! is_array( $token ) || T_USE !== $token[0] ) {
+			if ( null === $next ) {
 				continue;
 			}
 
-			$prefix = '';
-			$name   = '';
-			$alias  = null;
-			$as     = false;
+			if ( T_NAMESPACE === $id ) {
+				$named     = is_array( $tokens[ $next ] );
+				$namespace = $named ? $tokens[ $next ][1] : '';
+				$aliases   = array();
+				$opening   = $named ? self::neighbour( $tokens, $next, 1 ) : $tokens[ $next ];
+				$top       = '{' === $opening ? $depth + 1 : $depth;
+			} elseif ( T_USE === $id && $top === $depth && ')' !== self::neighbour( $tokens, $at, -1 ) ) {
+				$aliases = self::imports( $tokens, $at ) + $aliases;
+			} elseif ( T_CLASS === $id && T_DOUBLE_COLON !== self::token_id( self::neighbour( $tokens, $at, -1 ) ) ) {
+				$anonymous = T_NEW === self::token_id( self::neighbour( $tokens, $at, -1 ) );
+				$named     = ! $anonymous && T_STRING === self::token_id( $tokens[ $next ] );
 
-			for ( $near = $at + 1; isset( $tokens[ $near ] ) && ';' !== $tokens[ $near ]; $near++ ) {
-				$part = $tokens[ $near ];
-				$id   = is_array( $part ) ? $part[0] : $part;
-
-				if ( $as && T_STRING === $id ) {
-					$alias = $part[1];
-					$as    = false;
-				} elseif ( in_array( $id, $names, true ) ) {
-					$name .= $part[1];
-				} elseif ( T_AS === $id ) {
-					$as = true;
-				} elseif ( '{' === $id ) {
-					$prefix = $name;
-					$name   = '';
-				} elseif ( ',' === $id || '}' === $id ) {
-					$aliases[ strtolower( $alias ?? self::short_name( $name ) ) ] = $prefix . $name;
-
-					$name  = '';
-					$alias = null;
+				if ( ! $anonymous && ! $named ) {
+					continue;
 				}
-			}
 
-			if ( '' !== $name ) {
-				$aliases[ strtolower( $alias ?? self::short_name( $name ) ) ] = $prefix . $name;
+				$cursor  = $named ? $next : ( '(' === $tokens[ $next ] ? self::closing( $tokens, $next ) : $at );
+				$extends = self::neighbour_at( $tokens, $cursor, 1 );
+				$parent  = null === $extends ? null : self::neighbour( $tokens, $extends, 1 );
+
+				$found['classes'][] = array(
+					'name'   => $named ? self::qualify( $tokens[ $next ][1], $namespace ) : null,
+					'parent' => T_EXTENDS === self::token_id( $tokens[ $extends ] ?? null ) && is_array( $parent )
+						? self::resolve( $parent, $namespace, $aliases )
+						: null,
+					'line'   => $token[2],
+				);
+			} elseif ( T_NEW === $id && in_array( self::token_id( $tokens[ $next ] ), $names, true ) ) {
+				$found['news'][] = array(
+					'name' => self::resolve( $tokens[ $next ], $namespace, $aliases ),
+					'line' => $token[2],
+				);
+			} elseif ( T_ENUM === $id ) {
+				$colon = self::neighbour_at( $tokens, $next, 1 );
+				$type  = null === $colon ? null : self::neighbour( $tokens, $colon, 1 );
+
+				$found['enums'][] = array(
+					'backed' => ':' === ( $tokens[ $colon ] ?? null )
+						&& is_array( $type )
+						&& in_array( strtolower( $type[1] ), array( 'string', 'int' ), true ),
+					'line'   => $token[2],
+				);
 			}
 		}
 
-		return $aliases;
+		return $found;
+	}
+
+	/**
+	 * The names a use statement imports. A function or constant import, or a closure's use, imports no class.
+	 *
+	 * @param array $tokens
+	 * @param int   $at     Where the use keyword is.
+	 *
+	 * @return array<string, string> Lowercase alias, or last part of the name => fully qualified name.
+	 */
+	private static function imports( array $tokens, int $at ): array {
+		$kind = self::token_id( self::neighbour( $tokens, $at, 1 ) );
+
+		if ( T_FUNCTION === $kind || T_CONST === $kind ) {
+			return array();
+		}
+
+		$names   = array( T_STRING, T_NAME_QUALIFIED, T_NAME_FULLY_QUALIFIED, T_NS_SEPARATOR );
+		$imports = array();
+		$prefix  = '';
+		$name    = '';
+		$alias   = null;
+		$as      = false;
+
+		for ( $near = $at + 1; isset( $tokens[ $near ] ) && ';' !== $tokens[ $near ]; $near++ ) {
+			$part = $tokens[ $near ];
+			$id   = self::token_id( $part );
+
+			if ( $as && T_STRING === $id ) {
+				$alias = $part[1];
+				$as    = false;
+			} elseif ( in_array( $id, $names, true ) ) {
+				$name .= $part[1];
+			} elseif ( T_AS === $id ) {
+				$as = true;
+			} elseif ( '{' === $id ) {
+				$prefix = $name;
+				$name   = '';
+			} elseif ( ',' === $id || '}' === $id ) {
+				if ( '' !== $name ) {
+					$imports[ strtolower( $alias ?? self::short_name( $name ) ) ] = ltrim( $prefix . $name, '\\' );
+				}
+
+				$name  = '';
+				$alias = null;
+			}
+		}
+
+		if ( '' !== $name ) {
+			$imports[ strtolower( $alias ?? self::short_name( $name ) ) ] = ltrim( $prefix . $name, '\\' );
+		}
+
+		return $imports;
+	}
+
+	/**
+	 * The fully qualified name a class name token stands for.
+	 *
+	 * @param array                 $token
+	 * @param string                $in_namespace
+	 * @param array<string, string> $aliases      As imports() lists them.
+	 *
+	 * @return string
+	 */
+	private static function resolve( array $token, string $in_namespace, array $aliases ): string {
+		if ( T_NAME_FULLY_QUALIFIED === $token[0] ) {
+			return ltrim( $token[1], '\\' );
+		}
+
+		if ( T_NAME_RELATIVE === $token[0] ) {
+			return self::qualify( substr( $token[1], strlen( 'namespace\\' ) ), $in_namespace );
+		}
+
+		$parts = explode( '\\', $token[1], 2 );
+		$alias = $aliases[ strtolower( $parts[0] ) ] ?? null;
+
+		if ( null === $alias ) {
+			return self::qualify( $token[1], $in_namespace );
+		}
+
+		return isset( $parts[1] ) ? $alias . '\\' . $parts[1] : $alias;
+	}
+
+	/**
+	 * A name declared in a namespace, fully qualified.
+	 *
+	 * @param string $name
+	 * @param string $in_namespace
+	 *
+	 * @return string
+	 */
+	private static function qualify( string $name, string $in_namespace ): string {
+		return '' === $in_namespace ? $name : $in_namespace . '\\' . $name;
 	}
 
 	/**
@@ -608,11 +759,44 @@ final class ArchitectureTest extends TestCase {
 	}
 
 	/**
-	 * Whether a class is the base or extends it, through the classes declared here.
+	 * Where the parenthesis that closes the one at $open is.
 	 *
-	 * @param string|null                $name    Short name.
-	 * @param string                     $base    Short name.
-	 * @param array<string, string|null> $parents Short name => short name of the class it extends.
+	 * @param array $tokens
+	 * @param int   $open
+	 *
+	 * @return int
+	 */
+	private static function closing( array $tokens, int $open ): int {
+		$depth = 0;
+
+		for ( $near = $open; isset( $tokens[ $near ] ); $near++ ) {
+			$depth += '(' === $tokens[ $near ] ? 1 : ( ')' === $tokens[ $near ] ? -1 : 0 );
+
+			if ( 0 === $depth ) {
+				return $near;
+			}
+		}
+
+		return $open;
+	}
+
+	/**
+	 * A token's id, or the character a one-character token is.
+	 *
+	 * @param array|string|null $token
+	 *
+	 * @return int|string|null
+	 */
+	private static function token_id( $token ) {
+		return is_array( $token ) ? $token[0] : $token;
+	}
+
+	/**
+	 * Whether a class is the base or extends it, through the classes known.
+	 *
+	 * @param string|null                $name    Fully qualified name.
+	 * @param string                     $base    Fully qualified name.
+	 * @param array<string, string|null> $parents As parents() lists them.
 	 *
 	 * @return bool
 	 */
@@ -662,54 +846,141 @@ final class ArchitectureTest extends TestCase {
 	}
 
 	/**
-	 * Code with the bodies of its closures and arrow functions blanked out, since they run when called, not where
-	 * they are written. Line breaks are kept.
+	 * Code with the bodies of the closures and arrow functions passed to these calls blanked out, since the call runs
+	 * them later, not where they are written. A closure inside an array( ... ) or [ ... ] argument counts as passed;
+	 * one passed to any other call inside, such as array_map(), does not. Line breaks are kept.
 	 *
-	 * @param string $code
+	 * @param string   $code
+	 * @param string[] $calls Function names, and method names written as "->name".
 	 *
 	 * @return string
 	 */
-	private static function without_closures( string $code ): string {
+	private static function without_callbacks( string $code, array $calls ): string {
+		$tokens = array_slice( token_get_all( '<?php ' . $code ), 1 );
 		$opens  = array( '(', '[', '{', T_CURLY_OPEN, T_DOLLAR_OPEN_CURLY_BRACES );
 		$closes = array( ')', ']', '}' );
+		$stack  = array();
 		$result = '';
 		$state  = '';
 		$depth  = 0;
 
-		foreach ( array_slice( token_get_all( '<?php ' . $code ), 1 ) as $token ) {
+		foreach ( $tokens as $at => $token ) {
 			$text = is_array( $token ) ? $token[1] : $token;
-			$id   = is_array( $token ) ? $token[0] : $token;
+			$id   = self::token_id( $token );
 
-			if ( '' === $state ) {
-				$state = array(
-					T_FUNCTION => 'function',
-					T_FN       => 'fn',
-				)[ $id ] ?? '';
+			if ( 'body' === $state ) {
+				$depth  += self::brace( $token );
+				$state   = 0 === $depth ? '' : 'body';
+				$result .= self::blank( $text );
+
+				continue;
+			}
+
+			if ( 'arrow' === $state ) {
+				if ( 0 !== $depth || ! ( ',' === $id || ';' === $id || in_array( $id, $closes, true ) ) ) {
+					$depth  += in_array( $id, $opens, true ) ? 1 : ( in_array( $id, $closes, true ) ? -1 : 0 );
+					$result .= self::blank( $text );
+
+					continue;
+				}
+
+				$state = '';
+			}
+
+			if ( '' === $state && ( T_FUNCTION === $id || T_FN === $id ) && self::passed_to_call( $stack ) ) {
+				$state = T_FN === $id ? 'fn' : 'function';
 			} elseif ( 'function' === $state && '{' === $id ) {
-				$state = 'body';
-				$depth = 1;
-				$text  = self::blank( $text );
+				$state   = 'body';
+				$depth   = 1;
+				$result .= self::blank( $text );
+
+				continue;
 			} elseif ( 'fn' === $state && T_DOUBLE_ARROW === $id ) {
 				$state = 'arrow';
 				$depth = 0;
-			} elseif ( 'body' === $state ) {
-				$depth += self::brace( $token );
-				$state  = 0 === $depth ? '' : $state;
-				$text   = self::blank( $text );
-			} elseif ( 'arrow' === $state ) {
-				if ( 0 === $depth && ( ',' === $id || ';' === $id || in_array( $id, $closes, true ) ) ) {
-					$state = '';
-				} else {
-					$depth += in_array( $id, $opens, true ) ? 1 : 0;
-					$depth -= in_array( $id, $closes, true ) ? 1 : 0;
-					$text   = self::blank( $text );
-				}
+			}
+
+			if ( '(' === $id ) {
+				$before  = self::token_id( self::neighbour( $tokens, $at, -1 ) );
+				$kind    = T_ARRAY === $before ? 'array' : 'other';
+				$stack[] = self::opens_call( $tokens, $at, $calls ) ? 'call' : $kind;
+			} elseif ( '[' === $id ) {
+				$stack[] = 'array';
+			} elseif ( in_array( $id, $opens, true ) ) {
+				$stack[] = 'other';
+			} elseif ( in_array( $id, $closes, true ) ) {
+				array_pop( $stack );
 			}
 
 			$result .= $text;
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Whether the parenthesis at $at opens a call to one of these functions or methods.
+	 *
+	 * @param array    $tokens
+	 * @param int      $at
+	 * @param string[] $calls  Function names, and method names written as "->name".
+	 *
+	 * @return bool
+	 */
+	private static function opens_call( array $tokens, int $at, array $calls ): bool {
+		$name = self::neighbour_at( $tokens, $at, -1 );
+
+		$names = array( T_STRING, T_NAME_FULLY_QUALIFIED );
+
+		if ( null === $name || ! in_array( self::token_id( $tokens[ $name ] ), $names, true ) ) {
+			return false;
+		}
+
+		$before = self::token_id( self::neighbour( $tokens, $name, -1 ) );
+
+		if ( T_DOUBLE_COLON === $before || T_FUNCTION === $before ) {
+			return false;
+		}
+
+		$method = T_OBJECT_OPERATOR === $before || T_NULLSAFE_OBJECT_OPERATOR === $before;
+
+		return in_array( ( $method ? '->' : '' ) . ltrim( $tokens[ $name ][1], '\\' ), $calls, true );
+	}
+
+	/**
+	 * Whether the innermost call around the current token, array( ... ) and [ ... ] skipped, is one looked for.
+	 *
+	 * @param string[] $stack What each open bracket opens: 'call', 'array' or 'other'.
+	 *
+	 * @return bool
+	 */
+	private static function passed_to_call( array $stack ): bool {
+		foreach ( array_reverse( $stack ) as $bracket ) {
+			if ( 'array' !== $bracket ) {
+				return 'call' === $bracket;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * A file's code with its comments and string literals blanked out.
+	 *
+	 * @param string $file
+	 *
+	 * @return string With its lines where they are in the file.
+	 */
+	private static function bare_code( string $file ): string {
+		$code  = '';
+		$blank = array( T_COMMENT, T_DOC_COMMENT, T_CONSTANT_ENCAPSED_STRING, T_ENCAPSED_AND_WHITESPACE );
+
+		foreach ( token_get_all( file_get_contents( $file ) ) as $token ) {
+			$text  = is_array( $token ) ? $token[1] : $token;
+			$code .= is_array( $token ) && in_array( $token[0], $blank, true ) ? self::blank( $text ) : $text;
+		}
+
+		return $code;
 	}
 
 	/**
