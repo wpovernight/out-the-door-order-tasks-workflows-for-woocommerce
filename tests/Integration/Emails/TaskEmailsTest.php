@@ -301,11 +301,12 @@ class TaskEmailsTest extends IntegrationTestCase {
 
 	public function test_the_settings_of_each_email_in_order(): void {
 		update_option( 'woocommerce_feature_email_improvements_enabled', 'no' );
-		$shared = array( 'enabled', 'recipient', 'subject', 'heading', 'additional_content', 'notify_creator', 'notify_shop_managers' );
+		$first = array( 'enabled', 'recipient', 'subject', 'heading', 'additional_content' );
+		$last  = array( 'notify_creator', 'notify_shop_managers', 'email_type' );
 
-		$this->assertSame( array_merge( $shared, array( 'email_type' ) ), array_keys( ( new TaskCreatedEmail() )->form_fields ) );
+		$this->assertSame( array_merge( $first, $last ), array_keys( ( new TaskCreatedEmail() )->form_fields ) );
 		$this->assertSame(
-			array_merge( $shared, array( 'notify_on_fields', 'email_type' ) ),
+			array_merge( $first, array( 'notify_on_fields' ), $last ),
 			array_keys( ( new TaskUpdatedEmail( $this->tasks ) )->form_fields )
 		);
 	}

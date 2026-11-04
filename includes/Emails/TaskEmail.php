@@ -68,13 +68,13 @@ abstract class TaskEmail extends WC_Email {
 
 		$this->form_fields = array_merge(
 			array(
-				'enabled'              => array(
+				'enabled'            => array(
 					'title'   => __( 'Enable/Disable', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
 					'type'    => 'checkbox',
 					'label'   => __( 'Enable this email notification', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
 					'default' => 'no',
 				),
-				'recipient'            => array(
+				'recipient'          => array(
 					'title'       => __( 'Recipient(s)', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
 					'type'        => 'text',
 					'description' => sprintf(
@@ -86,7 +86,7 @@ abstract class TaskEmail extends WC_Email {
 					'default'     => get_option( 'admin_email' ),
 					'desc_tip'    => true,
 				),
-				'subject'              => array(
+				'subject'            => array(
 					'title'       => __( 'Subject', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
 					'type'        => 'text',
 					'description' => $placeholder_text,
@@ -94,7 +94,7 @@ abstract class TaskEmail extends WC_Email {
 					'default'     => '',
 					'desc_tip'    => true,
 				),
-				'heading'              => array(
+				'heading'            => array(
 					'title'       => __( 'Email heading', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
 					'type'        => 'text',
 					'description' => $placeholder_text,
@@ -102,7 +102,7 @@ abstract class TaskEmail extends WC_Email {
 					'default'     => '',
 					'desc_tip'    => true,
 				),
-				'additional_content'   => array(
+				'additional_content' => array(
 					'title'       => __( 'Additional content', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
 					'description' => __( 'Text to appear below the main email content.', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
 					'css'         => 'width:400px; height: 75px;',
@@ -111,6 +111,9 @@ abstract class TaskEmail extends WC_Email {
 					'default'     => '',
 					'desc_tip'    => true,
 				),
+			),
+			$this->own_form_fields(),
+			array(
 				'notify_creator'       => array(
 					'title'   => __( 'Notify Task Creator', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
 					'type'    => 'checkbox',
@@ -123,10 +126,7 @@ abstract class TaskEmail extends WC_Email {
 					'label'   => __( 'Send notification to all shop managers and administrators', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
 					'default' => 'no',
 				),
-			),
-			$this->own_form_fields(),
-			array(
-				'email_type' => array(
+				'email_type'           => array(
 					'title'       => __( 'Email type', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
 					'type'        => 'select',
 					'description' => __( 'Choose which format of email to send.', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
@@ -208,7 +208,7 @@ abstract class TaskEmail extends WC_Email {
 	abstract protected function sent( int $task_id, array $task_with_fields, array $changes ): void;
 
 	/**
-	 * The settings fields this email adds after the shared ones, before the email type.
+	 * The settings fields this email adds after the additional content, before the recipients to notify.
 	 *
 	 * @return array
 	 */
