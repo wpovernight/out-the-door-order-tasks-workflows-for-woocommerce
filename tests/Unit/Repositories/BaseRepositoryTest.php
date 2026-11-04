@@ -1249,6 +1249,14 @@ class BaseRepositoryTest extends TestCase {
 		$this->assertSame( 1, $this->repository->execute_raw( 'DELETE FROM x WHERE id = %d', array( 'id' => 3 ) ) );
 	}
 
+	public function test_execute_raw_drops_the_builders_conditions(): void {
+		$this->wpdb->shouldReceive( 'query' )->once()->with( 'OPTIMIZE TABLE x' )->andReturn( true );
+
+		$this->repository->where( 'name', 'Lamp' )->execute_raw( 'OPTIMIZE TABLE x' );
+
+		$this->assertStringNotContainsString( 'WHERE', $this->repository->get_query() );
+	}
+
 	public function test_insert_raw_builds_a_multi_row_insert(): void {
 		$this->wpdb->shouldReceive( 'query' )
 			->once()

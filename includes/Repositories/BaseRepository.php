@@ -10,8 +10,12 @@ use WPO\OTD\Utilities\Paginator;
 defined( 'ABSPATH' ) || exit;
 
 abstract class BaseRepository {
+	/**
+	 * What every plugin table's name starts with, after the WordPress prefix.
+	 */
+	public const TABLE_PREFIX = 'wpo_otd_';
+
 	protected \wpdb $wpdb;
-	private string $plugin_table_prefix = 'wpo_otd_';
 	private string $table_name;
 	protected bool $enable_cache = false;
 	protected static array $cache = array();
@@ -48,14 +52,6 @@ abstract class BaseRepository {
 	private int $limit            = 0;
 	private int $offset           = 0;
 	private bool $lock_for_update = false;
-
-	/**
-	 * Primary key column, used as the fallback ORDER BY for stable pagination.
-	 * Override in child repositories whose key differs.
-	 *
-	 * @var string
-	 */
-	protected string $primary_key = 'id';
 
 	/**
 	 * Whether the table has created_at and updated_at columns, which every write then stamps with the current UTC time.
@@ -318,7 +314,7 @@ abstract class BaseRepository {
 		// repeat or be skipped across pages. Fall back to the primary key when the
 		// caller hasn't set one.
 		if ( '' === $this->order_by ) {
-			$this->order_by( $this->primary_key );
+			$this->order_by( 'id' );
 		}
 
 		$items = $this->limit( $per_page )
@@ -481,11 +477,10 @@ abstract class BaseRepository {
 	 *
 	 * @param string $query
 	 * @param array<int, mixed> $bindings
-	 * @param bool $reset
 	 *
 	 * @return int|bool Number of rows affected.
 	 */
-	public function execute_raw( string $query, array $bindings = array(), bool $reset = true ): bool|int {
+	public function execute_raw( string $query, array $bindings = array() ): bool|int {
 		if ( ! empty( $bindings ) ) {
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $query is prepared on this line; placeholders are caller-supplied.
 			$query = $this->wpdb->prepare( $query, ...array_values( $bindings ) );
@@ -494,9 +489,7 @@ abstract class BaseRepository {
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Query is prepared above.
 		$result = $this->run_query( fn() => $this->wpdb->query( $query ) );
 
-		if ( $reset ) {
-			$this->reset_query();
-		}
+		$this->reset_query();
 
 		return $result;
 	}
@@ -557,13 +550,7 @@ abstract class BaseRepository {
 
 		$this->validate_set_columns( array_keys( $data ) );
 
-		// Convert dates to DATETIME strings, in UTC as the columns hold them.
-		foreach ( $data as $key => $value ) {
-			if ( $value instanceof \DateTimeInterface ) {
-				$data[ $key ] = $this->to_utc_datetime( $value );
-			}
-		}
-
+		$data   = $this->with_utc_dates( $data );
 		$result = $this->run_query( fn() => $this->wpdb->insert( $this->get_table_full_name(), $data ) );
 
 		$this->reset_query();
@@ -755,14 +742,7 @@ abstract class BaseRepository {
 
 		$this->reset_query();
 
-		// Convert dates to DATETIME strings, in UTC as the columns hold them.
-		foreach ( $data as $key => $value ) {
-			if ( $value instanceof \DateTimeInterface ) {
-				$data[ $key ] = $this->to_utc_datetime( $value );
-			}
-		}
-
-		return $this->wpdb->update( $this->get_table_full_name(), $data, $where );
+		return $this->wpdb->update( $this->get_table_full_name(), $this->with_utc_dates( $data ), $where );
 	}
 
 	/**
@@ -992,6 +972,23 @@ abstract class BaseRepository {
 	}
 
 	/**
+	 * Turn each date in a row into a DATETIME string in UTC, as the columns hold them.
+	 *
+	 * @param array<string, mixed> $data
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function with_utc_dates( array $data ): array {
+		foreach ( $data as $key => $value ) {
+			if ( $value instanceof \DateTimeInterface ) {
+				$data[ $key ] = $this->to_utc_datetime( $value );
+			}
+		}
+
+		return $data;
+	}
+
+	/**
 	 * Format a date as a DATETIME string in UTC.
 	 *
 	 * @param \DateTimeInterface $date
@@ -1016,7 +1013,7 @@ abstract class BaseRepository {
 			throw $this->discard( new \LogicException( 'Only a table with timestamps can be touched.' ) );
 		}
 
-		return $this->where( $this->primary_key, $id )->update( array( 'updated_at' => gmdate( 'Y-m-d H:i:s' ) ) );
+		return $this->where( 'id', $id )->update( array( 'updated_at' => gmdate( 'Y-m-d H:i:s' ) ) );
 	}
 
 	/**
@@ -1426,7 +1423,7 @@ abstract class BaseRepository {
 	 * @return string
 	 */
 	public function get_table_full_name( bool $with_alias = false ): string {
-		$name = $this->wpdb->prefix . $this->plugin_table_prefix . $this->table_name;
+		$name = $this->wpdb->prefix . self::TABLE_PREFIX . $this->table_name;
 		return $this->alias && $with_alias ? "{$name} AS {$this->alias}" : $name;
 	}
 

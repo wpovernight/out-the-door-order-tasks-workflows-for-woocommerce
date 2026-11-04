@@ -3,6 +3,7 @@
 namespace WPO\OTD\Core;
 
 use WPO\OTD\OutTheDoor;
+use WPO\OTD\Repositories\BaseRepository;
 use WPO\OTD\Repositories\TaskFieldOptionRepository;
 use WPO\OTD\Repositories\TaskFieldRepository;
 use WPO\OTD\Services\TaskStatusRoleService;
@@ -13,7 +14,6 @@ final class Installer {
 	private const OPTION_VERSION      = 'wpo_otd_version';
 	private const OPTION_DB_VERSION   = 'wpo_otd_db_version';
 	private const OPTION_UPGRADE_LOCK = 'wpo_otd_upgrade_lock';
-	private const TABLE_PREFIX        = 'wpo_otd_';
 
 	/**
 	 * The install-state options this plugin writes to the wp_options table.
@@ -182,7 +182,7 @@ final class Installer {
 	public static function drop_tables(): void {
 		global $wpdb;
 
-		$like = $wpdb->esc_like( $wpdb->prefix . self::TABLE_PREFIX ) . '%';
+		$like = $wpdb->esc_like( $wpdb->prefix . BaseRepository::TABLE_PREFIX ) . '%';
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Install-time table discovery.
 		$tables = $wpdb->get_col( $wpdb->prepare( 'SHOW TABLES LIKE %s', $like ) );
