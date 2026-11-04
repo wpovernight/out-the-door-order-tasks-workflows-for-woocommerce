@@ -34,9 +34,3 @@ class CycleB {
 	public function __construct( public CycleA $a ) {
 	}
 }
-
-interface Greeter {
-}
-
-class EnglishGreeter implements Greeter {
-}

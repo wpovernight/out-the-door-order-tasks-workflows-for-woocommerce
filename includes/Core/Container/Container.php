@@ -32,16 +32,6 @@ final class Container implements ContainerInterface {
 	private array $instances = array();
 
 	/**
-	 * Lazy loaders for deferred providers, keyed by a promised service id.
-	 *
-	 * Resolving such an id runs the loader (which registers the owning provider)
-	 * before the id is constructed. Populated by the Kernel.
-	 *
-	 * @var array<string, Closure>
-	 */
-	private array $deferred = array();
-
-	/**
 	 * Ids currently mid-construction, used to detect dependency cycles.
 	 *
 	 * @var array<string, true>
@@ -78,46 +68,6 @@ final class Container implements ContainerInterface {
 	}
 
 	/**
-	 * Alias an abstraction (usually an interface) to a concrete id.
-	 *
-	 * Lets callers depend on `SomeInterface::class` while the container resolves
-	 * a concrete implementation. The seam that makes substitution possible.
-	 *
-	 * @param string $abstract Interface or alias id.
-	 * @param string $concrete Concrete id to resolve instead.
-	 *
-	 * @return void
-	 */
-	public function alias( string $abstract, string $concrete ): void {
-		$this->bind( $abstract, fn( Container $c ) => $c->get( $concrete ), true );
-	}
-
-	/**
-	 * Register a lazy loader for a deferred provider's promised id.
-	 *
-	 * @param string  $id     Service id the deferred provider binds.
-	 * @param Closure $loader Receives the container; registers the provider.
-	 *
-	 * @return void
-	 */
-	public function defer( string $id, Closure $loader ): void {
-		$this->deferred[ $id ] = $loader;
-	}
-
-	/**
-	 * Drop deferred loaders for the given ids (once their provider has loaded).
-	 *
-	 * @param string[] $ids Service ids to remove from the deferred map.
-	 *
-	 * @return void
-	 */
-	public function forget_deferred( array $ids ): void {
-		foreach ( $ids as $id ) {
-			unset( $this->deferred[ $id ] );
-		}
-	}
-
-	/**
 	 * Whether the container has been "configured" to provide the given id.
 	 *
 	 * @param string $id Service id.
@@ -125,9 +75,7 @@ final class Container implements ContainerInterface {
 	 * @return bool
 	 */
 	public function has( string $id ): bool {
-		return isset( $this->bindings[ $id ] ) ||
-		       isset( $this->instances[ $id ] ) ||
-		       isset( $this->deferred[ $id ] );
+		return isset( $this->bindings[ $id ] ) || isset( $this->instances[ $id ] );
 	}
 
 	/**
@@ -142,20 +90,6 @@ final class Container implements ContainerInterface {
 		// Return the shared instance if this id has already been resolved.
 		if ( isset( $this->instances[ $id ] ) ) {
 			return $this->instances[ $id ];
-		}
-
-		// First call for a deferred provider's id, load the provider now.
-		// Its loader calls register() (and boot(), if the boot phase has started),
-		// which adds the real binding.
-		if ( ! isset( $this->bindings[ $id ] ) && isset( $this->deferred[ $id ] ) ) {
-			( $this->deferred[ $id ] )( $this );
-
-			// That loader may itself resolve this same id while running, and if it
-			// does, the instance is already cached. Re-check the cache here so we
-			// return that one instance instead of constructing a duplicate below.
-			if ( isset( $this->instances[ $id ] ) ) {
-				return $this->instances[ $id ];
-			}
 		}
 
 		// This id is already mid-construction higher up the call stack, so

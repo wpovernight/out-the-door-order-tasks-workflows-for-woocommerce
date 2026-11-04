@@ -11,9 +11,7 @@ use WPO\OTD\Core\Container\NotFoundException;
 use WPO\OTD\Tests\TestCase;
 use WPO\OTD\Tests\Unit\Core\Fixtures\Car;
 use WPO\OTD\Tests\Unit\Core\Fixtures\CycleA;
-use WPO\OTD\Tests\Unit\Core\Fixtures\EnglishGreeter;
 use WPO\OTD\Tests\Unit\Core\Fixtures\Engine;
-use WPO\OTD\Tests\Unit\Core\Fixtures\Greeter;
 use WPO\OTD\Tests\Unit\Core\Fixtures\NeedsScalar;
 use WPO\OTD\Tests\Unit\Core\Fixtures\WithOptionalArguments;
 
@@ -144,16 +142,7 @@ class ContainerTest extends TestCase {
 		$this->assertSame( 2, $this->container->get( 'service' )->version );
 	}
 
-	public function test_aliases_resolve_to_the_shared_concrete_instance(): void {
-		$this->container->alias( Greeter::class, EnglishGreeter::class );
-
-		$greeter = $this->container->get( Greeter::class );
-
-		$this->assertInstanceOf( EnglishGreeter::class, $greeter );
-		$this->assertSame( $this->container->get( EnglishGreeter::class ), $greeter );
-	}
-
-	public function test_has_reports_bindings_instances_and_deferred_ids(): void {
+	public function test_has_reports_bindings_and_instances(): void {
 		$this->assertFalse( $this->container->has( Engine::class ) );
 
 		$this->container->get( Engine::class );
@@ -161,56 +150,5 @@ class ContainerTest extends TestCase {
 
 		$this->container->bind( 'bound', static fn() => new \stdClass() );
 		$this->assertTrue( $this->container->has( 'bound' ) );
-
-		$this->container->defer( 'deferred', static function () {} );
-		$this->assertTrue( $this->container->has( 'deferred' ) );
-
-		$this->container->forget_deferred( array( 'deferred' ) );
-		$this->assertFalse( $this->container->has( 'deferred' ) );
-	}
-
-	public function test_resolving_a_deferred_id_runs_its_loader_first(): void {
-		$loads = 0;
-
-		$this->container->defer(
-			'lazy',
-			function ( Container $container ) use ( &$loads ) {
-				++$loads;
-				$container->forget_deferred( array( 'lazy' ) );
-				$container->bind( 'lazy', static fn() => (object) array( 'loaded' => true ) );
-			}
-		);
-
-		$this->assertTrue( $this->container->get( 'lazy' )->loaded );
-		$this->container->get( 'lazy' );
-		$this->assertSame( 1, $loads );
-	}
-
-	public function test_a_deferred_loader_that_resolves_its_own_id_does_not_build_a_duplicate(): void {
-		$built    = 0;
-		$resolved = null;
-
-		$this->container->defer(
-			'lazy',
-			function ( Container $container ) use ( &$built, &$resolved ) {
-				$container->forget_deferred( array( 'lazy' ) );
-				$container->bind(
-					'lazy',
-					static function () use ( &$built ) {
-						++$built;
-
-						return new \stdClass();
-					}
-				);
-
-				// A provider's boot() may resolve its own service while loading.
-				$resolved = $container->get( 'lazy' );
-			}
-		);
-
-		$instance = $this->container->get( 'lazy' );
-
-		$this->assertSame( $resolved, $instance );
-		$this->assertSame( 1, $built );
 	}
 }
