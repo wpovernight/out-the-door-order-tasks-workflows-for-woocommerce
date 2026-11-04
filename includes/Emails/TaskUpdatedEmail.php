@@ -2,18 +2,14 @@
 
 namespace WPO\OTD\Emails;
 
-use WC_Email;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use WPO\OTD\Core\Logger;
 use WPO\OTD\Services\TaskManagerService;
-use WPO\OTD\Traits\TaskEmailRecipients;
 use WPO\OTD\Enums\DefaultTaskFields;
 
 defined( 'ABSPATH' ) || exit;
 
-class TaskUpdatedEmail extends WC_Email {
-	use TaskEmailRecipients;
-	protected array $task_data = array();
+class TaskUpdatedEmail extends TaskEmail {
+	protected bool $sent_to_admin = false;
 	protected readonly TaskManagerService $task_manager_service;
 
 	/**
@@ -30,11 +26,6 @@ class TaskUpdatedEmail extends WC_Email {
 
 		$this->template_html  = 'emails/task-updated.php';
 		$this->template_plain = 'emails/plain/task-updated.php';
-		$this->template_base  = WPO_OTD()->plugin_path() . '/templates/';
-		$this->placeholders = array(
-			'{task_title}' => '',
-			'{task_id}'    => '',
-		);
 
 		// Triggers for this email. WooCommerce re-fires each registered email action as "<action>_notification"
 		// once its mailer, and so this email, exists (see EmailService::register_email_actions()).
@@ -42,9 +33,6 @@ class TaskUpdatedEmail extends WC_Email {
 		add_action( 'wpo_otd_task_moved_notification', array( $this, 'trigger_on_task_moved' ), 10, 4 );
 
 		parent::__construct();
-
-		// Default recipient: shop manager and admin emails.
-		$this->recipient = $this->get_option( 'recipient', get_option( 'admin_email' ) );
 	}
 
 	/**
@@ -74,57 +62,7 @@ class TaskUpdatedEmail extends WC_Email {
 	 *                                with 'old_value' and 'new_value' for each.
 	 */
 	public function trigger( int $task_id, array $task_with_fields, array $updated_fields = array() ): void {
-		if ( ! $this->is_enabled() ) {
-			return;
-		}
-
-		$this->setup_locale();
-
-		try {
-			$this->task_data = $task_with_fields;
-
-			// Check if we should send the email based on monitored fields.
-			$monitored_fields = $this->get_monitored_fields();
-			if ( ! empty( $monitored_fields ) ) {
-				// Check if any of the updated fields are in the monitored list.
-				$should_send = false;
-				foreach ( $updated_fields as $field_slug => $changes ) {
-					if ( in_array( $field_slug, $monitored_fields, true ) ) {
-						$should_send = true;
-						break;
-					}
-				}
-
-				// If no monitored fields were updated, don't send the email.
-				if ( ! $should_send ) {
-					return;
-				}
-			}
-
-			// Replace placeholders in subject and heading.
-			$this->placeholders['{task_title}'] = $task_with_fields['title'];
-			$this->placeholders['{task_id}']    = (string) $task_id;
-
-			$recipients = $this->get_task_recipients( $task_with_fields );
-
-			if ( ! empty( $recipients ) ) {
-				$this->recipient = implode( ', ', $recipients );
-				$sent            = $this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
-
-				if ( $sent ) {
-					/**
-					 * Action hook after task updated email is sent.
-					 *
-					 * @param int   $task_id          The task ID.
-					 * @param array $task_with_fields Complete task data.
-					 * @param array $updated_fields   Array of updated field slugs with old and new values.
-					 */
-					do_action( 'wpo_otd_task_updated_email_sent', $task_id, $task_with_fields, $updated_fields );
-				}
-			}
-		} finally {
-			$this->restore_locale();
-		}
+		$this->send_for_task( $task_id, $task_with_fields, $updated_fields );
 	}
 
 	/**
@@ -175,65 +113,54 @@ class TaskUpdatedEmail extends WC_Email {
 	}
 
 	/**
-	 * Get content HTML.
+	 * Send only when a monitored field changed, or when no field is monitored.
 	 *
-	 * @return string
+	 * @param array $updated_fields Updated field slugs with old and new values.
+	 *
+	 * @return bool
 	 */
-	public function get_content_html(): string {
-		$this->maybe_init_task_for_preview( $this->task_data );
+	protected function should_send( array $updated_fields ): bool {
+		$monitored_fields = $this->get_monitored_fields();
 
-		return wc_get_template_html(
-			$this->template_html,
-			array(
-				'task_data'          => $this->task_data,
-				'email_heading'      => $this->get_heading(),
-				'additional_content' => $this->get_additional_content(),
-				'sent_to_admin'      => false,
-				'plain_text'         => false,
-				'email'              => $this,
+		return empty( $monitored_fields ) || array() !== array_intersect( array_keys( $updated_fields ), $monitored_fields );
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected function sent( int $task_id, array $task_with_fields, array $updated_fields ): void {
+		/**
+		 * Action hook after task updated email is sent.
+		 *
+		 * @param int   $task_id          The task ID.
+		 * @param array $task_with_fields Complete task data.
+		 * @param array $updated_fields   Array of updated field slugs with old and new values.
+		 */
+		do_action( 'wpo_otd_task_updated_email_sent', $task_id, $task_with_fields, $updated_fields );
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected function own_form_fields(): array {
+		return array(
+			'notify_on_fields' => array(
+				'title'       => __( 'Notify On', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
+				'type'        => 'multiselect',
+				'class'       => 'wc-enhanced-select',
+				'description' => __( 'Select which fields changes should trigger this email notification.', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
+				'default'     => array( 'status', 'priority' ),
+				'options'     => $this->get_notify_on_field_options(),
+				'desc_tip'    => true,
 			),
-			'',
-			$this->template_base
 		);
 	}
 
 	/**
-	 * Get content plain.
-	 *
-	 * @return string
+	 * {@inheritDoc}
 	 */
-	public function get_content_plain(): string {
-		$this->maybe_init_task_for_preview( $this->task_data );
-
-		return wc_get_template_html(
-			$this->template_plain,
-			array(
-				'task_data'          => $this->task_data,
-				'email_heading'      => $this->get_heading(),
-				'additional_content' => $this->get_additional_content(),
-				'sent_to_admin'      => false,
-				'plain_text'         => true,
-				'email'              => $this,
-			),
-			'',
-			$this->template_base
-		);
-	}
-
-	/**
-	 * Initialize a sample task for preview if none exists.
-	 *
-	 * @param array $task_data Task data.
-	 *
-	 * @return void
-	 */
-	public function maybe_init_task_for_preview( array $task_data ): void {
-		if ( ! empty( $task_data['id'] ) ) {
-			return;
-		}
-
-		// Create sample task data with proper structure expected by email templates.
-		$this->task_data = array(
+	protected function preview_task(): array {
+		return array(
 			'id'          => 12345,
 			'title'       => __( 'Sample Task: Process Customer Order', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
 			'description' => __( 'This is a preview of how task update details will appear in the email notification. The task has been updated with new status and priority.', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
@@ -330,100 +257,6 @@ class TaskUpdatedEmail extends WC_Email {
 				),
 			),
 		);
-	}
-
-	/**
-	 * Initialize settings form fields.
-	 *
-	 * @return void
-	 */
-	public function init_form_fields(): void {
-		$placeholder_text = sprintf(
-			'%s: %s',
-			__( 'Available placeholders', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
-			'<code>' . esc_html( implode( '</code>, <code>', array_keys( $this->placeholders ) ) ) . '</code>'
-		);
-
-		$this->form_fields = array(
-			'enabled'    => array(
-				'title'   => __( 'Enable/Disable', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
-				'type'    => 'checkbox',
-				'label'   => __( 'Enable this email notification', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
-				'default' => 'no',
-			),
-			'recipient'  => array(
-				'title'       => __( 'Recipient(s)', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
-				'type'        => 'text',
-				'description' => sprintf(
-					/* translators: %s: admin email */
-					__( 'Enter recipients (comma separated) for this email. Defaults to %s.', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
-					'<code>' . esc_attr( get_option( 'admin_email' ) ) . '</code>'
-				),
-				'placeholder' => '',
-				'default'     => get_option( 'admin_email' ),
-				'desc_tip'    => true,
-			),
-			'subject'    => array(
-				'title'       => __( 'Subject', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
-				'type'        => 'text',
-				'description' => $placeholder_text,
-				'placeholder' => $this->get_default_subject(),
-				'default'     => '',
-				'desc_tip'    => true,
-			),
-			'heading'    => array(
-				'title'       => __( 'Email heading', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
-				'type'        => 'text',
-				'description' => $placeholder_text,
-				'placeholder' => $this->get_default_heading(),
-				'default'     => '',
-				'desc_tip'    => true,
-			),
-			'additional_content' => array(
-				'title'       => __( 'Additional content', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
-				'description' => __( 'Text to appear below the main email content.', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
-				'css'         => 'width:400px; height: 75px;',
-				'placeholder' => __( 'N/A', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
-				'type'        => 'textarea',
-				'default'     => '',
-				'desc_tip'    => true,
-			),
-			'notify_on_fields' => array(
-				'title'       => __( 'Notify On', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
-				'type'        => 'multiselect',
-				'class'       => 'wc-enhanced-select',
-				'description' => __( 'Select which fields changes should trigger this email notification.', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
-				'default'     => array( 'status', 'priority' ),
-				'options'     => $this->get_notify_on_field_options(),
-				'desc_tip'    => true,
-			),
-			'notify_creator' => array(
-				'title'   => __( 'Notify Task Creator', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
-				'type'    => 'checkbox',
-				'label'   => __( 'Send notification to the user who created the task', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
-				'default' => 'yes',
-			),
-			'notify_shop_managers' => array(
-				'title'   => __( 'Notify Shop Managers', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
-				'type'    => 'checkbox',
-				'label'   => __( 'Send notification to all shop managers and administrators', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
-				'default' => 'no',
-			),
-			'email_type' => array(
-				'title'       => __( 'Email type', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
-				'type'        => 'select',
-				'description' => __( 'Choose which format of email to send.', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
-				'default'     => 'html',
-				'class'       => 'email_type wc-enhanced-select',
-				'options'     => $this->get_email_type_options(),
-				'desc_tip'    => true,
-			),
-		);
-
-		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
-			$this->form_fields['cc']  = $this->get_cc_field();
-			$this->form_fields['bcc'] = $this->get_bcc_field();
-		}
 	}
 
 	/**

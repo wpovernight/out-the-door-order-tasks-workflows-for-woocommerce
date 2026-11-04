@@ -274,14 +274,14 @@ final class ArchitectureTest extends TestCase {
 	}
 
 	/**
-	 * Whether a file holds a WooCommerce email.
+	 * Whether a file holds a WooCommerce email, directly or through our task email base.
 	 *
 	 * @param string $file
 	 *
 	 * @return bool
 	 */
 	private function is_email( string $file ): bool {
-		return 1 === preg_match( '/\bextends\s+\\\\?WC_Email\b/', $this->code( $file ) );
+		return 1 === preg_match( '/\bextends\s+\\\\?(?:WC_Email|TaskEmail)\b/', $this->code( $file ) );
 	}
 
 	/**

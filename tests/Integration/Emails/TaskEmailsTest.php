@@ -295,6 +295,40 @@ class TaskEmailsTest extends IntegrationTestCase {
 		$this->assertStringContainsString( 'Sample Task: Process Customer Order', $email->get_content_plain() );
 	}
 
+	/** ================================
+	 *   Both
+	 *  ================================ */
+
+	public function test_the_settings_of_each_email_in_order(): void {
+		update_option( 'woocommerce_feature_email_improvements_enabled', 'no' );
+		$shared = array( 'enabled', 'recipient', 'subject', 'heading', 'additional_content', 'notify_creator', 'notify_shop_managers' );
+
+		$this->assertSame( array_merge( $shared, array( 'email_type' ) ), array_keys( ( new TaskCreatedEmail() )->form_fields ) );
+		$this->assertSame(
+			array_merge( $shared, array( 'notify_on_fields', 'email_type' ) ),
+			array_keys( ( new TaskUpdatedEmail( $this->tasks ) )->form_fields )
+		);
+	}
+
+	public function test_only_the_created_email_tells_its_templates_it_goes_to_the_admin(): void {
+		$heard = array();
+		add_action(
+			'wpo_otd_email_task_details',
+			static function ( $task_data, $sent_to_admin ) use ( &$heard ) {
+				$heard[] = $sent_to_admin;
+			},
+			10,
+			2
+		);
+
+		( new TaskCreatedEmail() )->get_content_html();
+		( new TaskCreatedEmail() )->get_content_plain();
+		( new TaskUpdatedEmail( $this->tasks ) )->get_content_html();
+		( new TaskUpdatedEmail( $this->tasks ) )->get_content_plain();
+
+		$this->assertSame( array( true, true, false, false ), $heard );
+	}
+
 	/**
 	 * Turn an email on with the given settings.
 	 *
