@@ -58,9 +58,8 @@ final class ArchitectureTest extends TestCase {
 			...self::LISTENING_FUNCTIONS,
 			...array(
 				'get_option',
-				'update_option',
-				'add_option',
-				'delete_option',
+				'get_site_option',
+				'(update|add|delete)_(site_)?option',
 				'\w+_transient',
 				'register_\w+',
 				'as_\w+',
@@ -311,7 +310,8 @@ final class ArchitectureTest extends TestCase {
 			'add_role',
 			'remove_role',
 			'get_role'
-		) . '|(' . self::WPDB . '|\bwpdb)\s*->|->((add|remove)_cap|queue)\s*\(|(?i:\$?\w*repository\w*)\s*->/';
+		) . '|(' . self::WPDB . '|\bwpdb)\s*->|->((add|remove)_cap|queue)\s*\('
+			. '|(?i:\$?\w*repository\w*)\s*->\s*\w+\s*\((?!\s*\.\.\.\s*\))/';
 		$violations = array();
 
 		foreach ( $this->files() as $path => $file ) {
@@ -613,7 +613,9 @@ final class ArchitectureTest extends TestCase {
 			} elseif ( T_USE === $id && $top === $depth && ')' !== self::neighbour( $tokens, $at, -1 ) ) {
 				$aliases = self::imports( $tokens, $at ) + $aliases;
 			} elseif ( T_CLASS === $id && T_DOUBLE_COLON !== self::token_id( self::neighbour( $tokens, $at, -1 ) ) ) {
-				$anonymous = T_NEW === self::token_id( self::neighbour( $tokens, $at, -1 ) );
+				$anonymous = T_NEW === self::token_id(
+					self::neighbour( $tokens, self::before_modifiers( $tokens, $at ), -1 )
+				);
 				$named     = ! $anonymous && T_STRING === self::token_id( $tokens[ $next ] );
 
 				if ( ! $anonymous && ! $named ) {
@@ -650,6 +652,58 @@ final class ArchitectureTest extends TestCase {
 		}
 
 		return $found;
+	}
+
+	/**
+	 * Where the first of the attribute groups and readonly modifiers right before the token at $at is, or $at when
+	 * there are none.
+	 *
+	 * @param array $tokens
+	 * @param int   $at
+	 *
+	 * @return int
+	 */
+	private static function before_modifiers( array $tokens, int $at ): int {
+		$near = self::neighbour_at( $tokens, $at, -1 );
+
+		while ( null !== $near ) {
+			$start = ']' === $tokens[ $near ] ? self::attribute_start( $tokens, $near ) : null;
+
+			if ( T_READONLY === self::token_id( $tokens[ $near ] ) ) {
+				$at = $near;
+			} elseif ( null !== $start ) {
+				$at = $start;
+			} else {
+				break;
+			}
+
+			$near = self::neighbour_at( $tokens, $at, -1 );
+		}
+
+		return $at;
+	}
+
+	/**
+	 * Where the attribute group that the bracket at $close ends starts.
+	 *
+	 * @param array $tokens
+	 * @param int   $close
+	 *
+	 * @return int|null Null when the bracket ends no attribute group.
+	 */
+	private static function attribute_start( array $tokens, int $close ): ?int {
+		$depth = 0;
+
+		for ( $near = $close; $near >= 0; $near-- ) {
+			$id     = self::token_id( $tokens[ $near ] );
+			$depth += ']' === $id ? 1 : ( '[' === $id || T_ATTRIBUTE === $id ? -1 : 0 );
+
+			if ( 0 === $depth ) {
+				return T_ATTRIBUTE === $id ? $near : null;
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -857,12 +911,13 @@ final class ArchitectureTest extends TestCase {
 	 */
 	private static function without_callbacks( string $code, array $calls ): string {
 		$tokens = array_slice( token_get_all( '<?php ' . $code ), 1 );
-		$opens  = array( '(', '[', '{', T_CURLY_OPEN, T_DOLLAR_OPEN_CURLY_BRACES );
+		$opens  = array( '(', '[', '{', T_CURLY_OPEN, T_DOLLAR_OPEN_CURLY_BRACES, T_ATTRIBUTE );
 		$closes = array( ')', ']', '}' );
 		$stack  = array();
 		$result = '';
 		$state  = '';
 		$depth  = 0;
+		$level  = 0;
 
 		foreach ( $tokens as $at => $token ) {
 			$text = is_array( $token ) ? $token[1] : $token;
@@ -889,13 +944,14 @@ final class ArchitectureTest extends TestCase {
 
 			if ( '' === $state && ( T_FUNCTION === $id || T_FN === $id ) && self::passed_to_call( $stack ) ) {
 				$state = T_FN === $id ? 'fn' : 'function';
+				$level = count( $stack );
 			} elseif ( 'function' === $state && '{' === $id ) {
 				$state   = 'body';
 				$depth   = 1;
 				$result .= self::blank( $text );
 
 				continue;
-			} elseif ( 'fn' === $state && T_DOUBLE_ARROW === $id ) {
+			} elseif ( 'fn' === $state && T_DOUBLE_ARROW === $id && count( $stack ) === $level ) {
 				$state = 'arrow';
 				$depth = 0;
 			}
@@ -928,11 +984,10 @@ final class ArchitectureTest extends TestCase {
 	 * @return bool
 	 */
 	private static function opens_call( array $tokens, int $at, array $calls ): bool {
-		$name = self::neighbour_at( $tokens, $at, -1 );
+		$name      = self::neighbour_at( $tokens, $at, -1 );
+		$callables = array( T_STRING, T_NAME_FULLY_QUALIFIED );
 
-		$names = array( T_STRING, T_NAME_FULLY_QUALIFIED );
-
-		if ( null === $name || ! in_array( self::token_id( $tokens[ $name ] ), $names, true ) ) {
+		if ( null === $name || ! in_array( self::token_id( $tokens[ $name ] ), $callables, true ) ) {
 			return false;
 		}
 
