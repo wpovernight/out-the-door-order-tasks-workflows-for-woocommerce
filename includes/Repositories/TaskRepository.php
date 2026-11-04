@@ -9,9 +9,6 @@ use WPO\OTD\Models\Task;
 defined( 'ABSPATH' ) || exit;
 
 class TaskRepository extends BaseRepository {
-	private static string $table_name = 'tasks';
-	private static string $model_class = Task::class;
-
 	protected bool $timestamps = true;
 
 	private readonly TaskFieldValueRepository $task_field_value_repository;
@@ -24,7 +21,7 @@ class TaskRepository extends BaseRepository {
 	public function __construct( TaskFieldValueRepository $task_field_value_repository ) {
 		$this->task_field_value_repository = $task_field_value_repository;
 
-		parent::__construct( self::$table_name, self::$model_class );
+		parent::__construct( 'tasks', Task::class );
 	}
 
 	/**
