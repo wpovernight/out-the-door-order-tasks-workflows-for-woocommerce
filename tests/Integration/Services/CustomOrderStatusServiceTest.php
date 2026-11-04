@@ -1079,6 +1079,28 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		$this->assertFalse( as_has_scheduled_action( self::REASSIGN_HOOK ), 'The same failing batch is not run again; deleting the status again restarts it.' );
 	}
 
+	public function test_a_failed_move_logs_the_filtered_status(): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $status->id );
+		$order  = $this->order_in( 'packed' );
+		$logs   = $this->capture_logs();
+		add_filter( 'wpo_otd_reassign_orders_to_status', static fn() => 'completed' );
+		// WooCommerce turns an Exception from saving into a false return; an Error reaches the service.
+		add_action(
+			'woocommerce_before_order_object_save',
+			static function () {
+				throw new \Error( 'Order is locked' );
+			}
+		);
+
+		$this->service->process_deletion_batch( 'packed', 'processing', $status->id );
+
+		$this->assertSame(
+			array( 'warning', "Failed to reassign order {$order} from status \"packed\" to \"completed\": Order is locked" ),
+			$logs()[0]
+		);
+	}
+
 	public function test_the_scheduled_hook_runs_a_batch(): void {
 		$status = $this->create_registered_status( 'Packed' );
 		$this->mark_deleting( $status->id );

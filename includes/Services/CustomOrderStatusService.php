@@ -998,6 +998,8 @@ class CustomOrderStatusService {
 	 *              failed. A failure is logged.
 	 */
 	private function move_order( $order, string $from_status, string $to_status ): bool {
+		$resolved_to_status = $to_status;
+
 		try {
 			/**
 			 * Filter the fallback status assigned to an order during reassignment: a status key, with or without the
@@ -1031,7 +1033,7 @@ class CustomOrderStatusService {
 					'Failed to reassign order %d from status "%s" to "%s": %s',
 					$order->get_id(),
 					$from_status,
-					$to_status,
+					$resolved_to_status,
 					$e->getMessage()
 				)
 			);
