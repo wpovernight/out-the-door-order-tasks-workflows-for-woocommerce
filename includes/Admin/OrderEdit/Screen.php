@@ -520,7 +520,7 @@ final class Screen {
 			);
 		}
 
-		$total_quantity = (int) $order_item->get_quantity();
+		$total_quantity = $this->quantity_to_fulfil( $order_item );
 		if ( $quantity > $total_quantity ) {
 			wp_send_json_error(
 				array(

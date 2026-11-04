@@ -66,6 +66,24 @@ class OrderEditAjaxTest extends WP_Ajax_UnitTestCase {
 		$this->assertCount( 1, $this->fulfillments->get_order_item_fulfillment_data( $this->item->get_id() ) );
 	}
 
+	public function test_refunded_units_are_taken_off_the_total(): void {
+		$this->order->calculate_totals();
+		wc_create_refund(
+			array(
+				'order_id'   => $this->order->get_id(),
+				'amount'     => 10,
+				'line_items' => array( $this->item->get_id() => array( 'qty' => 1, 'refund_total' => 10 ) ),
+			)
+		);
+
+		$refused = $this->save( array( 'quantity' => 3 ) );
+		$saved   = $this->save( array( 'quantity' => 2 ) );
+
+		$this->assertSame( 'Fulfillment quantity cannot exceed 2.', $refused['data']['message'] );
+		$this->assertSame( '<span class="wpo-otd-tag fully-fulfilled">2 / 2 fulfilled</span>', $saved['data']['html'] );
+		$this->assertStringContainsString( 'Fulfillment updated for &quot;Lamp&quot;: 2 of 2 fulfilled.', $this->latest_note() );
+	}
+
 	public function test_the_new_tag_counts_every_entry(): void {
 		$this->fulfillments->save_order_item_fulfillment_quantity( $this->item->get_id(), 1, null );
 
