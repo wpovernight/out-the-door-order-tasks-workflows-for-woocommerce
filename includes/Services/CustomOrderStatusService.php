@@ -994,7 +994,7 @@ class CustomOrderStatusService {
 			 */
 			$resolved_to_status = apply_filters( 'wpo_otd_reassign_orders_to_status', $to_status, $order );
 
-			if ( self::same_status( $from_status, (string) $resolved_to_status ) ) {
+			if ( self::same_status( $from_status, self::status_text( $resolved_to_status ) ) ) {
 				Logger::warning( sprintf( 'Order %d stays in status "%s": the status to move it to is the same one.', $order->get_id(), $from_status ) );
 
 				return false;
@@ -1006,7 +1006,7 @@ class CustomOrderStatusService {
 			);
 
 			if ( ! $updated ) {
-				Logger::warning( sprintf( 'Order %d could not be moved from status "%s" to "%s"; it stays.', $order->get_id(), $from_status, $resolved_to_status ) );
+				Logger::warning( sprintf( 'Order %d could not be moved from status "%s" to "%s"; it stays.', $order->get_id(), $from_status, self::status_text( $resolved_to_status ) ) );
 			}
 
 			return $updated;
@@ -1016,7 +1016,7 @@ class CustomOrderStatusService {
 					'Failed to reassign order %d from status "%s" to "%s": %s',
 					$order->get_id(),
 					$from_status,
-					$resolved_to_status,
+					self::status_text( $resolved_to_status ),
 					$e->getMessage()
 				)
 			);
@@ -1156,6 +1156,18 @@ class CustomOrderStatusService {
 	 */
 	private static function same_status( string $first, string $second ): bool {
 		return self::without_prefix( strtolower( $first ) ) === self::without_prefix( strtolower( $second ) );
+	}
+
+	/**
+	 * A filtered order status as text. A filter may return any type; a value that is not a string is given as JSON, so
+	 * that writing it into a message raises no "Array to string conversion" warning.
+	 *
+	 * @param mixed $status
+	 *
+	 * @return string
+	 */
+	private static function status_text( mixed $status ): string {
+		return is_string( $status ) ? $status : (string) wp_json_encode( $status );
 	}
 
 	/**

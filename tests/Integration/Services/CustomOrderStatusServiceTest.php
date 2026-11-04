@@ -1099,6 +1099,22 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		);
 	}
 
+	public function test_a_filtered_status_that_is_not_a_string_is_logged_as_json(): void {
+		$status = $this->create_registered_status( 'Packed' );
+		$this->mark_deleting( $status->id );
+		$order  = $this->order_in( 'packed' );
+		$logs   = $this->capture_logs();
+		add_filter( 'wpo_otd_reassign_orders_to_status', static fn() => array( 'completed' ) );
+
+		$this->service->process_deletion_batch( 'packed', 'processing', $status->id );
+
+		$this->assertSame( 'packed', wc_get_order( $order )->get_status() );
+		$this->assertSame(
+			array( 'warning', "Order {$order} could not be moved from status \"packed\" to \"[\"completed\"]\"; it stays." ),
+			$logs()[0]
+		);
+	}
+
 	public function test_the_scheduled_hook_runs_a_batch(): void {
 		$status = $this->create_registered_status( 'Packed' );
 		$this->mark_deleting( $status->id );
