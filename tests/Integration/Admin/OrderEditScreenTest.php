@@ -4,6 +4,7 @@ namespace WPO\OTD\Tests\Integration\Admin;
 
 use WPO\OTD\Admin\OrderEdit\Screen;
 use WPO\OTD\Enums\FulfillmentStatuses;
+use WPO\OTD\Models\Fulfillment;
 use WPO\OTD\Services\FulfillmentService;
 use WPO\OTD\Tests\IntegrationTestCase;
 
@@ -159,6 +160,7 @@ class OrderEditScreenTest extends IntegrationTestCase {
 		$this->assertStringContainsString( '<span class="wpo-otd-tag fully-fulfilled">4 / 3 fulfilled</span>', $html );
 		$this->assertStringContainsString( 'name="wpo-otd-fulfillment-quantity[' . $item->get_id() . '][1]"', $html );
 		$this->assertStringContainsString( 'value="1"', $html );
+		$this->assertStringContainsString( 'max="0"', $html, 'The other entry holds 3 of the 3.' );
 	}
 
 	public function test_other_lines_get_no_column_content(): void {
@@ -218,6 +220,53 @@ class OrderEditScreenTest extends IntegrationTestCase {
 		$this->assertSame( 2, $this->fulfillments->get_order_item_fulfillment_data( $items[0]->get_id() )[0]->quantity );
 		$this->assertCount( 1, $this->fulfillments->get_order_item_fulfillment_data( $items[1]->get_id() ), 'The existing entry is updated.' );
 		$this->assertSame( 2, $this->fulfillments->get_order_item_fulfillment_data( $items[1]->get_id() )[0]->quantity );
+	}
+
+	public function test_a_page_opened_before_the_first_entry_updates_it(): void {
+		$order = $this->create_order( array( 3 ) );
+		$item  = $this->first_item( $order );
+		$this->fulfillments->save_order_item_fulfillment_quantity( $item->get_id(), 1, null );
+
+		$this->post_quantities( $order, array( $item->get_id() => array( 0 => '2' ) ) );
+
+		$this->assertEquals(
+			array( new Fulfillment( array( 'id' => 1, 'quantity' => 2 ) ) ),
+			$this->fulfillments->get_order_item_fulfillment_data( $item->get_id() )
+		);
+	}
+
+	public function test_a_posted_quantity_may_not_take_the_line_past_its_quantity_to_fulfil(): void {
+		$order = $this->create_order( array( 3, 3 ) );
+		$items = array_values( $order->get_items() );
+		foreach ( $items as $item ) {
+			$this->fulfillments->save_order_item_fulfillment_quantity( $item->get_id(), 1, null );
+			$this->fulfillments->save_order_item_fulfillment_quantity( $item->get_id(), 1, null );
+		}
+		$this->refund( $order, $items[1], 1 );
+
+		$this->post_quantities(
+			$order,
+			array(
+				$items[0]->get_id() => array( 1 => '3' ),
+				$items[1]->get_id() => array( 1 => '2' ),
+			)
+		);
+
+		$this->assertSame( 2, $this->fulfillments->get_fulfilled_quantity( $items[0]->get_id() ), 'Entry 2 holds 1, so entry 1 may hold 2 at most.' );
+		$this->assertSame( 2, $this->fulfillments->get_fulfilled_quantity( $items[1]->get_id() ), 'One unit is refunded, so entry 1 may hold 1 at most.' );
+
+		$this->post_quantities( $order, array( $items[0]->get_id() => array( 1 => '2' ) ) );
+
+		$this->assertSame( 3, $this->fulfillments->get_fulfilled_quantity( $items[0]->get_id() ) );
+	}
+
+	public function test_a_posted_quantity_is_capped_by_the_quantity_saved_with_it(): void {
+		$order = $this->create_order( array( 3 ) );
+		$item  = $this->first_item( $order );
+
+		$this->post_quantities( $order, array( $item->get_id() => array( 0 => '5' ) ), array( $item->get_id() => '5' ) );
+
+		$this->assertSame( 5, $this->fulfillments->get_fulfilled_quantity( $item->get_id() ) );
 	}
 
 	public function test_nothing_is_saved_without_posted_quantities(): void {
@@ -357,5 +406,24 @@ class OrderEditScreenTest extends IntegrationTestCase {
 		$items = $order->get_items();
 
 		return reset( $items );
+	}
+
+	/**
+	 * Save fulfillment quantities as the order items form posts them.
+	 *
+	 * @param \WC_Abstract_Order $order
+	 * @param array<int, array>  $quantities      Per line, the posted entry ID and quantity.
+	 * @param array<int, string> $line_quantities Per line, the line quantity posted with them.
+	 *
+	 * @return void
+	 */
+	private function post_quantities( \WC_Abstract_Order $order, array $quantities, array $line_quantities = array() ): void {
+		$posted = array( 'wpo-otd-fulfillment-quantity' => $quantities );
+
+		if ( $line_quantities ) {
+			$posted['order_item_qty'] = $line_quantities;
+		}
+
+		$this->screen->save_posted_fulfillment_quantities( $order->get_id(), $posted );
 	}
 }

@@ -304,7 +304,7 @@ final class Screen {
 				<span class="screen-reader-text">%5$s</span>
 			</label>',
 			esc_attr( $item_id ),
-			esc_attr( $total_quantity ),
+			esc_attr( $this->most_for_entry( $item, $fulfillment ? $fulfillment->id : null ) ),
 			esc_attr( $fulfillment_quantity ),
 			esc_attr( $fulfillment ? $fulfillment->id : '' ),
 			esc_html__( 'Fulfillment Quantity', 'out-the-door-order-tasks-workflows-for-woocommerce' )
@@ -386,6 +386,46 @@ final class Screen {
 	}
 
 	/**
+	 * Get the entry the editor changes. The editor shows one entry per line: the one it names, or else the line's
+	 * first, so a page opened before the line had an entry updates that entry instead of adding a second one.
+	 *
+	 * @param int      $item_id
+	 * @param int|null $fulfillment_id 0 or null when the editor named no entry.
+	 *
+	 * @return int|null Null when the line has no entry yet, so saving adds one.
+	 */
+	private function entry_to_edit( int $item_id, ?int $fulfillment_id ): ?int {
+		if ( $fulfillment_id > 0 ) {
+			return $fulfillment_id;
+		}
+
+		$entries = $this->fulfillment_service->get_order_item_fulfillment_data( $item_id );
+
+		return $entries ? $entries[0]->id : null;
+	}
+
+	/**
+	 * Get the most units one entry of a line may hold: the line's quantity to fulfil less what its other entries hold.
+	 *
+	 * @param \WC_Order_Item $item
+	 * @param int|null       $fulfillment_id The entry, or null for a new one.
+	 * @param int|null       $quantity       The line's quantity, when it is about to change; default the saved one.
+	 *
+	 * @return int Never below 0.
+	 */
+	private function most_for_entry( \WC_Order_Item $item, ?int $fulfillment_id, ?int $quantity = null ): int {
+		$others = 0;
+
+		foreach ( $this->fulfillment_service->get_order_item_fulfillment_data( $item->get_id() ) ?? array() as $entry ) {
+			if ( $entry->id !== $fulfillment_id ) {
+				$others += $entry->quantity;
+			}
+		}
+
+		return max( 0, $this->fulfillment_service->get_quantity_to_fulfil( $item, $quantity ) - $others );
+	}
+
+	/**
 	 * Persist the fulfillment quantities submitted with the order items form.
 	 *
 	 * @param int   $order_id Order ID.
@@ -406,16 +446,26 @@ final class Screen {
 				continue;
 			}
 
-			$fulfillment_id       = absint( array_key_first( $fulfillment_data ) );
-			$fulfillment_quantity = isset( $fulfillment_data[ $fulfillment_id ] )
-				? absint( $fulfillment_data[ $fulfillment_id ] )
-				: 0;
+			$item = \WC_Order_Factory::get_order_item( $item_id );
+			if ( ! $item ) {
+				continue;
+			}
 
-			$this->fulfillment_service->save_order_item_fulfillment_quantity(
-				$item_id,
-				$fulfillment_quantity,
-				$fulfillment_id > 0 ? $fulfillment_id : null
-			);
+			$posted_id            = absint( array_key_first( $fulfillment_data ) );
+			$fulfillment_quantity = isset( $fulfillment_data[ $posted_id ] )
+				? absint( $fulfillment_data[ $posted_id ] )
+				: 0;
+			$fulfillment_id       = $this->entry_to_edit( $item_id, $posted_id );
+
+			// The same save may change the line's quantity, which WooCommerce stores after this hook.
+			$quantity = isset( $items['order_item_qty'][ $item_id ] ) ? (int) wc_stock_amount( $items['order_item_qty'][ $item_id ] ) : null;
+
+			// This form has no way to report an error, so a quantity over the cap is left unsaved.
+			if ( $fulfillment_quantity > $this->most_for_entry( $item, $fulfillment_id, $quantity ) ) {
+				continue;
+			}
+
+			$this->fulfillment_service->save_order_item_fulfillment_quantity( $item_id, $fulfillment_quantity, $fulfillment_id );
 		}
 	}
 
@@ -501,14 +551,16 @@ final class Screen {
 			);
 		}
 
+		$fulfillment_id = $this->entry_to_edit( $item_id, $fulfillment_id );
 		$total_quantity = $this->fulfillment_service->get_quantity_to_fulfil( $order_item );
-		if ( $quantity > $total_quantity ) {
+		$most           = $this->most_for_entry( $order_item, $fulfillment_id );
+		if ( $quantity > $most ) {
 			wp_send_json_error(
 				array(
 					'message' => sprintf(
-						/* translators: %d: total quantity */
+						/* translators: %d: the most the fulfillment may hold */
 						esc_html__( 'Fulfillment quantity cannot exceed %d.', 'out-the-door-order-tasks-workflows-for-woocommerce' ),
-						$total_quantity
+						$most
 					),
 				)
 			);
