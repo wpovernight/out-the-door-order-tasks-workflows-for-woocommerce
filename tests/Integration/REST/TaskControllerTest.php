@@ -253,6 +253,7 @@ class TaskControllerTest extends RestTestCase {
 
 		$this->assertResponse( 404, $this->request( 'PUT', '/tasks/999999', array( 'title' => 'Ghost' ) ), 'not_found' );
 		$this->assertResponse( 400, $this->request( 'PUT', "/tasks/{$id}", array( 'title' => str_repeat( 'a', 256 ) ) ), 'invalid_data' );
+		$this->assertResponse( 400, $this->request( 'PUT', "/tasks/{$id}", array( 'field_values' => 'status' ) ), 'invalid_data' );
 	}
 
 	public function test_updating_a_task_with_a_title_empty_once_sanitized_is_refused(): void {

@@ -259,6 +259,7 @@ class CustomOrderStatusControllerTest extends RestTestCase {
 		$this->assertResponse( 200, $response );
 		$this->assertSame( 'Boxed', $this->json( $response )['data']['label'] );
 		$this->assertResponse( 400, $this->request( 'PUT', "/custom-order-statuses/{$id}", array( 'background' => 'blue' ) ), 'invalid_data' );
+		$this->assertResponse( 400, $this->request( 'PUT', "/custom-order-statuses/{$id}", array( 'foreground' => '#12345' ) ), 'invalid_data' );
 		$this->assertResponse( 404, $this->request( 'PUT', '/custom-order-statuses/999999', array( 'label' => 'Ghost' ) ), 'not_found' );
 	}
 

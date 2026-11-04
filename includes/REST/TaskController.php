@@ -14,6 +14,15 @@ use WPO\OTD\Services\TaskStatusRoleService;
 defined( 'ABSPATH' ) || exit;
 
 class TaskController extends BaseRestController {
+	/**
+	 * The rules a task's body is checked against when it is created or updated.
+	 */
+	private const TASK_RULES = array(
+		'title'        => 'string|max:255',
+		'description'  => 'string',
+		'field_values' => 'array',
+	);
+
 	protected string $resource_name = 'tasks';
 
 	private readonly TaskManagerService $task_manager_service;
@@ -206,11 +215,6 @@ class TaskController extends BaseRestController {
 			)
 		);
 
-
-		/**
-		 * Field options endpoints:
-		 */
-
 		// GET /{namespace}/tasks/fields/{field_id}/options -> returns options for a specific field.
 		// POST /{namespace}/tasks/fields/{field_id}/options -> creates a new option for a specific field.
 		register_rest_route(
@@ -306,10 +310,8 @@ class TaskController extends BaseRestController {
 	 */
 	public function get_items( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		try {
-			$task_manager_service = $this->task_manager_service;
-			$tasks                = $task_manager_service->get_all_tasks_with_fields();
+			$tasks = $this->task_manager_service->get_all_tasks_with_fields();
 
-			// ToDo: Add pagination, filtering, etc.
 
 			/**
 			 * Allow modifying the tasks response before it's returned.
@@ -339,11 +341,7 @@ class TaskController extends BaseRestController {
 			return $data;
 		}
 
-		$errors = $this->validate( $data, array(
-			'title'        => 'string|max:255',
-			'description'  => 'string',
-			'field_values' => 'array',
-		) );
+		$errors = $this->validate( $data, self::TASK_RULES );
 
 		// Not the "required" rule, which counts "0" as missing, and "0" is a title.
 		if ( ! isset( $data['title'] ) || '' === $data['title'] ) {
@@ -422,10 +420,9 @@ class TaskController extends BaseRestController {
 		}
 
 		try {
-			$task_manager_service = $this->task_manager_service;
-			$task                 = $include_fields
-				? $task_manager_service->get_task_with_fields( $id )
-				: $task_manager_service->get_task( $id );
+			$task = $include_fields
+				? $this->task_manager_service->get_task_with_fields( $id )
+				: $this->task_manager_service->get_task( $id );
 
 			if ( ! $task ) {
 				return new WP_Error( 'not_found', 'Task not found', array( 'status' => 404 ) );
@@ -465,20 +462,14 @@ class TaskController extends BaseRestController {
 			return $data;
 		}
 
-		$errors = $this->with_empty_title_error( $data, $this->validate( $data, array(
-			'title'       => 'string|max:255',
-			'description' => 'string',
-			'field_values' => 'array',
-		) ) );
+		$errors = $this->with_empty_title_error( $data, $this->validate( $data, self::TASK_RULES ) );
 
 		if ( ! empty( $errors ) ) {
 			return $this->invalid_data( $errors, 'Invalid data provided' );
 		}
 
 		try {
-			$task_manager_service = $this->task_manager_service;
-
-			$task = $task_manager_service->update_task( $id, $data, $data['field_values'] ?? null );
+			$task = $this->task_manager_service->update_task( $id, $data, $data['field_values'] ?? null );
 
 			/**
 			 * Allow modifying the updated task response.
@@ -510,10 +501,8 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'invalid_id', 'Invalid task ID provided', array( 'status' => 400 ) );
 		}
 
-		$task_manager_service = $this->task_manager_service;
-
 		try {
-			$deleted = $task_manager_service->delete_task( $id );
+			$deleted = $this->task_manager_service->delete_task( $id );
 		} catch ( \Exception $e ) {
 			return $this->server_error( 'task_deletion_failed', __( 'Failed to delete task.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), 'Task deletion failed: ' . $e->getMessage() );
 		}
@@ -584,8 +573,7 @@ class TaskController extends BaseRestController {
 	 */
 	public function get_task_fields( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		try {
-			$task_manager_service = $this->task_manager_service;
-			$fields               = $task_manager_service->get_all_fields();
+			$fields = $this->task_manager_service->get_all_fields();
 
 			return $this->respond( $fields );
 		} catch ( \Throwable $e ) {
@@ -608,8 +596,7 @@ class TaskController extends BaseRestController {
 		}
 
 		try {
-			$task_manager_service = $this->task_manager_service;
-			$options              = $task_manager_service->get_field_options_by_field_id( $field_id );
+			$options = $this->task_manager_service->get_field_options_by_field_id( $field_id );
 
 			if ( empty( $options ) ) {
 				return new WP_Error( 'not_found', 'Field not found or has no options', array( 'status' => 404 ) );
@@ -636,8 +623,7 @@ class TaskController extends BaseRestController {
 		}
 
 		try {
-			$task_manager_service = $this->task_manager_service;
-			$options              = $task_manager_service->get_field_options_by_field_slug( $field_slug );
+			$options = $this->task_manager_service->get_field_options_by_field_slug( $field_slug );
 
 			if ( empty( $options ) ) {
 				return new WP_Error( 'not_found', 'Field not found or has no options', array( 'status' => 404 ) );
@@ -659,7 +645,6 @@ class TaskController extends BaseRestController {
 	public function create_field_option( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$field_id = (int) $this->url_param( $request, 'field_id' );
 
-		// Validate field_id.
 		if ( $field_id <= 0 ) {
 			return new WP_Error( 'invalid_field_id', 'Invalid field ID provided', array( 'status' => 400 ) );
 		}
@@ -673,7 +658,7 @@ class TaskController extends BaseRestController {
 		$errors = $this->validate( $data, array(
 			'label'    => 'required|string|max:255',
 			'slug'     => 'string|max:255|regex:/^[a-z0-9_-]+$/i',
-			'color'    => 'string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
+			'color'    => 'string|regex:' . self::COLOR_PATTERN,
 			'position' => 'integer',
 		) );
 
@@ -682,9 +667,7 @@ class TaskController extends BaseRestController {
 		}
 
 		try {
-			$task_manager_service = $this->task_manager_service;
-
-			$option = $task_manager_service->add_field_option(
+			$option = $this->task_manager_service->add_field_option(
 				$field_id,
 				array(
 					'label'    => $data['label'],
@@ -737,7 +720,7 @@ class TaskController extends BaseRestController {
 		$errors = $this->validate( $data, array(
 			'label'    => 'string|max:255',
 			'slug'     => 'string|max:255|regex:/^[a-z0-9_-]+$/i',
-			'color'    => 'string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
+			'color'    => 'string|regex:' . self::COLOR_PATTERN,
 			'position' => 'integer',
 		) );
 
@@ -746,9 +729,7 @@ class TaskController extends BaseRestController {
 		}
 
 		try {
-			$task_manager_service = $this->task_manager_service;
-
-			$option = $task_manager_service->update_field_option( $field_id, $option_id, $data );
+			$option = $this->task_manager_service->update_field_option( $field_id, $option_id, $data );
 
 			/**
 			 * Allow modifying the updated field option response.
@@ -787,8 +768,7 @@ class TaskController extends BaseRestController {
 		}
 
 		try {
-			$task_manager_service = $this->task_manager_service;
-			if ( ! $task_manager_service->delete_field_option( $field_id, $option_id ) ) {
+			if ( ! $this->task_manager_service->delete_field_option( $field_id, $option_id ) ) {
 				return $this->server_error( 'deletion_failed', 'Failed to delete field option.', "Failed to delete field option: the database refused to delete option {$option_id}." );
 			}
 
@@ -813,20 +793,16 @@ class TaskController extends BaseRestController {
 		$field_id           = (int) $this->url_param( $request, 'field_id' );
 		$ordered_option_ids = $request->get_param( 'ordered_option_ids' );
 
-		// Validate field_id.
 		if ( $field_id <= 0 ) {
 			return new WP_Error( 'invalid_field_id', 'Invalid field ID provided', array( 'status' => 400 ) );
 		}
 
-		// Validate ordered_option_ids.
 		if ( ! is_array( $ordered_option_ids ) || empty( $ordered_option_ids ) ) {
 			return new WP_Error( 'invalid_option_ids', 'Invalid option IDs provided', array( 'status' => 400 ) );
 		}
 
 		try {
-			$task_manager_service = $this->task_manager_service;
-
-			$task_manager_service->update_field_option_positions( $field_id, $ordered_option_ids );
+			$this->task_manager_service->update_field_option_positions( $field_id, $ordered_option_ids );
 
 			return $this->respond(
 				array(
@@ -835,7 +811,6 @@ class TaskController extends BaseRestController {
 				)
 			);
 		} catch ( \InvalidArgumentException $e ) {
-			// Validation errors (field not found, invalid option IDs, etc.).
 			return new WP_Error(
 				'invalid_data',
 				$e->getMessage(),
@@ -909,14 +884,12 @@ class TaskController extends BaseRestController {
 			);
 		}
 
-		$task_service = $this->task_manager_service;
-
 		try {
-			if ( ! $task_service->get_task( $task_id ) ) {
+			if ( ! $this->task_manager_service->get_task( $task_id ) ) {
 				return new WP_Error( 'not_found', 'Task not found', array( 'status' => 404 ) );
 			}
 
-			$new_position = $task_service->move_task( $task_id, $target_status_id, $previous_task_id );
+			$new_position = $this->task_manager_service->move_task( $task_id, $target_status_id, $previous_task_id );
 		} catch ( \InvalidArgumentException $e ) {
 			return new WP_Error( 'invalid_params', $e->getMessage(), array( 'status' => 400 ) );
 		} catch ( \Exception $e ) {
@@ -936,7 +909,6 @@ class TaskController extends BaseRestController {
 	 * @param WP_REST_Request $request
 	 *
 	 * @return WP_REST_Response|WP_Error
-	 * @throws \Exception
 	 */
 	public function finish_task( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$task_id = (int) $this->url_param( $request, 'id' );
@@ -945,10 +917,8 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'invalid_id', 'Invalid task ID provided', array( 'status' => 400 ) );
 		}
 
-		$task_service = $this->task_manager_service;
-
 		try {
-			$task_service->mark_task_finished( $task_id );
+			$this->task_manager_service->mark_task_finished( $task_id );
 
 			return $this->respond( array(
 				'success' => true,
@@ -969,7 +939,6 @@ class TaskController extends BaseRestController {
 	 * @param WP_REST_Request $request
 	 *
 	 * @return WP_REST_Response|WP_Error
-	 * @throws \Exception
 	 */
 	public function archive_task( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$task_id = (int) $this->url_param( $request, 'id' );
@@ -978,10 +947,8 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'invalid_id', 'Invalid task ID provided', array( 'status' => 400 ) );
 		}
 
-		$task_service = $this->task_manager_service;
-
 		try {
-			$task_service->archive_task( $task_id );
+			$this->task_manager_service->archive_task( $task_id );
 		} catch ( \InvalidArgumentException $e ) {
 			return new WP_Error( 'not_found', $e->getMessage(), array( 'status' => 404 ) );
 		} catch ( \Exception $e ) {
@@ -999,7 +966,6 @@ class TaskController extends BaseRestController {
 	 *
 	 * @param WP_REST_Request $request
 	 * @return WP_REST_Response|WP_Error
-	 * @throws \Exception
 	 */
 	public function unarchive_task( WP_REST_Request $request ): WP_REST_Response|WP_Error {
 		$task_id = (int) $this->url_param( $request, 'id' );
@@ -1008,10 +974,8 @@ class TaskController extends BaseRestController {
 			return new WP_Error( 'invalid_id', 'Invalid task ID provided', array( 'status' => 400 ) );
 		}
 
-		$task_service = $this->task_manager_service;
-
 		try {
-			$task_service->unarchive_task( $task_id );
+			$this->task_manager_service->unarchive_task( $task_id );
 		} catch ( \InvalidArgumentException $e ) {
 			return new WP_Error( 'not_found', $e->getMessage(), array( 'status' => 404 ) );
 		} catch ( \Exception $e ) {
@@ -1051,20 +1015,18 @@ class TaskController extends BaseRestController {
 			return $this->invalid_data( $errors, 'Invalid data provided' );
 		}
 
-		$task_status_role_service = $this->task_status_role_service;
-
 		try {
 			if ( array_key_exists( 'done', $data ) ) {
-				$task_status_role_service->set_done_field_option_id( $data['done'] );
+				$this->task_status_role_service->set_done_field_option_id( $data['done'] );
 			}
 
 			if ( array_key_exists( 'undone', $data ) ) {
-				$task_status_role_service->set_undone_field_option_id( $data['undone'] );
+				$this->task_status_role_service->set_undone_field_option_id( $data['undone'] );
 			}
 
 			return $this->respond( array(
-				'done'   => $task_status_role_service->get_done_field_option_id(),
-				'undone' => $task_status_role_service->get_undone_field_option_id(),
+				'done'   => $this->task_status_role_service->get_done_field_option_id(),
+				'undone' => $this->task_status_role_service->get_undone_field_option_id(),
 			) );
 		} catch ( \InvalidArgumentException $e ) {
 			return new WP_Error( 'invalid_option', $e->getMessage(), array( 'status' => 400 ) );

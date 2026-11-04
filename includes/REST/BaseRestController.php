@@ -20,6 +20,11 @@ abstract class BaseRestController {
 	 */
 	public const MAX_PER_PAGE = 100;
 
+	/**
+	 * A colour the regex rule takes: "#" and 3 or 6 hex digits.
+	 */
+	protected const COLOR_PATTERN = '/^#([a-f0-9]{3}|[a-f0-9]{6})$/i';
+
 	protected string $namespace = 'wc/v3/wpo/otd';
 
 	abstract public function register_routes(): void;

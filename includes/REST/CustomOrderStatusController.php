@@ -122,8 +122,8 @@ class CustomOrderStatusController extends BaseRestController {
 		$errors = $this->validate( $data, array(
 			'label'      => 'required|string|max:255',
 			'status_key' => 'string|max:' . CustomOrderStatus::MAX_KEY_LENGTH . '|regex:' . CustomOrderStatus::KEY_PATTERN,
-			'background' => 'string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
-			'foreground' => 'string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
+			'background' => 'string|regex:' . self::COLOR_PATTERN,
+			'foreground' => 'string|regex:' . self::COLOR_PATTERN,
 		) );
 		$errors = $this->with_unusable_key_error( $data, $errors, null );
 
@@ -131,10 +131,8 @@ class CustomOrderStatusController extends BaseRestController {
 			return $this->invalid_data( $errors, __( 'Invalid data provided', 'out-the-door-order-tasks-workflows-for-woocommerce' ) );
 		}
 
-		$custom_order_status_service = $this->custom_order_status_service;
-
 		try {
-			$new_status = $custom_order_status_service->create( $data );
+			$new_status = $this->custom_order_status_service->create( $data );
 		} catch ( InvalidStatusKeyException $e ) {
 			return $this->invalid_key( $e );
 		} catch ( \Throwable $e ) {
@@ -206,8 +204,7 @@ class CustomOrderStatusController extends BaseRestController {
 			return new WP_Error( 'invalid_id', __( 'Invalid ID provided', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 400 ) );
 		}
 
-		$custom_order_status_service = $this->custom_order_status_service;
-		$status                      = $custom_order_status_service->find( $id );
+		$status = $this->custom_order_status_service->find( $id );
 
 		if ( ! $status ) {
 			return new WP_Error( 'not_found', __( 'Custom order status not found', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 404 ) );
@@ -240,8 +237,8 @@ class CustomOrderStatusController extends BaseRestController {
 		$errors = $this->validate( $data, array(
 			'label'      => 'not_null|string|max:255',
 			'status_key' => 'not_null|string|max:' . CustomOrderStatus::MAX_KEY_LENGTH . '|regex:' . CustomOrderStatus::KEY_PATTERN,
-			'background' => 'not_null|string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
-			'foreground' => 'not_null|string|regex:/^#([a-f0-9]{3}|[a-f0-9]{6})$/i',
+			'background' => 'not_null|string|regex:' . self::COLOR_PATTERN,
+			'foreground' => 'not_null|string|regex:' . self::COLOR_PATTERN,
 		) );
 		$errors = $this->with_unusable_key_error( $data, $errors, $id );
 
@@ -249,10 +246,8 @@ class CustomOrderStatusController extends BaseRestController {
 			return $this->invalid_data( $errors, __( 'Invalid data provided', 'out-the-door-order-tasks-workflows-for-woocommerce' ) );
 		}
 
-		$custom_order_status_service = $this->custom_order_status_service;
-
 		try {
-			$updated_status = $custom_order_status_service->update( $id, $data );
+			$updated_status = $this->custom_order_status_service->update( $id, $data );
 		} catch ( InvalidStatusKeyException $e ) {
 			return $this->invalid_key( $e );
 		} catch ( \InvalidArgumentException $e ) {
@@ -285,10 +280,8 @@ class CustomOrderStatusController extends BaseRestController {
 			return new WP_Error( 'invalid_id', __( 'Invalid ID provided', 'out-the-door-order-tasks-workflows-for-woocommerce' ), array( 'status' => 400 ) );
 		}
 
-		$custom_order_status_service = $this->custom_order_status_service;
-
 		try {
-			$outcome = $custom_order_status_service->begin_deletion( $id );
+			$outcome = $this->custom_order_status_service->begin_deletion( $id );
 		} catch ( \Throwable $e ) {
 			return $this->server_error( 'deletion_failed', __( 'Failed to delete custom order status.', 'out-the-door-order-tasks-workflows-for-woocommerce' ), 'Custom order status deletion failed: ' . $e->getMessage() );
 		}
