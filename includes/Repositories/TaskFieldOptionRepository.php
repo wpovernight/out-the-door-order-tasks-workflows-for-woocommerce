@@ -41,22 +41,19 @@ class TaskFieldOptionRepository extends BaseRepository {
 			return;
 		}
 
-		// Build CASE statement for position updates.
 		$case_parts = array();
 		$bindings   = array();
 
 		foreach ( $ordered_option_ids as $position => $option_id ) {
 			$case_parts[] = 'WHEN id = %d THEN %d';
 			$bindings[]   = absint( $option_id );
-			$bindings[]   = absint( $position + 1 ); // Start positions from 1 instead of 0.
+			$bindings[]   = absint( $position + 1 );
 		}
 
 		$case_statement = implode( ' ', $case_parts );
 
-		// Add field_id to bindings for WHERE clause.
 		$bindings[] = absint( $field_id );
 
-		// Add option IDs for IN clause.
 		foreach ( $ordered_option_ids as $option_id ) {
 			$bindings[] = absint( $option_id );
 		}

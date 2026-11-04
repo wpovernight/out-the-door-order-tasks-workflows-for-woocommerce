@@ -89,17 +89,10 @@ class CustomOrderStatusService {
 	 * @return void
 	 */
 	public function register_hooks(): void {
-		// Add custom order statuses to WooCommerce.
 		add_filter( 'wc_order_statuses', array( $this, 'add_to_order_statuses' ) );
-
-		// Register custom order statuses with WooCommerce so they are recognized as valid statuses.
 		add_filter( 'woocommerce_register_shop_order_post_statuses', array( $this, 'register_order_statuses' ) );
-
-		// Add custom order statuses to the bulk actions dropdown in the orders list table.
 		add_filter( 'bulk_actions-edit-shop_order', array( $this, 'add_to_bulk_action' ) );
 		add_filter( 'bulk_actions-woocommerce_page_wc-orders', array( $this, 'add_to_bulk_action' ) ); // HPOS support
-
-		// Add dynamic styles for custom order statuses in the orders page.
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_dynamic_style' ), 99 );
 
 		// Drain & finalize a custom status deletion, one batch per scheduled run.
@@ -298,7 +291,6 @@ class CustomOrderStatusService {
 	 * @return Paginator
 	 */
 	public function list( ?int $page = null, ?int $per_page = null ): Paginator {
-		// A null page means "no pagination requested", return the full list on a single page.
 		if ( null === $page ) {
 			return Paginator::full( $this->all() );
 		}
@@ -417,7 +409,6 @@ class CustomOrderStatusService {
 			throw new InvalidStatusKeyException( esc_html( $problem ) );
 		}
 
-		// Ensure the status key is unique.
 		$existing = $this->repository->where( 'status_key', $status->status_key )->first();
 		if ( $existing ) {
 			// Append a number to make it unique, cutting the key so it still fits.
@@ -678,9 +669,8 @@ class CustomOrderStatusService {
 			return self::DELETION_DONE;
 		}
 
-		// Orders exist, or may: mark as pending deletion and schedule the async drain.
-		// Do NOT delete the row yet — it must stay registered so wc_get_orders()
-		// can still match its orders.
+		// Orders exist, or may. The row stays until they are moved, so the status stays registered and wc_get_orders()
+		// can still match them.
 		$status->is_deleting = true;
 		if ( false === $this->repository->save( $status ) ) {
 			throw new RuntimeException( esc_html( "Custom order status {$id} could not be flagged for deletion: " . $this->repository->get_last_db_error() ) );
@@ -854,7 +844,6 @@ class CustomOrderStatusService {
 			return;
 		}
 
-		// Final batch done — now it's safe to remove the status.
 		$this->remove( $status_id, $from_status, $to_status );
 	}
 

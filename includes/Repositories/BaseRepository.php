@@ -395,7 +395,7 @@ abstract class BaseRepository {
 	}
 
 	/**
-	 * Find a TaskField by its slug.
+	 * Find a record by its slug.
 	 *
 	 * @template TModel of BaseModel
 	 * @param string $slug
@@ -698,10 +698,8 @@ abstract class BaseRepository {
 		$placeholders = implode( ', ', $rows );
 		$query        = "INSERT INTO {$this->get_table_full_name()} ({$columns}) VALUES {$placeholders}";
 
-		// Add bindings
 		$this->bindings = array_merge( $this->bindings, $bindings );
 
-		// Prepare query with bindings
 		$query = $this->append_bindings( $query );
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Query is prepared above.
@@ -724,12 +722,10 @@ abstract class BaseRepository {
 	 *                                  group, a column compared twice, or a name that is not bare.
 	 */
 	public function update( array $data ): int|false {
-		// Validate the data array.
 		if ( empty( $data ) ) {
 			throw $this->discard( new InvalidArgumentException( 'Data must be a non-empty array.' ) );
 		}
 
-		// Ensure that the WHERE clause is set.
 		if ( empty( $this->wheres ) ) {
 			throw $this->discard( new RuntimeException( 'No WHERE clause specified for update.' ) );
 		}
@@ -872,12 +868,10 @@ abstract class BaseRepository {
 	 * @throws RuntimeException If no WHERE clause is specified.
 	 */
 	protected function update_raw( string $set_clause, array $bindings ): int|false {
-		// Ensure that the SET clause is not empty.
 		if ( '' === trim( $set_clause ) ) {
 			throw $this->discard( new InvalidArgumentException( 'SET clause must not be empty.' ) );
 		}
 
-		// Ensure that the WHERE clause is set.
 		if ( empty( $this->wheres ) ) {
 			throw $this->discard( new RuntimeException( 'No WHERE clause specified for update.' ) );
 		}
@@ -1486,7 +1480,7 @@ abstract class BaseRepository {
 
 		// Remember which table the alias refers to. Anything other than "table", "table alias" or
 		// "table AS alias" (a subquery, say) is not recorded: columns qualified with it are checked
-		// against this repository's table, as before.
+		// against this repository's table.
 		if ( preg_match( '/^`?([\w$]+)`?(?:\s+(?:AS\s+)?`?([\w$]+)`?)?$/i', trim( $table ), $matches ) ) {
 			$this->joined_tables[ $matches[2] ?? $matches[1] ] = $matches[1];
 		}
@@ -1532,7 +1526,6 @@ abstract class BaseRepository {
 			return $this;
 		}
 
-		// Add the WHERE clause to the query.
 		$this->wheres[] = array(
 			strtolower( $column ),
 			strtoupper( $operator ),
@@ -1540,7 +1533,6 @@ abstract class BaseRepository {
 			strtoupper( $logical_operator )
 		);
 
-		// Add the value to the bindings array.
 		$this->add_binding( $value );
 
 		return $this;
@@ -1764,7 +1756,6 @@ abstract class BaseRepository {
 			if ( is_array( $value ) && in_array( $operator, array( 'IN', 'NOT IN' ), true ) ) {
 				$parts[] = "{$prefix}{$column} {$operator} (" . self::in_placeholders( $value ) . ')';
 			} else {
-				// Choose a placeholder based on scalar type.
 				$placeholder = $this->placeholder_for( $value );
 				$parts[]     = "{$prefix}{$column} {$operator} {$placeholder}";
 			}
@@ -1784,7 +1775,7 @@ abstract class BaseRepository {
 		// If offset is set but no limit, use a very large default limit
 		// This is because MySQL requires LIMIT before OFFSET
 		if ( $this->offset > 0 && $this->limit === 0 ) {
-			$limit_offset .= ' LIMIT 18446744073709551615'; // Max MySQL BIGINT value
+			$limit_offset .= ' LIMIT 18446744073709551615'; // The largest unsigned BIGINT.
 		} elseif ( $this->limit > 0 ) {
 			$limit_offset .= ' LIMIT ' . $this->limit;
 		}

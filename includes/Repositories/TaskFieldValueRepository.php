@@ -63,7 +63,6 @@ class TaskFieldValueRepository extends BaseRepository {
 
 		$field_ids = array_map( 'intval', array_keys( $field_values ) );
 
-		// Build rows for insertion
 		$rows     = array();
 		$bindings = array();
 

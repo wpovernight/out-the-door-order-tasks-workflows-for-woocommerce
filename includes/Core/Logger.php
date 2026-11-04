@@ -45,7 +45,6 @@ final class Logger {
 			return;
 		}
 
-		// Validate level
 		if ( ! in_array( $level, self::LEVELS, true ) ) {
 			return;
 		}
