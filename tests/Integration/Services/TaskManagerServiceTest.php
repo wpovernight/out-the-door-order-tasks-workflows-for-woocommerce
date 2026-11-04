@@ -931,6 +931,28 @@ class TaskManagerServiceTest extends IntegrationTestCase {
 		$this->assertArrayNotHasKey( 'shipping_carrier', $this->service->get_all_fields() );
 	}
 
+	public function test_creating_a_field_with_an_unknown_type_saves_it_as_text_and_logs_it_once(): void {
+		$logged = array();
+		add_filter(
+			'wpo_otd_logging_enabled',
+			static function ( $enabled, $level, $message ) use ( &$logged ) {
+				$logged[] = array( $level, $message );
+
+				return false;
+			},
+			10,
+			3
+		);
+
+		$id = $this->service->create_field( array( 'label' => 'Creator Note', 'type' => 'user' ) );
+
+		$this->assertSame( 'text', $this->service->get_all_fields( 'id' )[ $id ]->type );
+		$this->assertSame(
+			array( array( 'error', 'Invalid field type "user" for field "creator_note". Defaulting to text.' ) ),
+			$logged
+		);
+	}
+
 	public function test_updating_or_deleting_a_missing_field_fails(): void {
 		$this->assertFalse( $this->service->update_field( 999999, array( 'label' => 'Ghost' ) ) );
 		$this->assertFalse( $this->service->delete_field( 999999 ) );

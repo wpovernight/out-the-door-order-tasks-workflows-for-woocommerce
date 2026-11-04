@@ -573,7 +573,12 @@ final class TaskManagerService {
 	 * @return int|false
 	 */
 	public function create_field( array $data ): int|false {
-		$field = new TaskField( $data );
+		$field  = new TaskField( $data );
+		$notice = TaskField::type_fallback_notice( $data, $field->slug );
+
+		if ( null !== $notice ) {
+			Logger::error( $notice );
+		}
 
 		$result = $this->task_field_repository->save( $field );
 

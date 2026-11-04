@@ -67,16 +67,29 @@ class TaskFieldTest extends TestCase {
 		$this->assertSame( 'my_custom_slug', ( new TaskField( array( 'label' => 'Ignored', 'slug' => 'My Custom-Slug!', 'type' => 'text' ) ) )->slug );
 	}
 
-	public function test_an_unknown_type_falls_back_to_text_and_is_logged(): void {
-		$this->wc_logger->shouldReceive( 'log' )->once()->with( 'error', 'Invalid field type "user" for field "creator". Defaulting to text.', Mockery::any() );
+	public function test_an_unknown_type_falls_back_to_text_without_logging(): void {
+		$this->wc_logger->shouldNotReceive( 'log' );
 
 		$this->assertSame( 'text', ( new TaskField( array( 'label' => 'Creator', 'type' => 'user' ) ) )->type );
 	}
 
 	public function test_a_missing_type_falls_back_to_text(): void {
-		$this->wc_logger->shouldReceive( 'log' )->once();
-
 		$this->assertSame( 'text', ( new TaskField( array( 'label' => 'Notes' ) ) )->type );
+	}
+
+	public function test_the_fallback_notice_names_the_type_and_the_slug(): void {
+		$this->assertSame(
+			'Invalid field type "user" for field "creator". Defaulting to text.',
+			TaskField::type_fallback_notice( array( 'type' => 'user' ), 'creator' )
+		);
+		$this->assertSame(
+			'Invalid field type "" for field "notes". Defaulting to text.',
+			TaskField::type_fallback_notice( array(), 'notes' )
+		);
+	}
+
+	public function test_a_valid_type_has_no_fallback_notice(): void {
+		$this->assertNull( TaskField::type_fallback_notice( array( 'type' => 'select' ), 'carrier' ) );
 	}
 
 	public function test_fill_cannot_change_id_type_or_slug(): void {
