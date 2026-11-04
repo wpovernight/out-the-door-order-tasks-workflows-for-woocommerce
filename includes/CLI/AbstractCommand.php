@@ -6,21 +6,16 @@ defined( 'ABSPATH' ) || exit;
 
 abstract class AbstractCommand implements CommandInterface {
 	/**
-	 * Top-level WP-CLI namespace for all plugin commands (e.g. `wp otd ...`).
+	 * The command's name under the plugin's WP-CLI namespace, as in `wp otd ...`.
 	 *
-	 * @var string
-	 */
-	private string $command_prefix = 'otd';
-
-	/**
 	 * {@inheritDoc}
 	 */
 	public function get_name(): string {
-		return $this->command_prefix . ' ' . $this->get_command_name();
+		return 'otd ' . $this->get_command_name();
 	}
 
 	/**
-	 * The command's own name, appended to the prefix (e.g. "generate-tasks").
+	 * The command's own name, appended to the namespace (e.g. "generate-tasks").
 	 *
 	 * @return string
 	 */
