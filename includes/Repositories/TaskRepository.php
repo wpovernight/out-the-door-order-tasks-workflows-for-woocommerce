@@ -131,13 +131,10 @@ class TaskRepository extends BaseRepository {
 	 */
 	public function rebalance_positions( int $status_id ): bool {
 		return (bool) $this->transaction( function () use ( $status_id ) {
-			$task_field_value_repository = $this->task_field_value_repository;
-			$task_field_value_table_name = $task_field_value_repository->get_table_full_name();
+			$task_field_value_table_name = $this->task_field_value_repository->get_table_full_name();
+			$bindings                    = array( DefaultTaskFields::STATUS, DefaultTaskFields::POSITION, $status_id );
 
-			$status_field_id   = DefaultTaskFields::STATUS;
-			$position_field_id = DefaultTaskFields::POSITION;
-
-			// Lock the relevant rows (prevents concurrent updates to these rows until COMMIT).
+			// Locked until COMMIT, so no concurrent write changes a position while the column is renumbered.
 			$lock_query = "
 				SELECT
 					position.id
@@ -151,20 +148,16 @@ class TaskRepository extends BaseRepository {
 					FOR UPDATE;
 				";
 
-			$locked = $task_field_value_repository
-				->execute_raw( $lock_query, array( $status_field_id, $position_field_id, $status_id ) );
+			$locked = $this->task_field_value_repository->execute_raw( $lock_query, $bindings );
 
-			// If lock query failed (not 0 rows, but actual failure), return false.
 			if ( false === $locked ) {
 				return false;
 			}
 
-			// If no rows found (empty status), return true (success - nothing to rebalance).
 			if ( 0 === $locked ) {
 				return true;
 			}
 
-			// CTE to rank and update positions.
 			$ranked_cte = "
 			WITH ranked AS (
 				SELECT
@@ -188,10 +181,9 @@ class TaskRepository extends BaseRepository {
 				p.value = r.new_position;
 		";
 
-			$affected_rows = $task_field_value_repository
-				->execute_raw( $ranked_cte, array( $status_field_id, $position_field_id, $status_id ) );
+			$affected_rows = $this->task_field_value_repository->execute_raw( $ranked_cte, $bindings );
 
-			// Return true even if 0 rows were affected (positions were already correct)
+			// No row changed when the positions were already 1, 2, 3, ...
 			return false !== $affected_rows;
 		} );
 	}

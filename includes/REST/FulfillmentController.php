@@ -89,7 +89,7 @@ class FulfillmentController extends BaseRestController {
 		);
 
 		$data = array_map(
-			fn( $order ) => $this->format_order( $order, $this->fulfillment_service ),
+			fn( $order ) => $this->format_order( $order ),
 			$paginator->items()
 		);
 
@@ -108,15 +108,14 @@ class FulfillmentController extends BaseRestController {
 	 * Format a single order into a structured response.
 	 *
 	 * @param \WC_Abstract_Order $order
-	 * @param FulfillmentService $fulfillment_service
 	 *
 	 * @return array
 	 */
-	private function format_order( \WC_Abstract_Order $order, FulfillmentService $fulfillment_service ): array {
+	private function format_order( \WC_Abstract_Order $order ): array {
 		$items = array();
 
 		foreach ( $order->get_items() as $item ) {
-			$items[] = $this->format_order_item( $item, $fulfillment_service );
+			$items[] = $this->format_order_item( $item );
 		}
 
 		return array(
@@ -134,13 +133,12 @@ class FulfillmentController extends BaseRestController {
 	 * Format a single order item with its fulfillment data. Its quantity is the quantity to fulfil, refunds taken off.
 	 *
 	 * @param \WC_Order_Item_Product $item
-	 * @param FulfillmentService $fulfillment_service
 	 *
 	 * @return array
 	 */
-	private function format_order_item( \WC_Order_Item_Product $item, FulfillmentService $fulfillment_service ): array {
-		$quantity           = $fulfillment_service->get_quantity_to_fulfil( $item );
-		$fulfilled_quantity = $fulfillment_service->get_fulfilled_quantity( $item );
+	private function format_order_item( \WC_Order_Item_Product $item ): array {
+		$quantity           = $this->fulfillment_service->get_quantity_to_fulfil( $item );
+		$fulfilled_quantity = $this->fulfillment_service->get_fulfilled_quantity( $item );
 
 		$product    = $item->get_product();
 		$image_url  = '';
@@ -164,7 +162,7 @@ class FulfillmentController extends BaseRestController {
 			'attributes'         => $attributes,
 			'quantity'           => $quantity,
 			'fulfilled_quantity' => $fulfilled_quantity,
-			'fulfillment_status' => $fulfillment_service->get_item_fulfillment_status( $fulfilled_quantity, $quantity ),
+			'fulfillment_status' => $this->fulfillment_service->get_item_fulfillment_status( $fulfilled_quantity, $quantity ),
 		);
 	}
 

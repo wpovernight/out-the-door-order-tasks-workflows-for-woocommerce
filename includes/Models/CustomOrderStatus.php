@@ -165,7 +165,6 @@ class CustomOrderStatus extends BaseModel {
 		}
 
 		if ( ! $this->has_sufficient_contrast( $fg_rgb, $bg_rgb ) ) {
-			// Fallback to black or white if contrast is insufficient.
 			$fg_rgb = $brightness > 125 ? array( 0, 0, 0 ) : array( 255, 255, 255 );
 		}
 
