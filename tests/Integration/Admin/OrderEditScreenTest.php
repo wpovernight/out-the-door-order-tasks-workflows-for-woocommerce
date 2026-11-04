@@ -399,6 +399,8 @@ class OrderEditScreenTest extends IntegrationTestCase {
 
 		foreach ( array( 'common', 'skeleton', 'task-card', 'sidebar-modal', 'order-edit' ) as $style ) {
 			$this->assertTrue( wp_style_is( "wpo-otd-admin-{$style}", 'enqueued' ), "Style {$style} is not enqueued." );
+			$this->assertStringEndsWith( "/assets/css/{$style}.min.css", wp_styles()->registered[ "wpo-otd-admin-{$style}" ]->src );
+			$this->assertSame( WPO_OTD_VERSION, wp_styles()->registered[ "wpo-otd-admin-{$style}" ]->ver );
 		}
 	}
 

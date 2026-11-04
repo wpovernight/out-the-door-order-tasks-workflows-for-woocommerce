@@ -25,26 +25,22 @@ final class Screen {
 	}
 
 	/**
-	 * Register screen and actions.
+	 * Hook the admin page and its assets.
 	 *
 	 * @return void
 	 */
 	public function register_hooks(): void {
-		// Enqueue admin scripts and styles.
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
-
-		// Add a sub menu item under WooCommerce menu.
 		add_action( 'admin_menu', array( $this, 'add_screen' ), 99 );
 	}
 
 	/**
-	 * Enqueue admin scripts and styles.
+	 * Enqueue the page's scripts and styles, on its own screen only.
 	 *
 	 * @return void
 	 */
 	public function enqueue_scripts(): void {
 		$screen = get_current_screen();
-		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
 		if ( ! $screen || 'woocommerce_page_' . self::PAGE_SLUG !== $screen->id ) {
 			return;
@@ -87,63 +83,17 @@ final class Screen {
 			)
 		);
 
-		/**
-		 * Enqueue styles.
-		 */
-		wp_enqueue_style(
-			'wpo-otd-admin-common',
-			WPO_OTD()->plugin_url() . '/assets/css/common' . $suffix . '.css',
-			array(),
-			WPO_OTD_VERSION
-		);
-
-		wp_enqueue_style(
-			'wpo-otd-admin-order-manager',
-			WPO_OTD()->plugin_url() . '/assets/css/order-manager' . $suffix . '.css',
-			array(),
-			WPO_OTD_VERSION
-		);
-
-		wp_enqueue_style(
-			'wpo-otd-admin-task-card',
-			WPO_OTD()->plugin_url() . '/assets/css/task-card' . $suffix . '.css',
-			array(),
-			WPO_OTD_VERSION
-		);
-
-		wp_enqueue_style(
-			'wpo-otd-admin-sidebar-modal',
-			WPO_OTD()->plugin_url() . '/assets/css/sidebar-modal' . $suffix . '.css',
-			array(),
-			WPO_OTD_VERSION
-		);
-
-		wp_enqueue_style(
-			'wpo-otd-admin-dashboard',
-			WPO_OTD()->plugin_url() . '/assets/css/dashboard' . $suffix . '.css',
-			array(),
-			WPO_OTD_VERSION
-		);
-
-		wp_enqueue_style(
-			'wpo-otd-admin-task-manager',
-			WPO_OTD()->plugin_url() . '/assets/css/task-manager' . $suffix . '.css',
-			array(),
-			WPO_OTD_VERSION
-		);
-
-		wp_enqueue_style(
-			'wpo-otd-admin-custom-order-status',
-			WPO_OTD()->plugin_url() . '/assets/css/custom-order-status' . $suffix . '.css',
-			array(),
-			WPO_OTD_VERSION
-		);
-
-		wp_enqueue_style(
-			'wpo-otd-admin-skeleton',
-			WPO_OTD()->plugin_url() . '/assets/css/skeleton' . $suffix . '.css',
-			array(),
-			WPO_OTD_VERSION
+		Assets::enqueue_styles(
+			array(
+				'wpo-otd-admin-common'              => 'common',
+				'wpo-otd-admin-order-manager'       => 'order-manager',
+				'wpo-otd-admin-task-card'           => 'task-card',
+				'wpo-otd-admin-sidebar-modal'       => 'sidebar-modal',
+				'wpo-otd-admin-dashboard'           => 'dashboard',
+				'wpo-otd-admin-task-manager'        => 'task-manager',
+				'wpo-otd-admin-custom-order-status' => 'custom-order-status',
+				'wpo-otd-admin-skeleton'            => 'skeleton',
+			)
 		);
 	}
 
@@ -191,7 +141,7 @@ final class Screen {
 			return;
 		}
 
-		// Handles using the React app.
+		// The React app renders into this root.
 		echo '<div id="wpo-otd-order-manager"></div>';
 	}
 }

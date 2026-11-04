@@ -35,13 +35,32 @@ final class Assets {
 			true
 		);
 
-		// The SDK components carry their own translatable strings now that they
-		// are no longer inlined into the consuming bundles.
+		// The SDK components carry their own strings, so the SDK needs its own translations.
 		wp_set_script_translations(
 			self::SDK_HANDLE,
 			'out-the-door-order-tasks-workflows-for-woocommerce',
 			WPO_OTD()->plugin_path() . '/languages'
 		);
+	}
+
+	/**
+	 * Enqueue the plugin's stylesheets, minified unless SCRIPT_DEBUG is on.
+	 *
+	 * @param array<string, string> $styles Handle => file name in assets/css, without the extension.
+	 *
+	 * @return void
+	 */
+	public static function enqueue_styles( array $styles ): void {
+		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+
+		foreach ( $styles as $handle => $file ) {
+			wp_enqueue_style(
+				$handle,
+				WPO_OTD()->plugin_url() . '/assets/css/' . $file . $suffix . '.css',
+				array(),
+				WPO_OTD_VERSION
+			);
+		}
 	}
 
 	/**

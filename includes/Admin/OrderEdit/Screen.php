@@ -29,33 +29,29 @@ final class Screen {
 	}
 
 	/**
-	 * Register meta box.
+	 * Hook the meta box, the order items table's fulfillment column and its saves, the fulfillment cleanup when an
+	 * item is deleted, and the screen's assets.
 	 *
 	 * @return void
 	 */
 	public function register_hooks(): void {
-		// Add meta box to order edit screen.
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ), 10, 2 );
-
-		// Add fulfillment column header in order items table.
 		add_action( 'woocommerce_admin_order_item_headers', array( $this, 'order_items_headers' ) );
-
-		// Add fulfillment column values in order items table.
 		add_action( 'woocommerce_admin_order_item_values', array( $this, 'order_items_values' ), 10, 3 );
-
-		// Save fulfillment quantity changes.
 		add_action( 'woocommerce_before_save_order_items', array( $this, 'save_posted_fulfillment_quantities' ), 10, 2 );
-
-		// Recalculate the order-level status once WooCommerce has persisted the new item quantities.
 		add_action( 'woocommerce_saved_order_items', array( $this, 'refresh_order_fulfillment_status' ), 10, 2 );
-
-		// Cleanup fulfillment data on order item deletion.
 		add_action( 'woocommerce_before_delete_order_item', array( $this, 'on_delete_order_item' ), 10, 2 );
-
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
-
-		// AJAX handler for saving fulfillment.
 		add_action( 'wp_ajax_wpo_otd_save_fulfillment', array( $this, 'ajax_save_fulfillment' ) );
+	}
+
+	/**
+	 * The order edit screen's ID, which WooCommerce's orders list shares.
+	 *
+	 * @return string
+	 */
+	private static function order_screen_id(): string {
+		return is_callable( 'wc_get_page_screen_id' ) ? wc_get_page_screen_id( 'shop-order' ) : 'shop_order';
 	}
 
 	/**
@@ -67,7 +63,7 @@ final class Screen {
 	 * @return void
 	 */
 	public function add_meta_box( string $post_type, object $post ): void {
-		$screen_id = is_callable( 'wc_get_page_screen_id' ) ? wc_get_page_screen_id( 'shop-order' ) : 'shop_order';
+		$screen_id = self::order_screen_id();
 
 		if ( $screen_id !== $post_type ) {
 			return;
@@ -91,10 +87,9 @@ final class Screen {
 	 * @return void
 	 */
 	public function enqueue_scripts( string $hook ): void {
-		$screen          = get_current_screen();
-		$valid_screen_id = is_callable( 'wc_get_page_screen_id' ) ? wc_get_page_screen_id( 'shop-order' ) : 'shop_order';
+		$screen = get_current_screen();
 
-		if ( ! $screen || $valid_screen_id !== $screen->id ) {
+		if ( ! $screen || self::order_screen_id() !== $screen->id ) {
 			return;
 		}
 
@@ -134,15 +129,9 @@ final class Screen {
 			}
 		}
 
-		// Verify it's a valid order.
-		if ( $order_id > 0 ) {
-			$order = wc_get_order( $order_id );
-			if ( ! $order ) {
-				$order_id = 0;
-			}
+		if ( $order_id > 0 && ! wc_get_order( $order_id ) ) {
+			$order_id = 0;
 		}
-
-		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
 		Assets::register_runtime();
 		/**
@@ -196,39 +185,14 @@ final class Screen {
 			)
 		);
 
-		wp_enqueue_style(
-			'wpo-otd-admin-common',
-			WPO_OTD()->plugin_url() . '/assets/css/common' . $suffix . '.css',
-			array(),
-			WPO_OTD_VERSION
-		);
-
-		wp_enqueue_style(
-			'wpo-otd-admin-skeleton',
-			WPO_OTD()->plugin_url() . '/assets/css/skeleton' . $suffix . '.css',
-			array(),
-			WPO_OTD_VERSION
-		);
-
-		wp_enqueue_style(
-			'wpo-otd-admin-task-card',
-			WPO_OTD()->plugin_url() . '/assets/css/task-card' . $suffix . '.css',
-			array(),
-			WPO_OTD_VERSION
-		);
-
-		wp_enqueue_style(
-			'wpo-otd-admin-sidebar-modal',
-			WPO_OTD()->plugin_url() . '/assets/css/sidebar-modal' . $suffix . '.css',
-			array(),
-			WPO_OTD_VERSION
-		);
-
-		wp_enqueue_style(
-			'wpo-otd-admin-order-edit',
-			WPO_OTD()->plugin_url() . '/assets/css/order-edit' . $suffix . '.css',
-			array(),
-			WPO_OTD_VERSION
+		Assets::enqueue_styles(
+			array(
+				'wpo-otd-admin-common'        => 'common',
+				'wpo-otd-admin-skeleton'      => 'skeleton',
+				'wpo-otd-admin-task-card'     => 'task-card',
+				'wpo-otd-admin-sidebar-modal' => 'sidebar-modal',
+				'wpo-otd-admin-order-edit'    => 'order-edit',
+			)
 		);
 	}
 
@@ -349,8 +313,6 @@ final class Screen {
 			$edit_button_html
 		);
 
-
-		// Output the fulfillment cell.
 		printf(
 			'<td class="wpo-otd-fulfillment">%s%s</td>',
 			$view_html, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -362,8 +324,8 @@ final class Screen {
 	 * Get fulfillment status HTML.
 	 *
 	 * @param string $fulfillment_status
-	 * @param int|null $shipped_quantity
-	 * @param int|null $total_quantity
+	 * @param int    $shipped_quantity
+	 * @param int    $total_quantity
 	 *
 	 * @return string
 	 */
@@ -380,7 +342,6 @@ final class Screen {
 			$total_quantity,
 			esc_html__( 'fulfilled', 'out-the-door-order-tasks-workflows-for-woocommerce' )
 		);
-
 
 		return sprintf(
 			'<span class="wpo-otd-tag %1$s">%2$s</span>',
@@ -491,7 +452,8 @@ final class Screen {
 	/**
 	 * Update the order-level fulfillment status cache after order items have been saved.
 	 *
-	 * This must run on `woocommerce_saved_order_items` rather than on the `before` hook.
+	 * Runs on `woocommerce_saved_order_items` rather than the `before` hook, since the status depends on the item
+	 * quantities WooCommerce stores in between.
 	 *
 	 * @param int   $order_id Order ID.
 	 * @param array $items Order items that were saved.
@@ -526,7 +488,6 @@ final class Screen {
 	 * @return void
 	 */
 	public function ajax_save_fulfillment(): void {
-		// Check nonce for security.
 		if (
 			! isset( $_POST['nonce'] ) ||
 			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'wpo_otd_order_edit' )
@@ -538,7 +499,6 @@ final class Screen {
 			);
 		}
 
-		// Check user capabilities.
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
 			wp_send_json_error(
 				array(
@@ -547,7 +507,6 @@ final class Screen {
 			);
 		}
 
-		// Get and validate parameters.
 		$order_id       = isset( $_POST['order_id'] ) ? absint( $_POST['order_id'] ) : 0;
 		$item_id        = isset( $_POST['item_id'] ) ? absint( $_POST['item_id'] ) : 0;
 		$fulfillment_id = isset( $_POST['fulfillment_id'] ) ? absint( $_POST['fulfillment_id'] ) : null;
@@ -561,7 +520,6 @@ final class Screen {
 			);
 		}
 
-		// Get the order item to validate and get total quantity.
 		$order_item = \WC_Order_Factory::get_order_item( $item_id );
 		if ( ! $order_item || $order_item->get_order_id() !== $order_id ) {
 			wp_send_json_error(
@@ -586,7 +544,6 @@ final class Screen {
 			);
 		}
 
-		// Save the fulfillment quantity.
 		$saved_fulfillment_id = $this->fulfillment_service->save_order_item_fulfillment_quantity(
 			$item_id,
 			$quantity,
@@ -601,13 +558,11 @@ final class Screen {
 			);
 		}
 
-		// Update the order-level fulfillment status cache.
 		$this->fulfillment_service->update_order_fulfillment_status_meta( $order_item->get_order_id() );
 
 		$fulfilled_quantity = $this->fulfillment_service->get_fulfilled_quantity( $item_id );
 		$fulfillment_status = $this->fulfillment_service->get_item_fulfillment_status( $fulfilled_quantity, $total_quantity );
 
-		// Register an order note to record the fulfillment quantity change.
 		$order = $order_item->get_order();
 		if ( $order ) {
 			$order->add_order_note(
@@ -621,7 +576,6 @@ final class Screen {
 			);
 		}
 
-		// Return the updated HTML.
 		wp_send_json_success(
 			array(
 				'message'        => esc_html__( 'Fulfillment quantity saved successfully.', 'out-the-door-order-tasks-workflows-for-woocommerce' ),

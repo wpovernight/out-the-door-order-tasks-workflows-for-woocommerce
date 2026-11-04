@@ -10,8 +10,8 @@ use WPO\OTD\Utilities\Paginator;
 defined( 'ABSPATH' ) || exit;
 
 final class FulfillmentService {
-	public const FULFILLMENT_DATA_META_KEY            = '_wpo_otd_fulfillment_data';
-	public const ORDER_FULFILLMENT_STATUS_META_KEY   = '_wpo_otd_fulfillment_status';
+	public const FULFILLMENT_DATA_META_KEY         = '_wpo_otd_fulfillment_data';
+	public const ORDER_FULFILLMENT_STATUS_META_KEY = '_wpo_otd_fulfillment_status';
 
 	/**
 	 * Register hooks.
@@ -65,7 +65,7 @@ final class FulfillmentService {
 	/**
 	 * Get fulfillment data for an order item.
 	 *
-	 * @param int|\WC_Order_Item|\WC_Order_Item_Product $item
+	 * @param int|\WC_Order_Item $item
 	 *
 	 * @return Fulfillment[]|null
 	 */
@@ -76,7 +76,7 @@ final class FulfillmentService {
 			}
 
 			$fulfillment_meta = wc_get_order_item_meta( intval( $item ), self::FULFILLMENT_DATA_META_KEY, true );
-		} elseif ( $item instanceof \WC_Order_Item || $item instanceof \WC_Order_Item_Product ) {
+		} elseif ( $item instanceof \WC_Order_Item ) {
 			$fulfillment_meta = $item->get_meta( self::FULFILLMENT_DATA_META_KEY, true );
 		} else {
 			return null;

@@ -89,8 +89,9 @@ class OrderManagerScreenTest extends IntegrationTestCase {
 
 		foreach ( array( 'common', 'order-manager', 'task-card', 'sidebar-modal', 'dashboard', 'task-manager', 'custom-order-status', 'skeleton' ) as $style ) {
 			$this->assertTrue( wp_style_is( "wpo-otd-admin-{$style}", 'enqueued' ), "Style {$style} is not enqueued." );
+			$this->assertStringEndsWith( "/assets/css/{$style}.min.css", wp_styles()->registered[ "wpo-otd-admin-{$style}" ]->src );
+			$this->assertSame( WPO_OTD_VERSION, wp_styles()->registered[ "wpo-otd-admin-{$style}" ]->ver );
 		}
-		$this->assertStringEndsWith( '/assets/css/common.min.css', wp_styles()->registered['wpo-otd-admin-common']->src );
 	}
 
 	public function test_the_runtime_is_registered_once(): void {
