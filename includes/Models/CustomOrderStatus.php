@@ -2,11 +2,9 @@
 
 namespace WPO\OTD\Models;
 
-use WPO\OTD\Contracts\ArraySerializableModel;
-
 defined( 'ABSPATH' ) || exit;
 
-class CustomOrderStatus extends BaseModel implements ArraySerializableModel {
+class CustomOrderStatus extends BaseModel {
 	/**
 	 * The longest status key: WooCommerce stores it as "wc-<key>" in 20-character status columns, both in the posts
 	 * table and in the HPOS orders table.
@@ -24,8 +22,6 @@ class CustomOrderStatus extends BaseModel implements ArraySerializableModel {
 	public string $background;
 	public string $foreground;
 	public bool $is_deleting;
-
-	protected array $non_db_properties = array( 'foreground' );
 
 	// fill() never flags a deletion: only a deletion request through CustomOrderStatusService does.
 	protected array $guarded = array( 'id', 'is_deleting' );
@@ -141,7 +137,6 @@ class CustomOrderStatus extends BaseModel implements ArraySerializableModel {
 			$hex_bg = $hex_bg[0] . $hex_bg[0] . $hex_bg[1] . $hex_bg[1] . $hex_bg[2] . $hex_bg[2];
 		}
 
-		// Convert hex to RGB.
 		$bg_rgb = array(
 			hexdec( substr( $hex_bg, 0, 2 ) ),
 			hexdec( substr( $hex_bg, 2, 2 ) ),
@@ -156,14 +151,12 @@ class CustomOrderStatus extends BaseModel implements ArraySerializableModel {
 		);
 
 		if ( $brightness > 125 ) {
-			// Light background: darken color.
 			$fg_rgb = array(
 				max( 0, $bg_rgb['0'] - $adjust[0] ),
 				max( 0, $bg_rgb['1'] - $adjust[1] ),
 				max( 0, $bg_rgb['2'] - $adjust[2] ),
 			);
 		} else {
-			// Dark background: lighten color.
 			$fg_rgb = array(
 				min( 255, $bg_rgb['0'] + $adjust[0] ),
 				min( 255, $bg_rgb['1'] + $adjust[1] ),
@@ -171,13 +164,11 @@ class CustomOrderStatus extends BaseModel implements ArraySerializableModel {
 			);
 		}
 
-		// Ensure sufficient contrast.
 		if ( ! $this->has_sufficient_contrast( $fg_rgb, $bg_rgb ) ) {
 			// Fallback to black or white if contrast is insufficient.
 			$fg_rgb = $brightness > 125 ? array( 0, 0, 0 ) : array( 255, 255, 255 );
 		}
 
-		// Convert to hex
 		return sprintf( '#%02x%02x%02x', $fg_rgb[0], $fg_rgb[1], $fg_rgb[2] );
 	}
 

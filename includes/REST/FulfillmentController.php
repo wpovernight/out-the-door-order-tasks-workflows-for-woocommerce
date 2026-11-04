@@ -79,11 +79,9 @@ class FulfillmentController extends BaseRestController {
 			);
 		}
 
-		$fulfillment_service = $this->fulfillment_service;
-
 		// Paginate only when page/per_page are provided, else full list.
 		$pagination = $this->pagination_params( $request );
-		$paginator  = $fulfillment_service->get_orders_by_fulfillment_status(
+		$paginator  = $this->fulfillment_service->get_orders_by_fulfillment_status(
 			$status,
 			array(),
 			$pagination['page'] ?? null,
@@ -91,7 +89,7 @@ class FulfillmentController extends BaseRestController {
 		);
 
 		$data = array_map(
-			fn( $order ) => $this->format_order( $order, $fulfillment_service ),
+			fn( $order ) => $this->format_order( $order, $this->fulfillment_service ),
 			$paginator->items()
 		);
 
@@ -144,7 +142,7 @@ class FulfillmentController extends BaseRestController {
 		$quantity           = $fulfillment_service->get_quantity_to_fulfil( $item );
 		$fulfilled_quantity = $fulfillment_service->get_fulfilled_quantity( $item );
 
-		$product   = $item->get_product();
+		$product    = $item->get_product();
 		$image_url  = '';
 		$attributes = array();
 
@@ -171,7 +169,8 @@ class FulfillmentController extends BaseRestController {
 	}
 
 	/**
-	 * Format variation attributes as a readable string.
+	 * A variation's attributes as label and value pairs, those without a value left out. A global attribute's value is
+	 * its term's name.
 	 *
 	 * @param \WC_Product_Variation $variation
 	 *
@@ -204,7 +203,8 @@ class FulfillmentController extends BaseRestController {
 	}
 
 	/**
-	 * Format the customer's billing address as a location string.
+	 * The order's city, state and country, each from the shipping address, else the billing one. The state and country
+	 * are named as WooCommerce names them, or left as codes when it does not know them.
 	 *
 	 * @param \WC_Abstract_Order $order
 	 *

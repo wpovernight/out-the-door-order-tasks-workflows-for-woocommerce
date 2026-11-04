@@ -78,33 +78,18 @@ final class EmailService {
 	public function email_task_details(
 		array $task_data, bool $sent_to_admin, bool $plain_text, \WC_Email $email
 	): void {
-		if ( $plain_text ) {
-			wc_get_template(
-				'emails/plain/email-task-details.php',
-				array(
-					'task_data'     => $task_data,
-					'sent_to_admin' => $sent_to_admin,
-					'plain_text'    => $plain_text,
-					'email'         => $email,
-					'email_service' => $this,
-				),
-				'',
-				WPO_OTD()->plugin_path() . '/templates/'
-			);
-		} else {
-			wc_get_template(
-				'emails/email-task-details.php',
-				array(
-					'task_data'     => $task_data,
-					'sent_to_admin' => $sent_to_admin,
-					'plain_text'    => $plain_text,
-					'email'         => $email,
-					'email_service' => $this,
-				),
-				'',
-				WPO_OTD()->plugin_path() . '/templates/'
-			);
-		}
+		wc_get_template(
+			$plain_text ? 'emails/plain/email-task-details.php' : 'emails/email-task-details.php',
+			array(
+				'task_data'     => $task_data,
+				'sent_to_admin' => $sent_to_admin,
+				'plain_text'    => $plain_text,
+				'email'         => $email,
+				'email_service' => $this,
+			),
+			'',
+			WPO_OTD()->plugin_path() . '/templates/'
+		);
 	}
 
 	/**

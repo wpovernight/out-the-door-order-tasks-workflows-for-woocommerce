@@ -3,10 +3,15 @@
 namespace WPO\OTD\Tests\Unit\Models;
 
 use DateTime;
+use WPO\OTD\Contracts\ArraySerializableModel;
 use WPO\OTD\Models\BaseModel;
 use WPO\OTD\Tests\TestCase;
 
 class BaseModelTest extends TestCase {
+	public function test_every_model_is_array_serializable(): void {
+		$this->assertInstanceOf( ArraySerializableModel::class, new Widget( array( 'name' => 'Widget' ) ) );
+	}
+
 	public function test_fill_sets_known_properties_only(): void {
 		$model = new Widget( array( 'id' => 3, 'name' => 'Old' ) );
 

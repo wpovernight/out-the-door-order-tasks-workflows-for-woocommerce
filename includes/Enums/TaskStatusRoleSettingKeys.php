@@ -9,7 +9,7 @@ final class TaskStatusRoleSettingKeys {
 	public const UNDONE = 'role_undone_option_id';
 
 	/**
-	 * Get all valid field types.
+	 * Get every status role setting key.
 	 *
 	 * @return array
 	 */
@@ -21,13 +21,13 @@ final class TaskStatusRoleSettingKeys {
 	}
 
 	/**
-	 * Check if a field type is valid.
+	 * Check whether a key is a status role setting key.
 	 *
-	 * @param string $type
+	 * @param string $key
 	 *
 	 * @return bool
 	 */
-	public static function is_valid( string $type ): bool {
-		return in_array( $type, self::all(), true );
+	public static function is_valid( string $key ): bool {
+		return in_array( $key, self::all(), true );
 	}
 }

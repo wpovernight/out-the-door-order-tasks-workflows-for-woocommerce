@@ -2,9 +2,11 @@
 
 namespace WPO\OTD\Models;
 
+use WPO\OTD\Contracts\ArraySerializableModel;
+
 defined( 'ABSPATH' ) || exit;
 
-abstract class BaseModel {
+abstract class BaseModel implements ArraySerializableModel {
 	protected array $non_db_properties = array();
 	protected array $guarded           = array( 'id' );
 
