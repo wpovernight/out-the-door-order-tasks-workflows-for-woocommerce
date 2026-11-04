@@ -458,6 +458,27 @@ abstract class IntegrationTestCase extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Refund units of an order line made by create_order(), at its price of 10.
+	 *
+	 * @param \WC_Abstract_Order $order
+	 * @param \WC_Order_Item     $item
+	 * @param int                $quantity
+	 *
+	 * @return void
+	 */
+	protected function refund( \WC_Abstract_Order $order, \WC_Order_Item $item, int $quantity ): void {
+		$refund = wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 10 * $quantity,
+				'line_items' => array( $item->get_id() => array( 'qty' => $quantity, 'refund_total' => 10 * $quantity ) ),
+			)
+		);
+
+		$this->assertNotWPError( $refund );
+	}
+
+	/**
 	 * Empty the static model caches of the repositories that cache.
 	 *
 	 * @return void

@@ -139,6 +139,46 @@ class FulfillmentServiceTest extends IntegrationTestCase {
 		$this->assertSame( FulfillmentStatuses::NOT_FULFILLED, $this->service->get_order_fulfillment_status( wc_create_order() ) );
 	}
 
+	public function test_refunded_units_need_no_fulfilment(): void {
+		$order = $this->create_order( array( 3 ) );
+		$this->ship( $order, array( 2 ) );
+		$this->refund( $order, $this->first_item( $order ), 1 );
+
+		$this->assertSame( FulfillmentStatuses::FULFILLED, $this->service->get_order_fulfillment_status( wc_get_order( $order->get_id() ) ) );
+	}
+
+	public function test_a_fully_refunded_line_leaves_the_order_to_its_other_lines(): void {
+		$order = $this->create_order( array( 2, 1 ) );
+		$items = array_values( $order->get_items() );
+		$this->ship( $order, array( 2 ) );
+		$this->refund( $order, $items[1], 1 );
+
+		$this->assertSame( FulfillmentStatuses::FULFILLED, $this->service->get_order_fulfillment_status( wc_get_order( $order->get_id() ) ) );
+	}
+
+	public function test_an_order_with_nothing_left_to_fulfil_is_not_fulfilled(): void {
+		$order = $this->create_order( array( 2, 1 ) );
+		$items = array_values( $order->get_items() );
+		$this->ship( $order, array( 2 ) );
+		$this->refund( $order, $items[0], 2 );
+		$this->refund( $order, $items[1], 1 );
+
+		$this->assertSame( FulfillmentStatuses::NOT_FULFILLED, $this->service->get_order_fulfillment_status( wc_get_order( $order->get_id() ) ) );
+	}
+
+	public function test_the_quantity_to_fulfil_takes_off_refunded_units(): void {
+		$order = $this->create_order( array( 3 ) );
+		$item  = $this->first_item( $order );
+
+		$this->assertSame( 3, $this->service->get_quantity_to_fulfil( $item ) );
+
+		$this->refund( $order, $item, 1 );
+
+		$this->assertSame( 2, $this->service->get_quantity_to_fulfil( $item ) );
+		$this->assertSame( 4, $this->service->get_quantity_to_fulfil( $item, 5 ), 'A quantity about to be saved.' );
+		$this->assertSame( 0, $this->service->get_quantity_to_fulfil( $item, 0 ), 'Never below 0.' );
+	}
+
 	public function test_shipping_more_than_ordered_is_logged(): void {
 		$order = $this->create_order( array( 2, 1 ) );
 		$this->ship( $order, array( array( 2, 1 ), 1 ) );

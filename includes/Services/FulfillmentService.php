@@ -42,7 +42,9 @@ final class FulfillmentService {
 
 	/**
 	 * Get fulfillment status for an order: fulfilled when every item is, not fulfilled when no item is fulfilled at
-	 * all, partially fulfilled otherwise. Each item is measured against its ordered quantity, refunds left out.
+	 * all, partially fulfilled otherwise. Each item is measured against its quantity to fulfil, refunds taken off. An
+	 * item with nothing to fulfil is left out, and an order none of whose items has anything to fulfil is not
+	 * fulfilled, as an order without items is.
 	 *
 	 * @param \WC_Abstract_Order $order
 	 *
@@ -52,22 +54,25 @@ final class FulfillmentService {
 		$statuses = array();
 
 		foreach ( $order->get_items() as $item ) {
-			$quantity  = (int) $item->get_quantity();
+			$ordered   = (int) $item->get_quantity();
+			$quantity  = $this->get_quantity_to_fulfil( $item );
 			$fulfilled = $this->get_fulfilled_quantity( $item );
 
-			if ( $fulfilled > $quantity ) {
+			if ( $fulfilled > $ordered ) {
 				Logger::warning(
 					sprintf(
 						'Fulfillment quantity (%d) exceeds the ordered quantity (%d) of item #%d in order #%d.',
 						$fulfilled,
-						$quantity,
+						$ordered,
 						$item->get_id(),
 						$order->get_id()
 					)
 				);
 			}
 
-			$statuses[ $this->get_item_fulfillment_status( $fulfilled, $quantity ) ] = true;
+			if ( $quantity > 0 ) {
+				$statuses[ $this->get_item_fulfillment_status( $fulfilled, $quantity ) ] = true;
+			}
 		}
 
 		$statuses = array_keys( $statuses );
@@ -79,6 +84,26 @@ final class FulfillmentService {
 		return array( FulfillmentStatuses::FULFILLED ) === $statuses
 			? FulfillmentStatuses::FULFILLED
 			: FulfillmentStatuses::PARTIALLY_FULFILLED;
+	}
+
+	/**
+	 * Get how many units of an order item are to be fulfilled: its quantity less the refunded units, never below 0.
+	 *
+	 * @param \WC_Order_Item $item
+	 * @param int|null       $quantity The item's quantity, when it is about to change; default the saved one.
+	 *
+	 * @return int
+	 */
+	public function get_quantity_to_fulfil( \WC_Order_Item $item, ?int $quantity = null ): int {
+		$quantity ??= (int) $item->get_quantity();
+		$order      = $item->get_order();
+
+		// WooCommerce reports refunded units as a negative number.
+		if ( $order instanceof \WC_Abstract_Order ) {
+			$quantity += (int) $order->get_qty_refunded_for_item( $item->get_id() );
+		}
+
+		return max( 0, $quantity );
 	}
 
 	/**

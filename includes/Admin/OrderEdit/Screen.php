@@ -275,7 +275,7 @@ final class Screen {
 		$fulfillment          = $fulfillment_data[0] ?? null;
 		$fulfillment_quantity = $fulfillment ? (int) $fulfillment->quantity : 0;
 		$fulfilled_quantity   = $this->fulfillment_service->get_fulfilled_quantity( $item );
-		$total_quantity       = $this->quantity_to_fulfil( $item );
+		$total_quantity       = $this->fulfillment_service->get_quantity_to_fulfil( $item );
 		$fulfillment_status   = $this->fulfillment_service->get_item_fulfillment_status( $fulfilled_quantity, $total_quantity );
 
 		// View mode
@@ -383,25 +383,6 @@ final class Screen {
 			esc_attr( $class ),
 			$label // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		);
-	}
-
-	/**
-	 * Get how many units of an order item are left to fulfil: its quantity less the refunded units.
-	 *
-	 * @param \WC_Order_Item $item
-	 *
-	 * @return int
-	 */
-	private function quantity_to_fulfil( \WC_Order_Item $item ): int {
-		$quantity = (int) $item->get_quantity();
-		$order    = $item->get_order();
-
-		// WooCommerce reports refunded units as a negative number.
-		if ( $order instanceof \WC_Abstract_Order ) {
-			$quantity += (int) $order->get_qty_refunded_for_item( $item->get_id() );
-		}
-
-		return $quantity;
 	}
 
 	/**
@@ -520,7 +501,7 @@ final class Screen {
 			);
 		}
 
-		$total_quantity = $this->quantity_to_fulfil( $order_item );
+		$total_quantity = $this->fulfillment_service->get_quantity_to_fulfil( $order_item );
 		if ( $quantity > $total_quantity ) {
 			wp_send_json_error(
 				array(

@@ -92,6 +92,29 @@ class FulfillmentControllerTest extends RestTestCase {
 		);
 	}
 
+	public function test_refunded_units_are_taken_off_each_item(): void {
+		$order = $this->create_order( array( 3, 1 ) );
+		$items = array_values( $order->get_items() );
+		$this->fulfillments->save_order_item_fulfillment_quantity( $items[0]->get_id(), 2, null );
+		$this->refund( $order, $items[0], 1 );
+		$this->refund( $order, $items[1], 1 );
+		$this->fulfillments->update_order_fulfillment_status_meta( $order->get_id() );
+
+		$formatted = $this->json( $this->request( 'GET', '/fulfillments/orders' ) )['data'][0];
+
+		$this->assertSame( FulfillmentStatuses::FULFILLED, $formatted['fulfillment_status'] );
+		$this->assertSame(
+			array(
+				array( 'quantity' => 2, 'fulfilled_quantity' => 2, 'fulfillment_status' => FulfillmentStatuses::FULFILLED ),
+				array( 'quantity' => 0, 'fulfilled_quantity' => 0, 'fulfillment_status' => FulfillmentStatuses::FULFILLED ),
+			),
+			array_map(
+				static fn( $item ) => array_intersect_key( $item, array_flip( array( 'quantity', 'fulfilled_quantity', 'fulfillment_status' ) ) ),
+				$formatted['items']
+			)
+		);
+	}
+
 	public function test_state_names_are_resolved_when_the_country_has_them(): void {
 		$order = $this->create_order();
 		$order->set_shipping_country( 'US' );

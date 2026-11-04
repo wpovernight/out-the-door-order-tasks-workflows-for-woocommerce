@@ -133,7 +133,7 @@ class FulfillmentController extends BaseRestController {
 	}
 
 	/**
-	 * Format a single order item with its fulfillment data.
+	 * Format a single order item with its fulfillment data. Its quantity is the quantity to fulfil, refunds taken off.
 	 *
 	 * @param \WC_Order_Item_Product $item
 	 * @param FulfillmentService $fulfillment_service
@@ -141,7 +141,7 @@ class FulfillmentController extends BaseRestController {
 	 * @return array
 	 */
 	private function format_order_item( \WC_Order_Item_Product $item, FulfillmentService $fulfillment_service ): array {
-		$quantity           = (int) $item->get_quantity();
+		$quantity           = $fulfillment_service->get_quantity_to_fulfil( $item );
 		$fulfilled_quantity = $fulfillment_service->get_fulfilled_quantity( $item );
 
 		$product   = $item->get_product();
