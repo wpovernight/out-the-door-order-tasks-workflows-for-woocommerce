@@ -595,6 +595,7 @@ final class TaskManagerService {
 	 * @param int $field_id
 	 *
 	 * @return bool
+	 * @throws RuntimeException For a field ID of 0 or below, which names no row.
 	 */
 	public function delete_field( int $field_id ): bool {
 		$result = $this->task_field_repository->delete( $field_id );

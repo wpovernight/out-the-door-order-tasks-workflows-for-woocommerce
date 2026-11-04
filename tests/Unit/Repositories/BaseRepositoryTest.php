@@ -1171,10 +1171,17 @@ class BaseRepositoryTest extends TestCase {
 			fn() => $this->repository->delete( 0 ),
 			fn() => $this->repository->delete( -5 ),
 			fn() => $this->repository->where( 'status', 'trash' )->delete( -5 ),
+			fn() => $this->repository->where( 'status', 'trash' )->delete( 0 ),
 		);
 
 		foreach ( $attempts as $attempt ) {
-			$this->assert_throws( RuntimeException::class, $attempt );
+			try {
+				$attempt();
+				$this->fail( 'An ID of 0 or below must be refused.' );
+			} catch ( RuntimeException $e ) {
+				$this->assertSame( 'An ID to delete must be above 0.', $e->getMessage() );
+			}
+
 			$this->assertSame( 'SELECT * FROM ' . self::TABLE, $this->repository->get_query(), 'The query being built is discarded.' );
 		}
 	}

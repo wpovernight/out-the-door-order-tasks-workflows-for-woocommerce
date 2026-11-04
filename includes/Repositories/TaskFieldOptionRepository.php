@@ -80,6 +80,6 @@ class TaskFieldOptionRepository extends BaseRepository {
 				  WHERE field_id = %d
 				  AND position >= %d";
 
-		$this->execute_raw( $query, array( $field_id, absint( $start_position ) ) );
+		$this->execute_raw( $query, array( $field_id, $start_position ) );
 	}
 }
