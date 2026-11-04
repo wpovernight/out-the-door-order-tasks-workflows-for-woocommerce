@@ -379,19 +379,7 @@ abstract class BaseRestController {
 		 */
 		$rules = apply_filters( 'wpo_otd_rest_validation_rules', $rules, $data );
 
-		if ( $keep_rules ) {
-			$lists = $this->with_rules_kept( is_array( $rules ) ? $rules : array(), $own );
-		} else {
-			$lists = array();
-
-			// A field whose rules a filter gave as anything but a string has none.
-			foreach ( is_array( $rules ) ? $rules : array() as $field => $rule_string ) {
-				if ( is_string( $rule_string ) ) {
-					$lists[ $field ] = $this->parse_rules( $rule_string );
-				}
-			}
-		}
-
+		$lists  = $this->with_rules_kept( is_array( $rules ) ? $rules : array(), $keep_rules ? $own : array() );
 		$errors = array();
 
 		foreach ( $lists as $field => $rules_array ) {
@@ -414,13 +402,13 @@ abstract class BaseRestController {
 	}
 
 	/**
-	 * Put back each rule a filter took away from the rules given.
+	 * Split the filtered rules into lists, putting back each rule to keep that the filter took away.
 	 *
 	 * Each field's rules are kept as a list, never joined and split again: a rule a filter wrote in a form the
 	 * splitting does not know, such as a regex not delimited by "/", could otherwise swallow the route's own rules.
 	 *
-	 * @param array                $filtered The rules as filtered. A field whose rules are not a string is left out.
-	 * @param array<string,string> $own      The rules as given.
+	 * @param array                $filtered The rules as filtered. A field whose rules are not a string has none.
+	 * @param array<string,string> $own      The rules to keep: those given, on a route that keeps them; else none.
 	 *
 	 * @return array<string,string[]> Each field's rules as filtered, then each of its own the filter left out, in order.
 	 */
