@@ -79,7 +79,7 @@ Together, these elements form a layered, loosely coupled system where:
 
 ### 1. Core Components
 Provide the foundation for plugin bootstrapping, lifecycle management, and dependency resolution.
-They initialize the plugin environment, ensure prerequisites are met, and register key services and repositories.
+They initialize the plugin environment, ensure prerequisites are met, and wire the services into WordPress; the container builds services and repositories as they are needed.
 - **Container/**: A PSR-11 dependency-injection container (`Container.php`) plus the `ServiceProvider` contract and typed exceptions. It autowires services from their constructor type-hints and caches them as singletons.
 - **Kernel.php**: The composition root that collects `ServiceProvider`s and boots them in two phases — `register()` (bind definitions only) then `boot()` (wire WordPress hooks/REST routes).
 - **Providers/CoreServiceProvider.php**: The free plugin's provider — binds nothing, since the container autowires, and on boot wires its hooks, REST routes, and admin screens by request context.
