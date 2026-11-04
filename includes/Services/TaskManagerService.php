@@ -491,7 +491,7 @@ final class TaskManagerService {
 	 * @param int $task_id
 	 *
 	 * @return int|false
-	 * @throws RuntimeException For a task ID of 0, which names no row to delete.
+	 * @throws RuntimeException For a task ID of 0 or below, which names no row.
 	 */
 	public function delete_task( int $task_id ): int|false {
 		$result = $this->task_repository->delete( $task_id );
@@ -927,9 +927,6 @@ final class TaskManagerService {
 		$grouped = array();
 
 		foreach ( $values as $value ) {
-			if ( ! isset( $grouped[ $value->field_id ] ) ) {
-				$grouped[ $value->field_id ] = array();
-			}
 			$grouped[ $value->field_id ][] = $value;
 		}
 
@@ -1143,7 +1140,6 @@ final class TaskManagerService {
 		}
 
 		if ( ! empty( $previous_task_id ) || 'first' === $fallback_placement ) {
-			// Get the position of the previous task, or start at 0.0 if placing first.
 			$previous_position = 0.0;
 			if ( ! empty( $previous_task_id ) ) {
 				$previous_task_position_value = $this

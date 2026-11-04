@@ -42,6 +42,25 @@ class TaskRepositoryTest extends IntegrationTestCase {
 	}
 
 	/** ================================
+	 *   find() and delete()
+	 *  ================================ */
+
+	public function test_a_negative_id_names_no_task(): void {
+		$id = $this->create_tasks( array( 1.0 ), $this->todo )[0];
+
+		$this->assertNull( $this->repository->find( -$id ) );
+
+		try {
+			$this->repository->delete( -$id );
+			$this->fail( 'A negative ID must be refused.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertSame( 'An ID to delete must be above 0.', $e->getMessage() );
+		}
+
+		$this->assertNotNull( $this->repository->find( $id ) );
+	}
+
+	/** ================================
 	 *   get_last_task_position()
 	 *  ================================ */
 

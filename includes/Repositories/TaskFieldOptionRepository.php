@@ -44,16 +44,16 @@ class TaskFieldOptionRepository extends BaseRepository {
 
 		foreach ( $ordered_option_ids as $position => $option_id ) {
 			$case_parts[] = 'WHEN id = %d THEN %d';
-			$bindings[]   = absint( $option_id );
+			$bindings[]   = (int) $option_id;
 			$bindings[]   = absint( $position + 1 );
 		}
 
 		$case_statement = implode( ' ', $case_parts );
 
-		$bindings[] = absint( $field_id );
+		$bindings[] = $field_id;
 
 		foreach ( $ordered_option_ids as $option_id ) {
-			$bindings[] = absint( $option_id );
+			$bindings[] = (int) $option_id;
 		}
 
 		$placeholders = self::in_placeholders( $ordered_option_ids, '%d' );
@@ -80,6 +80,6 @@ class TaskFieldOptionRepository extends BaseRepository {
 				  WHERE field_id = %d
 				  AND position >= %d";
 
-		$this->execute_raw( $query, array( absint( $field_id ), absint( $start_position ) ) );
+		$this->execute_raw( $query, array( $field_id, absint( $start_position ) ) );
 	}
 }

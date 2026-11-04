@@ -44,6 +44,16 @@ class TaskFieldOptionRepositoryTest extends IntegrationTestCase {
 		$this->assertSame( array( 'low', 'medium', 'high', 'critical' ), $this->slugs( DefaultTaskFields::PRIORITY ) );
 	}
 
+	public function test_negative_ids_name_no_field_or_option(): void {
+		$this->repository->update_positions( DefaultTaskFields::STATUS, array( -$this->status_option_id( 'done' ) ) );
+		$this->repository->update_positions( -DefaultTaskFields::STATUS, array( $this->status_option_id( 'done' ) ) );
+		$this->repository->increment_positions_from( -DefaultTaskFields::PRIORITY, 1 );
+
+		$this->assertSame( array( 'not_started', 'in_progress', 'done' ), $this->slugs( DefaultTaskFields::STATUS ) );
+		$this->assertSame( array( 1, 2, 3 ), $this->stored_positions( DefaultTaskFields::STATUS ) );
+		$this->assertSame( array( 1, 2, 3, 4 ), $this->stored_positions( DefaultTaskFields::PRIORITY ) );
+	}
+
 	public function test_update_positions_with_nothing_to_order_does_nothing(): void {
 		$this->repository->update_positions( DefaultTaskFields::STATUS, array() );
 

@@ -373,7 +373,7 @@ abstract class BaseRepository {
 	 * @return TModel|null
 	 */
 	public function find( int $id ): ?BaseModel {
-		return $this->find_by( 'id', absint( $id ) );
+		return $this->find_by( 'id', $id );
 	}
 
 	/**
@@ -1188,15 +1188,21 @@ abstract class BaseRepository {
 	/**
 	 * Delete records from the table based on the WHERE clause.
 	 *
+	 * @param int|null $id The row to delete, or null to delete the rows the WHERE clause matches.
+	 *
 	 * @return int|false Number of rows deleted or false on failure.
-	 * @throws RuntimeException If no WHERE clause is specified.
+	 * @throws RuntimeException If no WHERE clause is specified, or the ID is 0 or below.
 	 * @throws InvalidArgumentException If invalid arguments are sent to where(), or a WHERE clause is not
 	 *                                  "column = value" joined by AND: another operator, an OR, a group, a column
 	 *                                  compared twice (the id included), or a name that is not bare.
 	 */
 	public function delete( ?int $id = null ): int|false {
-		if ( ! empty( $id ) ) {
-			$this->where( 'id', absint( $id ) );
+		if ( null !== $id ) {
+			if ( $id <= 0 ) {
+				throw $this->discard( new RuntimeException( 'An ID to delete must be above 0.' ) );
+			}
+
+			$this->where( 'id', $id );
 		}
 
 		if ( empty( $this->wheres ) ) {

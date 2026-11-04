@@ -1164,6 +1164,30 @@ class BaseRepositoryTest extends TestCase {
 		$this->assert_throws( InvalidArgumentException::class, fn() => ( new GadgetRepository() )->where( 'id', 'IN', array( 1 ) )->delete() );
 	}
 
+	public function test_delete_refuses_an_id_of_zero_or_below(): void {
+		$this->wpdb->shouldNotReceive( 'delete' );
+
+		$attempts = array(
+			fn() => $this->repository->delete( 0 ),
+			fn() => $this->repository->delete( -5 ),
+			fn() => $this->repository->where( 'status', 'trash' )->delete( -5 ),
+		);
+
+		foreach ( $attempts as $attempt ) {
+			$this->assert_throws( RuntimeException::class, $attempt );
+			$this->assertSame( 'SELECT * FROM ' . self::TABLE, $this->repository->get_query(), 'The query being built is discarded.' );
+		}
+	}
+
+	public function test_find_looks_up_a_negative_id_as_given(): void {
+		$this->wpdb->shouldReceive( 'get_results' )
+			->with( 'SELECT * FROM ' . self::TABLE . ' WHERE id = %s LIMIT 1 -- ["-5"]', ARRAY_A )
+			->once()
+			->andReturn( array() );
+
+		$this->assertNull( $this->repository->find( -5 ) );
+	}
+
 	/**
 	 * WHERE clauses that $wpdb->update() and $wpdb->delete() cannot express, which would widen or change the rows
 	 * they match if written as an equality array.
