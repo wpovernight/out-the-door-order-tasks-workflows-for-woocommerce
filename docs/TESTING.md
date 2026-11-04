@@ -107,7 +107,7 @@ Functions\when( 'get_option' )->justReturn( array( 'view' => 'list' ) );
 Functions\expect( 'update_option' )->once()->with( 'wpo_otd_task_manager_settings', Mockery::type( 'array' ) );
 ```
 
-`set_static_property()` resets singletons and static caches (`Logger`, `RepositoryRegistry`, `BaseRepository`); reset them in `tearDown()` too.
+`set_static_property()` resets singletons and static caches (`Logger`, `BaseRepository`); reset them in `tearDown()` too.
 
 Exceptions thrown with `esc_html()` messages carry HTML entities (`&quot;`), as they do in WordPress.
 

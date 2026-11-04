@@ -80,9 +80,9 @@ Together, these elements form a layered, loosely coupled system where:
 ### 1. Core Components
 Provide the foundation for plugin bootstrapping, lifecycle management, and dependency resolution.
 They initialize the plugin environment, ensure prerequisites are met, and register key services and repositories.
-- **Container/**: A PSR-11 dependency-injection container (`Container.php`) plus the `ServiceProvider` / `DeferrableProvider` contracts and typed exceptions. It autowires services from their constructor type-hints and caches them as singletons.
+- **Container/**: A PSR-11 dependency-injection container (`Container.php`) plus the `ServiceProvider` contract and typed exceptions. It autowires services from their constructor type-hints and caches them as singletons.
 - **Kernel.php**: The composition root that collects `ServiceProvider`s and boots them in two phases — `register()` (bind definitions only) then `boot()` (wire WordPress hooks/REST routes).
-- **Providers/CoreServiceProvider.php**: The free plugin's provider — registers model→repository bindings and, on boot, wires its hooks, REST routes, and admin screens by request context.
+- **Providers/CoreServiceProvider.php**: The free plugin's provider — binds nothing, since the container autowires, and on boot wires its hooks, REST routes, and admin screens by request context.
 - **Installer.php**: An injectable service that manages database table creation, version-based migrations, and initial data setup, resolved from a container at a composition root.
 - **DependencyChecker.php**: Verifies required dependencies (e.g., WooCommerce) and PHP/WordPress version compatibility.
 - **Logger.php**: A static logging utility that wraps WooCommerce's `WC_Logger`, providing convenience methods for all log levels.
@@ -91,7 +91,7 @@ They initialize the plugin environment, ensure prerequisites are met, and regist
 
 ### 2. Models Layer
 Defines the plugin's data entities and how they represent real-world concepts (e.g., tasks, task fields, options).
-Each model describes its structure, validation, and relationships with other entities.
+Each model is plain data: it describes its structure and validation, and never loads anything. Related rows load through repository methods.
 
 📁 `includes/Models/`
 
@@ -99,7 +99,6 @@ Each model describes its structure, validation, and relationships with other ent
 Implements the Repository Pattern to abstract data access and CRUD operations.
 Repositories provide a fluent, chainable query API that hides direct database interactions and ensures consistent persistence logic.
 - **BaseRepository.php**: Abstract class for common repository functionality, including a fluent query builder and per-repository static caching.
-- **RepositoryRegistry.php**: Globally binds repositories to their corresponding models, simplifying resolution and dependency management.
 
 📁 `includes/Repositories/`
 
