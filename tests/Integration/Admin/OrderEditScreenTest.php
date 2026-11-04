@@ -160,7 +160,18 @@ class OrderEditScreenTest extends IntegrationTestCase {
 		$this->assertStringContainsString( '<span class="wpo-otd-tag fully-fulfilled">4 / 3 fulfilled</span>', $html );
 		$this->assertStringContainsString( 'name="wpo-otd-fulfillment-quantity[' . $item->get_id() . '][1]"', $html );
 		$this->assertStringContainsString( 'value="1"', $html );
-		$this->assertStringContainsString( 'max="0"', $html, 'The other entry holds 3 of the 3.' );
+		$this->assertStringContainsString( 'max="1"', $html, 'The other entry holds 3 of the 3, but the max never falls below the value.' );
+	}
+
+	public function test_the_max_follows_the_cap_and_never_falls_below_the_value(): void {
+		$order = $this->create_order( array( 3, 3 ) );
+		$items = array_values( $order->get_items() );
+		$this->fulfillments->save_order_item_fulfillment_quantity( $items[0]->get_id(), 1, null );
+		$this->fulfillments->save_order_item_fulfillment_quantity( $items[1]->get_id(), 3, null );
+		$this->refund( $order, $items[1], 1 );
+
+		$this->assertStringContainsString( 'max="3"', $this->column( $items[0] ), 'Up to the quantity to fulfil.' );
+		$this->assertStringContainsString( 'max="3"', $this->column( $items[1] ), 'A refund took the cap to 2, below the saved 3.' );
 	}
 
 	public function test_other_lines_get_no_column_content(): void {
@@ -406,6 +417,22 @@ class OrderEditScreenTest extends IntegrationTestCase {
 		$items = $order->get_items();
 
 		return reset( $items );
+	}
+
+	/**
+	 * Render a line's fulfillment column, the line read fresh.
+	 *
+	 * @param \WC_Order_Item $item
+	 *
+	 * @return string
+	 */
+	private function column( \WC_Order_Item $item ): string {
+		$item = \WC_Order_Factory::get_order_item( $item->get_id() );
+
+		ob_start();
+		$this->screen->order_items_values( $item->get_product(), $item, $item->get_id() );
+
+		return ob_get_clean();
 	}
 
 	/**

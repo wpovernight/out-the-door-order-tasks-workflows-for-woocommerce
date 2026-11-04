@@ -289,7 +289,8 @@ final class Screen {
 		);
 		$view_html               = sprintf( '<div class="view">%s%s</div>', $fulfillment_status_html, $edit_button_html );
 
-		// Edit mode
+		// Edit mode. The field is posted with every order update, and a browser refuses to submit a form whose field
+		// holds more than its max, so the max never falls below the saved value, which a refund can take past the cap.
 		$edit_input_html  = sprintf(
 			'<label>
 				<input
@@ -304,7 +305,7 @@ final class Screen {
 				<span class="screen-reader-text">%5$s</span>
 			</label>',
 			esc_attr( $item_id ),
-			esc_attr( $this->most_for_entry( $item, $fulfillment ? $fulfillment->id : null ) ),
+			esc_attr( max( $this->most_for_entry( $item, $fulfillment ? $fulfillment->id : null ), $fulfillment_quantity ) ),
 			esc_attr( $fulfillment_quantity ),
 			esc_attr( $fulfillment ? $fulfillment->id : '' ),
 			esc_html__( 'Fulfillment Quantity', 'out-the-door-order-tasks-workflows-for-woocommerce' )
