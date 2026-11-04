@@ -751,6 +751,25 @@ class BaseRepositoryTest extends IntegrationTestCase {
 		$this->assertSame( array( 'b' ), $this->keys( $repository->get() ), 'The condition still applies to the next query.' );
 	}
 
+	public function test_a_select_raw_that_throws_drops_the_builders_conditions(): void {
+		$this->insert_statuses( array( 'a' => '#111', 'b' => '#222' ) );
+		$repository = new RawStatusRepository();
+		$this->throw_on_queries( '/ORDER BY status_key/', new \RuntimeException( 'Gone away' ) );
+
+		$repository->where( 'status_key', 'b' );
+
+		try {
+			$repository->select_in( array( 'a' ), '#111' );
+			$this->fail( 'The exception must propagate.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertSame( 'Gone away', $e->getMessage() );
+		}
+
+		remove_all_filters( 'query' );
+
+		$this->assertSame( array( 'a', 'b' ), $this->keys( $repository->get() ) );
+	}
+
 	public function test_select_raw_tells_a_failed_read_apart(): void {
 		$this->insert_statuses( array( 'a' => '#111' ) );
 		$repository = new RawStatusRepository();

@@ -503,7 +503,7 @@ abstract class BaseRepository {
 
 	/**
 	 * Run a SELECT written in full, for a query the builder cannot express, and give its rows as models. The builder's
-	 * own conditions are neither used nor reset.
+	 * own conditions are not used, and are kept unless the query throws.
 	 *
 	 * @template TModel of BaseModel
 	 * @param string            $query    With a placeholder for each binding; in_placeholders() writes an IN () list's.
