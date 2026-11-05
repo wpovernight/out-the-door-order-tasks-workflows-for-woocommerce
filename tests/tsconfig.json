@@ -1,0 +1,26 @@
+{
+	// Type-checks the JS tests. Separate from the root config so the test
+	// globals (describe, expect, jest-dom matchers) stay out of src/.
+	"extends": "../tsconfig.json",
+	"compilerOptions": {
+		"baseUrl": "../src",
+		"paths": {
+			"@sdk": ["sdk/index.ts"],
+			"@sdk/*": ["sdk/*"],
+			"@orderManager/*": ["order-manager/*"],
+			"@taskManager/*": ["task-manager/*"],
+			"@orderEdit/*": ["order-edit/*"],
+			"@otd-test-utils": ["../tests/js/helpers/index.ts"]
+		},
+		"types": ["react", "node", "jest", "@testing-library/jest-dom"],
+		// The JS config files are listed for ESLint's parser, not checked.
+		"allowJs": true,
+		"checkJs": false
+	},
+	"include": [
+		"js/**/*",
+		"e2e/**/*",
+		"../src/**/*.d.ts"
+	],
+	"exclude": []
+}

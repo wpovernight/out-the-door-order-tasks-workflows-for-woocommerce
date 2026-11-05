@@ -19,3 +19,6 @@
 
 # Built plugin - written by `wp otd build` (and bin/build-zip.php).
 /dist/
+
+# JS test output: Jest coverage.
+/coverage/

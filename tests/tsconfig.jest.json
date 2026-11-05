@@ -1,0 +1,8 @@
+{
+	// Jest compiles each file on its own and leaves type checking to
+	// "npm run typecheck", which uses tsconfig.json.
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"isolatedModules": true
+	}
+}

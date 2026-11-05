@@ -10,12 +10,14 @@ module.exports = {
         ecmaVersion: 2020,
         sourceType: 'module',
         ecmaFeatures: {jsx: true},
-        project: './tsconfig.json',
+        project: ['./tsconfig.json', './tests/tsconfig.json'],
     },
     settings: {
         'import/resolver': {
             typescript: {
                 alwaysTryTypes: true,
+                project: ['./tsconfig.json', './tests/tsconfig.json'],
+                noWarnOnMultipleProjects: true,
             },
         },
     },
@@ -43,6 +45,14 @@ module.exports = {
                     },
                 ],
             },
+        },
+        {
+            files: ['tests/js/**'],
+            extends: ['plugin:@wordpress/eslint-plugin/test-unit'],
+        },
+        {
+            files: ['tests/e2e/**'],
+            extends: ['plugin:@wordpress/eslint-plugin/test-playwright'],
         },
     ],
 };
