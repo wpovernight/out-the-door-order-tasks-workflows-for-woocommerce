@@ -3,7 +3,6 @@
 namespace WPO\OTD\Core\Providers;
 
 use WP_CLI;
-use WPO\OTD\CLI\BuildCommand;
 use WPO\OTD\CLI\CommandInterface;
 use WPO\OTD\CLI\FulfillmentsClearCommand;
 use WPO\OTD\CLI\InstallCommand;
@@ -27,7 +26,6 @@ final class CliServiceProvider implements ServiceProvider {
 		TasksRemoveCommand::class,
 		FulfillmentsClearCommand::class,
 		OptionsClearCommand::class,
-		BuildCommand::class,
 	);
 
 	/**

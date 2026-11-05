@@ -1,7 +1,15 @@
 <?php
+/**
+ * `wp otd build`: builds the distributable plugin without a WordPress install.
+ *
+ * Loaded by the wp-cli.yml next to the plugin's main file, so any WP-CLI run from the plugin
+ * folder picks it up; from elsewhere, pass `--require=<plugin>/bin/build-command.php`.
+ * Registered for `before_wp_load` (like `wp i18n`), so WordPress is never looked for or loaded.
+ */
 
-namespace WPO\OTD\CLI;
+namespace WPO\OTD\Build;
 
+use FilesystemIterator;
 use RecursiveCallbackFilterIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -9,11 +17,14 @@ use RuntimeException;
 use SplFileInfo;
 use WP_CLI;
 use WP_CLI\Process;
-use WP_Filesystem_Direct;
 
 use function WP_CLI\Utils\esc_cmd;
+use function WP_CLI\Utils\get_temp_dir;
+use function WP_CLI\Utils\normalize_path;
 
-defined( 'ABSPATH' ) || exit;
+if ( ! class_exists( 'WP_CLI' ) ) {
+	return;
+}
 
 /**
  * Builds the distributable plugin from a git commit or tag.
@@ -23,57 +34,54 @@ defined( 'ABSPATH' ) || exit;
  * then copies everything .distignore doesn't exclude into the destination folder.
  * The current checkout and its vendor/ are never touched.
  */
-final class BuildCommand extends AbstractCommand {
+final class BuildCommand {
 	/**
 	 * The clean-css CLI release used for minification, pinned so every build produces the same output.
 	 */
 	private const CLEAN_CSS = 'clean-css-cli@5.6.3';
 
-	private ?WP_Filesystem_Direct $filesystem = null;
-
 	/**
-	 * {@inheritDoc}
+	 * Register the command with WP-CLI.
+	 *
+	 * @return void
 	 */
-	protected function get_command_name(): string {
-		return 'build';
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public function get_description(): string {
-		return 'Builds the distributable plugin from a git commit or tag into a folder.';
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public function get_synopsis(): array {
-		return array(
+	public static function register(): void {
+		WP_CLI::add_command(
+			'otd build',
+			new self(),
 			array(
-				'type'        => 'positional',
-				'name'        => 'destination',
-				'optional'    => false,
-				'description' => 'Folder to write the built plugin into. Created if missing; an existing folder must be empty.',
-			),
-			array(
-				'type'        => 'assoc',
-				'name'        => 'ref',
-				'optional'    => true,
-				'default'     => 'HEAD',
-				'description' => 'Commit, tag or branch to build. Uncommitted changes are never included.',
-			),
-			array(
-				'type'        => 'flag',
-				'name'        => 'skip-pot',
-				'optional'    => true,
-				'description' => 'Do not generate the translation template.',
-			),
+				'shortdesc' => 'Builds the distributable plugin from a git commit or tag into a folder.',
+				'synopsis'  => array(
+					array(
+						'type'        => 'positional',
+						'name'        => 'destination',
+						'optional'    => false,
+						'description' => 'Folder to write the built plugin into. Created if missing; an existing folder must be empty.',
+					),
+					array(
+						'type'        => 'assoc',
+						'name'        => 'ref',
+						'optional'    => true,
+						'default'     => 'HEAD',
+						'description' => 'Commit, tag or branch to build. Uncommitted changes are never included.',
+					),
+					array(
+						'type'        => 'flag',
+						'name'        => 'skip-pot',
+						'optional'    => true,
+						'description' => 'Do not generate the translation template.',
+					),
+				),
+				'when'      => 'before_wp_load',
+			)
 		);
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @param string[]             $arguments Positional arguments.
+	 * @param array<string, mixed> $options   Associative arguments.
+	 *
+	 * @return void
 	 */
 	public function __invoke( array $arguments, array $options ): void {
 		try {
@@ -96,14 +104,14 @@ final class BuildCommand extends AbstractCommand {
 	 * @return void
 	 */
 	private function build( string $destination, string $ref, bool $skip_pot ): void {
-		$repository  = $this->run( 'git rev-parse --show-toplevel', dirname( __DIR__, 2 ) );
+		$repository  = $this->run( 'git rev-parse --show-toplevel', dirname( __DIR__ ) );
 		$commit      = $this->resolve_commit( $repository, $ref );
 		$destination = $this->resolve_destination( $destination );
 
 		// Checked now so a long build isn't wasted, and again before copying in case files appeared meanwhile.
 		$this->check_destination( $destination );
 
-		$temp   = wp_normalize_path( trailingslashit( get_temp_dir() ) ) . 'otd-build-' . bin2hex( random_bytes( 4 ) );
+		$temp   = rtrim( normalize_path( get_temp_dir() ), '/' ) . '/otd-build-' . bin2hex( random_bytes( 4 ) );
 		$source = $temp . '/source';
 
 		$cleaned = false;
@@ -169,11 +177,12 @@ final class BuildCommand extends AbstractCommand {
 	 * @return string
 	 */
 	private function resolve_destination( string $destination ): string {
-		if ( ! path_is_absolute( $destination ) ) {
+		// "/x", "\x", "C:/x", "C:\x" and "\\server\x" are absolute.
+		if ( ! preg_match( '#^(?:[a-zA-Z]:)?[/\\\\]#', $destination ) ) {
 			$destination = getcwd() . '/' . $destination;
 		}
 
-		return wp_normalize_path( $destination );
+		return normalize_path( $destination );
 	}
 
 	/**
@@ -216,11 +225,11 @@ final class BuildCommand extends AbstractCommand {
 	private function create_destination( string $destination ): string {
 		$this->check_destination( $destination );
 
-		if ( ! wp_mkdir_p( $destination ) ) {
+		if ( ! $this->mkdir( $destination ) ) {
 			throw new RuntimeException( sprintf( 'Could not create the destination folder: %s', $destination ) );
 		}
 
-		return wp_normalize_path( (string) realpath( $destination ) );
+		return normalize_path( (string) realpath( $destination ) );
 	}
 
 	/**
@@ -238,7 +247,7 @@ final class BuildCommand extends AbstractCommand {
 			return;
 		}
 
-		$stable_tag = get_file_data( $readme, array( 'stable_tag' => 'Stable tag' ) )['stable_tag'];
+		$stable_tag = $this->file_headers( $readme, array( 'stable_tag' => 'Stable tag' ) )['stable_tag'];
 
 		if ( $stable_tag !== $version ) {
 			WP_CLI::warning( sprintf( 'readme.txt has "Stable tag: %s" but the plugin\'s version is %s; the release workflow would refuse this.', $stable_tag, $version ) );
@@ -255,10 +264,12 @@ final class BuildCommand extends AbstractCommand {
 	private function exit_on_interrupt( bool $enable ): void {
 		static $handler = null;
 
-		$handler ??= static function (): void {
-			WP_CLI::log( 'Interrupted; removing the temporary build folder.' );
-			exit( 130 );
-		};
+		if ( null === $handler ) {
+			$handler = static function (): void {
+				WP_CLI::log( 'Interrupted; removing the temporary build folder.' );
+				exit( 130 );
+			};
+		}
 
 		if ( function_exists( 'sapi_windows_set_ctrl_handler' ) ) {
 			sapi_windows_set_ctrl_handler( $handler, $enable );
@@ -282,7 +293,7 @@ final class BuildCommand extends AbstractCommand {
 	 */
 	private function plugin_headers( string $source ): array {
 		foreach ( (array) glob( $source . '/*.php' ) as $file ) {
-			$headers = get_file_data(
+			$headers = $this->file_headers(
 				$file,
 				array(
 					'name'    => 'Plugin Name',
@@ -297,6 +308,27 @@ final class BuildCommand extends AbstractCommand {
 		}
 
 		throw new RuntimeException( 'No main plugin file (with a "Plugin Name" header) found at the root of the ref.' );
+	}
+
+	/**
+	 * Read header fields from the first 8 KB of a file, the way WordPress's get_file_data() does.
+	 *
+	 * @param string                $file    File path.
+	 * @param array<string, string> $headers Keys mapped to header names.
+	 *
+	 * @return array<string, string> The keys mapped to the values found, '' for missing ones.
+	 */
+	private function file_headers( string $file, array $headers ): array {
+		$data   = str_replace( "\r", "\n", (string) file_get_contents( $file, false, null, 0, 8192 ) );
+		$values = array();
+
+		foreach ( $headers as $key => $name ) {
+			$values[ $key ] = preg_match( '/^(?:[ \t]*<\?php)?[ \t\/*#@]*' . preg_quote( $name, '/' ) . ':(.*)$/mi', $data, $match )
+				? trim( (string) preg_replace( '/\s*(?:\*\/|\?>).*/', '', $match[1] ) )
+				: '';
+		}
+
+		return $values;
 	}
 
 	/**
@@ -338,13 +370,14 @@ final class BuildCommand extends AbstractCommand {
 			return array();
 		}
 
+		$root        = strlen( normalize_path( $source ) ) + 1;
 		$stylesheets = array();
 
-		foreach ( new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $folder, RecursiveDirectoryIterator::SKIP_DOTS ) ) as $file ) {
+		foreach ( new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $folder, FilesystemIterator::SKIP_DOTS ) ) as $file ) {
 			$name = $file->getFilename();
 
-			if ( str_ends_with( $name, '.css' ) && ! str_ends_with( $name, '.min.css' ) ) {
-				$stylesheets[] = substr( wp_normalize_path( $file->getPathname() ), strlen( wp_normalize_path( $source ) ) + 1 );
+			if ( '.css' === substr( $name, -4 ) && '.min.css' !== substr( $name, -8 ) ) {
+				$stylesheets[] = substr( normalize_path( $file->getPathname() ), $root );
 			}
 		}
 
@@ -368,7 +401,7 @@ final class BuildCommand extends AbstractCommand {
 			throw new RuntimeException( 'The main plugin file has no "Text Domain" header; pass --skip-pot to build without a translation template.' );
 		}
 
-		wp_mkdir_p( $source . '/languages' );
+		$this->mkdir( $source . '/languages' );
 
 		$command = esc_cmd(
 			'i18n make-pot %s %s --slug=%s --domain=%s --exclude=src,docs',
@@ -404,10 +437,10 @@ final class BuildCommand extends AbstractCommand {
 	 */
 	private function copy_distributable( string $source, string $destination ): int {
 		$patterns = $this->distignore_patterns( $source . '/.distignore' );
-		$root     = strlen( wp_normalize_path( $source ) ) + 1;
+		$root     = strlen( normalize_path( $source ) ) + 1;
 
 		$filter = static function ( SplFileInfo $file ) use ( $patterns, $root ): bool {
-			$relative = substr( wp_normalize_path( $file->getPathname() ), $root );
+			$relative = substr( normalize_path( $file->getPathname() ), $root );
 
 			foreach ( $patterns as $pattern ) {
 				if ( preg_match( $pattern, $relative ) ) {
@@ -421,7 +454,7 @@ final class BuildCommand extends AbstractCommand {
 		// Filtering before recursion prunes excluded folders (node_modules/, src/, ...) instead of walking them.
 		$files = new RecursiveIteratorIterator(
 			new RecursiveCallbackFilterIterator(
-				new RecursiveDirectoryIterator( $source, RecursiveDirectoryIterator::SKIP_DOTS ),
+				new RecursiveDirectoryIterator( $source, FilesystemIterator::SKIP_DOTS ),
 				$filter
 			)
 		);
@@ -429,9 +462,9 @@ final class BuildCommand extends AbstractCommand {
 		$count = 0;
 
 		foreach ( $files as $file ) {
-			$target = $destination . '/' . substr( wp_normalize_path( $file->getPathname() ), $root );
+			$target = $destination . '/' . substr( normalize_path( $file->getPathname() ), $root );
 
-			if ( ! wp_mkdir_p( dirname( $target ) ) || ! $this->filesystem()->copy( $file->getPathname(), $target, true ) ) {
+			if ( ! $this->mkdir( dirname( $target ) ) || ! copy( $file->getPathname(), $target ) ) {
 				throw new RuntimeException( sprintf( 'Could not copy %s', $target ) );
 			}
 
@@ -461,12 +494,12 @@ final class BuildCommand extends AbstractCommand {
 		foreach ( (array) file( $file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES ) as $line ) {
 			$line = trim( $line );
 
-			if ( '' === $line || str_starts_with( $line, '#' ) ) {
+			if ( '' === $line || '#' === $line[0] ) {
 				continue;
 			}
 
 			$line      = ltrim( $line, '/' );
-			$is_folder = str_ends_with( $line, '/' );
+			$is_folder = '/' === substr( $line, -1 );
 			$regex     = str_replace( array( '\*', '\?' ), array( '.*', '.' ), preg_quote( rtrim( $line, '/' ), '#' ) );
 
 			$patterns[] = $is_folder ? "#^{$regex}(/.*)?$#" : "#^{$regex}$#";
@@ -489,11 +522,53 @@ final class BuildCommand extends AbstractCommand {
 	private function remove_worktree( string $repository, string $source, string $temp ): void {
 		Process::create( esc_cmd( 'git worktree remove --force %s', $source ), $repository, null )->run();
 
-		if ( file_exists( $temp ) && ! $this->filesystem()->delete( $temp, true ) ) {
+		if ( file_exists( $temp ) && ! $this->delete( $temp ) ) {
 			WP_CLI::warning( sprintf( 'Could not delete the temporary build folder; remove it by hand: %s', $temp ) );
 		}
 
 		Process::create( 'git worktree prune', $repository, null )->run();
+	}
+
+	/**
+	 * Create a folder and any missing parents.
+	 *
+	 * @param string $folder Folder path.
+	 *
+	 * @return bool Whether the folder exists afterwards.
+	 */
+	private function mkdir( string $folder ): bool {
+		return is_dir( $folder ) || @mkdir( $folder, 0777, true ) || is_dir( $folder ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- the result is checked.
+	}
+
+	/**
+	 * Delete a folder and everything in it.
+	 *
+	 * Files are made writable first, since Windows refuses to delete read-only ones.
+	 *
+	 * @param string $folder Folder path.
+	 *
+	 * @return bool Whether the folder is gone.
+	 */
+	private function delete( string $folder ): bool {
+		$entries = new RecursiveIteratorIterator(
+			new RecursiveDirectoryIterator( $folder, FilesystemIterator::SKIP_DOTS ),
+			RecursiveIteratorIterator::CHILD_FIRST
+		);
+
+		foreach ( $entries as $entry ) {
+			$path = $entry->getPathname();
+
+			if ( $entry->isDir() && ! $entry->isLink() ) {
+				@rmdir( $path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- checked by the final file_exists().
+			} else {
+				@chmod( $path, 0666 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+				@unlink( $path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			}
+		}
+
+		@rmdir( $folder ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+
+		return ! file_exists( $folder );
 	}
 
 	/**
@@ -528,21 +603,6 @@ final class BuildCommand extends AbstractCommand {
 
 		return trim( $result->stdout );
 	}
-
-	/**
-	 * A direct filesystem, for recursive deletes and copies without credential prompts.
-	 *
-	 * @return WP_Filesystem_Direct
-	 */
-	private function filesystem(): WP_Filesystem_Direct {
-		if ( null === $this->filesystem ) {
-			require_once ABSPATH . 'wp-admin/includes/file.php';
-			require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php';
-			require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php';
-
-			$this->filesystem = new WP_Filesystem_Direct( null );
-		}
-
-		return $this->filesystem;
-	}
 }
+
+BuildCommand::register();
