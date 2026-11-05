@@ -30,6 +30,8 @@ wp otd tasks generate       # Generate sample tasks (dev/testing)
 wp otd tasks remove         # Remove all tasks and their field values
 wp otd fulfillments clear   # Remove all fulfillment data
 wp otd options clear        # Remove all plugin wp_options entries
+wp otd build <destination> [--ref=<ref>] [--skip-pot]
+                            # Build the distributable plugin from a commit/tag into an empty folder
 ```
 
 ## License
