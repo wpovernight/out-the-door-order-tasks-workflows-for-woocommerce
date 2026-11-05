@@ -10,7 +10,8 @@
 			"@orderManager/*": ["order-manager/*"],
 			"@taskManager/*": ["task-manager/*"],
 			"@orderEdit/*": ["order-edit/*"],
-			"@otd-test-utils": ["../tests/js/helpers/index.ts"]
+			"@otd-test-utils": ["../tests/js/helpers/index.ts"],
+			"@otd-e2e": ["../tests/e2e/base/index.ts"]
 		},
 		"types": ["react", "node", "jest", "@testing-library/jest-dom"],
 		// The JS config files are listed for ESLint's parser, not checked.
@@ -19,8 +20,8 @@
 	},
 	"include": [
 		"js/**/*",
-		"e2e/**/*",
+		"e2e/**/*.ts",
 		"../src/**/*.d.ts"
 	],
-	"exclude": []
+	"exclude": ["e2e/playwright-report", "e2e/test-results", "e2e/.auth"]
 }

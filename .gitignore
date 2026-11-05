@@ -22,3 +22,9 @@
 
 # JS test output: Jest coverage.
 /coverage/
+
+# Playwright output, and the E2E login state and credentials.
+/tests/e2e/.auth/
+/tests/e2e/.env
+/tests/e2e/playwright-report/
+/tests/e2e/test-results/
