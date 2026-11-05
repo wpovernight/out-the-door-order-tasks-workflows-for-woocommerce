@@ -56,13 +56,15 @@ const ALIASES = {
 
 /**
  * Build a Jest config for a plugin whose tests live in <rootDir>/tests/js and
- * are type-checked by <rootDir>/tests/tsconfig.json.
+ * are type-checked by <rootDir>/tests/tsconfig.json. The add-on must also
+ * supply tests/tsconfig.jest.json with isolatedModules enabled.
  *
  * @param {Object} options
- * @param {string} options.rootDir The plugin's root folder.
+ * @param {string} options.rootDir            The plugin's root folder.
+ * @param {Object} [options.moduleNameMapper] Aliases overriding the core defaults.
  * @return {import('jest').Config} The Jest config.
  */
-const createJestConfig = ({ rootDir }) => {
+const createJestConfig = ({ rootDir, moduleNameMapper = {} }) => {
 	assertCoreInstalled();
 
 	return {
@@ -76,7 +78,7 @@ const createJestConfig = ({ rootDir }) => {
 		setupFilesAfterEnv: [path.join(CORE_DIR, 'tests/js/setup.ts')],
 		resolver: path.join(CORE_DIR, 'tests/js/resolver.js'),
 		moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
-		moduleNameMapper: ALIASES,
+		moduleNameMapper: { ...ALIASES, ...moduleNameMapper },
 		transform: {
 			'^.+\\.tsx?$': [
 				require.resolve('ts-jest', { paths: [CORE_DIR] }),

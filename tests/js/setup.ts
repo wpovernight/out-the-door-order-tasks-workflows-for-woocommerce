@@ -2,6 +2,7 @@
  * Runs before every test file, in core and in add-ons.
  */
 import '@testing-library/jest-dom';
+import { cleanup } from '@testing-library/react/pure';
 import { resetHooks } from './helpers/hooks';
 import { clearLocalized } from './helpers/localized';
 import { installFetchGuard, takeUnmockedRequests } from './helpers/fetch';
@@ -11,6 +12,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+	cleanup();
 	resetHooks();
 	clearLocalized();
 
