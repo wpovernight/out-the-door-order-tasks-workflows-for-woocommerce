@@ -28,7 +28,8 @@ requests. The setup unmounts components before checking unexpected requests.
 # Browser tests
 
 Set `OTD_E2E_BASE_URL`, `OTD_E2E_USER`, `OTD_E2E_PASSWORD` in the shell or
-`tests/e2e/.env` (gitignored). Use an existing administrator account. Add-ons
+`tests/e2e/.env` (gitignored). A dedicated administrator account for the tests
+(for example `e2e-admin`) is recommended over a personal one. Add-ons
 reuse `tests/e2e/base` through a test-only sibling path. Run
 `npx playwright install chromium`, then `npm run test:e2e` against the built site.
 No system packages are installed by these scripts. Authentication artifacts and
