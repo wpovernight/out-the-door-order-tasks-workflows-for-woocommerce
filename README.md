@@ -32,7 +32,7 @@ wp otd fulfillments clear   # Remove all fulfillment data
 wp otd options clear        # Remove all plugin wp_options entries
 ```
 
-`wp otd build` builds the distributable plugin from a commit or tag into an empty folder.
+`wp otd build` builds the distributable plugin from a commit, tag or version (`--ref=1.0.0` builds the `v1.0.0` tag) into an empty folder.
 
 ```bash
 wp otd build [<destination>] [--ref=<ref>] [--skip-pot]   # destination defaults to dist/<text-domain>/

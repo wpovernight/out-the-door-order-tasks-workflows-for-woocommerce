@@ -63,7 +63,7 @@ final class BuildCommand {
 						'name'        => 'ref',
 						'optional'    => true,
 						'default'     => 'HEAD',
-						'description' => 'Commit, tag or branch to build. Uncommitted changes are never included.',
+						'description' => 'Commit, tag, branch or version (1.0.0 for the v1.0.0 tag) to build. Uncommitted changes are never included.',
 					),
 					array(
 						'type'        => 'flag',
@@ -163,19 +163,29 @@ final class BuildCommand {
 	/**
 	 * Resolve $ref to a full commit hash.
 	 *
+	 * A bare version such as 1.0.0 that isn't itself a ref falls back to its release tag, v1.0.0.
+	 *
 	 * @param string $repository Repository root.
-	 * @param string $ref        Git commit, tag or branch.
+	 * @param string $ref        Git commit, tag, branch or version.
 	 *
 	 * @return string
 	 */
 	private function resolve_commit( string $repository, string $ref ): string {
-		$result = Process::create( esc_cmd( 'git rev-parse --verify --quiet %s', $ref . '^{commit}' ), $repository, null )->run();
+		$candidates = array( $ref );
 
-		if ( 0 !== $result->return_code ) {
-			throw new RuntimeException( sprintf( 'Unknown commit, tag or branch: %s', $ref ) );
+		if ( preg_match( '/^\d+\.\d+/', $ref ) ) {
+			$candidates[] = 'v' . $ref;
 		}
 
-		return trim( $result->stdout );
+		foreach ( $candidates as $candidate ) {
+			$result = Process::create( esc_cmd( 'git rev-parse --verify --quiet %s', $candidate . '^{commit}' ), $repository, null )->run();
+
+			if ( 0 === $result->return_code ) {
+				return trim( $result->stdout );
+			}
+		}
+
+		throw new RuntimeException( sprintf( 'Unknown commit, tag, branch or version: %s', $ref ) );
 	}
 
 	/**
