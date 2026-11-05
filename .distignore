@@ -27,6 +27,7 @@ yarn.lock
 # WordPress-specific meta/config
 .wordpress-org/
 .distignore
+wp-cli.yml
 wp-cli.local.yml
 
 # Dev & Test tooling
