@@ -35,7 +35,7 @@ wp otd options clear        # Remove all plugin wp_options entries
 `wp otd build` builds the distributable plugin from a commit or tag into an empty folder.
 
 ```bash
-wp otd build <destination> [--ref=<ref>] [--skip-pot]
+wp otd build [<destination>] [--ref=<ref>] [--skip-pot]   # destination defaults to dist/<text-domain>/
 ```
 
 ## License

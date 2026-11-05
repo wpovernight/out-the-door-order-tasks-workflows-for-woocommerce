@@ -16,3 +16,6 @@
 # Test artifacts — PHPUnit's result cache and the coverage reports from `composer test:coverage`.
 .phpunit.result.cache
 /build/
+
+# Built plugin - written by `wp otd build` (and bin/build-zip.php).
+/dist/

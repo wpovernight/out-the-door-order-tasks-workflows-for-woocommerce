@@ -55,8 +55,8 @@ final class BuildCommand {
 					array(
 						'type'        => 'positional',
 						'name'        => 'destination',
-						'optional'    => false,
-						'description' => 'Folder to write the built plugin into. Created if missing; an existing folder must be empty.',
+						'optional'    => true,
+						'description' => 'Folder to write the built plugin into. Created if missing; an existing folder must be empty. Defaults to dist/<text-domain>/ in the plugin folder.',
 					),
 					array(
 						'type'        => 'assoc',
@@ -85,7 +85,7 @@ final class BuildCommand {
 	 */
 	public function __invoke( array $arguments, array $options ): void {
 		try {
-			$this->build( $arguments[0], $options['ref'] ?? 'HEAD', ! empty( $options['skip-pot'] ) );
+			$this->build( $arguments[0] ?? null, $options['ref'] ?? 'HEAD', ! empty( $options['skip-pot'] ) );
 		} catch ( RuntimeException $e ) {
 			WP_CLI::error( $e->getMessage() );
 		}
@@ -97,19 +97,23 @@ final class BuildCommand {
 	 * Failures throw instead of calling WP_CLI::error(), which exits and would skip
 	 * the `finally` that removes the temporary worktree.
 	 *
-	 * @param string $destination Destination folder, absolute or relative to the current directory.
-	 * @param string $ref         Git commit, tag or branch.
-	 * @param bool   $skip_pot    Whether to skip the translation template.
+	 * @param string|null $destination Destination folder, absolute or relative to the current directory;
+	 *                                 null for dist/<text domain>/ in the plugin folder.
+	 * @param string      $ref         Git commit, tag or branch.
+	 * @param bool        $skip_pot    Whether to skip the translation template.
 	 *
 	 * @return void
 	 */
-	private function build( string $destination, string $ref, bool $skip_pot ): void {
-		$repository  = $this->run( 'git rev-parse --show-toplevel', dirname( __DIR__ ) );
-		$commit      = $this->resolve_commit( $repository, $ref );
-		$destination = $this->resolve_destination( $destination );
+	private function build( ?string $destination, string $ref, bool $skip_pot ): void {
+		$repository = $this->run( 'git rev-parse --show-toplevel', dirname( __DIR__ ) );
+		$commit     = $this->resolve_commit( $repository, $ref );
 
 		// Checked now so a long build isn't wasted, and again before copying in case files appeared meanwhile.
-		$this->check_destination( $destination );
+		// The default destination needs the ref's text domain, so it's checked once the ref is checked out.
+		if ( null !== $destination ) {
+			$destination = $this->resolve_destination( $destination );
+			$this->check_destination( $destination );
+		}
 
 		$temp   = rtrim( normalize_path( get_temp_dir() ), '/' ) . '/otd-build-' . bin2hex( random_bytes( 4 ) );
 		$source = $temp . '/source';
@@ -131,6 +135,11 @@ final class BuildCommand {
 			$this->run( esc_cmd( 'git worktree add --detach %s %s', $source, $commit ), $repository );
 
 			$plugin = $this->plugin_headers( $source );
+
+			if ( null === $destination ) {
+				$destination = $this->default_destination( $plugin['domain'] );
+				$this->check_destination( $destination );
+			}
 
 			$this->check_stable_tag( $source, $plugin['version'] );
 			$this->build_assets( $source );
@@ -183,6 +192,21 @@ final class BuildCommand {
 		}
 
 		return normalize_path( $destination );
+	}
+
+	/**
+	 * The destination used when none is given: dist/<text domain>/ in the plugin folder.
+	 *
+	 * Falls back to the plugin folder's name when the ref's main file has no "Text Domain" header.
+	 *
+	 * @param string $domain The ref's text domain.
+	 *
+	 * @return string
+	 */
+	private function default_destination( string $domain ): string {
+		$plugin = normalize_path( dirname( __DIR__ ) );
+
+		return $plugin . '/dist/' . ( '' !== $domain ? $domain : basename( $plugin ) );
 	}
 
 	/**
