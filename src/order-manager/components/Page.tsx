@@ -6,6 +6,7 @@ import { TaskView } from '@orderManager/views/TaskView';
 import { useTab } from '@orderManager/context/TabContext';
 import { DashboardView } from '@orderManager/views/Dashboard/DashboardView';
 import { CustomOrderStatusView } from '@orderManager/views/CustomOrderStatus/CustomOrderStatusView';
+import { AutomationsView } from '@orderManager/views/Automations/AutomationsView';
 
 export interface OtdRoute {
 	path: string;
@@ -16,6 +17,7 @@ const coreRoutes: OtdRoute[] = [
 	{ path: '/dashboard', element: <DashboardView /> },
 	{ path: '/task-manager/*', element: <TaskView /> },
 	{ path: '/custom-order-status', element: <CustomOrderStatusView /> },
+	{ path: '/automations/*', element: <AutomationsView /> },
 ];
 
 export default function Page() {

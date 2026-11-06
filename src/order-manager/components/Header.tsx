@@ -16,6 +16,10 @@ const coreTabLabels: Record<string, string> = {
 		'Custom Order Status',
 		'out-the-door-order-tasks-workflows-for-woocommerce'
 	),
+	automations: __(
+		'Automations',
+		'out-the-door-order-tasks-workflows-for-woocommerce'
+	),
 };
 
 export default function Header() {

@@ -2,7 +2,12 @@ import React, { createContext, useContext, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { applyFilters } from '@wordpress/hooks';
 
-export const CORE_TABS = ['dashboard', 'task-manager', 'custom-order-status'];
+export const CORE_TABS = [
+	'dashboard',
+	'task-manager',
+	'custom-order-status',
+	'automations',
+];
 
 type Tab = string;
 
