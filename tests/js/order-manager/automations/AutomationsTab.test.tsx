@@ -222,6 +222,45 @@ describe('Automations tab', () => {
 		expect(hint).not.toHaveClass('is-visible');
 	});
 
+	it('keeps the hint while its control is still hovered or focused', async () => {
+		const { user } = renderPage();
+
+		const newRule = screen.getByRole('button', { name: /New rule/ });
+		const hint = document.getElementById(
+			newRule.getAttribute('aria-describedby') as string
+		);
+
+		act(() => newRule.focus());
+		await user.hover(newRule);
+		await user.unhover(newRule);
+		expect(hint).toHaveClass('is-visible');
+
+		await user.hover(newRule);
+		act(() => newRule.blur());
+		expect(hint).toHaveClass('is-visible');
+
+		await user.unhover(newRule);
+		expect(hint).not.toHaveClass('is-visible');
+	});
+
+	it('shows the hint again after Escape when the control is hovered again', async () => {
+		const { user } = renderPage();
+
+		const newRule = screen.getByRole('button', { name: /New rule/ });
+		const hint = document.getElementById(
+			newRule.getAttribute('aria-describedby') as string
+		);
+
+		await user.hover(newRule);
+		act(() => newRule.focus());
+		await user.keyboard('{Escape}');
+		expect(hint).not.toHaveClass('is-visible');
+
+		await user.unhover(newRule);
+		await user.hover(newRule);
+		expect(hint).toHaveClass('is-visible');
+	});
+
 	it('changes nothing when the controls are used', async () => {
 		const { user } = renderPage();
 

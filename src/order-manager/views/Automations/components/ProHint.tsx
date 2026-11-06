@@ -24,7 +24,8 @@ interface ProHintProps {
  * A disabled control with an "Available in Pro" hint.
  *
  * The control stays focusable (aria-disabled, not disabled), so keyboard users
- * reach it and hear the hint as its description. Escape hides the hint.
+ * reach it and hear the hint as its description. The hint shows while the
+ * control is hovered or focused; Escape hides it until the next hover or focus.
  *
  * @param props
  * @param props.children
@@ -32,23 +33,30 @@ interface ProHintProps {
  */
 export const ProHint = ({ children, className = '' }: ProHintProps) => {
 	const hintId = useId();
-	const [isVisible, setIsVisible] = useState(false);
+	const [isHovered, setIsHovered] = useState(false);
+	const [isFocused, setIsFocused] = useState(false);
+	const [isDismissed, setIsDismissed] = useState(false);
 
-	const show = () => setIsVisible(true);
-	const hide = () => setIsVisible(false);
+	const isVisible = (isHovered || isFocused) && !isDismissed;
 
 	return (
 		<span className={`automations-pro-hint ${className}`.trim()}>
 			{children({
 				'aria-describedby': hintId,
 				'aria-disabled': true,
-				onMouseEnter: show,
-				onMouseLeave: hide,
-				onFocus: show,
-				onBlur: hide,
+				onMouseEnter: () => {
+					setIsHovered(true);
+					setIsDismissed(false);
+				},
+				onMouseLeave: () => setIsHovered(false),
+				onFocus: () => {
+					setIsFocused(true);
+					setIsDismissed(false);
+				},
+				onBlur: () => setIsFocused(false),
 				onKeyDown: (event) => {
 					if (event.key === 'Escape') {
-						hide();
+						setIsDismissed(true);
 					}
 				},
 			})}
