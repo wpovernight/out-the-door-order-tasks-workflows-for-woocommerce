@@ -91,10 +91,22 @@ body.woocommerce_page_wpo_otd_order_manager #wpcontent {
     padding: 0 12px 0 38px;
     border: 1px solid var(--wpo-otd-border-color);
     border-radius: 8px;
-    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23535862' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-4-4'/%3E%3C/svg%3E") no-repeat 12px center;
+    background: #fff var(--wpo-otd-icon-search) no-repeat 12px center;
     color: var(--wpo-otd-text-gray);
     font-size: 1.07em;
     cursor: not-allowed;
+}
+
+#wpo-otd-order-manager .automations-icon {
+    display: inline-block;
+    flex: 0 0 auto;
+    background-color: currentColor;
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
 }
 
 #wpo-otd-order-manager .automations-new-rule,
@@ -110,6 +122,19 @@ body.woocommerce_page_wpo_otd_order_manager #wpcontent {
 #wpo-otd-order-manager .automations-new-rule:hover {
     background-color: var(--wpo-otd-purple-primary);
     opacity: 0.4;
+}
+
+#wpo-otd-order-manager .automations-new-rule {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+}
+
+#wpo-otd-order-manager .automations-new-rule-icon {
+    width: 14px;
+    height: 14px;
+    mask-image: var(--wpo-otd-icon-add);
+    -webkit-mask-image: var(--wpo-otd-icon-add);
 }
 
 #wpo-otd-order-manager .automations-add-rule {
@@ -208,7 +233,11 @@ body.woocommerce_page_wpo_otd_order_manager #wpcontent {
 }
 
 #wpo-otd-order-manager .automations-chip-arrow {
+    width: 14px;
+    height: 14px;
     color: var(--wpo-otd-text-gray);
+    mask-image: var(--wpo-otd-icon-arrow-right);
+    -webkit-mask-image: var(--wpo-otd-icon-arrow-right);
 }
 
 #wpo-otd-order-manager .automations-chip-label {
@@ -268,7 +297,15 @@ body.woocommerce_page_wpo_otd_order_manager #wpcontent {
 }
 
 #wpo-otd-order-manager .automations-pro-card-lock {
+    width: 16px;
+    height: 21px;
     color: var(--wpo-otd-purple-primary);
+    mask-image: var(--wpo-otd-icon-lock);
+    -webkit-mask-image: var(--wpo-otd-icon-lock);
+    mask-size: 24px 24px;
+    mask-position: -4px -1px;
+    -webkit-mask-size: 24px 24px;
+    -webkit-mask-position: -4px -1px;
 }
 
 #wpo-otd-order-manager .automations-pro-badge {
@@ -294,6 +331,13 @@ body.woocommerce_page_wpo_otd_order_manager #wpcontent {
     font-size: 1.15em;
     font-weight: 600;
     text-decoration: none;
+}
+
+#wpo-otd-order-manager .automations-pro-card-link-arrow {
+    width: 12px;
+    height: 12px;
+    mask-image: var(--wpo-otd-icon-external-link);
+    -webkit-mask-image: var(--wpo-otd-icon-external-link);
 }
 
 #wpo-otd-order-manager .automations-pro-card-link:hover,

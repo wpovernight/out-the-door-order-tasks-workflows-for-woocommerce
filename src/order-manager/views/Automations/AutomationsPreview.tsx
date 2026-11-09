@@ -55,7 +55,10 @@ export const AutomationsPreview = () => {
 								className="wpo-button wpo-button-primary automations-new-rule"
 								{...hintProps}
 							>
-								<span aria-hidden="true">+</span>{' '}
+								<span
+									className="automations-icon automations-new-rule-icon"
+									aria-hidden="true"
+								/>
 								{__(
 									'New rule',
 									'out-the-door-order-tasks-workflows-for-woocommerce'

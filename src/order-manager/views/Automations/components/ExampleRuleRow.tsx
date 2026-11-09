@@ -94,11 +94,9 @@ export const ExampleRuleRow = ({ rule }: { rule: ExampleRule }) => {
 						>
 							{index > 0 && chip.type !== 'more' && (
 								<span
-									className="automations-chip-arrow"
+									className="automations-icon automations-chip-arrow"
 									aria-hidden="true"
-								>
-									→
-								</span>
+								/>
 							)}
 							<span className="automations-chip-label">
 								{chip.label}

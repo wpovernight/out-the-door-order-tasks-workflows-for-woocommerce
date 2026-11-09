@@ -55,7 +55,7 @@ const chipsOf = (row: HTMLElement): string[] =>
  */
 const controls = (): HTMLElement[] => [
 	screen.getByRole('searchbox', { name: 'Search' }),
-	screen.getByRole('button', { name: /New rule/ }),
+	screen.getByRole('button', { name: 'New rule' }),
 	...screen.getAllByRole('switch'),
 	screen.getByRole('button', { name: 'Add new rule' }),
 ];
@@ -135,6 +135,34 @@ describe('Automations tab', () => {
 		]);
 	});
 
+	it('draws its icons from CSS as empty, hidden spans, never inline SVG', () => {
+		const { container } = renderPage();
+
+		expect(container.querySelector('svg')).toBeNull();
+
+		const icons = (selector: string) =>
+			Array.from(container.querySelectorAll(selector));
+		const expectDecorative = (selector: string, count: number) => {
+			expect(icons(selector)).toHaveLength(count);
+			for (const icon of icons(selector)) {
+				expect(icon).toHaveClass('automations-icon');
+				expect(icon).toHaveAttribute('aria-hidden', 'true');
+				expect(icon).toBeEmptyDOMElement();
+			}
+		};
+
+		expectDecorative('.automations-new-rule-icon', 1);
+		expectDecorative('.automations-chip-arrow', 5);
+		expectDecorative('.automations-pro-card-lock', 1);
+		expectDecorative('.automations-pro-card-link-arrow', 1);
+
+		expect(
+			screen.getByRole('button', { name: 'New rule' })
+		).toContainElement(
+			container.querySelector<HTMLElement>('.automations-new-rule-icon')
+		);
+	});
+
 	it('makes every control disabled, labelled and described by the hint', () => {
 		renderPage();
 
@@ -171,7 +199,7 @@ describe('Automations tab', () => {
 
 		const order = [
 			screen.getByRole('searchbox', { name: 'Search' }),
-			screen.getByRole('button', { name: /New rule/ }),
+			screen.getByRole('button', { name: 'New rule' }),
 			...screen.getAllByRole('switch'),
 			screen.getByRole('button', { name: 'Add new rule' }),
 		];
@@ -204,7 +232,7 @@ describe('Automations tab', () => {
 	it('shows the hint on hover and hides it on leave and on Escape', async () => {
 		const { user } = renderPage();
 
-		const newRule = screen.getByRole('button', { name: /New rule/ });
+		const newRule = screen.getByRole('button', { name: 'New rule' });
 		const hint = document.getElementById(
 			newRule.getAttribute('aria-describedby') as string
 		);
@@ -225,7 +253,7 @@ describe('Automations tab', () => {
 	it('keeps the hint while its control is still hovered or focused', async () => {
 		const { user } = renderPage();
 
-		const newRule = screen.getByRole('button', { name: /New rule/ });
+		const newRule = screen.getByRole('button', { name: 'New rule' });
 		const hint = document.getElementById(
 			newRule.getAttribute('aria-describedby') as string
 		);
@@ -246,7 +274,7 @@ describe('Automations tab', () => {
 	it('shows the hint again after Escape when the control is hovered again', async () => {
 		const { user } = renderPage();
 
-		const newRule = screen.getByRole('button', { name: /New rule/ });
+		const newRule = screen.getByRole('button', { name: 'New rule' });
 		const hint = document.getElementById(
 			newRule.getAttribute('aria-describedby') as string
 		);
@@ -273,7 +301,7 @@ describe('Automations tab', () => {
 			expect(toggle).not.toBeChecked();
 		}
 
-		await user.click(screen.getByRole('button', { name: /New rule/ }));
+		await user.click(screen.getByRole('button', { name: 'New rule' }));
 		await user.click(screen.getByRole('button', { name: 'Add new rule' }));
 
 		expect(screen.getAllByRole('switch')).toHaveLength(3);

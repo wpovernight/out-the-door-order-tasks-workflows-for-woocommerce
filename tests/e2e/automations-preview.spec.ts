@@ -28,7 +28,7 @@ test('the Automations tab previews example rules and Pro', async ({
 	await expect(page.getByRole('switch')).toHaveCount(3);
 	await expect(page.getByText('+ 1 action')).toBeVisible();
 
-	const newRule = page.getByRole('button', { name: /New rule/ });
+	const newRule = page.getByRole('button', { name: 'New rule', exact: true });
 	await expect(newRule).toHaveAttribute('aria-disabled', 'true');
 	await newRule.hover();
 	await expect(
@@ -51,6 +51,24 @@ test('the Automations tab previews example rules and Pro', async ({
 	await expect(
 		page.getByRole('link', { name: /See what's in Pro - \$99\/year/ })
 	).toBeVisible();
+
+	const icons = [
+		{ selector: '.automations-new-rule-icon', width: 14, height: 14 },
+		{ selector: '.automations-chip-arrow', width: 14, height: 14 },
+		{ selector: '.automations-pro-card-lock', width: 16, height: 21 },
+		{ selector: '.automations-pro-card-link-arrow', width: 12, height: 12 },
+	];
+	for (const { selector, width, height } of icons) {
+		const icon = page.locator(selector).first();
+		await expect(icon).toBeVisible();
+		expect(await icon.boundingBox()).toMatchObject({ width, height });
+		const mask = await icon.evaluate(
+			(element) =>
+				getComputedStyle(element).maskImage ||
+				getComputedStyle(element).webkitMaskImage
+		);
+		expect(mask).toContain('data:image/svg+xml');
+	}
 
 	await page.mouse.move(0, 0);
 	await page.screenshot({
