@@ -161,7 +161,8 @@
     border-radius: var(--wpo-otd-radius-s);
 }
 
-.wpo-button:disabled {
+.wpo-button:disabled,
+.wpo-button[aria-disabled="true"] {
     cursor: not-allowed;
 }
 
@@ -175,7 +176,8 @@
     background-color: var(--wpo-otd-purple-primary-dark);
 }
 
-.wpo-button-primary:disabled {
+.wpo-button-primary:disabled,
+.wpo-button-primary[aria-disabled="true"] {
     background-color: var(--wpo-otd-purple-primary);
     opacity: 0.5;
 }
@@ -414,6 +416,24 @@
     border: 1px solid var(--wpo-otd-border-color);
     color: var(--wpo-otd-text-gray);
     background: #fff;
+}
+
+#wpcontent .wpo-otd-search-input {
+    border: 1px solid var(--wpo-otd-border-color);
+    border-radius: var(--wpo-otd-radius-m);
+    font-size: 1.08em;
+    width: 20em;
+    color: var(--wpo-otd-text-primary);
+    outline: none;
+    transition: border-color var(--wpo-otd-transition-fast);
+    background-image: var(--wpo-otd-icon-search);
+    background-position: 0.8em;
+    background-repeat: no-repeat;
+    padding: 0.37em 1em 0.37em 3em;
+}
+
+#wpcontent .wpo-otd-search-input:focus {
+    border-color: var(--wpo-otd-purple-primary);
 }
 
 .wpo-count-badge {

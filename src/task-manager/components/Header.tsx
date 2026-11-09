@@ -65,6 +65,7 @@ export default function Header() {
 					<input
 						type="search"
 						id="header-search-input"
+						className="wpo-otd-search-input"
 						placeholder={__(
 							'Search',
 							'out-the-door-order-tasks-workflows-for-woocommerce'

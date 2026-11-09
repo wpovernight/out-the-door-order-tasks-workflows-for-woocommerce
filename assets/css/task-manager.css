@@ -116,22 +116,7 @@
 }
 
 #wpo-otd-order-manager .task-manager-tab .header-actions #header-search-input {
-    border: 1px solid var(--wpo-otd-border-color);
-    border-radius: var(--wpo-otd-radius-m);
-    font-size: 1.08em;
-    width: 20em;
-    color: var(--wpo-otd-text-primary);
-    outline: none;
-    transition: border-color var(--wpo-otd-transition-fast);
     margin: 0.5em 0;
-    background-image: var(--wpo-otd-icon-search);
-    background-position: 0.8em;
-    background-repeat: no-repeat;
-    padding: 0.37em 1em 0.37em 3em;
-}
-
-#wpo-otd-order-manager .task-manager-tab #header-search-input:focus {
-    border-color: var(--wpo-otd-purple-primary);
 }
 
 #wpo-otd-order-manager .task-manager-tab .header-actions .add-new-task {
