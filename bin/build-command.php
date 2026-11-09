@@ -32,7 +32,7 @@ if ( ! class_exists( 'WP_CLI' ) ) {
  * Runs the same steps as the release workflow (JS build, CSS minification, production
  * Composer install, translation template) in a temporary git worktree of the chosen ref,
  * then copies everything .distignore doesn't exclude into the destination folder.
- * The current checkout and its vendor/ are never touched.
+ * The current checkout and its vendor/ are never touched, and nothing is deleted unless --clean is passed.
  */
 final class BuildCommand {
 	/**
@@ -56,7 +56,7 @@ final class BuildCommand {
 						'type'        => 'positional',
 						'name'        => 'destination',
 						'optional'    => true,
-						'description' => 'Folder to write the built plugin into. Created if missing; an existing folder must be empty. Defaults to dist/<text-domain>/ in the plugin folder.',
+						'description' => 'Folder to write the built plugin into. Created if missing; an existing folder must be empty unless --clean is passed. Defaults to dist/<text-domain>/ in the plugin folder.',
 					),
 					array(
 						'type'        => 'assoc',
@@ -70,6 +70,12 @@ final class BuildCommand {
 						'name'        => 'skip-pot',
 						'optional'    => true,
 						'description' => 'Do not generate the translation template.',
+					),
+					array(
+						'type'        => 'flag',
+						'name'        => 'clean',
+						'optional'    => true,
+						'description' => 'Empty an existing destination folder before copying, once the build has succeeded. Refused for a folder containing the repository, the current directory, the temp folder or your home folder.',
 					),
 				),
 				'when'      => 'before_wp_load',
@@ -85,7 +91,7 @@ final class BuildCommand {
 	 */
 	public function __invoke( array $arguments, array $options ): void {
 		try {
-			$this->build( $arguments[0] ?? null, $options['ref'] ?? 'HEAD', ! empty( $options['skip-pot'] ) );
+			$this->build( $arguments[0] ?? null, $options['ref'] ?? 'HEAD', ! empty( $options['skip-pot'] ), ! empty( $options['clean'] ) );
 		} catch ( RuntimeException $e ) {
 			WP_CLI::error( $e->getMessage() );
 		}
@@ -101,10 +107,11 @@ final class BuildCommand {
 	 *                                 null for dist/<text domain>/ in the plugin folder.
 	 * @param string      $ref         Git commit, tag or branch.
 	 * @param bool        $skip_pot    Whether to skip the translation template.
+	 * @param bool        $clean       Whether to empty a destination folder that has content.
 	 *
 	 * @return void
 	 */
-	private function build( ?string $destination, string $ref, bool $skip_pot ): void {
+	private function build( ?string $destination, string $ref, bool $skip_pot, bool $clean ): void {
 		$repository = $this->run( 'git rev-parse --show-toplevel', dirname( __DIR__ ) );
 		$commit     = $this->resolve_commit( $repository, $ref );
 
@@ -112,7 +119,7 @@ final class BuildCommand {
 		// The default destination needs the ref's text domain, so it's checked once the ref is checked out.
 		if ( null !== $destination ) {
 			$destination = $this->resolve_destination( $destination );
-			$this->check_destination( $destination );
+			$this->check_destination( $destination, $clean, $repository );
 		}
 
 		$temp   = rtrim( normalize_path( get_temp_dir() ), '/' ) . '/otd-build-' . bin2hex( random_bytes( 4 ) );
@@ -138,7 +145,7 @@ final class BuildCommand {
 
 			if ( null === $destination ) {
 				$destination = $this->default_destination( $plugin['domain'] );
-				$this->check_destination( $destination );
+				$this->check_destination( $destination, $clean, $repository );
 			}
 
 			$this->check_stable_tag( $source, $plugin['version'] );
@@ -148,7 +155,7 @@ final class BuildCommand {
 				$this->make_pot( $source, $plugin['domain'] );
 			}
 
-			$destination = $this->create_destination( $destination );
+			$destination = $this->create_destination( $destination, $clean, $repository );
 
 			WP_CLI::log( sprintf( 'Copying distributable files into %s', $destination ) );
 			$count = $this->copy_distributable( $source, $destination );
@@ -220,16 +227,18 @@ final class BuildCommand {
 	}
 
 	/**
-	 * Refuse a destination that is a file or a folder with content; a missing one is fine.
+	 * Refuse a destination that is a file, or a folder with content unless $clean allows emptying it; a missing one is fine.
 	 *
-	 * Requiring an empty folder means the build never deletes anything, and also rules out
-	 * the repository or a folder containing it.
+	 * Without $clean, requiring an empty folder means the build never deletes anything, and also rules out
+	 * the repository or a folder containing it. With $clean, check_clearable() rules those out instead.
 	 *
 	 * @param string $destination Absolute destination path.
+	 * @param bool   $clean       Whether a folder with content may be emptied.
+	 * @param string $repository  Repository root.
 	 *
 	 * @return void
 	 */
-	private function check_destination( string $destination ): void {
+	private function check_destination( string $destination, bool $clean, string $repository ): void {
 		if ( ! file_exists( $destination ) ) {
 			return;
 		}
@@ -238,26 +247,109 @@ final class BuildCommand {
 			throw new RuntimeException( sprintf( 'Destination is a file, not a folder: %s', $destination ) );
 		}
 
-		$entries = scandir( $destination );
-
-		if ( false === $entries ) {
-			throw new RuntimeException( sprintf( 'Could not read the destination folder: %s', $destination ) );
+		if ( $this->is_empty_folder( $destination ) ) {
+			return;
 		}
 
-		if ( array_diff( $entries, array( '.', '..' ) ) ) {
-			throw new RuntimeException( sprintf( 'Destination folder is not empty: %s', $destination ) );
+		if ( ! $clean ) {
+			throw new RuntimeException( sprintf( 'Destination folder is not empty: %s (pass --clean to empty it first)', $destination ) );
+		}
+
+		$this->check_clearable( $destination, $repository );
+	}
+
+	/**
+	 * Refuse to empty a folder that is, or contains, the repository, the current directory,
+	 * the temp folder (which holds the build's worktree) or the home folder, or that is a filesystem root.
+	 *
+	 * @param string $destination Absolute path of an existing folder.
+	 * @param string $repository  Repository root.
+	 *
+	 * @return void
+	 */
+	private function check_clearable( string $destination, string $repository ): void {
+		$folder = $this->canonical( $destination );
+
+		if ( null === $folder || dirname( $folder ) === $folder || preg_match( '#^[a-zA-Z]:/?$#', $folder ) ) {
+			throw new RuntimeException( sprintf( 'Refusing to empty %s', $destination ) );
+		}
+
+		$protected = array(
+			'the repository'     => $repository,
+			'the plugin folder'  => dirname( __DIR__ ),
+			'the current folder' => (string) getcwd(),
+			'the temp folder'    => get_temp_dir(),
+			'your home folder'   => (string) ( getenv( 'HOME' ) ?: getenv( 'USERPROFILE' ) ),
+		);
+
+		$windows = '\\' === DIRECTORY_SEPARATOR;
+
+		foreach ( $protected as $label => $path ) {
+			$path = '' !== $path ? $this->canonical( $path ) : null;
+
+			if ( null === $path ) {
+				continue;
+			}
+
+			$inside = $windows
+				? 0 === stripos( $path . '/', rtrim( $folder, '/' ) . '/' )
+				: str_starts_with( $path . '/', rtrim( $folder, '/' ) . '/' );
+
+			if ( $inside ) {
+				throw new RuntimeException( sprintf( 'Refusing to empty %s: it contains %s (%s).', $destination, $label, $path ) );
+			}
 		}
 	}
 
 	/**
-	 * Check the destination again and create it, only once the build has succeeded.
+	 * The canonical, forward-slashed path of an existing file or folder.
+	 *
+	 * @param string $path Path.
+	 *
+	 * @return string|null Null when the path doesn't exist.
+	 */
+	private function canonical( string $path ): ?string {
+		$real = realpath( $path );
+
+		return false === $real ? null : rtrim( normalize_path( $real ), '/' );
+	}
+
+	/**
+	 * Whether a folder has no entries.
+	 *
+	 * @param string $folder Folder path.
+	 *
+	 * @return bool
+	 */
+	private function is_empty_folder( string $folder ): bool {
+		$entries = scandir( $folder );
+
+		if ( false === $entries ) {
+			throw new RuntimeException( sprintf( 'Could not read the destination folder: %s', $folder ) );
+		}
+
+		return ! array_diff( $entries, array( '.', '..' ) );
+	}
+
+	/**
+	 * Check the destination again, empty it if $clean allows, and create it, only once the build has succeeded.
 	 *
 	 * @param string $destination Absolute destination path.
+	 * @param bool   $clean       Whether a folder with content may be emptied.
+	 * @param string $repository  Repository root.
 	 *
 	 * @return string The destination's canonical path.
 	 */
-	private function create_destination( string $destination ): string {
-		$this->check_destination( $destination );
+	private function create_destination( string $destination, bool $clean, string $repository ): string {
+		$this->check_destination( $destination, $clean, $repository );
+
+		if ( $clean && is_dir( $destination ) && ! $this->is_empty_folder( $destination ) ) {
+			WP_CLI::log( sprintf( 'Emptying %s', $destination ) );
+
+			if ( ! $this->empty_folder( $destination ) ) {
+				throw new RuntimeException( sprintf( 'Could not empty the destination folder: %s', $destination ) );
+			}
+		}
 
 		if ( ! $this->mkdir( $destination ) ) {
 			throw new RuntimeException( sprintf( 'Could not create the destination folder: %s', $destination ) );
@@ -584,6 +676,23 @@ final class BuildCommand {
 	 * @return bool Whether the folder is gone.
 	 */
 	private function delete( string $folder ): bool {
+		$this->empty_folder( $folder );
+
+		@rmdir( $folder ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+
+		return ! file_exists( $folder );
+	}
+
+	/**
+	 * Delete everything in a folder, keeping the folder itself.
+	 *
+	 * Symlinks are removed, not followed. Files are made writable first, since Windows refuses to delete read-only ones.
+	 *
+	 * @param string $folder Folder path.
+	 *
+	 * @return bool Whether the folder is empty afterwards.
+	 */
+	private function empty_folder( string $folder ): bool {
 		$entries = new RecursiveIteratorIterator(
 			new RecursiveDirectoryIterator( $folder, FilesystemIterator::SKIP_DOTS ),
 			RecursiveIteratorIterator::CHILD_FIRST
@@ -593,16 +702,18 @@ final class BuildCommand {
 			$path = $entry->getPathname();
 
 			if ( $entry->isDir() && ! $entry->isLink() ) {
-				@rmdir( $path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- checked by the final file_exists().
+				@rmdir( $path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- checked by the caller.
 			} else {
-				@chmod( $path, 0666 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
-				@unlink( $path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+				// chmod() follows symlinks, so it would change the permissions of the link's target.
+				if ( ! $entry->isLink() ) {
+					@chmod( $path, 0666 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+				}
+
+				@unlink( $path ) || @rmdir( $path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- rmdir() removes a folder symlink on Windows; checked by the caller.
 			}
 		}
 
-		@rmdir( $folder ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
-
-		return ! file_exists( $folder );
+		return $this->is_empty_folder( $folder );
 	}
 
 	/**
