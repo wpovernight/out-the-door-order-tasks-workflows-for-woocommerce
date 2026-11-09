@@ -79,7 +79,7 @@ export const ExampleRuleRow = ({ rule }: { rule: ExampleRule }) => {
 			<div className="automations-rule-body">
 				<h4 className="automations-rule-title">
 					{rule.title}
-					<span className="automations-example-badge">
+					<span className="wpo-otd-tag automations-example-badge">
 						{__(
 							'Example',
 							'out-the-door-order-tasks-workflows-for-woocommerce'

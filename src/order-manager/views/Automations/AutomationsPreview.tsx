@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 import { getExampleRules } from './exampleRules';
@@ -21,6 +21,7 @@ export const AutomationsPreview = () => {
 		true
 	) as boolean;
 
+	const searchId = useId();
 	const searchLabel = __(
 		'Search',
 		'out-the-door-order-tasks-workflows-for-woocommerce'
@@ -38,14 +39,21 @@ export const AutomationsPreview = () => {
 				<div className="automations-header-actions">
 					<ProHint className="automations-search">
 						{(hintProps) => (
-							<input
-								type="search"
-								readOnly
-								aria-label={searchLabel}
-								placeholder={searchLabel}
-								className="automations-search-input"
-								{...hintProps}
-							/>
+							<>
+								<label htmlFor={searchId}>
+									<span className="screen-reader-text">
+										{searchLabel}
+									</span>
+								</label>
+								<input
+									type="search"
+									id={searchId}
+									readOnly
+									placeholder={searchLabel}
+									className="wpo-otd-search-input automations-search-input"
+									{...hintProps}
+								/>
+							</>
 						)}
 					</ProHint>
 					<ProHint>

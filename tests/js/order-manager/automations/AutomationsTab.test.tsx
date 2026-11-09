@@ -1,3 +1,5 @@
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import React from 'react';
 import { act, screen, within } from '@testing-library/react';
 import { addFilter } from '@wordpress/hooks';
@@ -161,6 +163,74 @@ describe('Automations tab', () => {
 		).toContainElement(
 			container.querySelector<HTMLElement>('.automations-new-rule-icon')
 		);
+	});
+
+	it("uses core's search field and tag", () => {
+		renderPage();
+
+		const search = screen.getByRole('searchbox', { name: 'Search' });
+		expect(search).toHaveClass('wpo-otd-search-input');
+		expect(search).not.toHaveAttribute('aria-label');
+		expect(
+			document.querySelector(`label[for="${search.id}"]`)
+		).toHaveTextContent('Search');
+
+		for (const badge of screen.getAllByText('Example')) {
+			expect(badge).toHaveClass('wpo-otd-tag');
+		}
+	});
+
+	it('styles the preview from core tokens, not hard-coded radii or token colours', () => {
+		const css = (file: string) =>
+			readFileSync(
+				join(__dirname, '../../../../assets/css', file),
+				'utf8'
+			);
+		const normalise = (colour: string) => {
+			const hex = colour.toLowerCase();
+			return hex.length === 4
+				? `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`
+				: hex;
+		};
+		const tokenColours = new Map(
+			Array.from(
+				css('common.css').matchAll(
+					/(--wpo-otd-[a-z-]+):\s*(#[0-9a-f]{3,8})\s*;/gi
+				),
+				([, name, value]) => [normalise(value), name]
+			)
+		);
+		const declarations = Array.from(
+			css('order-manager.css').matchAll(/([^{}]+)\{([^}]*)\}/g)
+		)
+			.filter(([, selector]) => selector.includes('.automations-'))
+			.flatMap(([, selector, body]) =>
+				body
+					.split(';')
+					.map((line) => line.trim())
+					.filter(Boolean)
+					.map((line) => `${selector.trim()} { ${line} }`)
+			);
+
+		expect(declarations.length).toBeGreaterThan(50);
+
+		const problems = declarations.filter((declaration) => {
+			const [, property, value] =
+				/\{ ([a-z-]+):\s*(.*) \}$/.exec(declaration) ?? [];
+
+			if (property === 'border-radius') {
+				return !/^(var\(--wpo-otd-radius-[a-z]+\)|50%)$/.test(value);
+			}
+			if (property === 'color' && value === '#fff') {
+				return false;
+			}
+
+			return (value?.match(/#[0-9a-f]{3,8}\b/gi) ?? []).some((colour) =>
+				tokenColours.has(normalise(colour))
+			);
+		});
+
+		expect(problems).toEqual([]);
 	});
 
 	it('makes every control disabled, labelled and described by the hint', () => {

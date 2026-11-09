@@ -70,9 +70,35 @@ test('the Automations tab previews example rules and Pro', async ({
 		expect(mask).toContain('data:image/svg+xml');
 	}
 
+	const radiusOf = (locator: typeof newRule) =>
+		locator.evaluate((element) => getComputedStyle(element).borderRadius);
+	const searchLook = (locator: typeof newRule) =>
+		locator.evaluate((element) => {
+			const style = getComputedStyle(element);
+			return {
+				borderRadius: style.borderRadius,
+				border: style.border,
+				backgroundColor: style.backgroundColor,
+				backgroundImage: style.backgroundImage,
+				padding: style.padding,
+				fontSize: style.fontSize,
+				width: style.width,
+			};
+		});
+	const search = page.getByRole('searchbox', { name: 'Search' });
+	const look = await searchLook(search);
+	expect(parseFloat(look.borderRadius)).toBeGreaterThan(0);
+	expect(await radiusOf(newRule)).toBe(look.borderRadius);
+	expect(look.backgroundImage).toContain('data:image/svg+xml');
+
 	await page.mouse.move(0, 0);
 	await page.screenshot({
 		path: testInfo.outputPath('automations-tab.png'),
 		fullPage: true,
 	});
+
+	await tabs.getByRole('button', { name: 'Task Manager' }).click();
+	expect(
+		await searchLook(page.getByRole('searchbox', { name: 'Search' }))
+	).toEqual(look);
 });

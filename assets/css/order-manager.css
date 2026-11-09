@@ -60,7 +60,7 @@ body.woocommerce_page_wpo_otd_order_manager #wpcontent {
 
 #wpo-otd-order-manager .automations-view {
     margin: 2em 2.4em;
-    color: #252B37;
+    color: var(--wpo-otd-text-primary);
 }
 
 #wpo-otd-order-manager .automations-header {
@@ -85,15 +85,8 @@ body.woocommerce_page_wpo_otd_order_manager #wpcontent {
 }
 
 #wpo-otd-order-manager .automations-search-input {
-    width: 320px;
     max-width: 100%;
-    min-height: 40px;
-    padding: 0 12px 0 38px;
-    border: 1px solid var(--wpo-otd-border-color);
-    border-radius: 8px;
-    background: #fff var(--wpo-otd-icon-search) no-repeat 12px center;
-    color: var(--wpo-otd-text-gray);
-    font-size: 1.07em;
+    background-color: var(--wpo-otd-card-bg);
     cursor: not-allowed;
 }
 
@@ -113,21 +106,15 @@ body.woocommerce_page_wpo_otd_order_manager #wpcontent {
 #wpo-otd-order-manager .automations-add-rule {
     min-height: 40px;
     padding: 0 16px;
-    font-size: 1.07em;
+    font-size: 1.08em;
     font-weight: 600;
-    cursor: not-allowed;
-}
-
-#wpo-otd-order-manager .automations-new-rule,
-#wpo-otd-order-manager .automations-new-rule:hover {
-    background-color: var(--wpo-otd-purple-primary);
-    opacity: 0.4;
 }
 
 #wpo-otd-order-manager .automations-new-rule {
     display: inline-flex;
     align-items: center;
     gap: 0.5em;
+    border-radius: var(--wpo-otd-radius-m);
 }
 
 #wpo-otd-order-manager .automations-new-rule-icon {
@@ -147,9 +134,9 @@ body.woocommerce_page_wpo_otd_order_manager #wpcontent {
     padding: 0;
     list-style: none;
     border: 1px solid var(--wpo-otd-border-light);
-    border-radius: 12px;
-    box-shadow: 0 1px 2px rgba(10, 13, 18, 0.05);
-    background: #fff;
+    border-radius: var(--wpo-otd-radius-l);
+    box-shadow: 0 1px 2px 0 #0A0D120D;
+    background: var(--wpo-otd-card-bg);
 }
 
 #wpo-otd-order-manager .automations-rule {
@@ -176,7 +163,7 @@ body.woocommerce_page_wpo_otd_order_manager #wpcontent {
     height: 18px;
     padding: 0;
     border: none;
-    border-radius: 9px;
+    border-radius: var(--wpo-otd-radius-xl);
     background: var(--wpo-otd-border-light);
     cursor: not-allowed;
 }
@@ -189,8 +176,8 @@ body.woocommerce_page_wpo_otd_order_manager #wpcontent {
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    background: #fff;
-    box-shadow: 0 1px 2px rgba(10, 13, 18, 0.15);
+    background: var(--wpo-otd-card-bg);
+    box-shadow: 0 1px 2px 0 #0A0D120D;
 }
 
 #wpo-otd-order-manager .automations-rule-body {
@@ -207,11 +194,8 @@ body.woocommerce_page_wpo_otd_order_manager #wpcontent {
 }
 
 #wpo-otd-order-manager .automations-example-badge {
-    padding: 2px 8px;
-    border-radius: 4px;
     background: #FFF1F3;
     color: #C01048;
-    font-size: 0.82em;
     font-weight: 500;
 }
 
@@ -242,19 +226,19 @@ body.woocommerce_page_wpo_otd_order_manager #wpcontent {
 
 #wpo-otd-order-manager .automations-chip-label {
     padding: 3px 8px;
-    border-radius: 4px;
+    border-radius: var(--wpo-otd-radius-s);
     font-size: 0.98em;
     line-height: 1.4;
 }
 
 #wpo-otd-order-manager .automations-chip-trigger .automations-chip-label {
     background: var(--wpo-otd-bg-lighter);
-    color: #414651;
+    color: var(--wpo-otd-text-gray);
 }
 
 #wpo-otd-order-manager .automations-chip-condition .automations-chip-label {
     background: #EFF8FF;
-    color: #175CD3;
+    color: var(--wpo-otd-wp-blue);
 }
 
 #wpo-otd-order-manager .automations-chip-action .automations-chip-label {
@@ -264,8 +248,8 @@ body.woocommerce_page_wpo_otd_order_manager #wpcontent {
 
 #wpo-otd-order-manager .automations-chip-more .automations-chip-label {
     padding: 2px 7px;
-    border: 1px dashed #717680;
-    color: #414651;
+    border: 1px dashed var(--wpo-otd-text-gray);
+    color: var(--wpo-otd-text-gray);
 }
 
 #wpo-otd-order-manager .automations-footer {
@@ -283,7 +267,7 @@ body.woocommerce_page_wpo_otd_order_manager #wpcontent {
 #wpo-otd-order-manager .automations-pro-card {
     padding: 1.6em 1.8em;
     border: 1px solid var(--wpo-otd-border-light);
-    border-radius: 12px;
+    border-radius: var(--wpo-otd-radius-l);
     background: var(--wpo-otd-bg-gray-alt);
 }
 
@@ -311,7 +295,7 @@ body.woocommerce_page_wpo_otd_order_manager #wpcontent {
 #wpo-otd-order-manager .automations-pro-badge {
     padding: 1px 8px;
     border: 1px solid var(--wpo-otd-purple-primary);
-    border-radius: 999px;
+    border-radius: var(--wpo-otd-radius-xl);
     color: var(--wpo-otd-purple-primary);
     font-size: 0.65em;
     font-weight: 500;
@@ -357,8 +341,8 @@ body.woocommerce_page_wpo_otd_order_manager #wpcontent {
     z-index: 10;
     transform: translateX(-50%);
     padding: 4px 8px;
-    border-radius: 4px;
-    background: #252B37;
+    border-radius: var(--wpo-otd-radius-s);
+    background: var(--wpo-otd-text-primary);
     color: #fff;
     font-size: 0.85em;
     font-weight: 500;
