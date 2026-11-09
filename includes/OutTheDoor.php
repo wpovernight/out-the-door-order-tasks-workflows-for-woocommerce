@@ -124,6 +124,13 @@ final class OutTheDoor {
 	 */
 	public function translations(): void {
 		$text_domain             = 'out-the-door-order-tasks-workflows-for-woocommerce';
+		/**
+		 * WordPress's filter for the locale a plugin loads its translations in, applied here as WordPress applies
+		 * it in load_plugin_textdomain().
+		 *
+		 * @param string $locale      The locale. Default the site's or the current user's locale.
+		 * @param string $text_domain The plugin's text domain.
+		 */
 		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- `plugin_locale` is a WordPress core filter that plugins apply when loading their own translations.
 		$locale                  = apply_filters( 'plugin_locale', determine_locale(), $text_domain );
 		$custom_translation_path = WP_LANG_DIR . '/out-the-door-order-tasks-workflows-for-woocommerce/out-the-door-order-tasks-workflows-for-woocommerce-' . $locale . '.mo';
