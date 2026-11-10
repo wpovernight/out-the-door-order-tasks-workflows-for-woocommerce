@@ -13,7 +13,7 @@ use WPO\OTD\Core\Providers\CliServiceProvider;
 defined( 'ABSPATH' ) || exit;
 
 final class OutTheDoor {
-	public const VERSION = '1.0.0';
+	public const VERSION = '1.0.1';
 
 	private ?Kernel $kernel = null;
 
