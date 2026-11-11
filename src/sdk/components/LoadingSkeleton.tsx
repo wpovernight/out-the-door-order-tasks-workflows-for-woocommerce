@@ -105,10 +105,14 @@ export const LoadingSkeleton: React.FC<LoadingSkeletonProps> = ({
 };
 
 interface EmptyStateProps {
-	icon?: 'note' | 'box' | string;
+	icon?: 'note' | 'box' | 'rules' | string;
+	/** A bold first line; the message is then shown under it as its description. */
+	title?: string;
 	message: string;
 	actionText?: string;
 	onAction?: () => void;
+	/** Shows the action as a primary or secondary button instead of the default blue one. */
+	actionVariant?: 'primary' | 'secondary';
 	actionButtonProps?: React.ButtonHTMLAttributes<HTMLButtonElement>;
 }
 
@@ -116,27 +120,34 @@ interface EmptyStateProps {
  * Empty state component for when there are no items.
  *
  * @param {Object}   props
- * @param {string}   [props.icon='note']       - Icon name ('note', 'box') or emoji string
+ * @param {string}   [props.icon='note']       - Icon name ('note', 'box', 'rules') or emoji string
+ * @param {string}   [props.title]             - Bold first line; the message becomes its description
  * @param {string}   props.message             - Message to display (required)
  * @param {string}   [props.actionText]        - Text for the action button
  * @param {Function} [props.onAction]          - Callback when action button is clicked
+ * @param {string}   [props.actionVariant]     - 'primary' or 'secondary' button instead of the default one
  * @param {Object}   [props.actionButtonProps] - Additional props for the action button (data attributes, etc.)
  */
 export const EmptyState: React.FC<EmptyStateProps> = ({
 	icon = 'note',
+	title,
 	message,
 	actionText,
 	onAction,
+	actionVariant,
 	actionButtonProps,
 }) => {
 	// Extract className from actionButtonProps to merge with default
 	const { className: customClassName, ...restButtonProps } =
 		actionButtonProps || {};
-	const buttonClassName = customClassName
-		? `wpo-otd-empty-state-action ${customClassName}`
+	const baseButtonClassName = actionVariant
+		? `wpo-button wpo-button-${actionVariant}`
 		: 'wpo-otd-empty-state-action';
+	const buttonClassName = customClassName
+		? `${baseButtonClassName} ${customClassName}`
+		: baseButtonClassName;
 
-	const isSvgIcon = icon === 'note' || icon === 'box';
+	const isSvgIcon = icon === 'note' || icon === 'box' || icon === 'rules';
 
 	return (
 		<div className="wpo-otd-empty-state">
@@ -145,7 +156,12 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 			>
 				{!isSvgIcon && icon}
 			</div>
-			<p className="wpo-otd-empty-state-message">{message}</p>
+			{title && <p className="wpo-otd-empty-state-title">{title}</p>}
+			<p
+				className={`wpo-otd-empty-state-message${title ? ' wpo-otd-empty-state-description' : ''}`}
+			>
+				{message}
+			</p>
 			{actionText && onAction && (
 				<button
 					type="button"

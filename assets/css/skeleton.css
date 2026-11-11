@@ -86,9 +86,31 @@
     background-image: var(--wpo-otd-icon-box);
 }
 
+/* Two-toned already, so shown at full strength. */
+.wpo-otd-empty-state-icon--rules {
+    width: 5em;
+    height: 5em;
+    background-image: var(--wpo-otd-icon-rules-empty);
+    background-size: contain;
+    background-repeat: no-repeat;
+    font-size: initial;
+    opacity: 1;
+}
+
+.wpo-otd-empty-state-title {
+    margin: 0;
+    color: var(--wpo-otd-text-primary);
+    font-size: 1.15em;
+    font-weight: 500;
+}
+
 .wpo-otd-empty-state-message {
     font-size: 1em;
     margin: 0;
+}
+
+.wpo-otd-empty-state-description {
+    color: var(--wpo-otd-text-gray);
 }
 
 .wpo-otd-empty-state-action {
