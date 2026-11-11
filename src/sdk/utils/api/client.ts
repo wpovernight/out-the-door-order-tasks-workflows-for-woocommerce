@@ -32,17 +32,25 @@ export function getHeaders(): Record<string, string> {
 }
 
 /**
- * A failed API request. The code is the error code the endpoint answered with, when it sent one.
+ * A failed API request. The code is the error code the endpoint answered with, when it sent one; the data is the
+ * error's `data` object, when it sent one, e.g. `data.errors` with every message by field.
  */
 export class ApiError extends Error {
 	readonly code?: string;
 	readonly status: number;
+	readonly data?: Record<string, unknown>;
 
-	constructor(message: string, status: number, code?: string) {
+	constructor(
+		message: string,
+		status: number,
+		code?: string,
+		data?: Record<string, unknown>
+	) {
 		super(message);
 		this.name = 'ApiError';
 		this.status = status;
 		this.code = code;
+		this.data = data;
 	}
 }
 
@@ -63,23 +71,27 @@ async function extractError(response: Response): Promise<ApiError> {
 	}
 
 	const code = typeof body?.code === 'string' ? body.code : undefined;
+	const data =
+		body?.data && typeof body.data === 'object' && !Array.isArray(body.data)
+			? (body.data as Record<string, unknown>)
+			: undefined;
 
 	const fieldErrors = body?.data?.errors;
 	if (fieldErrors && typeof fieldErrors === 'object') {
 		const first = Object.values(fieldErrors)[0];
 		if (Array.isArray(first) && first.length > 0) {
-			return new ApiError(String(first[0]), response.status, code);
+			return new ApiError(String(first[0]), response.status, code, data);
 		}
 		if (typeof first === 'string') {
-			return new ApiError(first, response.status, code);
+			return new ApiError(first, response.status, code, data);
 		}
 	}
 
 	if (typeof body?.message === 'string' && body.message) {
-		return new ApiError(body.message, response.status, code);
+		return new ApiError(body.message, response.status, code, data);
 	}
 
-	return new ApiError(fallback, response.status, code);
+	return new ApiError(fallback, response.status, code, data);
 }
 
 /**
