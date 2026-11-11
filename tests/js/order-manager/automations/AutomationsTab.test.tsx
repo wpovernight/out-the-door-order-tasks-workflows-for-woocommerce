@@ -85,6 +85,14 @@ describe('Automations tab', () => {
 		).toBeInTheDocument();
 	});
 
+	it("shows Active Rules as the header's one sub-tab", () => {
+		renderPage();
+
+		expect(
+			screen.getByRole('heading', { name: 'Active Rules' })
+		).toHaveClass('automations-header-tab');
+	});
+
 	it('also serves paths below /automations', () => {
 		renderPage('/automations/rules/7');
 

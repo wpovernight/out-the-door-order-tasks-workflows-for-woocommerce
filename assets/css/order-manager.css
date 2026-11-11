@@ -63,13 +63,14 @@ body.woocommerce_page_wpo_otd_order_manager #wpcontent {
     color: var(--wpo-otd-text-primary);
 }
 
+/* The header reads as a row of sub-tabs: a rule across it, the active one underlined above the rule. */
 #wpo-otd-order-manager .automations-header {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: space-between;
     gap: 1em;
-    margin-bottom: 1.2em;
-    padding-left: 1.2em;
+    margin-bottom: 1.6em;
+    border-bottom: 1px solid var(--wpo-otd-border-light);
 }
 
 #wpo-otd-order-manager .automations-header h3 {
@@ -78,10 +79,19 @@ body.woocommerce_page_wpo_otd_order_manager #wpcontent {
     font-weight: 600;
 }
 
+#wpo-otd-order-manager .automations-header .automations-header-tab {
+    display: flex;
+    align-items: center;
+    margin-bottom: -1px;
+    padding: 0.7em 1em;
+    border-bottom: 2px solid var(--wpo-otd-purple-primary);
+}
+
 #wpo-otd-order-manager .automations-header-actions {
     display: flex;
     align-items: center;
     gap: 1em;
+    padding-bottom: 0.6em;
 }
 
 #wpo-otd-order-manager .automations-search-input {

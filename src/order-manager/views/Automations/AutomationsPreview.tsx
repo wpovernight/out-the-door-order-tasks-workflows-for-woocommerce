@@ -30,7 +30,7 @@ export const AutomationsPreview = () => {
 	return (
 		<div className="automations-view">
 			<div className="automations-header">
-				<h3>
+				<h3 className="automations-header-tab">
 					{__(
 						'Active Rules',
 						'out-the-door-order-tasks-workflows-for-woocommerce'
