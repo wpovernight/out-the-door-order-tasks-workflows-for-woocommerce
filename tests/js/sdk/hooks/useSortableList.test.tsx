@@ -37,6 +37,24 @@ jest.mock('@atlaskit/pragmatic-drag-and-drop/element/adapter', () => {
 	};
 });
 
+type PreviewArgs = {
+	nativeSetDragImage: unknown;
+	getOffset?: unknown;
+	render: (args: { container: HTMLElement }) => (() => void) | void;
+};
+
+const mockPreviews: PreviewArgs[] = [];
+
+// The real one hands the browser a picture, which jsdom cannot take: the test
+// plays its part with what the hook gives it.
+jest.mock(
+	'@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview',
+	() => ({
+		setCustomNativeDragPreview: (args: PreviewArgs) =>
+			mockPreviews.push(args),
+	})
+);
+
 const ROW_HEIGHT = 40;
 
 /**
@@ -68,12 +86,14 @@ const Item = ({
 	index,
 	disabled,
 	withHandle,
+	preview,
 }: {
 	listId: string;
 	id: string;
 	index: number;
 	disabled?: boolean;
 	withHandle?: boolean;
+	preview?: (id: string) => React.ReactNode;
 }) => {
 	const element = useRef<HTMLLIElement>(null);
 	const handle = useRef<HTMLSpanElement>(null);
@@ -84,6 +104,7 @@ const Item = ({
 		element,
 		handle: withHandle ? handle : undefined,
 		disabled,
+		preview: preview ? () => preview(id) : undefined,
 	});
 
 	return (
@@ -99,12 +120,14 @@ const List = ({
 	ids,
 	disabled,
 	withHandle,
+	preview,
 	onMove = () => undefined,
 }: {
 	listId?: string;
 	ids: string[];
 	disabled?: boolean;
 	withHandle?: boolean;
+	preview?: (id: string) => React.ReactNode;
 	onMove?: (from: number, to: number) => void;
 }) => {
 	useSortableMonitor({ listId, onMove });
@@ -119,6 +142,7 @@ const List = ({
 					index={index}
 					disabled={disabled}
 					withHandle={withHandle}
+					preview={preview}
 				/>
 			))}
 		</ul>
@@ -208,6 +232,7 @@ const renderList = (props: React.ComponentProps<typeof List>) => {
 };
 
 beforeEach(() => {
+	mockPreviews.length = 0;
 	for (const id of Object.keys(states)) {
 		delete states[id];
 	}
@@ -459,5 +484,75 @@ describe('useSortableItem and useSortableMonitor', () => {
 		drag('a', 'b', 'bottom');
 		expect(second).toHaveBeenCalledWith(0, 1);
 		expect(first).not.toHaveBeenCalled();
+	});
+
+	it('leaves the browser its own picture of the item without a preview', () => {
+		renderList({ ids: ['a'] });
+
+		draggableOf('a').onGenerateDragPreview({
+			nativeSetDragImage: jest.fn(),
+		} as never);
+
+		expect(mockPreviews).toHaveLength(0);
+	});
+
+	it('renders the preview while the browser takes its picture, and removes it after', () => {
+		const nativeSetDragImage = jest.fn();
+		renderList({
+			ids: ['a', 'b'],
+			preview: (id) => (
+				<strong className="preview">{`Moving ${id}`}</strong>
+			),
+		});
+
+		draggableOf('b').onGenerateDragPreview({
+			nativeSetDragImage,
+		} as never);
+
+		expect(mockPreviews).toHaveLength(1);
+		const [given] = mockPreviews;
+		expect(given.nativeSetDragImage).toBe(nativeSetDragImage);
+		expect(given.getOffset).toEqual(expect.any(Function));
+
+		const container = document.createElement('div');
+		document.body.append(container);
+		// Not in act(): the browser takes its picture as soon as render returns.
+		const actEnvironment = globalThis as {
+			IS_REACT_ACT_ENVIRONMENT?: boolean;
+		};
+		actEnvironment.IS_REACT_ACT_ENVIRONMENT = false;
+		const cleanup = given.render({ container });
+		actEnvironment.IS_REACT_ACT_ENVIRONMENT = true;
+
+		expect(container.querySelector('.preview')).toHaveTextContent(
+			'Moving b'
+		);
+
+		act(() => {
+			cleanup?.();
+		});
+		expect(container).toBeEmptyDOMElement();
+		container.remove();
+	});
+
+	it('renders the newest preview without setting the item up again', () => {
+		const { rerender } = renderList({
+			ids: ['a'],
+			preview: () => 'first',
+		});
+		const draggables = [...registered.draggables];
+
+		rerender(<List ids={['a']} preview={() => 'second'} />);
+		expect(registered.draggables).toEqual(draggables);
+
+		draggableOf('a').onGenerateDragPreview({
+			nativeSetDragImage: jest.fn(),
+		} as never);
+		const container = document.createElement('div');
+		act(() => {
+			mockPreviews[0].render({ container });
+		});
+
+		expect(container).toHaveTextContent('second');
 	});
 });

@@ -1,11 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
-import type { RefObject } from 'react';
+import type { ReactNode, RefObject } from 'react';
+import { flushSync } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
 import {
 	draggable,
 	dropTargetForElements,
 	monitorForElements,
 } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+import { pointerOutsideOfPreview } from '@atlaskit/pragmatic-drag-and-drop/element/pointer-outside-of-preview';
+import { setCustomNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview';
 import {
 	attachClosestEdge,
 	extractClosestEdge,
@@ -74,6 +78,13 @@ export interface UseSortableItemOptions {
 	handle?: RefObject<HTMLElement | null>;
 	/** Neither dragged nor dropped onto while true. */
 	disabled?: boolean;
+	/**
+	 * What follows the pointer while the item is dragged, beside it; the
+	 * browser's picture of the element when left out. It is rendered outside
+	 * the app, straight into the page's body, so style it without relying on
+	 * the app's wrapper.
+	 */
+	preview?: () => ReactNode;
 }
 
 export interface SortableItemState {
@@ -100,6 +111,7 @@ export interface SortableItemState {
  * @param options.element  The element that moves and takes drops.
  * @param options.handle   The element it is dragged by; the whole one if left out.
  * @param options.disabled Neither dragged nor dropped onto while true.
+ * @param options.preview  What follows the pointer while dragged, if not the element.
  * @return Whether it is being dragged, and the edge to show a drop line on.
  */
 export function useSortableItem({
@@ -109,9 +121,14 @@ export function useSortableItem({
 	element,
 	handle,
 	disabled = false,
+	preview,
 }: UseSortableItemOptions): SortableItemState {
 	const [isDragging, setIsDragging] = useState(false);
 	const [closestEdge, setClosestEdge] = useState<SortableEdge | null>(null);
+
+	// Read when a drag starts, so a new render function does not set the item up again.
+	const previewRef = useRef(preview);
+	previewRef.current = preview;
 
 	// Read when needed, so a move does not set the item up again, and a drag
 	// started before the list changed still moves the right item.
@@ -194,6 +211,26 @@ export function useSortableItem({
 				element: target,
 				dragHandle: handle?.current ?? undefined,
 				getInitialData: data,
+				onGenerateDragPreview: ({ nativeSetDragImage }) => {
+					const render = previewRef.current;
+					if (!render) {
+						return;
+					}
+
+					setCustomNativeDragPreview({
+						nativeSetDragImage,
+						getOffset: pointerOutsideOfPreview({
+							x: '16px',
+							y: '8px',
+						}),
+						render: ({ container }) => {
+							const root = createRoot(container);
+							// The browser takes its picture straight away.
+							flushSync(() => root.render(render()));
+							return () => root.unmount();
+						},
+					});
+				},
 				onDragStart: () => setIsDragging(true),
 				onDrop: () => setIsDragging(false),
 			}),
