@@ -152,10 +152,17 @@ const targetOf = (id: string): Args => {
  * @param sourceId The dragged item.
  * @param targetId The item it is dropped on.
  * @param edge     The edge of the target it is nearest to.
+ * @param during   Run while the item is over the target, before the drop.
  * @return The drop target's data.
  */
-const drag = (sourceId: string, targetId: string, edge: 'top' | 'bottom') => {
-	const source = { data: draggableOf(sourceId).getInitialData() as Data };
+const drag = (
+	sourceId: string,
+	targetId: string,
+	edge: 'top' | 'bottom',
+	during: () => void = () => undefined
+) => {
+	const dragged = draggableOf(sourceId);
+	const source = { data: dragged.getInitialData() as Data };
 	const target = targetOf(targetId);
 	const element = target.element as HTMLElement;
 	const box = element.getBoundingClientRect();
@@ -172,12 +179,13 @@ const drag = (sourceId: string, targetId: string, edge: 'top' | 'bottom') => {
 	const location = { current: { dropTargets: [self] } };
 
 	act(() => {
-		draggableOf(sourceId).onDragStart();
+		dragged.onDragStart();
 	});
 	act(() => {
 		target.onDragEnter({ source, self } as never);
 	});
 	const over = { ...states };
+	during();
 	act(() => {
 		for (const monitor of registered.monitors) {
 			if (monitor.canMonitor({ source } as never)) {
@@ -185,7 +193,7 @@ const drag = (sourceId: string, targetId: string, edge: 'top' | 'bottom') => {
 			}
 		}
 		target.onDrop({ source, self } as never);
-		draggableOf(sourceId).onDrop();
+		dragged.onDrop();
 	});
 
 	return over;
@@ -370,6 +378,52 @@ describe('useSortableItem and useSortableMonitor', () => {
 			document.querySelector('[data-handle="a"]')
 		);
 	});
+
+	it('moves the right item when the list changed during the drag', () => {
+		const onMove = jest.fn();
+		const { rerender } = renderList({ ids: ['a', 'b', 'c', 'd'], onMove });
+
+		// C is dragged over A's top edge; then B is removed before the drop.
+		drag('c', 'a', 'top', () =>
+			rerender(<List ids={['a', 'c', 'd']} onMove={onMove} />)
+		);
+
+		expect(onMove).toHaveBeenCalledTimes(1);
+		expect(onMove).toHaveBeenCalledWith(1, 0);
+	});
+
+	it('moves the right item when one was added above the target during the drag', () => {
+		const onMove = jest.fn();
+		const { rerender } = renderList({ ids: ['a', 'b', 'c'], onMove });
+
+		drag('a', 'c', 'bottom', () =>
+			rerender(<List ids={['x', 'a', 'b', 'c']} onMove={onMove} />)
+		);
+
+		expect(onMove).toHaveBeenCalledWith(1, 3);
+	});
+
+	it.each([
+		['the dragged item', 'c'],
+		['the item it is over', 'a'],
+	])(
+		'ignores the drop when %s was removed during the drag',
+		(_name, gone) => {
+			const onMove = jest.fn();
+			const { rerender } = renderList({ ids: ['a', 'b', 'c'], onMove });
+
+			drag('c', 'a', 'top', () =>
+				rerender(
+					<List
+						ids={['a', 'b', 'c'].filter((id) => id !== gone)}
+						onMove={onMove}
+					/>
+				)
+			);
+
+			expect(onMove).not.toHaveBeenCalled();
+		}
+	);
 
 	it('reads the index of each drag, so a moved item drags from where it is', () => {
 		const onMove = jest.fn();

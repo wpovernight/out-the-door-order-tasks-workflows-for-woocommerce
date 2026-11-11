@@ -23,7 +23,11 @@ type SortableItemData = {
 	[SORTABLE_ITEM]: true;
 	listId: string;
 	id: string | number;
-	index: number;
+	/**
+	 * The item's index as the list is shown now, or null once it is gone. Read
+	 * at the moment it is needed: the list may change during a drag.
+	 */
+	currentIndex: () => number | null;
 };
 
 const isSortableItemData = (
@@ -109,9 +113,18 @@ export function useSortableItem({
 	const [isDragging, setIsDragging] = useState(false);
 	const [closestEdge, setClosestEdge] = useState<SortableEdge | null>(null);
 
-	// Read on each drag, so a move does not set the item up again.
+	// Read when needed, so a move does not set the item up again, and a drag
+	// started before the list changed still moves the right item.
 	const indexRef = useRef(index);
 	indexRef.current = index;
+	const mountedRef = useRef(true);
+
+	useEffect(() => {
+		mountedRef.current = true;
+		return () => {
+			mountedRef.current = false;
+		};
+	}, []);
 
 	useEffect(() => {
 		const target = element.current;
@@ -126,7 +139,7 @@ export function useSortableItem({
 			[SORTABLE_ITEM]: true,
 			listId,
 			id,
-			index: indexRef.current,
+			currentIndex: () => (mountedRef.current ? indexRef.current : null),
 		});
 
 		const isOtherOfList = (source: Record<string | symbol, unknown>) =>
@@ -150,9 +163,11 @@ export function useSortableItem({
 			}
 
 			const own = indexRef.current;
+			const from = source.currentIndex();
 			if (
-				('bottom' === edge && own === source.index - 1) ||
-				('top' === edge && own === source.index + 1)
+				null !== from &&
+				(('bottom' === edge && own === from - 1) ||
+					('top' === edge && own === from + 1))
 			) {
 				return null;
 			}
@@ -207,7 +222,9 @@ export interface UseSortableMonitorOptions {
 	/** The list to watch; drops in other lists are ignored. */
 	listId: string;
 	/**
-	 * Called when an item is dropped where it moves.
+	 * Called when an item is dropped where it moves. Both indexes are of the
+	 * list as shown at the drop, even when it changed during the drag; a drop
+	 * of an item no longer shown, or onto one, is ignored.
 	 *
 	 * @param from The item's index before the move.
 	 * @param to   The index it ends up at, as moveItem() takes it.
@@ -247,10 +264,18 @@ export function useSortableMonitor({
 						return;
 					}
 
-					const from = source.data.index;
+					// Both read now: an item added or removed since the drag
+					// began has shifted them.
+					const from = source.data.currentIndex();
+					const over = target.data.currentIndex();
+
+					if (null === from || null === over) {
+						return;
+					}
+
 					const to = getReorderDestinationIndex({
 						startIndex: from,
-						indexOfTarget: target.data.index,
+						indexOfTarget: over,
 						closestEdgeOfTarget: extractClosestEdge(target.data),
 						axis: 'vertical',
 					});
