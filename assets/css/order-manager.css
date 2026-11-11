@@ -165,7 +165,31 @@ body.woocommerce_page_wpo_otd_order_manager #wpcontent {
     border: none;
     border-radius: var(--wpo-otd-radius-xl);
     background: var(--wpo-otd-border-light);
+    cursor: pointer;
+    transition: background-color var(--wpo-otd-transition-fast);
+}
+
+#wpo-otd-order-manager .automations-rule-toggle[aria-checked="true"] {
+    background: var(--wpo-otd-purple-primary);
+}
+
+#wpo-otd-order-manager .automations-rule-toggle:focus-visible {
+    outline: 2px solid var(--wpo-otd-purple-primary);
+    outline-offset: 2px;
+}
+
+#wpo-otd-order-manager .automations-rule-toggle:disabled,
+#wpo-otd-order-manager .automations-rule-toggle[aria-disabled="true"] {
     cursor: not-allowed;
+}
+
+#wpo-otd-order-manager .automations-rule-toggle[aria-checked="true"]:disabled,
+#wpo-otd-order-manager .automations-rule-toggle[aria-checked="true"][aria-disabled="true"] {
+    opacity: 0.5;
+}
+
+#wpo-otd-order-manager .automations-rule-toggle[aria-busy="true"] {
+    cursor: progress;
 }
 
 #wpo-otd-order-manager .automations-rule-toggle::after {
@@ -178,6 +202,11 @@ body.woocommerce_page_wpo_otd_order_manager #wpcontent {
     border-radius: 50%;
     background: var(--wpo-otd-card-bg);
     box-shadow: 0 1px 2px 0 #0A0D120D;
+    transition: transform var(--wpo-otd-transition-fast);
+}
+
+#wpo-otd-order-manager .automations-rule-toggle[aria-checked="true"]::after {
+    transform: translateX(14px);
 }
 
 #wpo-otd-order-manager .automations-rule-body {
