@@ -36,7 +36,7 @@ export const getExampleRules = (): ExampleRule[] => [
 		],
 		actions: [
 			__(
-				'Add note: School A order',
+				'Add note',
 				'out-the-door-order-tasks-workflows-for-woocommerce'
 			),
 		],
@@ -60,7 +60,7 @@ export const getExampleRules = (): ExampleRule[] => [
 		],
 		actions: [
 			__(
-				'Create task: Embroidery',
+				'Create task',
 				'out-the-door-order-tasks-workflows-for-woocommerce'
 			),
 		],
@@ -79,7 +79,7 @@ export const getExampleRules = (): ExampleRule[] => [
 		conditions: [],
 		actions: [
 			__(
-				'Set order status: Processing',
+				'Set order status',
 				'out-the-door-order-tasks-workflows-for-woocommerce'
 			),
 		],

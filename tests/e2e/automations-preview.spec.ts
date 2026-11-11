@@ -27,6 +27,9 @@ test('the Automations tab previews example rules and Pro', async ({
 	}
 	await expect(page.getByRole('switch')).toHaveCount(3);
 	await expect(page.getByText('+ 1 action')).toBeVisible();
+	await expect(
+		page.locator('.automations-chip-action .automations-chip-label')
+	).toHaveText(['Add note', 'Create task', 'Set order status']);
 
 	const newRule = page.getByRole('button', { name: 'New rule', exact: true });
 	await expect(newRule).toHaveAttribute('aria-disabled', 'true');

@@ -101,19 +101,19 @@ describe('Automations tab', () => {
 		expect(chipsOf(rowOf('Flag orders from one client'))).toEqual([
 			'trigger:Order created',
 			'condition:Company is "School A"',
-			'action:Add note: School A order',
+			'action:Add note',
 		]);
 		expect(chipsOf(rowOf('Route embroidery to the right team'))).toEqual([
 			'trigger:Order created',
 			'condition:Any item in category Embroidery',
-			'action:Create task: Embroidery',
+			'action:Create task',
 			'more:+ 1 action',
 		]);
 		expect(
 			chipsOf(rowOf('Keep order status in step with your board'))
 		).toEqual([
 			'trigger:Task moved to In progress',
-			'action:Set order status: Processing',
+			'action:Set order status',
 		]);
 	});
 
