@@ -680,6 +680,24 @@
     align-self: center;
 }
 
+/* A link-like button such as Undo, in the toast's own colour, before the close button. */
+.wpo-otd-toast .wpo-button.toast-action {
+    margin-left: auto;
+    align-self: center;
+    padding: 0.2em 0.4em;
+    color: inherit;
+    font-weight: 600;
+    font-size: 1.15em;
+}
+
+.wpo-otd-toast .wpo-button.toast-action:hover {
+    background-color: var(--wpo-otd-hover-overlay-alt);
+}
+
+.wpo-otd-toast .wpo-button.toast-action + .wpo-button.close-toast {
+    margin-left: 0;
+}
+
 .wpo-otd-toast .wpo-button.close-toast::before {
     content: '\f335';
     font-family: 'dashicons';

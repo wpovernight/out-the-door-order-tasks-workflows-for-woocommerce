@@ -20,14 +20,27 @@ export enum ToastDuration {
 	PERSISTENT = 0,
 }
 
+/**
+ * A button shown in a toast beside its close button, e.g. Undo. Using it
+ * also closes the toast.
+ */
+export interface ToastAction {
+	label: string;
+	onClick: () => void;
+}
+
 export interface ToastOptions {
 	title: string;
 	message?: string;
 	type?: ToastType;
 	duration?: ToastDuration;
+	action?: ToastAction;
 }
 
-interface ToastNotification extends Required<ToastOptions> {
+interface ToastNotification
+	extends
+		Required<Omit<ToastOptions, 'action'>>,
+		Pick<ToastOptions, 'action'> {
 	id: number;
 	isExiting: boolean;
 }
@@ -88,6 +101,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
 						message={toast.message}
 						type={toast.type}
 						isExiting={toast.isExiting}
+						action={toast.action}
 						onClose={() => dismissToast(toast.id)}
 					/>
 				))}

@@ -1,12 +1,15 @@
 import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { ToastType } from '@sdk/context/ToastContext';
+import type { ToastAction } from '@sdk/context/ToastContext';
 
 interface ToastProps {
 	title: string;
 	message: string;
 	type: ToastType;
 	isExiting?: boolean;
+	/** A button beside the close button; using it also closes the toast. */
+	action?: ToastAction;
 	onClose: () => void;
 }
 
@@ -15,6 +18,7 @@ export const Toast: React.FC<ToastProps> = ({
 	message,
 	type = ToastType.INFO,
 	isExiting = false,
+	action,
 	onClose,
 }) => {
 	return (
@@ -26,6 +30,18 @@ export const Toast: React.FC<ToastProps> = ({
 					<span className="toast-title">{title}</span>
 					{message && <p>{message}</p>}
 				</div>
+				{action && (
+					<button
+						type="button"
+						className="wpo-button toast-action"
+						onClick={() => {
+							action.onClick();
+							onClose();
+						}}
+					>
+						{action.label}
+					</button>
+				)}
 				<button
 					type="button"
 					className="wpo-button wpo-button-icon close-toast"
