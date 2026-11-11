@@ -25,10 +25,16 @@ const coreTabLabels: Record<string, string> = {
 export default function Header() {
 	const { tab, setTab, tabs } = useTab();
 
+	/**
+	 * The tabs' labels, by tab slug. A label is any React node, so an add-on
+	 * can put a count or a badge beside the text.
+	 *
+	 * @param {Record<string, React.ReactNode>} labels Core's labels, as text.
+	 */
 	const tabLabels = applyFilters(
 		'wpo_otd.tab_labels',
 		coreTabLabels
-	) as Record<string, string>;
+	) as Record<string, React.ReactNode>;
 
 	return (
 		<div className="header">
