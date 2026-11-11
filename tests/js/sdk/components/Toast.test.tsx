@@ -79,6 +79,55 @@ describe('Toast action', () => {
 		expect(screen.queryByText('Order saved.')).toBeNull();
 	});
 
+	it('runs the action once when its key is pressed again while the toast closes', async () => {
+		const user = userEvent.setup({
+			advanceTimers: jest.advanceTimersByTime,
+		});
+		const onClick = jest.fn();
+		renderProvider();
+		act(() =>
+			addToast({
+				title: 'Order saved.',
+				action: { label: 'Undo', onClick },
+			})
+		);
+
+		const undo = screen.getByRole('button', { name: 'Undo' });
+		undo.focus();
+		await user.keyboard('{Enter}');
+		expect(toastNamed('Order saved.')).toHaveClass('is-exiting');
+		expect(undo).toBeDisabled();
+
+		// Pressed again on the same button, as a fast keyboard user might.
+		undo.focus();
+		await user.keyboard('{Enter}');
+		act(() => {
+			undo.click();
+		});
+
+		expect(onClick).toHaveBeenCalledTimes(1);
+	});
+
+	it('runs the action once even when clicked twice before it re-renders', () => {
+		const onClick = jest.fn();
+		renderProvider();
+		act(() =>
+			addToast({
+				title: 'Order saved.',
+				action: { label: 'Undo', onClick },
+			})
+		);
+
+		const undo = screen.getByRole('button', { name: 'Undo' });
+		// Two clicks in one batch: the second lands before the button is disabled.
+		act(() => {
+			undo.click();
+			undo.click();
+		});
+
+		expect(onClick).toHaveBeenCalledTimes(1);
+	});
+
 	it('keeps the action unused when the toast is closed', async () => {
 		const user = userEvent.setup({
 			advanceTimers: jest.advanceTimersByTime,

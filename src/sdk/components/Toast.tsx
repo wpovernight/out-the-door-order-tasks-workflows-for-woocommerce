@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { __ } from '@wordpress/i18n';
 import { ToastType } from '@sdk/context/ToastContext';
 import type { ToastAction } from '@sdk/context/ToastContext';
@@ -21,6 +21,9 @@ export const Toast: React.FC<ToastProps> = ({
 	action,
 	onClose,
 }) => {
+	// Run once only: a key pressed again while the toast fades out would run it again.
+	const actionUsed = useRef(false);
+
 	return (
 		<div
 			className={`wpo-otd-toast toast-${type}${isExiting ? ' is-exiting' : ''}`}
@@ -34,7 +37,12 @@ export const Toast: React.FC<ToastProps> = ({
 					<button
 						type="button"
 						className="wpo-button toast-action"
+						disabled={isExiting}
 						onClick={() => {
+							if (actionUsed.current) {
+								return;
+							}
+							actionUsed.current = true;
 							action.onClick();
 							onClose();
 						}}
