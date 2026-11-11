@@ -4,10 +4,11 @@ import userEvent from '@testing-library/user-event';
 import { ToastDuration, ToastProvider, ToastType, useToast } from '@sdk';
 import type { ToastOptions } from '@sdk';
 
-let addToast: (toast: ToastOptions) => void = () => undefined;
+let addToast: (toast: ToastOptions) => number = () => -1;
+let dismissToast: (id: number) => void = () => undefined;
 
 const Grab = () => {
-	addToast = useToast().addToast;
+	({ addToast, dismissToast } = useToast());
 	return null;
 };
 
@@ -95,5 +96,46 @@ describe('Toast action', () => {
 
 		expect(onClick).not.toHaveBeenCalled();
 		expect(toastNamed('Order saved.')).toHaveClass('is-exiting');
+	});
+});
+
+describe('dismissToast', () => {
+	it('closes the toast whose id addToast returned, and only that one', () => {
+		renderProvider();
+		let first = -1;
+		let second = -1;
+		act(() => {
+			first = addToast({ title: 'First.' });
+			second = addToast({ title: 'Second.' });
+		});
+		expect(first).not.toBe(second);
+
+		act(() => dismissToast(second));
+
+		expect(toastNamed('Second.')).toHaveClass('is-exiting');
+		expect(toastNamed('First.')).not.toHaveClass('is-exiting');
+		act(() => {
+			jest.advanceTimersByTime(400);
+		});
+		expect(screen.queryByText('Second.')).toBeNull();
+		expect(screen.getByText('First.')).toBeInTheDocument();
+	});
+
+	it('ignores an id already closed', () => {
+		renderProvider();
+		let id = -1;
+		act(() => {
+			id = addToast({ title: 'Saved.' });
+		});
+		act(() => dismissToast(id));
+		act(() => {
+			jest.advanceTimersByTime(400);
+		});
+
+		act(() => {
+			addToast({ title: 'Next.' });
+			dismissToast(id);
+		});
+		expect(toastNamed('Next.')).not.toHaveClass('is-exiting');
 	});
 });

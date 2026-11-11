@@ -48,7 +48,10 @@ interface ToastNotification
 const TOAST_FADE_OUT_MS = 400;
 
 interface ToastContextType {
-	addToast: (toast: ToastOptions) => void;
+	/** Show a toast; returns its id, for dismissToast(). */
+	addToast: (toast: ToastOptions) => number;
+	/** Close a toast early; an id already closed is ignored. */
+	dismissToast: (id: number) => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -86,12 +89,14 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
 			if (toast.duration !== ToastDuration.PERSISTENT) {
 				setTimeout(() => dismissToast(id), toast.duration);
 			}
+
+			return id;
 		},
 		[dismissToast]
 	);
 
 	return (
-		<ToastContext.Provider value={{ addToast }}>
+		<ToastContext.Provider value={{ addToast, dismissToast }}>
 			{children}
 			<div className="wpo-otd-toast-container">
 				{toasts.map((toast) => (
