@@ -22,38 +22,24 @@ const iconSvg = (name: string): string => {
 describe('drag handle icon', () => {
 	const svg = iconSvg('--wpo-otd-icon-drag-handle');
 
-	it('is a 16 by 16 SVG', () => {
+	it('is a 24 by 24 SVG', () => {
 		expect(svg).toMatch(
-			/^<svg width="16" height="16" viewBox="0 0 16 16" [^>]*>/
+			/^<svg width="24" height="24" viewBox="0 0 24 24" [^>]*>/
 		);
-		expect(svg).toMatch(/<\/svg>$/);
+		expect(svg).toMatch(/<\/svg>\n?$/);
 	});
 
 	it('draws a grip of two columns and three rows of dots', () => {
-		const dots = Array.from(
-			svg.matchAll(/<circle cx="([\d.]+)" cy="([\d.]+)" r="1.5"/g)
-		).map(([, cx, cy]) => `${cx},${cy}`);
+		// Each dot starts at its bottom point: its centre's x, then y + 2.
+		const dots = Array.from(svg.matchAll(/M([\d.]+) ([\d.]+)C/g)).map(
+			([, x, y]) => `${x},${Number(y) - 2}`
+		);
 
-		expect(dots).toEqual([
-			'5.5,3',
-			'10.5,3',
-			'5.5,8',
-			'10.5,8',
-			'5.5,13',
-			'10.5,13',
-		]);
+		expect(dots).toEqual(['9,18', '15,18', '9,12', '15,12', '9,6', '15,6']);
 	});
 
-	it('is filled like the three dots icon', () => {
-		const dotsFill = /fill="(#[0-9A-F]+)"\/>/i.exec(
-			iconSvg('--wpo-otd-icon-dots-three')
-		)?.[1];
-
-		expect(dotsFill).toBeDefined();
-		expect(
-			Array.from(svg.matchAll(/<circle [^>]*fill="([^"]+)"/g)).map(
-				([, fill]) => fill
-			)
-		).toEqual(Array(6).fill(dotsFill));
+	it('is one filled shape, so a mask can colour it', () => {
+		expect(Array.from(svg.matchAll(/<path /g))).toHaveLength(1);
+		expect(svg).toMatch(/<path [^>]*fill="#[0-9A-F]{6}"\/>/i);
 	});
 });
