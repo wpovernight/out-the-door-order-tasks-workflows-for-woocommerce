@@ -35,6 +35,13 @@ describe('rules empty-state illustration', () => {
 		expect(body).not.toContain('mask');
 	});
 
+	it('sizes a primary or secondary action like the automations header buttons', () => {
+		expect(ruleBody(skeleton, '.wpo-otd-empty-state > .wpo-button')).toBe(
+			'min-height: 40px; padding: 0 16px; border-radius: var(--wpo-otd-radius-m); ' +
+				'font-size: 1.08em; font-weight: 600;'
+		);
+	});
+
 	it('shows a title in the text colour and its description in grey', () => {
 		expect(ruleBody(skeleton, '.wpo-otd-empty-state-title')).toContain(
 			'color: var(--wpo-otd-text-primary);'

@@ -127,6 +127,15 @@
     background: var(--wpo-otd-wp-blue-dark);
 }
 
+/* A primary or secondary action: core's button colours, sized like the Automations header's buttons. */
+.wpo-otd-empty-state > .wpo-button {
+    min-height: 40px;
+    padding: 0 16px;
+    border-radius: var(--wpo-otd-radius-m);
+    font-size: 1.08em;
+    font-weight: 600;
+}
+
 /* ============================================
    Error State Component
    ============================================ */
