@@ -41,6 +41,7 @@ export * from './hooks/useAsyncLoader';
 export * from './hooks/useLocalized';
 export * from './hooks/useOnClickOutside';
 export * from './hooks/useScrollable';
+export * from './hooks/useSortableList';
 export * from './hooks/useTaskFormModal';
 export * from './hooks/useTaskSort';
 
