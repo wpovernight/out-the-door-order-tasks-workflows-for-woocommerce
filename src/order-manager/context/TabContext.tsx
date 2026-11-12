@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { applyFilters } from '@wordpress/hooks';
+import { confirmLeave, hasLeaveGuard } from '@sdk';
 
 export const CORE_TABS = [
 	'dashboard',
@@ -34,9 +35,21 @@ export const TabProvider: React.FC<{ children: React.ReactNode }> = ({
 		return tabs.includes(firstSegment) ? firstSegment : 'dashboard';
 	}, [location.pathname, tabs]);
 
-	// Navigate to new tab instead of setting state.
+	// Navigate to new tab instead of setting state, once a view guarding
+	// against being left (useLeaveGuard) lets it go.
 	const setTab = (newTab: Tab) => {
-		navigate(`/${newTab}`);
+		const go = () => navigate(`/${newTab}`);
+
+		if (!hasLeaveGuard()) {
+			go();
+			return;
+		}
+
+		void confirmLeave().then((mayLeave) => {
+			if (mayLeave) {
+				go();
+			}
+		});
 	};
 
 	return (

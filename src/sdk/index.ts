@@ -38,6 +38,7 @@ export * from './context/ToastContext';
 // Hooks.
 export * from './hooks/getInitialStatusRoles';
 export * from './hooks/useAsyncLoader';
+export * from './hooks/useLeaveGuard';
 export * from './hooks/useLocalized';
 export * from './hooks/useOnClickOutside';
 export * from './hooks/useScrollable';

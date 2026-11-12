@@ -1,16 +1,30 @@
 import React from 'react';
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import { addFilter } from '@wordpress/hooks';
+import { useLocation } from 'react-router-dom';
 import { renderWithProviders } from '@otd-test-utils';
+import { useLeaveGuard } from '@sdk';
+import type { LeaveCheck } from '@sdk';
 import Header from '@orderManager/components/Header';
 import { TabProvider } from '@orderManager/context/TabContext';
 
-const renderHeader = () =>
+const Where = () => (
+	<output data-testid="path">{useLocation().pathname}</output>
+);
+
+const Guard = ({ ask }: { ask: LeaveCheck }) => {
+	useLeaveGuard(true, ask);
+	return null;
+};
+
+const renderHeader = (guard?: LeaveCheck) =>
 	renderWithProviders(
 		<TabProvider>
 			<Header />
+			<Where />
+			{guard && <Guard ask={guard} />}
 		</TabProvider>,
-		{ route: '/automations' }
+		{ route: '/automations/rules/new' }
 	);
 
 const tabButton = (name: RegExp | string) =>
@@ -59,5 +73,39 @@ describe('Order Manager header', () => {
 		expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
 			'Out the Door'
 		);
+	});
+
+	it('switches tabs at once when no view guards against leaving', async () => {
+		const { user } = renderHeader();
+
+		await user.click(tabButton('Dashboard'));
+
+		expect(screen.getByTestId('path')).toHaveTextContent('/dashboard');
+	});
+
+	it('stays when a view guarding against leaving refuses', async () => {
+		const ask = jest.fn(() => Promise.resolve(false));
+		const { user } = renderHeader(ask);
+
+		await user.click(tabButton('Dashboard'));
+
+		await waitFor(() => expect(ask).toHaveBeenCalledTimes(1));
+		expect(screen.getByTestId('path')).toHaveTextContent(
+			'/automations/rules/new'
+		);
+	});
+
+	it('switches once a view guarding against leaving lets it go', async () => {
+		const ask = jest.fn(() => Promise.resolve(true));
+		const { user } = renderHeader(ask);
+
+		await user.click(tabButton(/^Automations/));
+
+		await waitFor(() =>
+			expect(screen.getByTestId('path')).toHaveTextContent(
+				/^\/automations$/
+			)
+		);
+		expect(ask).toHaveBeenCalledTimes(1);
 	});
 });
