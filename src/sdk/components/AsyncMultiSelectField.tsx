@@ -2,24 +2,67 @@ import React, { useEffect, useRef, useState } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
 import { useOnClickOutside } from '@sdk/hooks/useOnClickOutside';
 
-interface Option {
-	id: number;
+export interface AsyncMultiSelectOption {
+	id: number | string;
 	label: string;
+	/** What the results list shows; the label when left out. */
 	searchLabel?: string;
 	fieldId?: number;
 	url?: string;
 }
 
+/**
+ * One page of results, and whether another follows.
+ */
+export interface AsyncMultiSelectPage {
+	options: AsyncMultiSelectOption[];
+	hasMore: boolean;
+}
+
 interface AsyncMultiSelectProps {
 	placeholder: string;
-	selectedOptions?: Option[];
+	/**
+	 * The options chosen to start with; with onChange, the options chosen,
+	 * followed whenever they change.
+	 */
+	selectedOptions?: AsyncMultiSelectOption[];
 	id?: string;
 	className?: string;
 	name?: string;
-	onSearch?: (query: string, signal: AbortSignal) => Promise<Option[]>;
-	onSelect?: (option: Option) => void;
-	onRemove?: (optionId: number) => void;
+	/**
+	 * Find options for what was typed: a list, or a page of a longer one.
+	 * Page is 1, then one more for each "Load more".
+	 */
+	onSearch?: (
+		query: string,
+		signal: AbortSignal,
+		page: number
+	) => Promise<AsyncMultiSelectOption[] | AsyncMultiSelectPage>;
+	onSelect?: (option: AsyncMultiSelectOption) => void;
+	onRemove?: (optionId: AsyncMultiSelectOption['id']) => void;
+	/** Makes the choice the caller's: called with the options now chosen. */
+	onChange?: (options: AsyncMultiSelectOption[]) => void;
+	disabled?: boolean;
+	/** Marks the search field as refused. */
+	invalid?: boolean;
+	/** The id of help or error text describing the field. */
+	describedBy?: string;
+	/** The search field's accessible name, when no label names it. */
+	ariaLabel?: string;
+	/** How many may be chosen; the search field goes once that many are. */
+	max?: number;
+	/** List options as soon as the field is focused, before anything is typed. */
+	browse?: boolean;
+	/** Typed text can be added as an option of its own. */
+	creatable?: boolean;
+	/** Why typed text cannot be added, or null when it can. */
+	validate?: (text: string) => string | null;
 }
+
+const asPage = (
+	found: AsyncMultiSelectOption[] | AsyncMultiSelectPage
+): AsyncMultiSelectPage =>
+	Array.isArray(found) ? { options: found, hasMore: false } : found;
 
 export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 	placeholder = __(
@@ -33,28 +76,103 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 	onSearch,
 	onSelect,
 	onRemove,
+	onChange,
+	disabled = false,
+	invalid = false,
+	describedBy,
+	ariaLabel,
+	max,
+	browse = false,
+	creatable = false,
+	validate,
 }) => {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const inputRef = useRef<HTMLInputElement>(null);
+	// Read when a search runs, so a caller drawing a new function on each
+	// render does not search again.
+	const searchRef = useRef(onSearch);
+	searchRef.current = onSearch;
 
 	const [showResults, setShowResults] = useState<boolean>(false);
-	const [results, setResults] = useState<Option[]>([]);
-	const [selected, setSelected] = useState<Option[]>(selectedOptions);
+	const [results, setResults] = useState<AsyncMultiSelectOption[]>([]);
+	const [hasMore, setHasMore] = useState<boolean>(false);
+	const [page, setPage] = useState<number>(1);
+	const [kept, setKept] = useState<AsyncMultiSelectOption[]>(selectedOptions);
 	const [query, setQuery] = useState<string>('');
 	const [loading, setLoading] = useState<boolean>(false);
+	// The page being fetched: the list stays shown while a later one loads.
+	const [fetching, setFetching] = useState<number>(1);
+	// Set while the field is open with nothing typed, in browse mode.
+	const [browsing, setBrowsing] = useState<boolean>(false);
 
-	useOnClickOutside(containerRef, () => setShowResults(false));
+	const controlled = undefined !== onChange;
+	const selected = controlled ? selectedOptions : kept;
+	const typed = query.trim();
+	const full = undefined !== max && selected.length >= max;
+
+	useOnClickOutside(containerRef, () => {
+		setShowResults(false);
+		setBrowsing(false);
+	});
 
 	const abortControllerRef = useRef<AbortController | null>(null);
 
-	useEffect(() => {
-		if (!onSearch) {
+	/**
+	 * Fetch a page of results: page 1 replaces them, a later page adds to them.
+	 *
+	 * @param text   What was typed.
+	 * @param number The page.
+	 */
+	const fetchPage = async (text: string, number: number) => {
+		const search = searchRef.current;
+		if (!search) {
 			return;
 		}
 
-		if (!query.trim()) {
+		// Cancel any previous request
+		abortControllerRef.current?.abort();
+		abortControllerRef.current = new AbortController();
+		const signal = abortControllerRef.current.signal;
+
+		setLoading(true);
+		setFetching(number);
+		try {
+			setShowResults(true);
+
+			const found = asPage(await search(text, signal, number));
+
+			// Check if request was aborted
+			if (signal.aborted) {
+				return;
+			}
+
+			setResults((was) =>
+				1 === number ? found.options : [...was, ...found.options]
+			);
+			setHasMore(found.hasMore);
+			setPage(number);
+		} catch (error) {
+			// Ignore abort errors
+			if (error instanceof Error && error.name === 'AbortError') {
+				return;
+			}
+			console.error('Error fetching results:', error);
+		} finally {
+			if (!signal.aborted) {
+				setLoading(false);
+			}
+		}
+	};
+
+	useEffect(() => {
+		if (!searchRef.current || disabled) {
+			return;
+		}
+
+		if (!typed && !browsing) {
 			setResults([]);
+			setHasMore(false);
 			setShowResults(false);
 			return;
 		}
@@ -63,88 +181,91 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 			clearTimeout(debounceRef.current);
 		}
 
-		debounceRef.current = setTimeout(async () => {
-			// Cancel any previous request
-			if (abortControllerRef.current) {
-				abortControllerRef.current.abort();
-			}
-
-			// Create new abort controller for this request
-			abortControllerRef.current = new AbortController();
-			const signal = abortControllerRef.current.signal;
-
-			setLoading(true);
-			try {
-				setShowResults(true);
-
-				const searchResults = await onSearch(query, signal);
-
-				// Check if request was aborted
-				if (signal.aborted) {
-					return;
-				}
-
-				const filteredResults = searchResults.filter(
-					(result) =>
-						!selected.find((option) => option.id === result.id)
-				);
-
-				setResults(filteredResults);
-			} catch (error) {
-				// Ignore abort errors
-				if (error instanceof Error && error.name === 'AbortError') {
-					return;
-				}
-				console.error('Error fetching results:', error);
-			} finally {
-				if (!signal.aborted) {
-					setLoading(false);
-				}
-			}
-		}, 300);
+		debounceRef.current = setTimeout(() => fetchPage(typed, 1), 300);
 
 		return () => {
 			if (debounceRef.current) {
 				window.clearTimeout(debounceRef.current);
 			}
 			// Cancel request on cleanup
-			if (abortControllerRef.current) {
-				abortControllerRef.current.abort();
-			}
+			abortControllerRef.current?.abort();
 		};
-	}, [query, onSearch, selected]);
+		// fetchPage reads the latest search through a ref.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [typed, browsing, disabled]);
+
+	const choose = (next: AsyncMultiSelectOption[]) => {
+		if (onChange) {
+			onChange(next);
+		} else {
+			setKept(next);
+		}
+	};
+
+	const isChosen = (optionId: AsyncMultiSelectOption['id']) =>
+		selected.some((option) => option.id === optionId);
 
 	const handleInputFocus = () => {
+		if (browse && !typed) {
+			setBrowsing(true);
+		}
 		if (results.length) {
 			setShowResults(true);
 		}
 	};
 
-	const handleSelectOption = (option: Option) => {
-		if (
-			selected.find((selectedOption) => selectedOption.id === option.id)
-		) {
+	const handleSelectOption = (option: AsyncMultiSelectOption) => {
+		if (isChosen(option.id)) {
 			return; // Option already selected
 		}
 		onSelect?.(option);
-		setSelected((prevSelected) => [...prevSelected, option]);
+		choose([...selected, option]);
 		setShowResults(false);
+		setBrowsing(false);
 		setQuery('');
 		setResults([]);
+		setHasMore(false);
 		inputRef.current?.focus();
 	};
 
-	const handleRemoveOption = (optionId: number) => {
+	const handleRemoveOption = (optionId: AsyncMultiSelectOption['id']) => {
 		onRemove?.(optionId);
-		setSelected((prevSelected) =>
-			prevSelected.filter((option) => option.id !== optionId)
-		);
+		choose(selected.filter((option) => option.id !== optionId));
 		inputRef.current?.focus();
 	};
+
+	// Typed text as an option of its own, when it may be added.
+	const refusal = creatable && typed ? (validate?.(typed) ?? null) : null;
+	const custom: AsyncMultiSelectOption | null =
+		creatable &&
+		typed &&
+		null === refusal &&
+		!isChosen(typed) &&
+		!results.some(
+			(option) => option.label.toLowerCase() === typed.toLowerCase()
+		)
+			? { id: typed, label: typed }
+			: null;
+
+	const listed = results.filter((option) => !isChosen(option.id));
+	const searching = loading && 1 === fetching;
+	const options = [...(custom ? [custom] : []), ...listed];
+	// Typed text that may be added is offered before any search answers.
+	const open = showResults || (creatable && '' !== typed);
 
 	const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
 		if (e.key === 'Escape') {
 			setShowResults(false);
+			setBrowsing(false);
+			return;
+		}
+
+		if (e.key === 'Enter' && creatable) {
+			// Never submits a surrounding form.
+			e.preventDefault();
+			if (custom) {
+				handleSelectOption(custom);
+			}
 			return;
 		}
 
@@ -181,6 +302,7 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 
 		if (e.key === 'Escape') {
 			setShowResults(false);
+			setBrowsing(false);
 			inputRef.current?.focus();
 		}
 	};
@@ -190,20 +312,26 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 			ref={containerRef}
 			className={`wpo-otd-async-multi-select-container ${className ?? ''}`}
 		>
-			<input
-				ref={inputRef}
-				type="text"
-				id={id}
-				className={className}
-				// No `name`: this is only a search box. Selections are submitted
-				// through the hidden `${name}[]` inputs below, so typed text that
-				// doesn't match an order is never saved.
-				placeholder={placeholder}
-				onFocus={handleInputFocus}
-				onChange={(e) => setQuery(e.target.value)}
-				value={query}
-				onKeyDown={handleInputKeyDown}
-			/>
+			{!full && (
+				<input
+					ref={inputRef}
+					type="text"
+					id={id}
+					className={className}
+					// No `name`: this is only a search box. Selections are submitted
+					// through the hidden `${name}[]` inputs below, so typed text that
+					// doesn't match an order is never saved.
+					placeholder={placeholder}
+					aria-label={ariaLabel}
+					aria-invalid={invalid ? true : undefined}
+					aria-describedby={describedBy}
+					disabled={disabled}
+					onFocus={handleInputFocus}
+					onChange={(e) => setQuery(e.target.value)}
+					value={query}
+					onKeyDown={handleInputKeyDown}
+				/>
+			)}
 			<div className="screen-reader-text" aria-live="polite">
 				{(() => {
 					if (loading) {
@@ -213,14 +341,14 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 						);
 					}
 					if (showResults) {
-						return results.length
+						return options.length
 							? sprintf(
 									/* translators: %d is the number of results found. */
 									__(
 										'%d results found',
 										'out-the-door-order-tasks-workflows-for-woocommerce'
 									),
-									results.length
+									options.length
 								)
 							: __(
 									'No results found',
@@ -231,7 +359,12 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 				})()}
 			</div>
 
-			{showResults && loading && (
+			{open && null !== refusal && (
+				<div className="wpo-otd-async-multi-select-message">
+					<p>{refusal}</p>
+				</div>
+			)}
+			{open && null === refusal && searching && (
 				<div className="wpo-otd-async-multi-select-message">
 					<p>
 						{__(
@@ -241,7 +374,7 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 					</p>
 				</div>
 			)}
-			{showResults && !loading && !Boolean(results.length) && (
+			{showResults && null === refusal && !loading && !options.length && (
 				<div className="wpo-otd-async-multi-select-message">
 					<p>
 						{__(
@@ -251,21 +384,51 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 					</p>
 				</div>
 			)}
-			{showResults && !loading && Boolean(results.length) && (
-				<ul className="wpo-otd-async-multi-select-options">
-					{results.map((option) => (
-						<li key={option.id}>
-							<button
-								type="button"
-								onClick={() => handleSelectOption(option)}
-								onKeyDown={handleOptionKeyDown}
+			{open &&
+				null === refusal &&
+				!searching &&
+				Boolean(options.length) && (
+					<ul className="wpo-otd-async-multi-select-options">
+						{options.map((option) => (
+							<li
+								key={`${option === custom ? 'new' : 'found'}-${option.id}`}
 							>
-								{option.searchLabel}
-							</button>
-						</li>
-					))}
-				</ul>
-			)}
+								<button
+									type="button"
+									onClick={() => handleSelectOption(option)}
+									onKeyDown={handleOptionKeyDown}
+								>
+									{option === custom
+										? sprintf(
+												/* translators: %s: text typed into a search field. */
+												__(
+													'Add “%s”',
+													'out-the-door-order-tasks-workflows-for-woocommerce'
+												),
+												option.label
+											)
+										: (option.searchLabel ?? option.label)}
+								</button>
+							</li>
+						))}
+						{hasMore && (
+							<li>
+								<button
+									type="button"
+									className="wpo-otd-async-multi-select-more"
+									disabled={loading}
+									onClick={() => fetchPage(typed, page + 1)}
+									onKeyDown={handleOptionKeyDown}
+								>
+									{__(
+										'Load more',
+										'out-the-door-order-tasks-workflows-for-woocommerce'
+									)}
+								</button>
+							</li>
+						)}
+					</ul>
+				)}
 
 			<ul className="wpo-otd-async-multi-select-selected-options">
 				{selected &&
@@ -290,18 +453,22 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 							) : (
 								option.label
 							)}
-							<button
-								type="button"
-								className="wpo-button wpo-button-icon wpo-otd-sidebar-close"
-								onClick={() => handleRemoveOption(option.id)}
-							>
-								<span className="screen-reader-text">
-									{__(
-										'Close',
-										'out-the-door-order-tasks-workflows-for-woocommerce'
-									)}
-								</span>
-							</button>
+							{!disabled && (
+								<button
+									type="button"
+									className="wpo-button wpo-button-icon wpo-otd-sidebar-close"
+									onClick={() =>
+										handleRemoveOption(option.id)
+									}
+								>
+									<span className="screen-reader-text">
+										{__(
+											'Close',
+											'out-the-door-order-tasks-workflows-for-woocommerce'
+										)}
+									</span>
+								</button>
+							)}
 						</li>
 					))}
 			</ul>

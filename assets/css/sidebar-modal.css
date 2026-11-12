@@ -242,6 +242,14 @@
     cursor: pointer;
 }
 
+.wpo-otd-async-multi-select-container > ul.wpo-otd-async-multi-select-options > li > button.wpo-otd-async-multi-select-more {
+    color: var(--wpo-otd-purple-primary);
+}
+
+.wpo-otd-async-multi-select-container > ul.wpo-otd-async-multi-select-options > li > button.wpo-otd-async-multi-select-more:disabled {
+    cursor: wait;
+}
+
 .wpo-otd-async-multi-select-container > ul.wpo-otd-async-multi-select-selected-options {
     display: flex;
     column-gap: 0.5em;
