@@ -149,6 +149,37 @@ describe('AsyncMultiSelectField', () => {
 		).not.toBeInTheDocument();
 	});
 
+	it('offers the next page when every result of the first is chosen already', async () => {
+		const user = userEvent.setup();
+		const onSearch = jest.fn(
+			async (_query: string, _signal: AbortSignal, page: number) =>
+				1 === page
+					? { options: COUNTRIES.slice(0, 2), hasMore: true }
+					: { options: COUNTRIES.slice(2), hasMore: false }
+		);
+		render(
+			<Controlled
+				start={COUNTRIES.slice(0, 2)}
+				onSearch={onSearch}
+				browse
+			/>
+		);
+
+		await user.click(screen.getByRole('textbox', { name: 'Countries' }));
+		const more = await screen.findByRole('button', { name: 'Load more' });
+		expect(screen.queryByText('No results found')).not.toBeInTheDocument();
+		await user.click(more);
+
+		expect(
+			await screen.findByRole('button', { name: 'Romania' })
+		).toBeInTheDocument();
+		expect(onSearch).toHaveBeenLastCalledWith(
+			'',
+			expect.any(AbortSignal),
+			2
+		);
+	});
+
 	it('loads the next page and adds it to the list', async () => {
 		const user = userEvent.setup();
 		const onSearch = jest.fn(

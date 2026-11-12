@@ -358,7 +358,9 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 							'out-the-door-order-tasks-workflows-for-woocommerce'
 						);
 					}
-					if (shown) {
+					// Every result on the pages so far may be chosen already, with
+					// more to load: there is then nothing to count yet.
+					if (shown && (options.length || !hasMore)) {
 						return options.length
 							? sprintf(
 									/* translators: %d is the number of results found. */
@@ -392,20 +394,24 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 					</p>
 				</div>
 			)}
-			{shown && null === refusal && !loading && !options.length && (
-				<div className="wpo-otd-async-multi-select-message">
-					<p>
-						{__(
-							'No results found',
-							'out-the-door-order-tasks-workflows-for-woocommerce'
-						)}
-					</p>
-				</div>
-			)}
+			{shown &&
+				null === refusal &&
+				!loading &&
+				!options.length &&
+				!hasMore && (
+					<div className="wpo-otd-async-multi-select-message">
+						<p>
+							{__(
+								'No results found',
+								'out-the-door-order-tasks-workflows-for-woocommerce'
+							)}
+						</p>
+					</div>
+				)}
 			{open &&
 				null === refusal &&
 				!searching &&
-				Boolean(options.length) && (
+				(options.length > 0 || hasMore) && (
 					<ul className="wpo-otd-async-multi-select-options">
 						{options.map((option) => (
 							<li
