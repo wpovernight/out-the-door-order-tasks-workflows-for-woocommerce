@@ -444,6 +444,39 @@
     border-color: var(--wpo-otd-purple-primary);
 }
 
+/* A text field, select or text area, as tall as the date picker's field. */
+#wpcontent .wpo-otd-input {
+    font-size: inherit;
+    min-height: 3.4em;
+    color: var(--wpo-otd-text-primary);
+    border: 1px solid var(--wpo-otd-border-color);
+    border-radius: var(--wpo-otd-radius-m);
+    padding: 0.63em 0.8em;
+}
+
+#wpcontent .wpo-otd-input:focus {
+    border-color: var(--wpo-otd-wp-blue);
+    box-shadow: 0 0 0 1px var(--wpo-otd-wp-blue);
+    /* Only visible in Windows High Contrast mode */
+    outline: 2px solid transparent;
+}
+
+#wpcontent .wpo-otd-input[aria-invalid="true"] {
+    border-color: var(--wpo-otd-error);
+}
+
+#wpcontent .wpo-otd-input[aria-invalid="true"]:focus {
+    box-shadow: 0 0 0 1px var(--wpo-otd-error);
+}
+
+#wpcontent .wpo-otd-input:disabled {
+    color: var(--wpo-otd-text-gray);
+    background: var(--wpo-otd-bg-light);
+    border-color: var(--wpo-otd-border-color);
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
 .wpo-count-badge {
     font-size: 0.9em;
     padding: 0 0.3em;

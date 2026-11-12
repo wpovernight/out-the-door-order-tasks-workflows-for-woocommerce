@@ -316,6 +316,21 @@
     color: var(--wpo-otd-text-gray-light);
 }
 
+.wpo-otd-datepicker-trigger.is-invalid {
+    border-color: var(--wpo-otd-error);
+}
+
+.wpo-otd-datepicker-trigger.is-invalid:focus {
+    box-shadow: 0 0 0 1px var(--wpo-otd-error);
+}
+
+/* Disabled like a disabled .wpo-otd-input. */
+.wpo-otd-datepicker-trigger:disabled {
+    color: var(--wpo-otd-text-gray);
+    background: var(--wpo-otd-bg-light);
+    cursor: not-allowed;
+}
+
 .wpo-otd-datepicker-clear {
     position: absolute;
     top: 50%;
