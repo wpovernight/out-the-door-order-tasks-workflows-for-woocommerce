@@ -274,6 +274,53 @@ describe('AsyncMultiSelectField', () => {
 		expect(container.firstElementChild).not.toHaveClass('wpo-otd-input');
 	});
 
+	it('closes once disabled while open, and adds nothing typed or listed', async () => {
+		const user = userEvent.setup();
+		const onChosen = jest.fn();
+		const onSearch = jest.fn(async () => COUNTRIES);
+		const field = (disabled: boolean) => (
+			<Controlled
+				creatable
+				browse
+				onSearch={onSearch}
+				onChosen={onChosen}
+				disabled={disabled}
+			/>
+		);
+		const { rerender } = render(field(false));
+		const input = screen.getByRole('textbox', { name: 'Countries' });
+
+		await user.click(input);
+		await user.type(input, 'Ger');
+		expect(
+			screen.getByRole('button', { name: 'Add “Ger”' })
+		).toBeInTheDocument();
+		expect(
+			await screen.findByRole('button', { name: 'Germany' })
+		).toBeInTheDocument();
+
+		rerender(field(true));
+
+		expect(
+			screen.queryByRole('button', { name: 'Add “Ger”' })
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole('button', { name: 'Germany' })
+		).not.toBeInTheDocument();
+		expect(input).toBeDisabled();
+		await new Promise((resolve) => setTimeout(resolve, 350));
+		expect(
+			document.querySelector('.wpo-otd-async-multi-select-options')
+		).toBeNull();
+		expect(onChosen).not.toHaveBeenCalled();
+
+		// Enabled again, the list it had open stays closed.
+		rerender(field(false));
+		expect(
+			screen.queryByRole('button', { name: 'Germany' })
+		).not.toBeInTheDocument();
+	});
+
 	it('is marked as refused and described by its error', () => {
 		render(
 			<>

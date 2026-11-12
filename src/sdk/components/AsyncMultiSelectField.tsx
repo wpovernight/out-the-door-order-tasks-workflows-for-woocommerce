@@ -129,7 +129,7 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 	 */
 	const fetchPage = async (text: string, number: number) => {
 		const search = searchRef.current;
-		if (!search) {
+		if (!search || disabled) {
 			return;
 		}
 
@@ -167,6 +167,17 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 			}
 		}
 	};
+
+	// Disabled, it closes, and an open list or typed value can no longer add
+	// anything, so nothing changes while its owner waits on the choice.
+	useEffect(() => {
+		if (disabled) {
+			setShowResults(false);
+			setBrowsing(false);
+			setResults([]);
+			setHasMore(false);
+		}
+	}, [disabled]);
 
 	useEffect(() => {
 		if (!searchRef.current || disabled) {
@@ -218,7 +229,7 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 	};
 
 	const handleSelectOption = (option: AsyncMultiSelectOption) => {
-		if (isChosen(option.id)) {
+		if (disabled || isChosen(option.id)) {
 			return; // Option already selected
 		}
 		onSelect?.(option);
@@ -232,6 +243,9 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 	};
 
 	const handleRemoveOption = (optionId: AsyncMultiSelectOption['id']) => {
+		if (disabled) {
+			return;
+		}
 		onRemove?.(optionId);
 		choose(selected.filter((option) => option.id !== optionId));
 		inputRef.current?.focus();
@@ -254,7 +268,8 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 	const searching = loading && 1 === fetching;
 	const options = [...(custom ? [custom] : []), ...listed];
 	// Typed text that may be added is offered before any search answers.
-	const open = showResults || (creatable && '' !== typed);
+	const shown = showResults && !disabled;
+	const open = !disabled && (showResults || (creatable && '' !== typed));
 
 	const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
 		if (e.key === 'Escape') {
@@ -343,7 +358,7 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 							'out-the-door-order-tasks-workflows-for-woocommerce'
 						);
 					}
-					if (showResults) {
+					if (shown) {
 						return options.length
 							? sprintf(
 									/* translators: %d is the number of results found. */
@@ -377,7 +392,7 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 					</p>
 				</div>
 			)}
-			{showResults && null === refusal && !loading && !options.length && (
+			{shown && null === refusal && !loading && !options.length && (
 				<div className="wpo-otd-async-multi-select-message">
 					<p>
 						{__(
