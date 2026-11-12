@@ -13,6 +13,7 @@
  */
 
 // Components.
+export * from './components/ActionMenu';
 export * from './components/AsyncMultiSelectField';
 export * from './components/DatePicker';
 export * from './components/Dialog';

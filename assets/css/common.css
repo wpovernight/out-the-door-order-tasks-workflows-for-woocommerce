@@ -342,6 +342,69 @@
     vertical-align: middle;
 }
 
+/* ActionMenu: the three-dot button it opens from by default. */
+.wpo-otd-action-menu-dots {
+    position: relative;
+    width: 1.75em;
+    height: 1.75em;
+    border-radius: var(--wpo-otd-radius-m);
+    color: var(--wpo-otd-text-gray);
+}
+
+.wpo-otd-action-menu-dots::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 1.2em;
+    height: 1.2em;
+    background-color: currentColor;
+    mask-image: var(--wpo-otd-icon-dots-three);
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-image: var(--wpo-otd-icon-dots-three);
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+}
+
+/* ActionMenu's choices: a label, and a description under it. */
+.wpo-otd-action-menu > li > button {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2em;
+    color: var(--wpo-otd-text-primary);
+}
+
+.wpo-otd-action-menu > li > button.is-danger {
+    color: var(--wpo-otd-error);
+}
+
+.wpo-otd-action-menu-description {
+    font-size: 0.9em;
+    color: var(--wpo-otd-text-gray);
+}
+
+.wpo-otd-action-menu > li.wpo-otd-action-menu-heading,
+.wpo-otd-action-menu > li.wpo-otd-action-menu-note {
+    display: block;
+    padding: 0.9em 0.9em 0.4em;
+    font-size: 0.85em;
+    color: var(--wpo-otd-text-gray);
+}
+
+.wpo-otd-action-menu > li.wpo-otd-action-menu-heading {
+    text-transform: uppercase;
+    border-bottom: none;
+}
+
+.wpo-otd-action-menu > li.wpo-otd-action-menu-note {
+    padding-bottom: 0.9em;
+    border-bottom: none;
+}
+
 .wpo-otd-row-actions {
     display: flex;
     margin: 0;
