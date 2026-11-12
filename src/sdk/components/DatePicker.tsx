@@ -8,6 +8,15 @@ interface DatePickerProps {
 	value?: string; // YYYY-MM-DD
 	placeholder?: string;
 	onChange?: (date: string) => void;
+	/** The field can't be opened or cleared. */
+	disabled?: boolean;
+	/**
+	 * The field's value was refused: drawn in the error colour. A button can't
+	 * take aria-invalid, so name the error text in describedBy.
+	 */
+	invalid?: boolean;
+	/** Ids of the help or error text that describes the field. */
+	describedBy?: string;
 }
 
 type ViewMode = 'day' | 'month' | 'year';
@@ -242,6 +251,9 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 	value,
 	placeholder,
 	onChange,
+	disabled = false,
+	invalid = false,
+	describedBy,
 }) => {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const [open, setOpen] = useState(false);
@@ -276,6 +288,9 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 	};
 
 	const toggleOpen = () => {
+		if (disabled) {
+			return;
+		}
 		if (open) {
 			closePicker();
 		} else {
@@ -404,10 +419,13 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 					'wpo-otd-datepicker-trigger',
 					open && 'open',
 					!selectedDate && 'wpo-otd-placeholder',
+					invalid && 'is-invalid',
 				]
 					.filter(Boolean)
 					.join(' ')}
 				onClick={toggleOpen}
+				disabled={disabled}
+				aria-describedby={describedBy}
 			>
 				{selectedDate
 					? formatDisplayDate(selectedDate)
@@ -417,7 +435,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 							'out-the-door-order-tasks-workflows-for-woocommerce'
 						)}
 			</button>
-			{selectedDate && (
+			{selectedDate && !disabled && (
 				<button
 					type="button"
 					className="wpo-button wpo-button-icon wpo-otd-datepicker-clear"
@@ -435,7 +453,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({
 					</span>
 				</button>
 			)}
-			{open && (
+			{open && !disabled && (
 				<div className="wpo-otd-datepicker-dropdown">
 					<div className="wpo-otd-datepicker-header">
 						<button
