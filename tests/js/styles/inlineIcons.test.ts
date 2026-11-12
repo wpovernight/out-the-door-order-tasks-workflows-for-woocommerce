@@ -33,7 +33,9 @@ describe.each(['--wpo-otd-icon-warning-inline', '--wpo-otd-icon-info'])(
 
 		it('is one filled shape with holes, so a mask can colour it', () => {
 			expect(Array.from(svg.matchAll(/<path /g))).toHaveLength(1);
-			expect(svg).toMatch(/<path fill-rule="evenodd" [^>]*fill="#[0-9A-F]{6}"\/>/i);
+			expect(svg).toMatch(
+				/<path fill-rule="evenodd" [^>]*fill="#[0-9A-F]{6}"\/>/i
+			);
 		});
 	}
 );
