@@ -28,6 +28,8 @@ interface AsyncMultiSelectProps {
 	selectedOptions?: AsyncMultiSelectOption[];
 	id?: string;
 	className?: string;
+	/** Classes for the search field alone; className when left out. */
+	inputClassName?: string;
 	name?: string;
 	/**
 	 * Find options for what was typed: a list, or a page of a longer one.
@@ -72,6 +74,7 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 	selectedOptions = [],
 	id,
 	className,
+	inputClassName,
 	name,
 	onSearch,
 	onSelect,
@@ -317,7 +320,7 @@ export const AsyncMultiSelectField: React.FC<AsyncMultiSelectProps> = ({
 					ref={inputRef}
 					type="text"
 					id={id}
-					className={className}
+					className={inputClassName ?? className}
 					// No `name`: this is only a search box. Selections are submitted
 					// through the hidden `${name}[]` inputs below, so typed text that
 					// doesn't match an order is never saved.

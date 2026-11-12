@@ -262,6 +262,18 @@ describe('AsyncMultiSelectField', () => {
 		await waitFor(() => expect(onSearch).not.toHaveBeenCalled());
 	});
 
+	it('can style its search field apart from its container', () => {
+		const { container } = render(
+			<Controlled className="picker" inputClassName="wpo-otd-input" />
+		);
+
+		expect(screen.getByRole('textbox', { name: 'Countries' })).toHaveClass(
+			'wpo-otd-input'
+		);
+		expect(container.firstElementChild).toHaveClass('picker');
+		expect(container.firstElementChild).not.toHaveClass('wpo-otd-input');
+	});
+
 	it('is marked as refused and described by its error', () => {
 		render(
 			<>
