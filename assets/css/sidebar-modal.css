@@ -125,18 +125,19 @@
     gap: 0.5em;
 }
 
-.wpo-otd-task-form .field-group input,
-.wpo-otd-task-form .field-group select,
-.wpo-otd-task-form .field-group textarea {
+/* Fields other components put in the form, such as the order search. The form's own fields are .wpo-otd-input. */
+.wpo-otd-task-form .field-group input:not(.wpo-otd-input),
+.wpo-otd-task-form .field-group select:not(.wpo-otd-input),
+.wpo-otd-task-form .field-group textarea:not(.wpo-otd-input) {
     font-size: inherit;
     border-color: var(--wpo-otd-border-color);
     border-radius: var(--wpo-otd-radius-m);
     padding: 0.63em 0.8em;
 }
 
-.wpo-otd-task-form .field-group input:focus,
-.wpo-otd-task-form .field-group select:focus,
-.wpo-otd-task-form .field-group textarea:focus {
+.wpo-otd-task-form .field-group input:not(.wpo-otd-input):focus,
+.wpo-otd-task-form .field-group select:not(.wpo-otd-input):focus,
+.wpo-otd-task-form .field-group textarea:not(.wpo-otd-input):focus {
     border-color: var(--wpo-otd-wp-blue);
     box-shadow: 0 0 0 1px var(--wpo-otd-wp-blue);
     outline: 2px solid transparent;

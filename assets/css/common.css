@@ -444,11 +444,9 @@
     border-color: var(--wpo-otd-purple-primary);
 }
 
-/* A text field, select or text area, as tall as the date picker's field. */
+/* A text field, select or text area, as the task form draws its fields. */
 #wpcontent .wpo-otd-input {
     font-size: inherit;
-    min-height: 3.4em;
-    color: var(--wpo-otd-text-primary);
     border: 1px solid var(--wpo-otd-border-color);
     border-radius: var(--wpo-otd-radius-m);
     padding: 0.63em 0.8em;

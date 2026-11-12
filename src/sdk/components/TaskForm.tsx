@@ -351,6 +351,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 							id="title"
 							name="title"
 							type="text"
+							className="wpo-otd-input"
 							defaultValue={
 								task ? task.title : (initialValues?.title ?? '')
 							}
@@ -422,6 +423,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 						</label>
 						<textarea
 							id="description"
+							className="wpo-otd-input"
 							name="description"
 							rows={6}
 							placeholder={__(

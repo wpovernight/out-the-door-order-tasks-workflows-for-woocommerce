@@ -6,15 +6,31 @@ const input = '#wpcontent .wpo-otd-input';
 const datepicker = '.wpo-otd-datepicker-trigger';
 
 describe('shared input', () => {
-	it('is drawn from tokens, as tall as the date picker', () => {
+	it('is drawn from tokens, at the height and colour the browser gives a field', () => {
 		const body = ruleBody(common, input);
 
 		expect(body).toContain(
 			'border: 1px solid var(--wpo-otd-border-color);'
 		);
 		expect(body).toContain('border-radius: var(--wpo-otd-radius-m);');
-		expect(body).toContain('min-height: 3.4em;');
-		expect(ruleBody(modal, datepicker)).toContain('height: 3.4em;');
+		expect(body).toContain('padding: 0.63em 0.8em;');
+		expect(body).not.toContain('height');
+		expect(body).not.toMatch(/(^|; )color:/);
+	});
+
+	it("leaves the task form's own fields to it, and styles only other components' fields in the form", () => {
+		const scoped = (state: string) =>
+			['input', 'select', 'textarea']
+				.map(
+					(tag) =>
+						`.wpo-otd-task-form .field-group ${tag}:not(.wpo-otd-input)${state}`
+				)
+				.join(', ');
+
+		expect(ruleBody(modal, scoped(''))).toContain('padding: 0.63em 0.8em;');
+		expect(ruleBody(modal, scoped(':focus'))).toContain(
+			'box-shadow: 0 0 0 1px var(--wpo-otd-wp-blue);'
+		);
 	});
 
 	it('focuses like the task form fields', () => {
