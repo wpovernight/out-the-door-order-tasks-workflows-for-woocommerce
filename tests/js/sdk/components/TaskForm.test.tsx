@@ -94,17 +94,20 @@ const OpenSettings = ({
  * The form in settings mode, open in its panel, without the task fields
  * loaded: a request for them fails the test.
  *
- * @param value    The settings it starts with.
- * @param readOnly Whether nothing can be changed.
+ * @param value      The settings it starts with.
+ * @param readOnly   Whether nothing can be changed.
+ * @param priorities The priority options it loads.
  */
-const renderSettings = async (value: TaskSettings, readOnly?: boolean) => {
+const renderSettings = async (
+	value: TaskSettings,
+	readOnly?: boolean,
+	priorities: FieldOption[] = [option(2, 'Low', 21), option(2, 'High', 22)]
+) => {
 	const mock = mockFetch({
 		'GET /tasks/fields/status/options': ok(
 			envelope([option(1, 'To do', 11), option(1, 'Done', 12)])
 		),
-		'GET /tasks/fields/priority/options': ok(
-			envelope([option(2, 'Low', 21), option(2, 'High', 22)])
-		),
+		'GET /tasks/fields/priority/options': ok(envelope(priorities)),
 		'POST /tasks': ok(envelope({ id: 1, title: 'Pack', fields: [] })),
 	});
 	const onSave = jest.fn();
@@ -143,6 +146,16 @@ describe('TaskForm', () => {
 
 	it('adds a task as before: the orders and the due date shown, a task posted', async () => {
 		const { user, mock } = await renderForm();
+
+		// A status is always chosen: no choice of none is offered.
+		await user.click(screen.getByLabelText('Status'));
+		expect(
+			screen.getAllByRole('button').map((button) => button.textContent)
+		).not.toContain('First status column');
+		await user.click(screen.getByLabelText('Priority'));
+		expect(
+			screen.getAllByRole('button').map((button) => button.textContent)
+		).not.toContain('No priority');
 
 		expect(screen.getByLabelText('Associated Orders')).toBeInTheDocument();
 		expect(screen.getByLabelText('Due Date')).toBeInTheDocument();
@@ -229,7 +242,12 @@ describe('TaskForm in settings mode', () => {
 	it('hands the values to onSave and closes, saving no task', async () => {
 		const { user, mock, onSave } = await renderSettings({ title: '' });
 
-		expect(screen.getByLabelText('Status')).toHaveTextContent('Select');
+		expect(screen.getByLabelText('Status')).toHaveTextContent(
+			'First status column'
+		);
+		expect(screen.getByLabelText('Priority')).toHaveTextContent(
+			'No priority'
+		);
 		await user.type(
 			screen.getByLabelText('Title'),
 			// A doubled brace types one.
@@ -325,5 +343,52 @@ describe('TaskForm in settings mode', () => {
 			expect(screen.queryByLabelText('Title')).not.toBeInTheDocument()
 		);
 		expect(onSave).not.toHaveBeenCalled();
+	});
+
+	it('clears a status and a priority chosen, leaving them out of the values', async () => {
+		const { user, onSave } = await renderSettings({
+			title: 'Pack',
+			status: 12,
+			priority: 22,
+		});
+
+		await user.click(screen.getByLabelText('Status'));
+		await user.click(
+			screen.getByRole('button', { name: 'First status column' })
+		);
+		await user.click(screen.getByLabelText('Priority'));
+		await user.click(screen.getByRole('button', { name: 'No priority' }));
+		expect(screen.getByLabelText('Status')).toHaveTextContent(
+			'First status column'
+		);
+		await user.click(screen.getByRole('button', { name: 'Save' }));
+
+		expect(onSave).toHaveBeenCalledWith({ title: 'Pack' });
+	});
+
+	it('opens with no priority options left, a saved one shown as deleted', async () => {
+		const { user, onSave } = await renderSettings(
+			{ title: 'Pack', priority: 22 },
+			false,
+			[]
+		);
+
+		expect(screen.getByLabelText('Priority')).toHaveTextContent(
+			'22 (deleted)'
+		);
+		await user.click(screen.getByLabelText('Priority'));
+		await user.click(screen.getByRole('button', { name: 'No priority' }));
+		await user.click(screen.getByRole('button', { name: 'Save' }));
+
+		expect(onSave).toHaveBeenCalledWith({ title: 'Pack' });
+	});
+
+	it('opens read-only with no priority options left', async () => {
+		await renderSettings({ title: 'Pack' }, true, []);
+
+		expect(screen.getByLabelText('Priority')).toBeDisabled();
+		expect(screen.getByLabelText('Priority')).toHaveTextContent(
+			'No priority'
+		);
 	});
 });

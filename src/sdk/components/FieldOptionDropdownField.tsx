@@ -11,6 +11,13 @@ interface DropdownProps {
 	name?: string;
 	selected?: FieldOption;
 	onChange?: (option: FieldOption) => void;
+	/**
+	 * Offers a first choice of no option, with this label, for a field that
+	 * may be left unset; none is offered without it.
+	 */
+	emptyLabel?: string;
+	/** Called when the choice of no option is picked. */
+	onClear?: () => void;
 }
 
 export const FieldOptionDropdown: React.FC<DropdownProps> = ({
@@ -21,6 +28,8 @@ export const FieldOptionDropdown: React.FC<DropdownProps> = ({
 	id,
 	selected,
 	onChange,
+	emptyLabel,
+	onClear,
 }) => {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const triggerButtonRef = useRef<HTMLButtonElement>(null);
@@ -47,6 +56,13 @@ export const FieldOptionDropdown: React.FC<DropdownProps> = ({
 		onChange?.(option);
 		setOpen(false);
 		setSelectedOption(option);
+		triggerButtonRef.current?.focus();
+	};
+
+	const handleClear = () => {
+		onClear?.();
+		setOpen(false);
+		setSelectedOption(null);
 		triggerButtonRef.current?.focus();
 	};
 
@@ -135,6 +151,19 @@ export const FieldOptionDropdown: React.FC<DropdownProps> = ({
 					className="wpo-action-menu"
 					id={id ? `${id}-options` : undefined}
 				>
+					{undefined !== emptyLabel && (
+						<li>
+							<button
+								type="button"
+								onClick={handleClear}
+								onKeyDown={handleOptionKeyDown}
+							>
+								<span className="wpo-otd-tag">
+									{emptyLabel}
+								</span>
+							</button>
+						</li>
+					)}
 					{options.map((option) => (
 						<li key={option.id}>
 							<button

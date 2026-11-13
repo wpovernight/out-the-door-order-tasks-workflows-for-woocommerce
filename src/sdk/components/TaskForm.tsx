@@ -66,12 +66,10 @@ export const MAX_DUE_IN_DAYS = 36500;
  *
  * @param options The options.
  * @param id      The chosen id; none for no choice.
- * @param fieldId The field the options belong to.
  */
 const optionById = (
 	options: FieldOption[],
-	id: number | undefined,
-	fieldId: number
+	id: number | undefined
 ): FieldOption | undefined => {
 	if (undefined === id) {
 		return undefined;
@@ -80,7 +78,7 @@ const optionById = (
 	return (
 		options.find((option) => option.id === id) ?? {
 			id,
-			field_id: fieldId,
+			field_id: 0,
 			slug: '',
 			label: sprintf(
 				/* translators: %d: the id of an option that no longer exists. */
@@ -327,10 +325,14 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 	};
 
 	// Check if data is actually loaded
-	const isDataReady =
-		(isSettings || Object.keys(taskFields).length > 0) &&
-		fieldOptions.status?.length > 0 &&
-		fieldOptions.priority?.length > 0;
+	// Settings mode may leave the status and priority unset, so a field with
+	// no options left is ready once loaded; adding a task needs one of each.
+	const isDataReady = isSettings
+		? Array.isArray(fieldOptions.status) &&
+			Array.isArray(fieldOptions.priority)
+		: Object.keys(taskFields).length > 0 &&
+			fieldOptions.status?.length > 0 &&
+			fieldOptions.priority?.length > 0;
 
 	if (loadingStatus === 'loading' || !isDataReady) {
 		return <TaskFormSkeleton />;
@@ -381,18 +383,29 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				'out-the-door-order-tasks-workflows-for-woocommerce'
 			);
 
+	const selectText = __(
+		'Select',
+		'out-the-door-order-tasks-workflows-for-woocommerce'
+	);
+	let statusEmpty: string | undefined;
+	let priorityEmpty: string | undefined;
+
 	// Settings mode shows the values it was given, an unset status or
-	// priority as none chosen, and saves them rather than a task.
+	// priority as a choice of its own that a set one can go back to, and
+	// saves them rather than a task.
 	if (settings) {
-		statusOption = optionById(
-			fieldOptions.status,
-			settings.value.status,
-			fieldOptions.status[0].field_id
+		statusEmpty = __(
+			'First status column',
+			'out-the-door-order-tasks-workflows-for-woocommerce'
 		);
+		priorityEmpty = __(
+			'No priority',
+			'out-the-door-order-tasks-workflows-for-woocommerce'
+		);
+		statusOption = optionById(fieldOptions.status, settings.value.status);
 		priorityOption = optionById(
 			fieldOptions.priority,
-			settings.value.priority,
-			fieldOptions.priority[0].field_id
+			settings.value.priority
 		);
 		title = settings.value.title;
 		description = settings.value.description ?? '';
@@ -450,15 +463,14 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 							)}
 						</label>
 						<FieldOptionDropdown
-							placeholder={__(
-								'Select',
-								'out-the-door-order-tasks-workflows-for-woocommerce'
-							)}
+							placeholder={statusEmpty ?? selectText}
 							options={fieldOptions.status}
 							id="status"
 							name="field_status"
 							selected={statusOption}
 							onChange={handleFormChange}
+							emptyLabel={statusEmpty}
+							onClear={handleFormChange}
 						/>
 					</div>
 					<div>
@@ -469,15 +481,14 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 							)}
 						</label>
 						<FieldOptionDropdown
-							placeholder={__(
-								'Select',
-								'out-the-door-order-tasks-workflows-for-woocommerce'
-							)}
+							placeholder={priorityEmpty ?? selectText}
 							options={fieldOptions?.priority || []}
 							id="priority"
 							name="field_priority"
 							selected={priorityOption}
 							onChange={handleFormChange}
+							emptyLabel={priorityEmpty}
+							onClear={handleFormChange}
 						/>
 					</div>
 					<div>
