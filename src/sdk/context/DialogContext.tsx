@@ -16,12 +16,27 @@ export interface DialogOptions {
 	invertActions?: boolean;
 }
 
+/**
+ * Options for a dialog with a third choice besides confirming and closing.
+ */
+export interface ChoiceOptions extends DialogOptions {
+	alternativeText: string;
+}
+
+/**
+ * What a choice dialog was answered with: its confirm button, its third
+ * choice, or neither (cancel, Escape or a click outside).
+ */
+export type DialogChoice = 'confirm' | 'alternative' | 'cancel';
+
 interface DialogState extends DialogOptions {
 	variant: DialogVariant;
+	alternativeText?: string;
 }
 
 interface DialogContextType {
 	confirm: (options: DialogOptions) => Promise<boolean>;
+	choose: (options: ChoiceOptions) => Promise<DialogChoice>;
 	notice: (options: DialogOptions) => Promise<void>;
 }
 
@@ -31,14 +46,17 @@ export const DialogProvider: React.FC<{ children: React.ReactNode }> = ({
 	children,
 }) => {
 	const [state, setState] = useState<DialogState | null>(null);
-	const resolverRef = useRef<((value: boolean) => void) | null>(null);
+	const resolverRef = useRef<((value: DialogChoice) => void) | null>(null);
 
 	const open = useCallback(
-		(variant: DialogVariant, options: DialogOptions): Promise<boolean> => {
+		(
+			variant: DialogVariant,
+			options: DialogOptions & { alternativeText?: string }
+		): Promise<DialogChoice> => {
 			// If a dialog is already open, dismiss it as canceled so we
 			// don't lose the previous resolver.
 			if (resolverRef.current) {
-				resolverRef.current(false);
+				resolverRef.current('cancel');
 				resolverRef.current = null;
 			}
 			return new Promise((resolve) => {
@@ -50,7 +68,13 @@ export const DialogProvider: React.FC<{ children: React.ReactNode }> = ({
 	);
 
 	const confirm = useCallback(
-		(options: DialogOptions) => open('confirm', options),
+		async (options: DialogOptions) =>
+			'confirm' === (await open('confirm', options)),
+		[open]
+	);
+
+	const choose = useCallback(
+		(options: ChoiceOptions) => open('confirm', options),
 		[open]
 	);
 
@@ -61,7 +85,7 @@ export const DialogProvider: React.FC<{ children: React.ReactNode }> = ({
 		[open]
 	);
 
-	const resolveWith = (value: boolean) => {
+	const resolveWith = (value: DialogChoice) => {
 		const resolver = resolverRef.current;
 		resolverRef.current = null;
 		setState(null);
@@ -69,7 +93,7 @@ export const DialogProvider: React.FC<{ children: React.ReactNode }> = ({
 	};
 
 	return (
-		<DialogContext.Provider value={{ confirm, notice }}>
+		<DialogContext.Provider value={{ confirm, choose, notice }}>
 			{children}
 			{state && (
 				<Dialog
@@ -80,8 +104,10 @@ export const DialogProvider: React.FC<{ children: React.ReactNode }> = ({
 					confirmText={state.confirmText}
 					cancelText={state.cancelText}
 					invertActions={state.invertActions}
-					onConfirm={() => resolveWith(true)}
-					onClose={() => resolveWith(false)}
+					alternativeText={state.alternativeText}
+					onConfirm={() => resolveWith('confirm')}
+					onAlternative={() => resolveWith('alternative')}
+					onClose={() => resolveWith('cancel')}
 				/>
 			)}
 		</DialogContext.Provider>
@@ -97,4 +123,9 @@ const useDialogContext = (): DialogContextType => {
 };
 
 export const useConfirm = () => useDialogContext().confirm;
+/**
+ * Asks with a third choice besides confirming and closing, answering which
+ * was picked.
+ */
+export const useChoice = () => useDialogContext().choose;
 export const useNotice = () => useDialogContext().notice;

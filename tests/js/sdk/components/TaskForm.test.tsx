@@ -123,6 +123,38 @@ const renderSettings = async (
 	return { ...view, mock, onSave };
 };
 
+/**
+ * Opens Add Task in its panel, as the Task Manager does.
+ */
+const OpenAdd = () => {
+	const { openCreateTaskModal } = useTaskCreation();
+
+	return (
+		<button
+			type="button"
+			onClick={() => openCreateTaskModal({ title: 'Add Task' })}
+		>
+			Open
+		</button>
+	);
+};
+
+/**
+ * The close prompt's buttons, in order.
+ */
+const promptButtons = async () => {
+	await screen.findByText('Save your changes?');
+	const dialog = document.querySelector('dialog') as HTMLElement;
+	return within(dialog)
+		.getAllByRole('button')
+		.map((button) => button.textContent);
+};
+
+const panelClosedIn = () =>
+	waitFor(() =>
+		expect(screen.queryByLabelText('Title')).not.toBeInTheDocument()
+	);
+
 const posts = (calls: { method: string; path: string }[]) =>
 	calls.filter((call) => 'POST' === call.method);
 
@@ -390,5 +422,110 @@ describe('TaskForm in settings mode', () => {
 		expect(screen.getByLabelText('Priority')).toHaveTextContent(
 			'No priority'
 		);
+	});
+
+	it('offers Save when closing after edits, which hands the values over and closes', async () => {
+		const { user, onSave } = await renderSettings({ title: 'Pack' });
+
+		await user.type(screen.getByLabelText('Title'), ' it');
+		await user.click(screen.getByRole('button', { name: 'Cancel' }));
+		expect(await promptButtons()).toEqual([
+			'Save',
+			'Discard',
+			'Keep editing',
+		]);
+		const dialog = document.querySelector('dialog') as HTMLElement;
+		await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+		await panelClosedIn();
+		expect(onSave).toHaveBeenCalledTimes(1);
+		expect(onSave).toHaveBeenCalledWith({ title: 'Pack it' });
+	});
+
+	it("keeps the panel open when the prompt's Save finds the title empty", async () => {
+		const { user, onSave } = await renderSettings({ title: 'Pack' });
+
+		await user.clear(screen.getByLabelText('Title'));
+		await user.click(screen.getByRole('button', { name: 'Cancel' }));
+		await promptButtons();
+		const dialog = document.querySelector('dialog') as HTMLElement;
+		await user.click(within(dialog).getByRole('button', { name: 'Save' }));
+
+		await waitFor(() =>
+			expect(
+				screen.queryByText('Save your changes?')
+			).not.toBeInTheDocument()
+		);
+		expect(screen.getByLabelText('Title')).toBeInTheDocument();
+		expect(onSave).not.toHaveBeenCalled();
+	});
+
+	it('keeps editing when the prompt is told to', async () => {
+		const { user, onSave } = await renderSettings({ title: 'Pack' });
+
+		await user.type(screen.getByLabelText('Title'), ' it');
+		await user.click(screen.getByRole('button', { name: 'Cancel' }));
+		await promptButtons();
+		await user.click(screen.getByRole('button', { name: 'Keep editing' }));
+
+		expect(screen.getByLabelText('Title')).toHaveValue('Pack it');
+		expect(onSave).not.toHaveBeenCalled();
+	});
+});
+
+describe("Add Task's close prompt", () => {
+	const proto = HTMLDialogElement.prototype as Partial<HTMLDialogElement>;
+	beforeEach(() => {
+		proto.showModal = function (this: HTMLDialogElement) {
+			this.setAttribute('open', '');
+		};
+		proto.close = function (this: HTMLDialogElement) {
+			this.removeAttribute('open');
+		};
+	});
+	afterEach(() => {
+		delete proto.showModal;
+		delete proto.close;
+	});
+
+	it('offers only Discard and Keep editing, as before', async () => {
+		mockFetch({
+			'GET /tasks/fields': ok(
+				envelope({
+					status: {
+						id: 1,
+						label: 'Status',
+						type: 'select',
+						slug: 'status',
+						is_required: true,
+						is_editable: true,
+						is_protected: true,
+					},
+				})
+			),
+			'GET /tasks/fields/status/options': ok(
+				envelope([option(1, 'todo')])
+			),
+			'GET /tasks/fields/priority/options': ok(
+				envelope([option(2, 'normal')])
+			),
+		});
+		const { user } = renderWithProviders(
+			<SidebarModalProvider>
+				<OpenAdd />
+			</SidebarModalProvider>
+		);
+		await user.click(screen.getByRole('button', { name: 'Open' }));
+		await user.type(await screen.findByLabelText('Title'), 'Pack');
+		await user.click(screen.getByRole('button', { name: 'Cancel' }));
+
+		expect(await promptButtons()).toEqual(['Discard', 'Keep editing']);
+		expect(document.querySelector('.dialog-actions')).not.toHaveClass(
+			'dialog-actions-stacked'
+		);
+		expect(
+			document.querySelector('.dialog-actions .wpo-button-primary')
+		).toHaveTextContent('Keep editing');
+		await user.click(screen.getByRole('button', { name: 'Keep editing' }));
 	});
 });

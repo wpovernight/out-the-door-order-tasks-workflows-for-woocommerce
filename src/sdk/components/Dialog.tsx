@@ -11,7 +11,13 @@ interface DialogProps {
 	confirmText?: string;
 	cancelText?: string;
 	invertActions?: boolean;
+	/**
+	 * A third choice, offered first as the main one, the other two stacked
+	 * under it; none without it.
+	 */
+	alternativeText?: string;
 	onConfirm?: () => void;
+	onAlternative?: () => void;
 	onClose: () => void;
 }
 
@@ -23,7 +29,9 @@ export const Dialog: React.FC<DialogProps> = ({
 	confirmText = 'OK',
 	cancelText = 'Cancel',
 	invertActions = false,
+	alternativeText,
 	onConfirm,
+	onAlternative,
 	onClose,
 }) => {
 	const dialogRef = useRef<HTMLDialogElement>(null);
@@ -65,6 +73,16 @@ export const Dialog: React.FC<DialogProps> = ({
 		onClose();
 	};
 
+	const handleAlternative = () => {
+		onAlternative?.();
+		onClose();
+	};
+
+	// With a third choice, it is the main one: the other two are plain.
+	const primaryClass = alternativeText
+		? 'wpo-button'
+		: 'wpo-button wpo-button-primary';
+
 	return (
 		// eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
 		<dialog
@@ -77,7 +95,24 @@ export const Dialog: React.FC<DialogProps> = ({
 				<h2>{title}</h2>
 				<p>{message}</p>
 			</div>
-			<ul className="dialog-actions">
+			<ul
+				className={
+					alternativeText
+						? 'dialog-actions dialog-actions-stacked'
+						: 'dialog-actions'
+				}
+			>
+				{alternativeText && (
+					<li>
+						<button
+							type="button"
+							className="wpo-button wpo-button-primary"
+							onClick={handleAlternative}
+						>
+							{alternativeText}
+						</button>
+					</li>
+				)}
 				{variant === 'confirm' && (
 					<li>
 						<button
@@ -92,7 +127,7 @@ export const Dialog: React.FC<DialogProps> = ({
 				<li>
 					<button
 						type="button"
-						className="wpo-button wpo-button-primary"
+						className={primaryClass}
 						onClick={invertActions ? onClose : handleConfirm}
 					>
 						{invertActions ? cancelText : confirmText}

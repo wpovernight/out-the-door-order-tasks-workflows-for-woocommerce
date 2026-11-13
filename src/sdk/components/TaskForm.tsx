@@ -8,7 +8,7 @@ import { TaskFormSkeleton } from '@sdk/components/TaskFormSkeleton';
 import { searchOrders } from '@sdk/utils/api';
 import { FieldOption, isFieldOption, Task } from '@sdk/types/task';
 import { useSidebarModal } from '@sdk/context/SidebarModalContext';
-import { useConfirm } from '@sdk/context/DialogContext';
+import { useChoice, useConfirm } from '@sdk/context/DialogContext';
 import { ToastType, useToast } from '@sdk/context/ToastContext';
 import { DatePicker } from '@sdk/components/DatePicker';
 
@@ -107,6 +107,37 @@ const wholeNumber = (value: FormDataEntryValue | null): number | undefined => {
 	return Number.isInteger(number) ? number : undefined;
 };
 
+/**
+ * The settings a form in settings mode holds, what is empty left out.
+ *
+ * @param form The form.
+ */
+const settingsIn = (form: HTMLFormElement): TaskSettings => {
+	const formData = new FormData(form);
+	const text = (name: string): string => {
+		const entry = formData.get(name);
+		return 'string' === typeof entry ? entry : '';
+	};
+	const value: TaskSettings = { title: text('title') };
+	const description = text('description');
+	if ('' !== description) {
+		value.description = description;
+	}
+	const status = wholeNumber(formData.get('field_status'));
+	if (undefined !== status) {
+		value.status = status;
+	}
+	const priority = wholeNumber(formData.get('field_priority'));
+	if (undefined !== priority) {
+		value.priority = priority;
+	}
+	const dueInDays = wholeNumber(formData.get('due_in_days'));
+	if (undefined !== dueInDays) {
+		value.dueInDays = dueInDays;
+	}
+	return value;
+};
+
 export const TaskForm: React.FC<TaskFormProps> = ({
 	task,
 	initialValues,
@@ -125,7 +156,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 	} = useTasks();
 	const { setBeforeClose } = useSidebarModal();
 	const confirm = useConfirm();
+	const choose = useChoice();
 	const { addToast } = useToast();
+	// The form, for the close prompt's Save in settings mode to read.
+	const formRef = useRef<HTMLFormElement>(null);
 
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	// Tracks unsaved edits so the close guard knows whether to prompt before closing.
@@ -142,7 +176,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 			return true;
 		}
 
-		return await confirm({
+		const prompt = {
 			title: __(
 				'Save your changes?',
 				'out-the-door-order-tasks-workflows-for-woocommerce'
@@ -159,10 +193,34 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				'Keep editing',
 				'out-the-door-order-tasks-workflows-for-woocommerce'
 			),
-			action: 'save',
+			action: 'save' as const,
 			invertActions: true,
+		};
+
+		if (!settings || settings.readOnly) {
+			return await confirm(prompt);
+		}
+
+		// Settings mode saves nothing but the values, so the prompt can
+		// offer to save them too: checked as Save checks them, then closed.
+		const answer = await choose({
+			...prompt,
+			alternativeText: __(
+				'Save',
+				'out-the-door-order-tasks-workflows-for-woocommerce'
+			),
 		});
-	}, [confirm]);
+		if ('alternative' !== answer) {
+			return 'confirm' === answer;
+		}
+		const form = formRef.current;
+		if (!form || !form.reportValidity()) {
+			return false;
+		}
+		settings.onSave(settingsIn(form));
+		isDirtyRef.current = false;
+		return true;
+	}, [confirm, choose, settings]);
 
 	useEffect(() => {
 		setBeforeClose(beforeCloseGuard);
@@ -185,30 +243,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 		if (!settings || readOnly) {
 			return;
 		}
-		const formData = new FormData(form);
-		const text = (name: string): string => {
-			const value = formData.get(name);
-			return 'string' === typeof value ? value : '';
-		};
-		const value: TaskSettings = { title: text('title') };
-		const description = text('description');
-		if ('' !== description) {
-			value.description = description;
-		}
-		const status = wholeNumber(formData.get('field_status'));
-		if (undefined !== status) {
-			value.status = status;
-		}
-		const priority = wholeNumber(formData.get('field_priority'));
-		if (undefined !== priority) {
-			value.priority = priority;
-		}
-		const dueInDays = wholeNumber(formData.get('due_in_days'));
-		if (undefined !== dueInDays) {
-			value.dueInDays = dueInDays;
-		}
-
-		settings.onSave(value);
+		settings.onSave(settingsIn(form));
 		isDirtyRef.current = false;
 		onDone?.();
 	};
@@ -449,6 +484,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 	// The form field name should follow the pattern: field_{field_slug}
 	return (
 		<form
+			ref={formRef}
 			onSubmit={submit}
 			onChange={handleFormChange}
 			className={`wpo-otd-task-form ${isSubmitting ? 'submitting' : ''}`}
