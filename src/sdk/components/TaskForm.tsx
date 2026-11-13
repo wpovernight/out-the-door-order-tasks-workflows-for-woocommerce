@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from 'react';
 import { __, sprintf } from '@wordpress/i18n';
 import { useTasks } from '@sdk/context/TaskContext';
 import { useAsyncLoader } from '@sdk/hooks/useAsyncLoader';
@@ -11,6 +17,7 @@ import { useSidebarModal } from '@sdk/context/SidebarModalContext';
 import { useChoice, useConfirm } from '@sdk/context/DialogContext';
 import { ToastType, useToast } from '@sdk/context/ToastContext';
 import { DatePicker } from '@sdk/components/DatePicker';
+import { useLeaveGuard } from '@sdk/hooks/useLeaveGuard';
 
 export interface TaskFormInitialValues {
 	title?: string;
@@ -108,6 +115,30 @@ const wholeNumber = (value: FormDataEntryValue | null): number | undefined => {
 };
 
 /**
+ * What the form asks before edits are lost: Discard, or Keep editing.
+ */
+const discardPrompt = () => ({
+	title: __(
+		'Save your changes?',
+		'out-the-door-order-tasks-workflows-for-woocommerce'
+	),
+	message: __(
+		'You have unsaved work. Discarding will permanently erase your recent edits.',
+		'out-the-door-order-tasks-workflows-for-woocommerce'
+	),
+	confirmText: __(
+		'Discard',
+		'out-the-door-order-tasks-workflows-for-woocommerce'
+	),
+	cancelText: __(
+		'Keep editing',
+		'out-the-door-order-tasks-workflows-for-woocommerce'
+	),
+	action: 'save' as const,
+	invertActions: true,
+});
+
+/**
  * The settings a form in settings mode holds, what is empty left out.
  *
  * @param form The form.
@@ -176,26 +207,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 			return true;
 		}
 
-		const prompt = {
-			title: __(
-				'Save your changes?',
-				'out-the-door-order-tasks-workflows-for-woocommerce'
-			),
-			message: __(
-				'You have unsaved work. Discarding will permanently erase your recent edits.',
-				'out-the-door-order-tasks-workflows-for-woocommerce'
-			),
-			confirmText: __(
-				'Discard',
-				'out-the-door-order-tasks-workflows-for-woocommerce'
-			),
-			cancelText: __(
-				'Keep editing',
-				'out-the-door-order-tasks-workflows-for-woocommerce'
-			),
-			action: 'save' as const,
-			invertActions: true,
-		};
+		const prompt = discardPrompt();
 
 		if (!settings || settings.readOnly) {
 			return await confirm(prompt);
@@ -227,8 +239,27 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 		return () => setBeforeClose(null);
 	}, [setBeforeClose, beforeCloseGuard]);
 
+	// The options settings mode starts with, kept from render to render: the
+	// dropdowns take a new one as a new choice, which would undo a change.
+	const settingsStatus = useMemo(
+		() => optionById(fieldOptions.status ?? [], settings?.value.status),
+		[fieldOptions.status, settings]
+	);
+	const settingsPriority = useMemo(
+		() => optionById(fieldOptions.priority ?? [], settings?.value.priority),
+		[fieldOptions.priority, settings]
+	);
+
+	// Settings mode's edits live only in the panel until its Save, so the
+	// screen is guarded against being left or reloaded while it has some.
+	const [guardsLeave, setGuardsLeave] = useState(false);
+	useLeaveGuard(guardsLeave, () => confirm(discardPrompt()));
+
 	const handleFormChange = () => {
 		isDirtyRef.current = true;
+		if (isSettings && !readOnly) {
+			setGuardsLeave(true);
+		}
 	};
 	const { loadingStatus, loadingError } = useAsyncLoader(async () => {
 		await Promise.all([
@@ -437,11 +468,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 			'No priority',
 			'out-the-door-order-tasks-workflows-for-woocommerce'
 		);
-		statusOption = optionById(fieldOptions.status, settings.value.status);
-		priorityOption = optionById(
-			fieldOptions.priority,
-			settings.value.priority
-		);
+		statusOption = settingsStatus;
+		priorityOption = settingsPriority;
 		title = settings.value.title;
 		description = settings.value.description ?? '';
 		submitText = __(

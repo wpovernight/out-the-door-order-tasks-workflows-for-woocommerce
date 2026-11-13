@@ -1,7 +1,13 @@
 import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 import { envelope, mockFetch, ok, renderWithProviders } from '@otd-test-utils';
-import { SidebarModalProvider, TaskForm, useTaskCreation } from '@sdk';
+import {
+	confirmLeave,
+	hasLeaveGuard,
+	SidebarModalProvider,
+	TaskForm,
+	useTaskCreation,
+} from '@sdk';
 import type { FieldOption, TaskSettings } from '@sdk';
 
 const option = (
@@ -154,6 +160,35 @@ const panelClosedIn = () =>
 	waitFor(() =>
 		expect(screen.queryByLabelText('Title')).not.toBeInTheDocument()
 	);
+
+/**
+ * Whether a reload or closing the page is held back to ask first.
+ */
+const unloadPrevented = (): boolean => {
+	const event = new Event('beforeunload', { cancelable: true });
+	const preventDefault = jest.spyOn(event, 'preventDefault');
+	window.dispatchEvent(event);
+	return preventDefault.mock.calls.length > 0;
+};
+
+const dialogProto = HTMLDialogElement.prototype as Partial<HTMLDialogElement>;
+
+/**
+ * jsdom has no modal dialogs: these stand in for them.
+ */
+const installDialogStubs = () => {
+	dialogProto.showModal = function (this: HTMLDialogElement) {
+		this.setAttribute('open', '');
+	};
+	dialogProto.close = function (this: HTMLDialogElement) {
+		this.removeAttribute('open');
+	};
+};
+
+const removeDialogStubs = () => {
+	delete dialogProto.showModal;
+	delete dialogProto.close;
+};
 
 const posts = (calls: { method: string; path: string }[]) =>
 	calls.filter((call) => 'POST' === call.method);
@@ -473,6 +508,55 @@ describe('TaskForm in settings mode', () => {
 	});
 });
 
+describe('leaving the screen with the settings panel open', () => {
+	beforeEach(installDialogStubs);
+	afterEach(removeDialogStubs);
+
+	it('is free before any edit', async () => {
+		await renderSettings({ title: 'Pack' });
+
+		expect(hasLeaveGuard()).toBe(false);
+		expect(unloadPrevented()).toBe(false);
+	});
+
+	it('asks before edits not yet saved are lost, and stays on Keep editing', async () => {
+		const { user, onSave } = await renderSettings({ title: 'Pack' });
+
+		await user.type(screen.getByLabelText('Title'), ' it');
+		expect(hasLeaveGuard()).toBe(true);
+		expect(unloadPrevented()).toBe(true);
+
+		const leaving = confirmLeave();
+		await screen.findByText('Save your changes?');
+		await user.click(screen.getByRole('button', { name: 'Keep editing' }));
+		await expect(leaving).resolves.toBe(false);
+		expect(screen.getByLabelText('Title')).toHaveValue('Pack it');
+
+		const leavingAgain = confirmLeave();
+		await screen.findByText('Save your changes?');
+		await user.click(screen.getByRole('button', { name: 'Discard' }));
+		await expect(leavingAgain).resolves.toBe(true);
+		expect(onSave).not.toHaveBeenCalled();
+	});
+
+	it('is free again once the panel saved and closed', async () => {
+		const { user } = await renderSettings({ title: 'Pack' });
+
+		await user.type(screen.getByLabelText('Title'), ' it');
+		await user.click(screen.getByRole('button', { name: 'Save' }));
+		await panelClosedIn();
+
+		expect(hasLeaveGuard()).toBe(false);
+		expect(unloadPrevented()).toBe(false);
+	});
+
+	it('is free read-only', async () => {
+		await renderSettings({ title: 'Pack' }, true);
+
+		expect(hasLeaveGuard()).toBe(false);
+	});
+});
+
 describe("Add Task's close prompt", () => {
 	const proto = HTMLDialogElement.prototype as Partial<HTMLDialogElement>;
 	beforeEach(() => {
@@ -519,6 +603,8 @@ describe("Add Task's close prompt", () => {
 		await user.type(await screen.findByLabelText('Title'), 'Pack');
 		await user.click(screen.getByRole('button', { name: 'Cancel' }));
 
+		// Adding a task guards against being left as before: not at all.
+		expect(hasLeaveGuard()).toBe(false);
 		expect(await promptButtons()).toEqual(['Discard', 'Keep editing']);
 		expect(document.querySelector('.dialog-actions')).not.toHaveClass(
 			'dialog-actions-stacked'
