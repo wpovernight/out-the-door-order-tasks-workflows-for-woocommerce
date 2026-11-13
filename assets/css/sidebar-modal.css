@@ -150,6 +150,17 @@
     gap: 5px;
 }
 
+/* A number of days, with its unit after it. */
+.wpo-otd-task-form .wpo-otd-task-form-due-in {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+}
+
+.wpo-otd-task-form .wpo-otd-task-form-due-in > input {
+    max-width: 8em;
+}
+
 .wpo-otd-field-option-dropdown-container {
     position: relative;
 }

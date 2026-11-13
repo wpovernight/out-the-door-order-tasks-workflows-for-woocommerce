@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useTasks } from '@sdk/context/TaskContext';
 import { useAsyncLoader } from '@sdk/hooks/useAsyncLoader';
 import { FieldOptionDropdown } from '@sdk/components/FieldOptionDropdownField';
 import { AsyncMultiSelectField } from '@sdk/components/AsyncMultiSelectField';
 import { TaskFormSkeleton } from '@sdk/components/TaskFormSkeleton';
 import { searchOrders } from '@sdk/utils/api';
-import { isFieldOption, Task } from '@sdk/types/task';
+import { FieldOption, isFieldOption, Task } from '@sdk/types/task';
 import { useSidebarModal } from '@sdk/context/SidebarModalContext';
 import { useConfirm } from '@sdk/context/DialogContext';
 import { ToastType, useToast } from '@sdk/context/ToastContext';
@@ -21,19 +21,103 @@ export interface TaskFormInitialValues {
 	orderIds?: number[];
 }
 
+/**
+ * A task as it is set up to be created later, by something other than the
+ * form: no task is saved, only these values handed back.
+ */
+export interface TaskSettings {
+	title: string;
+	description?: string;
+	/** A status option's id. */
+	status?: number;
+	/** A priority option's id. */
+	priority?: number;
+	/** Days after the day the task is created that it is due, 0 to 36,500. */
+	dueInDays?: number;
+}
+
+/**
+ * The form in settings mode: it edits a task's settings and saves no task.
+ */
+export interface TaskSettingsMode {
+	value: TaskSettings;
+	/** Called with the values on Save, before the form closes. */
+	onSave: (value: TaskSettings) => void;
+	/** Shown under the description, e.g. the placeholders its text may hold. */
+	placeholders?: React.ReactNode;
+	/** Every field disabled, and only Close. */
+	readOnly?: boolean;
+}
+
 interface TaskFormProps {
 	task?: Task;
 	initialValues?: TaskFormInitialValues;
 	onDone?: () => void;
 	onTaskSaved?: (task: Task) => void;
+	/** Set up a task without saving one, instead of adding or editing a task. */
+	settings?: TaskSettingsMode;
 }
+
+/** The most days ahead a task set up in settings mode may be due. */
+export const MAX_DUE_IN_DAYS = 36500;
+
+/**
+ * The option with this id; one no longer offered shows as "{id} (deleted)".
+ *
+ * @param options The options.
+ * @param id      The chosen id; none for no choice.
+ * @param fieldId The field the options belong to.
+ */
+const optionById = (
+	options: FieldOption[],
+	id: number | undefined,
+	fieldId: number
+): FieldOption | undefined => {
+	if (undefined === id) {
+		return undefined;
+	}
+
+	return (
+		options.find((option) => option.id === id) ?? {
+			id,
+			field_id: fieldId,
+			slug: '',
+			label: sprintf(
+				/* translators: %d: the id of an option that no longer exists. */
+				__(
+					'%d (deleted)',
+					'out-the-door-order-tasks-workflows-for-woocommerce'
+				),
+				id
+			),
+			color: '',
+			position: 0,
+		}
+	);
+};
+
+/**
+ * A whole number typed into a form, or none.
+ *
+ * @param value The form's value.
+ */
+const wholeNumber = (value: FormDataEntryValue | null): number | undefined => {
+	if ('string' !== typeof value || '' === value.trim()) {
+		return undefined;
+	}
+	const number = Number(value);
+	return Number.isInteger(number) ? number : undefined;
+};
 
 export const TaskForm: React.FC<TaskFormProps> = ({
 	task,
 	initialValues,
 	onDone,
 	onTaskSaved,
+	settings,
 }) => {
+	const isSettings = undefined !== settings;
+	const readOnly = isSettings && true === settings.readOnly;
 	const {
 		saveTask,
 		loadTaskFields,
@@ -92,11 +176,44 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 	};
 	const { loadingStatus, loadingError } = useAsyncLoader(async () => {
 		await Promise.all([
-			loadTaskFields(),
+			// Settings mode saves no task, so it needs none of its fields.
+			...(isSettings ? [] : [loadTaskFields()]),
 			loadFieldOptions('status'),
 			loadFieldOptions('priority'),
 		]);
-	}, [loadFieldOptions, loadTaskFields]);
+	}, [loadFieldOptions, loadTaskFields, isSettings]);
+
+	const saveSettings = (form: HTMLFormElement) => {
+		if (!settings || readOnly) {
+			return;
+		}
+		const formData = new FormData(form);
+		const text = (name: string): string => {
+			const value = formData.get(name);
+			return 'string' === typeof value ? value : '';
+		};
+		const value: TaskSettings = { title: text('title') };
+		const description = text('description');
+		if ('' !== description) {
+			value.description = description;
+		}
+		const status = wholeNumber(formData.get('field_status'));
+		if (undefined !== status) {
+			value.status = status;
+		}
+		const priority = wholeNumber(formData.get('field_priority'));
+		if (undefined !== priority) {
+			value.priority = priority;
+		}
+		const dueInDays = wholeNumber(formData.get('due_in_days'));
+		if (undefined !== dueInDays) {
+			value.dueInDays = dueInDays;
+		}
+
+		settings.onSave(value);
+		isDirtyRef.current = false;
+		onDone?.();
+	};
 
 	const prepareFormData = (formData: FormData): Record<string, any> => {
 		const fieldValues: Array<{
@@ -146,6 +263,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 		e.preventDefault();
 		if (isSubmitting) {
 			return; // Prevent multiple submissions
+		}
+		if (isSettings) {
+			saveSettings(e.target as HTMLFormElement);
+			return;
 		}
 		setIsSubmitting(true);
 		isSubmittingRef.current = true;
@@ -207,7 +328,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 
 	// Check if data is actually loaded
 	const isDataReady =
-		Object.keys(taskFields).length > 0 &&
+		(isSettings || Object.keys(taskFields).length > 0) &&
 		fieldOptions.status?.length > 0 &&
 		fieldOptions.priority?.length > 0;
 
@@ -231,7 +352,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				?.resolved
 		: null;
 	const defaultStatusIndex = initialValues?.statusIndex ?? 0;
-	const statusOption =
+	let statusOption: FieldOption | undefined =
 		statusResolved && isFieldOption(statusResolved)
 			? statusResolved
 			: fieldOptions?.status?.[defaultStatusIndex];
@@ -241,10 +362,45 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 				?.resolved
 		: null;
 	const defaultPriorityIndex = initialValues?.priorityIndex ?? 0;
-	const priorityOption =
+	let priorityOption: FieldOption | undefined =
 		priorityResolved && isFieldOption(priorityResolved)
 			? priorityResolved
 			: fieldOptions?.priority?.[defaultPriorityIndex];
+
+	let title = task ? task.title : (initialValues?.title ?? '');
+	let description = task
+		? task.description
+		: (initialValues?.description ?? '');
+	let submitText = task
+		? __(
+				'Update Task',
+				'out-the-door-order-tasks-workflows-for-woocommerce'
+			)
+		: __(
+				'Create Task',
+				'out-the-door-order-tasks-workflows-for-woocommerce'
+			);
+
+	// Settings mode shows the values it was given, an unset status or
+	// priority as none chosen, and saves them rather than a task.
+	if (settings) {
+		statusOption = optionById(
+			fieldOptions.status,
+			settings.value.status,
+			fieldOptions.status[0].field_id
+		);
+		priorityOption = optionById(
+			fieldOptions.priority,
+			settings.value.priority,
+			fieldOptions.priority[0].field_id
+		);
+		title = settings.value.title;
+		description = settings.value.description ?? '';
+		submitText = __(
+			'Save',
+			'out-the-door-order-tasks-workflows-for-woocommerce'
+		);
+	}
 
 	const dueDate = task
 		? (task.fields.find((field) => field.slug === 'due_date')?.values?.[0]
@@ -284,7 +440,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 			onChange={handleFormChange}
 			className={`wpo-otd-task-form ${isSubmitting ? 'submitting' : ''}`}
 		>
-			<fieldset disabled={isSubmitting}>
+			<fieldset disabled={isSubmitting || readOnly}>
 				<div className="field-group">
 					<div>
 						<label htmlFor="status">
@@ -325,18 +481,52 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 						/>
 					</div>
 					<div>
-						<label htmlFor="due-date">
-							{__(
-								'Due Date',
-								'out-the-door-order-tasks-workflows-for-woocommerce'
-							)}
-						</label>
-						<DatePicker
-							id="due-date"
-							name="field_due_date"
-							value={dueDate}
-							onChange={handleFormChange}
-						/>
+						{settings ? (
+							<>
+								<label htmlFor="due-in-days">
+									{__(
+										'Due in',
+										'out-the-door-order-tasks-workflows-for-woocommerce'
+									)}
+								</label>
+								<span className="wpo-otd-task-form-due-in">
+									<input
+										id="due-in-days"
+										name="due_in_days"
+										type="number"
+										className="wpo-otd-input"
+										min={0}
+										max={MAX_DUE_IN_DAYS}
+										step={1}
+										defaultValue={
+											settings.value.dueInDays ?? ''
+										}
+										aria-describedby="due-in-days-unit"
+									/>
+									<span id="due-in-days-unit">
+										{__(
+											'days',
+											'out-the-door-order-tasks-workflows-for-woocommerce'
+										)}
+									</span>
+								</span>
+							</>
+						) : (
+							<>
+								<label htmlFor="due-date">
+									{__(
+										'Due Date',
+										'out-the-door-order-tasks-workflows-for-woocommerce'
+									)}
+								</label>
+								<DatePicker
+									id="due-date"
+									name="field_due_date"
+									value={dueDate}
+									onChange={handleFormChange}
+								/>
+							</>
+						)}
 					</div>
 				</div>
 				<div className="field-group">
@@ -352,9 +542,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 							name="title"
 							type="text"
 							className="wpo-otd-input"
-							defaultValue={
-								task ? task.title : (initialValues?.title ?? '')
-							}
+							defaultValue={title}
+							maxLength={settings ? 255 : undefined}
 							placeholder={__(
 								'Write a name for your task.',
 								'out-the-door-order-tasks-workflows-for-woocommerce'
@@ -363,56 +552,58 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 						/>
 					</div>
 				</div>
-				<div className="field-group">
-					<div>
-						<label htmlFor="associated-orders">
-							{__(
-								'Associated Orders',
-								'out-the-door-order-tasks-workflows-for-woocommerce'
-							)}
-						</label>
-						<AsyncMultiSelectField
-							placeholder={__(
-								'Search orders by number, customer, address…',
-								'out-the-door-order-tasks-workflows-for-woocommerce'
-							)}
-							selectedOptions={associatedOrderIds}
-							id="associated-orders"
-							name="field_order"
-							onSelect={handleFormChange}
-							onRemove={handleFormChange}
-							// ToDo: Lazy load for next pages
-							onSearch={async (
-								query: string,
-								signal?: AbortSignal
-							) => {
-								const results = await searchOrders(
-									query,
-									signal
-								);
-								return results.map((order) => {
-									const customerName =
-										[
-											order.billing?.first_name,
-											order.billing?.last_name,
-										]
-											.filter(Boolean)
-											.join(' ')
-											.trim() ||
-										order.billing?.company?.trim();
+				{!settings && (
+					<div className="field-group">
+						<div>
+							<label htmlFor="associated-orders">
+								{__(
+									'Associated Orders',
+									'out-the-door-order-tasks-workflows-for-woocommerce'
+								)}
+							</label>
+							<AsyncMultiSelectField
+								placeholder={__(
+									'Search orders by number, customer, address…',
+									'out-the-door-order-tasks-workflows-for-woocommerce'
+								)}
+								selectedOptions={associatedOrderIds}
+								id="associated-orders"
+								name="field_order"
+								onSelect={handleFormChange}
+								onRemove={handleFormChange}
+								// ToDo: Lazy load for next pages
+								onSearch={async (
+									query: string,
+									signal?: AbortSignal
+								) => {
+									const results = await searchOrders(
+										query,
+										signal
+									);
+									return results.map((order) => {
+										const customerName =
+											[
+												order.billing?.first_name,
+												order.billing?.last_name,
+											]
+												.filter(Boolean)
+												.join(' ')
+												.trim() ||
+											order.billing?.company?.trim();
 
-									return {
-										id: order.id,
-										label: `#${order.id}`,
-										searchLabel: customerName
-											? `#${order.id} - ${customerName}`
-											: `#${order.id}`,
-									};
-								})
-							}}
-						/>
+										return {
+											id: order.id,
+											label: `#${order.id}`,
+											searchLabel: customerName
+												? `#${order.id} - ${customerName}`
+												: `#${order.id}`,
+										};
+									});
+								}}
+							/>
+						</div>
 					</div>
-				</div>
+				)}
 				<div className="field-group">
 					<div>
 						<label htmlFor="description">
@@ -430,44 +621,54 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 								'Describe the task.',
 								'out-the-door-order-tasks-workflows-for-woocommerce'
 							)}
-							defaultValue={
-								task
-									? task.description
-									: (initialValues?.description ?? '')
-							}
+							defaultValue={description}
 						/>
 					</div>
 				</div>
+				{settings?.placeholders && (
+					<div className="field-group">
+						<div>{settings.placeholders}</div>
+					</div>
+				)}
 			</fieldset>
-			<div className="action-group">
-				<button
-					type="button"
-					className="wpo-button"
-					onClick={onDone}
-					disabled={isSubmitting}
-				>
-					{__(
-						'Cancel',
-						'out-the-door-order-tasks-workflows-for-woocommerce'
-					)}
-				</button>
-				<button
-					type="submit"
-					className="wpo-button wpo-button-primary"
-					disabled={isSubmitting}
-				>
-					{isSubmitting && <span className="wpo-otd-spinner"></span>}
-					{task
-						? __(
-								'Update Task',
-								'out-the-door-order-tasks-workflows-for-woocommerce'
-							)
-						: __(
-								'Create Task',
-								'out-the-door-order-tasks-workflows-for-woocommerce'
-							)}
-				</button>
-			</div>
+			{readOnly ? (
+				<div className="action-group">
+					<button
+						type="button"
+						className="wpo-button"
+						onClick={onDone}
+					>
+						{__(
+							'Close',
+							'out-the-door-order-tasks-workflows-for-woocommerce'
+						)}
+					</button>
+				</div>
+			) : (
+				<div className="action-group">
+					<button
+						type="button"
+						className="wpo-button"
+						onClick={onDone}
+						disabled={isSubmitting}
+					>
+						{__(
+							'Cancel',
+							'out-the-door-order-tasks-workflows-for-woocommerce'
+						)}
+					</button>
+					<button
+						type="submit"
+						className="wpo-button wpo-button-primary"
+						disabled={isSubmitting}
+					>
+						{isSubmitting && (
+							<span className="wpo-otd-spinner"></span>
+						)}
+						{submitText}
+					</button>
+				</div>
+			)}
 		</form>
 	);
 };

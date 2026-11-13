@@ -1,12 +1,20 @@
 import React from 'react';
 import { useSidebarModal } from '@sdk/context/SidebarModalContext';
-import { TaskForm, TaskFormInitialValues } from '@sdk/components/TaskForm';
+import {
+	TaskForm,
+	TaskFormInitialValues,
+	TaskSettingsMode,
+} from '@sdk/components/TaskForm';
 import { Task } from '@sdk/types/task';
 
 interface CreateTaskModalOptions {
 	title: string;
 	initialValues?: TaskFormInitialValues;
 	onTaskSaved?: (task: Task) => void;
+}
+
+interface TaskSettingsModalOptions extends TaskSettingsMode {
+	title: string;
 }
 
 interface EditTaskModalOptions {
@@ -29,7 +37,23 @@ export const useTaskCreation = () => {
 		);
 	};
 
-	return { openCreateTaskModal, closeModal: closeSidebar };
+	/**
+	 * Opens the form in settings mode: it saves no task, only hands its values
+	 * to `onSave`; read-only, it shows them with only Close.
+	 *
+	 * @param options       The panel's title and the settings mode's props.
+	 * @param options.title The panel's title.
+	 */
+	const openTaskSettings = ({
+		title,
+		...settings
+	}: TaskSettingsModalOptions) => {
+		openSidebar(<TaskForm settings={settings} onDone={closeSidebar} />, {
+			title,
+		});
+	};
+
+	return { openCreateTaskModal, openTaskSettings, closeModal: closeSidebar };
 };
 
 export const useTaskEdit = () => {
