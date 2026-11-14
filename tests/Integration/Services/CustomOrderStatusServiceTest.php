@@ -570,7 +570,11 @@ class CustomOrderStatusServiceTest extends IntegrationTestCase {
 		$this->assertNotNull( $this->service->find( $status->id ) );
 
 		$messages = array_column( $logs(), 1 );
-		$this->assertContains( "Order {$order} could not be moved from status \"packed\"; it stays.", $messages );
+		// Newer WooCommerce reports the failed save from update_status(); older versions leave it to the read-back.
+		$this->assertCount(
+			1,
+			preg_grep( "/^Order {$order} could not be moved from status \"packed\"( to \"on-hold\")?; it stays\.$/", $messages )
+		);
 		$this->assertSame( "The deletion of custom order status {$status->id} stopped: 1 of its orders could not be moved from packed: {$order}.", end( $messages ) );
 	}
 
