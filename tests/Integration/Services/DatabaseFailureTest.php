@@ -119,14 +119,22 @@ class DatabaseFailureTest extends IntegrationTestCase {
 	}
 
 	public function test_a_failed_renumbering_rolls_back_the_rebalance(): void {
-		$ids = array( $this->create_task(), $this->create_task() );
-		$this->tasks->set_field_value( $ids[0], DefaultTaskFields::POSITION, '2.5' );
-		$this->tasks->set_field_value( $ids[1], DefaultTaskFields::POSITION, '1.5' );
-		$this->fail_queries( '/^UPDATE \w+wpo_otd_task_field_values SET value = CASE/' );
+		$positions = array();
+
+		foreach ( range( 1, 501 ) as $number ) {
+			$id = $this->create_task();
+			$this->tasks->set_field_value( $id, DefaultTaskFields::POSITION, "{$number}.5" );
+			$positions[ $id ] = "{$number}.5";
+		}
+
+		// Only the second chunk numbers a task 501, so the first chunk's update runs before the failure.
+		$this->fail_queries( '/^UPDATE \w+wpo_otd_task_field_values SET value = CASE id WHEN \d+ THEN 501 /' );
 
 		$this->assertFalse( $this->make( TaskRepository::class )->rebalance_positions( $this->status_option_id( 'not_started' ) ) );
-		$this->assertSame( '2.5', $this->field_value( $ids[0], DefaultTaskFields::POSITION ) );
-		$this->assertSame( '1.5', $this->field_value( $ids[1], DefaultTaskFields::POSITION ) );
+
+		foreach ( $positions as $id => $position ) {
+			$this->assertSame( $position, $this->field_value( $id, DefaultTaskFields::POSITION ), "Task {$id} was renumbered." );
+		}
 	}
 
 	public function test_a_failed_rebalance_is_logged(): void {
