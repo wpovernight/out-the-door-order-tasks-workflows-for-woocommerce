@@ -158,30 +158,31 @@ class TaskRepository extends BaseRepository {
 				return true;
 			}
 
-			$ranked_cte = "
-			WITH ranked AS (
-				SELECT
-					position.id,
-					ROW_NUMBER() OVER (
-						ORDER BY
-							CAST(position.value AS DECIMAL(10, 5))
-					) AS new_position
-				FROM
-					{$task_field_value_table_name} AS position
-					INNER JOIN {$task_field_value_table_name} AS status ON position.task_id = status.task_id
-				WHERE
-					status.field_id = %d
-					AND position.field_id = %d
-					AND status.value = %d
-			)
+			// A derived table rather than WITH ... UPDATE, which MariaDB rejects. Its window function makes it
+			// materialized, so it may read the table the UPDATE writes.
+			$renumber_query = "
 			UPDATE
 				{$task_field_value_table_name} AS p
-				INNER JOIN ranked r ON p.id = r.id
+				INNER JOIN (
+					SELECT
+						position.id,
+						ROW_NUMBER() OVER (
+							ORDER BY
+								CAST(position.value AS DECIMAL(10, 5))
+						) AS new_position
+					FROM
+						{$task_field_value_table_name} AS position
+						INNER JOIN {$task_field_value_table_name} AS status ON position.task_id = status.task_id
+					WHERE
+						status.field_id = %d
+						AND position.field_id = %d
+						AND status.value = %d
+				) AS ranked ON p.id = ranked.id
 			SET
-				p.value = r.new_position;
+				p.value = ranked.new_position;
 		";
 
-			$affected_rows = $this->task_field_value_repository->execute_raw( $ranked_cte, $bindings );
+			$affected_rows = $this->task_field_value_repository->execute_raw( $renumber_query, $bindings );
 
 			// No row changed when the positions were already 1, 2, 3, ...
 			return false !== $affected_rows;
