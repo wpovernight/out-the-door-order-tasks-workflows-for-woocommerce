@@ -162,6 +162,23 @@ class TaskRepositoryTest extends IntegrationTestCase {
 		$this->assertLessThan( min( $positions[0], $positions[2] ), max( $positions[1], $positions[3] ), 'Tasks that were at 1 stay ahead of those at 2.' );
 	}
 
+	public function test_rebalancing_orders_tied_tasks_by_creation(): void {
+		$ids = $this->create_tasks( array( 2.0, 1.0, 2.0, 1.0 ), $this->todo );
+
+		$this->assertTrue( $this->repository->rebalance_positions( $this->todo ) );
+
+		$this->assertSame( array( 3.0, 1.0, 4.0, 2.0 ), $this->positions( $ids ) );
+	}
+
+	public function test_rebalancing_numbers_a_column_longer_than_one_chunk(): void {
+		$ids = $this->create_tasks( range( 501.0, 1.0 ), $this->todo );
+
+		$this->assertTrue( $this->repository->rebalance_positions( $this->todo ) );
+
+		// Every task, the first chunk's and the second's, gets its own number.
+		$this->assertSame( array_map( 'floatval', range( 501, 1 ) ), $this->positions( $ids ) );
+	}
+
 	public function test_rebalancing_handles_zero_negative_and_large_positions(): void {
 		$ids = $this->create_tasks( array( 1000000.0, -5.0, 0.0, 0.00001 ), $this->todo );
 

@@ -1641,7 +1641,16 @@ final class TaskManagerService {
 	 */
 	public function rebalance_task_positions( int $status_id ): void {
 		try {
-			$this->task_repository->rebalance_positions( $status_id );
+			if ( ! $this->task_repository->rebalance_positions( $status_id ) ) {
+				$db_error = $this->task_repository->get_last_db_error();
+				Logger::error(
+					sprintf(
+						'Failed to rebalance task positions for status %d.%s',
+						$status_id,
+						$db_error ? ' Database error: ' . $db_error : ''
+					)
+				);
+			}
 		} catch ( \Throwable $e ) {
 			Logger::error( sprintf(
 				'Failed to rebalance task positions for status %d: %s',

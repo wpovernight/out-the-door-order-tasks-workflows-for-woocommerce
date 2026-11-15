@@ -118,6 +118,33 @@ class DatabaseFailureTest extends IntegrationTestCase {
 		$this->assertFalse( $this->make( TaskRepository::class )->rebalance_positions( $this->status_option_id( 'not_started' ) ) );
 	}
 
+	public function test_a_failed_renumbering_rolls_back_the_rebalance(): void {
+		$ids = array( $this->create_task(), $this->create_task() );
+		$this->tasks->set_field_value( $ids[0], DefaultTaskFields::POSITION, '2.5' );
+		$this->tasks->set_field_value( $ids[1], DefaultTaskFields::POSITION, '1.5' );
+		$this->fail_queries( '/^UPDATE \w+wpo_otd_task_field_values SET value = CASE/' );
+
+		$this->assertFalse( $this->make( TaskRepository::class )->rebalance_positions( $this->status_option_id( 'not_started' ) ) );
+		$this->assertSame( '2.5', $this->field_value( $ids[0], DefaultTaskFields::POSITION ) );
+		$this->assertSame( '1.5', $this->field_value( $ids[1], DefaultTaskFields::POSITION ) );
+	}
+
+	public function test_a_failed_rebalance_is_logged(): void {
+		$id = $this->create_task();
+		$this->tasks->set_field_value( $id, DefaultTaskFields::POSITION, '3.5' );
+		$this->logs = array();
+		$this->fail_queries( '/^UPDATE \w+wpo_otd_task_field_values SET value = CASE/' );
+
+		$this->tasks->rebalance_task_positions( $this->status_option_id( 'not_started' ) );
+
+		$this->assertSame( '3.5', $this->field_value( $id, DefaultTaskFields::POSITION ) );
+		$this->assertCount( 1, $this->logs );
+		$this->assertStringStartsWith(
+			'error: Failed to rebalance task positions for status ' . $this->status_option_id( 'not_started' ) . '. Database error: ',
+			$this->logs[0]
+		);
+	}
+
 	public function test_a_crashing_rebalance_is_logged_not_thrown(): void {
 		$id = $this->create_task();
 		$this->tasks->set_field_value( $id, DefaultTaskFields::POSITION, '3.5' );

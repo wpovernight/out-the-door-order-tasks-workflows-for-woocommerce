@@ -122,70 +122,50 @@ class TaskRepository extends BaseRepository {
 	}
 
 	/**
-	 * Renumber the task positions of one status column 1, 2, 3, ... in their current order.
+	 * Renumber the task positions of one status column 1, 2, 3, ... in their current order. Tasks at the same position
+	 * keep the order of their IDs.
 	 *
 	 * @param int $status_id
 	 *
-	 * @return bool
+	 * @return bool False when the database failed; nothing is renumbered then.
 	 * @throws \Throwable
 	 */
 	public function rebalance_positions( int $status_id ): bool {
 		return (bool) $this->transaction( function () use ( $status_id ) {
-			$task_field_value_table_name = $this->task_field_value_repository->get_table_full_name();
-			$bindings                    = array( DefaultTaskFields::STATUS, DefaultTaskFields::POSITION, $status_id );
-
 			// Locked until COMMIT, so no concurrent write changes a position while the column is renumbered.
-			$lock_query = "
-				SELECT
-					position.id
-				FROM
-					{$task_field_value_table_name} AS position
-					INNER JOIN {$task_field_value_table_name} AS status ON position.task_id = status.task_id
-				WHERE
-					status.field_id = %d
-					AND position.field_id = %d
-					AND status.value = %d
-					FOR UPDATE;
-				";
+			$rows = $this->positions_in_status( $status_id )
+				->order_by_raw( 'CAST(position.value AS DECIMAL(10,5)) ASC, position.id ASC' )
+				->lock_for_update()
+				->get( true );
 
-			$locked = $this->task_field_value_repository->execute_raw( $lock_query, $bindings );
-
-			if ( false === $locked ) {
-				return false;
+			// $wpdb gives an empty list for a failed query too, so only its error tells that apart from an empty column.
+			if ( empty( $rows ) ) {
+				return '' === $this->task_field_value_repository->get_last_db_error();
 			}
 
-			if ( 0 === $locked ) {
-				return true;
+			$table = $this->task_field_value_repository->get_table_full_name();
+			$ids   = array_map( 'intval', array_column( $rows, 'id' ) );
+
+			// CASE tries its branches in turn for every row, so a long column is written in chunks to stay fast.
+			foreach ( array_chunk( $ids, 500 ) as $chunk_index => $chunk ) {
+				$cases    = array();
+				$bindings = array();
+
+				foreach ( $chunk as $index => $id ) {
+					$cases[]    = 'WHEN %d THEN %d';
+					$bindings[] = $id;
+					$bindings[] = $chunk_index * 500 + $index + 1;
+				}
+
+				$query = "UPDATE {$table} SET value = CASE id " . implode( ' ', $cases ) . ' END WHERE id IN (' . self::in_placeholders( $chunk, '%d' ) . ')';
+
+				// No row changes when the positions were already 1, 2, 3, ...
+				if ( false === $this->task_field_value_repository->execute_raw( $query, array_merge( $bindings, $chunk ) ) ) {
+					return false;
+				}
 			}
 
-			// A derived table rather than WITH ... UPDATE, which MariaDB rejects. Its window function makes it
-			// materialized, so it may read the table the UPDATE writes.
-			$renumber_query = "
-			UPDATE
-				{$task_field_value_table_name} AS p
-				INNER JOIN (
-					SELECT
-						position.id,
-						ROW_NUMBER() OVER (
-							ORDER BY
-								CAST(position.value AS DECIMAL(10, 5))
-						) AS new_position
-					FROM
-						{$task_field_value_table_name} AS position
-						INNER JOIN {$task_field_value_table_name} AS status ON position.task_id = status.task_id
-					WHERE
-						status.field_id = %d
-						AND position.field_id = %d
-						AND status.value = %d
-				) AS ranked ON p.id = ranked.id
-			SET
-				p.value = ranked.new_position;
-		";
-
-			$affected_rows = $this->task_field_value_repository->execute_raw( $renumber_query, $bindings );
-
-			// No row changed when the positions were already 1, 2, 3, ...
-			return false !== $affected_rows;
+			return true;
 		} );
 	}
 
