@@ -6,7 +6,7 @@ Tested up to: 7.1
 Requires PHP: 8.1
 WC requires at least: 8.2
 WC tested up to: 11.1
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -82,6 +82,9 @@ Yes. Mark the shipped quantity of each ordered item and leave the remaining quan
 Yes. Create as many custom order statuses as you need to reflect your store's workflow.
 
 == Changelog ==
+
+= 1.0.1 =
+* Fix: Minor bug fixes and improvements.
 
 = 1.0.0 =
 * Initial release.
