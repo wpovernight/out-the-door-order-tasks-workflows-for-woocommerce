@@ -19,6 +19,7 @@ use WP_CLI;
 use WP_CLI\Process;
 
 use function WP_CLI\Utils\esc_cmd;
+use function WP_CLI\Utils\get_php_binary;
 use function WP_CLI\Utils\get_temp_dir;
 use function WP_CLI\Utils\normalize_path;
 
@@ -539,18 +540,9 @@ final class BuildCommand {
 
 		WP_CLI::log( '> wp ' . $command );
 
-		$result = WP_CLI::runcommand(
-			$command,
-			array(
-				'launch'     => true,
-				'return'     => 'all',
-				'exit_error' => false,
-			)
-		);
-
-		if ( 0 !== $result->return_code ) {
-			throw new RuntimeException( sprintf( "`wp %s` failed:\n%s", $command, trim( $result->stderr . "\n" . $result->stdout ) ) );
-		}
+		// Run through step() rather than WP_CLI::runcommand(), which reads stdout to the end before stderr: a run
+		// whose stderr fills the pipe (WP-CLI on a newer PHP prints thousands of deprecation notices) hangs forever.
+		$this->step( esc_cmd( '%s %s', get_php_binary(), $GLOBALS['argv'][0] ) . ' ' . $command, $source, false );
 	}
 
 	/**
@@ -719,14 +711,21 @@ final class BuildCommand {
 	/**
 	 * Run a build step, logging it first so a slow step doesn't look like a hang.
 	 *
+	 * Stderr is merged into stdout: Process::run() reads stdout to the end before stderr, so a step writing
+	 * more than a pipe's buffer to stderr would block forever. A step's output is only shown when it fails.
+	 *
 	 * @param string $command Shell command.
 	 * @param string $cwd     Working directory.
+	 * @param bool   $log     Whether to log the command (false when the caller logged a shorter form).
 	 *
 	 * @return void
 	 */
-	private function step( string $command, string $cwd ): void {
-		WP_CLI::log( '> ' . $command );
-		$this->run( $command, $cwd );
+	private function step( string $command, string $cwd, bool $log = true ): void {
+		if ( $log ) {
+			WP_CLI::log( '> ' . $command );
+		}
+
+		$this->run( $command . ' 2>&1', $cwd );
 	}
 
 	/**
