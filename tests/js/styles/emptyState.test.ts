@@ -36,9 +36,20 @@ describe('rules empty-state illustration', () => {
 	});
 
 	it('sizes a primary or secondary action like the automations header buttons', () => {
-		expect(ruleBody(skeleton, '.wpo-otd-empty-state > .wpo-button')).toBe(
+		expect(
+			ruleBody(
+				skeleton,
+				'.wpo-otd-empty-state > .wpo-button, .wpo-otd-empty-state-actions > .wpo-button'
+			)
+		).toBe(
 			'min-height: 40px; padding: 0 16px; border-radius: var(--wpo-otd-radius-m); ' +
 				'font-size: 1.08em; font-weight: 600;'
+		);
+	});
+
+	it('sets two actions side by side, centred', () => {
+		expect(ruleBody(skeleton, '.wpo-otd-empty-state-actions')).toBe(
+			'display: flex; flex-wrap: wrap; justify-content: center; gap: 0.8em;'
 		);
 	});
 

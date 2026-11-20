@@ -145,6 +145,9 @@
     --wpo-otd-icon-rules-empty: url(data:image/svg+xml,%3Csvg%20width%3D%2280%22%20height%3D%2280%22%20viewBox%3D%220%200%2080%2080%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Cpath%20opacity%3D%220.3%22%20d%3D%22M10.8498%2012.2227C9.16315%2010.2527%2010.2398%207.19935%2012.7898%206.72268C12.9931%206.68602%2013.1998%206.66602%2013.4065%206.66602H54.9998C66.5465%206.66602%2073.7631%2019.166%2067.9898%2029.166C65.3098%2033.806%2060.3598%2036.666%2054.9998%2036.666H13.4065C10.8165%2036.666%209.19648%2033.8593%2010.4898%2031.616C10.5965%2031.436%2010.7165%2031.266%2010.8498%2031.1093L13.3631%2028.176C16.5731%2024.4293%2016.5731%2018.906%2013.3631%2015.1593L10.8498%2012.2227Z%22%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20fill%3D%22%23717680%22%2F%3E%0A%3Cpath%20d%3D%22M10%2055C10%2046.7167%2016.7167%2040%2025%2040H66.5933C69.1833%2040%2070.8033%2042.8067%2069.51%2045.05C69.4033%2045.23%2069.2833%2045.4%2069.15%2045.5567L66.6333%2048.49C63.4233%2052.2367%2063.4233%2057.76%2066.6333%2061.5067L69.15%2064.44C70.84%2066.4067%2069.7667%2069.4633%2067.2167%2069.9433C67.0133%2069.98%2066.8033%2070%2066.5933%2070H25C16.7167%2070%2010%2063.2833%2010%2055Z%22%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20fill%3D%22%23717680%22%2F%3E%0A%3C%2Fsvg%3E%0A);
     --wpo-otd-icon-warning-inline: url(data:image/svg+xml,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M8%201.5L15.2%2014.25H0.8ZM8%204L2.92%2013H13.08ZM7.4%207.1A0.6%200.6%200%200%201%208.6%207.1V9.9A0.6%200.6%200%200%201%207.4%209.9ZM8%2010.75A0.75%200.75%200%201%201%208%2012.25A0.75%200.75%200%201%201%208%2010.75Z%22%20fill%3D%22%23535862%22%2F%3E%0A%3C%2Fsvg%3E%0A);
     --wpo-otd-icon-info: url(data:image/svg+xml,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Cpath%20fill-rule%3D%22evenodd%22%20clip-rule%3D%22evenodd%22%20d%3D%22M8%201A7%207%200%201%200%208%2015A7%207%200%201%200%208%201ZM8%202.25A5.75%205.75%200%201%201%208%2013.75A5.75%205.75%200%201%201%208%202.25ZM8%204.25A0.875%200.875%200%201%201%208%206A0.875%200.875%200%201%201%208%204.25ZM7.375%207.5A0.625%200.625%200%200%201%208.625%207.5V11.25A0.625%200.625%200%200%201%207.375%2011.25Z%22%20fill%3D%22%23535862%22%2F%3E%0A%3C%2Fsvg%3E%0A);
+    --wpo-otd-icon-checkbox-check: url(data:image/svg+xml,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M14.6668%206.5L8.25016%2012.9167L5.3335%2010%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E);
+    --wpo-otd-icon-checkbox-dash: url(data:image/svg+xml,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5.9165%2010H14.0832%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E);
+    --wpo-otd-icon-view: url(data:image/svg+xml,%3Csvg%20width%3D%2216%22%20height%3D%2214%22%20viewBox%3D%220%200%2016%2014%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M0.75%207C2.25%203.9%204.9%202.25%208%202.25C11.1%202.25%2013.75%203.9%2015.25%207C13.75%2010.1%2011.1%2011.75%208%2011.75C4.9%2011.75%202.25%2010.1%200.75%207Z%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.5%22%20stroke-linejoin%3D%22round%22%2F%3E%3Ccircle%20cx%3D%228%22%20cy%3D%227%22%20r%3D%222.25%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.5%22%2F%3E%3C%2Fsvg%3E);
 }
 
 .wpo-otd-tag {
@@ -476,6 +479,11 @@
     -webkit-mask-image: var(--wpo-otd-icon-copy);
 }
 
+.wpo-otd-row-actions > li > button.wpo-otd-view-button::before {
+    mask-image: var(--wpo-otd-icon-view);
+    -webkit-mask-image: var(--wpo-otd-icon-view);
+}
+
 .wpo-otd-form-actions {
     display: flex;
     gap: 0.5em;
@@ -550,6 +558,127 @@
     font-weight: normal;
     color: var(--wpo-otd-text-gray);
     display: inline-block;
+}
+
+/* A checkbox drawn as a rounded square, ticked or dashed (indeterminate) in purple; WP's own tick is replaced. */
+input[type="checkbox"].wpo-otd-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    position: relative;
+    width: 1.5em;
+    height: 1.5em;
+    min-width: 1.5em;
+    margin: 0;
+    border: 1px solid var(--wpo-otd-border-color);
+    border-radius: var(--wpo-otd-radius-m);
+    background: var(--wpo-otd-card-bg);
+    box-shadow: none;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+input[type="checkbox"].wpo-otd-checkbox:checked,
+input[type="checkbox"].wpo-otd-checkbox:indeterminate {
+    border-color: var(--wpo-otd-purple-primary);
+    background: var(--wpo-otd-purple-bg);
+}
+
+input[type="checkbox"].wpo-otd-checkbox:checked::before,
+input[type="checkbox"].wpo-otd-checkbox:indeterminate::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    width: auto;
+    height: auto;
+    margin: 0;
+    background-color: var(--wpo-otd-purple-primary);
+    mask-image: var(--wpo-otd-icon-checkbox-check);
+    mask-size: 100% 100%;
+    mask-repeat: no-repeat;
+    -webkit-mask-image: var(--wpo-otd-icon-checkbox-check);
+    -webkit-mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+}
+
+input[type="checkbox"].wpo-otd-checkbox:indeterminate::before {
+    mask-image: var(--wpo-otd-icon-checkbox-dash);
+    -webkit-mask-image: var(--wpo-otd-icon-checkbox-dash);
+}
+
+input[type="checkbox"].wpo-otd-checkbox:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* A row of buttons drawn as one bordered control, the one with aria-pressed="true" filled grey. */
+.wpo-otd-segmented {
+    display: inline-flex;
+    border: 1px solid var(--wpo-otd-border-color);
+    border-radius: var(--wpo-otd-radius-m);
+    background: var(--wpo-otd-card-bg);
+    overflow: hidden;
+}
+
+.wpo-otd-segmented > .wpo-button {
+    padding: 0.63em 1.2em;
+    border-radius: 0;
+    font-size: inherit;
+    line-height: 2;
+    color: var(--wpo-otd-text-gray);
+}
+
+.wpo-otd-segmented > .wpo-button + .wpo-button {
+    border-left: 1px solid var(--wpo-otd-border-color);
+}
+
+.wpo-otd-segmented > .wpo-button:hover {
+    background: var(--wpo-otd-bg-gray);
+}
+
+.wpo-otd-segmented > .wpo-button[aria-pressed="true"] {
+    background: var(--wpo-otd-bg-gray-medium);
+    color: var(--wpo-otd-text-primary);
+}
+
+.wpo-otd-segmented > .wpo-button:focus-visible {
+    outline: 2px solid var(--wpo-otd-wp-blue);
+    outline-offset: -2px;
+}
+
+/* A native select (.wpo-otd-input) in this wrapper loses WP's arrow and shows core's chevron instead. */
+.wpo-otd-select {
+    position: relative;
+    display: inline-flex;
+}
+
+#wpcontent .wpo-otd-select > select.wpo-otd-input {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    max-width: none;
+    padding-right: 2.6em;
+    background-image: none;
+    line-height: 2;
+}
+
+.wpo-otd-select::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 0.9em;
+    width: 0.9em;
+    height: 0.9em;
+    transform: translateY(-50%);
+    background-color: var(--wpo-otd-text-gray);
+    pointer-events: none;
+    mask-image: var(--wpo-otd-icon-chevron-down);
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-image: var(--wpo-otd-icon-chevron-down);
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
 }
 
 .wpo-otd-dialog {

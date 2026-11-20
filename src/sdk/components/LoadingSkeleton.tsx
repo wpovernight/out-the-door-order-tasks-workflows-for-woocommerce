@@ -114,19 +114,24 @@ interface EmptyStateProps {
 	/** Shows the action as a primary or secondary button instead of the default blue one. */
 	actionVariant?: 'primary' | 'secondary';
 	actionButtonProps?: React.ButtonHTMLAttributes<HTMLButtonElement>;
+	/** A second action, shown after the first as a secondary button. */
+	secondaryActionText?: string;
+	onSecondaryAction?: () => void;
 }
 
 /**
  * Empty state component for when there are no items.
  *
  * @param {Object}   props
- * @param {string}   [props.icon='note']       - Icon name ('note', 'box', 'rules') or emoji string
- * @param {string}   [props.title]             - Bold first line; the message becomes its description
- * @param {string}   props.message             - Message to display (required)
- * @param {string}   [props.actionText]        - Text for the action button
- * @param {Function} [props.onAction]          - Callback when action button is clicked
- * @param {string}   [props.actionVariant]     - 'primary' or 'secondary' button instead of the default one
- * @param {Object}   [props.actionButtonProps] - Additional props for the action button (data attributes, etc.)
+ * @param {string}   [props.icon='note']         - Icon name ('note', 'box', 'rules') or emoji string
+ * @param {string}   [props.title]               - Bold first line; the message becomes its description
+ * @param {string}   props.message               - Message to display (required)
+ * @param {string}   [props.actionText]          - Text for the action button
+ * @param {Function} [props.onAction]            - Callback when action button is clicked
+ * @param {string}   [props.actionVariant]       - 'primary' or 'secondary' button instead of the default one
+ * @param {Object}   [props.actionButtonProps]   - Additional props for the action button (data attributes, etc.)
+ * @param {string}   [props.secondaryActionText] - Text for a second button, shown after the action as a secondary one
+ * @param {Function} [props.onSecondaryAction]   - Callback when the second button is clicked
  */
 export const EmptyState: React.FC<EmptyStateProps> = ({
 	icon = 'note',
@@ -136,6 +141,8 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 	onAction,
 	actionVariant,
 	actionButtonProps,
+	secondaryActionText,
+	onSecondaryAction,
 }) => {
 	// Extract className from actionButtonProps to merge with default
 	const { className: customClassName, ...restButtonProps } =
@@ -148,6 +155,16 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 		: baseButtonClassName;
 
 	const isSvgIcon = icon === 'note' || icon === 'box' || icon === 'rules';
+	const action = actionText && onAction && (
+		<button
+			type="button"
+			className={buttonClassName}
+			onClick={() => onAction()}
+			{...restButtonProps}
+		>
+			{actionText}
+		</button>
+	);
 
 	return (
 		<div className="wpo-otd-empty-state">
@@ -162,15 +179,19 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 			>
 				{message}
 			</p>
-			{actionText && onAction && (
-				<button
-					type="button"
-					className={buttonClassName}
-					onClick={() => onAction()}
-					{...restButtonProps}
-				>
-					{actionText}
-				</button>
+			{secondaryActionText && onSecondaryAction ? (
+				<div className="wpo-otd-empty-state-actions">
+					{action}
+					<button
+						type="button"
+						className="wpo-button wpo-button-secondary"
+						onClick={() => onSecondaryAction()}
+					>
+						{secondaryActionText}
+					</button>
+				</div>
+			) : (
+				action
 			)}
 		</div>
 	);

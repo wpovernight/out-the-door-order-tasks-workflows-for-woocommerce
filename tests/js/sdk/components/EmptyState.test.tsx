@@ -85,4 +85,57 @@ describe('EmptyState', () => {
 			expect(onAction).toHaveBeenCalledTimes(1);
 		}
 	);
+
+	it('shows a second action after the first as a secondary button, the two side by side', async () => {
+		const onAction = jest.fn();
+		const onSecondaryAction = jest.fn();
+
+		const { container } = render(
+			<EmptyState
+				message="No runs match."
+				actionText="Clear search"
+				onAction={onAction}
+				actionVariant="secondary"
+				secondaryActionText="Search all runs"
+				onSecondaryAction={onSecondaryAction}
+			/>
+		);
+
+		const actions = container.querySelector(
+			'.wpo-otd-empty-state > .wpo-otd-empty-state-actions'
+		);
+
+		expect(
+			Array.from(actions!.querySelectorAll('button')).map(
+				(button) => button.textContent
+			)
+		).toEqual(['Clear search', 'Search all runs']);
+		expect(
+			screen.getByRole('button', { name: 'Search all runs' })
+		).toHaveAttribute('class', 'wpo-button wpo-button-secondary');
+
+		await userEvent.click(
+			screen.getByRole('button', { name: 'Search all runs' })
+		);
+
+		expect(onSecondaryAction).toHaveBeenCalledTimes(1);
+		expect(onAction).not.toHaveBeenCalled();
+	});
+
+	it('keeps a single action a direct child, with no wrapper', () => {
+		const { container } = render(
+			<EmptyState
+				message="Nothing."
+				actionText="Go"
+				onAction={jest.fn()}
+			/>
+		);
+
+		expect(
+			container.querySelector('.wpo-otd-empty-state-actions')
+		).toBeNull();
+		expect(
+			container.querySelector('.wpo-otd-empty-state > button')
+		).not.toBeNull();
+	});
 });
