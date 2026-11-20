@@ -605,6 +605,14 @@ input[type="checkbox"].wpo-otd-checkbox:indeterminate::before {
     -webkit-mask-image: var(--wpo-otd-icon-checkbox-dash);
 }
 
+/* After the ticked look, so a focused ticked box still shows the ring: as .wpo-otd-input:focus. */
+input[type="checkbox"].wpo-otd-checkbox:focus-visible {
+    border-color: var(--wpo-otd-wp-blue);
+    box-shadow: 0 0 0 1px var(--wpo-otd-wp-blue);
+    /* Only visible in Windows High Contrast mode */
+    outline: 2px solid transparent;
+}
+
 input[type="checkbox"].wpo-otd-checkbox:disabled {
     opacity: 0.5;
     cursor: not-allowed;

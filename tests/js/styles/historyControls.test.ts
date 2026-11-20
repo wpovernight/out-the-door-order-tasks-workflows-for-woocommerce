@@ -73,6 +73,25 @@ describe('.wpo-otd-checkbox', () => {
 		expect(body).toContain('border-radius: var(--wpo-otd-radius-m);');
 	});
 
+	it('shows the focus ring of core fields when reached by keyboard', () => {
+		expect(
+			ruleBody(
+				css,
+				'input[type="checkbox"].wpo-otd-checkbox:focus-visible'
+			)
+		).toBe(
+			'border-color: var(--wpo-otd-wp-blue); box-shadow: 0 0 0 1px var(--wpo-otd-wp-blue); outline: 2px solid transparent;'
+		);
+		// Placed after the ticked look, which sets a purple border.
+		expect(
+			css.indexOf('input[type="checkbox"].wpo-otd-checkbox:focus-visible')
+		).toBeGreaterThan(
+			css.indexOf(
+				'input[type="checkbox"].wpo-otd-checkbox:indeterminate::before {'
+			)
+		);
+	});
+
 	it('is purple when ticked or indeterminate', () => {
 		expect(
 			ruleBody(
