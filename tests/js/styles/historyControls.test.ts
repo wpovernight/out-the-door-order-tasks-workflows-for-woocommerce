@@ -166,5 +166,7 @@ describe('.wpo-otd-select', () => {
 
 		expect(body).toContain('mask-image: var(--wpo-otd-icon-chevron-down);');
 		expect(body).toContain('pointer-events: none;');
+		// The icon points up; turned, it points down, as a select's arrow does.
+		expect(body).toContain('transform: translateY(-50%) rotate(180deg);');
 	});
 });

@@ -676,7 +676,8 @@ input[type="checkbox"].wpo-otd-checkbox:disabled {
     right: 0.9em;
     width: 0.9em;
     height: 0.9em;
-    transform: translateY(-50%);
+    /* The icon points up, as the dashboard's open section shows it: turned to point down. */
+    transform: translateY(-50%) rotate(180deg);
     background-color: var(--wpo-otd-text-gray);
     pointer-events: none;
     mask-image: var(--wpo-otd-icon-chevron-down);
