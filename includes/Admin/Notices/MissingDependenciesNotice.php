@@ -33,13 +33,18 @@ final class MissingDependenciesNotice extends AdminNotice {
 	}
 
 	/**
-	 * @return string|null
+	 * Only when a requirement is unmet.
+	 *
+	 * @return bool
 	 */
-	protected function message(): ?string {
-		if ( array() === $this->errors ) {
-			return null;
-		}
+	protected function should_show(): bool {
+		return array() !== $this->errors;
+	}
 
+	/**
+	 * @return string
+	 */
+	protected function message(): string {
 		return '<strong>' . esc_html( OutTheDoor::PLUGIN_NAME ) . '</strong> '
 			. esc_html__( 'can’t run because:', 'out-the-door-order-tasks-workflows-for-woocommerce' );
 	}

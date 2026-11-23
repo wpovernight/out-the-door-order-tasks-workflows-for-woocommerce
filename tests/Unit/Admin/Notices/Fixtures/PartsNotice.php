@@ -12,12 +12,16 @@ use WPO\OTD\Enums\NoticeType;
  */
 final class PartsNotice extends AdminNotice {
 	/**
-	 * @param array<string, mixed> $parts type, message, details, capability and screens.
+	 * @param array<string, mixed> $parts type, should_show, message, details, capability and screens.
 	 */
 	public function __construct( private readonly array $parts ) {}
 
 	protected function type(): NoticeType {
 		return $this->parts['type'];
+	}
+
+	protected function should_show(): bool {
+		return array_key_exists( 'should_show', $this->parts ) ? $this->part( 'should_show' ) : parent::should_show();
 	}
 
 	protected function message(): ?string {

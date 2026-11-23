@@ -9,7 +9,7 @@ use WPO\OTD\Enums\NoticeType;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * An admin notice. A subclass says what the notice says and whether it has anything to say; this class shows it
+ * An admin notice. A subclass says whether the notice should show and what it says; this class shows it
  * with the other admin notices, only to users with its capability and only on its screens, prints it in WordPress's
  * markup, and never lets it break an admin screen.
  */
@@ -24,8 +24,8 @@ abstract class AdminNotice {
 	}
 
 	/**
-	 * Print the notice when the current user may see it, the current screen is one of its screens, and it has
-	 * something to say.
+	 * Print the notice when the current user may see it, the current screen is one of its screens, and it should
+	 * show.
 	 *
 	 * Never throws, since it runs on admin screens: anything that goes wrong is logged and shows nothing.
 	 *
@@ -33,7 +33,7 @@ abstract class AdminNotice {
 	 */
 	final public function show(): void {
 		try {
-			if ( ! current_user_can( $this->capability() ) || ! $this->is_on_its_screen() ) {
+			if ( ! current_user_can( $this->capability() ) || ! $this->is_on_its_screen() || ! $this->should_show() ) {
 				return;
 			}
 
@@ -62,9 +62,17 @@ abstract class AdminNotice {
 	abstract protected function type(): NoticeType;
 
 	/**
-	 * The notice's paragraph, or null when there is nothing to say and no notice is shown.
+	 * Whether the notice has something to say. Called only for a user and screen that may see the notice, so a
+	 * costly check belongs here.
 	 *
-	 * Called only for a user and screen that may see the notice, so a costly check belongs here. HTML that passes
+	 * @return bool
+	 */
+	protected function should_show(): bool {
+		return true;
+	}
+
+	/**
+	 * The notice's paragraph, or null to show no notice. Called only once should_show() is true. HTML that passes
 	 * through wp_kses_post(): escape the plain text in it.
 	 *
 	 * @return string|null

@@ -20,13 +20,18 @@ final class DowngradeNotice extends AdminNotice {
 	}
 
 	/**
-	 * @return string|null
+	 * Only when the data was written by a newer release.
+	 *
+	 * @return bool
 	 */
-	protected function message(): ?string {
-		if ( ! Installer::is_downgraded() ) {
-			return null;
-		}
+	protected function should_show(): bool {
+		return Installer::is_downgraded();
+	}
 
+	/**
+	 * @return string
+	 */
+	protected function message(): string {
 		return '<strong>' . esc_html( OutTheDoor::PLUGIN_NAME ) . '</strong> '
 			. esc_html__( 'was downgraded. Its data was saved by a newer version, which this version may not handle correctly. Update to the latest version, or restore a backup taken before the update.', 'out-the-door-order-tasks-workflows-for-woocommerce' );
 	}

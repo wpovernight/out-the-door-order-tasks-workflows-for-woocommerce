@@ -100,22 +100,40 @@ class AdminNoticeTest extends TestCase {
 		$this->assertSame( '', $this->show( $this->notice( array( 'message' => null ) ) ) );
 	}
 
+	public function test_nothing_is_shown_when_it_should_not_show_and_its_message_is_never_asked_for(): void {
+		$asked = false;
+
+		$notice = $this->notice(
+			array(
+				'should_show' => false,
+				'message'     => static function () use ( &$asked ): string {
+					$asked = true;
+
+					return 'Message';
+				},
+			)
+		);
+
+		$this->assertSame( '', $this->show( $notice ) );
+		$this->assertFalse( $asked );
+	}
+
 	public function test_store_managers_see_it_by_default(): void {
 		$this->assertNotSame( '', $this->show( $this->notice() ) );
 		$this->assertSame( array( 'manage_woocommerce' ), $this->checked );
 	}
 
-	public function test_users_without_its_capability_see_nothing_and_its_message_is_never_asked_for(): void {
+	public function test_users_without_its_capability_see_nothing_and_its_condition_is_never_checked(): void {
 		$this->user_can = false;
 		$asked          = false;
 
 		$notice = $this->notice(
 			array(
-				'capability' => 'activate_plugins',
-				'message'    => static function () use ( &$asked ): string {
+				'capability'  => 'activate_plugins',
+				'should_show' => static function () use ( &$asked ): bool {
 					$asked = true;
 
-					return 'Message';
+					return true;
 				},
 			)
 		);
@@ -157,6 +175,12 @@ class AdminNoticeTest extends TestCase {
 		);
 
 		$this->assertSame( '', $this->show( $this->notice( array( 'message' => self::throws( 'Count failed' ) ) ) ) );
+	}
+
+	public function test_a_condition_that_throws_is_logged_and_shows_nothing(): void {
+		$this->wc_logger->shouldReceive( 'log' )->once()->with( 'error', Mockery::pattern( '/ admin notice \(Check failed\)\.$/' ), Mockery::any() );
+
+		$this->assertSame( '', $this->show( $this->notice( array( 'should_show' => self::throws( 'Check failed' ) ) ) ) );
 	}
 
 	public function test_details_that_throw_print_nothing_at_all(): void {
