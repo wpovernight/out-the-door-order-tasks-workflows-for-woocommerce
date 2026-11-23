@@ -268,6 +268,33 @@ class InstallerTest extends IntegrationTestCase {
 		$this->assertSame( 1, (int) get_option( 'wpo_otd_db_version' ) );
 	}
 
+	/** ================================
+	 *   Downgrades
+	 *  ================================ */
+
+	public function test_activation_records_the_compatible_version(): void {
+		$this->assertSame( 1, (int) get_option( 'wpo_otd_min_compatible' ) );
+		$this->assertFalse( Installer::is_downgraded() );
+	}
+
+	public function test_record_compatible_version_raises_a_lower_stored_value(): void {
+		update_option( 'wpo_otd_min_compatible', 0 );
+
+		Installer::record_compatible_version();
+
+		$this->assertSame( 1, (int) get_option( 'wpo_otd_min_compatible' ) );
+	}
+
+	public function test_a_newer_compatible_version_is_kept_and_reported_as_a_downgrade(): void {
+		update_option( 'wpo_otd_min_compatible', 2 );
+
+		Installer::record_compatible_version();
+
+		$this->assertSame( 2, (int) get_option( 'wpo_otd_min_compatible' ) );
+		$this->assertTrue( Installer::is_downgraded() );
+		$this->assertFalse( Installer::is_upgrade_due() );
+	}
+
 	/**
 	 * Get a table's storage engine, or null when it does not exist.
 	 *

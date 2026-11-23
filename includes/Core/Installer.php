@@ -12,9 +12,10 @@ use WPO\OTD\Services\TaskStatusRoleService;
 defined( 'ABSPATH' ) || exit;
 
 final class Installer {
-	private const OPTION_VERSION      = 'wpo_otd_version';
-	private const OPTION_DB_VERSION   = 'wpo_otd_db_version';
-	private const OPTION_UPGRADE_LOCK = 'wpo_otd_upgrade_lock';
+	private const OPTION_VERSION        = 'wpo_otd_version';
+	private const OPTION_DB_VERSION     = 'wpo_otd_db_version';
+	private const OPTION_UPGRADE_LOCK   = 'wpo_otd_upgrade_lock';
+	private const OPTION_MIN_COMPATIBLE = 'wpo_otd_min_compatible';
 
 	/**
 	 * The install-state options this plugin writes to the wp_options table.
@@ -25,6 +26,7 @@ final class Installer {
 		self::OPTION_VERSION,
 		self::OPTION_DB_VERSION,
 		self::OPTION_UPGRADE_LOCK,
+		self::OPTION_MIN_COMPATIBLE,
 	);
 
 	/**
@@ -33,6 +35,17 @@ final class Installer {
 	 * Deliberately decoupled from the plugin's version. Bump this by one whenever you add a migration.
 	 */
 	private const DB_VERSION = 1;
+
+	/**
+	 * Data compatibility version: the oldest compatibility level whose code can safely run on the data this release
+	 * writes. Each release stores the highest value it has seen, and an older release that finds a higher stored value
+	 * shows a downgrade warning.
+	 *
+	 * Bump this by one whenever a release changes anything older releases cannot handle: table structure, the format
+	 * of stored data, the shape of an option, or what a stored value means, with or without a migration. Leave it
+	 * alone for changes older releases simply ignore, such as a new nullable column or a new option.
+	 */
+	private const COMPATIBLE_VERSION = 1;
 
 	/**
 	 * Map of db schema version => array of migration method names (instance methods).
@@ -80,6 +93,31 @@ final class Installer {
 
 		update_option( self::OPTION_VERSION, OutTheDoor::VERSION, true );
 		update_option( self::OPTION_DB_VERSION, self::DB_VERSION, true );
+		self::record_compatible_version();
+	}
+
+	/**
+	 * Store this release's compatibility version when it is higher than the stored one. Never lowers it, so after a
+	 * downgrade the stored value still says what the data needs.
+	 *
+	 * Runs on every request, as data in a new format can be written anywhere. Reads an autoloaded option, so it
+	 * costs no query.
+	 *
+	 * @return void
+	 */
+	public static function record_compatible_version(): void {
+		if ( (int) get_option( self::OPTION_MIN_COMPATIBLE, 0 ) < self::COMPATIBLE_VERSION ) {
+			update_option( self::OPTION_MIN_COMPATIBLE, self::COMPATIBLE_VERSION, true );
+		}
+	}
+
+	/**
+	 * Check whether the data was written by a newer release that this release may not handle.
+	 *
+	 * @return bool
+	 */
+	public static function is_downgraded(): bool {
+		return (int) get_option( self::OPTION_MIN_COMPATIBLE, 0 ) > self::COMPATIBLE_VERSION;
 	}
 
 	/**

@@ -5,6 +5,7 @@ namespace WPO\OTD\Core\Providers;
 use WPO\OTD\Core\Container\Container;
 use WPO\OTD\Core\Container\ServiceProvider;
 use WPO\OTD\Core\Installer;
+use WPO\OTD\Admin\Notices\DowngradeNotice;
 use WPO\OTD\Services\EmailService;
 use WPO\OTD\Services\CustomOrderStatusService;
 use WPO\OTD\Services\FulfillmentService;
@@ -40,6 +41,9 @@ final class CoreServiceProvider implements ServiceProvider {
 			}
 		);
 
+		// Data compatibility, so an older release installed later can tell it was downgraded.
+		Installer::record_compatible_version();
+
 		// Upgrade migrations
 		add_action(
 			'admin_init',
@@ -52,6 +56,7 @@ final class CoreServiceProvider implements ServiceProvider {
 
 		// Admin screens
 		if ( is_admin() ) {
+			( new DowngradeNotice() )->register_hooks();
 			$container->get( OrderManagerScreen::class )->register_hooks();
 			$container->get( OrderEditScreen::class )->register_hooks();
 		}
