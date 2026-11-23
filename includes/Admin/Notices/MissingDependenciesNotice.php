@@ -3,6 +3,7 @@
 namespace WPO\OTD\Admin\Notices;
 
 use WPO\OTD\Enums\NoticeType;
+use WPO\OTD\OutTheDoor;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -39,7 +40,7 @@ final class MissingDependenciesNotice extends AdminNotice {
 			return null;
 		}
 
-		return '<strong>' . esc_html__( 'Out the Door – Order Tasks & Workflows for WooCommerce', 'out-the-door-order-tasks-workflows-for-woocommerce' ) . '</strong> '
+		return '<strong>' . esc_html( OutTheDoor::PLUGIN_NAME ) . '</strong> '
 			. esc_html__( 'can’t run because:', 'out-the-door-order-tasks-workflows-for-woocommerce' );
 	}
 

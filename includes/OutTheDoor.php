@@ -14,6 +14,7 @@ defined( 'ABSPATH' ) || exit;
 
 final class OutTheDoor {
 	public const VERSION = '1.0.0';
+	public const PLUGIN_NAME = 'Out the Door – Order Tasks & Workflows for WooCommerce';
 
 	private ?Kernel $kernel = null;
 
