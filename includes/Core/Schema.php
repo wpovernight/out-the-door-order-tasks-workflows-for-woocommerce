@@ -9,6 +9,20 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Schema {
 	/**
+	 * The plugin's tables, without the site's table prefix. Add-ons create tables under the same "wpo_otd_" prefix,
+	 * so the plugin's own are named, never found by the prefix.
+	 *
+	 * @var string[]
+	 */
+	public const TABLES = array(
+		'wpo_otd_tasks',
+		'wpo_otd_task_fields',
+		'wpo_otd_task_field_options',
+		'wpo_otd_task_field_values',
+		'wpo_otd_custom_statuses',
+	);
+
+	/**
 	 * The CREATE TABLE statements for dbDelta().
 	 *
 	 * Foreign keys are deliberately absent since dbDelta cannot parse them correctly.

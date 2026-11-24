@@ -4,7 +4,6 @@ namespace WPO\OTD\Core;
 
 use WPO\OTD\Enums\DefaultTaskFields;
 use WPO\OTD\OutTheDoor;
-use WPO\OTD\Repositories\BaseRepository;
 use WPO\OTD\Repositories\TaskFieldOptionRepository;
 use WPO\OTD\Repositories\TaskFieldRepository;
 use WPO\OTD\Services\TaskStatusRoleService;
@@ -211,29 +210,20 @@ final class Installer {
 	}
 
 	/**
-	 * Drop all plugin tables, discovered by name prefix so new tables are
-	 * included automatically. FK checks are disabled so drop order is irrelevant.
+	 * Drop the plugin's own tables, those Schema::TABLES names. An add-on's tables share the name prefix and are left
+	 * alone. FK checks are disabled so drop order is irrelevant.
 	 *
 	 * @return void
 	 */
 	public static function drop_tables(): void {
 		global $wpdb;
 
-		$like = $wpdb->esc_like( $wpdb->prefix . BaseRepository::TABLE_PREFIX ) . '%';
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Install-time table discovery.
-		$tables = $wpdb->get_col( $wpdb->prepare( 'SHOW TABLES LIKE %s', $like ) );
-
-		if ( empty( $tables ) ) {
-			return;
-		}
-
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Install-time schema teardown.
 		$wpdb->query( 'SET FOREIGN_KEY_CHECKS = 0' );
 
-		foreach ( $tables as $table ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Install-time DROP TABLE; $table is a trusted identifier from SHOW TABLES and table names cannot be bound as prepared-statement placeholders.
-			$wpdb->query( "DROP TABLE IF EXISTS `{$table}`" );
+		foreach ( Schema::TABLES as $table ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Install-time DROP TABLE; $table is plugin-owned and table names cannot be bound as prepared-statement placeholders.
+			$wpdb->query( "DROP TABLE IF EXISTS `{$wpdb->prefix}{$table}`" );
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Install-time schema teardown.

@@ -3,6 +3,7 @@
 namespace WPO\OTD\Tests\Integration\Core;
 
 use WPO\OTD\Core\Installer;
+use WPO\OTD\Core\Schema;
 use WPO\OTD\Enums\DefaultTaskFields;
 use WPO\OTD\Enums\TaskStatusRoleSettingKeys;
 use WPO\OTD\OutTheDoor;
@@ -167,6 +168,35 @@ class InstallerTest extends IntegrationTestCase {
 
 		// Nothing left to drop is not an error.
 		Installer::drop_tables();
+	}
+
+	public function test_a_reset_leaves_an_add_ons_tables_that_share_the_prefix(): void {
+		global $wpdb;
+
+		$this->needs_reinstall = true;
+		$this->allow_real_ddl();
+
+		$add_on_table = $this->table( 'rules' );
+		$wpdb->query( "CREATE TABLE `{$add_on_table}` ( id BIGINT UNSIGNED NOT NULL, PRIMARY KEY (id) ) ENGINE=InnoDB" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->insert( $add_on_table, array( 'id' => 7 ) );
+		$wpdb->query( 'COMMIT' );
+
+		try {
+			$this->make( Installer::class )->reset();
+
+			$this->assertSame( '7', $wpdb->get_var( "SELECT id FROM `{$add_on_table}`" ), 'An add-on\'s rows are kept.' ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$this->assertSame( 8, $this->count_rows( 'task_fields' ), 'The plugin\'s own tables are rebuilt.' );
+		} finally {
+			$wpdb->query( "DROP TABLE IF EXISTS `{$add_on_table}`" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		}
+	}
+
+	public function test_schema_tables_names_every_table_the_schema_creates(): void {
+		global $wpdb;
+
+		preg_match_all( '/CREATE TABLE `' . preg_quote( $wpdb->prefix, '/' ) . '([a-z_]+)`/', Schema::tables(), $matches );
+
+		$this->assertSame( $matches[1], Schema::TABLES );
 	}
 
 	public function test_create_tables_restores_missing_foreign_keys_after_removing_orphans(): void {
