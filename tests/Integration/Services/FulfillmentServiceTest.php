@@ -221,6 +221,15 @@ class FulfillmentServiceTest extends IntegrationTestCase {
 		$this->assertSame( FulfillmentStatuses::NOT_FULFILLED, $this->cached_status( $order->get_id() ) );
 	}
 
+	public function test_a_refund_gets_no_fulfillment_status(): void {
+		$order  = $this->create_order( array( 3 ) );
+		$refund = $this->refund( $order, $this->first_item( $order ), 1 );
+
+		$this->assertSame( '', $this->service->update_order_fulfillment_status_meta( $refund->get_id() ), 'By id.' );
+		$this->assertSame( '', $this->service->update_order_fulfillment_status_meta( $refund ), 'As an object.' );
+		$this->assertSame( '', $this->cached_status( $refund->get_id() ) );
+	}
+
 	public function test_a_refund_deleted_through_the_rest_api_refreshes_the_cached_status(): void {
 		$order = $this->create_order( array( 3 ) );
 		$this->ship( $order, array( 2 ) );

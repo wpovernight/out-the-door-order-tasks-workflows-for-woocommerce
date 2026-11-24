@@ -279,14 +279,15 @@ final class FulfillmentService {
 	 *
 	 * @param \WC_Abstract_Order|int $order Order object or order ID.
 	 *
-	 * @return string The computed fulfillment status, or empty string on failure.
+	 * @return string The computed fulfillment status, or empty string on failure or for a refund.
 	 */
 	public function update_order_fulfillment_status_meta( $order ): string {
 		$order = $order instanceof \WC_Abstract_Order
 			? $order
 			: wc_get_order( $order );
 
-		if ( ! $order ) {
+		// A refund is no order: its lines are refunded units, with nothing to fulfil.
+		if ( ! $order instanceof \WC_Order ) {
 			return '';
 		}
 
