@@ -412,6 +412,27 @@ class TaskManagerServiceTest extends IntegrationTestCase {
 		$this->assertNull( $fields['order']['values'][0]['resolved'] );
 	}
 
+	public function test_an_order_link_to_a_refund_is_not_resolved(): void {
+		$order  = $this->create_order();
+		$items  = $order->get_items();
+		$refund = $this->refund( $order, reset( $items ), 1 );
+
+		$task = $this->service->create_task(
+			'Linked to a refund',
+			'',
+			array(
+				$this->status( $this->status_option_id( 'not_started' ) ),
+				array( 'field_id' => DefaultTaskFields::ORDER, 'field_slug' => 'order', 'value' => $refund->get_id() ),
+			)
+		);
+
+		$fields = array_column( $this->service->get_task_with_fields( $task['id'] )['fields'], null, 'slug' );
+
+		$this->assertSame( (float) $refund->get_id(), $fields['order']['values'][0]['raw'] );
+		$this->assertNull( $fields['order']['values'][0]['resolved'] );
+		$this->assertCount( 1, $this->service->get_all_tasks_with_fields(), 'The task list still reads.' );
+	}
+
 	public function test_get_task_with_fields_of_a_missing_task_is_null(): void {
 		$this->assertNull( $this->service->get_task_with_fields( 999999 ) );
 	}

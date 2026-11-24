@@ -1529,7 +1529,8 @@ final class TaskManagerService {
 
 					case 'order':
 						$order = wc_get_order( (int) $raw );
-						if ( $order ) {
+						// A refund's id loads a refund, which is no order.
+						if ( $order instanceof \WC_Order ) {
 							$resolved = array(
 								'id'           => $order->get_id(),
 								'full_name'    => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
