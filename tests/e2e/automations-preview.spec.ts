@@ -11,6 +11,17 @@ test('the Automations tab previews example rules and Pro', async ({
 }, testInfo) => {
 	await page.goto(ORDER_MANAGER_URL);
 
+	// An active add-on may take over the tab; the preview is what core shows without one.
+	await page.evaluate(() => {
+		const { hooks } = (
+			window as unknown as {
+				wp: { hooks: { removeAllFilters: (name: string) => void } };
+			}
+		).wp;
+		hooks.removeAllFilters('wpo_otd.automations_view');
+		hooks.removeAllFilters('wpo_otd.automations_show_upsell');
+	});
+
 	const tabs = page.locator('#main-tabs');
 	await tabs.getByRole('button', { name: 'Automations' }).click();
 
